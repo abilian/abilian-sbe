@@ -1,0 +1,40 @@
+language: python
+python:
+  - "2.7"
+
+env:
+  - SQLALCHEMY_DATABASE_URI="sqlite://"
+  - SQLALCHEMY_DATABASE_URI="postgres://abilian_sbe_test:test_pw@localhost:5432/abilian_sbe_test_db"
+
+services:
+  - redis-server
+
+addons:
+  postgresql: "9.3"
+
+# Install OS dependencies
+before_install:
+ - sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm
+ - sudo apt-add-repository -y ppa:chris-lea/node.js
+ - sudo apt-get update
+ - sudo apt-get install -y poppler-utils nodejs
+ - sudo npm install -g less
+
+# Install Python dependencies
+install:
+  - pip install -r requirements.txt -r dev-requirements.txt
+
+# Create DB
+before_script:
+  - createuser -w -U postgres -DRS abilian_core_test
+  - psql -w -U postgres -c "ALTER USER abilian_core_test WITH ENCRYPTED PASSWORD 'test_pw';"
+  - createdb -w -U postgres -E utf-8 -O abilian_core_test abilian_core_test_db
+
+# Run tests
+script:
+  - py.test --tb=short -q --cov abilian --cov-config etc/coverage.rc abilian tests
+  - sphinx-build -W -b html docs/ docs/_build/
+
+# Report coverage
+after_success:
+  - coveralls --rcfile=etc/coverage.rc
