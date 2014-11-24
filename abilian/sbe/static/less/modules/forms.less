@@ -1,0 +1,23 @@
+/* make forms slightly denser */
+label {
+  margin-bottom: 0;
+}
+
+/* Make buttons just slightly smaller, without using btn-small */
+.btn {
+  padding: 3px 10px;
+}
+
+/* override bogus values in datepicker.css */
+.datepicker {
+  margin-top: 0 !important;
+  padding: 0 !important;
+}
+
+/* For Required fields - puts a yellow background color on inputs */
+input, select, textarea {
+  &.highlight,
+  &:required {
+    background-color: #FFC;
+  }
+}

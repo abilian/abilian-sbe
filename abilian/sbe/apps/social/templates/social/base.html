@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% from "macros/box.html" import m_box, m_box_menu with context %}
+
+{% block main %}
+  <div class="row">
+    <div class="col-md-9">
+      {% block content %}
+      {% endblock %}
+    </div>
+
+    <div class="col-md-3">
+      {% block sidebar %}
+        {% call m_box_menu() %}
+          <ul class="nav nav-list">
+            {# TODO: user url_for() #}
+            <li><a href="/social/">{{ _("My feed") }}</a></li>
+            <li><a href="{{ url_for(g.user) }}">{{ _("My profile") }}</a></li>
+            <li><a href="/social/users/">{{ _("User directory") }}</a></li>
+          </ul>
+        {% endcall %}
+
+{#        {% call m_box(_("My communities"), color="orange", with_toolbar=True) %}#}
+{#          <ul>#}
+{#            {% for community in g.sidebars.my_communities %}#}
+{#              <li><a#}
+{#                  href="{{ url_for("communities.community", community_id=community.slug) }}">{{ community.name }}</a>#}
+{#              </li>#}
+{#            {% endfor %}#}
+{#          </ul>#}
+{#        {% endcall %}#}
+
+        {% call m_box(_("Latest visitors"), color="orange") %}
+          <ul class="latest-visitors">
+            {%- for user in g.sidebars.latest_visitors %}
+              <li><a href="{{ url_for(user) }}">
+                <img class="avatar" src="{{ url_for('images.user_avatar', user_id=user.id, s=20) }}"
+                     alt="" /> {{ user.name }}
+              </a>
+              {%- if user.is_online %}
+              <img src="{{ url_for('abilian_sbe_static', filename='img/greendot.png') }}" alt="" />{%- endif %}
+              </li>
+            {%- endfor %}
+          </ul>
+        {%- endcall %}
+
+      {%- endblock %}
+    </div>
+  </div>
+{%- endblock %}

@@ -1,0 +1,122 @@
+{% macro render_message(message) %}
+  {% set user_href = url_for(".user", user_id=message.creator.id) %}
+  <li class="stream-item clearfix">
+    <a href="{{ user_href }}" class="user-photo" target=""
+        style="background-image: url('{{ url_for(".user_mugshot", user_id=message.creator.id, s=45) }}');"></a>
+
+    <div class="activity-body">
+      {%- if message.group %}
+        <span class="label pull-right">{{ message.group.name }}</span>
+      {% endif %}
+      <a href="{{ user_href }}">{{ message.creator }}</a> <span class="action">a écrit</span>
+
+      <div class="activity-body-inner  clearfix">
+        {{ message.content | linkify |paragraphs }}
+      </div>
+      <div class="stream-subtext">{{ message.created_at | age }}</div>
+    </div>
+  </li>
+{% endmacro %}
+
+{% macro render_field(field) %}
+  {% if field.widget.input_type == 'hidden' %}
+    <!-- pass -->
+  {% elif field.errors %}
+    <div class="control-group error">
+      {% set css_class = 'has_error ' + kwargs.pop('class', '') %}
+      <label class="control-label"
+          for="input-{{ field.name }}">{{ field.label }}</label>
+
+      <div class="controls">
+        {{ field(class=css_class, **kwargs) }}
+        <span class="help-block">{% for error in field.errors %}{{ error|e }}
+          . {% endfor %}</span>
+      </div>
+    </div>
+  {% else %}
+    <div class="control-group">
+      <label class="control-label"
+          for="input-{{ field.name }}">{{ field.label }}</label>
+
+      <div class="controls">
+        {{ field(**kwargs) }}
+      </div>
+    </div>
+  {% endif %}
+{% endmacro %}
+
+
+{# Not sure if these macros are still needed #}
+
+{% macro m_activity(entries) %}
+  {%- for e in entries %}
+    <p>{{ e.post }} on {{ e.object_id }}</p>
+  {%- endfor %}
+{% endmacro %}
+
+
+{% macro m_images(images) %}
+  <ul class="image-gallery">
+    {%- for image in images %}
+      <li id="image-{{ image.id }}">
+        <a href="{{ url_for(image) }}"><img alt=""
+            src="{{ url_for(image) }}/preview?size=100"/></a>
+      </li>
+      <script>
+        $(document).ready(function() {
+          var id = "#image-{{ image.id }}";
+          $(id).popover({
+            placement: "top",
+            html:      true,
+            title:     "{{ image.name }}",
+            content:   function() {
+              return 'Uploaded on {{ image.created_at.strftime("%Y-%m-%d") }}';
+            }
+          });
+        });
+      </script>
+    {%- endfor %}
+  </ul>
+  <div style="clear: both"></div>
+{% endmacro %}
+
+{% macro m_audit(entries) %}
+  <h3 class="main collapsed" data-toggle="collapse"
+      href="#audit_log_entries">{{ _("Audit log") }}</h3>
+
+  <div id="audit_log_entries" class="collapse" style="margin-bottom: 25px;">
+    {%- for entry in entries %}
+      {%- if entry.type == 1 %}
+        <div>
+          <img src="{{ url_for(entry.user) }}/mugshot?s=16" alt=""/>
+          <a href="{{ url_for(entry.user) }}">{{ entry.user.name }}</a>
+          made changes on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
+          to entity {{ entry.entity }}
+          <ul>
+            {%- for key in entry.changes %}
+              {%- set old_value, new_value = entry.changes[key] %}
+              <li>
+                {%- if old_value %}
+                  Field <b>{{ key }}</b> changed from <em>{{ old_value }}</em>
+                  to <em>{{ new_value }}</em>
+                {%- else %}
+                  Field <b>{{ key }}</b> set to <em>{{ new_value }}</em>
+                {%- endif %}
+              </li>
+            {%- endfor %}
+          </ul>
+        </div>
+      {%- elif entry.type == 0 %}
+        <div>
+          <img src="{{ url_for(entry.user) }}/mugshot?s=16" alt="">
+          <a href="{{ url_for(entry.user) }}">{{ entry.user.name }}</a>
+          created a new {{ entry.entity.__class__.__name__ }},
+          <a href="{{ url_for(entry.entity) }}">{{ entry.entity.name }}</a>,
+          on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
+        </div>
+      {%- elif entry.type == 2 %}
+        {# TODO: deletion. #}
+      {%- endif %}
+    {%- endfor %}
+  </div>
+{% endmacro %}

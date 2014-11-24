@@ -1,0 +1,56 @@
+{% extends "default/object_edit.html" %}
+
+{% from "macros/box.html" import m_box_content with context %}
+{% from "macros/form.html" import  m_field with context %}
+
+{% block after_form %}
+  {% call m_box_content(_("Delete community"), color="danger") %}
+
+  <p>Supprimer la communauté (attention, action irréversible!)</p>
+
+  <form action="{{ url_for(".delete", community_id=g.community.slug) }}"
+    method="POST" enctype="multipart/form-data">
+    {{ form.csrf_token }}
+    <div class="form-actions">
+      <button type="submit" name="__action" value="delete" class="btn btn-danger">
+        {{ _("Destroy community") }}
+      </button>
+    </div>
+  </form>
+
+  {%- deferJS %}
+  <script type="text/javascript">
+   $(document).ready(function() {
+     $('button.btn-danger[value="delete"]').click(function(e) {
+       e.preventDefault();
+       var $button = $(this);
+       var button_form = $(this.form);
+       var msg = '<p class="lead">Voulez-vous vraiment supprimer la communauté «{{ g.community.name }}»?</p>';
+
+       bootbox.dialog({
+         'title': '<strong class="text-danger"><i class="glyphicon glyphicon-warning-sign"></i> La suppression est irréversible</strong>',
+         'message': msg,
+         'buttons': {
+           'cancel': {
+             label: '{{ _('Cancel') }}',
+             className: "btn-primary"
+           },
+           'confirm': {
+             label: '{{_('Destroy') }}',
+             className: 'btn-danger',
+             callback: function() {
+               var action_val = $('<input />',
+                                  {'type':   'hidden',
+                                   'name':  '__action',
+                                   'value': $button.attr('value')});
+               button_form.append(action_val);
+               button_form.submit();
+             }
+           },
+         }});
+     });
+   });
+  </script>
+  {%- enddeferJS %}
+  {%- endcall %}
+{% endblock %}

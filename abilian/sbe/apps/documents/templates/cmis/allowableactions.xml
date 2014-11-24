@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+{%- from "cmis/macros.xml" import allowable_actions -%}
+{{ allowable_actions({}) }}

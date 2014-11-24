@@ -1,0 +1,42 @@
+{% extends "wiki/_base.html" %}
+
+{% from "macros/box.html" import m_box_menu, m_box_content %}
+
+{% block content %}
+  {% call m_box_content(page.title) %}
+    <div class="wiki-page">
+      <h1>{{ page.title }}</h1>
+
+      <div class="wiki-page-info">
+        <span class="last-modified">
+          {{ _("Last modified by") }} {{ page.last_modified_by }}
+          {{ _("on") }} {{ page.updated_at | datetimeformat }}</span>
+      </div>
+
+      <div class="wiki-page-body">
+        {{ page.body_html|safe }}
+      </div>
+
+      {%- if page.attachments %}
+      <div id="attachments">
+        <ul>
+          {%- for attachment in page.attachments %}
+            <li>
+              <span class="attachment-item">
+                <img src="{{ attachment.icon }}" style="vertical-align: middle;" alt="" />
+                <a href="{{ url_for(".attachment_download", community_id=g.community.slug, title=page.title, attachment=attachment.id) }}">{{ attachment.name }}</a>
+                ({{ attachment.content_length|filesize }})
+              </span>
+
+              <form action="{{ url_for('.attachment_delete', community_id=g.community.slug, title=page.title, attachment=attachment.id) }}" method="POST" style="display: inline;">
+                {{ csrf.field() }}
+                <button type="submit" disabled="disabled" name="action" value="delete"><i class="fa fa-trash"></i></button>
+              </form>
+            </li>
+          {%- endfor %}
+        </ul>
+      </div>
+      {%- endif %}
+    </div>
+  {% endcall %}
+{% endblock %}

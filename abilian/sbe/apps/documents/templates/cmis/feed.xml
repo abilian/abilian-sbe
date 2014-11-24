@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+{%- from "cmis/macros.xml" import links -%}
+<atom:feed xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/"
+    xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/"
+    xmlns:app="http://www.w3.org/2007/app">
+  <atom:author>
+    <atom:name>System</atom:name>
+  </atom:author>
+  <atom:id>
+    http://chemistry.apache.org/d29ya3NwYWNlOi8vU3BhY2VzU3RvcmUvM2RmYmJhNzMtN2M1NC00YWQ4LTljMWMtZTNjZmUyZWIyY2Qx
+  </atom:id>
+  <atom:title>{{ object.title }}</atom:title>
+  <app:edited>2012-09-01T21:51:56Z</app:edited>
+  <atom:updated>2012-09-01T21:51:56Z</atom:updated>
+
+  <cmisra:numItems>{{ collection|length }}</cmisra:numItems>
+
+  {% for entity in collection %}
+    {{ to_xml(entity, no_xml_header=True) | safe}}
+  {% endfor %}
+
+  {{ links(object, ROOT) }}
+
+</atom:feed>

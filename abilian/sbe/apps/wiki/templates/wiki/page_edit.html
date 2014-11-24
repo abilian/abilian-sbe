@@ -1,0 +1,47 @@
+{% extends "wiki/_base.html" %}
+
+{% from "macros/box.html" import m_box_content %}
+{% from "macros/form.html" import m_field %}
+
+{% block content %}
+  {% if view.create %}
+    {% set title=_("Create page") %}
+  {% else %}
+    {% set title=_("Edit page") %}
+  {% endif %}
+
+  {% call m_box_content(title) %}
+    <form action="{{ url_for(".page_edit_post", community_id=g.community.slug) }}"
+        method="POST">
+
+      {{ form.csrf_token }}
+
+      {{ m_field(form.title) }}
+      {{ m_field(form.body_src, rows=10, class_="resizeable-vertical") }}
+      {{ m_field(form.message) }}
+
+      {# hidden fields #}
+      {{ form.page_id() }}
+      {{ form.csrf_token() }}
+
+      <div class="form-actions">
+        {% if view.create %}
+          <button type="submit" class="btn btn-primary" name="action"
+              value="create">
+            {{ _("Create article") }}
+          </button>
+        {% else %}
+          <button type="submit" class="btn btn-primary" name="action"
+              value="save">
+            {{ _("Save article") }}
+          </button>
+        {% endif %}
+        <button type="submit" class="btn cancel" name="action" value="cancel">
+          {{ _("Cancel") }}
+        </button>
+      </div>
+
+    </form>
+  {% endcall %}
+
+{% endblock %}

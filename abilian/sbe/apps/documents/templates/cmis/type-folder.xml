@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<atom:entry xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/"
+    xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/"
+    xmlns:app="http://www.w3.org/2007/app">
+<atom:author>
+  <atom:name>unknown</atom:name>
+</atom:author>
+<atom:id>http://chemistry.apache.org/Y21pczpmb2xkZXI=</atom:id>
+<atom:title>Folder</atom:title>
+<app:edited>2012-09-01T22:04:38Z</app:edited>
+<atom:updated>2012-09-01T22:04:38Z</atom:updated>
+
+<cmisra:type xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:type="cmis:cmisTypeFolderDefinitionType">
+<cmis:id>cmis:folder</cmis:id>
+<cmis:localName>folder</cmis:localName>
+<cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+</cmis:localNamespace>
+<cmis:displayName>Folder</cmis:displayName>
+<cmis:queryName>cmis:folder</cmis:queryName>
+<cmis:description>Folder Type</cmis:description>
+<cmis:baseId>cmis:folder</cmis:baseId>
+<cmis:creatable>true</cmis:creatable>
+<cmis:fileable>true</cmis:fileable>
+<cmis:queryable>true</cmis:queryable>
+<cmis:fulltextIndexed>true</cmis:fulltextIndexed>
+<cmis:includedInSupertypeQuery>true</cmis:includedInSupertypeQuery>
+<cmis:controllablePolicy>false</cmis:controllablePolicy>
+<cmis:controllableACL>true</cmis:controllableACL>
+<cmis:propertyIdDefinition>
+  <cmis:id>cmis:objectTypeId</cmis:id>
+  <cmis:localName>objectTypeId</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Object Type Id</cmis:displayName>
+  <cmis:queryName>cmis:objectTypeId</cmis:queryName>
+  <cmis:description>Id of the object’s type</cmis:description>
+  <cmis:propertyType>id</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>oncreate</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>true</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>true</cmis:orderable>
+</cmis:propertyIdDefinition>
+<cmis:propertyDateTimeDefinition>
+  <cmis:id>cmis:creationDate</cmis:id>
+  <cmis:localName>creationDate</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Creation Date</cmis:displayName>
+  <cmis:queryName>cmis:creationDate</cmis:queryName>
+  <cmis:description>The object creation date</cmis:description>
+  <cmis:propertyType>datetime</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>true</cmis:orderable>
+</cmis:propertyDateTimeDefinition>
+<cmis:propertyIdDefinition>
+  <cmis:id>cmis:objectId</cmis:id>
+  <cmis:localName>objectId</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Object Id</cmis:displayName>
+  <cmis:queryName>cmis:objectId</cmis:queryName>
+  <cmis:description>The unique object id (a node ref)</cmis:description>
+  <cmis:propertyType>id</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>true</cmis:orderable>
+</cmis:propertyIdDefinition>
+<cmis:propertyIdDefinition>
+  <cmis:id>cmis:allowedChildObjectTypeIds</cmis:id>
+  <cmis:localName>allowedChildObjectTypeIds</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Allowed Child Object Types Ids</cmis:displayName>
+  <cmis:queryName>cmis:allowedChildObjectTypeIds</cmis:queryName>
+  <cmis:description>The allowed child object type ids</cmis:description>
+  <cmis:propertyType>id</cmis:propertyType>
+  <cmis:cardinality>multi</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>false</cmis:queryable>
+  <cmis:orderable>false</cmis:orderable>
+</cmis:propertyIdDefinition>
+<cmis:propertyIdDefinition>
+  <cmis:id>cmis:baseTypeId</cmis:id>
+  <cmis:localName>baseTypeId</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Base Type Id</cmis:displayName>
+  <cmis:queryName>cmis:baseTypeId</cmis:queryName>
+  <cmis:description>Id of the base object type for the object</cmis:description>
+  <cmis:propertyType>id</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>false</cmis:orderable>
+</cmis:propertyIdDefinition>
+<cmis:propertyStringDefinition>
+  <cmis:id>cmis:lastModifiedBy</cmis:id>
+  <cmis:localName>lastModifiedBy</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Last Modified By</cmis:displayName>
+  <cmis:queryName>cmis:lastModifiedBy</cmis:queryName>
+  <cmis:description>The authority who last modified this object
+  </cmis:description>
+  <cmis:propertyType>string</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>true</cmis:orderable>
+</cmis:propertyStringDefinition>
+<cmis:propertyStringDefinition>
+  <cmis:id>cmis:changeToken</cmis:id>
+  <cmis:localName>changeToken</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Change token</cmis:displayName>
+  <cmis:queryName>cmis:changeToken</cmis:queryName>
+  <cmis:description>Change Token</cmis:description>
+  <cmis:propertyType>string</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>false</cmis:queryable>
+  <cmis:orderable>false</cmis:orderable>
+</cmis:propertyStringDefinition>
+<cmis:propertyStringDefinition>
+  <cmis:id>cmis:name</cmis:id>
+  <cmis:localName>name</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Name</cmis:displayName>
+  <cmis:queryName>cmis:name</cmis:queryName>
+  <cmis:description>Name</cmis:description>
+  <cmis:propertyType>string</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readwrite</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>true</cmis:orderable>
+</cmis:propertyStringDefinition>
+<cmis:propertyDateTimeDefinition>
+  <cmis:id>cmis:lastModificationDate</cmis:id>
+  <cmis:localName>lastModificationDate</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Last Modified Date</cmis:displayName>
+  <cmis:queryName>cmis:lastModificationDate</cmis:queryName>
+  <cmis:description>The date this object was last modified</cmis:description>
+  <cmis:propertyType>datetime</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>true</cmis:orderable>
+</cmis:propertyDateTimeDefinition>
+<cmis:propertyStringDefinition>
+  <cmis:id>cmis:path</cmis:id>
+  <cmis:localName>path</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Path</cmis:displayName>
+  <cmis:queryName>cmis:path</cmis:queryName>
+  <cmis:description>The fully qualified path to this folder/description
+  </cmis:description>
+  <cmis:propertyType>string</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>false</cmis:queryable>
+  <cmis:orderable>false</cmis:orderable>
+</cmis:propertyStringDefinition>
+<cmis:propertyStringDefinition>
+  <cmis:id>cmis:createdBy</cmis:id>
+  <cmis:localName>createdBy</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Created by</cmis:displayName>
+  <cmis:queryName>cmis:createdBy</cmis:queryName>
+  <cmis:description>The authority who created this object</cmis:description>
+  <cmis:propertyType>string</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>true</cmis:orderable>
+</cmis:propertyStringDefinition>
+<cmis:propertyIdDefinition>
+  <cmis:id>alfcmis:nodeRef</cmis:id>
+  <cmis:localName>nodeRef</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/alfcmis
+  </cmis:localNamespace>
+  <cmis:displayName>Alfresco Node Ref</cmis:displayName>
+  <cmis:queryName>alfcmis:nodeRef</cmis:queryName>
+  <cmis:description>Alfresco Node Ref</cmis:description>
+  <cmis:propertyType>id</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>false</cmis:queryable>
+  <cmis:orderable>false</cmis:orderable>
+</cmis:propertyIdDefinition>
+<cmis:propertyIdDefinition>
+  <cmis:id>cmis:parentId</cmis:id>
+  <cmis:localName>parentId</cmis:localName>
+  <cmis:localNamespace>http://www.alfresco.org/model/cmis/1.0/cs01
+  </cmis:localNamespace>
+  <cmis:displayName>Parent Id</cmis:displayName>
+  <cmis:queryName>cmis:parentId</cmis:queryName>
+  <cmis:description>The parent id of the folder</cmis:description>
+  <cmis:propertyType>id</cmis:propertyType>
+  <cmis:cardinality>single</cmis:cardinality>
+  <cmis:updatability>readonly</cmis:updatability>
+  <cmis:inherited>false</cmis:inherited>
+  <cmis:required>false</cmis:required>
+  <cmis:queryable>true</cmis:queryable>
+  <cmis:orderable>true</cmis:orderable>
+</cmis:propertyIdDefinition>
+</cmisra:type>
+
+<atom:link rel="service"
+    href="{{ ROOT }}?repositoryId=ae344585-9654-4f17-a083-fe4c272f2ab6"
+    type="application/atomsvc+xml"/>
+<atom:link rel="self" href="{{ ROOT }}/type?id=cmis%3Afolder"
+    type="application/atom+xml;type=entry" cmisra:id="cmis:folder"/>
+<atom:link rel="enclosure" href="{{ ROOT }}/type?id=cmis%3Afolder"
+    type="application/atom+xml;type=entry"/>
+<atom:link rel="down" href="{{ ROOT }}/types?typeId=cmis%3Afolder"
+    type="application/atom+xml;type=feed"/>
+<atom:link rel="down" href="{{ ROOT }}/typedesc?typeId=cmis%3Afolder"
+    type="application/cmistree+xml"/>
+<atom:link rel="describedby" href="{{ ROOT }}/type?id=cmis%3Afolder"
+    type="application/atom+xml;type=entry"/>
+</atom:entry>

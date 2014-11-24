@@ -1,0 +1,5 @@
+Wikipédia est un projet d’encyclopédie collective établie sur Internet, universelle, multilingue et fonctionnant sur le principe du wiki. Wikipédia a pour objectif d’offrir un contenu librement réutilisable, objectif et vérifiable, que chacun peut modifier et améliorer.
+
+Le cadre du projet est défini par des principes fondateurs. Son contenu est sous licence Creative Commons by-sa et peut être copié et réutilisé sous la même licence — même à des fins commerciales — sous réserve d'en respecter les conditions.
+
+Actuellement, Wikipédia en français compte plus de deux mille articles distingués comme « articles de qualité » ou comme « bons articles ».

@@ -1,0 +1,389 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import  m_box_content, m_box_menu with context %}
+{% from "macros/recent.html" import m_recent_items %}
+
+{% macro m_users_table(users_and_roles, controls) %}
+  {% set table_id = uuid() %}
+  <form method="POST">
+    {{ csrf_token }}
+    <table class="table table-condensed table-striped" id="{{ table_id }}">
+      <thead>
+      <tr>
+        <th></th>
+        <th class="hide">Last Name</th>
+        <th class="hide">First Name</th>
+        <th>{{ _("Name") }}</th>
+        <th>{{ _("Role") }}</th>
+        {% if controls %}
+          <th>{{ _("Action") }}</th>
+        {% endif %}
+      </tr>
+      </thead>
+
+      <tbody>
+      {% for user, role, has_access in users_and_roles %}
+        <tr>
+          <td>{%- if not user.can_login %}
+            <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i>
+            {%- elif has_access %}
+            <i class="fa fa-check">&nbsp;</i>
+            {%- endif %}
+          </td>
+          <td class="hide">{{ user.last_name }}</td>
+          <td class="hide">{{ user.first_name }}</td>
+          <td>
+            {%- if not user.can_login %}<s title="{{ _('account disabled') }}">{%- endif %}
+            <a href="{{ url_for("social.user", user_id=user.id) }}">{{ user.name }}</a>
+            ({{ user.email }})
+            {%- if not user.can_login %}</s>{%- endif %}
+          </td>
+          <td>{{ role }}</td>
+          {%- if controls %}
+            <td>
+              <button type="submit" name="delete-user-role"
+                  value="{{ "%s:%s" % (role, user.id) }}"
+                  class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
+              </button>
+            </td>
+          {%- endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </form>
+
+  {%- deferJS %}
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var id = "#{{ table_id }}"; // Should be unique enough
+      $(id).dataTable({
+        aaSorting: [[3, "asc"]],
+        aoColumns:       [
+         { bSortable: false }, // 0: has_access
+         { bVisible: false },  // 1: last_name
+         { bVisible: false }, // 2: first_name
+         { aDataSort: [1, 2], asSorting: [ "asc", "desc" ] }, // 3: fullname
+         { aDataSort: [4, 1, 2], asSorting: [ "asc", "desc" ] }, // 4: role - sort by role then name
+         {%- if controls %}
+         { bSortable: false }
+         {% endif %}
+        ],
+        sPaginationType: "bootstrap",
+        bFilter:         true,
+        bLengthChange:   false
+      });
+    });
+  </script>
+  {%- enddeferJS %}
+
+  <div style="clear: both;"></div>
+{% endmacro %}
+
+{% macro m_groups_table(groups_and_roles, controls) %}
+  {% set table_id = uuid() %}
+  <form method="POST">
+    {{ csrf_token }}
+    <table class="table table-condensed table-striped" id="{{ table_id }}">
+      <thead>
+      <tr>
+        <th>{{ _("Name") }}</th>
+        <th>{{ _("Role") }}</th>
+        {% if controls %}
+          <th>{{ _("Action") }}</th>
+        {% endif %}
+      </tr>
+      </thead>
+
+      <tbody>
+      {% for group, role in groups_and_roles %}
+        <tr>
+          <td><a
+              href="{{ url_for("social.group_home", group_id=group.id) }}">{{ group.name }}</a>
+          </td>
+          <td>{{ role }}</td>
+          {%- if controls %}
+            <td>
+              <button type="submit" name="delete-group-role"
+                  value="{{ role }}:{{ group.id }}"
+                  class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
+              </button>
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </form>
+
+  {%- deferJS %}
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var id = "#{{ table_id }}"; // Should be unique enough
+      $(id).dataTable({
+        aoColumns:       [
+          { asSorting: [ "asc", "desc" ] },
+          { asSorting: [ "asc", "desc" ] },
+          {%- if controls %}
+            { asSorting: [ "asc", "desc" ] }
+          {% endif %}
+        ],
+        sPaginationType: "bootstrap",
+        bFilter:         true,
+        bLengthChange:   false
+      });
+    });
+  </script>
+  {%- enddeferJS %}
+  <div style="clear: both;"></div>
+{% endmacro %}
+
+
+{% block content %}
+  {% call m_box_content("Permissions") %}
+    <h2 style="margin-top: 0;">{{ _('Manage permissions on <em>{folder}</em>').format(folder=folder.title) }}</h2>
+
+    <a class="btn btn-default datatable-export"
+        href="{{ url_for('.permissions_export', folder_id=folder.id, community_id=folder.community.slug) }}"><i
+        class="fa fa-align-justify"></i>{{ _("Export to Excel") }}</a>
+
+    <hr/>
+
+    <h3>{{ _("Inheritance") }}</h3>
+
+    {% if folder.inherit_security %}
+      <i class="fa fa-check-circle-o"></i>{{ _("Activated") }}
+      <button class="btn btn-default"
+          id="deactivate_inheritance">{{ _("Deactivate") }}</button>
+    {% else %}
+      <i class="fa fa-ban"></i>{{ _("Deactivated") }}
+      <button class="btn btn-default" id="activate_inheritance">{{ _("Activate") }}</button>
+    {% endif %}
+
+    {#
+    <h3>Current local roles for groups</h3>
+
+    {% if groups_and_local_roles %}
+      {{ m_groups_table(groups_and_local_roles, controls=True) }}
+    {% else %}
+      {{ _("Nothing") }}.
+    {% endif %}
+
+    <p>
+      <button class="btn" href="#modal-add-group-local-role"
+          data-toggle="modal">
+        <i class="fa fa-plus"></i>{{ _("Add new local role") }}&hellip;</button>
+    </p>
+
+    <h3>{{ _("Current inherited roles for groups") }}</h3>
+
+    {% if folder.inherit_security %}
+      {% if groups_and_inherited_roles %}
+        {{ m_groups_table(groups_and_inherited_roles, controls=False) }}
+      {% else %}
+        {{ _("Nothing") }}.
+      {% endif %}
+    {% else %}
+      {{ _("Deactivated") }}
+    {% endif %}
+
+    <hr>
+    #}
+
+    <h3>{{ _("Current local roles for users") }}</h3>
+
+    {% if users_and_local_roles %}
+      {{ m_users_table(users_and_local_roles, controls=True) }}
+    {% else %}
+      {{ _("Nothing") }}.
+    {% endif %}
+
+    <p>
+      <button class="btn btn-default" href="#modal-add-user-local-role" data-toggle="modal">
+        <i class="fa fa-plus"></i>{{ _("Add new local role") }}&hellip;</button>
+    </p>
+
+    <h3>{{ _("Current inherited roles for users") }}</h3>
+
+    {% if folder.inherit_security %}
+      {% if users_and_inherited_roles %}
+        {{ m_users_table(users_and_inherited_roles, controls=False) }}
+      {% else %}
+        {{ _("Nothing") }}.
+      {% endif %}
+    {% else %}
+      {{ _("Deactivated") }}
+    {% endif %}
+
+    <h3 class="main">{{ _("Audit Log") }}</h3>
+    <div style="margin-bottom: 25px;">
+      {% for entry in audit_entries %}
+        <div>{{ entry.msg }}</div>
+      {% endfor %}
+    </div>
+
+  {% endcall %}
+{% endblock %}
+
+
+{% block sidebar %}
+  {%- set content_actions = actions.for_category('documents:content') %}
+  {%- if content_actions %}
+    {% call m_box_menu() %}
+      <ul class="nav nav-list">
+        {%- for action in content_actions %}
+          <li>{{ action.render() }}</li>
+        {%- endfor %}
+      </ul>
+    {% endcall %}
+  {%- endif %}
+{% endblock %}
+
+
+{% block modals %}
+  {% include "documents/_modals.html" %}
+
+  <!-- MORE modals ! -->
+  <div class="modal fade" id="modal-add-group-local-role" role="dialog" data-keyboard="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        
+        <form method="POST" class="form-horizontal"
+              action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
+              enctype="multipart/form-data" style="margin-bottom: 0;">
+              {{ csrf_token }}
+              <input type="hidden" name="action" value="add-group-role" />
+
+              <div class="modal-header">
+                <button class="close" data-dismiss="modal">&times;</button>
+                <h3>{{ _("Add a local role for a group") }}</h3>
+              </div>
+
+              <div class="modal-body">
+                <div class="control-group">
+                  <label class="control-label"
+                         for="group-select">{{ _("Group") }}</label>
+
+                         <div class="controls">
+                           <select data-toggle="select2" id="group-select" name="group">
+                             {% for group in all_groups %}
+                               <option value="{{ group.id }}">{{ group.name }}</option>
+                             {% endfor %}
+                           </select>
+                         </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label"
+                         for="role-select-for-group">{{ _("Role") }}</label>
+
+                         <div class="controls">
+                           <select data-toggle="select2" id="role-select-for-group" name="role">
+                             <option value="reader">{{ _("Reader") }}</option>
+                             <option value="writer">{{ _("Writer") }}</option>
+                             <option value="manager">{{ _("Manager") }}</option>
+                           </select>
+                         </div>
+                </div>
+
+              </div>
+
+              <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default">{{ _("Cancel") }}</button>
+                <button class="btn btn-primary" type="submit" name="action"
+                        value="add-local-role">{{ _("Add local role") }}</button>
+              </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-add-user-local-role" role="dialog" data-keyboard="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <form method="POST" class="form-horizontal"
+              action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
+              enctype="multipart/form-data" style="margin-bottom: 0;">
+              {{ csrf_token }}
+              <input type="hidden" name="action" value="add-user-role" />
+
+              <div class="modal-header">
+                <button class="close" data-dismiss="modal">&times;</button>
+                <h3>{{ _("Add a local role for a user") }}</h3>
+              </div>
+
+              <div class="modal-body">
+                <div class="control-group">
+                  <label class="control-label" for="user-select">User</label>
+
+                  <div class="controls">
+                    <input type="text" id="user-select" name="user" />
+                  </div>
+                </div>
+
+                <div class="control-group">
+                  <label class="control-label" for="role-select">Role</label>
+
+                  <div class="controls">
+                    <select data-toggle="select2" id="role-select" name="role">
+                      <option value="reader">Reader</option>
+                      <option value="writer">Writer</option>
+                      <option value="manager">Manager</option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+
+              <div class="modal-footer">
+                <button data-dismiss="modal" class="btn btn-default">Cancel</button>
+                <button class="btn btn-primary" type="submit" name="action"
+                        value="add-local-role">{{ _("Add local role") }}</button>
+              </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script type="text/javascript">
+    Abilian.fn.onAppInit(function() {
+      $("#deactivate_inheritance").click(function() {
+        var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="deactivate_inheritance" /></form>');
+        form.attr("method", "post");
+        form.attr("action", "{{ request.path }}");
+        $(document.body).append(form);
+        form.submit();
+      });
+
+      $("#activate_inheritance").click(function() {
+        var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="activate_inheritance" /></form>');
+        form.attr("method", "post");
+        form.attr("action", "{{ request.path }}");
+        $(document.body).append(form);
+        form.submit();
+      });
+
+      $("#user-select").attr("style", "width: 220px").select2({
+        minimumInputLength: 2,
+        ajax:               {
+          url:         "{{ url_for("social.users_json") }}",
+          dataType:    'json',
+          quietMillis: 100,
+          data:        function(term, page) {
+            return { q: term };
+          },
+          results:     function(data, page) {
+            return {results: data.results, more: false};
+          }
+        },
+        allowClear:         true
+      });
+      $("#s2id_user-select a span").text("");
+      $("input#user-select").attr("value", "");
+
+    });
+  </script>
+{% endblock %}

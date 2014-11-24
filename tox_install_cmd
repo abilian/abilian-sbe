@@ -1,0 +1,9 @@
+#!/bin/bash
+
+BIN_DIR="$(echo $PATH | tr : '\n' | head -n1)"
+export VIRTUAL_ENV="$(dirname "$BIN_DIR")"
+if [ ! -x "$VIRTUAL_ENV/bin/pip-accel" ]; then
+  pip install pip-accel
+fi
+
+pip-accel install "$@"

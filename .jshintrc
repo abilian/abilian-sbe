@@ -1,0 +1,15 @@
+{
+  "camelcase": true,
+  "curly": true,
+  "indent": 4,
+  "latedef": true,
+  "quotmark": "single",
+  "undef": true,
+  "unused": true,
+  "strict": true,
+  "trailing": true,
+
+  // environment settings
+  "browser": true,
+  "jquery": true
+}

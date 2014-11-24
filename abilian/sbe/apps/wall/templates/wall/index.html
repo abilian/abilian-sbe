@@ -1,0 +1,10 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+{% from "macros/activity.html" import m_activities %}
+
+{% block content %}
+  {%- call m_box_content(_("Activity stream")) %}
+    {{ m_activities(entries, ignore_communities=True) }}
+  {%- endcall %}
+{% endblock %}

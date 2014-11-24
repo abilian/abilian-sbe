@@ -1,0 +1,14 @@
+{% extends "wiki/_base.html" %}
+
+{% from "macros/box.html" import m_box_content %}
+{% from "wiki/macros.html" import m_difflines %}
+
+{% block content %}
+  {% call m_box_content(_("(changes)")) %}
+    <p>Changes between revisions {{ rev1.number }} and {{ rev2.number }}.</p>
+    <pre>
+      {{ m_difflines(diff) }}
+    </pre>
+
+  {% endcall %}
+{% endblock %}

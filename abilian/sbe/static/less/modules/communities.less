@@ -1,0 +1,50 @@
+/* Community header */
+
+td.avatar img {
+  border-radius: 10%;
+}
+
+.community-avatar {
+  display: block;
+  float: left;
+  margin: -4px 0 0 -75px;
+  position: relative;
+}
+
+.community-header img {
+  border-radius: 8px;
+}
+
+table.community-list tr {
+  td {
+    vertical-align: middle;
+
+    &.avatar {
+      width: 65px !important;
+      height: 65px !important;
+    }
+
+    a {
+      text-decoration: none;
+      color: #555; /* TODO: global font color */
+    }
+
+    .profile {
+      margin: 10px 0 10px 10px;
+    }
+
+    .name {
+      margin: 2px 0;
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .description {
+      font-style: italic;
+    }
+  }
+
+  &:last-child td {
+    border-bottom: 1px solid #dddddd;
+  }
+}

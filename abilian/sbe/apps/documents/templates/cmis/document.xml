@@ -1,0 +1,137 @@
+{%- from "cmis/macros.xml" import links, allowable_actions -%}
+<atom:entry xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/"
+    xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/"
+    xmlns:app="http://www.w3.org/2007/app">
+  <atom:author>
+    <atom:name>admin</atom:name>
+  </atom:author>
+  <atom:id>
+    http://chemistry.apache.org/d29ya3NwYWNlOi8vU3BhY2VzU3RvcmUvNzkyODJmNmEtMjJlOC00OWIxLTk2ZjAtZDgzZDY1Nzg5M2JlOzEuMA==
+  </atom:id>
+  <atom:published>2012-09-01T21:53:18Z</atom:published>
+  <atom:title>{{ document.title }}</atom:title>
+  <app:edited>2012-09-01T21:53:18Z</app:edited>
+  <atom:updated>2012-09-01T21:53:18Z</atom:updated>
+
+  <atom:content
+      src="{{ROOT}}/content?id={{document.id}}"
+      type="{{ document.mime_type }}"/>
+
+  <cmisra:object>
+    <cmis:properties>
+      <cmis:propertyBoolean queryName="cmis:isLatestMajorVersion"
+          displayName="Is Latest Major Version" localName="isLatestMajorVersion"
+          propertyDefinitionId="cmis:isLatestMajorVersion">
+        <cmis:value>true</cmis:value>
+      </cmis:propertyBoolean>
+      <cmis:propertyInteger queryName="cmis:contentStreamLength"
+          displayName="Content Stream Length" localName="contentStreamLength"
+          propertyDefinitionId="cmis:contentStreamLength">
+        <cmis:value>{{ document.content_length }}</cmis:value>
+      </cmis:propertyInteger>
+      <cmis:propertyId queryName="cmis:objectTypeId"
+          displayName="Object Type Id" localName="objectTypeId"
+          propertyDefinitionId="cmis:objectTypeId">
+        <cmis:value>{{ document.sbe_type }}</cmis:value>
+      </cmis:propertyId>
+      <cmis:propertyString queryName="cmis:versionSeriesCheckedOutBy"
+          displayName="Version Series Checked Out By"
+          localName="versionSeriesCheckedOutBy"
+          propertyDefinitionId="cmis:versionSeriesCheckedOutBy"/>
+      <cmis:propertyId queryName="cmis:versionSeriesCheckedOutId"
+          displayName="Version Series Checked Out Id"
+          localName="versionSeriesCheckedOutId"
+          propertyDefinitionId="cmis:versionSeriesCheckedOutId"/>
+      <cmis:propertyString queryName="cmis:name" displayName="Name"
+          localName="name" propertyDefinitionId="cmis:name">
+        <cmis:value>{{ document.name }}</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyString queryName="cmis:contentStreamMimeType"
+          displayName="Content Stream MIME Type"
+          localName="contentStreamMimeType"
+          propertyDefinitionId="cmis:contentStreamMimeType">
+        <cmis:value>{{ document.content_type }}</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyId queryName="cmis:versionSeriesId"
+          displayName="Version series id" localName="versionSeriesId"
+          propertyDefinitionId="cmis:versionSeriesId">
+        <cmis:value>TODO</cmis:value>
+      </cmis:propertyId>
+      <cmis:propertyDateTime queryName="cmis:creationDate"
+          displayName="Creation Date" localName="creationDate"
+          propertyDefinitionId="cmis:creationDate">
+        <cmis:value>2012-09-01T23:53:18.300+02:00</cmis:value>
+      </cmis:propertyDateTime>
+      <cmis:propertyString queryName="cmis:changeToken"
+          displayName="Change token" localName="changeToken"
+          propertyDefinitionId="cmis:changeToken"/>
+      <cmis:propertyString queryName="cmis:versionLabel"
+          displayName="Version Label" localName="versionLabel"
+          propertyDefinitionId="cmis:versionLabel">
+        <cmis:value>1.0</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyBoolean queryName="cmis:isLatestVersion"
+          displayName="Is Latest Version" localName="isLatestVersion"
+          propertyDefinitionId="cmis:isLatestVersion">
+        <cmis:value>true</cmis:value>
+      </cmis:propertyBoolean>
+      <cmis:propertyBoolean queryName="cmis:isVersionSeriesCheckedOut"
+          displayName="Is Version Series Checked Out"
+          localName="isVersionSeriesCheckedOut"
+          propertyDefinitionId="cmis:isVersionSeriesCheckedOut">
+        <cmis:value>false</cmis:value>
+      </cmis:propertyBoolean>
+      <cmis:propertyString queryName="cmis:lastModifiedBy"
+          displayName="Last Modified By" localName="lastModifiedBy"
+          propertyDefinitionId="cmis:lastModifiedBy">
+        <cmis:value>admin</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyString queryName="cmis:createdBy" displayName="Created by"
+          localName="createdBy" propertyDefinitionId="cmis:createdBy">
+        <cmis:value>admin</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyString queryName="cmis:checkinComment"
+          displayName="Checkin Comment" localName="checkinComment"
+          propertyDefinitionId="cmis:checkinComment">
+        <cmis:value>Initial Version</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyId queryName="cmis:objectId" displayName="Object Id"
+          localName="objectId" propertyDefinitionId="cmis:objectId">
+        <cmis:value>{{document.id}}</cmis:value>
+      </cmis:propertyId>
+      <cmis:propertyBoolean queryName="cmis:isMajorVersion"
+          displayName="Is Major Version" localName="isMajorVersion"
+          propertyDefinitionId="cmis:isMajorVersion">
+        <cmis:value>true</cmis:value>
+      </cmis:propertyBoolean>
+      <cmis:propertyBoolean queryName="cmis:isImmutable"
+          displayName="Is Immutable" localName="isImmutable"
+          propertyDefinitionId="cmis:isImmutable">
+        <cmis:value>false</cmis:value>
+      </cmis:propertyBoolean>
+      <cmis:propertyId queryName="cmis:baseTypeId" displayName="Base Type Id"
+          localName="baseTypeId" propertyDefinitionId="cmis:baseTypeId">
+        <cmis:value>{{ document.sbe_type }}</cmis:value>
+      </cmis:propertyId>
+      <cmis:propertyDateTime queryName="cmis:lastModificationDate"
+          displayName="Last Modified Date" localName="lastModificationDate"
+          propertyDefinitionId="cmis:lastModificationDate">
+        <cmis:value>2012-09-01T23:53:18.300+02:00</cmis:value>
+      </cmis:propertyDateTime>
+      <cmis:propertyString queryName="cmis:contentStreamFileName"
+          displayName="Content Stream Filename"
+          localName="contentStreamFileName"
+          propertyDefinitionId="cmis:contentStreamFileName">
+        <cmis:value>{{ document.file_name }}</cmis:value>
+      </cmis:propertyString>
+    </cmis:properties>
+
+    {% if options.includeAllowableActions %}
+      {{ allowable_actions(object) }}
+    {% endif %}
+  </cmisra:object>
+
+  {{ links(document, ROOT) }}
+
+</atom:entry>

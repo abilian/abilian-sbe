@@ -1,0 +1,33 @@
+{% extends "wiki/_base.html" %}
+
+{% from "macros/box.html" import m_box_content %}
+
+{% block content %}
+  {% call m_box_content(_("(changes)")) %}
+    {% set show_controls = revisions|length > 1 %}
+    <form
+        action="{{ url_for(".page_compare", community_id=g.community.slug, title=page.title) }}">
+      <ul style="list-style: none;">
+        {% for rev in revisions %}
+          <li>{% if show_controls %}<input type="checkbox" name="rev{{ rev.number }}">{% endif %} {{ rev.number }}: by <a
+              href="{{ url_for("social.user", user_id=rev.author.id) }}">{{ rev.author }}</a>
+            at {{ rev.created_at|datetimeformat }}
+            ({{ rev.body_src|length }} {{ _("characters") }})
+          </li>
+        {% endfor %}
+      </ul>
+
+      <input type="hidden" name="title" value="{{ page.title }}">
+
+      {% if show_controls %}
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" name="action"
+            value="compare">
+          {{ _("Compare revisions") }}
+        </button>
+      </div>
+      {% endif %}
+    </form>
+  {% endcall %}
+{% endblock %}
+

@@ -1,0 +1,80 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_menu, m_box_content %}
+
+
+{% block content %}
+  {% call m_box_content(_("Recent conversations")) %}
+    {% if threads %}
+      <ul class="threads">
+        {% for thread in threads %}
+          {{ m_thread(thread) }}
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>{{ _("No message has been posted to this community yet") }}</p>
+    {% endif %}
+
+    {% if has_more or True %}
+      <hr>
+      <p><a href="{{ url_for(".archives", community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
+    {% endif %}
+  {% endcall %}
+{% endblock %}
+
+{% block sidebar %}
+  {% call m_box_menu() %}
+    <ul class="nav nav-list">
+      {%- set global_actions = actions.for_category('forum:global') %}
+      {%- for action in global_actions %}
+        <li>{{ action.render() }}</li>
+      {%- endfor %}
+    </ul>
+  {% endcall %}
+{% endblock %}
+
+
+{% macro m_thread(thread) %}
+  {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
+  {%- set author_img = url_for("images.user_avatar", user_id=thread.creator.id, s=45) %}
+  {%- set author_name = thread.creator.name %}
+  {%- set thread_href = url_for(thread) %}
+  {%- set thread_length = thread.posts|length %}
+
+  <li>
+    <a class="avatar" href="{{ author_href }}" title="{{ author_name }}">
+      <img title="{{ author_name }}" alt="" src="{{ author_img }}" />
+    </a>
+
+    <div class="entry">
+      <h4><a href="{{ thread_href }}">{{ thread.title }}</a></h4>
+
+      <div class="details">
+        {{ _("by") }}
+        <a href="{{ author_href }}" class="name">{{ author_name }}</a>
+        –
+        <span class="datetime">
+          {%- trans date=thread.created_at|dateformat('long'),
+                    time=thread.created_at|timeformat('short')
+          %}{{ date }} at {{ time }}{%- endtrans %}
+        </span>
+      </div>
+
+      <div class="comments">
+        <a href="{{ thread_href }}">
+          <span class="glyphicon glyphicon-comment"></span>
+          {{ thread_length-1 }} commentaires
+        </a>
+
+        {%- if thread_length > 1 %}
+        {% set last_post_creator = thread.posts[-1].creator %}
+        <span class="hidden-xs">
+          {{ _("Last comment by") }}
+          <a href="{{ url_for("social.user", user_id=last_post_creator.id) }}">{{ last_post_creator.name }}</a>
+        </span>
+        {%- endif %}
+      </div>
+    </div>
+  </li>
+{% endmacro %}
+

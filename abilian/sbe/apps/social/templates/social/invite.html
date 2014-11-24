@@ -1,0 +1,35 @@
+{% extends "social/base.html" %}
+
+{% block content %}
+  <h2>{{ _("Invite colleagues to join this community") }}</h2>
+
+  <p>
+    {{ _("Please enter the email addresses of people you'd like to invite to the community. Enter one email address per line.") }}
+  </p>
+
+  <form action="/social/invite" method="POST" class="form-horizontal" id="edit-form">
+    <fieldset>
+      <div class="control-group">
+        <label class="control-label" for="input-emails"><label for="emails">{{ _("Emails") }}</label></label>
+        <div class="controls">
+          <textarea id="emails" name="emails" cols="40" rows="10"></textarea>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label" for="input-message"><label for="message">{{ _("Personnalized message") }}</label></label>
+        <div class="controls">
+          <textarea id="message" name="message" cols="40" rows="10"></textarea>
+        </div>
+      </div>
+
+    </fieldset>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary" name="action" value="invite">{{ _("Invite") }}</button>
+      <button type="submit" class="btn cancel" name="action" value="cancel">{{ _("Cancel") }}</button>
+    </div>
+
+  </form>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content %}
+{% from "macros/form.html" import m_field %}
+
+{% block content %}
+  {% call m_box_content(_("Start a new conversation")) %}
+    {% set is_manager = g.community.has_permission(current_user, 'manage') %}
+
+    <div class="body">
+      <form action="." method="POST" enctype="multipart/form-data">
+        {{ form.csrf_token }}
+
+        {{ m_field(form.title, class_="span8") }}
+        {{ m_field(form.message, class_="resizeable-vertical", rows=10) }}
+        {{ m_field(form.attachments) }}
+
+        {% if g.community.type == 'participative' or is_manager %}
+          {{ m_field(form.send_by_email) }}
+        {% endif %}
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" name="_action"
+              value="post">
+            {{ _("Post this message") }}
+          </button>
+          <button type="submit" class="btn cancel" name="_action"
+              value="cancel">
+            {{ _("Cancel") }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  {% endcall %}
+{% endblock %}

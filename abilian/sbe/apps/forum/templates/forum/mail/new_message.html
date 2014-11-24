@@ -1,0 +1,39 @@
+<html>
+<body>
+{%- set thread=post.thread %}
+{%- set community=thread.community %}
+<p style="color: dimgray;">
+  {{ post.creator }} a posté un nouveau message dans la communauté
+  <a href="{{ url_for("communities.community", community_id=community.slug, _external=True) }}#thread_{{ post.id }}">{{ community.name }}</a>.
+</p>
+
+<hr>
+
+<h1><a href="{{ url_for(post, _external=True) }}">{{ post.title }}</a>
+</h1>
+
+{{ post.body_html|safe }}
+
+{%- if post.attachments %}
+<h3>Pièce(s) jointe(s)</h3>
+<div id="attachments">
+  <ul>
+    {%- for attachment in post.attachments %}
+    <li>
+      <span class="attachment-item">
+      <a href="{{ url_for(attachment, _external=True) }}">{{ attachment.name }}</a>
+      ({{ attachment.content_length|filesize }})
+      </span>
+    </li>
+    {%- endfor %}
+  </ul>
+</div>
+{%- endif %}
+
+<hr>
+
+<p style="color: dimgray;">
+  Vous recevez ce message car vous êtes membres de la communauté
+  {{ community.name }}</p>
+</body>
+</html>

@@ -1,0 +1,42 @@
+/* Override some defaults */
+/* body { */
+/*   padding-top: 150px; */
+/* } */
+
+/* .container { */
+/*   width: 300px; */
+/* } */
+
+#logo {
+  display: block;
+  margin: 10px auto;
+  /* margin-top: -100px; */
+}
+
+.row {
+  margin-top: 10px;
+}
+
+/* The white background content wrapper */
+.container > .content,      /* override rule */
+.content {
+  background-color: #f7f7f7;
+  padding: 20px;
+  /* margin: 0 -20px; */
+  border-radius: 10px 10px 10px 10px;
+  -webkit-border-radius: 10px 10px 10px 10px;
+  -moz-border-radius: 10px 10px 10px 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  -webkit-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+  -moz-box-shadow: 0 1px 2px rgba(0,0,0,.15);
+}
+
+legend {
+  margin-right: -50px;
+  font-weight: bold;
+  color: #404040;
+}
+
+.login-form input {
+  width: 100%;
+}

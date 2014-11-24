@@ -1,0 +1,386 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu with context %}
+{% from "macros/audit.html" import m_audit_log %}
+{% from "macros/table.html" import m_table %}
+
+{% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
+
+{% block content %}
+  {% call m_box_content(title=_("Document view")) %}
+
+    <div style="margin: 5px 0;">
+      <i class="fa fa-file-o fa-lg"></i>
+      {{ m_breadcrumbs2(breadcrumbs) }}
+    </div>
+
+    <hr>
+
+    <h2 style="margin-top: 0;">{{ doc.title }}</h2>
+
+    {%- if doc.description %}
+      <p>{{ doc.description }}</p>
+      <p>&nbsp;</p>
+    {%- endif %}
+
+    <h3 class="main">{{ _('Preview') }}</h3>
+
+    <div class="preview" style="max-width: {{ doc.preview_size }}px;">
+      <img          
+          src="{{ url_for(".document_preview", doc_id=doc.id, community_id=doc.community.slug, size=doc.preview_size) }}"
+          alt="" class="preview" data-page="0" />
+
+      {%- if has_preview %}
+        <div class="preview-nav">
+          <a class="preview-prev"
+              title="{{ _('Previous') }}">{{ _('Previous') }}</a>
+          <a class="preview-next" title="{{ _('Next') }}">{{ _('Next') }}</a>
+        </div>
+      {%- else %}
+        {{ _("Document preview not yet available") }}
+      {%- endif %}
+    </div>
+
+    <div class="collapsable">
+      <h3 class="main collapsed" data-toggle="collapse"
+          href="#doc_properties">{{ _('Properties') }}</h3>
+
+      <div id="doc_properties" class="collapse">
+        {{ m_table([
+          (_('File name'), doc.title),
+          (_('Size'), doc.content_length|filesize),
+          (_('Content type (MIME)'), doc.content_type or ''),
+          (_('Language'), doc.language or ''),
+         ]) }}
+      </div>
+
+      {%- if doc.extra_metadata %}
+        <h3 class="main collapsed" data-toggle="collapse"
+            href="#doc_extra_metadata">Extra Metadata</h3>
+        <div id="doc_extra_metadata" class="collapse">
+          {%- set sorted = doc.extra_metadata|dictsort %}
+          {{ m_table(sorted) }}
+        </div>
+      {%- endif %}
+
+      {#
+    <h3 class="main">{{ _('Tags') }}</h3>
+
+    <div>
+      <form action="/dm/{{ doc.id }}/tag" method="POST">
+        <input class="tagbox" name="tags" value="{{ doc.tags }}">
+        <input type="submit" class="btn-primary">
+      </form>
+    </div>
+    #}
+
+      <h3 class="main collapsed" data-toggle="collapse"
+          href="#doc_dates">{{ _('Dates') }}</h3>
+
+      <div id="doc_dates" class="collapse">
+        <p>{{ _('Created on') }}: {{ doc.created_at|date_age }}</p>
+
+        <p>{{ _('Last modified on') }}: {{ doc.updated_at|date_age }}</p>
+      </div>
+
+      <h3 class="main collapsed" data-toggle="collapse"
+          href="#doc_people">{{ _('People') }}</h3>
+
+      <div id="doc_people" class="collapse">
+        <p>
+          {{ _('Creator') }}: <a
+            href="{{ url_for("social.user", user_id=doc.creator.id) }}"><img
+            alt=""
+            src="{{ url_for("images.user_avatar", user_id=doc.creator.id, s=16) }}"/>
+          {{ doc.creator }}</a>
+        </p>
+
+        <p>
+          {{ _('Owner') }}: <a
+            href="{{ url_for("social.user", user_id=doc.owner.id) }}"><img
+            alt=""
+            src="{{ url_for("images.user_avatar", user_id=doc.owner.id, s=16) }}"/>
+          {{ doc.owner }}</a>
+        </p>
+      </div>
+
+      {{ m_audit_log(audit_entries) }}
+
+    </div>
+  {% endcall %}
+{% endblock %}
+
+{% block additional_left_stuff %}
+  <div class="well property-box"
+      style="padding: 8px 0; background-color: white;">
+    <ul class="nav nav-list">
+      <li class="nav-header">{{ _('Properties') }}</li>
+
+      <li>{{ _('File name') }}: {{ doc.title }}</li>
+      <li>{{ _('Size') }}: {{ doc.content_length|filesize }}</li>
+      <li>{{ _('Type') }}: {{ doc.content_type }}</li>
+      <li>{{ _('Language') }}: {{ doc.language }}</li>
+      <li>{{ _('Pages') }}: {{ doc.page_num }}</li>
+      <li>{{ _('Created') }}: {{ doc.created_at|age }}</li>
+      <li>{{ _('Modified') }}: {{ doc.updated_at|age }}</li>
+      <li>{{ _('Creator') }}: <a
+          href="{{ url_for("social.user", user_id=doc.creator.id) }}"><img
+          src="{{ url_for("images.user_avatar", user_id=doc.creator.id, s=16) }}"
+          alt="">
+        {{ doc.creator }}</a></li>
+      <li>{{ _('Owner') }}: <a
+          href="{{ url_for("social.user", user_id=doc.owner.id) }}"><img
+          src="{{ url_for("images.user_avatar", user_id=doc.owner.id, s=16) }}"
+          alt="">
+        {{ doc.owner }}</a></li>
+    </ul>
+  </div>
+
+  {#
+<div class="well property-box" style="padding: 8px 0; background-color: white;">
+  <ul class="nav nav-list">
+    <li class="nav-header">Tags</li>
+
+    <li>{% for tag in doc.tags.split(",") %}
+    <a href="/dm/tag?tag={{ tag }}">{{ tag }}</a>
+    &nbsp;&nbsp;
+    {% else %}
+    No tag.
+    {% endfor %}
+    </li>
+  </ul>
+</div>
+#}
+{% endblock %}
+
+{% block sidebar %}
+  {%- set content_actions = actions.for_category('documents:content') %}
+  {%- if content_actions %}
+    {% call m_box_menu() %}
+      <ul class="nav nav-list">
+        {%- for action in content_actions %}
+          <li>{{ action.render() }}</li>
+        {%- endfor %}
+      </ul>
+    {% endcall %}
+  {%- endif %}
+{% endblock %}
+
+{% block modals %}
+  <div class="modal fade" id="modal-upload-new-version" role="dialog"
+    data-keyboard="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <form id="fileupload"
+          action="{{ url_for(".document_upload", doc_id=doc.id, community_id=doc.community.slug) }}" method="POST"
+          enctype="multipart/form-data" style="margin-bottom: 0;">
+          {{ csrf_token }}
+
+          <div class="modal-header">
+            <button class="close" data-dismiss="modal">&times;</button>
+            <h3>{{ _("Upload new version") }}</h3>
+          </div>
+
+          <div class="modal-body">
+            <div class="form-group">
+              <input type="file" name="file"/>
+            </div>
+            {# Doesn't work currently.
+            <div class="fileupload fileupload-new" data-fileupload="file">
+            <div class="fileupload-preview uneditable-input span5"></div>
+            <span class="btn btn-file"><span class="fileupload-new">{{ _("Select file") }}</span><span class="fileupload-exists">{{ _("Change") }}</span></span>
+            <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">{{ _("Remove") }}</a>
+            </div>
+            #}
+          </div>
+
+          <div class="modal-footer">
+            <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+            <button class="btn btn-primary" type="submit">{{ _("Upload") }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-send-by-email" role="dialog"
+    data-keyboard="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="{{ url_for(".document_send", doc_id=doc.id, community_id=doc.community.slug) }}" method="POST"
+          style="margin-bottom: 0;">
+          {{ csrf_token }}
+
+          <div class="modal-header">
+            <button class="close" data-dismiss="modal">&times;</button>
+            <h3>{{ _("Send by email") }}</h3>
+          </div>
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="control-label">{{ _("Recipient") }}</label>
+              <div class="input-group">
+                <span class="input-group-addon">@</span>
+                <input class="form-control col-md-3" id="prependedInput" type="text" name="recipient"
+                value="{{ request.args.get('recipient', '') }} "/>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label">{{ _("Message") }}</label>
+              <textarea name="message" class="form-control col-md-6 resizeable-vertical" rows="6"
+                placeholder="{{ _('Message...') }}">{{ request.args.get('message', '') }}</textarea>
+            </div>
+
+            <div class="modal-footer">
+              <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+              <button class="btn btn-primary" type="submit">{{ _("Send") }}</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-delete" role="dialog"
+    data-keyboard="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="{{ url_for(".document_delete", doc_id=doc.id, community_id=doc.community.slug) }}"
+          method="POST" style="margin-bottom: 0;">
+          {{ csrf_token }}
+
+          <div class="modal-header">
+            <button class="close" data-dismiss="modal">&times;</button>
+            <h3>{{ _("Delete File") }}</h3>
+          </div>
+
+          <div class="modal-body">
+            {{ _('Are you sure you want to delete the file "{filename}" ?').format(filename=doc.title) }}
+          </div>
+
+          <div class="modal-footer">
+            <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+            <button type="submit"
+              class="btn btn-danger">{{ _("Really Delete") }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-edit" role="dialog"
+    data-keyboard="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form method="POST" class="form-horizontal"
+          action="{{ url_for(".document_edit", doc_id=doc.id, community_id=doc.community.slug) }}"
+          enctype="multipart/form-data" style="margin-bottom: 0;">
+
+          {{ csrf_token }}
+
+          <div class="modal-header">
+            <button class="close" data-dismiss="modal">&times;</button>
+            <h3>{{ _("Edit document properties") }}</h3>
+          </div>
+
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="control-label" for="inputName">{{ _("Name") }}</label>
+
+              <input type="text" class="form-control" id="inputName" name="title" value="{{ doc.title }}">
+              <span class="help-block hide"></span>
+            </div>
+
+            <div class="form-group">
+              <label class="control-label"
+                for="inputDescription">{{ _("Description") }}</label>
+
+              <textarea class="form-control resizeable-vertical" 
+                rows="5" cols="80" id="inputDescription" name="description">{{ 
+                doc.description 
+                }}</textarea>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+            <button class="btn btn-primary" type="submit" name="action"
+              value="edit">{{ _("Save changes") }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+
+{% block js %}
+  <script type="text/javascript">
+    {% include "documents/_modals.js" %}
+
+    // Simple document viewer...
+    Abilian.fn.onAppInit(function() {
+      var imgSrc = $("img.preview").attr("src");
+
+      var previewNav = $(".preview-nav");
+      var previewPrev = $('.preview-prev');
+      var previewNext = $('.preview-next');
+
+      function showNav() {
+        $(document).bind("keydown", keyDown);
+        previewNav.stop().fadeTo(150, 1);
+      }
+
+      function hideNav() {
+        $(document).unbind("keydown", keyDown);
+        previewNav.stop().fadeTo(150, 0);
+      }
+
+      var page_num = {{ doc.page_num }};
+      if (page_num > 1) {
+        $("div.preview").hover(showNav, hideNav);
+      }
+
+      // TODO: what if we want to go past the last page?
+      function loadNext() {
+        var img = $("img.preview");
+        var page = img.data("page") + 1;
+        if (page >= page_num) {
+          page = page - 1;
+        }
+        img.attr("src", imgSrc + "&page=" + page);
+        img.data("page", page);
+        return true;
+      }
+
+      function loadPrev() {
+        var img = $("img.preview");
+        var page = img.data("page") - 1;
+        if (page < 0) {
+          page = 0;
+        }
+        img.attr("src", imgSrc + "&page=" + page);
+        img.data("page", page);
+        return true;
+      }
+
+      previewNext.click(loadNext);
+      previewPrev.click(loadPrev);
+
+      function keyDown(e) {
+        var code = e.keyCode;
+        // Note: we prevent default keyboard action
+        if (code == 39) {
+          loadNext();
+          return false;
+        } else if (code == 37) {
+          loadPrev();
+          return false;
+        }
+        return true;
+      }
+    });
+  </script>
+{% endblock %}

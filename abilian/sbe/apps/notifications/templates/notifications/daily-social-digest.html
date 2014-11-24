@@ -1,0 +1,83 @@
+{% extends "notifications/_base.html" %}
+
+{% block title %}
+  Résumé quotidien des activités dans vos communautés
+{% endblock %}
+
+{% block body %}
+  {% for digest in digests %}
+    <h2>Dans la communauté: {{ digest.community.name }}</h2>
+
+    {% if digest.new_members %}
+      <h3>Nouveaux membres</h3>
+
+      {% for user in digest.new_members %}
+        <p><a
+            href="{{ url_for("social.user", user_id=user.id, _external=True) }}">{{ user }}</a>
+          {% if user.contact %}
+            ({{ user.contact.partenaire }})
+          {% endif %}
+        </p>
+      {% endfor %}
+    {% endif %}
+
+    {% if digest.new_documents %}
+      <h3>Nouveaux documents</h3>
+
+      {% for doc in digest.new_documents %}
+        <p><a href="{{ url_for("documents.document_view",community_id=digest.community.slug,
+                            doc_id=doc.id, _external=True) }}">{{ doc }}</a><br>
+          <small>Posté par {{ doc.creator }}.</small>
+        </p>
+      {% endfor %}
+    {% endif %}
+
+    {% if digest.updated_documents %}
+      <h3>Documents mis à jour</h3>
+
+      {% for doc in digest.updated_documents %}
+        <p><a href="{{ url_for("documents.document_view",
+                                   community_id=digest.community.slug,
+                                   doc_id=doc.id, _external=True) }}">{{ doc }}</a>.
+        </p>
+      {% endfor %}
+    {% endif %}
+
+    {% if digest.new_conversations %}
+      <h3>Nouvelles conversations</h3>
+
+      {% for thread in digest.new_conversations %}
+        <p><a href="{{ url_for("forum.thread",
+                                   community_id=digest.community.slug,
+                                   thread_id=thread.id, _external=True) }}">{{ thread }}</a><br>
+          <small>Posté par {{ thread.creator }}.</small>
+        </p>
+      {% endfor %}
+    {% endif %}
+
+    {% if digest.updated_conversations %}
+      <h3>Conversations mises à jour</h3>
+
+      {% for thread in digest.updated_conversations %}
+        <p><a href="{{ url_for("forum.thread",
+                                   community_id=digest.community.slug,
+                                   thread_id=thread.id, _external=True) }}">{{ thread }}</a>
+        </p>
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endblock %}
+
+{% block footer %}
+  Vous recevez ce mail car vous êtes abonné aux notifications de
+  vos communautés.
+  <br>
+  Vous pouvez modifier les notifications que vous recevez en
+  allant sur la page
+  <a href="{{ url_for("preferences.index", _external=True, _scheme="https") }}">Préférences</a>
+  de l'application.
+  <br>
+  Vous pouvez également vous désabonner directement en suivant
+  <a href="{{ url_for("notifications.unsubscribe_sbe", token=token, _external=True, _scheme="https") }}">ce
+    lien</a>.
+{% endblock %}

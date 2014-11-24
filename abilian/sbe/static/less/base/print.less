@@ -1,0 +1,45 @@
+@media print {
+  /* things we don't to see printed */
+  .navbar,
+  .nav,
+  .btn
+  {
+    display: none;
+  }
+
+  /* things we want to see */
+  /* collapable: alway expand */
+  .collapsable *[data-toggle="collapse"] {
+    background-image: url("../icons/round-minus-16.png");
+  }
+  .collapse {
+    height: auto !important;
+  }
+  /* except log entries */
+  #audit_log_entries {
+    height: 0px !important;
+  }
+
+  /* margins */
+  @page {
+    margin: 1.2cm 1cm;
+  }
+  body {
+    padding: 0px;
+  }
+  #wrapper {
+    width: auto !important;
+    margin: 0px;
+    padding: 0px;
+  }
+
+  /* page breaks */
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  /* flask debug toolbar: hide it! */
+  #flDebugToolbarHandle, #flDebugToolbar {
+    display: none;
+  }
+}

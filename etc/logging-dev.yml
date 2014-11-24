@@ -1,0 +1,75 @@
+disable_existing_loggers: false
+
+root:
+  level: INFO
+  handlers: [console]
+
+formatters:
+  simpleFormater:
+    format: '%(asctime)s - %(levelname)s [%(name)s]: %(message)s'
+    datefmt: '%Y/%m/%d %H:%M:%S'
+
+  with_origin:
+    format: '%(asctime)s - %(levelname)s: %(pathname)s:%(lineno)d [%(funcName)s()]: %(message)s'
+    datefmt: '%Y/%m/%d %H:%M:%S'    
+
+  msg_only:
+    format: '%(message)s'
+    datefmt: ''
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    formatter: simpleFormater
+    level: DEBUG
+    stream: ext://sys.stdout
+
+  console_trace:
+    class: logging.StreamHandler
+    formatter: with_origin
+    level: DEBUG
+    stream: ext://sys.stdout
+
+  console_msg_only:
+    class: logging.StreamHandler
+    formatter: msg_only
+    level: DEBUG
+    stream: ext://sys.stdout
+
+loggers:
+
+  myapp:
+    handlers: [console]
+    level: DEBUG
+    propagate: false
+
+  abilian:
+    level: INFO
+
+  raven:
+    level: DEBUG
+
+  sentry.errors:
+    handlers: [console]
+    propagate: false
+
+  webassets:
+    level: ERROR
+
+
+  sqlalchemy:
+    level: WARNING
+
+  sqlalchemy.engine:
+    # set to INFO to log queries
+    level: WARNING
+
+  # sqlalchemy.pool:
+  #   level: DEBUG
+  #   propagate: false
+  #   handlers: [console_trace]
+
+  werkzeug:
+    # requests logging
+    propagate: false
+    handlers: [console_msg_only]

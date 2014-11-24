@@ -1,0 +1,20 @@
+{%- from "wiki/macros.html" import m_difflines %}
+<span class="text-muted">{{ _('Last edit by: %(user)s', user=current.author.name) }}, {{ current.created_at | datetimeformat }}</span>
+{{ _('Text has been replaced by last version.') }}<br />
+<p class="text-center ">
+  {{ _('Here is a comparison of your edits and new version edits') }}
+</p>
+
+<span class="col-md-6">
+  {{ _('Your version') }}<br />
+  <pre>
+    {{ m_difflines(edited_diff) }}
+  </pre>
+</span>
+
+<span class="col-md-6">
+  {{ _('Last version') }}<br />
+  <pre>
+    {{ m_difflines(current_diff) }}
+  </pre>
+</span>

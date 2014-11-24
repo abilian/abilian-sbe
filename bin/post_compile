@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+# The post_compile hook is run by heroku-buildpack-python
+
+echo "-----> I'm post-compile hook"
+
+bin/install_nodejs
+npm install -g less
+
+echo "-----> Post-compile done"
+

@@ -1,0 +1,76 @@
+<!--suppress XmlUnboundNsPrefix -->{% macro links(object, ROOT) %}
+  <atom:link rel="service" href="{{ ROOT }}" type="application/atomsvc+xml"/>
+  <atom:link rel="self" href="{{ ROOT }}/entry?id={{ object.id }}"
+  type="application/atom+xml;type=entry" cmisra:id="{{ object.id }}"/>
+  <atom:link rel="enclosure" href="{{ ROOT }}/entry?id={{ object.id }}"
+  type="application/atom+xml;type=entry"/>
+  <atom:link rel="edit" href="{{ ROOT }}/entry?id={{ object.id }}"
+  type="application/atom+xml;type=entry"/>
+  <atom:link rel="describedby" href="{{ ROOT }}/type?id=cmis%3Adocument"
+  type="application/atom+xml;type=entry"/>
+  <atom:link
+  rel="http://docs.oasis-open.org/ns/cmis/link/200908/allowableactions"
+  href="{{ ROOT }}/allowableactions?id={{ object.id }}"
+  type="application/cmisallowableactions+xml"/>
+  <atom:link rel="http://docs.oasis-open.org/ns/cmis/link/200908/acl"
+  href="{{ ROOT }}/acl?id={{ object.id }}" type="application/cmisacl+xml"/>
+  <atom:link rel="http://docs.oasis-open.org/ns/cmis/link/200908/policies"
+  href="{{ ROOT }}/policies?id={{ object.id }}"
+  type="application/atom+xml;type=feed"/>
+  <atom:link rel="http://docs.oasis-open.org/ns/cmis/link/200908/relationships"
+  href="{{ ROOT }}/relationships?id={{ object.id }}"
+  type="application/atom+xml;type=feed"/>
+
+  {%- if object.sbe_type == 'cmis:document' -%}
+  <atom:link rel="up" href="{{ ROOT }}/parents?id={{ object.id }}"
+  type="application/atom+xml;type=feed"/>
+  <atom:link rel="version-history"
+  href="{{ ROOT }}/versions?id={{ object.id }}&amp;versionSeries=TODO"
+  type="application/atom+xml;type=feed"/>
+  <atom:link rel="edit-media" href="{{ ROOT }}/content?id={{ object.id }}"
+  type="{{ object.content_type }}"/>
+{% elif object.sbe_type == 'cmis:folder' %}
+  <atom:link rel="down" href="{{ ROOT }}/children?id={{ object.id }}"
+  type="application/atom+xml;type=feed"/>
+  <atom:link rel="down" href="{{ ROOT }}/descendants?id={{ object.id }}"
+  type="application/cmistree+xml"/>
+  <atom:link rel="http://docs.oasis-open.org/ns/cmis/link/200908/foldertree"
+  href="{{ ROOT }}/foldertree?id={{ object.id }}"
+  type="application/cmistree+xml"/>
+  {%- else -%}
+  {%- endif -%}
+{% endmacro %}
+
+{% macro allowable_actions(object) %}
+ <cmis:allowableActions>
+  <cmis:canDeleteObject>true</cmis:canDeleteObject>
+  <cmis:canUpdateProperties>true</cmis:canUpdateProperties>
+  <cmis:canGetFolderTree>false</cmis:canGetFolderTree>
+  <cmis:canGetProperties>true</cmis:canGetProperties>
+  <cmis:canGetObjectRelationships>false</cmis:canGetObjectRelationships>
+  <cmis:canGetObjectParents>true</cmis:canGetObjectParents>
+  <cmis:canGetFolderParent>false</cmis:canGetFolderParent>
+  <cmis:canGetDescendants>false</cmis:canGetDescendants>
+  <cmis:canMoveObject>true</cmis:canMoveObject>
+  <cmis:canDeleteContentStream>true</cmis:canDeleteContentStream>
+  <cmis:canCheckOut>false</cmis:canCheckOut>
+  <cmis:canCancelCheckOut>false</cmis:canCancelCheckOut>
+  <cmis:canCheckIn>false</cmis:canCheckIn>
+  <cmis:canSetContentStream>true</cmis:canSetContentStream>
+  <cmis:canGetAllVersions>false</cmis:canGetAllVersions>
+  <cmis:canAddObjectToFolder>true</cmis:canAddObjectToFolder>
+  <cmis:canRemoveObjectFromFolder>true</cmis:canRemoveObjectFromFolder>
+  <cmis:canGetContentStream>true</cmis:canGetContentStream>
+  <cmis:canApplyPolicy>false</cmis:canApplyPolicy>
+  <cmis:canGetAppliedPolicies>false</cmis:canGetAppliedPolicies>
+  <cmis:canRemovePolicy>false</cmis:canRemovePolicy>
+  <cmis:canGetChildren>false</cmis:canGetChildren>
+  <cmis:canCreateDocument>false</cmis:canCreateDocument>
+  <cmis:canCreateFolder>false</cmis:canCreateFolder>
+  <cmis:canCreateRelationship>false</cmis:canCreateRelationship>
+  <cmis:canDeleteTree>false</cmis:canDeleteTree>
+  <cmis:canGetRenditions>false</cmis:canGetRenditions>
+  <cmis:canGetACL>false</cmis:canGetACL>
+  <cmis:canApplyACL>false</cmis:canApplyACL>
+</cmis:allowableActions>
+{% endmacro %}

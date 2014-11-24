@@ -1,0 +1,24 @@
+{% extends "preferences/_base.html" %}
+
+{% from "macros/box.html" import m_box_content %}
+{% from "macros/form.html" import m_field %}
+
+{% block content %}
+  {% call m_box_content(_("Community email digests")) %}
+
+  <form method="post" action="{{ url_for("preferences.sbe_notifications_post") }}" role="form">
+    {{ csrf.field() }}
+    {% for field in form %}
+      {{ m_field(field) }}
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary" name="_action" value="add">
+      {{ _("Save") }}
+    </button>
+    <button type="submit" class="btn cancel" name="_action" value="cancel">
+      {{ _("Cancel") }}
+    </button>
+  </form>
+
+  {% endcall %}
+{% endblock %}

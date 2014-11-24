@@ -1,0 +1,42 @@
+{# FIXME: this template is not used anymore #}
+
+{% extends "base.html" %}
+
+{% from "macros/box.html" import m_box_content with context %}
+{% from "macros/form.html" import m_field with context %}
+
+{% block main %}
+
+  <div class="row">
+    <div class="col-md-9">
+
+      {% call m_box_content(_("Edit community")) %}
+        <form action="{{ request.path }}" method="POST" enctype="multipart/form-data" role="form">
+          {{ form.csrf_token }}
+
+          {{ m_field(form.name, style="width: 90%;") }}
+          {{ m_field(form.description, class_="clearfix", rows="4", style="width: 90%; resize: none;") }}
+          {{ m_field(form.image) }}
+
+          {{ m_field(form.type) }}
+
+          {{ m_field(form.has_documents) }}
+          {{ m_field(form.has_wiki) }}
+          {{ m_field(form.has_forum) }}
+          {{ m_field(form.is_crm_visible) }}
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" name="__action"
+                value="create">
+              {{ _("Save") }}
+            </button>
+            <button type="submit" class="btn btn-cancel" name="_action"
+                value="cancel">
+              {{ _("Cancel") }}
+            </button>
+          </div>
+        </form>
+      {% endcall %}
+    </div>
+  </div>
+{% endblock %}

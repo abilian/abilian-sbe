@@ -1,0 +1,48 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+{% from "macros/recent.html" import m_recent_items with context %}
+
+{% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
+
+{% block content %}
+  {% call m_box_content(title=_('Folder contents')) %}
+    <div style="margin: 5px 0;">
+      <i class="fa fa-folder-open-o fa-large"></i>
+      {{ m_breadcrumbs2(breadcrumbs) }}
+    </div>
+
+    <hr>
+
+    {%- if folder.description %}
+      <p>{{ folder.description }}</p>
+      <p>&nbsp;</p>
+    {%- endif %}
+
+    {{ m_docs_table(children, True) }}
+  {% endcall %}
+{% endblock %}
+
+{% block sidebar %}
+  {%- set content_actions = actions.for_category('documents:content') %}
+  {%- if content_actions %}
+    {% call m_box_menu() %}
+      <ul class="nav nav-list">
+        {%- for action in content_actions %}
+          <li>{{ action.render() }}</li>
+        {%- endfor %}
+      </ul>
+    {% endcall %}
+  {%- endif %}
+{% endblock %}
+
+
+{% block modals %}
+  {% include "documents/_modals.html" %}
+{% endblock %}
+
+{% deferJS %}
+<script type="text/javascript">
+ {% include "documents/_modals.js" %}
+</script>
+{% enddeferJS %}

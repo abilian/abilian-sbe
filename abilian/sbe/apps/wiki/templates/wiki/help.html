@@ -1,0 +1,12 @@
+{% extends "wiki/_base.html" %}
+
+{% from "macros/box.html" import m_box_content %}
+
+{% block content %}
+  {% call m_box_content(_("Help")) %}
+
+    {{ body }}
+
+  {% endcall %}
+{% endblock %}
+

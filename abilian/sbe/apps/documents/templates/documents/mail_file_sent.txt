@@ -1,0 +1,6 @@
+{%- trans filename=filename, message=message, sender=sender_name %}
+{{ sender }} has sent you the file "{{ filename }}" from the extranet.
+
+Message:
+"{{ message }}"
+{%- endtrans %}

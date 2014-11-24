@@ -1,0 +1,77 @@
+{%- from "cmis/macros.xml" import links, allowable_actions -%}
+<atom:entry xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/"
+    xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/"
+    xmlns:app="http://www.w3.org/2007/app">
+  <atom:author>
+    <atom:name>System</atom:name>
+  </atom:author>
+  <atom:id>
+    http://chemistry.apache.org/d29ya3NwYWNlOi8vU3BhY2VzU3RvcmUvM2RmYmJhNzMtN2M1NC00YWQ4LTljMWMtZTNjZmUyZWIyY2Qx
+  </atom:id>
+  <atom:published>2012-09-01T21:33:27Z</atom:published>
+  <atom:title>{{ folder.title }}</atom:title>
+  <app:edited>2012-09-01T21:51:56Z</app:edited>
+  <atom:updated>2012-09-01T21:51:56Z</atom:updated>
+
+  <cmisra:object>
+    <cmis:properties>
+      <cmis:propertyId queryName="cmis:allowedChildObjectTypeIds"
+          displayName="Allowed Child Object Types Ids"
+          localName="allowedChildObjectTypeIds"
+          propertyDefinitionId="cmis:allowedChildObjectTypeIds"/>
+      <cmis:propertyId queryName="cmis:objectTypeId"
+          displayName="Object Type Id" localName="objectTypeId"
+          propertyDefinitionId="cmis:objectTypeId">
+        <cmis:value>{{ folder.sbe_type }}</cmis:value>
+      </cmis:propertyId>
+      <cmis:propertyString queryName="cmis:path" displayName="Path"
+          localName="path" propertyDefinitionId="cmis:path">
+        <cmis:value>{{ folder.path }}</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyString queryName="cmis:name" displayName="Name"
+          localName="name" propertyDefinitionId="cmis:name">
+        <cmis:value>{{ folder.name }}</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyDateTime queryName="cmis:creationDate"
+          displayName="Creation Date" localName="creationDate"
+          propertyDefinitionId="cmis:creationDate">
+        <cmis:value>2012-09-01T23:33:27.555+02:00</cmis:value>
+      </cmis:propertyDateTime>
+      <cmis:propertyString queryName="cmis:changeToken"
+          displayName="Change token" localName="changeToken"
+          propertyDefinitionId="cmis:changeToken"/>
+      <cmis:propertyString queryName="cmis:lastModifiedBy"
+          displayName="Last Modified By" localName="lastModifiedBy"
+          propertyDefinitionId="cmis:lastModifiedBy">
+        <cmis:value>System</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyString queryName="cmis:createdBy" displayName="Created by"
+          localName="createdBy" propertyDefinitionId="cmis:createdBy">
+        <cmis:value>System</cmis:value>
+      </cmis:propertyString>
+      <cmis:propertyId queryName="cmis:objectId" displayName="Object Id"
+          localName="objectId" propertyDefinitionId="cmis:objectId">
+        <cmis:value>{{ folder.id }}</cmis:value>
+      </cmis:propertyId>
+      <cmis:propertyId queryName="cmis:baseTypeId" displayName="Base Type Id"
+          localName="baseTypeId" propertyDefinitionId="cmis:baseTypeId">
+        <cmis:value>{{ folder.sbe_type }}</cmis:value>
+      </cmis:propertyId>
+      <cmis:propertyDateTime queryName="cmis:lastModificationDate"
+          displayName="Last Modified Date" localName="lastModificationDate"
+          propertyDefinitionId="cmis:lastModificationDate">
+        <cmis:value>2012-09-01T23:51:56.385+02:00</cmis:value>
+      </cmis:propertyDateTime>
+      <cmis:propertyId queryName="cmis:parentId" displayName="Parent Id"
+          localName="parentId" propertyDefinitionId="cmis:parentId"/>
+    </cmis:properties>
+
+    {% if options.includeAllowableActions %}
+      {{ allowable_actions(folder) }}
+    {% endif %}
+  </cmisra:object>
+
+  {{ links(folder, ROOT) }}
+
+</atom:entry>

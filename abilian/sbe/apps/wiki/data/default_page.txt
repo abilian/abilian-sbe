@@ -1,0 +1,9 @@
+## Welcome
+
+Welcome to your wiki! This is the default page we've installed for your convenience. Go ahead and edit it.
+
+
+### Wiki features
+
+This wiki uses the [Markdown](../help) syntax, with the notable extension that "WikiLinks" are written as this: [[New Page]].
+

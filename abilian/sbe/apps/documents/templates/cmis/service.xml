@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<app:service xmlns:app="http://www.w3.org/2007/app"
+    xmlns:atom="http://www.w3.org/2005/Atom"
+    xmlns:cmis="http://docs.oasis-open.org/ns/cmis/core/200908/"
+    xmlns:cmisra="http://docs.oasis-open.org/ns/cmis/restatom/200908/">
+<app:workspace>
+
+<atom:title>default</atom:title>
+
+<app:collection href="{{ROOT}}/children?id={{ root_folder.id }}">
+  <cmisra:collectionType>root</cmisra:collectionType>
+  <atom:title type="text">Root Collection</atom:title>
+  <app:accept>application/atom+xml;type=entry</app:accept>
+  <app:accept>application/cmisatom+xml</app:accept>
+</app:collection>
+<app:collection href="{{ROOT}}/types">
+  <cmisra:collectionType>types</cmisra:collectionType>
+  <atom:title type="text">Types Collection</atom:title>
+  <app:accept/>
+</app:collection>
+<app:collection href="{{ROOT}}/query">
+  <cmisra:collectionType>query</cmisra:collectionType>
+  <atom:title type="text">Query Collection</atom:title>
+  <app:accept>application/cmisquery+xml</app:accept>
+</app:collection>
+<app:collection href="{{ROOT}}/checkedout">
+  <cmisra:collectionType>checkedout</cmisra:collectionType>
+  <atom:title type="text">Checked Out Collection</atom:title>
+  <app:accept>application/cmisatom+xml</app:accept>
+</app:collection>
+<app:collection href="{{ROOT}}/unfiled">
+  <cmisra:collectionType>unfiled</cmisra:collectionType>
+  <atom:title type="text">Unfiled Collection</atom:title>
+  <app:accept>application/cmisatom+xml</app:accept>
+</app:collection>
+
+<cmisra:repositoryInfo>
+  <cmis:repositoryId>default</cmis:repositoryId>
+  <cmis:repositoryName>Abilian micro content repository</cmis:repositoryName>
+  <cmis:repositoryDescription>Abilian micro content repository</cmis:repositoryDescription>
+
+  <cmis:vendorName>Abilian</cmis:vendorName>
+  <cmis:productName>Abilian micro content repository</cmis:productName>
+  <cmis:productVersion>0.1</cmis:productVersion>
+
+  <cmis:rootFolderId>{{ root_folder.id }}</cmis:rootFolderId>
+  <cmis:latestChangeLogToken>0</cmis:latestChangeLogToken>
+
+  <cmis:capabilities>
+    <cmis:capabilityACL>manage</cmis:capabilityACL>
+    <cmis:capabilityAllVersionsSearchable>false</cmis:capabilityAllVersionsSearchable>
+    <cmis:capabilityChanges>properties</cmis:capabilityChanges>
+    <cmis:capabilityContentStreamUpdatability>anytime</cmis:capabilityContentStreamUpdatability>
+    <cmis:capabilityGetDescendants>true</cmis:capabilityGetDescendants>
+    <cmis:capabilityGetFolderTree>true</cmis:capabilityGetFolderTree>
+    <cmis:capabilityMultifiling>false</cmis:capabilityMultifiling>
+    <cmis:capabilityPWCSearchable>false</cmis:capabilityPWCSearchable>
+    <cmis:capabilityPWCUpdatable>false</cmis:capabilityPWCUpdatable>
+    <cmis:capabilityQuery>bothcombined</cmis:capabilityQuery>
+    <cmis:capabilityRenditions>none</cmis:capabilityRenditions>
+    <cmis:capabilityUnfiling>false</cmis:capabilityUnfiling>
+    <cmis:capabilityVersionSpecificFiling>false</cmis:capabilityVersionSpecificFiling>
+    <cmis:capabilityJoin>none</cmis:capabilityJoin>
+  </cmis:capabilities>
+
+  <cmis:aclCapability>
+    <cmis:supportedPermissions>basic</cmis:supportedPermissions>
+    <cmis:propagation>objectonly</cmis:propagation>
+
+    <cmis:permissions>
+      <cmis:permission>cmis:read</cmis:permission>
+      <cmis:description>Read</cmis:description>
+    </cmis:permissions>
+    <cmis:permissions>
+      <cmis:permission>cmis:write</cmis:permission>
+      <cmis:description>Write</cmis:description>
+    </cmis:permissions>
+    <cmis:permissions>
+      <cmis:permission>cmis:all</cmis:permission>
+      <cmis:description>All</cmis:description>
+    </cmis:permissions>
+
+    <cmis:mapping>
+      <cmis:key>canGetDescendents.Folder</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canGetChildren.Folder</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canGetParents.Folder</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canGetFolderParent.Object</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canCreateDocument.Folder</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canCreateFolder.Folder</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canCreateRelationship.Source</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canCreateRelationship.Target</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canGetProperties.Object</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canViewContent.Object</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canUpdateProperties.Object</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canMove.Object</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canMove.Target</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canMove.Source</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canDelete.Object</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canDeleteTree.Folder</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canSetContent.Document</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canDeleteContent.Document</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canAddToFolder.Object</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canAddToFolder.Folder</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canRemoveFromFolder.Object</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canRemoveFromFolder.Folder</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canCheckout.Document</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canCancelCheckout.Document</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canCheckin.Document</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canGetAllVersions.VersionSeries</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canGetObjectRelationships.Object</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canAddPolicy.Object</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canAddPolicy.Policy</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canRemovePolicy.Object</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canRemovePolicy.Policy</cmis:key>
+      <cmis:permission>cmis:write</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canGetAppliedPolicies.Object</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canGetACL.Object</cmis:key>
+      <cmis:permission>cmis:read</cmis:permission>
+    </cmis:mapping>
+    <cmis:mapping>
+      <cmis:key>canApplyACL.Object</cmis:key>
+      <cmis:permission>cmis:all</cmis:permission>
+    </cmis:mapping>
+  </cmis:aclCapability>
+
+  <cmis:cmisVersionSupported>1.1</cmis:cmisVersionSupported>
+  <cmis:thinClientURI/>
+  <cmis:changesIncomplete>true</cmis:changesIncomplete>
+  <cmis:principalAnonymous>anonymous</cmis:principalAnonymous>
+  <cmis:principalAnyone>anyone</cmis:principalAnyone>
+</cmisra:repositoryInfo>
+
+<atom:link rel="http://docs.oasis-open.org/ns/cmis/link/200908/typedescendants"
+    href="{{ROOT}}/typedesc"
+    type="application/atom+xml;type=feed"/>
+<atom:link rel="http://docs.oasis-open.org/ns/cmis/link/200908/foldertree"
+    href="{{ROOT}}/foldertree?id={{ root_folder.id }}"
+    type="application/cmistree+xml"/>
+<atom:link rel="http://docs.oasis-open.org/ns/cmis/link/200908/rootdescendants"
+    href="{{ROOT}}/descendants?id={{ root_folder.id }}"
+    type="application/cmistree+xml" cmisra:id="100"/>
+<atom:link rel="http://docs.oasis-open.org/ns/cmis/link/200908/changes"
+    href="{{ROOT}}/changes"
+    type="application/atom+xml;type=feed"/>
+
+<cmisra:uritemplate>
+  <cmisra:template>{{ROOT}}/entry?id={id}&amp;filter={filter}&amp;includeAllowableActions={includeAllowableActions}&amp;includeACL={includeACL}&amp;includePolicyIds={includePolicyIds}&amp;includeRelationships={includeRelationships}&amp;renditionFilter={renditionFilter}</cmisra:template>
+  <cmisra:type>objectbyid</cmisra:type>
+  <cmisra:mediatype>application/atom+xml;type=entry</cmisra:mediatype>
+</cmisra:uritemplate>
+
+<cmisra:uritemplate>
+  <cmisra:template>{{ROOT}}/entry?path={path}&amp;filter={filter}&amp;includeAllowableActions={includeAllowableActions}&amp;includeACL={includeACL}&amp;includePolicyIds={includePolicyIds}&amp;includeRelationships={includeRelationships}&amp;renditionFilter={renditionFilter}</cmisra:template>
+  <cmisra:type>objectbypath</cmisra:type>
+  <cmisra:mediatype>application/atom+xml;type=entry</cmisra:mediatype>
+</cmisra:uritemplate>
+
+<cmisra:uritemplate>
+  <cmisra:template>{{ROOT}}/type?id={id}</cmisra:template>
+  <cmisra:type>typebyid</cmisra:type>
+  <cmisra:mediatype>application/atom+xml;type=entry</cmisra:mediatype>
+</cmisra:uritemplate>
+
+<cmisra:uritemplate>
+  <cmisra:template>{{ROOT}}/query?q={q}&amp;searchAllVersions={searchAllVersions}&amp;includeAllowableActions={includeAllowableActions}&amp;includeRelationships={includeRelationships}&amp;maxItems={maxItems}&amp;skipCount={skipCount}</cmisra:template>
+  <cmisra:type>query</cmisra:type>
+  <cmisra:mediatype>application/atom+xml;type=feed</cmisra:mediatype>
+</cmisra:uritemplate>
+</app:workspace>
+</app:service>     

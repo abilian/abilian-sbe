@@ -1,0 +1,88 @@
+/* Forum home page */
+
+ul.threads {
+  margin: 0;
+
+  .list-unstyled();
+
+  li {
+    padding: 5px 0;
+    margin: 10px auto;
+    font-size: 12px;
+
+    @avatar-size: 45px;
+    @avatar-full-height: 50px;
+
+    .entry {
+      position: relative;
+      min-height: @avatar-full-height;
+      display: block;
+      padding: 5px;
+      padding-bottom: @line-height-computed;
+      margin-left: 65px;
+      text-align: left;
+      border-left: 2px solid #FF7F66;
+      background: #fafafa;
+      .border-right-radius(@border-radius-small);
+
+      > h4 { margin-top: 0; }
+
+      .details {
+        .datetime {
+          color: @gray;
+        }
+      }
+      .comments {
+        text-align: right;
+      }
+
+      @media (min-width: @screen-sm-min) {
+        /* on screens large enough, put author and comments at bottom of .entry */
+        .details {
+          position: absolute;
+          bottom: 0; left: 0;
+          padding: 5px;
+        }
+        .comments {
+        position: absolute;
+        bottom: 0; right: 0;
+        padding: 5px;
+        }
+      }
+    }     
+
+    .avatar {
+      float: left;
+      > img {
+        .square(@avatar-size);
+        margin-top: (@avatar-full-height - @avatar-size);
+        margin-right: 10px;
+        background-color: white;
+        border-radius: 50% !important;
+        -webkit-border-radius: 50% !important;
+        -moz-border-radius: 50% !important;
+        }
+      }
+  }
+
+  /* archives */
+  &-archives {
+    margin: 0;
+
+    li {
+      list-style: none;
+      padding: 2px 10px;
+    }
+
+    .comments { color: grey; }
+  }
+} /* ul.threads */
+
+/* A thread view */
+.comments {
+  hr {
+    margin: 10px 0 10px 0;
+  }
+
+  .comment .date { color: grey; }
+}

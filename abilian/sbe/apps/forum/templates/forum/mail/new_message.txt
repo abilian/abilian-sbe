@@ -1,0 +1,26 @@
+{%- set thread=post.thread %}
+{%- set community=thread.community %}
+{{ post.creator }} a posté un nouveau message dans la communauté {{ community.name }}:
+
+  {{ post.title }}: ({{ url_for(post, _external=True) }})
+
+«
+{%- set text_lines = post.body_html|safe %}
+{%- for line in text_lines.split('<br>') %}
+    {{ line | striptags }}
+{%- endfor %}
+»
+{%- if post.attachments %}
+
+
+Pièce(s) jointe(s):
+{%- for attachment in post.attachments %}
+   * {{ attachment.name }} ({{ attachment.content_length|filesize|striptags }})
+     ({{ url_for(attachment, _external=True) }})
+{%- endfor %}
+{%- endif %}
+
+
+
+
+Vous recevez ce message car vous êtes membres de la communauté {{ community.name }}.

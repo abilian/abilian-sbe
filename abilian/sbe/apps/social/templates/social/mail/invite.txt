@@ -1,0 +1,5 @@
+You have been invited to join {{ org_name }} on Yaka. To accept this invite, please visit the following link:
+
+{{ confirm_url }}
+
+If you do not wish to join this organization, feel free to ignore this email.

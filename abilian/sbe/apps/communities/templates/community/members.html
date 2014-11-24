@@ -1,0 +1,174 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+
+{% block content %}
+  {% call m_box_content(_("Members")) %}
+    {% set is_manager = g.community.has_permission(current_user, 'manage') %}
+
+    {% if is_manager %}
+      {{ add_member() }}
+    {% endif %}
+
+    <h2>{{ _("Current members") }}</h2>
+    <p>(<i class="glyphicon glyphicon-lock"></i>: {{ _('account disabled') }})</p>
+
+    {% set table_id = uuid() %}
+    <table class="table table-condensed table-striped" id="{{ table_id }}">
+      <thead>
+      <tr>
+        <th class="hide">Last Name</th>
+        <th class="hide">First Name</th>
+        <th>Nom</th>
+        <th>Role</th>
+        {% if is_manager %}
+        <th>Action</th>
+        {% endif %}
+      </tr>
+      </thead>
+
+      <tbody>
+      {% for user, m_id, role in memberships %}
+        <tr>
+          <td class="hide">{{ user.last_name }}</td>
+          <td class="hide">{{ user.first_name }}</td>
+          <td>
+            {%- if not user.can_login %}
+            <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i><s>
+            {%- endif %}
+
+            <a href="{{ url_for("social.user", user_id=user.id) }}">{{ user.name }}</a>
+            <br />
+            (<i>{{ user.email }}</i>)
+            {%- if not user.can_login %}</s>{%- endif %}
+          </td>
+          <td>{{ _(role) }}</td>
+          {% if is_manager %}
+            <td>
+              <form
+                  action="{{ url_for(".members_post", community_id=g.community.slug) }}"
+                  method="POST" style="display: inline;">
+                {{ csrf_token }}
+                <input type="hidden" name="membership_id" value="{{ m_id }}">
+                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <button type="submit" name="action" value="delete"
+                    class="btn btn-danger" data-original-title="" title=""><i
+                    class="fa fa-remove"></i></button>
+              </form>
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    {%- deferJS %}
+    <script type="text/javascript">
+      Abilian.fn.onAppInit(function() {
+        var id = "#{{ table_id }}"; // Should be unique enough
+        $(id).dataTable({
+          aoColumns:       [
+            { bVisible: false },
+            { bVisible: false },
+            { aDataSort: [0, 1], asSorting: [ "asc", "desc" ] },
+            { asSorting: [ "asc", "desc" ] }
+            {% if is_manager %}
+            , { }
+            {% endif %}
+          ],
+          sPaginationType: "bootstrap",
+          bFilter:         true,
+          bLengthChange:   false
+        });
+      });
+    </script>
+    {%- enddeferJS %}
+    <div class="clearfix"></div>
+  {% endcall %}
+{% endblock %}
+
+{% block sidebar %}
+  {% call m_box_menu() %}
+    <ul class="nav nav-list">
+      {%- set actions = actions.for_category('members:menu') %}
+      {%- for action in actions %}
+        <li>{{ action.render() }}</li>
+      {%- endfor %}
+    </ul>
+  {% endcall %}
+{% endblock %}
+
+
+{% macro add_member() %}
+  <h2>{{ _("Add a member") }}</h2>
+
+  <div id="add-user-role" role="dialog">
+    <form method="POST" class="form-inline" enctype="multipart/form-data" role="form">
+      {{ csrf_token }}
+
+      <div class="form-group">
+        <label for="user-select">{{ _('User') }}</label>
+        <input class="form-control" type="text" id="user-select" name="user" />
+      </div>
+
+      <div class="form-group">
+        <label for="role-select">{{ _('Role') }}</label>
+        <select id="role-select" name="role" class="form-control" style="width: auto;">
+          <option value="member" default="default">{{ _("Member") }}</option>
+          <option value="manager">{{ _("Manager") }}</option>
+        </select>
+      </div>
+
+      <button class="btn btn-primary" type="submit" name="action"
+          value="add-user-role">{{ _("Add") }}</button>
+    </form>
+  </div>
+
+  {%- deferJS %}
+  <script type="text/javascript">
+   jQuery(window).on(
+     Abilian.events.appInit,
+     function() {
+       $("#user-select")
+            .attr("style", "min-width: 220px")
+            .select2({
+         minimumInputLength: 2,
+         ajax: {
+           url:         "{{ url_for("social.users_json") }}",
+           dataType:    'json',
+           quietMillis: 100,
+           data:        function(term, page) { 
+             return { q: term, with_membership: {{ g.community.id | tojson }} }; 
+           },
+           results:     function(data, page) {
+             return {results: data.results, more: false}; 
+           }
+         },
+         allowClear:    true
+         formatResult: function(state, container, query, escapeMarkup) {
+           var markup = [], text;
+           window.Select2.util.markMatch(state.name, query.term, markup, escapeMarkup);
+           text = '<b>' + markup.join("") + '</b>';
+           if (state.role) {
+             text+= ' <small class="label label-default pull-right">' + escapeMarkup(state.role) + '</small> ';
+           }
+
+           if (state.email) {
+             text += ' <br /><i>' + escapeMarkup(state.email) + '</i> ';
+           }
+           return text;             
+         }
+       });
+
+       $("#s2id_user-select a span").text("");
+       $("input#user-select").attr("value", "");
+    });
+  </script>
+  {%- enddeferJS %}
+{% endmacro %}
+
+{# Do we need this one ?
+{% block modals %}
+  {% include "community/_modals.html" %}
+{% endblock %}
+#}

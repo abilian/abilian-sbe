@@ -1,0 +1,57 @@
+{% extends "social/base.html" %}
+
+{% from "social/macros.html" import render_field %}
+
+{% block content %}
+  <h2>{{ _("Create a new group") }}</h2>
+
+  <form action="{{ request.path }}" method="POST" class="form-horizontal" id="edit-form">
+    {{ form.csrf }}
+
+    <fieldset>
+      {%- for field in form %}
+        {{ render_field(field) }}
+      {%- endfor %}
+    </fieldset>
+
+    <div class="form-actions">
+      {%- if for_new %}
+        <button type="submit" class="btn btn-primary" name="_action" value="add">Add new</button>
+        <button type="submit" class="btn cancel" name="_action" value="cancel">Cancel</button>
+      {%- else %}
+        <button type="submit" class="btn btn-primary" name="_action" value="save">Save changes</button>
+        <button type="submit" class="btn cancel" name="_action" value="cancel">Cancel</button>
+      {%- endif %}
+    </div>
+
+  </form>
+
+  {%- if rules %}
+    <script>
+     $(document).ready(function() {
+       var rules = {{ rules }};
+
+       // Make bold labels for required fields
+       $("label").each(function(i, e) {
+         var for_ = $(e).attr("for");
+         if (rules[for_] && rules[for_].required) {
+           $(e).addClass("required");
+         }
+       });
+
+       // Activate valitation plugin
+       $("#edit-form").validate({
+         /* debug: true, */
+         rules:       rules,
+         highlight:   function(label) {
+           $(label).closest('.control-group').addClass('error');
+         },
+         unhighlight: function(label) {
+           $(label).closest('.control-group').removeClass('error');
+         },
+       });
+     });
+    </script>
+  {%- endif %}
+
+{% endblock %}

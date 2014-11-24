@@ -1,0 +1,178 @@
+{% extends "community/_base.html" %}
+
+{%- from "macros/box.html" import m_box_content, m_box_menu %}
+{% from "macros/form.html" import m_field %}
+
+{%- block content %}
+  {%- call m_box_content(title="Thead") %}
+    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
+
+    {#  TODO #}
+    <div class="header">
+      <h3 style="margin: 0;"><a
+          href="{{ url_for(".index", community_id=g.community.slug) }}"><i
+          class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
+      </h3>
+    </div>
+
+    <div class="thread-header">
+      {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
+      <a href="{{ author_href }}"><img class="avatar" width="55" height="55"
+          src="{{ url_for("images.user_avatar", user_id=thread.creator.id, s=55) }}"
+          style="float: right;"></a>
+
+      <h2>{{ thread.title }}</h2>
+
+      <div class="author">{{ _("From:") }} <a
+          href="{{ author_href }}">{{ thread.creator }}</a></div>
+      <div
+          class="date">{{ _("Date:") }} {{ thread.created_at | datetimeformat }}</div>
+    </div>
+
+    <hr style="margin-top: 5px;">
+    {%- set post = thread.posts[0] %}
+    {{ post.body_html|safe }}
+
+    {%- if post.attachments %}
+      <div id="attachments">
+        <ul>
+          {%- for attachment in post.attachments %}
+            <li>
+              <span class="attachment-item">
+                <img src="{{ attachment.icon }}" style="vertical-align: middle;"
+                    alt=""/>
+                <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
+                ({{ attachment.content_length|filesize }})
+              </span>
+            </li>
+          {%- endfor %}
+        </ul>
+      </div>
+    {%- endif %}
+
+    {%- if thread.posts|length > 1 %}
+      <hr />
+      <h3>Comments</h3>
+
+      <div class="comments">
+        {%- for post in thread.posts[1:] %}
+          {{ m_post(post) }}
+        {%- endfor %}
+      </div>
+    {%- endif %}
+
+    <hr />
+    <h3>{{ _("Post a comment") }}</h3>
+    <form action="." method="POST" enctype="multipart/form-data">
+      {{ form.csrf_token }}
+
+      {{ m_field(form.message, class_="resizeable-vertical", rows=10) }}
+      {{ m_field(form.attachments) }}
+
+      {%- if g.community.type == 'participative' or is_manager %}
+        {{ m_field(form.send_by_email) }}
+      {%- endif %}
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" name="_action"
+            value="post">
+          {{ _("Post this comment") }}
+        </button>
+        <button type="submit" class="btn cancel" name="_action" value="cancel">
+          {{ _("Cancel") }}
+        </button>
+      </div>
+
+    </form>
+
+  {%- endcall %}
+
+{%- endblock %}
+
+{%- macro m_post(post) %}
+  {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
+  {%- set author_img = url_for("images.user_avatar", user_id=post.creator.id, s=45) %}
+
+  <hr />
+  <a id="post_{{ post.id }}"></a>
+  <div class="comment">
+    <a href="{{ author_href }}"><b>{{ post.creator }}</b></a>,
+    <span class="date">{{ post.created_at | datetimeformat }}</span>
+
+    <div class="comment-body">
+      {{ post.body_html|safe }}
+    </div>
+
+    {%- if post.attachments %}
+      <div id="attachments">
+        <ul>
+          {%- for attachment in post.attachments %}
+            <li>
+              <span class="attachment-item">
+                <img src="{{ attachment.icon }}" style="vertical-align: middle;"
+                     alt=""/>
+                <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
+                ({{ attachment.content_length|filesize }})
+              </span>
+            </li>
+          {%- endfor %}
+        </ul>
+      </div>
+    {%- endif %}
+
+  </div>
+{%- endmacro %}
+
+{%- block sidebar %}
+  {%- call m_box_menu() %}
+    <ul class="nav nav-list">
+      {%- set content_actions = actions.for_category('forum:thread') %}
+      {%- set global_actions = actions.for_category('forum:global') %}
+
+      {%- for action in content_actions %}
+        <li>{{ action.render() }}</li>
+      {%- endfor %}
+
+      {%- if content_actions and global_actions %}
+        <li class="divider"></li>
+      {%- endif %}
+
+      {%- for action in global_actions %}
+        <li>{{ action.render() }}</li>
+      {%- endfor %}
+    </ul>
+  {%- endcall %}
+{%- endblock %}
+
+
+{%- block modals %}
+  <div class="modal fade" id="modal-delete" role="dialog"
+      data-keyboard="true">
+
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form
+          action="{{ url_for(".thread_delete", thread_id=thread.id, community_id=g.community.slug) }}"
+          method="POST" style="margin-bottom: 0;">
+
+          {{ csrf_field }}
+          
+          <div class="modal-header">
+            <button class="close" data-dismiss="modal">&times;</button>
+            <h3>{{ _("Delete Thread") }}</h3>
+          </div>
+
+          <div class="modal-body">
+            {{ _('Are you sure you want to delete this thread?') }}
+          </div>
+
+          <div class="modal-footer">
+            <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+            <button type="submit"
+                    class="btn btn-danger">{{ _("Really Delete") }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{%- endblock %}

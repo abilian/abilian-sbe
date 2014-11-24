@@ -1,0 +1,3 @@
+recursive-include etc *
+recursive-include docs *
+recursive-include tests *.py

@@ -1,0 +1,12 @@
+{%- set diff_line_attrs= {
+    ' ': '',
+    '+': 'style="background-color: lightgreen;"',
+    '-': 'style="background-color: palevioletred; text-decoration: line-through;"'
+  }
+%}
+
+{%- macro m_difflines(diff, line_attrs=diff_line_attrs) %}
+  {%- for line in diff -%}
+    <span {{ line_attrs.get(line[0], '') | safe }}>{{ line[1:] }}</span>
+  {%- endfor %}
+{%- endmacro %}

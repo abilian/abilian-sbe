@@ -1,0 +1,13 @@
+{% extends "social/base.html" %}
+
+{% from "macros/box.html" import m_box %}
+{% from "macros/activity.html" import m_activities %}
+
+{% from "social/macros.html" import render_message %}
+
+{% block content %}
+  {% call m_box(_("Activity stream"), color="blue") %}
+    {{ m_activities(activity_entries) }}
+  {% endcall %}
+
+{% endblock %}

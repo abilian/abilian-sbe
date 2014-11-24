@@ -1,0 +1,141 @@
+/* Document preview */
+
+img.preview {
+  border: 1px black;
+}
+
+.preview {
+  &-nav {
+    display: none;
+    background: #0c3b3d;
+    width: 64px;
+    height: 32px;
+    padding: 5px;
+    position: absolute;
+    top: 215px;
+    left: 720px;
+    border-radius: 5px 5px;
+    -moz-border-radius: 5px 5px;
+    -webkit-border-radius: 5px 5px;
+
+    a {
+      display: block;
+      overflow: hidden;
+      text-indent: -900em;
+      height: 22px;
+      float: left;
+      padding: 5px;
+      border-radius: 5px;
+      -moz-border-radius: 5px;
+      -khtml-border-radius: 5px;
+      -webkit-border-radius: 5px;
+
+      &:hover {
+        background-color: #a1c436;
+        cursor: pointer;
+      }
+    }
+  } /* .preview-nav */
+
+  &-prev {
+    width: 22px;
+    background: url(../../images/prev.png) no-repeat center;
+    }
+
+  &-next {
+    width: 22px;
+    background: url(../../images/next.png) no-repeat center;
+    }
+}
+
+/* folder / documents objects table */
+table#objects-table tbody td > img + i,
+.folder-items li > img + i {
+  position: relative;
+  left: -14px;
+  font-size: 9px;
+}
+
+/* My own (ugly) boxes */
+.property {
+  &-box .nav > li > a {
+    display: inline;
+    background-color: white;
+  }
+
+  &-list {
+    padding-left: 14px;
+    padding-right: 14px;
+    margin-left: 0;
+    margin-bottom: 5px;
+    list-style: none;
+
+    li {
+      margin-top: 5px;
+      margin-bottom: 5px;
+    }
+  }
+}
+
+#objects-table_wrapper img {
+  border-radius: 20%;
+}
+
+/* File Uploads (currently not used) */
+.btn.btn-file {
+  overflow: hidden;
+  position: relative;
+  vertical-align: middle;
+
+  > input[type="file"] {
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+}
+
+.fileupload {
+  margin-bottom: 9px;
+
+  .uneditable-input {
+    display: inline-block;
+    margin-bottom: 0;
+    vertical-align: middle;
+  }
+
+  .thumbnail {
+    overflow: hidden;
+    display: inline-block;
+    margin-bottom: 5px;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  .thumbnail > img {
+    display: inline-block;
+    vertical-align: middle;
+    max-height: 100%;
+  }
+
+  .btn {
+    vertical-align: middle;
+  }
+
+  &-exists &-new,
+  &-new &-exists {
+    display: none;
+  }
+
+  &-inline &-controls {
+    display: inline;
+  }
+
+  &-new .input-append .btn-file {
+    -webkit-border-radius: 0 3px 3px 0;
+    -moz-border-radius: 0 3px 3px 0;
+    border-radius: 0 3px 3px 0;
+  }
+}

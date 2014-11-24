@@ -1,0 +1,92 @@
+{% extends "social/base.html" %}
+
+{% block content %}
+  {% call m_box(_("Groups Directory")) %}
+
+    {# don't change xml comment below for a jinja comment: it
+   would remove the long message from i18n catalog... #}
+    <!--      <p class="span7">
+        {{ _("Create and join groups to discuss projects or to meet colleagues with similar skills, interests and hobbies. Public groups are open to anyone and appear in the groups directory. Private groups are invitation-only spaces for confidential activities, and do not appear in the groups directory.") }}
+      </p>
+-->
+    {#
+      {% if g.user.has_role("admin") %}
+      <a class="btn btl-large btn-primary span2" style="width: 170px;"
+              href="/social/groups/new">{{ _("Create new group") }}</a>
+      {% endif %}
+      #}
+
+    <!-- TODO -->
+    {#
+    <ul class="nav nav-tabs">
+      <li class="active"><a href="?tab=all_groups">{{ _("All public groups") }}</a></li>
+      <li><a href="?tab=my_groups">{{ _("My groups") }}</a></li>
+    </ul>
+    #}
+
+    <table class="grid">
+      <thead>
+      <tr>
+        <th class="first" colspan="2">
+          <a href="?sort_by=name">{{ _("Groups") }}</a>
+        </th>
+
+        <th class="">
+          <a href="?sort_by=date_created">{{ _("Created On") }}</a>
+        </th>
+
+        <th class="">
+          <a href="?sort_by=last_active">{{ _("Members") }}</a>
+        </th>
+        {#
+        <th></th>
+        #}
+      </tr>
+      </thead>
+
+      <tbody>
+
+      {% for group in groups %}
+        <tr>
+          <td class="picture">
+            <a href="{{ url_for(".group_home", group_id=group.id) }}"><img
+                class="avatar-45"
+                src="{{ url_for(".group_mugshot", group_id=group.id, s=45) }}"></a>
+          </td>
+
+          <td class="identity">
+            <div class="info">
+              <a href="{{ url_for(".group_home", group_id=group.id) }}"><b>{{ group.name }}</b></a>
+
+              <p>{{ group.description|default("", true) }}</p>
+            </div>
+          </td>
+
+          <td>
+            {{ group.created_at | date }}
+          </td>
+
+          <td>
+            {{ group.members | count }}
+          </td>
+
+          {#
+          <td>
+            <form action="{{ group.url }}" method="post">
+              <input type="hidden" name="return_url" value="{{ request.url }}">
+              {% if not g.user.is_member_of(group) %}
+              <button class="btn btn-primary" name="action" value="join">{{ _("Join") }}</button>
+            {% else %}
+              <button class="btn btn-danger" name="action" value="leave">{{ _("Leave") }}</button>
+            {% endif %}
+            </form>
+          </td>
+          #}
+        </tr>
+      {% endfor %}
+
+      </tbody>
+    </table>
+  {% endcall %}
+
+{% endblock %}

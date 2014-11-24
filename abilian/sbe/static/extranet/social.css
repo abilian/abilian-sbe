@@ -1,0 +1,33 @@
+.activity-stream {
+    list-style: none;
+    margin: 0;
+}
+
+.activity-stream > li + li {
+    margin-top: 1em;
+}
+
+.activity-stream .user-photo {
+    float: left;
+    display: block;
+    width: 45px;
+    height: 45px;
+    background-repeat: no-repeat;
+    background-size: contain;
+    vertical-align: middle;
+    border-radius: 3px;
+}
+
+.activity-stream .activity-body {
+    font-size: 0.9em;
+    display: block;
+    overflow: hidden;
+    padding-left: 1em;
+    padding-top: .1em;
+}
+
+.activity-body-inner {
+    padding: 0.8em;
+    background-color: #f6f6f6;
+    line-height: 1.35em;
+}

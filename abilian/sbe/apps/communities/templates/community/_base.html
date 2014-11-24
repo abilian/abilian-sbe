@@ -1,0 +1,33 @@
+{#- base template for communities (as container for social apps) #}
+{% extends "base.html" %}
+
+{% block header %}
+    <h1 style="margin: 0px;">
+      <img src="{{ url_for("communities.image", community_id=g.community.slug, s=55) }}" />
+      {{ _("Community") }}: {{ g.community.name }}
+    </h1>
+    {%- set tabs = actions.for_category('communities:tabs') %}
+    <p>
+      <ul class="nav nav-pills" id="community-tabs">
+        {%- for tab in tabs %}
+          <li {% if tab.is_current() %}class="active"{% endif %}>{{ tab.render() }}</li>
+        {%- endfor %}
+      </ul>
+    </p>
+{% endblock %}
+
+
+{% block main %}
+  <div class="row">
+    <div class="col-md-9">
+      {%- block content %}
+      {%- endblock %}
+    </div>
+    <div class="col-md-3" id="sidebar">
+      {%- block sidebar %}
+      {%- endblock %}
+    </div>
+  </div>
+  {%- block modals %}{% endblock %}
+
+{% endblock %}

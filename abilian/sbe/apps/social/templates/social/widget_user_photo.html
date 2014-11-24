@@ -1,0 +1,9 @@
+{%- if user_id %}
+  <img width="140" height="140"
+       src="{{ url_for("images.user_avatar", user_id=user_id, s=140) }}"
+       class="media-object" alt="" />
+{%- endif %}
+
+<input name="{{ field.name }}" type="file"
+       {%- for attr, val in attrs.items() %} {{ attr }}="{{ val }}"{%- endfor %}
+       />
