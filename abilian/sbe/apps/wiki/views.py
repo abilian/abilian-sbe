@@ -36,6 +36,7 @@ wiki = Blueprint("wiki", __name__,
                  template_folder="templates")
 route = wiki.route
 
+
 @wiki.url_value_preprocessor
 def init_wiki_values(endpoint, values):
   g.current_tab = 'wiki'
@@ -66,6 +67,7 @@ def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
       title = obj.title
     kw['title'] = title
   return kw
+
 
 #
 # Page level (all functions prefixed by 'page_').
@@ -329,6 +331,7 @@ def page_delete():
   flash(_(u"Page %(title)s deleted.", title=title))
   return redirect(url_for(".index", community_id=g.community.slug))
 
+
 @route('/attachments')
 def attachment_download():
   title = request.args['title'].strip()
@@ -349,6 +352,7 @@ def attachment_download():
     )
   response.headers['content-disposition'] = content_disposition
   return response
+
 
 @route('/attachments', methods=['POST'])
 @csrf.protect
@@ -388,6 +392,7 @@ def attachment_upload():
     flash(_(u'No file uploaded.'))
 
   return redirect(url_for(page))
+
 
 @route('/attachments/delete', methods=['POST'])
 @csrf.protect

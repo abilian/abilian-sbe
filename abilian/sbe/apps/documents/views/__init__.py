@@ -1,5 +1,5 @@
 from .views import documents
-from .documents import *
-from .folders import *
+from .documents import *  # noqa
+from .folders import *  # noqa
 
 __all__ = ['documents']

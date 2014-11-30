@@ -3,9 +3,6 @@
 """
 from __future__ import absolute_import
 
-import re
-import unicodedata
-import urllib
 from urllib import quote
 
 from flask import (redirect, request, make_response, flash, g,

@@ -43,17 +43,20 @@ endif
 # testing
 #
 test:
-	py.test --tb=short $(SRC) 
+	py.test --tb=short $(SRC) tests
 
 test-with-coverage:
 	py.test --tb=short --durations 10 --cov $(PKG) --cov-config etc/coverage.rc \
-	  --cov-report term-missing $(SRC)
+	  --cov-report term-missing $(SRC) tests
 
 test-long:
-	RUN_SLOW_TESTS=True py.test -x $(SRC)
+	RUN_SLOW_TESTS=True py.test -x $(SRC) tests
 
-abilian_update:
-	pip install --upgrade --no-deps -e "git+https://github.com/abilian/abilian-core.git@master#egg=Abilian-Core"
+pytest-pep8:
+	py.test --pep8 -m pep8 $(SRC) tests
+
+pytest-flakes:
+	py.test --flakes -m flakes $(SRC) # tests
 
 #
 # Everything else

@@ -2,13 +2,9 @@
 The blueprint for this app.
 """
 
-from os.path import join, dirname
-
-from flask import Blueprint, redirect, g, make_response, request, url_for, \
-  render_template
+from flask import Blueprint, redirect, g, url_for, render_template
 
 from abilian.core import signals
-from abilian.core.models.subjects import User, Group
 from abilian.core.util import get_params
 from abilian.core.extensions import db
 from abilian.web.views.images import user_avatar

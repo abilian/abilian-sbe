@@ -4,12 +4,12 @@ First cut at a notification system.
 """
 from __future__ import absolute_import
 
-from flask import render_template, current_app as app, request, abort
+from flask import render_template, current_app as app, request
 from flask.ext.login import current_user
+from werkzeug.exceptions import InternalServerError, Forbidden
 
 from abilian.core.extensions import db, csrf
 from abilian.core.models.subjects import User
-
 from abilian.services.auth.views import get_token_status
 from abilian.sbe.apps.notifications import TOKEN_SERIALIZER_NAME
 
@@ -26,7 +26,7 @@ route = notifications.route
 @route("/debug/social/")
 def debug_social():
   if not current_user.has_role("admin"):
-    abort(403)
+    raise Forbidden()
 
   email = request.args['email']
   user = User.query.filter(User.email == email).one()
@@ -57,4 +57,4 @@ def unsubscribe_sbe(token):
                            token=token)
 
   else:
-    abort(500)
+    raise InternalServerError()

@@ -10,6 +10,9 @@ conf
 .coverage
 .vagrant
 .webassets-cache
+.dox
+.travis-solo
+.cache
 
 whoosh*
 yaka.db
@@ -24,6 +27,7 @@ sandbox
 results
 htmlcov
 experimental
+junit-py27.xml
 
 *.log
 *.log.?

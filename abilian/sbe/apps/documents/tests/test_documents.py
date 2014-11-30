@@ -72,21 +72,21 @@ class IndexingTestCase(CommunityIndexingTestCase):
     obj_types = (Folder.entity_type,)
     with self.login(self.user_no_community):
       res = svc.search(u'folder', object_types=obj_types)
-      self.assertEquals(len(res), 0)
+      assert len(res) == 0
 
     with self.login(self.user):
       res = svc.search(u'folder', object_types=obj_types)
-      self.assertEquals(len(res), 1)
+      assert len(res) == 1
       hit = res[0]
-      self.assertEquals(hit['object_key'], folder.object_key)
-      self.assertEquals(hit['community_slug'], self.community.slug)
+      assert hit['object_key'] == folder.object_key
+      assert hit['community_slug'] == self.community.slug
 
     with self.login(self.user_c2):
       res = svc.search(u'folder', object_types=obj_types)
-      self.assertEquals(len(res), 1)
+      assert len(res) == 1
       hit = res[0]
-      self.assertEquals(hit['object_key'], folder_other.object_key)
-      self.assertEquals(hit['community_slug'], self.c2.slug)
+      assert hit['object_key'] == folder_other.object_key
+      assert hit['community_slug'] == self.c2.slug
 
 
 class TestViews(CommunityIndexingTestCase, BaseTests):
@@ -157,10 +157,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                   community_id=self.community.slug, doc_id=doc.id)
     response = self.get(url)
     self.assert_200(response)
-    self.assertEquals(response.headers['Content-Type'], content_type)
+    assert response.headers['Content-Type'] == content_type
 
     content = self.open_file(title).read()
-    self.assertEquals(response.data, content)
+    assert response.data == content
 
     if test_preview:
       url = url_for("documents.document_preview",
@@ -169,11 +169,11 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
       response = self.get(url)
       if assert_preview_available:
         self.assert_200(response)
-        self.assertEquals(response.headers['Content-Type'], 'image/jpeg')
+        assert response.headers['Content-Type'] == 'image/jpeg'
       else:
         # redirect to 'missing image'
         self.assert_302(response)
-        self.assertEquals(response.headers['Cache-Control'], 'no-cache')
+        assert response.headers['Cache-Control'] == 'no-cache'
 
     url = url_for("documents.document_delete",
                   community_id=self.community.slug, doc_id=doc.id)
@@ -222,7 +222,6 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         u'folder 1/doc.txt',
         u'folder 1/dos cp437: é.txt',
     }
-
 
   def test_zip_upload_uncompress(self):
     folder = Folder(title=u'folder 1', parent=self.community.folder)
@@ -344,13 +343,13 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         rv = self.client.post(url, data={'recipient': 'dest@example.com',
                                          'message': u'Voilà un fichier'})
         self.assertEquals(rv.status_code, 302, "expected 302, got:" + rv.status)
-        self.assertEquals(len(outbox), 1)
+        assert len(outbox) == 1
         msg = outbox[0]
         self.assertEquals(
             msg.subject,
             u'[Abilian Test] Unknown sent you a file'
         )
-        self.assertEquals(msg.recipients, [u'dest@example.com'])
+        assert msg.recipients == [u'dest@example.com']
         expected_disposition = attachment('ascii title.txt')
         msg = str(msg)
         assert expected_disposition in msg
@@ -360,8 +359,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         url = get_send_url(unicode_doc.id)
         rv = self.client.post(url, data={'recipient': 'dest@example.com',
                                          'message': u'Voilà un fichier'})
-        self.assertEquals(rv.status_code, 302, "expected 302, got:" + rv.status)
-        self.assertEquals(len(outbox), 1)
+        assert rv.status_code == 302
+        assert len(outbox) == 1
         msg = outbox[0]
         self.assertEquals(
           msg.subject,
@@ -389,10 +388,8 @@ class TestPathIndexable(unittest.TestCase):
     self.obj = self.MockPath(id_gen.next(), parent=obj)
 
   def test_iter_to_root(self):
-    self.assertEquals([o.id for o in self.obj._iter_to_root()],
-                      [3, 2, 1, 0])
-    self.assertEquals([o.id for o in self.obj._iter_to_root(skip_self=True)],
-                      [2, 1, 0])
+    assert [o.id for o in self.obj._iter_to_root()] == [3, 2, 1, 0]
+    assert [o.id for o in self.obj._iter_to_root(skip_self=True)] == [2, 1, 0]
 
   def test_indexable_parent_ids(self):
     self.assertEquals(self.obj._indexable_parent_ids,

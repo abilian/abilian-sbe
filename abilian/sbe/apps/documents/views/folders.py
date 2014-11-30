@@ -13,10 +13,11 @@ from cStringIO import StringIO
 from datetime import datetime
 from urllib import quote
 from zipfile import ZipFile, is_zipfile
+from werkzeug.exceptions import InternalServerError
 
 from xlwt import Workbook, easyxf
 
-from flask import (redirect, request, make_response, flash, abort,
+from flask import (redirect, request, make_response, flash,
                    current_app, send_file, jsonify,
                    render_template_string, Markup, render_template)
 
@@ -53,6 +54,7 @@ def index():
   folder = g.community.folder
   url = url_for(folder)
   return redirect(url)
+
 
 @default_view(documents, Folder, id_attr='folder_id', kw_func=default_view_kw)
 @route("/folder/<int:folder_id>")
@@ -198,7 +200,6 @@ def permissions(folder_id):
       self.msg = Markup(msg.format(date=self.date, manager=self.manager,
                                    role=self.entry.role,
                                    principal=principal))
-
 
   audit_entries = [EntryPresenter(e) for e in security.entries_for(folder)]
   csrf_token = csrf.field()
@@ -778,7 +779,7 @@ def check_valid_name():
     help_text = _(u'Cannot rename: "{name}" is already present in parent '
                   'folder')
   else:
-    abort(500)
+    raise InternalServerError()
 
   existing = set((e.title for e in parent.children))
 

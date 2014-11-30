@@ -7,6 +7,7 @@ from abilian.core.extensions import db
 
 from ..models import Folder, Document
 
+
 class TestService(BaseTestCase):
 
   def setUp(self):
@@ -84,7 +85,7 @@ class TestService(BaseTestCase):
     root = self.root
     folder1 = root.create_subfolder(u"folder1")
     folder2 = root.create_subfolder(u"folder2")
-    subfolder = folder1.create_subfolder(u"subfolder")
+    subfolder = folder1.create_subfolder(u"subfolder")  # noqa
 
     self.repository.move_object(folder1, folder2)
 
@@ -134,8 +135,8 @@ class TestService(BaseTestCase):
 
     # test delete tree
     folder = root.create_subfolder(u"folder")
-    sub = folder.create_subfolder(u'subfolder')
-    doc = folder.create_document(u"doc")
+    sub = folder.create_subfolder(u'subfolder')  # noqa
+    doc = folder.create_document(u"doc")  # noqa
     self.session.flush()
 
     self.repository.delete_object(folder)

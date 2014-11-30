@@ -6,7 +6,6 @@ from sqlalchemy.schema import Column
 from sqlalchemy.types import Text
 
 from flask import render_template, request, redirect, g, url_for, flash
-#from flaskext.babel import lazy_gettext as _
 from flask.ext.babel import gettext as _
 from flask.ext.mail import Message as Email
 
@@ -40,11 +39,14 @@ def invite_post():
   emails = request.form.get("emails").split("\n")
   emails = [ email.strip() for email in emails ]
 
-  message = request.form.get("message", "")
+  # FIXME: what do we do with this ?
+  message = request.form.get("message", "")  # noqa
 
   with mail.connect() as conn:
     for email in emails:
-      invite = Invite(sender=g.user, email=email)
+      # FIXME: what do we do with this ?
+      invite = Invite(sender=g.user, email=email)  # noqa
+
       #subject = _(u"%s would like to invite you to the %s community") % (g.user.name, "Yaka")
       subject = "%s would like to invite you to the %s community" % (g.user.name, "Yaka")
       msg = Email(subject, recipients=[email], sender=g.user.email)

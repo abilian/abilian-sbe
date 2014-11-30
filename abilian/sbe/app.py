@@ -1,19 +1,13 @@
 """
 Static configuration for the application.
 
-Everything is hardwired at this point. A plugin system will have to be
-developped later.
+TODO: add more (runtime) flexibility in plugin discovery, selection
+and activation.
 """
 
-from time import time
 import logging
 
-import sqlalchemy as sa
-
 import jinja2
-from flask import request_started, request_tearing_down
-from flask.globals import g, request
-from flask.ext.login import current_user
 
 from abilian.app import Application as BaseApplication
 from abilian.core.extensions import db
@@ -23,7 +17,7 @@ from .apps.documents.repository import repository
 from .extension import sbe
 
 # Used for side effects, do not remove
-import abilian.web.forms
+import abilian.web.forms  # noqa
 
 
 __all__ = ['create_app', 'db']

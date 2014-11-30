@@ -1,6 +1,6 @@
 def register_plugin(app):
   from .views.social import social
-  from .views import users, groups, sidebars
+  from .views import users, groups, sidebars  # noqa
 
   app.register_blueprint(social)
 

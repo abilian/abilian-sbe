@@ -19,7 +19,7 @@ from abilian.services.image import crop_and_resize
 from abilian.web import csrf, nav, views
 from abilian.i18n import _, _l
 
-from abilian.sbe.apps.documents.models import Blob, Document
+from abilian.sbe.apps.documents.models import Document
 
 from .actions import register_actions
 from .forms import CommunityForm

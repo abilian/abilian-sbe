@@ -1,13 +1,13 @@
 import re
 
-from flask import flash, current_app, request, abort, g
+from flask import flash, current_app, request, g
 from flask.ext.babel import gettext as _
+from werkzeug.exceptions import NotFound, Forbidden, InternalServerError
 
 from abilian.core.signals import activity
 from abilian.services.security import security
 from abilian.web import url_for
 
-from ..models import Folder, Document
 from ..repository import repository
 
 #
@@ -59,7 +59,6 @@ def get_new_filename(folder, name):
   renamed = name in existing
 
   if renamed:
-    old_name = name
     name = name.rsplit('.', 1)
     ext = u'.{}'.format(name[1]) if len(name) > 1 else u''
     name = name[0]
@@ -76,6 +75,7 @@ def get_new_filename(folder, name):
     name = u'{}-{}{}'.format(name, index, ext)
 
   return name
+
 
 def create_document(folder, fs):
   check_write_access(folder)
@@ -140,7 +140,7 @@ def get_selected_objects(folder):
 
   for obj in docs + folders:
     if obj.parent != folder:
-      abort(500)
+      raise InternalServerError()
 
   return folders, docs
 
@@ -152,14 +152,14 @@ def check_read_access(obj):
   or the current user doesn't have read access on the object (403).
   """
   if not obj:
-    abort(404)
+    raise NotFound()
   if not security.running:
     return True
   if security.has_role(g.user, "admin"):
     return True
   if repository.has_access(g.user, obj):
     return True
-  abort(403)
+  raise Forbidden()
 
 
 def check_write_access(obj):
@@ -169,7 +169,7 @@ def check_write_access(obj):
   or the current user doesn't have write access on the object (403).
   """
   if not obj:
-    abort(404)
+    raise NotFound()
   if not security.running:
     return
   if security.has_role(g.user, "admin"):
@@ -177,7 +177,7 @@ def check_write_access(obj):
   if (repository.has_access(g.user, obj)
       and repository.has_permission(g.user, "write", obj)):
     return
-  abort(403)
+  raise Forbidden()
 
 
 def check_manage_access(obj):
@@ -188,7 +188,7 @@ def check_manage_access(obj):
   """
 
   if not obj:
-    abort(404)
+    raise NotFound()
   if not security.running:
     return
   if security.has_role(g.user, "admin"):
@@ -196,7 +196,7 @@ def check_manage_access(obj):
   if (repository.has_access(g.user, obj)
       and repository.has_permission(g.user, "manage", obj)):
     return
-  abort(403)
+  raise Forbidden()
 
 
 def match(mime_type, patterns):

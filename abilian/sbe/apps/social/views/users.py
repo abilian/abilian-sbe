@@ -13,7 +13,7 @@ from flask import (
   current_app, Response, render_template)
 
 import sqlalchemy as sa
-from sqlalchemy.sql.expression import or_, func, asc, desc, nullslast
+from sqlalchemy.sql.expression import or_, and_, func, asc, desc, nullslast
 
 from abilian.i18n import _
 from abilian.core.models.subjects import User
@@ -23,7 +23,6 @@ from abilian.services.image import crop_and_resize
 from abilian.web import url_for, csrf
 from abilian.web.views import default_view
 from abilian.web.forms import widgets
-from abilian.web.decorators import templated
 from abilian.web.filters import age
 
 from abilian.sbe.apps.communities.models import Membership
@@ -32,6 +31,7 @@ from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from ..forms import UserProfileForm, UserProfileViewForm
 from .social import social
 from .util import Env
+
 
 logger = logging.getLogger(__name__)
 
@@ -49,19 +49,21 @@ def make_tabs(user):
 
 
 @social.route("/users/")
-@templated("social/users.html")
 def users():
   query = request.args.get("query")
 
   if query:
     query = query.replace("%", " ")
-    q = or_(User.first_name.like("%" + query + "%"), User.last_name.like("%" + query + "%"))
+    q = or_(User.first_name.like("%" + query + "%"),
+            User.last_name.like("%" + query + "%"))
     users = User.query.filter(q).limit(100).all()
   else:
     users = User.query.limit(100).all()
-  return dict(users=users)
+  ctx = dict(users=users)
+  return render_template("social/users.html", **ctx)
 
 
+# FIXME: Contact and Partenaire are not in the SBE package !
 @social.route("/users/dt_json")
 def users_dt_json():
   """JSON call to fill a DataTable. Needs some refactoring."""
@@ -146,6 +148,7 @@ def users_dt_json():
     "aaData": data,
   }
   return jsonify(result)
+
 
 @social.route("/users/<int:user_id>")
 @default_view(social, User, 'user_id')
@@ -275,7 +278,6 @@ def can_edit(user):
 
 
 @social.route("/users/<int:user_id>/edit")
-@templated('crm/single_view.html')
 def user_edit(user_id):
   user = User.query.get(user_id)
   assert user is not None
@@ -292,8 +294,9 @@ def user_edit(user_id):
   form_view = widgets.SingleView(UserProfileForm, panel)
   rendered_form = form_view.render_form(form)
 
-  return dict(rendered_entity=rendered_form,
-              module=None)
+  ctx = dict(rendered_entity=rendered_form, module=None)
+  # FIXME: template is not in this package.
+  return render_template("crm/single_view.html", **ctx)
 
 
 @social.route("/users/<int:user_id>/edit", methods=['POST'])

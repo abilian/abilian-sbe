@@ -15,7 +15,9 @@ def register_plugin(app):
   cfg.setdefault('DAILY_SOCIAL_DIGEST_SUBJECT',
                  u'Des nouvelles de vos communautés')
   sbe.init_app(app)
-  from .views import notifications, social
-  from .tasks import social
+
+  # TODO: Slightly confusing. Reorg?
+  from .views import notifications, social  # noqa
+  from .tasks import social  # noqa
 
   app.register_blueprint(notifications)

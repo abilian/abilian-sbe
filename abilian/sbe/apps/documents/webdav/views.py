@@ -41,10 +41,12 @@ def log_request():
     print(litmus_msg)
     print('%s on %s' % (request.method, request.path))
 
+
 @webdav.before_request
 def only_admin():
   if not current_app.services('security').has_role(user, "admin"):
     abort(403)
+
 
 @webdav.after_request
 def log_response(response):

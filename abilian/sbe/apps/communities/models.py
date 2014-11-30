@@ -32,6 +32,7 @@ MEMBER = Role('member')
 
 VALID_ROLES = (READER, WRITER, MANAGER, MEMBER,)
 
+
 class Membership(db.Model):
   """
   Objects that represent the membership of someone in a community.
@@ -47,16 +48,17 @@ class Membership(db.Model):
   community_id = Column(ForeignKey('community.id'), index=True, nullable=False)
   community = relationship('Community', lazy='joined')
 
-  role = Column(RoleType()) # should be either 'member' or 'manager'
+  role = Column(RoleType())  # should be either 'member' or 'manager'
 
   __table_args__ = (UniqueConstraint('user_id', 'community_id'),)
 
   def __repr__(self):
     return u'<Membership user={}, community={}, role={}>'.format(
-        repr(self.user),
-        repr(self.community),
-        str(self.role)
+      repr(self.user),
+      repr(self.community),
+      str(self.role)
     ).encode('utf-8')
+
 
 def community_content(cls):
   """
@@ -91,7 +93,7 @@ class Community(Entity):
 
   is_community_content = True
 
-  #: A public description.
+  # : A public description.
   description = Column(Unicode(500), default=u"", nullable=False,
                        info=SEARCHABLE)
 
@@ -105,7 +107,7 @@ class Community(Entity):
                                 name='fk_community_root_folder'),
                      unique=True)
   folder = relation(Folder,
-                    single_parent=True, # required for delete-orphan
+                    single_parent=True,  # required for delete-orphan
                     primaryjoin=(folder_id == Folder.id),
                     cascade='all, delete-orphan',
                     backref=backref('_community', lazy='select', uselist=False))
@@ -298,12 +300,13 @@ _whoosh_community_id_field = wf.NUMERIC(numtype=int, bits=64, signed=False,
                                         stored=True, unique=False)
 _whoosh_community_slug_field = wf.ID(stored=True)
 
+
 def CommunityIdColumn():
   return Column(
     ForeignKey(Community.id),
     nullable=False,
-    info=SEARCHABLE|dict(
+    info=SEARCHABLE | dict(
       index_to=(
         ('community_id', _whoosh_community_id_field,),
       )),
-    )
+  )

@@ -2,7 +2,7 @@
 import imghdr
 import PIL.Image
 
-from wtforms.fields import TextField
+from wtforms.fields import StringField
 from wtforms.validators import ValidationError
 from wtforms_alchemy import model_form_factory
 
@@ -16,7 +16,7 @@ from abilian.web.forms.filters import strip
 
 from abilian.sbe.apps.communities.models import Community
 
-from .widgets import UserPhotoInputWidget
+#from .widgets import UserPhotoInputWidget
 
 
 ModelForm = model_form_factory(Form)
@@ -42,18 +42,18 @@ class UserProfileForm(ModelForm):
   #mobile = ContactEditForm.mobile
   #url = ContactEditForm.url
 
-  mail_2 = TextField('Mail 2', view_widget=abilian_widgets.EmailWidget(),
+  mail_2 = StringField('Mail 2', view_widget=abilian_widgets.EmailWidget(),
                      filters=(strip,), validators=[optional()])
-  telephone_2 = TextField(u'T\xe9l\xe9phone 2', filters=(strip,),
+  telephone_2 = StringField(u'T\xe9l\xe9phone 2', filters=(strip,),
                           validators=[optional()])
-  fax_2 = TextField('Fax 2', filters=(strip,), validators=[optional()])
-  mobile_2 = TextField('Mobile 2', filters=(strip,), validators=[optional()])
-  url_2 = TextField('URL 2', filters=(strip,), validators=[optional()])
-  mail_3 = TextField('Mail 3', filters=(strip,), validators=[optional()])
-  telephone_3 = TextField(u'T\xe9l\xe9phone 3', filters=(strip,),
+  fax_2 = StringField('Fax 2', filters=(strip,), validators=[optional()])
+  mobile_2 = StringField('Mobile 2', filters=(strip,), validators=[optional()])
+  url_2 = StringField('URL 2', filters=(strip,), validators=[optional()])
+  mail_3 = StringField('Mail 3', filters=(strip,), validators=[optional()])
+  telephone_3 = StringField(u'T\xe9l\xe9phone 3', filters=(strip,),
                           validators=[optional()])
-  fax_3 = TextField('Fax 3', filters=(strip,), validators=[optional()])
-  mobile_3 = TextField('Mobile 3', filters=(strip,), validators=[optional()])
+  fax_3 = StringField('Fax 3', filters=(strip,), validators=[optional()])
+  mobile_3 = StringField('Mobile 3', filters=(strip,), validators=[optional()])
 
   presentation = TextAreaField(u'Pr\xe9sentation', filters=(strip,),
                                validators=[optional()])
@@ -140,7 +140,7 @@ class UserProfileViewForm(UserProfileForm):
 
 class GroupForm(Form):
 
-  name = TextField(_l("Name"),
+  name = StringField(_l("Name"),
                    filters=(strip,),
                    validators=[required(message=_l("Name is required."))])
 

@@ -5,10 +5,15 @@ from __future__ import absolute_import
 
 from abilian.sbe.extension import sbe
 
+
 def register_plugin(app):
   sbe.init_app(app)
-  from . import events # Used just for side effect
+
+  # Used for side-effect
+  from . import events  # noqa
+
   from .views import communities
-  from . import search
   app.register_blueprint(communities)
+
+  from . import search
   search.init_app(app)

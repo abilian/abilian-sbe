@@ -20,6 +20,7 @@ __all__ = ['restapi']
 
 restapi = Blueprint('restapi', __name__, url_prefix="/api")
 
+
 # Util
 
 def make_json_response(obj, response_code=200):
@@ -316,7 +317,8 @@ def search_users():
 @restapi.route("/attachments", methods=['POST'])
 @login_required
 def create_attachment():
-  attachment = request.files['attachment']
+  # TODO
+  # attachment = request.files['attachment']
   return make_json_response({}, 201)
 
 

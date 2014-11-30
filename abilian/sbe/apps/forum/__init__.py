@@ -6,6 +6,7 @@ from __future__ import absolute_import
 
 from abilian.sbe.extension import sbe
 
+
 def register_plugin(app):
   sbe.init_app(app)
   from .views import forum

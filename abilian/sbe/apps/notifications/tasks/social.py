@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 from datetime import timedelta, datetime
 from sqlalchemy import and_, or_
+from validate_email import validate_email
 
 from celery.task import periodic_task
 from celery.schedules import crontab
@@ -36,7 +37,12 @@ def send_daily_social_digest():
   for user in User.query.filter(User.can_login == True).all():
     preferences = app.services['preferences']
     prefs = preferences.get_preferences(user)
+
     if not prefs.get('sbe:notifications:daily', False):
+      continue
+
+    # Defensive programming.
+    if not validate_email(user.email):
       continue
 
     try:
@@ -126,7 +132,9 @@ class CommunityDigest(object):
   def update_from_activity(self, activity, user):
     actor = activity.actor
     obj = activity.object
-    target = activity.target
+
+    # TODO ?
+    #target = activity.target
 
     if activity.verb == 'join':
       self.new_members.append(actor)

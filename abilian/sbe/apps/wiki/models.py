@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy import (
   UnicodeText, Unicode, Column, ForeignKey, Integer,
   UniqueConstraint, DateTime,
-  )
+)
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.hybrid import hybrid_property
 
@@ -28,11 +28,12 @@ from . import markup
 
 __all__ = ['WikiPage']
 
+
 @community_content
 class WikiPage(Entity, Commentable):
   __tablename__ = 'wiki_page'
 
-  #: The title for this page
+  # : The title for this page
   _title = Column('title', Unicode(200), nullable=False, index=True)
 
   community_id = CommunityIdColumn()
@@ -44,7 +45,7 @@ class WikiPage(Entity, Commentable):
 
   #: The body, using some markup language (Markdown for now)
   body_src = Column(UnicodeText, default=u"", nullable=False,
-                    info=SEARCHABLE|dict(index_to=('text',)))
+                    info=SEARCHABLE | dict(index_to=('text',)))
 
   __table_args__ = (UniqueConstraint('title', 'community_id'),)
 
@@ -109,7 +110,7 @@ class WikiPageRevision(db.Model):
   __tablename__ = 'wiki_page_revision'
   __table_args__ = (UniqueConstraint('page_id', 'number'),)
 
-  #: Some primary key just in case
+  # : Some primary key just in case
   id = Column(Integer, primary_key=True)
 
   #: Date and time this revision was created

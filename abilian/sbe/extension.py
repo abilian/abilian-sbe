@@ -20,8 +20,7 @@ class AbilianSBE(object):
   """
   Base extension required by abilian.sbe.apps
   """
-  def __init__(self, app=None, *args, **kwargs):
-    object.__init__(self, *args, **kwargs)
+  def __init__(self, app=None):
     if app is not None:
       self.init_app(app)
 

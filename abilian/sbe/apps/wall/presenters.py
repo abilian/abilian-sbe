@@ -8,12 +8,11 @@ import bleach
 from jinja2 import Template, Markup
 from flask.ext.babel import gettext as _, lazy_gettext as _l
 
-from abilian.core.models.subjects import User
 from abilian.core.util import BasePresenter
 from abilian.web.util import url_for
 
 from abilian.sbe.apps.communities.models import Community
-from abilian.sbe.apps.documents.models import Document, Folder
+from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.wiki.models import WikiPage
 
