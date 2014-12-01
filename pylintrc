@@ -1,3 +1,4 @@
+# -*- mode: conf; -*-
 [MASTER]
 
 # Specify a configuration file.
@@ -38,7 +39,14 @@ load-plugins=
 # --enable=similarities". If you want to run only the classes checker, but have
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
-#disable=
+
+# C0111: Missing class docstring
+# R0201: Method could be a function
+# W0142: used * or ** magic
+# W0232: Class has no __init__ method
+# W0613: unused argument
+
+disable=C0111,R0201,W0142,W0232,W0613
 
 
 [REPORTS]

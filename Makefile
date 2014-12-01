@@ -58,6 +58,12 @@ pytest-pep8:
 pytest-flakes:
 	py.test --flakes -m flakes $(SRC) # tests
 
+vagrant-tests:
+	vagrant up
+	vagrant ssh -c /vagrant/deploy/vagrant_test.sh
+	# We could also do this:
+	#vagrant ssh -c 'cp -a /vagrant src && cd src && tox'
+
 #
 # Everything else
 #
@@ -90,14 +96,11 @@ clean:
 	rm -rf doc/_build
 	rm -rf static/gen static/.webassets-cache
 	rm -rf htmlcov
-	rm -rf junit-py27.xml ghostdriver.log
+	rm -rf junit-py27.xml ghostdriver.log coverage.xml
 
 tidy: clean
 	rm -rf .tox
 
-vagrant-test:
-	vagrant up
-	vagrant ssh -c 'cp -a /vagrant src && cd src && tox'
 
 update-pot:
 	python setup.py extract_messages update_catalog compile_catalog

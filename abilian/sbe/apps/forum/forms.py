@@ -13,38 +13,38 @@ from abilian.web.forms.fields import FileField
 
 
 ALLOWED_TAGS = [
-  'a',
-  'abbr',
-  'acronym',
-  'b',
-  'blockquote',
-  'br',
-  'code',
-  'em',
-  'i',
-  'li',
-  'ol',
-  'strong',
-  'ul',
-  'h1',
-  'h2',
-  'h3',
-  'h4',
-  'h5',
-  'h6',
-  'p',
-  'u',
-  'img',
+    'a',
+    'abbr',
+    'acronym',
+    'b',
+    'blockquote',
+    'br',
+    'code',
+    'em',
+    'i',
+    'li',
+    'ol',
+    'strong',
+    'ul',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+    'p',
+    'u',
+    'img',
 ]
 ALLOWED_ATTRIBUTES = {
-  'a': ['href', 'title'],
-  'abbr': ['title'],
-  'acronym': ['title'],
-  'img': ['src'],
+    'a': {'href': True, 'title': True},
+    'abbr': {'title': True},
+    'acronym': {'title': True},
+    'img': {'src': True},
 }
 
 WIDGET_ALLOWED = {attr: ALLOWED_ATTRIBUTES.get(attr, True)
-                  for attr in ALLOWED_TAGS }
+                  for attr in ALLOWED_TAGS}
 
 class ThreadForm(Form):
   title = StringField(label=_l(u"Title"),

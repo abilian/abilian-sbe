@@ -151,10 +151,10 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
   decorators = [require_admin, tab('settings')]
 
   def breadcrumb(self):
-   return nav.BreadcrumbItem(label=_(u'Settings'),
-                             icon='cog',
-                             url=nav.Endpoint('communities.settings',
-                                              community_id=g.community.slug))
+    return nav.BreadcrumbItem(label=_(u'Settings'),
+                              icon='cog',
+                              url=nav.Endpoint('communities.settings',
+                                               community_id=g.community.slug))
 
   def get_form_kwargs(self):
     kwargs = views.ObjectEdit.get_form_kwargs(self)

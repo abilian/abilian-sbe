@@ -2,7 +2,7 @@
 
 # Additional packages for development.
 
-# Our favorite test runner
+# Our favorite test runner with some plugins
 pytest>=2.4.0
 pytest-xdist
 

@@ -9,8 +9,8 @@ from cgi import escape
 from os.path import dirname, join
 
 from flask import (
-  request, redirect, g, make_response, abort, jsonify, flash,
-  current_app, Response, render_template)
+    request, redirect, g, make_response, abort, jsonify,
+    current_app, Response, render_template)
 
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import or_, and_, func, asc, desc, nullslast
@@ -18,11 +18,10 @@ from sqlalchemy.sql.expression import or_, and_, func, asc, desc, nullslast
 from abilian.i18n import _
 from abilian.core.models.subjects import User
 from abilian.core.extensions import db, get_extension
-from abilian.core.signals import activity
 from abilian.services.image import crop_and_resize
-from abilian.web import url_for, csrf
+from abilian.web import url_for
 from abilian.web.views import default_view
-from abilian.web.forms import widgets
+from abilian.web.decorators import templated
 from abilian.web.filters import age
 
 from abilian.sbe.apps.communities.models import Membership
@@ -276,79 +275,6 @@ def can_edit(user):
   #return (has_contact and
   #        ((user == g.user) or security.has_role(g.user, 'admin')))
 
-
-@social.route("/users/<int:user_id>/edit")
-def user_edit(user_id):
-  user = User.query.get(user_id)
-  assert user is not None
-
-  if not can_edit(user):
-    return Response(status=403)
-
-  contact = user.contact
-  assert contact is not None
-
-  form = UserProfileForm(obj=contact)
-  form._widgets_options = { 'photo': dict(user_id=user_id) }
-  panel = widgets.Panel(None, *[widgets.Row(f.name) for f in form])
-  form_view = widgets.SingleView(UserProfileForm, panel)
-  rendered_form = form_view.render_form(form)
-
-  ctx = dict(rendered_entity=rendered_form, module=None)
-  # FIXME: template is not in this package.
-  return render_template("crm/single_view.html", **ctx)
-
-
-@social.route("/users/<int:user_id>/edit", methods=['POST'])
-@csrf.protect
-def user_edit_post(user_id):
-  user = User.query.get(user_id)
-  assert user is not None
-
-  if request.form.get('_action') == u'cancel':
-    return redirect(url_for(".user", user_id=user_id))
-
-  if not can_edit(user):
-    return Response(status=403)
-
-  # FIXME: introduce user profiles instead!
-  contact = Contact.query.filter(Contact.user == user).first()
-  assert contact is not None
-  # FIXME: only for user and admin!
-
-  form = UserProfileForm(obj=contact)
-  if form.validate():
-    form.populate_obj(contact)
-    if form.photo.has_file() and hasattr(contact, 'photo'):
-      # UserProfileForm has a photo field, but for it is not defined in Contact
-      # schema but in User schema
-      contact.user.photo = contact.photo.read()
-      db.session.add(contact.user)
-      del contact.photo
-
-    db.session.add(contact)
-    try:
-      db.session.flush()
-      activity.send(contact, actor=g.user, verb="update", object=contact)
-      db.session.commit()
-    except sa.exc.IntegrityError:
-      db.session.rollback()
-      logger.error('Error saving user profile',
-                   exc_info=True, extra={'stack': True})
-      flash(_(u'Error occured'), "error")
-    except:
-      db.session.rollback()
-      logger.error('Unexpected error while saving user profile',
-                   exc_info=True, extra={'stack': True})
-      flash(_(u'Error occured'), "error")
-
-    else:
-      flash(_(u'Profile edited'), "success")
-      return redirect(url_for(".user", user_id=user_id))
-  else:
-    flash(_(u'Please fix the error(s) below'), "error")
-
-  return user_edit(user_id)
 
 
 @social.route("/users/<int:user_id>", methods=['POST'])

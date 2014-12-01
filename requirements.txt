@@ -1,5 +1,8 @@
 # Abilian Core
--e git+https://github.com/abilian/abilian-core.git@master#egg=Abilian-Core
+abilian-core
+
+# Not using the git url because it confuses PBR
+#-e git+https://github.com/abilian/abilian-core.git@master#egg=Abilian-Core
 
 # Used for language detection.
 guess-language-spirit==0.5a5

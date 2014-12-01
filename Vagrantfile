@@ -9,8 +9,7 @@ Vagrant.configure("2") do |config|
     vb.cpus = 2
   end
 
-  #config.vm.network "forwarded_port", guest: 80, host: 8080
   config.vm.network "forwarded_port", guest: 5000, host: 5000
 
-  config.vm.provision :shell, :path => "devops/provision.sh"
+  config.vm.provision :shell, :path => "deploy/provision.sh"
 end
