@@ -24,6 +24,8 @@ before_install:
 install:
   - pip install -r dev-requirements.txt
   - pip install -r git-requirements.txt
+  - pip --version
+  - pip list
 
 # Create DB
 before_script:

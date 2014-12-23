@@ -10,6 +10,7 @@ pytest-xdist
 mock>=1.0.1
 
 # Coverage
+coverage>=3.7.1,<4.0a1
 pytest-cov
 
 # Client for the coveralls.io web service (coverage reporting)
