@@ -5,7 +5,7 @@ abilian-core
 #-e git+https://github.com/abilian/abilian-core.git@master#egg=Abilian-Core
 
 # Used for language detection.
-guess-language-spirit==0.5a5
+guess-language-spirit>=0.5.1,<0.6
 
 # Email validator, will probably move to abilian-core later.
 validate_email>=1.2,<2.0
