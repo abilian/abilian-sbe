@@ -12,11 +12,8 @@
       <h3>Nouveaux membres</h3>
 
       {% for user in digest.new_members %}
-        <p><a
-            href="{{ url_for("social.user", user_id=user.id, _external=True) }}">{{ user }}</a>
-          {% if user.contact %}
-            ({{ user.contact.partenaire }})
-          {% endif %}
+        <p>
+          <a href="{{ url_for("social.user", user_id=user.id, _external=True) }}">{{ user }}</a>
         </p>
       {% endfor %}
     {% endif %}

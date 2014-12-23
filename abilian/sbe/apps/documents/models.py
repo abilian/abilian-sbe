@@ -10,8 +10,9 @@ import itertools
 import os
 import mimetypes
 import pkg_resources
+import uuid
 
-from flask import json, g, url_for
+from flask import json, g, url_for, current_app
 
 import sqlalchemy as sa
 from sqlalchemy import event
@@ -29,11 +30,12 @@ from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.subjects import User, Group
 from abilian.core.models.blob import Blob
 from abilian.core.entities import db, Entity
+from abilian.core.extensions import celery
 from abilian.services.conversion import converter
 from abilian.services.security import InheritSecurity, security, Anonymous, Admin
 from abilian.services.indexing import indexable_role
 
-from .tasks import preview_document, convert_document_content
+from . import tasks
 
 
 logger = logging.getLogger(__package__)
@@ -545,7 +547,71 @@ class Document(BaseContent, PathAndSecurityIndexable):
   meta = True # for now
   sharing = True
 
+  # antivirus status
+  def ensure_antivirus_scheduled(self):
+    if not self.antivirus_required:
+      return True
+
+    if celery.conf.CELERY_ALWAYS_EAGER:
+      async_conversion(self)
+      return True
+
+    task_id = self.content_blob.meta.get('antivirus_task_id')
+    if task_id is not None:
+      res = tasks.process_document.AsyncResult(task_id)
+      if not res.failed():
+        # success, or pending or running
+        return True
+
+    # schedule a new task
+    self.content_blob.meta['antivirus_task_id'] = str(uuid.uuid4())
+    async_conversion(self)
+
+  @property
+  def antivirus_scanned(self):
+    """
+    True if antivirus task was run, even if antivirus didn't return a result
+    """
+    return self.content_blob and 'antivirus' in self.content_blob.meta
+
+  @property
+  def antivirus_status(self):
+    """
+    True: antivirus has scanned file: no virus
+    False: antivirus has scanned file: virus detected
+    None: antivirus task was run, but antivirus didn't return a result
+    """
+    return self.content_blob and self.content_blob.meta.get('antivirus')
+
+  @property
+  def antivirus_required(self):
+    """
+    True if antivirus dosen't need to be run
+    """
+    required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
+    return required and self.antivirus_scanned is False
+
+  @property
+  def antivirus_ok(self):
+    """
+    True if user can safely access document content
+    """
+    required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
+    if required:
+      return self.antivirus_status is True
+
+    return self.antivirus_status is not False
+
+
+
   # R/W properties
+  @BaseContent.content.setter
+  def content(self, value):
+    BaseContent.content.fset(self, value)
+    self.content_blob.meta['antivirus_task_id'] = str(uuid.uuid4())
+    self.pdf_blob = None
+    self.text_blob = None
+
   @property
   def pdf(self):
     return self.pdb_blob and self.pdf_blob.value
@@ -619,7 +685,9 @@ def _get_documents_queue():
 
 
 def async_conversion(document):
-  _get_documents_queue().append(document)
+  _get_documents_queue().append(
+    (document, document.content_blob.meta.get('antivirus_task_id')),
+  )
 
 
 def _trigger_conversion_tasks(session):
@@ -629,10 +697,9 @@ def _trigger_conversion_tasks(session):
 
   document_queue = _get_documents_queue()
   while document_queue:
-    doc = document_queue.pop()
+    doc, task_id = document_queue.pop()
     if doc.id:
-      preview_document.delay(doc.id)
-      convert_document_content.delay(doc.id)
+      tasks.process_document.apply_async((doc.id,), task_id=task_id)
 
 def setup_listener():
   mark_attr = '__abilian_sa_listening'

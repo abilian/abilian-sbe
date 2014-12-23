@@ -14,9 +14,6 @@ from abilian.services.activity import ActivityEntry
 from abilian.sbe.apps.communities.models import Membership
 from abilian.sbe.apps.documents.models import Folder, Document
 
-CRM_CLASSES = ['Partenaire', 'Contact', 'Visite', 'ActionFiliere', 'Projet',
-               'ProgrammeFiliere']
-
 
 def get_recent_entries(num=20, user=None, community=None):
   AE = ActivityEntry

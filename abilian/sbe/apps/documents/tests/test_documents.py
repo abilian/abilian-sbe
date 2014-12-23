@@ -58,6 +58,72 @@ class TestBlobs(BaseTests):
     self.session.add(doc)
     self.session.commit()
 
+  def test_antivirus_properties(self):
+    root = Folder(title=u"root")
+    doc = Document(parent=root, title=u"test")
+    doc.set_content('content', 'text/plain')
+    appcfg = self.app.config
+    meta = doc.content_blob.meta
+
+    # 1: not check required ################
+    # no data in meta
+    appcfg['ANTIVIRUS_CHECK_REQUIRED'] = False
+    assert doc.antivirus_scanned is False
+    assert doc.antivirus_status is None
+    assert doc.antivirus_required is False
+    assert doc.antivirus_ok is True
+
+    # antivirus was run, but no result
+    meta['antivirus'] = None
+    assert doc.antivirus_scanned is True
+    assert doc.antivirus_status is None
+    assert doc.antivirus_required is False
+    assert doc.antivirus_ok is True
+
+    # virus detected
+    meta['antivirus'] = False
+    assert doc.antivirus_scanned is True
+    assert doc.antivirus_status is False
+    assert doc.antivirus_required is False
+    assert doc.antivirus_ok is False
+
+    # virus free
+    meta['antivirus'] = True
+    assert doc.antivirus_scanned is True
+    assert doc.antivirus_status is True
+    assert doc.antivirus_required is False
+    assert doc.antivirus_ok is True
+
+    # 2: check required ##################
+    # no data in meta
+    del meta['antivirus']
+    appcfg['ANTIVIRUS_CHECK_REQUIRED'] = True
+    assert doc.antivirus_scanned is False
+    assert doc.antivirus_status is None
+    assert doc.antivirus_required is True
+    assert doc.antivirus_ok is False
+
+    # antivirus was run, but no result
+    meta['antivirus'] = None
+    assert doc.antivirus_scanned is True
+    assert doc.antivirus_status is None
+    assert doc.antivirus_required is False
+    assert doc.antivirus_ok is False
+
+    # virus detected
+    meta['antivirus'] = False
+    assert doc.antivirus_scanned is True
+    assert doc.antivirus_status is False
+    assert doc.antivirus_required is False
+    assert doc.antivirus_ok is False
+
+    # virus free
+    meta['antivirus'] = True
+    assert doc.antivirus_scanned is True
+    assert doc.antivirus_status is True
+    assert doc.antivirus_required is False
+    assert doc.antivirus_ok is True
+
 
 class IndexingTestCase(CommunityIndexingTestCase):
 

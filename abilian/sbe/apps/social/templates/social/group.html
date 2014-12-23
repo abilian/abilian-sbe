@@ -17,11 +17,6 @@
                    {{ user.name }}
                  </a>
                </td>
-               <td>
-                 {%- if user.contact and user.contact.partenaire %}
-                   {{ user.contact.partenaire.nom }}
-                 {%- endif %}
-               </td>
                <td>{{ user.email }}</td>
                {%- if is_admin %}
                <td>

@@ -4,7 +4,7 @@ python:
 
 env:
   - SQLALCHEMY_DATABASE_URI="sqlite://"
-  - SQLALCHEMY_DATABASE_URI="postgres://abilian:abilian@localhost:5432/abilian"
+  - SQLALCHEMY_DATABASE_URI="postgres://abilian_user:abilian_pw@localhost:5432/abilian_db"
 
 services:
   - redis-server
@@ -29,9 +29,9 @@ install:
 
 # Create DB
 before_script:
-  - createuser -w -U postgres -DRS abilian
-  - psql -w -U postgres -c "ALTER USER abilian WITH ENCRYPTED PASSWORD 'abilian';"
-  - createdb -w -U postgres -E utf-8 -O abilian abilian
+  - createuser -w -U postgres -DRS abilian_user
+  - psql -w -U postgres -c "ALTER USER abilian_user WITH ENCRYPTED PASSWORD 'abilian_pw';"
+  - createdb -w -U postgres -E utf-8 -O abilian_user abilian_db
 
 # Run tests
 script:

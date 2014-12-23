@@ -10,7 +10,7 @@ Dans la communauté: {{ digest.community.name }}
 
   Nouveaux membres:
   {%- for user in digest.new_members %}
-    * {{ user }}{%- if user.contact %} ({{ user.contact.partenaire }}){%- endif %}
+    * {{ user }}
       ({{ url_for("social.user", user_id=user.id, _external=True) }})
   {%- endfor %}
 {%- endif %}

@@ -41,6 +41,8 @@ MAX_PREVIEW_SIZE = 1000
 def document_view(doc_id):
   doc = get_document(doc_id)
   check_read_access(doc)
+  doc.ensure_antivirus_scheduled()
+  db.session.commit()
 
   bc = breadcrumbs_for(doc)
   actions.context['object'] = doc
@@ -133,11 +135,22 @@ def document_download(doc_id):
   return response
 
 
+def preview_missing_image():
+  response = redirect(
+    url_for('static', filename='images/preview_missing.png'))
+  response.headers['Cache-Control'] = 'no-cache'
+  return response
+
+
 @route("/doc/<int:doc_id>/preview")
 def document_preview(doc_id):
   """Returns a preview (image) for the file given by its id."""
 
   doc = get_document(doc_id)
+
+  if not doc.antivirus_ok:
+    return preview_missing_image()
+
   size = int(request.args.get("size", 0))
 
   # Just in case
@@ -167,10 +180,7 @@ def document_preview(doc_id):
       image = ""
 
   if not image:
-    response = redirect(
-      url_for('static', filename='images/preview_missing.png'))
-    response.headers['Cache-Control'] = 'no-cache'
-    return response
+    return preview_missing_image()
 
   response = make_response(image)
   response.headers['content-type'] = content_type

@@ -16,6 +16,22 @@
 
     <hr>
 
+    {%- if doc.antivirus_required %}
+      <p class="small alert alert-warning">
+      <span class="fa-stack">
+        <i class="fa fa-search fa-stack-2x"></i>
+        <i class="fa fa-bug fa-stack-1x text-danger"></i>
+      </span>
+      {% trans %}Waiting for virus check...{% endtrans %}
+      </p>
+    {%-  elif not doc.antivirus_ok %}
+      <p class="alert alert-danger">
+        <i class="fa fa-exclamation-triangle"></i>
+        {%- trans %}Virus found. Access disabled.{%- endtrans %}
+      </p>
+    {%- endif %}
+
+
     <h2 style="margin-top: 0;">{{ doc.title }}</h2>
 
     {%- if doc.description %}
@@ -63,17 +79,6 @@
         </div>
       {%- endif %}
 
-      {#
-    <h3 class="main">{{ _('Tags') }}</h3>
-
-    <div>
-      <form action="/dm/{{ doc.id }}/tag" method="POST">
-        <input class="tagbox" name="tags" value="{{ doc.tags }}">
-        <input type="submit" class="btn-primary">
-      </form>
-    </div>
-    #}
-
       <h3 class="main collapsed" data-toggle="collapse"
           href="#doc_dates">{{ _('Dates') }}</h3>
 
@@ -108,49 +113,6 @@
 
     </div>
   {% endcall %}
-{% endblock %}
-
-{% block additional_left_stuff %}
-  <div class="well property-box"
-      style="padding: 8px 0; background-color: white;">
-    <ul class="nav nav-list">
-      <li class="nav-header">{{ _('Properties') }}</li>
-
-      <li>{{ _('File name') }}: {{ doc.title }}</li>
-      <li>{{ _('Size') }}: {{ doc.content_length|filesize }}</li>
-      <li>{{ _('Type') }}: {{ doc.content_type }}</li>
-      <li>{{ _('Language') }}: {{ doc.language }}</li>
-      <li>{{ _('Pages') }}: {{ doc.page_num }}</li>
-      <li>{{ _('Created') }}: {{ doc.created_at|age }}</li>
-      <li>{{ _('Modified') }}: {{ doc.updated_at|age }}</li>
-      <li>{{ _('Creator') }}: <a
-          href="{{ url_for("social.user", user_id=doc.creator.id) }}"><img
-          src="{{ url_for("images.user_avatar", user_id=doc.creator.id, s=16) }}"
-          alt="">
-        {{ doc.creator }}</a></li>
-      <li>{{ _('Owner') }}: <a
-          href="{{ url_for("social.user", user_id=doc.owner.id) }}"><img
-          src="{{ url_for("images.user_avatar", user_id=doc.owner.id, s=16) }}"
-          alt="">
-        {{ doc.owner }}</a></li>
-    </ul>
-  </div>
-
-  {#
-<div class="well property-box" style="padding: 8px 0; background-color: white;">
-  <ul class="nav nav-list">
-    <li class="nav-header">Tags</li>
-
-    <li>{% for tag in doc.tags.split(",") %}
-    <a href="/dm/tag?tag={{ tag }}">{{ tag }}</a>
-    &nbsp;&nbsp;
-    {% else %}
-    No tag.
-    {% endfor %}
-    </li>
-  </ul>
-</div>
-#}
 {% endblock %}
 
 {% block sidebar %}

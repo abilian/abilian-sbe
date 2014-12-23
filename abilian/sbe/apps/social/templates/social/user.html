@@ -11,7 +11,7 @@
             src="{{ url_for("images.user_avatar", user_id=user.id, s=140) }}"
             class="media-object avatar pull-left" alt=""/>
 
-      <span class="info col-xs-6">
+      <div class="info col-xs-6">
         <h2 class="title">{{ user.name }}
           {%- if can_edit %}
             <a class="btn btn-default"
@@ -34,63 +34,7 @@
           </div>
         {%- endif %}
 
-        {%- if contact.partenaire %}
-          <div class="row"><b class="col-xs-3">{{ _("Company") }}:</b><span
-              class="col-xs-8">
-              {%- if has_crm_access and user.contact and user.contact.partenaire_id %}
-                <a href="{{ url_for('partenaires.entity_view', entity_id=user.contact.partenaire_id) }}">{%- endif %}
-            {{ contact.partenaire.nom }}
-            {%- if has_crm_access %}</a>{%- endif %}
-          </span></div>
-        {%- endif %}
-
-        {%- if contact.titre %}
-          <div class="row"><b class="col-xs-3">{{ _("Job title:") }}</b><span
-              class="col-xs-8">{{ contact.titre }}</span></div>
-        {%- endif %}
-
-        {%- if contact.telephone %}
-          <div class="row"><b class="col-xs-3">Téléphone:</b><span
-              class="col-xs-8">{{ contact.telephone }}</span></div>
-        {%- endif %}
-
-        {%- if contact.adresse %}
-          <div class="row">
-            <b class="col-xs-3">Adresse:</b>
-            <span class="col-xs-8">{{ contact.adresse }}</span>
-            {%- if contact.code_postal %}
-            <span class="col-xs-offset-3 col-xs-8">{{ contact.code_postal }} {{ contact.ville }}</span>
-            {%- endif %}
-            {%- if contact.pays %}
-              <span class="col-xs-offset-3 col-xs-8">{{ contact.pays }}</span>
-            {%- endif %}
-          </div>
-        {%- endif %}
-        {%- if contact.fax %}
-          <div class="row"><b class="col-xs-3">Fax:</b><span
-              class="col-xs-8">{{ contact.fax }}</span></div>
-        {%- endif %}
-        {%- if contact.mobile %}
-          <div class="row"><b class="col-xs-3">Mobile:</b><span
-              class="col-xs-8">{{ contact.mobile }}</span></div>
-        {%- endif %}
-        {%- if contact.url %}
-          <div class="row"><b class="col-xs-3">url:</b><span
-              class="col-xs-8">{{ contact.url }}</span></div>
-        {%- endif %}
-
-        {#
-        {%- if g.user != user %}
-          <form action="." method="post" style="margin-top: 10px;">
-            {%- if g.user.is_following(user) %}
-              <button class="btn" name="action" value="unfollow">{{ _("Unfollow") }}</button>
-            {%- else %}
-              <button class="btn" name="action" value="follow">{{ _("Follow") }}</button>
-            {%- endif %}
-          </form>
-        {%- endif %}
-        #}
-      </span>
+      </div>
     </div>
   {% endcall %}
 
@@ -103,78 +47,6 @@
 
       <p>{{ view_form.communautes.view_widget.render_view(view_form.communautes)|safe }}</p>
     {%- endif %}
-
-    {%- if contact.presentation %}
-      <h2>{{ _('Presentation') }}</h2>
-      <p>{{ contact.presentation }}</p>
-    {%- elif can_edit %}
-      <h2>{{ _('Presentation') }}</h2>
-      <p class="muted">
-        {%- trans edit_url=url_for('.user_edit', user_id=user.id)+'#presentation'|safe %}
-          You haven't set yet your presentation.
-          <a href="{{ edit_url }}">Edit my profile</a>
-        {%- endtrans %}
-      </p>
-    {%- endif %}
-
-    {%- if contact.cursus %}
-      <h2>{{ _('Cursus') }}</h2>
-      <p>{{ contact.cursus }}</p>
-    {%- elif can_edit %}
-      <h2>{{ _('Cursus') }}</h2>
-      <p class="muted">
-        {%- trans edit_url=url_for('.user_edit', user_id=user.id)+'#cursus'|safe %}
-          You haven't set your cursus.
-          <a href="{{ edit_url }}">Edit my profile</a>
-        {%- endtrans %}
-      </p>
-    {%- endif %}
-
-    {%- if contact.expertise %}
-      <h2>{{ _('Expertise') }}</h2>
-      <p>{{ contact.expertise }}</p>
-    {%- elif can_edit %}
-      <h2>{{ _('Expertise') }}</h2>
-      <p class="muted">
-        {%- trans edit_url=url_for('.user_edit', user_id=user.id)+'#expertise'|safe %}
-          You haven't set your expertise.
-          <a href="{{ edit_url }}">Edit my profile</a>
-        {%- endtrans %}
-      </p>
-    {%- endif %}
-
-    {%- if contact.centres_interets %}
-      <h2>{{ _('Interests') }}</h2>
-      <p>{{ contact.centres_interets }}</p>
-    {%- elif can_edit %}
-      <h2>{{ _('Interests') }}</h2>
-      <p class="muted">
-        {%- trans edit_url=url_for('.user_edit', user_id=user.id)+'#centres_interets'|safe %}
-          You haven't set yet your interests.
-          <a href="{{ edit_url }}">Edit my profile</a>
-        {%- endtrans %}
-      </p>
-    {%- endif %}
-
-    {#
-    <h3>{{ _("Groups") }}</h3>
-
-    {%- if user.group %}
-      <p>{{ user.name }} {{ _("is member of the following groups:") }}</p>
-      <ul class="property-list" style="padding-left: 0;">
-        {%- for group in user.groups %}
-          <li>
-            <a href="{{ url_for(".group_home", group_id=group.id) }}">
-              <img class="avatar"
-                   src="{{ url_for(".group_mugshot", group_id=group.id, s=45) }}" class="">
-                   {{ group.name }}</a> ({{ group.members|count }} members)
-          </li>
-        {%- endfor %}
-      </ul>
-    {%- else %}
-      <p>{{ user.name }} {{ _("isn't member of any group.") }}</p>
-    {%- endif %}
-    #}
 
     <h2>{{ _("Stats") }}</h2>
 

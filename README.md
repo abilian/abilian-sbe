@@ -58,9 +58,9 @@ Install [tox](http://pypi.python.org/pypi/tox). Run `tox -e ALL`.
 
 - `py27`: uses in-memory sqlite
 
-- `py27_postgres`: uses local postgresql server (you need to first create
-  a database: `extranet_spr_test` with user/password: `extranet_spr_test` /
-  `test_pw`)
+- `py27_postgres`: uses local postgresql server (you need to first create a
+  database, and user/password; tox uses environment variables `POSTGRES_HOST`,
+  `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`)
 
 On a VM
 -------
@@ -94,7 +94,7 @@ Assuming you deploying to an Ubuntu Precise Pangolin (12.04 LTS) server:
 Running with gunicorn
 ---------------------
 
-gunicorn 'extranet_spr:gunicorn_app(config_file="/path/to/config/file.ini")'
+gunicorn abilian.sbe.app.create_app()'
 
 Build Status
 ============

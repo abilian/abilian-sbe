@@ -15,13 +15,12 @@ from flask import (
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import or_, and_, func, asc, desc, nullslast
 
-from abilian.i18n import _
+from abilian.i18n import _, _l
 from abilian.core.models.subjects import User
 from abilian.core.extensions import db, get_extension
 from abilian.services.image import crop_and_resize
 from abilian.web import url_for
-from abilian.web.views import default_view
-from abilian.web.decorators import templated
+from abilian.web.views import default_view, ObjectEdit
 from abilian.web.filters import age
 
 from abilian.sbe.apps.communities.models import Membership
@@ -62,7 +61,6 @@ def users():
   return render_template("social/users.html", **ctx)
 
 
-# FIXME: Contact and Partenaire are not in the SBE package !
 @social.route("/users/dt_json")
 def users_dt_json():
   """JSON call to fill a DataTable. Needs some refactoring."""
@@ -80,21 +78,12 @@ def users_dt_json():
   q = User.query
   total_count = q.count()
 
-  q = q.options(
-      sa.orm.joinedload(User.contact),
-      sa.orm.noload(User.contact, Contact.communautes),
-      sa.orm.joinedload(User.contact, Contact.partenaire),
-  )
-
   if search:
     # TODO: gérer les accents
     filter = or_(func.lower(User.first_name).like("%" + search + "%"),
-                 func.lower(User.last_name).like("%" + search + "%"),
-                 func.lower(Partenaire.nom).like("%" + search + "%"))
-    q = q.join(User.contact).\
-          join(Contact.partenaire).\
-          filter(filter).\
-          reset_joinpoint()
+                 func.lower(User.last_name).like("%" + search + "%"),)
+    q = q.filter(filter)\
+         .reset_joinpoint()
 
   count = q.count()
   SORT_COLS = {
@@ -124,16 +113,11 @@ def users_dt_json():
     user_url = url_for(".user", user_id=user.id)
     mugshot = url_for(".user_mugshot", user_id=user.id, s=MUGSHOT_SIZE)
     name = escape(getattr(user, "name") or "")
-    contact = user.contact
-    job_title = escape((getattr(contact, "titre") if contact else None) or "")
-    company = escape((getattr(contact.partenaire, "nom")
-                     if contact and contact.partenaire else None)
-                     or "")
 
     cell0 = (u'<a href="{url}"><img src="{src}" width="{size}" height="{size}">'
              '</a>'.format(url=user_url, src=mugshot, size=MUGSHOT_SIZE))
-    cell1 = u'<div class="info"><a href="{user_url}">{name}</a> ' \
-            '- {company} <p>{job_title}</p></div>'.format(**locals())
+    cell1 = (u'<div class="info"><a href="{user_url}">{name}</a> '
+             u'</div>'.format(**locals()))
     cell2 = age(user.created_at)
     cell3 = age(user.last_active)
 
@@ -178,43 +162,6 @@ def user(user_id):
   env.activity_entries = entries
 
   return render_template("social/user.html", **env)
-
-
-# Older code is here.
-
-#@social.route("/users/<int:user_id>")
-#def user(user_id):
-#  #user = User.query.options(
-#  #  sa.orm.joinedload(User.contact),
-#  #  sa.orm.lazyload('contact.communautes'),
-#  #  ).get(user_id)
-#  #contact = user.contact
-#  #view_form = UserProfileViewForm(obj=contact)
-#  #user = User.query.get(user_id)
-#  #contact = user.contact
-#  #view_form = UserProfileViewForm(obj=contact)
-#  security = current_app.services['security']
-#
-#  communautes = [m.community for m in user.communautes_membership]
-#  if g.user != user and (not security.has_role(g.user, 'manager')):
-#    # filter visible communautes (ticket 165)
-#    communautes = [c for c in communautes if c.has_member(g.user)]
-#
-#  view_form.communautes._set_data(communautes)
-#
-#  env = Env(user=user,
-#            contact=contact,
-#            view_form=view_form,
-#            can_edit=can_edit(user),
-#            tabs=make_tabs(user))
-#
-#  env.has_crm_access = security.has_role(g.user, "crm:user")
-#
-#  entries = get_recent_entries(user=user)
-#  entries = ActivityEntryPresenter.wrap_collection(entries)
-#  env.activity_entries = entries
-#
-#  return render_template("social/user.html", **env)
 
 
 @social.route("/users/<int:user_id>/mugshot")
@@ -274,6 +221,35 @@ def can_edit(user):
   #
   #return (has_contact and
   #        ((user == g.user) or security.has_role(g.user, 'admin')))
+
+
+class UserProfileEdit(ObjectEdit):
+
+  Model = User
+  Form = UserProfileForm
+  pk = 'user_id'
+  _message_success = _l(u'Profile edited')
+
+  def view_url(self):
+    return url_for('.user', user_id=self.user.id)
+
+  def edit(self):
+    if not can_edit(self.user):
+      return Response(status=403)
+    return super(UserProfileEdit, self).edit()
+
+  def handle_commit_exception(self, exc):
+    db.session.rollback()
+    if isinstance(exc, sa.exc.IntegrityError):
+      log_msg = 'Error saving user profile'
+    else:
+      log_msg = 'Unexpected error while saving user profile'
+    logger.error(log_msg, exc_info=True, extra={'stack': True})
+    flash(_(u'Error occured'), "error")
+    return self.redirect_to_view()
+
+
+social.route("/users/<int:user_id>/edit")(UserProfileEdit.as_view('user_edit'))
 
 
 

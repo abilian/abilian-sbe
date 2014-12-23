@@ -7,15 +7,6 @@
   {% call m_box(_("User directory")) %}
 
   <form style="margin-bottom: 0;" method="POST">
-    {# TODO: better-looking design.
-      <div class="btn-toolbar" style="margin-bottom: 0;">
-        <div class="btn-group pull-right">
-          <input id="filter" type="text" placeholder="Filter...">
-        </div>
-      </div>
-
-      <hr style="margin: 10px 0 10px 0;"/>
-       #}
 
     <table class="table table-striped table-condensed" id="users-table">
       <thead>
@@ -41,7 +32,6 @@
         <td class="identity">
           <div class="info">
             <a href="{{ url_for(".user", user_id=user.id) }}">{{ user.name }}</a>
-            <p>{{ user.contact.titre }}</p>
           </div>
         </td>
 

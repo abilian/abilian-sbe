@@ -166,17 +166,24 @@ _actions = (
   # Document actions ##########
   # download "inline"
   DocumentAction(
-    'documents:content', 'download', _l(u'View in browser'),
-    icon='eye-open',
-    url=lambda ctx: url_for('.document_download', doc_id=ctx['object'].id),
-    condition=(lambda ctx: ctx['object'].content_type in
-               ('text/html', 'text/plain', 'application/pdf'))),
+      'documents:content', 'download', _l(u'View in browser'),
+      icon='eye-open',
+      url=lambda ctx: url_for('.document_download', doc_id=ctx['object'].id),
+      condition=(
+          lambda ctx:
+          ctx['object'].antivirus_ok
+          and ctx['object'].content_type in ('text/html',
+                                             'text/plain',
+                                             'application/pdf'))
+  ),
   # download "attached"
   DocumentAction(
-    'documents:content', 'download_attachment', _l(u'Download'),
-    icon='download',
-    url=lambda ctx: url_for('.document_download', doc_id=ctx['object'].id,
-                            attach=True)),
+      'documents:content', 'download_attachment', _l(u'Download'),
+      icon='download',
+      url=lambda ctx: url_for('.document_download', doc_id=ctx['object'].id,
+                              attach=True),
+      condition=(lambda ctx: ctx['object'].antivirus_ok),
+  ),
   # edit
   DocumentModalAction(
     'documents:content', 'edit', _l(u'Edit'),
@@ -184,25 +191,27 @@ _actions = (
     permission='write'),
   # upload-new
   DocumentModalAction(
-    'documents:content', 'upload', _l(u'Upload new version'),
-    icon='upload', url='#modal-upload-new-version',
-    permission='write'),
+      'documents:content', 'upload', _l(u'Upload new version'),
+      icon='upload', url='#modal-upload-new-version',
+      permission='write'),
   # send by email
   DocumentModalAction(
-    'documents:content', 'send_by_email', _l(u'Send by email'),
-    icon='envelope', url='#modal-send-by-email',
-    permission='write'),
+      'documents:content', 'send_by_email', _l(u'Send by email'),
+      icon='envelope', url='#modal-send-by-email',
+      condition=lambda ctx: ctx['object'].antivirus_ok,
+      permission='write'),
   # delete
   DocumentModalAction(
-    'documents:content', 'delete', _l(u'Delete'),
-    icon='trash', url='#modal-delete',
-    permission='write'),
+      'documents:content', 'delete', _l(u'Delete'),
+      icon='trash', url='#modal-delete',
+      permission='write'),
   # refresh preview
   DocumentAction(
-    'documents:content', 'refresh_preview', _l(u'Refresh preview'),
-    icon='refresh',
-    url=lambda ctx: url_for('.refresh_preview', doc_id=ctx['object'].id),
-    permission='manage',),
+      'documents:content', 'refresh_preview', _l(u'Refresh preview'),
+      icon='refresh',
+      url=lambda ctx: url_for('.refresh_preview', doc_id=ctx['object'].id),
+      condition=lambda ctx: ctx['object'].antivirus_ok,
+      permission='manage',),
   )
 
 

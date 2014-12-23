@@ -23,13 +23,12 @@ from flask import (redirect, request, make_response, flash,
 
 import sqlalchemy as sa
 from sqlalchemy import func
-from sqlalchemy import orm
 
 from abilian.i18n import _, _n
 from abilian.core.models.subjects import User, Group
 from abilian.core.extensions import db
 from abilian.core.signals import activity
-from abilian.services.security import security
+from abilian.services.security import security, Role
 from abilian.web.action import actions
 from abilian.web.views import default_view
 
@@ -332,7 +331,6 @@ def permissions_export(folder_id):
     (u'Identifiant', 40),
     (u'Prénom', 14),
     (u'Nom', 20),
-    (u'Partenaire', 20),
     (u'Rôle', None),
     (u'Local', None),
     (u'Héritage', None),
@@ -374,6 +372,8 @@ def permissions_export(folder_id):
     ws.row(r + row_offset).level = 1
 
     for c, value in enumerate(row):
+      if isinstance(value, Role):
+        value = unicode(value)
       ws.write(r + row_offset, c, value)
 
     # data grouping exit
@@ -429,29 +429,16 @@ def iter_permissions(folder, user):
       item_key.append(principal.name)
     return item_key
 
-  emails = set(p[0].email for p in result if isinstance(p[0], User))
-  contacts = Contact.query.filter(Contact.email.in_(emails))
-  contacts = contacts.options(orm.joinedload('partenaire'))
-  contacts = dict((c.email, c.partenaire) for c in contacts)
-
   for (p, role), data in sorted(result.items(), key=_sort_key):
     is_user = isinstance(p, User)
     has_access = False if is_user else '*'
     identifier = p.email if is_user else u'* Group *'
     first_name = p.first_name if is_user else u'-'
     last_name = p.last_name if is_user else p.name
-    partenaire = u'-'
-    if is_user:
-      has_access = repository.has_access(p, folder)
-      try:
-        partenaire = contacts.get(p.email)
-        partenaire = partenaire.name if partenaire is not None else u'?'
-      except (orm.exc.NoResultFound, orm.exc.MultipleResultsFound):
-        partenaire = u'?'
     local = data['local']
     inherit = data['inherit']
 
-    yield (has_access, identifier, first_name, last_name, partenaire, role,
+    yield (has_access, identifier, first_name, last_name, role,
            local, inherit, community)
 
   subfolders = (f for f in folder.subfolders
