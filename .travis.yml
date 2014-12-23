@@ -34,7 +34,8 @@ before_script:
 # Run tests
 script:
   - py.test --tb=short -q --cov abilian --cov-config etc/coverage.rc abilian tests
-  - sphinx-build -W -b html docs/ docs/_build/
+  # There are no docs yet!
+  #- sphinx-build -W -b html docs/ docs/_build/
 
 # Report coverage
 after_success:
