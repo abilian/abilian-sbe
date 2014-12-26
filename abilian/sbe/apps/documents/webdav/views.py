@@ -26,7 +26,7 @@ __all__ = ['webdav']
 # TODO: real logging
 class Logger(object):
   def debug(self, msg):
-    print msg
+    print(msg)
 
 log = Logger()
 
@@ -91,7 +91,7 @@ def options(path):
              'DAV': '1,2',
              'MS-Author-Via': 'DAV',
              'Allow': OPTIONS}
-  print "Returning", headers
+  print("Returning", headers)
   return "", HTTP_OK, headers
 
 
@@ -207,8 +207,8 @@ def propfind(path):
   path = normpath(path)
   depth = request.headers.get('depth', "1")
 
-  print request.headers
-  print request.data
+  print(request.headers)
+  print(request.data)
 
   try:
     propfind = Propfind(request.data)
@@ -224,7 +224,7 @@ def propfind(path):
     for child in obj.children:
       m.add_response_for(request.url + "/" + child.name, child, DAV_PROPS)
 
-  print m.to_string()
+  print(m.to_string())
 
   headers = {'Content-Type': 'text/xml'}
   return m.to_string(), HTTP_MULTI_STATUS, headers

@@ -35,4 +35,4 @@ def antivirus():
       tasks.antivirus_scan.delay(d.id)
       count += 1
 
-  print '{count}/{total} documents scheduled'.format(count=count, total=total)
+  print('{count}/{total} documents scheduled'.format(count=count, total=total))

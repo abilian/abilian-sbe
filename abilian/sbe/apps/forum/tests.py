@@ -71,9 +71,9 @@ class ViewTestCase(CommunityBaseTestCase):
   def test_posts_ordering(self):
     thread = Thread(community=self.community, title=u'test ordering')
     self.session.add(thread)
-    t1 = datetime(2014, 06, 20, 15, 00, 00)
+    t1 = datetime(2014, 6, 20, 15, 0, 0)
     p1 = Post(thread=thread, body_html=u'post 1', created_at=t1)
-    t2 = datetime(2014, 06, 20, 15, 01, 00)
+    t2 = datetime(2014, 6, 20, 15, 1, 0)
     p2 = Post(thread=thread, body_html=u'post 2', created_at=t2)
     self.session.flush()
     p1_id, p2_id = p1.id, p2.id
