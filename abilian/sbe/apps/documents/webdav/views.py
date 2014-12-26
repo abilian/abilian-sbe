@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import uuid
 import os.path
 
@@ -39,7 +41,7 @@ def log_request():
     print('')
     print(78 * '#')
     print(litmus_msg)
-    print('%s on %s' % (request.method, request.path))
+    print('{} on {}'.format(request.method, request.path))
 
 
 @webdav.before_request
@@ -50,7 +52,7 @@ def only_admin():
 
 @webdav.after_request
 def log_response(response):
-  print('Response: %s' % response)
+  print('Response: {}'.format(response))
   return response
 
 

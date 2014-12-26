@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from flask import make_response, request, Blueprint, render_template, \
     Response
 from sqlalchemy.orm.exc import NoResultFound

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 from abilian.web import url_for
 from abilian.sbe.testing import BaseTestCase
 
