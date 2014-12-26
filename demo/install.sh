@@ -14,7 +14,7 @@ fi
 pip install 'setuptools>=0.8'
 
 echo "Installing Abilian SBE and dependencies"
-pip install -r ../etc/deps.txt
+pip install -r ../requirements.txt
 pip install -e ..
 
 # create config & instance dirs
