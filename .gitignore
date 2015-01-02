@@ -58,4 +58,5 @@ demo/man/
 demo/src/
 demo/var/
 demo/local/
+
 /tests.functional.test/

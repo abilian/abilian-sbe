@@ -52,17 +52,34 @@ test-with-coverage:
 test-long:
 	RUN_SLOW_TESTS=True py.test -x $(SRC) tests
 
-pytest-pep8:
-	py.test --pep8 -m pep8 $(SRC) tests
-
-pytest-flakes:
-	py.test --flakes -m flakes $(SRC) # tests
-
 vagrant-tests:
 	vagrant up
 	vagrant ssh -c /vagrant/deploy/vagrant_test.sh
 	# We could also do this:
 	#vagrant ssh -c 'cp -a /vagrant src && cd src && tox'
+
+#
+# Linting
+#
+lint: lint-js lint-python
+
+lint-js:
+	@echo "--> Linting JavaScript files"
+	@jshint ./abilian/sbe/apps/
+
+lint-python:
+	@echo "--> Linting Python files"
+	@make pytest-pep8
+	@make pytest-flakes
+
+pytest-pep8:
+	@echo "--> Checking PEP8 conformance"
+	py.test --pep8 -m pep8 $(SRC) tests
+
+pytest-flakes:
+	@echo "--> Other static checks"
+	py.test --flakes -m flakes $(SRC) # tests
+
 
 #
 # Everything else
