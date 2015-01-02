@@ -1,12 +1,9 @@
 - repo: git://github.com/pre-commit/pre-commit-hooks
+  sha: 7ec485352199e02d608198b0206b0675fa84af73
   hooks:
   - id: trailing-whitespace
     files: \.(py|sh|yaml|txt)$
-  - id: pyflakes
+  - id: flake8
     files: \.py$
   - id: debug-statements
     files: \.py$
-  - id: name-tests-test
-    files: tests/.+\.py$
-  - id: check-json
-  - id: check-yaml
