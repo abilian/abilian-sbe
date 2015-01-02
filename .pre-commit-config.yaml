@@ -1,0 +1,12 @@
+- repo: git://github.com/pre-commit/pre-commit-hooks
+  hooks:
+  - id: trailing-whitespace
+    files: \.(py|sh|yaml|txt)$
+  - id: pyflakes
+    files: \.py$
+  - id: debug-statements
+    files: \.py$
+  - id: name-tests-test
+    files: tests/.+\.py$
+  - id: check-json
+  - id: check-yaml
