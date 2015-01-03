@@ -43,7 +43,7 @@ class TestService(BaseTestCase):
 
     self.repository.move_object(doc, folder, u"newdoc")
     assert doc in folder.children
-    assert not doc in root.children
+    assert doc not in root.children
     assert len(root.children) == 1
     assert len(folder.children) == 1
     assert doc.title == "newdoc"

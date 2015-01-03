@@ -32,7 +32,8 @@ from abilian.core.models.blob import Blob
 from abilian.core.entities import db, Entity
 from abilian.core.extensions import celery
 from abilian.services.conversion import converter
-from abilian.services.security import InheritSecurity, security, Anonymous, Admin
+from abilian.services.security import InheritSecurity, security, Anonymous, \
+    Admin
 from abilian.services.indexing import indexable_role
 
 from . import tasks
@@ -43,33 +44,39 @@ logger = logging.getLogger(__package__)
 __all__ = ['db', 'Folder', 'Document', 'BaseContent', 'icon_for']
 
 #: A Whoosh analyzer that folds accents and case.
-accent_folder = RegexTokenizer() | LowercaseFilter() | CharsetFilter(accent_map)
+accent_folder = (RegexTokenizer() | LowercaseFilter()
+                 | CharsetFilter(accent_map))
 
-ICONS_FOLDER = pkg_resources.resource_filename('abilian.sbe', 'static/fileicons')
+ICONS_FOLDER = pkg_resources.resource_filename('abilian.sbe',
+                                               'static/fileicons')
+
 
 def icon_url(filename):
   return url_for('abilian_sbe_static', filename='fileicons/' + filename)
+
 
 def icon_exists(filename):
   fullpath = os.path.join(ICONS_FOLDER, filename)
   return os.path.isfile(fullpath)
 
+
 #
 # Domain classes
 #
-
-_whoosh_community_id =('community_id',
-                       wf.NUMERIC(numtype=int, bits=64, signed=False,
-                                  stored=True, unique=False),)
+_whoosh_community_id = ('community_id',
+                        wf.NUMERIC(numtype=int, bits=64, signed=False,
+                                   stored=True, unique=False),)
 _whoosh_community_slug_field = ('community_slug', wf.ID(stored=True),)
+
 
 class CmisObject(Entity, InheritSecurity):
   """
   (Abstract) Base class for CMIS objects.
   """
-  is_community_content = True # normally set by
-                              #communities.models.community_content, but we have
-                              #to fix a circ.dep to use it
+  # normally set by communities.models.community_content,
+  # but we have to fix a circ.dep to use it
+  is_community_content = True
+
   __tablename__ = 'cmisobject'
   __indexable__ = False
   __indexation_args__ = {}
@@ -83,11 +90,11 @@ class CmisObject(Entity, InheritSecurity):
 
   _title = Column('title', UnicodeText, nullable=False, default=u"")
   description = Column(UnicodeText, nullable=False, default=u"",
-                       info=SEARCHABLE|dict(index_to=('description', 'text')))
+                       info=SEARCHABLE | dict(index_to=('description', 'text')))
 
   _parent_id = Column(Integer, ForeignKey('cmisobject.id'), nullable=True)
 
-   # no duplicate name in same folder
+  # no duplicate name in same folder
   __table_args__ = (UniqueConstraint('_parent_id', 'title'),)
 
   # Set in concrete classes
@@ -109,7 +116,7 @@ class CmisObject(Entity, InheritSecurity):
 
     Entity.__init__(self, *args, **kwargs)
 
-  # title is defined has an hybrid property to allow name <-> title sync (2 way)
+  # title is defined has an hybrid property to allow 2 way sync name <-> title
   @hybrid_property
   def title(self):
     return self._title
@@ -128,7 +135,7 @@ class CmisObject(Entity, InheritSecurity):
     new_obj = self.__class__(title=title, name=title, parent=parent)
     state = vars(self)
     for k, v in state.items():
-      if not k.startswith("_") and not k in ['uid', 'id', 'parent', 'title',
+      if not k.startswith("_") and k not in ['uid', 'id', 'parent', 'title',
                                              'name', 'path', 'subfolders',
                                              'documents']:
         setattr(new_obj, k, v)
@@ -218,7 +225,7 @@ class PathAndSecurityIndexable(object):
     for obj in iter_from_root:
       if obj.inherit_security:
         continue
-      obj_allowed =  set(o[0] for o in security.get_role_assignements(obj))
+      obj_allowed = set(o[0] for o in security.get_role_assignements(obj))
 
       if Anonymous in obj_allowed:
         continue
@@ -275,7 +282,6 @@ class Folder(CmisObject, PathAndSecurityIndexable):
   def icon(self):
    return icon_url('folder.png')
 
-
   @property
   def children(self):
     return self.subfolders + self.documents
@@ -325,8 +331,7 @@ class Folder(CmisObject, PathAndSecurityIndexable):
     return "<%s.%s id=%s name=%s path=%s at 0x%x>" % (
       self.__class__.__module__, self.__class__.__name__,
       repr(self.id), repr(self.title), repr(self.path),
-      id(self),
-      )
+      id(self))
 
   #
   # Security related methods
@@ -343,9 +348,9 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
   def get_local_roles_assignments(self):
     local_roles_assignments = security.get_role_assignements(self)
-    #local_roles_assignments = sorted(local_roles_assignments,
-    #                                 key=lambda u: (u[0].last_name.lower(),
-    #                                                u[0].first_name.lower()))
+    # local_roles_assignments = sorted(local_roles_assignments,
+    #                                  key=lambda u: (u[0].last_name.lower(),
+    #                                                 u[0].first_name.lower()))
     return local_roles_assignments
 
   def get_inherited_roles_assignments(self):
@@ -429,7 +434,6 @@ class BaseContent(CmisObject):
     self.content_blob.value = value
     self.content_length = len(value)
 
-
   def set_content(self, content, content_type=None):
     new_digest = hashlib.md5(content).hexdigest()
     if new_digest == self.content_digest:
@@ -459,8 +463,6 @@ class BaseContent(CmisObject):
 
     return content_type
 
-
-
   @property
   def icon(self):
     icon = icon_for(self.content_type)
@@ -470,7 +472,7 @@ class BaseContent(CmisObject):
 
     # Try harder, just in case. XXX: Could be probably removed later when we are
     # sure that all our bases are covered.
-    if not "." in self.title:
+    if "." not in self.title:
       return icon_url('bin.png')
 
     suffix = self.title.split(".")[-1]
@@ -544,7 +546,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
   sbe_type = 'cmis:document'
 
-  meta = True # for now
+  meta = True  # for now
   sharing = True
 
   # antivirus status
@@ -601,8 +603,6 @@ class Document(BaseContent, PathAndSecurityIndexable):
       return self.antivirus_status is True
 
     return self.antivirus_status is not False
-
-
 
   # R/W properties
   @BaseContent.content.setter
@@ -691,8 +691,8 @@ def async_conversion(document):
 
 
 def _trigger_conversion_tasks(session):
-  if (session is not db.session() # this commit is not from the application session
-    or session.transaction.nested): # inside a sub-transaction: not yet written in DB
+  if (session is not db.session()  # this commit is not from the application session
+      or session.transaction.nested):  # inside a sub-transaction: not yet written in DB
     return
 
   document_queue = _get_documents_queue()
@@ -700,6 +700,7 @@ def _trigger_conversion_tasks(session):
     doc, task_id = document_queue.pop()
     if doc.id:
       tasks.process_document.apply_async((doc.id,), task_id=task_id)
+
 
 def setup_listener():
   mark_attr = '__abilian_sa_listening'
