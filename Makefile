@@ -10,6 +10,22 @@ INSTANCE_FOLDER=$(shell 												\
 
 default: test
 
+
+#
+#
+#
+develop: setup-git
+	@echo "--> Installing dependencies"
+	pip install -U setuptools
+	pip install -e .
+
+setup-git:
+	@echo "--> Configuring git and installing hooks"
+	git config branch.autosetuprebase always
+	cd .git/hooks && ln -sf ../../tools/hooks/* ./
+	@echo ""
+
+
 #
 # testing
 #
