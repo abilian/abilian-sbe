@@ -4,7 +4,7 @@ python:
 
 env:
   - SQLALCHEMY_DATABASE_URI="sqlite://"
-  - SQLALCHEMY_DATABASE_URI="postgres://abilian_user:abilian_pw@localhost:5432/abilian_db"
+  - SQLALCHEMY_DATABASE_URI="postgres://postgres@localhost/abilian_sbe"
 
 services:
   - redis-server
@@ -33,16 +33,14 @@ install:
 
 # Create DB
 before_script:
-  - createuser -w -U postgres -DRS abilian_user
-  - psql -w -U postgres -c "ALTER USER abilian_user WITH ENCRYPTED PASSWORD 'abilian_pw';"
-  - createdb -w -U postgres -E utf-8 -O abilian_user abilian_db
+  - createdb -w -U postgres -E utf-8 abilian_sbe
 
 # Run tests
 script:
-  - py.test --tb=short -q --cov abilian --cov-config etc/coverage.rc abilian tests
+  - py.test --tb=short -q --cov abilian abilian tests
   # There are no docs yet!
   #- sphinx-build -W -b html docs/ docs/_build/
 
 # Report coverage
 after_success:
-  - coveralls --rcfile=etc/coverage.rc
+  - coveralls
