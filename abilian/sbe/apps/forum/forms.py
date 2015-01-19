@@ -37,10 +37,10 @@ ALLOWED_TAGS = [
     'img',
 ]
 ALLOWED_ATTRIBUTES = {
-    'a': {'href': True, 'title': True},
-    'abbr': {'title': True},
-    'acronym': {'title': True},
-    'img': {'src': True},
+    'a': ['href', 'title'],
+    'abbr': ['title'],
+    'acronym': ['title'],
+    'img': ['src'],
 }
 
 WIDGET_ALLOWED = {attr: ALLOWED_ATTRIBUTES.get(attr, True)
