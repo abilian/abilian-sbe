@@ -43,8 +43,14 @@ ALLOWED_ATTRIBUTES = {
     'img': ['src'],
 }
 
-WIDGET_ALLOWED = {attr: ALLOWED_ATTRIBUTES.get(attr, True)
-                  for attr in ALLOWED_TAGS}
+WIDGET_ALLOWED = {}
+for attr in ALLOWED_TAGS:
+  allowed = ALLOWED_ATTRIBUTES.get(attr, True)
+  if not isinstance(allowed, bool):
+    allowed = {tag: True for tag in allowed}
+  WIDGET_ALLOWED[attr] = allowed
+
+
 
 class ThreadForm(Form):
   title = StringField(label=_l(u"Title"),
