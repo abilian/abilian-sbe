@@ -10,14 +10,17 @@ from wtforms.validators import ValidationError, required
 from abilian.web.forms import Form
 from abilian.web.forms.fields import Select2Field, FileField
 from abilian.web.forms.widgets import TextArea, ImageInput, BooleanWidget
+from abilian.web.forms.validators import length
 
 from .models import Community
 
 
 class CommunityForm(Form):
   name = TextField(label=_l(u"Name"), validators=[required()])
-  description = TextAreaField(label=_l(u"Description"), validators=[required()],
-                              widget=TextArea(resizeable="vertical"))
+  description = TextAreaField(
+      label=_l(u"Description"),
+      validators=[required(), length(max=500)],
+      widget=TextArea(resizeable="vertical"),)
 
   image = FileField(label=_l('Image'), widget=ImageInput(width=65, height=65),
                     allow_delete=False)
