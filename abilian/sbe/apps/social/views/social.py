@@ -69,4 +69,4 @@ def share():
 # legacy views
 @route("/users/<int:id>/mugshot")
 def mugshot(id):
-  return user_avatar(id)
+  return user_avatar(user_id=id)
