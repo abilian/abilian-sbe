@@ -23,7 +23,7 @@
               <tr>
                 <td class="avatar">
                   <a href="{{ url_for(community) }}">
-                    <img src="{{ url_for(".image", community_id=community.slug, s=65) }}" />
+                    <img src="{{ community_image_url(community, s=65) }}" />
                   </a>
                 </td>
                 <td>

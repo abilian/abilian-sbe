@@ -3,7 +3,7 @@
 
 {% block header %}
     <h1 style="margin: 0px;">
-      <img src="{{ url_for("communities.image", community_id=g.community.slug, s=55) }}" />
+      <img src="{{ community_image_url(g.community, s=55) }}" />
       {{ _("Community") }}: {{ g.community.name }}
     </h1>
     {%- set tabs = actions.for_category('communities:tabs') %}

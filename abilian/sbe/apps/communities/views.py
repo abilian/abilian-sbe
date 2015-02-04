@@ -1,21 +1,24 @@
 # coding=utf-8
-from cStringIO import StringIO
-from os.path import dirname, join
-from PIL import Image
+"""
+"""
+from __future__ import absolute_import
+
+import hashlib
 from functools import wraps
+from pathlib import Path
 
 from whoosh.searching import Hit
 
+from werkzeug.exceptions import NotFound
 from flask import (
     render_template, g, redirect, url_for, abort,
-    request, make_response, current_app, session,
+    request, current_app, session,
 )
 from flask.ext.login import current_user
 
 from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.core.models.subjects import User
-from abilian.services.image import crop_and_resize
 from abilian.web import csrf, nav, views
 from abilian.i18n import _, _l
 
@@ -35,6 +38,13 @@ communities = Blueprint("communities", __name__,
 route = communities.route
 add_url = communities.add_url_rule
 communities.record_once(register_actions)
+
+@communities.record_once
+def register_context_processors(state):
+  @state.app.context_processor
+  def communities_context_processor():
+    # helper to get an url for community image
+    return dict(community_image_url=image_url)
 
 
 def tab(tab_name):
@@ -139,7 +149,7 @@ class BaseCommunityView(object):
     image = self.obj.image
     kwargs = dict()
     if image and 'community' in g:
-      setattr(image, 'url', url_for('.image', community_id=g.community.slug))
+      setattr(image, 'url', image_url(g.community))
       kwargs['image'] = image
 
     return kwargs
@@ -210,33 +220,43 @@ add_url("/<string:community_id>/destroy",
           'delete',
           message_success=_l(u"Community destroyed.")))
 
+## Community Image
+_DEFAULT_IMAGE = Path(__file__).parent / u'data' / u'community.png'
+_DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open('rb').read()).hexdigest()
+route('/_default_image')(
+  views.images.StaticImageView.as_view('community_default_image',
+                                       image=_DEFAULT_IMAGE,
+                                       md5=_DEFAULT_IMAGE_MD5)
+)
 
-@route("/<string:community_id>/image")
-def image():
-  size = int(request.args.get('s', 55))
-  if size > 500:
-    raise ValueError("Error, size = %d" % size)
-  community = g.community
+class CommunityImageView(views.images.BlobView):
+  id_arg = 'blob_id'
 
-  if not community:
-    abort(404)
+  def prepare_args(self, args, kwargs):
+    community = g.community
+    if not community:
+      raise NotFound()
 
-  if community.image:
-    data = community.image.value
-  else:
-    data = open(join(dirname(__file__), "data", "community.png")).read()
+    kwargs[self.id_arg] = community.image.id
+     #image = open(join(dirname(__file__), "data", "community.png"), 'rb')
+    return super(CommunityImageView, self).prepare_args(args, kwargs)
 
-  if size:
-    data = crop_and_resize(data, size)
 
-  format = Image.open(StringIO(data)).format
+image = CommunityImageView.as_view('image', max_size=500, set_expire=True)
+route("/<string:community_id>/image")(image)
 
-  response = make_response(data)
-  if format == 'PNG':
-    response.headers['content-type'] = 'image/png'
-  else:
-    response.headers['content-type'] = 'image/jpeg'
-  return response
+
+def image_url(community, **kwargs):
+  """
+  return proper URL for image url
+  """
+  if not community or not community.image:
+    kwargs['md5'] = _DEFAULT_IMAGE_MD5
+    return url_for('.community_default_image', **kwargs)
+
+  kwargs['community_id'] = community.slug
+  kwargs['md5'] = community.image.md5
+  return url_for('communities.image', **kwargs)
 
 
 @route("/<string:community_id>/members")
