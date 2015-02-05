@@ -20,6 +20,7 @@ from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.core.models.subjects import User
 from abilian.web import csrf, nav, views
+from abilian.web.views import images as image_views
 from abilian.i18n import _, _l
 
 from abilian.sbe.apps.documents.models import Document
@@ -224,12 +225,13 @@ add_url("/<string:community_id>/destroy",
 _DEFAULT_IMAGE = Path(__file__).parent / u'data' / u'community.png'
 _DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open('rb').read()).hexdigest()
 route('/_default_image')(
-  views.images.StaticImageView.as_view('community_default_image',
-                                       image=_DEFAULT_IMAGE,
-                                       md5=_DEFAULT_IMAGE_MD5)
+  image_views.StaticImageView.as_view('community_default_image',
+                                      set_expire=True,
+                                      image=_DEFAULT_IMAGE,
+                                      md5=_DEFAULT_IMAGE_MD5)
 )
 
-class CommunityImageView(views.images.BlobView):
+class CommunityImageView(image_views.BlobView):
   id_arg = 'blob_id'
 
   def prepare_args(self, args, kwargs):
