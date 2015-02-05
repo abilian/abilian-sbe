@@ -80,7 +80,7 @@
             <td>
               <a href="{{ url_for("social.user", user_id=obj.owner.id) }}"><img
                   alt=""
-                  src="{{ url_for("images.user_avatar", user_id=obj.owner.id, s=20) }}"
+                  src="{{ user_photo_url(obj.owner, size=20) }}"
                   style="vertical-align: middle;">
                 {{ obj.owner.name }}</a>
             </td>

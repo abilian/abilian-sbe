@@ -1,7 +1,5 @@
 {%- if user_id %}
-  <img width="140" height="140"
-       src="{{ url_for("images.user_avatar", user_id=user_id, s=140) }}"
-       class="media-object" alt="" />
+  <img width="140" height="140" src="{{ user_photo_url(user_id, size=140) }}" class="media-object" alt="" />
 {%- endif %}
 
 <input name="{{ field.name }}" type="file"

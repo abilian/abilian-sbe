@@ -34,7 +34,7 @@
           <ul class="latest-visitors">
             {%- for user in g.sidebars.latest_visitors %}
               <li><a href="{{ url_for(user) }}">
-                <img class="avatar" src="{{ url_for('images.user_avatar', user_id=user.id, s=20) }}"
+                <img class="avatar" src="{{ user_photo_url(user, size=20) }}"
                      alt="" /> {{ user.name }}
               </a>
               {%- if user.is_online %}

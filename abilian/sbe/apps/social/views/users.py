@@ -36,6 +36,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_USER_MUGSHOT = open(join(dirname(__file__),
                                  "../../../static/images/silhouette_unknown.png")).read()
 
+
 def make_tabs(user):
   return [
     dict(id='profile', label=_(u'Profile'), link=url_for(user, tab='profile')),
@@ -162,50 +163,6 @@ def user(user_id):
   env.activity_entries = entries
 
   return render_template("social/user.html", **env)
-
-
-@social.route("/users/<int:user_id>/mugshot")
-def user_mugshot(user_id):
-  size = int(request.args.get('s', 55))
-  if size > 500:
-    raise ValueError("Error, size = %d" % size)
-  user = User.query\
-    .options(sa.orm.undefer(User.photo))\
-    .get(user_id)
-
-  if not user:
-    abort(404)
-
-  if user.photo:
-    data = user.photo
-  else:
-    data = DEFAULT_USER_MUGSHOT
-
-  etag = None
-
-  if user.id == g.user.id:
-    # FIXME: there should be a photo_digest field on user object
-    acc = hashlib.md5(data)
-    etag = acc.hexdigest()
-
-    if request.if_none_match and etag in request.if_none_match:
-      return Response(status=304)
-
-  if size:
-    data = crop_and_resize(data, size)
-
-  response = make_response(data)
-  response.headers['content-type'] = 'image/jpeg'
-
-  if not user.id == g.user.id:
-    response.headers.add('Cache-Control', 'public, max-age=600')
-  else:
-    # user always checks its own mugshot is up-to-date, in order to seeing old
-    # one immediatly after having uploaded of a new picture.
-    response.headers.add('Cache-Control', 'private, must-revalidate')
-    response.set_etag(etag)
-
-  return response
 
 
 def can_edit(user):

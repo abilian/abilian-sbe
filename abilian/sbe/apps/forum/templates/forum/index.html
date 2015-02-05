@@ -36,7 +36,7 @@
 
 {% macro m_thread(thread) %}
   {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
-  {%- set author_img = url_for("images.user_avatar", user_id=thread.creator.id, s=45) %}
+  {%- set author_img = user_photo_url(thread.creator, size=45) %}
   {%- set author_name = thread.creator.name %}
   {%- set thread_href = url_for(thread) %}
   {%- set thread_length = thread.posts|length %}

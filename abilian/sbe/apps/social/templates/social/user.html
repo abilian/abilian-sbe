@@ -8,7 +8,7 @@
   {% call m_box(_("Profile")) %}
     <div class="header row">
         <img width="140" height="140"
-            src="{{ url_for("images.user_avatar", user_id=user.id, s=140) }}"
+            src="{{ user_photo_url(user, size=140) }}"
             class="media-object avatar pull-left" alt=""/>
 
       <div class="info col-xs-6">

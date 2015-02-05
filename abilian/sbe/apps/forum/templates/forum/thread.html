@@ -18,7 +18,7 @@
     <div class="thread-header">
       {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
       <a href="{{ author_href }}"><img class="avatar" width="55" height="55"
-          src="{{ url_for("images.user_avatar", user_id=thread.creator.id, s=55) }}"
+          src="{{ user_photo_url(thread.creator, size=55) }}"
           style="float: right;"></a>
 
       <h2>{{ thread.title }}</h2>
@@ -91,7 +91,7 @@
 
 {%- macro m_post(post) %}
   {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
-  {%- set author_img = url_for("images.user_avatar", user_id=post.creator.id, s=45) %}
+  {%- set author_img = user_photo_url(post.creator, size=45) %}
 
   <hr />
   <a id="post_{{ post.id }}"></a>

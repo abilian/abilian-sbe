@@ -173,8 +173,7 @@ def permissions(folder_id):
       self.entry = e
       self.date = e.happened_at.strftime('%Y-%m-%d %H:%M')
       self.manager = render(
-        u'<img src="{{ url_for("images.user_avatar", user_id=e.manager_id, '
-        's=16) }}" alt="" />'
+        u'<img src="{{ user_photo_url(e.manager, size=16) }}" alt="" />'
         '<a href="{{ url_for("social.user", user_id=e.manager_id) }}">'
         '{{ e.manager.name }}</a>', e=e)
 

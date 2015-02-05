@@ -2,7 +2,7 @@
   {% set user_href = url_for(".user", user_id=message.creator.id) %}
   <li class="stream-item clearfix">
     <a href="{{ user_href }}" class="user-photo" target=""
-        style="background-image: url('{{ url_for(".user_mugshot", user_id=message.creator.id, s=45) }}');"></a>
+        style="background-image: url('{{ user_photo_url(message.creator, size=45) }}');"></a>
 
     <div class="activity-body">
       {%- if message.group %}
@@ -88,7 +88,7 @@
     {%- for entry in entries %}
       {%- if entry.type == 1 %}
         <div>
-          <img src="{{ url_for(entry.user) }}/mugshot?s=16" alt=""/>
+          <img src="{{ user_photo_url(entry.user, size="16") }}" alt=""/>
           <a href="{{ url_for(entry.user) }}">{{ entry.user.name }}</a>
           made changes on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
           to entity {{ entry.entity }}
@@ -108,7 +108,7 @@
         </div>
       {%- elif entry.type == 0 %}
         <div>
-          <img src="{{ url_for(entry.user) }}/mugshot?s=16" alt="">
+          <img src="{{ user_photo_url(entry.user, size=16) }}" alt="" />
           <a href="{{ url_for(entry.user) }}">{{ entry.user.name }}</a>
           created a new {{ entry.entity.__class__.__name__ }},
           <a href="{{ url_for(entry.entity) }}">{{ entry.entity.name }}</a>,

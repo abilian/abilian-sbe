@@ -96,7 +96,7 @@
           {{ _('Creator') }}: <a
             href="{{ url_for("social.user", user_id=doc.creator.id) }}"><img
             alt=""
-            src="{{ url_for("images.user_avatar", user_id=doc.creator.id, s=16) }}"/>
+            src="{{ user_photo_url(doc.creator, size=16) }}"/>
           {{ doc.creator }}</a>
         </p>
 
@@ -104,7 +104,7 @@
           {{ _('Owner') }}: <a
             href="{{ url_for("social.user", user_id=doc.owner.id) }}"><img
             alt=""
-            src="{{ url_for("images.user_avatar", user_id=doc.owner.id, s=16) }}"/>
+            src="{{ user_photo_url(doc.owner, size=16) }}"/>
           {{ doc.owner }}</a>
         </p>
       </div>

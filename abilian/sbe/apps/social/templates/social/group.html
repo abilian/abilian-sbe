@@ -13,7 +13,7 @@
              <tr>
                <td>
                  <a href="{{ url_for(user) }}">
-                   <img src="{{ url_for('.user_mugshot', user_id=user.id, s=16) }}" alt="{{ user.name }}" title="{{ user.name }}" style="margin-bottom: 4px;" />
+                   <img src="{{ user_photo_url(user, size=16) }}" alt="{{ user.name }}" title="{{ user.name }}" style="margin-bottom: 4px;" />
                    {{ user.name }}
                  </a>
                </td>
