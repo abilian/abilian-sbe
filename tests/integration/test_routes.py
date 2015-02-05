@@ -9,6 +9,17 @@ class TestViews(BaseTestCase):
   no_login = True
 
   def test_all_registered_urls(self):
+
+    SKIP = frozenset([
+        'admin.audit_search_users',
+        'search.search_main', 'search.live',
+        'notifications.debug_social',
+        'social.groups_json', 'social.groups_new',
+        'social.users_json', 'social.users_dt_json',
+        'communities.community_default_image',
+        'images.user_default',
+    ])
+
     rules = sorted(self.app.url_map.iter_rules(), key=lambda x: x.endpoint)
     for rule in rules:
 
@@ -19,15 +30,7 @@ class TestViews(BaseTestCase):
         continue
 
       # FIXME. Skip several exceptions.
-      if rule.endpoint in ['admin.audit_search_users',
-
-                           'search.search_main', 'search.live',
-
-                           'notifications.debug_social',
-
-                           'social.groups_json', 'social.groups_new',
-                           'social.users_json', 'social.users_dt_json',
-                           ]:
+      if rule.endpoint in SKIP:
         continue
 
       # These endpoints expect a parameter ('q') that we don't provide
