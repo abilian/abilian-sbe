@@ -107,7 +107,7 @@ class TestBlobs(BaseTests):
     meta['antivirus'] = None
     assert doc.antivirus_scanned is True
     assert doc.antivirus_status is None
-    assert doc.antivirus_required is False
+    assert doc.antivirus_required is True
     assert doc.antivirus_ok is False
 
     # virus detected

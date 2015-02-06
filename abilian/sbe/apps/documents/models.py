@@ -588,10 +588,11 @@ class Document(BaseContent, PathAndSecurityIndexable):
   @property
   def antivirus_required(self):
     """
-    True if antivirus dosen't need to be run
+    True if antivirus doesn't need to be run
     """
     required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
-    return required and self.antivirus_scanned is False
+    return required and (not self.antivirus_scanned or
+                         self.antivirus_status is None)
 
   @property
   def antivirus_ok(self):
