@@ -42,18 +42,30 @@
             (<i>{{ user.email }}</i>)
             {%- if not user.can_login %}</s>{%- endif %}
           </td>
-          <td>{{ _(role) }}</td>
-          {% if is_manager %}
+          {%- if not is_manager %}
+            <td>{{ _(role) }}</td>
+          {%- else %}
             <td>
-              <form
-                  action="{{ url_for(".members_post", community_id=g.community.slug) }}"
-                  method="POST" style="display: inline;">
+              <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
+                    method="POST" style="display: inline;">
                 {{ csrf_token }}
-                <input type="hidden" name="membership_id" value="{{ m_id }}">
-                <input type="hidden" name="user_id" value="{{ user.id }}">
+                <input type="hidden" name="user" value="{{ user.id }}" />
+                <input type="hidden" name="action" value="set-user-role" />
+                <select onchange="this.form.submit();" id="role-select" name="role" class="form-control" style="width: auto;">
+                  <option value="member" default="default" {%- if role == 'member' %}selected="selected"{%- endif %}>{{ _("Member") }}</option>
+                  <option value="manager" {%- if role == 'manager' %}selected="selected"{%- endif %}>{{ _("Manager") }}</option>
+                </select>
+              </form>
+            </td>
+            <td>
+              <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
+                    method="POST" style="display: inline;">
+                {{ csrf_token }}
+                <input type="hidden" name="membership" value="{{ m_id }}">
+                <input type="hidden" name="user" value="{{ user.id }}">
                 <button type="submit" name="action" value="delete"
-                    class="btn btn-danger" data-original-title="" title=""><i
-                    class="fa fa-remove"></i></button>
+                        class="btn btn-danger" data-original-title="" title=""><i
+                  class="fa fa-times"></i></button>
               </form>
             </td>
           {% endif %}

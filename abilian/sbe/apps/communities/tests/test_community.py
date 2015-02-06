@@ -283,9 +283,19 @@ class CommunityWebTestCase(BaseIndexingTestCase):
       }
       response = self.client.post(url, data=data)
       assert response.status_code == 302
-      self.assertEquals(
-        response.headers['Location'],
-        u'http://localhost/communities/{}/members'.format(self.community.slug))
+      response.headers['Location'] == 'http://localhost' + url
+
+      membership = [m for m in self.community.memberships
+                    if m.user == self.user_c2][0]
+      assert membership.role == 'member'
+
+      data['action'] = 'set-user-role'
+      data['role'] = 'manager'
+      response = self.client.post(url, data=data)
+      assert response.status_code == 302
+      assert response.headers['Location'] == 'http://localhost' + url
+      self.session.expire(membership)
+      assert membership.role == 'manager'
 
       # Community.query.session is not self.db.session, but web app session.
       community = Community.query.get(self.community.id)
@@ -294,9 +304,9 @@ class CommunityWebTestCase(BaseIndexingTestCase):
       # test delete
       data = {
         'action': 'delete',
-        'user_id': self.user_c2.id,
-        'membership_id': [m.id for m in community.memberships
-                          if m.user == self.user_c2][0],
+        'user': self.user_c2.id,
+        'membership': [m.id for m in community.memberships
+                       if m.user == self.user_c2][0],
       }
       response = self.client.post(url, data=data)
       assert response.status_code == 302

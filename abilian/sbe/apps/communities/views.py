@@ -9,7 +9,7 @@ from pathlib import Path
 
 from whoosh.searching import Hit
 
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import NotFound, BadRequest
 from flask import (
     render_template, g, redirect, url_for, abort,
     request, current_app, session,
@@ -287,23 +287,24 @@ def members_post():
   community = g.community._model
   action = request.form.get("action")
 
-  if action == 'add-user-role':
+  if action in ('add-user-role', 'set-user-role',):
     role = request.form.get("role").lower()
     user_id = int(request.form["user"])
     user = User.query.get(user_id)
 
     community.set_membership(user, role)
 
-    app = current_app._get_current_object()
-    activity.send(app, actor=user, verb="join", object=community)
+    if action == 'add-user-role':
+      app = current_app._get_current_object()
+      activity.send(app, actor=user, verb="join", object=community)
 
     db.session.commit()
     return redirect(url_for(".members", community_id=community.slug))
 
   elif action == 'delete':
-    user_id = int(request.form['user_id'])
+    user_id = int(request.form['user'])
     user = User.query.get(user_id)
-    membership_id = int(request.form['membership_id'])
+    membership_id = int(request.form['membership'])
     membership = Membership.query.get(membership_id)
     if membership.user_id != user_id:
       abort(500)
@@ -317,7 +318,7 @@ def members_post():
     return redirect(url_for(".members", community_id=community.slug))
 
   else:
-    abort(500)
+    raise BadRequest('Unknown action: {}'.format(repr(action)))
 
 
 #
