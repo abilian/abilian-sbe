@@ -253,7 +253,7 @@ def image_url(community, **kwargs):
   """
   if not community or not community.image:
     kwargs['md5'] = _DEFAULT_IMAGE_MD5
-    return url_for('.community_default_image', **kwargs)
+    return url_for('communities.community_default_image', **kwargs)
 
   kwargs['community_id'] = community.slug
   kwargs['md5'] = community.image.md5
