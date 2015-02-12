@@ -4,13 +4,13 @@
 from __future__ import absolute_import
 
 import logging
-import hashlib
 from cgi import escape
 from os.path import dirname, join
 
 from flask import (
-    request, redirect, g, make_response, abort, jsonify,
-    current_app, Response, render_template)
+    request, redirect, g, abort, jsonify,
+    current_app, Response, render_template, flash
+)
 
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import or_, and_, func, asc, desc, nullslast
@@ -18,7 +18,6 @@ from sqlalchemy.sql.expression import or_, and_, func, asc, desc, nullslast
 from abilian.i18n import _, _l
 from abilian.core.models.subjects import User
 from abilian.core.extensions import db, get_extension
-from abilian.services.image import crop_and_resize
 from abilian.web import url_for
 from abilian.web.views import default_view, ObjectEdit
 from abilian.web.filters import age
