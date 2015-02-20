@@ -39,7 +39,7 @@ class CommunityUnitTestCase(BaseTestCase):
 class CommunityDbTestCase(BaseTestCase):
 
   def setUp(self):
-    BaseTestCase.setUp(self)
+    super(CommunityDbTestCase, self).setUp()
     self.community = Community(name=u"My Community")
     self.db.session.add(self.community)
     self.db.session.commit()

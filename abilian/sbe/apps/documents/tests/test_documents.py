@@ -32,7 +32,7 @@ class BaseTests(CommunityBaseTestCase):
   no_login = True
 
   def setUp(self):
-    CommunityBaseTestCase.setUp(self)
+    super(BaseTests, self).setUp()
 
     self.root_folder = Folder(title=u"root")
     db.session.add(self.root_folder)
@@ -158,7 +158,7 @@ class IndexingTestCase(CommunityIndexingTestCase):
 class TestViews(CommunityIndexingTestCase, BaseTests):
 
   def setUp(self):
-    CommunityIndexingTestCase.setUp(self)
+    super(TestViews, self).setUp()
     self.community.type = 'participative'
     self.community.set_membership(self.user, WRITER)
     self.session.commit()

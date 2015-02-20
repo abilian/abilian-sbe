@@ -30,7 +30,7 @@
                                  }
                              }
                            });
-                });     
+                });
  };
 
     Abilian.fn.onAppInit(function() {
@@ -38,7 +38,7 @@
                                            '{{ doc.id if doc else folder.id }}',
                                            '{%- if doc %}document{% else %}folder{% endif %}-edit');
         setup_modal_folder_inputname_check($('#modal-new-folder'), '{{ folder.id }}', 'new');
-        
+
         $('#modal-edit input[type="text"]').preventEnterKey();
         $('#modal-new-folder input[type="text"]').preventEnterKey();
     });

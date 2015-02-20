@@ -11,7 +11,7 @@ from ..models import Folder, Document
 class TestService(BaseTestCase):
 
   def setUp(self):
-    BaseTestCase.setUp(self)
+    super(TestService, self).setUp()
     self.repository = self.app.extensions['content_repository']
     self.root = Folder(title=u"")
     self.session.add(self.root)

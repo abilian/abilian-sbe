@@ -8,7 +8,7 @@ class CommunityBaseTestCase(BaseTestCase):
   no_login = True
 
   def setUp(self):
-    BaseTestCase.setUp(self)
+    super(CommunityBaseTestCase, self).setUp()
     self.community = Community(name=u"My Community")
     self.session.add(self.community)
     self.session.flush()

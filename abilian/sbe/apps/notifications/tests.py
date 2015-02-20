@@ -22,7 +22,7 @@ class TestNotificationViews(BaseTestCase):
     return cfg
 
   def setUp(self):
-    BaseTestCase.setUp(self)
+    super(TestNotificationViews, self).setUp()
     self.user = User(email=u'user_1@example.com', password='azerty',
                      can_login=True)
     self.session.add(self.user)

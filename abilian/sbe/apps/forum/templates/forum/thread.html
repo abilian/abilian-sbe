@@ -4,29 +4,26 @@
 {% from "macros/form.html" import m_field %}
 
 {%- block content %}
-  {%- call m_box_content(title="Thead") %}
     {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
 
     {#  TODO #}
-    <div class="header">
-      <h3 style="margin: 0;"><a
-          href="{{ url_for(".index", community_id=g.community.slug) }}"><i
-          class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
-      </h3>
-    </div>
+    <p>
+      <a href="{{ url_for(".index", community_id=g.community.slug) }}">
+        <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
+    </p>
 
     <div class="thread-header">
-      {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
-      <a href="{{ author_href }}"><img class="avatar" width="55" height="55"
-          src="{{ user_photo_url(thread.creator, size=55) }}"
-          style="float: right;"></a>
-
+      <div class="author">
+        {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
+        <a href="{{ author_href }}">
+          <img class="avatar pull-left" width="55" height="55"
+               src="{{ user_photo_url(thread.creator, size=55) }}">
+        </a>
+        <div><a href="{{ author_href }}">{{ thread.creator }}</a></div>
+        <div>{{ thread.created_at | datetimeformat }}</div>
+      </div>
       <h2>{{ thread.title }}</h2>
 
-      <div class="author">{{ _("From:") }} <a
-          href="{{ author_href }}">{{ thread.creator }}</a></div>
-      <div
-          class="date">{{ _("Date:") }} {{ thread.created_at | datetimeformat }}</div>
     </div>
 
     <hr style="margin-top: 5px;">
@@ -84,8 +81,6 @@
       </div>
 
     </form>
-
-  {%- endcall %}
 
 {%- endblock %}
 

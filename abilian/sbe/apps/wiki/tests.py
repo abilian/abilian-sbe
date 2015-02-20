@@ -13,7 +13,7 @@ from . import views
 
 class WikiBaseTestCase(CommunityBaseTestCase):
   def setUp(self):
-    CommunityBaseTestCase.setUp(self)
+    super(WikiBaseTestCase, self).setUp()
     g.user = User.query.all()[0]
 
 
@@ -55,7 +55,7 @@ class TestModels(WikiBaseTestCase):
 class TestIndexing(CommunityIndexingTestCase):
 
   def setUp(self):
-    CommunityIndexingTestCase.setUp(self)
+    super(TestIndexing, self).setUp()
     g.user = User.query.all()[0]
 
   def test_wiki_indexed(self):
