@@ -99,7 +99,7 @@ class Community(Entity):
 
   #: An image or logo for this community.
   image_id = Column(ForeignKey(Blob.id), index=True)
-  image = relationship(Blob)
+  image = relationship(Blob, lazy='joined')
 
   #: The root folder for this community.
   folder_id = Column(Integer,
