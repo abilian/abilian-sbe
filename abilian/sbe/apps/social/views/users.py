@@ -18,7 +18,7 @@ from sqlalchemy.sql.expression import or_, and_, func, asc, desc, nullslast
 
 from abilian.i18n import _, _l
 from abilian.core.models.subjects import User
-from abilian.core.extensions import db, get_extension
+from abilian.core.extensions import db
 from abilian.web import url_for
 from abilian.web.views import default_view, ObjectEdit
 from abilian.web.views.images import user_photo_url
@@ -169,18 +169,12 @@ def user(user_id):
 
 
 def can_edit(user):
-  security = get_extension("security")
+  security = current_app.services.get('security')
   if not security:
     return True
 
   # TODO: introduce a "self" role?
   return (user == g.user) or security.has_role(g.user, 'admin')
-
-  # FIXME: introduce pluggable profiles?
-  #has_contact = user.contact is not None
-  #
-  #return (has_contact and
-  #        ((user == g.user) or security.has_role(g.user, 'admin')))
 
 
 class UserProfileEdit(ObjectEdit):
