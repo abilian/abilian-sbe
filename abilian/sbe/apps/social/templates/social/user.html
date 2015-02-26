@@ -13,11 +13,13 @@
 
       <div class="info col-xs-6">
         <h2 class="title">{{ user.name }}
+{#
           {%- if can_edit %}
             <a class="btn btn-default"
                 href="{{ url_for('.user_edit', user_id=user.id) }}"><i
                 class="fa fa-edit"></i>{{ _("Edit") }}</a>
           {%- endif %}
+#}
         </h2>
 
         {%- if user.email %}
