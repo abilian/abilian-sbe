@@ -76,23 +76,31 @@
 
     {%- deferJS %}
     <script type="text/javascript">
-      Abilian.fn.onAppInit(function() {
-        var id = "#{{ table_id }}"; // Should be unique enough
-        $(id).dataTable({
-          aoColumns:       [
-            { bVisible: false },
-            { bVisible: false },
-            { aDataSort: [0, 1], asSorting: [ "asc", "desc" ] },
-            { asSorting: [ "asc", "desc" ] }
-            {% if is_manager %}
-            , { }
-            {% endif %}
-          ],
-          sPaginationType: "bootstrap",
-          bFilter:         true,
-          bLengthChange:   false
-        });
-      });
+   'use strict';	       
+   (function(window, document, undefined) {
+
+     function initMembersTable() {
+       var id = "#{{ table_id }}"; // Should be unique enough
+       $(id).dataTable({
+         aoColumns:       [
+           { bVisible: false },
+           { bVisible: false },
+           { aDataSort: [0, 1], asSorting: [ "asc", "desc" ] },
+           { asSorting: [ "asc", "desc" ] }
+           {% if is_manager %}
+           , { }
+           {% endif %}
+         ],
+         sPaginationType: "bootstrap",
+         bFilter:         true,
+         bLengthChange:   false
+       });
+     }
+
+     Abilian.fn.onAppInit(
+       requirejs(['jquery', 'jquery.dataTables'], initMembersTable)
+     );
+     }(window, document));
     </script>
     {%- enddeferJS %}
     <div class="clearfix"></div>

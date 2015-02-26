@@ -72,30 +72,34 @@
 
   {%- deferJS %}
   <script type="text/javascript">
-    $(document).ready(function() {
+   'use strict';	       
+   (function(window, document, undefined) {
 
-      var users_table = $('#users-table').dataTable({
-        aoColumns: [
-          { asSorting: [] },
-          { asSorting: [ "asc", "desc" ] },
-          { asSorting: [ "asc", "desc" ] },
-          { asSorting: [ "asc", "desc" ] }
-        ],
-        {# see http://datatables.net/ref #}
+     function initUsersTable() {
+       var users_table = $('#users-table').dataTable({
+         aoColumns: [
+           { asSorting: [] },
+           { asSorting: [ "asc", "desc" ] },
+           { asSorting: [ "asc", "desc" ] },
+           { asSorting: [ "asc", "desc" ] }
+         ],
+         {# see http://datatables.net/ref #}
+         sPaginationType: "bootstrap",
+         bFilter:         true,
+         bLengthChange:   false,
+         bStateSave:      true,
+         iDisplayLength:  50,
+         //sDom:           'lrtip',
+         bProcessing: true,
+         bServerSide: true,
+         sAjaxSource: "{{ url_for(".users_dt_json") }}"
+       });
+    }
 
-        sPaginationType: "bootstrap",
-        bFilter:         true,
-        bLengthChange:   false,
-        bStateSave:      true,
-        iDisplayLength:  50,
-        //sDom:           'lrtip',
-
-        bProcessing: true,
-        bServerSide: true,
-        sAjaxSource: "{{ url_for(".users_dt_json") }}"
-      });
-
-    });
+     Abilian.fn.onAppInit(
+       requirejs(['jquery', 'jquery.dataTables'], initMembersTable)
+     );
+   }(window, document));
   </script>
   {%- enddeferJS %}
 
