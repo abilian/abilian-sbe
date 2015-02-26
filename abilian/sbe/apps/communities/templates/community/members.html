@@ -156,7 +156,7 @@
              return {results: data.results, more: false}; 
            }
          },
-         allowClear:    true
+         allowClear:    true,
          formatResult: function(state, container, query, escapeMarkup) {
            var markup = [], text;
            window.Select2.util.markMatch(state.name, query.term, markup, escapeMarkup);
