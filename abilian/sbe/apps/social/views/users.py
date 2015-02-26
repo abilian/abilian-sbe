@@ -4,6 +4,7 @@
 from __future__ import absolute_import
 
 import logging
+import pkgutil
 from cgi import escape
 from os.path import dirname, join
 
@@ -20,6 +21,7 @@ from abilian.core.models.subjects import User
 from abilian.core.extensions import db, get_extension
 from abilian.web import url_for
 from abilian.web.views import default_view, ObjectEdit
+from abilian.web.views.images import user_photo_url
 from abilian.web.filters import age
 
 from abilian.sbe.apps.communities.models import Membership
@@ -32,8 +34,10 @@ from .util import Env
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_USER_MUGSHOT = open(join(dirname(__file__),
-                                 "../../../static/images/silhouette_unknown.png")).read()
+DEFAULT_USER_MUGSHOT = pkgutil.get_data(
+  'abilian.sbe',
+  'static/images/silhouette_unknown.png')
+
 
 
 def make_tabs(user):
@@ -111,7 +115,7 @@ def users_dt_json():
   for user in users:
     # TODO: this should be done on the browser.
     user_url = url_for(".user", user_id=user.id)
-    mugshot = url_for(".user_mugshot", user_id=user.id, s=MUGSHOT_SIZE)
+    mugshot = user_photo_url(user, size=MUGSHOT_SIZE)
     name = escape(getattr(user, "name") or "")
 
     cell0 = (u'<a href="{url}"><img src="{src}" width="{size}" height="{size}">'
