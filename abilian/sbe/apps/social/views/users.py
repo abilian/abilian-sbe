@@ -184,6 +184,14 @@ class UserProfileEdit(ObjectEdit):
   pk = 'user_id'
   _message_success = _l(u'Profile edited')
 
+  def init_object(self, args, kwargs):
+    user_id = kwargs['user_id']
+    self.user = User.query.get(user_id)
+    assert self.user is not None
+    self.obj = self.Model.query.filter(self.Model.user == self.user).first()
+    assert self.obj is not None
+    return args, kwargs
+
   def view_url(self):
     return url_for('.user', user_id=self.user.id)
 
