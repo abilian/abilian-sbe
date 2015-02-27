@@ -38,7 +38,7 @@ setuptools.setup(
   packages=['abilian.sbe'],
   zip_safe=False,
   platforms='any',
-  setup_requires=['setuptools-git', 'setuptools_scm'],
+  setup_requires=['babel', 'setuptools-git', 'setuptools_scm'],
   install_requires=install_requires,
   extras_require={
     'tests': dev_requires,
