@@ -1,5 +1,3 @@
--r requirements.txt
-
 # Additional packages for development.
 
 # Our favorite test runner with some plugins
