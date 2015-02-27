@@ -60,3 +60,6 @@ demo/var/
 demo/local/
 
 /tests.functional.test/
+/.eggs/
+/coverage.xml
+/instance/
