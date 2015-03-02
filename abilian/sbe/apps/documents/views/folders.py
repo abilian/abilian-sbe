@@ -524,9 +524,13 @@ def explore_archive(fd, filename=None, uncompress=False):
       for zipinfo in archive.infolist():
         filename = zipinfo.filename
         if isinstance(filename, bytes):
-          # not unicode: try to convert from legacy cp437
+          # not unicode: try to convert from utf-8 (OSX case: unicode flag not
+          # set), then legacy cp437
           # http://stackoverflow.com/questions/13261347/correctly-decoding-zip-entry-file-names-cp437-utf-8-or
-          filename = filename.decode('cp437')
+          try:
+            filename = filename.decode('utf-8')
+          except UnicodeDecodeError:
+            filename = filename.decode('cp437')
 
         if filename.endswith(u'/'):
           # skip directory names. Directory will be created only if they
