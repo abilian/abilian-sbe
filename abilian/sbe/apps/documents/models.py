@@ -476,7 +476,7 @@ class BaseContent(CmisObject):
       return icon_url('bin.png')
 
     suffix = self.title.split(".")[-1]
-    icon = '{}.png'.format(suffix)
+    icon = u'{}.png'.format(suffix)
     if icon_exists(icon):
       return icon_url(icon)
     else:
