@@ -1,4 +1,6 @@
+# coding=utf-8
 from __future__ import absolute_import
+
 import re
 
 from flask import url_for, g
@@ -9,6 +11,29 @@ from abilian.sbe.apps.communities.tests.base import (
 
 from .models import WikiPage
 from . import views
+
+import markdown
+from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
+from urllib import quote_plus
+
+
+def test_wikilink_extension():
+  text = u'/*€('
+  wikilink = u'[[' + text + ']]'
+
+  def build_url(label, base, end):
+    return u'/?title=' + quote_plus(label.encode('utf-8')) + end
+
+  extension = SBEWikiLinkExtension([('build_url', build_url)])
+  ctx = {}
+  ctx['extensions'] = [extension, 'toc']
+  ctx['output_format'] = 'html5'
+  md = markdown.Markdown(**ctx)
+  result = md.convert(wikilink)
+  qtext = unicode(quote_plus(text.encode('utf-8')))
+  expected = u'<p><a class="wikilink" href="/?title={href}/">{text}</a></p>'
+  expected = expected.format(href=qtext, text=text)
+  assert expected == result
 
 
 class WikiBaseTestCase(CommunityBaseTestCase):
