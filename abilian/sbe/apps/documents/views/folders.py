@@ -3,11 +3,12 @@
 """
 from __future__ import absolute_import
 
-from flask import g
 import os
+import re
 import logging
 import tempfile
 import itertools
+import fnmatch
 from functools import partial
 from cStringIO import StringIO
 from datetime import datetime
@@ -17,7 +18,7 @@ from werkzeug.exceptions import InternalServerError
 
 from xlwt import Workbook, easyxf
 
-from flask import (redirect, request, make_response, flash,
+from flask import (g, redirect, request, make_response, flash,
                    current_app, send_file, jsonify,
                    render_template_string, Markup, render_template)
 
@@ -501,6 +502,19 @@ def folder_edit(folder):
   return redirect(url_for(folder))
 
 
+ARCHIVE_IGNORE_FILES = {
+  u'__MACOSX/*',
+  u'.DS_Store',
+}
+# translates patterns to match with any parent directory ((*/)?pattern should
+# match)
+ARCHIVE_IGNORE_FILES = {re.compile(u'(?:.*\\/)?' + fnmatch.translate(pattern))
+                        for pattern in ARCHIVE_IGNORE_FILES}
+
+# skip directory names. Directory will be created only if they contains files
+ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate(u'*/')))
+
+
 def explore_archive(fd, filename=None, uncompress=False):
   """
   Given an uploaded file descriptor, return it or a list of archive
@@ -532,10 +546,10 @@ def explore_archive(fd, filename=None, uncompress=False):
           except UnicodeDecodeError:
             filename = filename.decode('cp437')
 
-        if filename.endswith(u'/'):
-          # skip directory names. Directory will be created only if they
-          # contains files
-          continue
+        if any(pattern.match(filename) is not None
+               for pattern in ARCHIVE_IGNORE_FILES):
+            continue
+
         filepath = filename.split(u'/')
         filename = filepath.pop()
         zip_fd = archive.open(zipinfo, 'r')
