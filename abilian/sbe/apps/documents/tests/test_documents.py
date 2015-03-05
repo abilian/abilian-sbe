@@ -287,6 +287,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         u'existing-doc/subfolder_in_renamed/doc.txt',
         u'folder 1/doc.txt',
         u'folder 1/dos cp437: é.txt',
+        u'folder 1/osx: utf-8: é.txt'
     }
 
   def test_zip_upload_uncompress(self):
