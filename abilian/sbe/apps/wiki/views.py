@@ -11,6 +11,7 @@ from flask import g, render_template, redirect, request, \
   flash, current_app, abort, make_response
 from markdown import markdown
 from markupsafe import Markup
+import sqlalchemy as sa
 from sqlalchemy.orm.exc import NoResultFound
 from whoosh.searching import Hit
 
@@ -51,6 +52,7 @@ def init_wiki_values(endpoint, values):
                          url=nav.Endpoint('wiki.page',
                                           community_id=g.community.slug,
                                           title=title)))
+
 
 @route('/')
 def index():
@@ -118,17 +120,16 @@ class BasePageView(object):
                    title=self.obj.title)
 
 
-
 class PageView(BasePageView, ObjectView):
   """
   """
   template = 'wiki/page.html'
-  view_endpoint='.page'
+  view_endpoint = '.page'
   decorators = [
     default_view(wiki, WikiPage,
                  id_attr=None,
                  kw_func=wiki_page_default_view_kw)
-    ]
+  ]
 
   def init_object(self, args, kwargs):
     args, kwargs = BasePageView.init_object(self, args, kwargs)
@@ -147,7 +148,7 @@ route('/page/')(PageView.as_view('page'))
 
 
 class PageEdit(BasePageView, ObjectEdit):
-#  template = 'wiki/page_edit.html'
+  # template = 'wiki/page_edit.html'
   title = _("Edit page")
   last_revision = None
   _message_success = _l(u"Wiki page successfully edited.")
@@ -207,8 +208,8 @@ class PageEdit(BasePageView, ObjectEdit):
       self.form.last_revision_id.errors = []
       field = self.form.body_src
       current = self.obj.last_revision
-      self.form.last_revision_id.data = current.id # update edited revision
-      self.redirect_if_no_change() # same edition? don't bother
+      self.form.last_revision_id.data = current.id  # update edited revision
+      self.redirect_if_no_change()  # same edition? don't bother
 
       if (self.last_revision.body_src == current.body_src
           and self.form.validate()):
@@ -241,13 +242,21 @@ class PageCreate(PageEdit, ObjectCreate):
   title = _l("Create page")
   _message_success = _l(u"Wiki page successfully created.")
 
+  get_form_kwargs = ObjectCreate.get_form_kwargs
+
   def init_object(self, args, kwargs):
     args, kwargs = ObjectCreate.init_object(self, args, kwargs)
     self.obj.community = g.community
+    session = sa.orm.object_session(self.obj)
+    if session:
+      sa.orm.session.make_transient(self.obj)
+      for rev in self.obj.revisions:
+        sa.orm.session.make_transient(rev)
     return args, kwargs
 
 
 route('/new')(PageCreate.as_view('page_new', view_endpoint='.page'))
+
 
 @route('/source/')
 def page_source():
@@ -349,7 +358,7 @@ def attachment_download():
   response.headers['content-type'] = attachment.content_type
   content_disposition = (
     'attachment;filename="{}"'.format(quote(attachment.name.encode('utf8')))
-    )
+                        )
   response.headers['content-disposition'] = content_disposition
   return response
 

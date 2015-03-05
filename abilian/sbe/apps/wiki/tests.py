@@ -127,6 +127,14 @@ class TestsViews(WikiBaseTestCase):
     assert form['last_revision_id'].data is None
 
   def test_create_page(self):
+    title = 'Some page name'
+    url = url_for("wiki.page_new", community_id=self.community.slug)
+    url += '?title=Some+page+name'
+    response = self.client.get(url)
+    self.assertStatus(response, 200)
+    # make sure the title is filled when comming from wikilink
+    self.assertIn('value="Some page name"', response.data)
+
     title = 'Some page'
     url = url_for("wiki.page_new", community_id=self.community.slug)
     data = dict(title=title, body_src="abc")
