@@ -7,6 +7,7 @@ from __future__ import absolute_import
 from flask import url_for
 import markdown
 from markdown.extensions.wikilinks import WikiLinkExtension, WikiLinks
+from markdown.util import etree
 __all__ = ['convert']
 
 
@@ -37,6 +38,26 @@ class SBEWikiLinkExtension(WikiLinkExtension):
 
     # append to end of inline patterns
     WIKILINK_RE = r'\[\[(.*?)\]\]'
-    wikilinkPattern = WikiLinks(WIKILINK_RE, self.getConfigs())
+    wikilinkPattern = SBEWikiLinks(WIKILINK_RE, self.getConfigs())
     wikilinkPattern.md = md
     md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
+
+
+class SBEWikiLinks(WikiLinks):
+  def handleMatch(self, m):
+    from .forms import page_exists
+    if m.group(2).strip():
+        base_url, end_url, html_class = self._getMeta()
+        label = m.group(2).strip()
+        url = self.config['build_url'](label, base_url, end_url)
+        a = etree.Element('a')
+        a.text = label
+        a.set('href', url)
+        if html_class:
+          if page_exists(label):
+            a.set('class', html_class)
+          else:
+            a.set('class', html_class + ' new')
+    else:
+        a = ''
+    return a

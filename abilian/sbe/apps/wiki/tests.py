@@ -2,19 +2,21 @@
 from __future__ import absolute_import
 
 import re
+from urllib import quote_plus
+from mock import MagicMock, patch
 
+import markdown
 from flask import url_for, g
 from abilian.core.models.subjects import User
+
 from abilian.sbe.apps.communities.tests.base import (
   CommunityBaseTestCase, CommunityIndexingTestCase
 )
 
+from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
+
 from .models import WikiPage
 from . import views
-
-import markdown
-from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
-from urllib import quote_plus
 
 
 def test_wikilink_extension():
@@ -29,9 +31,23 @@ def test_wikilink_extension():
   ctx['extensions'] = [extension, 'toc']
   ctx['output_format'] = 'html5'
   md = markdown.Markdown(**ctx)
-  result = md.convert(wikilink)
+
+  page_exists_mock = MagicMock(return_value=True)
+  with patch('abilian.sbe.apps.wiki.forms.page_exists', page_exists_mock):
+    result = md.convert(wikilink)
+
   qtext = unicode(quote_plus(text.encode('utf-8')))
   expected = u'<p><a class="wikilink" href="/?title={href}/">{text}</a></p>'
+  expected = expected.format(href=qtext, text=text)
+  assert expected == result
+
+  # make sur the class is 'wikilink new' if page exists'
+  page_exists_mock = MagicMock(return_value=False)
+  with patch('abilian.sbe.apps.wiki.forms.page_exists', page_exists_mock):
+    result = md.convert(wikilink)
+
+  qtext = unicode(quote_plus(text.encode('utf-8')))
+  expected = u'<p><a class="wikilink new" href="/?title={href}/">{text}</a></p>'
   expected = expected.format(href=qtext, text=text)
   assert expected == result
 
