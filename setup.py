@@ -7,11 +7,21 @@ import setuptools
 from distutils.command.build import build as _build
 from setuptools.command.sdist import sdist as _sdist
 from setuptools.command.develop import develop as _develop
-import setup_util as deps
 
-install_requires = deps.parse_requirements([u'requirements.txt'])
-dependency_links = deps.parse_dependency_links([u'requirements.txt'])
-dev_requires = deps.parse_requirements([u'dev-requirements.txt'])
+import pip
+
+session = session=pip.download.PipSession()
+_install_requires = pip.req.parse_requirements(
+    'requirements.txt', session=session)
+install_requires = [str(ir.req) for ir in _install_requires]
+_dev_requires = pip.req.parse_requirements(
+    'dev-requirements.txt', session=session)
+dev_requires = [str(ir.req) for ir in _dev_requires]
+
+# install_requires = deps.parse_requirements([u'requirements.txt'])
+# dependency_links = deps.parse_dependency_links([u'requirements.txt'])
+# dev_requires = deps.parse_requirements([u'dev-requirements.txt'])
+
 
 class build(_build):
   sub_commands = [('compile_catalog', None)] + _build.sub_commands
@@ -22,10 +32,10 @@ class sdist(_sdist):
 
 
 class develop(_develop):
-
   def run(self):
     _develop.run(self)
     self.run_command('compile_catalog')
+
 
 setuptools.setup(
   name='abilian-sbe',
@@ -44,7 +54,7 @@ setuptools.setup(
     'tests': dev_requires,
     'dev': dev_requires,
   },
-  dependency_links=dependency_links,
+  # dependency_links=dependency_links,
   include_package_data=True,
   classifiers=[
     'Development Status :: 3 - Alpha',
