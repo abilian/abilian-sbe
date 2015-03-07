@@ -3,14 +3,9 @@
 """
 from __future__ import absolute_import
 
-from flask import (
-  g,
-  Blueprint as BaseBlueprint,
-  abort,
-  )
-
 from abilian.i18n import _
 from abilian.web import nav
+from flask import g, Blueprint as BaseBlueprint, abort
 
 from . import security
 from .models import Community
@@ -69,10 +64,10 @@ def pull_community(endpoint, values):
     community = Community.query.filter(Community.slug == slug).first()
     if community:
       g.community = CommunityPresenter(community)
-      g.breadcrumb.append(
-        nav.BreadcrumbItem(
-          label=community.name,
-          url=nav.Endpoint('wall.index', community_id=community.slug)))
+      wall_url = nav.Endpoint('wall.index', community_id=community.slug)
+      breadcrumb_item = nav.BreadcrumbItem(label=community.name,
+                                           url=wall_url)
+      g.breadcrumb.append(breadcrumb_item)
     else:
       abort(404)
   except KeyError:

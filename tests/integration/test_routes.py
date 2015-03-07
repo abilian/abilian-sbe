@@ -23,7 +23,7 @@ class TestViews(BaseTestCase):
     rules = sorted(self.app.url_map.iter_rules(), key=lambda x: x.endpoint)
     for rule in rules:
 
-      if not "GET" in rule.methods:
+      if "GET" not in rule.methods:
         continue
 
       if rule.arguments:

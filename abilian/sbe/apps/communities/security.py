@@ -24,9 +24,8 @@ def require_manage(func):
   @wraps(func)
   def decorated_view(*args, **kwargs):
     community = getattr(g, 'community')
-    if community:
-      if community.has_permission(current_user, 'manage'):
-        return func(*args, **kwargs)
+    if community and community.has_permission(current_user, 'manage'):
+      return func(*args, **kwargs)
     security = current_app.services['security']
     is_admin = security.has_role(current_user, 'admin')
     if not is_admin:

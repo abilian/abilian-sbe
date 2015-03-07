@@ -11,6 +11,7 @@ wall = Blueprint("wall", __name__,
                  template_folder="templates")
 route = wall.route
 
+
 @wall.url_value_preprocessor
 def set_current_tab(endpoint, values):
   g.current_tab = 'wall'

@@ -96,23 +96,27 @@ pytest-flakes:
 	@echo "--> Other static checks"
 	py.test --flakes -m flakes $(SRC) # tests
 
+pep8:
+	pep8 -r *.py abilian tests
+
 
 #
-# Everything else
+# running
 #
 run:
 	python manage.py runserver
 
+run-uwsgi:
+	uwsgi --http 127.0.0.1:8080 --need-app --disable-logging --wsgi-file wsgi.py --processes 1 --threads 4
+
+
+#
+# Everything else
+#
 boot:
 	./manage.py config init
 	./manage.py initdb
 	./manage.py createadmin admin@example.com admin
-
-tox:
-	tox -e py27
-
-pep8:
-	pep8 -r --ignore E111,E225,E501,E121 *.py abilian tests
 
 clean:
 	find . -name "*.pyc" | xargs rm -f

@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 import jinja2
 from abilian.services.preferences import preferences
+
 from .panels.sbe_notifications import SbeNotificationsPanel
 
 

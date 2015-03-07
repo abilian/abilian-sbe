@@ -48,7 +48,7 @@ def get_recent_entries(num=20, user=None, community=None):
                                 AE.object_id.in_(communities)))
 
   query = query.order_by(AE.happened_at.desc()).limit(1000)
-  limit = min(num * 2, 100) # get twice entries as needed, but ceil to 100
+  limit = min(num * 2, 100)  # get twice entries as needed, but ceil to 100
   entries = []
   deleted = False
   security = current_app.services['security']

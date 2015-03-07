@@ -35,7 +35,8 @@ def app(request):
   # with app.app_context():
   #   app.create_db()
 
-  worker = lambda app, port: app.run(port=port)
+  def worker(app, port):
+    app.run(port=port)
 
   process = multiprocessing.Process(target=worker, args=(app, PORT))
 
@@ -62,10 +63,11 @@ def test_login(browser, app):
   browser.fill('email', "admin@example.com")
   browser.fill('password', "admin")
   button = browser.find_by_xpath("//form[@name='login']//button")
+  assert button
 
   # FIXME: at this point this raises an error because we have to set up the db.
-  #button.click()
-  #assert "Welcome to Abilian" in browser.find_element_by_xpath("/html/body").text
+  # button.click()
+  # assert "Welcome to Abilian" in browser.find_element_by_xpath("/html/body").text
 
 
 def test_forgotten_pw(browser, app):
