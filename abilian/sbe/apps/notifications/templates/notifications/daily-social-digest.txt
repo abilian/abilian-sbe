@@ -11,7 +11,7 @@ Dans la communauté: {{ digest.community.name }}
   Nouveaux membres:
   {%- for user in digest.new_members %}
     * {{ user }}
-      ({{ url_for("social.user", user_id=user.id, _external=True) }})
+      ({{ url_for("social.user", user_id=user.id, _external=True, _scheme=config['PREFERRED_URL_SCHEME'])) }})
   {%- endfor %}
 {%- endif %}
 {%- if digest.new_documents %}
@@ -20,7 +20,7 @@ Dans la communauté: {{ digest.community.name }}
   {%- for doc in digest.new_documents %}
     * {{ doc }} - Posté par {{ doc.creator }}
       ({{ url_for("documents.document_view",community_id=digest.community.slug,
-                            doc_id=doc.id, _external=True) }})
+                            doc_id=doc.id, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }})
   {%- endfor %}
 {%- endif %}
 {%- if digest.updated_documents %}
@@ -28,7 +28,7 @@ Dans la communauté: {{ digest.community.name }}
   Documents mis à jour:
   {%- for doc in digest.updated_documents %}
     * {{ doc }}
-      ({{ url_for("documents.document_view", community_id=digest.community.slug, doc_id=doc.id, _external=True) }})
+      ({{ url_for("documents.document_view", community_id=digest.community.slug, doc_id=doc.id, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }})
   {%- endfor %}
 {%- endif %}
 {%- if digest.new_conversations %}
@@ -36,22 +36,22 @@ Dans la communauté: {{ digest.community.name }}
   Nouvelles conversations:
   {%- for thread in digest.new_conversations %}
     * {{ thread }} - Posté par {{ thread.creator }}.
-      ({{ url_for("forum.thread", community_id=digest.community.slug, thread_id=thread.id, _external=True) }})
+      ({{ url_for("forum.thread", community_id=digest.community.slug, thread_id=thread.id, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }})
   {%- endfor %}
 {% endif %}
 {%- if digest.updated_conversations %}
   Conversations mises à jour:
   {%- for thread in digest.updated_conversations %}
     * {{ thread }}
-      ({{ url_for("forum.thread", community_id=digest.community.slug, thread_id=thread.id, _external=True) }})
+      ({{ url_for("forum.thread", community_id=digest.community.slug, thread_id=thread.id, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }})
   {%- endfor %}
 {%- endif %}
 {%- endfor %}
 
 Vous recevez ce mail car vous êtes abonné aux notifications de vos communautés.
 Vous pouvez modifier les notifications que vous recevez en allant sur la page
-"Préférences" ({{ url_for("preferences.index", _external=True, _scheme="https")
+"Préférences" ({{ url_for("preferences.index", _external=True, _scheme=config['PREFERRED_URL_SCHEME'])
 }}) de l'application.
 Vous pouvez également vous désabonner directement en suivant ce lien:
-  {{ url_for("notifications.unsubscribe_sbe", token=token, _external=True, _scheme="https") }}
+  {{ url_for("notifications.unsubscribe_sbe", token=token, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}
 

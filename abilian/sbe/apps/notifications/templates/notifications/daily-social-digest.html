@@ -13,7 +13,8 @@
 
       {% for user in digest.new_members %}
         <p>
-          <a href="{{ url_for("social.user", user_id=user.id, _external=True) }}">{{ user }}</a>
+          <a href="{{ url_for("social.user", user_id=user.id, _external=True,
+                              _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ user }}</a>
         </p>
       {% endfor %}
     {% endif %}
@@ -23,7 +24,8 @@
 
       {% for doc in digest.new_documents %}
         <p><a href="{{ url_for("documents.document_view",community_id=digest.community.slug,
-                            doc_id=doc.id, _external=True) }}">{{ doc }}</a><br>
+                               doc_id=doc.id, _external=True,
+                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ doc }}</a><br>
           <small>Posté par {{ doc.creator }}.</small>
         </p>
       {% endfor %}
@@ -34,8 +36,9 @@
 
       {% for doc in digest.updated_documents %}
         <p><a href="{{ url_for("documents.document_view",
-                                   community_id=digest.community.slug,
-                                   doc_id=doc.id, _external=True) }}">{{ doc }}</a>.
+                               community_id=digest.community.slug,
+                               doc_id=doc.id, _external=True,
+                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ doc }}</a>.
         </p>
       {% endfor %}
     {% endif %}
@@ -45,8 +48,9 @@
 
       {% for thread in digest.new_conversations %}
         <p><a href="{{ url_for("forum.thread",
-                                   community_id=digest.community.slug,
-                                   thread_id=thread.id, _external=True) }}">{{ thread }}</a><br>
+                               community_id=digest.community.slug,
+                               thread_id=thread.id, _external=True,
+                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ thread }}</a><br>
           <small>Posté par {{ thread.creator }}.</small>
         </p>
       {% endfor %}
@@ -57,8 +61,9 @@
 
       {% for thread in digest.updated_conversations %}
         <p><a href="{{ url_for("forum.thread",
-                                   community_id=digest.community.slug,
-                                   thread_id=thread.id, _external=True) }}">{{ thread }}</a>
+                               community_id=digest.community.slug,
+                               thread_id=thread.id, external=True,
+                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ thread }}</a>
         </p>
       {% endfor %}
     {% endif %}
@@ -71,10 +76,9 @@
   <br>
   Vous pouvez modifier les notifications que vous recevez en
   allant sur la page
-  <a href="{{ url_for("preferences.index", _external=True, _scheme="https") }}">Préférences</a>
+  <a href="{{ url_for("preferences.index", _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}">Préférences</a>
   de l'application.
   <br>
   Vous pouvez également vous désabonner directement en suivant
-  <a href="{{ url_for("notifications.unsubscribe_sbe", token=token, _external=True, _scheme="https") }}">ce
-    lien</a>.
+  <a href="{{ url_for("notifications.unsubscribe_sbe", token=token, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}">ce lien</a>.
 {% endblock %}
