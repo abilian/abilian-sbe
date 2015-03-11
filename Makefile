@@ -1,6 +1,5 @@
 .PHONY: test full-test pep8 clean setup default
 
-
 SRC=abilian/sbe
 PKG=$(SRC)
 
@@ -63,7 +62,7 @@ endif
 # testing
 #
 test:
-	py.test --tb=short $(SRC) tests
+	py.test --tb=short $(PKG) tests
 
 test-with-coverage:
 	py.test --tb=short --durations 10 --cov $(PKG) --cov-config etc/coverage.rc \
@@ -138,6 +137,7 @@ clean:
 	rm -rf static/gen static/.webassets-cache
 	rm -rf htmlcov
 	rm -rf junit-py27.xml ghostdriver.log coverage.xml
+	rm -rf tests.functional.test/
 
 tidy: clean
 	rm -rf .tox
