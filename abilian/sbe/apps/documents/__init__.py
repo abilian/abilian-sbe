@@ -11,10 +11,10 @@ def register_plugin(app):
   sbe.init_app(app)
   from .views import documents
   from .models import setup_listener
-  #from .webdav.views import webdav
-  #from .cmis.atompub import atompub
+  from .commands import manager
 
   app.register_blueprint(documents)
   setup_listener()
-  #app.register_blueprint(webdav)
-  #app.register_blueprint(atompub)
+
+  if app.script_manager:
+    app.script_manager.add_command('documents', manager)

@@ -5,14 +5,12 @@ from __future__ import absolute_import
 
 import sqlalchemy as sa
 from flask.ext.script import Manager
-from abilian.core.commands.base import manager as abilian_manager
 
 from . import tasks
 from .models import Document
 
 manager = Manager(description='SBE documents actions',
                   help='SBE documents actions')
-abilian_manager.add_command('documents', manager)
 
 @manager.command
 def antivirus():
