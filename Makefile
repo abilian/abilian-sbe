@@ -12,12 +12,9 @@ default: test
 
 
 #
+# Environment
 #
-#
-develop: setup-git
-	@echo "--> Installing dependencies"
-	pip install -U setuptools
-	pip install -e .
+develop: setup-git update-env
 
 setup-git:
 	@echo "--> Configuring git and installing hooks"
@@ -25,6 +22,13 @@ setup-git:
 	cd .git/hooks && ln -sf ../../tools/hooks/* ./
 	@echo ""
 
+update-env:
+	@echo "--> Installing/updating dependencies"
+	pip install -U setuptools
+	pip install -U -r requirements.txt
+	pip install -U -r etc/dev-requirements.txt
+	pip install -e .
+	@echo ""
 
 #
 # testing

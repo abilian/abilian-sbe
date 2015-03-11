@@ -1,8 +1,9 @@
 # Additional packages for development.
 
-# Our favorite test runner with some plugins
+# Our favorite test runner with some plugins and CI builder
 pytest>=2.4.0
 pytest-xdist
+tox
 
 # Backport of Python 3 mocking library
 mock>=1.0.1

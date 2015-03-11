@@ -15,8 +15,10 @@ _install_requires = pip.req.parse_requirements(
     'requirements.txt', session=session)
 install_requires = [str(ir.req) for ir in _install_requires]
 _dev_requires = pip.req.parse_requirements(
-    'dev-requirements.txt', session=session)
+    'etc/dev-requirements.txt', session=session)
 dev_requires = [str(ir.req) for ir in _dev_requires]
+
+print dev_requires
 
 # install_requires = deps.parse_requirements([u'requirements.txt'])
 # dependency_links = deps.parse_dependency_links([u'requirements.txt'])

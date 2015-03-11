@@ -26,8 +26,8 @@ before_install:
 
 # Install Python dependencies
 install:
-  - pip install -r dev-requirements.txt --download-cache $HOME/.pip-cache
-  - pip install -r git-requirements.txt --download-cache $HOME/.pip-cache
+  - pip install -r etc/dev-requirements.txt --download-cache $HOME/.pip-cache
+  - pip install -r etc/git-requirements.txt --download-cache $HOME/.pip-cache
   - pip install -e .
   - pip --version
   - pip list

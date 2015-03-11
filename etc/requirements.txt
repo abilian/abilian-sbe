@@ -1,0 +1,9 @@
+# Abilian Core
+abilian-core
+
+# Used for language detection in the document management app.
+guess-language-spirit>=0.5.1,<0.6
+# TODO: replace by langid ?
+
+# Email validator, will probably move to abilian-core later.
+#validate_email>=1.2,<2.0
