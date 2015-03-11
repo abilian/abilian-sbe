@@ -11,7 +11,7 @@ Dans la communauté: {{ digest.community.name }}
   Nouveaux membres:
   {%- for user in digest.new_members %}
     * {{ user }}
-      ({{ url_for("social.user", user_id=user.id, _external=True, _scheme=config['PREFERRED_URL_SCHEME'])) }})
+      ({{ url_for("social.user", user_id=user.id, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }})
   {%- endfor %}
 {%- endif %}
 {%- if digest.new_documents %}
