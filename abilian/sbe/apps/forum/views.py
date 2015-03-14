@@ -30,6 +30,7 @@ forum = Blueprint("forum", __name__,
                   template_folder="templates")
 route = forum.route
 
+
 @forum.url_value_preprocessor
 def init_forum_values(endpoint, values):
   g.current_tab = 'forum'
@@ -209,7 +210,7 @@ def attachment_download(thread_id, post_id, attachment_id):
   response.headers['content-type'] = attachment.content_type
   content_disposition = (
     'attachment;filename="{}"'.format(quote(attachment.name.encode('utf8')))
-    )
+  )
   response.headers['content-disposition'] = content_disposition
   return response
 

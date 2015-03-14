@@ -39,7 +39,6 @@ DEFAULT_USER_MUGSHOT = pkgutil.get_data(
   'static/images/silhouette_unknown.png')
 
 
-
 def make_tabs(user):
   return [
     dict(id='profile', label=_(u'Profile'), link=url_for(user, tab='profile')),
@@ -91,10 +90,10 @@ def users_dt_json():
 
   count = q.count()
   SORT_COLS = {
-    1: [], # will be set to [User.last_name, User.first_name]
+    1: [],  # will be set to [User.last_name, User.first_name]
     2: [User.created_at],
     3: [User.last_active],
-    }
+  }
   columns = list(SORT_COLS.get(sort_col, []))
   columns.extend([func.lower(User.last_name), func.lower(User.first_name)])
 
@@ -209,7 +208,6 @@ class UserProfileEdit(ObjectEdit):
 
 
 social.route("/users/<int:user_id>/edit")(UserProfileEdit.as_view('user_edit'))
-
 
 
 @social.route("/users/<int:user_id>", methods=['POST'])

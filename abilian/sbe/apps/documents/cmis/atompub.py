@@ -31,13 +31,13 @@ MIME_TYPE_CMIS_ACL = "application/cmisacl+xml"
 atompub = Blueprint("cmis", __name__, url_prefix="/cmis/atompub")
 route = atompub.route
 
+
 #
 # Dummy for now
 #
 class Logger(object):
   def debug(self, msg):
     print(msg)
-
 
 log = Logger()
 
@@ -99,17 +99,20 @@ def get_options(args):
     d[k] = v
   return d
 
+
 def get_document(id):
   doc = repository.get_document_by_id(id)
   if not doc:
     raise NotFound
   return doc
 
+
 def get_folder(id):
   obj = repository.get_folder_by_id(id)
   if not obj:
     raise NotFound
   return obj
+
 
 def get_object(id):
   obj = repository.get_object_by_id(id)
@@ -131,6 +134,7 @@ def authenticate():
 
   if (username, password) != ('admin', 'admin'):
     raise Unauthorized()
+
 
 #@atompub.errorhandler(401)
 def custom_401(error):
@@ -438,6 +442,7 @@ def getDescendants():
   id = request.args.get('id')
   log.debug("getObjectParents called on " + id)
   raise NotImplementedError()
+
 
 @route("/descendants", methods=['DELETE'])
 @route("/foldertree", methods=['DELETE'])

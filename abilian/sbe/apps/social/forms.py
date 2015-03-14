@@ -1,13 +1,10 @@
 # coding=utf-8
-import imghdr
-import PIL.Image
 
 from wtforms.fields import StringField
-from wtforms.validators import ValidationError
 from wtforms_alchemy import model_form_factory
 
 from wtforms import TextAreaField
-from flask.ext.babel import gettext as _, lazy_gettext as _l
+from flask.ext.babel import lazy_gettext as _l
 
 from abilian.web.forms import Form, widgets as abilian_widgets
 from abilian.web.forms.fields import QuerySelect2Field
@@ -28,7 +25,6 @@ class UserProfileForm(ModelForm):
 
 
 class UserProfileViewForm(UserProfileForm):
-
   communautes = QuerySelect2Field(
     u'Communautés d\'appartenance',
     get_label='name',
@@ -39,9 +35,9 @@ class UserProfileViewForm(UserProfileForm):
 
 
 class GroupForm(Form):
-
-  name = StringField(_l("Name"),
-                   filters=(strip,),
-                   validators=[required(message=_l("Name is required."))])
+  name = StringField(
+    _l("Name"),
+    filters=(strip,),
+    validators=[required(message=_l("Name is required."))])
 
   description = TextAreaField(_l("Description"))

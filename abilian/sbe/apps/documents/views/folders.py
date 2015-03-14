@@ -42,7 +42,7 @@ from .util import (
   get_folder, check_manage_access, get_document,
   check_read_access, breadcrumbs_for, check_write_access, create_document,
   get_selected_objects, edit_object, get_new_filename,
-  )
+)
 from .views import documents
 
 
@@ -109,10 +109,11 @@ def folder_json(folder_id):
     result['current_folder_selectable'] = False
 
   for folder in subfolders:
-    data = {'id': folder.id,
-            'url': folder_url(folder_id=folder.id,
-                               community_id=folder.community.slug),
-            'title': folder.title,
+    data = {
+      'id': folder.id,
+      'url': folder_url(folder_id=folder.id,
+                        community_id=folder.community.slug),
+      'title': folder.title,
     }
     folders.append(data)
 
@@ -161,9 +162,7 @@ def permissions(folder_id):
   query = query.order_by(func.lower(Group.name))
   all_groups = query.all()
 
-
   class EntryPresenter(object):
-
     _USER_FMT = (u'<a href="{{ url_for("social.user", user_id=user.id) }}">'
                  '{{ user.name }}</a>')
     _GROUP_FMT = (u'<a href="{{ url_for("social.group_home", group_id=group.id)'
@@ -732,7 +731,6 @@ def move_multiple(folder):
     elements = u', '.join(u'"{}"'.format(i.title) for i in exist_in_dest)
     flash(msg.format(elements=elements), 'error')
     return redirect(current_folder_url)
-
 
   db.session.commit()
 

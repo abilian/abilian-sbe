@@ -25,6 +25,7 @@ update-env:
 	@echo "--> Installing/updating dependencies"
 	pip install -U setuptools
 	pip install -U -r requirements.txt
+	pip install -U -r etc/git-requirements.txt
 	pip install -U -r etc/dev-requirements.txt
 	pip install -e .
 	@echo ""
