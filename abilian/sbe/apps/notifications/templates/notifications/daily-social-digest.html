@@ -62,7 +62,7 @@
       {% for thread in digest.updated_conversations %}
         <p><a href="{{ url_for("forum.thread",
                                community_id=digest.community.slug,
-                               thread_id=thread.id, external=True,
+                               thread_id=thread.id, _external=True,
                                _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ thread }}</a>
         </p>
       {% endfor %}
