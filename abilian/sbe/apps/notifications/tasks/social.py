@@ -48,8 +48,7 @@ def send_daily_social_digest():
     try:
       send_daily_social_digest_to(user)
     except:
-      app.logger.error('Error sending daily social digest',
-                       extra={'stack': True}, exc_info=True)
+      app.logger.error('Error sending daily social digest', exc_info=True)
 
 
 def send_daily_social_digest_to(user):
@@ -91,7 +90,6 @@ def send_daily_social_digest_to(user):
     return 0
 
   token = generate_unsubscribe_token(user)
-
   msg = Message(subject, sender=sender, recipients=[recipient])
   msg.body = render_template("notifications/daily-social-digest.txt",
                              digests=digests, token=token)
