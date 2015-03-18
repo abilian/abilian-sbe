@@ -1,16 +1,20 @@
+# coding=utf-8
 """
 Static configuration for the application.
 
 TODO: add more (runtime) flexibility in plugin discovery, selection
 and activation.
 """
+from __future__ import absolute_import
 
 import logging
 
 import jinja2
+from flask.ext.script import Manager
 
 from abilian.app import Application as BaseApplication
 from abilian.core.extensions import db
+from abilian.core.commands import setup_abilian_commands
 from abilian.services import converter
 
 from .apps.documents.repository import repository
@@ -44,13 +48,25 @@ class Application(BaseApplication):
   )
 
   def __init__(self, name='abilian.sbe', config=None, **kwargs):
-    BaseApplication.__init__(self, name, config=config,
-                             instance_relative_config=True, **kwargs)
-
-    self.register_jinja_loaders(jinja2.PackageLoader('abilian.sbe', 'templates'))
+    BaseApplication.__init__(self, name, config=config, **kwargs)
+    self.register_jinja_loaders(
+      jinja2.PackageLoader('abilian.sbe', 'templates')
+    )
 
   def init_extensions(self):
     BaseApplication.init_extensions(self)
     sbe.init_app(self)
     repository.init_app(self)
     converter.init_app(self)
+
+
+command_manager = Manager(create_app)
+setup_abilian_commands(command_manager)
+
+
+def command_entry_point():
+  command_manager.run()
+
+
+if __name__ == '__main__':
+  command_entry_point()
