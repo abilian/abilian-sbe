@@ -1,6 +1,6 @@
 {%- set thread=post.thread %}
 {%- set community=thread.community %}
-{{ _("_____Write above this line to post_____") }}
+{{ MAIL_REPLY_MARKER }}
 {{ post.creator }} a posté un nouveau message dans la communauté {{ community.name }}:
 
   {{ post.title }}: ({{ url_for(post, _external=True) }})

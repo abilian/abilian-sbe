@@ -117,9 +117,11 @@ def send_post_to_user(community, post, member):
   else:
       msg = Message(subject, sender=sender, recipients=[recipient])
   msg.body = render_template("forum/mail/new_message.txt",
-                             community=community, post=post, member=member)
+                             community=community, post=post, member=member,
+                             MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,)
   msg.html = render_template("forum/mail/new_message.html",
-                             community=community, post=post, member=member)
+                             community=community, post=post, member=member,
+                             MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,)
 
   logger.debug("Sending new post by email to %s" % member.email)
   try:

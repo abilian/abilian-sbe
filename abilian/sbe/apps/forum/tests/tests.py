@@ -53,12 +53,10 @@ class Test(TestCase):
 
     message = get_emailmessage_from_file('reply.email')
     newpost = process(message, marker)
-    print newpost
     assert newpost
 
     message = get_emailmessage_from_file('reply_nocharset_specified.email')
     newpost = process(message, marker)
-    print newpost
     assert newpost
 
     message = get_emailmessage_from_file('reply_no_marker.email')
