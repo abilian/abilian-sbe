@@ -12,7 +12,7 @@ from email.parser import FeedParser
 from flask import url_for
 from abilian.core.models.subjects import User
 
-from abilian.sbe.apps.communities.models import Community, MANAGER, READER
+from abilian.sbe.apps.communities.models import MANAGER
 from abilian.sbe.testing import BaseTestCase
 from abilian.sbe.apps.communities.tests.base import (
   CommunityBaseTestCase, CommunityIndexingTestCase,

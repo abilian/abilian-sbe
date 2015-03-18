@@ -9,7 +9,6 @@ import fileinput
 from email.parser import FeedParser
 
 from flask.ext.script import Manager
-from abilian.core.commands.base import manager as abilian_manager
 
 from .tasks import process_email, check_maildir
 

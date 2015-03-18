@@ -253,7 +253,7 @@ def check_maildir():
   home = expanduser("~")
   maildirpath = str(Path(home) / 'Maildir')
   src_mdir = mailbox.Maildir(maildirpath,
-                            factory=mailbox.MaildirMessage)
+                             factory=mailbox.MaildirMessage)
 
   src_mdir.lock()  # Useless but recommended if old mbox is used by error
 
