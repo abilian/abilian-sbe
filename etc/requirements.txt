@@ -7,3 +7,6 @@ guess-language-spirit>=0.5.1,<0.6
 
 # Email validator, will probably move to abilian-core later.
 #validate_email>=1.2,<2.0
+
+# Charset detection
+chardet
