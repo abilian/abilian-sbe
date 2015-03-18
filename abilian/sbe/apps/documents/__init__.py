@@ -5,7 +5,6 @@ Folders / Documents module
 from __future__ import absolute_import
 
 from abilian.sbe.extension import sbe
-from . import commands
 
 def register_plugin(app):
   sbe.init_app(app)

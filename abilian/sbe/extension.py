@@ -28,6 +28,7 @@ class AbilianSBE(object):
   def init_app(self, app):
     # False: it's ok if antivirus task was run but service couldn't get a result
     app.config.setdefault('ANTIVIRUS_CHECK_REQUIRED', False)
+    app.config.setdefault('SBE_FORUM_REPLY_BY_MAIL', False)
 
     if FQCN in app.extensions:
       return
@@ -48,6 +49,7 @@ class AbilianSBE(object):
 
 FQCN = fqcn(AbilianSBE)
 sbe = AbilianSBE()
+
 
 def inject_template_utils():
   return dict(uuid=uuid.uuid1)

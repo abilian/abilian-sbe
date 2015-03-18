@@ -1,0 +1,63 @@
+Content-Type: multipart/mixed; boundary="===============1787111805686484372=="
+MIME-Version: 1.0
+Subject: [My Community] Brand new thread
+From: test@testcase.app.tld
+To: test+IjMvNC81LzEi.jwBnvOMFiJCdczKfu3-1DS-k2zs@testcase.app.tld
+Date: Tue, 10 Mar 2015 18:33:57 +0100
+Message-ID: <20150310173357.5815.25177@yvon-VirtualBox>
+Sender: test@testcase.app.tld
+
+--===============1787111805686484372==
+Content-Type: multipart/alternative;
+ boundary="===============7630008712986776541=="
+MIME-Version: 1.0
+
+--===============7630008712986776541==
+Content-Type: other/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+coucou here is a reply
+_____Write above this line to post_____
+SYSTEM a posté un nouveau message dans la communauté My Community:
+
+  Brand new thread: (http://localhost/communities/my-community/forum/4/#post_6)
+
+«
+    my cherished post
+»
+
+
+
+
+Vous recevez ce message car vous êtes membres de la communauté My Community.
+--===============7630008712986776541==
+Content-Type: other/html; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+<html>
+<body>
+<p> coucou here is a reply</p>
+<p>_____Write above this line to post_____</p>
+<p style="color: dimgray;">
+  SYSTEM a posté un nouveau message dans la communauté
+  <a href="http://localhost/communities/my-community/#thread_6">My Community</a>.
+</p>
+
+<hr>
+
+<h1><a href="http://localhost/communities/my-community/forum/4/#post_6">Brand new thread</a>
+</h1>
+
+my cherished post
+
+<hr>
+
+<p style="color: dimgray;">
+  Vous recevez ce message car vous êtes membres de la communauté
+  My Community</p>
+</body>
+</html>
+--===============7630008712986776541==--
+
+--===============1787111805686484372==--
