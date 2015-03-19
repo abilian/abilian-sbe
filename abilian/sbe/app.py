@@ -16,7 +16,9 @@ from abilian.app import Application as BaseApplication
 from abilian.core.extensions import db
 from abilian.core.commands import setup_abilian_commands
 from abilian.services import converter
-
+from abilian.core.celery import (
+  FlaskLoader as CeleryBaseLoader, FlaskCelery as BaseCelery
+)
 from .apps.documents.repository import repository
 from .extension import sbe
 
@@ -30,6 +32,13 @@ logger = logging.getLogger(__name__)
 
 def create_app(config=None):
   return Application(config=config)
+
+# loader to be used by celery workers
+class CeleryLoader(CeleryBaseLoader):
+  flask_app_factory = 'abilian.sbe.app.create_app'
+
+
+celery = BaseCelery(loader=CeleryLoader)
 
 
 class Application(BaseApplication):
