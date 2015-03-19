@@ -11,7 +11,7 @@ import bleach
 import chardet
 from pathlib import Path
 from itsdangerous import URLSafeSerializer
-from flask import render_template, current_app, g
+from flask import current_app, g
 from flask.ext.mail import Message
 from flask.ext.babel import get_locale
 from celery.task import periodic_task
@@ -19,7 +19,7 @@ from celery.utils.log import get_task_logger
 from celery.schedules import crontab
 from abilian.core.extensions import celery, mail, db
 from abilian.core.models.subjects import User
-from abilian.i18n import _l
+from abilian.i18n import _l, render_template_i18n
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_TAGS
 from .models import Thread
@@ -116,12 +116,14 @@ def send_post_to_user(community, post, member):
                   reply_to=replyto)
   else:
       msg = Message(subject, sender=sender, recipients=[recipient])
-  msg.body = render_template("forum/mail/new_message.txt",
-                             community=community, post=post, member=member,
-                             MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,)
-  msg.html = render_template("forum/mail/new_message.html",
-                             community=community, post=post, member=member,
-                             MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,)
+  msg.body = render_template_i18n(
+      "forum/mail/new_message.txt",
+      community=community, post=post, member=member,
+      MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,)
+  msg.html = render_template_i18n(
+      "forum/mail/new_message.html",
+      community=community, post=post, member=member,
+      MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,)
 
   logger.debug("Sending new post by email to %s" % member.email)
   try:

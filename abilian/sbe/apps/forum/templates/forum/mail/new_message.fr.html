@@ -4,8 +4,8 @@
 {%- set community=thread.community %}
 <p>{{ MAIL_REPLY_MARKER }}</p>
 <p style="color: dimgray;">
-  {{ post.creator }} posted in the
-  <a href="{{ url_for("communities.community", community_id=community.slug, _external=True) }}#thread_{{ post.id }}">{{ community.name }}</a> community.
+  {{ post.creator }} a posté un nouveau message dans la communauté
+  <a href="{{ url_for("communities.community", community_id=community.slug, _external=True) }}#thread_{{ post.id }}">{{ community.name }}</a>.
 </p>
 
 <hr>
@@ -16,7 +16,7 @@
 {{ post.body_html|safe }}
 
 {%- if post.attachments %}
-<h3>Attachment(s)</h3>
+<h3>Pièce(s) jointe(s)</h3>
 <div id="attachments">
   <ul>
     {%- for attachment in post.attachments %}
@@ -34,7 +34,7 @@
 <hr>
 
 <p style="color: dimgray;">
-  You received this message because you are a member of the
-  {{ community.name }} community</p>
+  Vous recevez ce message car vous êtes membres de la communauté
+  {{ community.name }}</p>
 </body>
 </html>

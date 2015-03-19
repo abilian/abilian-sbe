@@ -1,7 +1,7 @@
 {%- set thread=post.thread %}
 {%- set community=thread.community %}
 {{ MAIL_REPLY_MARKER }}
-{{ post.creator }} posted in the {{ community.name }} community:
+{{ post.creator }} a posté un nouveau message dans la communauté {{ community.name }}:
 
   {{ post.title }}: ({{ url_for(post, _external=True) }})
 
@@ -14,7 +14,7 @@
 {%- if post.attachments %}
 
 
-Attachment(s):
+Pièce(s) jointe(s):
 {%- for attachment in post.attachments %}
    * {{ attachment.name }} ({{ attachment.content_length|filesize|striptags }})
      ({{ url_for(attachment, _external=True) }})
@@ -24,4 +24,4 @@ Attachment(s):
 
 
 
-You received this message because you are a member of the {{ community.name }} community.
+Vous recevez ce message car vous êtes membres de la communauté {{ community.name }}.
