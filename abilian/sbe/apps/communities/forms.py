@@ -30,10 +30,12 @@ class CommunityForm(Form):
                       choices=[(_l(u'informative'), 'informative'),
                                (_l(u'participative'), 'participative')])
 
-  has_documents = BooleanField(label=_l(u"Has documents"), widget=BooleanWidget(on_off_mode=True))
-  has_wiki = BooleanField(label=_l(u"Has a wiki"), widget=BooleanWidget(on_off_mode=True))
-  has_forum = BooleanField(label=_l(u"Has a forum"), widget=BooleanWidget(on_off_mode=True))
-  is_crm_visible = BooleanField(label=_l(u'visible in CRM'), widget=BooleanWidget(on_off_mode=True))
+  has_documents = BooleanField(label=_l(u"Has documents"),
+                               widget=BooleanWidget(on_off_mode=True))
+  has_wiki = BooleanField(label=_l(u"Has a wiki"),
+                          widget=BooleanWidget(on_off_mode=True))
+  has_forum = BooleanField(label=_l(u"Has a forum"),
+                           widget=BooleanWidget(on_off_mode=True))
 
   def validate_name(self, field):
     name = field.data = field.data.strip()

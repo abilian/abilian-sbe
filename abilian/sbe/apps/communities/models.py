@@ -141,10 +141,6 @@ class Community(Entity):
   #: True if this community has a forum
   has_forum = Column(Boolean, nullable=False, default=True)
 
-  #: True if membership to this community can be managed from the CRM
-  is_crm_visible = Column(Boolean, nullable=False, default=False,
-                          server_default=sa.text('FALSE'))
-
   #: One of 'participative' or 'informative
   type = Column(String(20), nullable=False, default="informative")
 
