@@ -56,6 +56,8 @@ class Application(BaseApplication):
     "abilian.sbe.apps.social",
   )
 
+  script_manager = '.app.command_manager'
+
   def __init__(self, name='abilian.sbe', config=None, **kwargs):
     BaseApplication.__init__(self, name, config=config, **kwargs)
     self.register_jinja_loaders(
