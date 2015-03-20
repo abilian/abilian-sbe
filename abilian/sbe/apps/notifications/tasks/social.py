@@ -10,10 +10,11 @@ from validate_email import validate_email
 from celery.task import periodic_task
 from celery.schedules import crontab
 
-from flask import render_template, current_app as app
+from flask import current_app as app
 from flask.ext.mail import Message
 from flask.ext.security.utils import md5
 
+from abilian.i18n import render_template_i18n
 from abilian.core.models.subjects import User
 from abilian.services.activity import ActivityEntry
 from abilian.services.auth.views import get_serializer
@@ -91,9 +92,9 @@ def send_daily_social_digest_to(user):
 
   token = generate_unsubscribe_token(user)
   msg = Message(subject, sender=sender, recipients=[recipient])
-  msg.body = render_template("notifications/daily-social-digest.txt",
+  msg.body = render_template_i18n("notifications/daily-social-digest.txt",
                              digests=digests, token=token)
-  msg.html = render_template("notifications/daily-social-digest.html",
+  msg.html = render_template_i18n("notifications/daily-social-digest.html",
                              digests=digests, token=token)
 
   mail.send(msg)
