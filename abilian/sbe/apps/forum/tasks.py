@@ -108,7 +108,8 @@ def send_post_to_user(community, post, member):
   subject = u'[%s] %s' % (community.name, post.title)
   config = current_app.config
   sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
-  if config['SBE_FORUM_REPLY_BY_MAIL'] and config['MAIL_ADDRESS_TAG_CHAR'] is not None:
+  SBE_FORUM_REPLY_BY_MAIL = config.get('SBE_FORUM_REPLY_BY_MAIL', False)
+  if SBE_FORUM_REPLY_BY_MAIL and config['MAIL_ADDRESS_TAG_CHAR'] is not None:
     name = sender.rsplit('@', 1)[0]
     domain = sender.rsplit('@', 1)[1]
     replyto = build_reply_email_address(name, post, member, domain)
@@ -119,11 +120,13 @@ def send_post_to_user(community, post, member):
   msg.body = render_template_i18n(
       "forum/mail/new_message.txt",
       community=community, post=post, member=member,
-      MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,)
+      MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
+      SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,)
   msg.html = render_template_i18n(
       "forum/mail/new_message.html",
       community=community, post=post, member=member,
-      MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,)
+      MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
+      SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,)
 
   logger.debug("Sending new post by email to %s" % member.email)
   try:

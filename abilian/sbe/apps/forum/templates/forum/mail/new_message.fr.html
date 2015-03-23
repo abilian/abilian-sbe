@@ -2,7 +2,9 @@
 <body>
 {%- set thread=post.thread %}
 {%- set community=thread.community %}
+{%- if SBE_FORUM_REPLY_BY_MAIL%}
 <p>{{ MAIL_REPLY_MARKER }}</p>
+{%- endif %}
 <p style="color: dimgray;">
   {{ post.creator }} a posté un nouveau message dans la communauté
   <a href="{{ url_for("communities.community", community_id=community.slug, _external=True) }}#thread_{{ post.id }}">{{ community.name }}</a>.

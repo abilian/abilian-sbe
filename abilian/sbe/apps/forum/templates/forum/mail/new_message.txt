@@ -1,6 +1,8 @@
 {%- set thread=post.thread %}
 {%- set community=thread.community %}
+{%- if SBE_FORUM_REPLY_BY_MAIL%}
 {{ MAIL_REPLY_MARKER }}
+{%- endif %}
 {{ post.creator }} posted in the {{ community.name }} community:
 
   {{ post.title }}: ({{ url_for(post, _external=True) }})
