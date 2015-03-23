@@ -51,7 +51,6 @@ for attr in ALLOWED_TAGS:
   WIDGET_ALLOWED[attr] = allowed
 
 
-
 class ThreadForm(Form):
   title = StringField(label=_l(u"Title"),
                       filters=(strip,),
@@ -62,7 +61,7 @@ class ThreadForm(Form):
                           validators=[required()])
   attachments = FileField(label=_l(u'Attachments'), multiple=True,
                           validators=[optional()])
-  send_by_email = BooleanField(label=_l(u"Send by email?"))
+  send_by_email = BooleanField(label=_l(u"Send by email?"), default=True)
 
   def validate_message(self, field):
     field.data = bleach.clean(field.data, tags=ALLOWED_TAGS,
@@ -76,7 +75,7 @@ class CommentForm(Form):
                           validators=[required()])
   attachments = FileField(label=_l(u'Attachments'), multiple=True,
                           validators=[optional()])
-  send_by_email = BooleanField(label=_l(u"Send by email?"))
+  send_by_email = BooleanField(label=_l(u"Send by email?"), default=True)
 
   def validate_message(self, field):
     field.data = bleach.clean(field.data, tags=ALLOWED_TAGS,
