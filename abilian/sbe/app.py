@@ -54,6 +54,7 @@ class Application(BaseApplication):
     "abilian.sbe.apps.forum",
     "abilian.sbe.apps.communities",
     "abilian.sbe.apps.social",
+    "abilian.sbe.apps.preferences",
   )
 
   script_manager = '.app.command_manager'
