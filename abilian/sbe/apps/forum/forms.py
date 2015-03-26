@@ -55,7 +55,7 @@ class ThreadForm(Form):
   title = StringField(label=_l(u"Title"),
                       filters=(strip,),
                       validators=[required()])
-  message = TextAreaField(label=_l("Message"),
+  message = TextAreaField(label=_l(u"Message"),
                           widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
                           filters=(strip,),
                           validators=[required()])
