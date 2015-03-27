@@ -24,7 +24,7 @@ The following commands will create a virtualenv for the application, install a s
 $ virtualenv sbe
 $ cd sbe; source bin/activate
 $ pip install -U setuptools pip
-$ pip install abilian.sbe
+$ pip install abilian-sbe
 $ python -m abilian.sbe.app setup_sbe_app
 ```
 
