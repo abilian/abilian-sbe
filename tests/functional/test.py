@@ -8,8 +8,10 @@ Also, we're using pytest-splinter
 (https://github.com/pytest-dev/pytest-splinter) to inject the browser as
 a pytest fixture.
 """
-
+import tempfile
+import shutil
 import multiprocessing
+from pathlib import Path
 import pytest
 import pytest_splinter.plugin  # noqa
 
@@ -26,10 +28,21 @@ ROOT = "http://localhost:{}".format(PORT)
 def splinter_webdriver(request):
   return 'phantomjs'
 
+@pytest.fixture(scope='module')
+def instance_path(request):
+  """
+  creates a temporary directory for instance data
+  """
+  tmp_dir = tempfile.mkdtemp(prefix='tmp-pytest-', suffix='-abilian-sbe')
+
+  def clear():
+    shutil.rmtree(tmp_dir)
+
+  request.addfinalizer(clear)
 
 @pytest.fixture(scope='module')
-def app(request):
-  app = Application()
+def app(request, instance_path):
+  app = Application(instance_path=instance_path)
 
   # FIXME: need a working environment (DB, Redis...)
   # with app.app_context():

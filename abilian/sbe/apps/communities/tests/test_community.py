@@ -176,11 +176,7 @@ class CommunityDbTestCase(BaseTestCase):
 
 
 class CommunityIndexingTestCase(BaseIndexingTestCase):
-  __name__ = 'dummy'  # Remove when unskipping the test below.
 
-  # Currently failing randomly in Whoosh ("ValueError: 3 is not unicode or
-  # sequence")
-  @skip
   def test_community_indexed(self):
     svc = self.svc
     obj_types = (Community.entity_type,)
