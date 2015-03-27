@@ -35,7 +35,7 @@ __all__ = ['create_app', 'db']
 logger = logging.getLogger(__name__)
 
 def create_app(config=None):
-  return Application(name='abilian_sbe', config=config)
+  return Application(config=config)
 
 
 command_manager = Manager(create_app)
@@ -67,7 +67,7 @@ class Application(BaseApplication):
 
   script_manager = command_manager
 
-  def __init__(self, name='abilian.sbe', config=None, **kwargs):
+  def __init__(self, name='abilian_sbe', config=None, **kwargs):
     BaseApplication.__init__(self, name, config=config, **kwargs)
     self.register_jinja_loaders(
       jinja2.PackageLoader('abilian.sbe', 'templates')
