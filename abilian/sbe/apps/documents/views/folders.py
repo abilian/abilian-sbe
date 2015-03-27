@@ -619,18 +619,30 @@ def download_multiple(folder):
       zip_folder(zipfile, subfolder, rel_path(path, subfolder))
     return zipfile
 
-  zip_fn = tempfile.mktemp()
+  # if using upstream send file: just create a temps file.
+  # if app is streaming itself: use NamedTemporaryFile so that file is removed
+  # on close()
+  temp_factory = (tempfile.mktemp if current_app.use_x_sendfile
+                  else tempfile.NamedTemporaryFile)
+  zip_fn = temp_factory(prefix='tmp-' + current_app.name + '-',
+                        suffix='.zip')
   with ZipFile(zip_fn, "w") as zipfile:
     for doc in docs:
       zipfile.writestr(doc.title, doc.content)
     for subfolder in folders:
       zip_folder(zipfile, subfolder, subfolder.title)
 
-  # TODO: find a way to remove the temp zip file after it has been sent.
+  if not isinstance(zip_fn, str):
+    zip_fn.seek(0, os.SEEK_END)
+    size = zip_fn.tell()
+    zip_fn.seek(0)
+  else:
+    size = os.path.getsize(zip_fn)
+
   resp = send_file(zip_fn, mimetype="application/zip", as_attachment=True,
                    attachment_filename=quote(
                      folder.title.encode("utf8") + ".zip"))
-  resp.headers.add('Content-Length', str(os.path.getsize(zip_fn)))
+  resp.headers.add('Content-Length', str(size))
   return resp
 
 
