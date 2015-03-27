@@ -5,13 +5,13 @@ Prerequisites (native dependencies)
 -----------------------------------
 
 - Python 2.7, `virtualenv`, `pip`
-- [Redis|http://redis.io/]
+- [Redis](http://redis.io/)
 - Sqlite, or a postgresql database.
 - A few image manipulation libraries (`libpng`, `libjpeg`...)
 - `poppler-utils`, `unoconv`, `LibreOffice`, `ImageMagick`.
-- [{Less}|http://lesscss.org/] css pre-processor
+- [{Less}](http://lesscss.org/) css pre-processor
 - A Java environment (JRE 1.7 for example). The
-  [closure compiler|https://developers.google.com/closure/compiler/] is used for
+  [closure compiler](https://developers.google.com/closure/compiler/) is used for
   minifying javascript files. You don't have to install the compiler yourself,
   but a Java environment is required.
 
