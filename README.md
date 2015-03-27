@@ -1,31 +1,32 @@
-About
-=====
-
-TODO.
-
-
-
-
 Install
 =======
 
 Prerequisites (native dependencies)
 -----------------------------------
 
-- Python 2.7
+- Python 2.7, `virtualenv`, `pip`
+- [Redis|http://redis.io/]
+- Sqlite, or a postgresql database.
 - A few image manipulation libraries (`libpng`, `libjpeg`...)
 - `poppler-utils`, `unoconv`, `LibreOffice`, `ImageMagick`.
-- `pip`
+- [{Less}|http://lesscss.org/] css pre-processor
+- A Java environment (JRE 1.7 for example). The
+  [closure compiler|https://developers.google.com/closure/compiler/] is used for
+  minifying javascript files. You don't have to install the compiler yourself,
+  but a Java environment is required.
 
-Look at the `fabfile.py` for the exact list.
+Get a working application
+=========================
 
-Python modules
---------------
+The following commands will create a virtualenv for the application, install a script named `abilian_sbe`, launch development server and open a setupwizard in your browser:
 
-Create a virtualenv (ex: `mkvirtualenv yaka`, assuming you have mkvirtualenv installed).
-
-Then run `pip install -r deps.txt` or `python setup.py develop`.
-
+```shell
+$ virtualenv sbe
+$ cd sbe; source bin/activate
+$ pip install -U setuptools pip
+$ pip install abilian.sbe
+$ python -m abilian.sbe.app setup_sbe_app
+```
 
 MAC OS + Homebrew
 -----------------
@@ -62,43 +63,16 @@ Install [tox](http://pypi.python.org/pypi/tox). Run `tox -e ALL`.
   database, and user/password; tox uses environment variables `POSTGRES_HOST`,
   `POSTGRES_PORT`, `POSTGRES_DB`, `POSTGRES_USER`, `POSTGRES_PASSWORD`)
 
-On a VM
--------
-
-1. Install [vagrant](http://vagrantup.com/) and Fabric (`pip install fabric`).
-
-2. Download a box:
-
-        vagrant box add precise64 http://files.vagrantup.com/precise64.box
-
-3. Use `fabric` and `vagrant` to run tests:
-
-        vagrant up
-        fab vagrant upgrade setup
-        fab vagrant push stage deploy
-
-
-Deploy
-======
-
-Assuming you deploying to an Ubuntu Precise Pangolin (12.04 LTS) server:
-
-1. Edit the `fabfile.py` and set the address of your server.
-
-2. Run `fab upgrade setup deploy` from you development machine.
-
-3. On the server, verify settings in `config.ini`, then start the server
-   manually (run `. env/bin/activate` then `make run`).  (This will be automated
-   later.)
-
 Running with gunicorn
 ---------------------
 
-gunicorn abilian.sbe.app.create_app()'
+```shell
+gunicorn 'abilian.sbe.app.create_app()'
+```
 
 Build Status
 ============
 
 The project is under continuous integration with Travis:
 
-[![Build Status](https://secure.travis-ci.org/sfermigier/yaka.png?branch=master)](https://secure.travis-ci.org/#!/sfermigier/yaka)
+[![Build Status](https://travis-ci.org/abilian/abilian-sbe.svg?branch=master)](https://travis-ci.org/abilian/abilian-sbe)
