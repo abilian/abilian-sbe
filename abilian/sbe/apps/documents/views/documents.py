@@ -10,6 +10,7 @@ from flask import (redirect, request, make_response, flash, g,
 from flask.ext.mail import Message
 from flask.ext.babel import gettext as _
 
+from abilian.i18n import render_template_i18n
 from abilian.core.extensions import db, mail
 from abilian.core.signals import activity
 from abilian.services import audit_service
@@ -126,7 +127,7 @@ def document_download(doc_id):
 
   attach = request.args.get('attach')
   if attach or \
-      not match(doc.content_type, ("text/plain", "application/pdf", "image/*")):
+    not match(doc.content_type, ("text/plain", "application/pdf", "image/*")):
     # Note: we omit text/html for security reasons.
     quoted_filename = quote(doc.title.encode('utf8'))
     response.headers[
@@ -220,11 +221,11 @@ def document_send(doc_id):
   msg = Message(subject)
   msg.sender = g.user.email
   msg.recipients = [recipient]
-  msg.body = render_template('documents/mail_file_sent.txt',
-                             sender_name=sender_name,
-                             message=user_msg,
-                             document_url=url_for(doc),
-                             filename=doc.title)
+  msg.body = render_template_i18n('documents/mail_file_sent.txt',
+                                  sender_name=sender_name,
+                                  message=user_msg,
+                                  document_url=url_for(doc),
+                                  filename=doc.title)
 
   filename = doc.title
   msg.attach(filename, doc.content_type, doc.content)
