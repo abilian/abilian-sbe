@@ -4,16 +4,16 @@ Install
 Prerequisites (native dependencies)
 -----------------------------------
 
--  Python 2.7, ``virtualenv``, ``pip``
--  `Redis <http://redis.io/>`__
--  Sqlite, or a postgresql database.
--  A few image manipulation libraries (``libpng``, ``libjpeg``...)
--  ``poppler-utils``, ``unoconv``, ``LibreOffice``, ``ImageMagick``.
--  `{Less} <http://lesscss.org/>`__ css pre-processor
+- Python 2.7, ``virtualenv``, ``pip``
+- `Redis <http://redis.io/>`__
+- Sqlite, or a postgresql database.
+- A few image manipulation libraries (``libpng``, ``libjpeg``...)
+- ``poppler-utils``, ``unoconv``, ``LibreOffice``, ``ImageMagick``.
+- `{Less} <http://lesscss.org/>`__ css pre-processor
 - A Java environment (JRE 1.7 for example). The `closure compiler
-    <https://developers.google.com/closure/compiler/>`__ is used for minifying
-    javascript files. You don't have to install the compiler yourself, but a
-    Java environment is required.
+  <https://developers.google.com/closure/compiler/>`__ is used for minifying
+  javascript files. You don't have to install the compiler yourself, but a Java
+  environment is required.
 
 Get a working application
 =========================
@@ -22,7 +22,7 @@ The following commands will create a virtualenv for the application,
 install a script named ``abilian_sbe``, launch development server and
 open a setupwizard in your browser:
 
-.. code:: shell
+.. code:: bash
 
     $ virtualenv sbe
     $ cd sbe; source bin/activate
@@ -61,8 +61,7 @@ Install `tox <http://pypi.python.org/pypi/tox>`__. Run ``tox -e ALL``.
 
 2 environments are available:
 
--  ``py27``: uses in-memory sqlite
-
+- ``py27``: uses in-memory sqlite
 - ``py27_postgres``: uses local postgresql server (you need to first create a
    database, and user/password; tox uses environment variables
    ``POSTGRES_HOST``, ``POSTGRES_PORT``, ``POSTGRES_DB``, ``POSTGRES_USER``,
@@ -71,7 +70,7 @@ Install `tox <http://pypi.python.org/pypi/tox>`__. Run ``tox -e ALL``.
 Running with gunicorn
 ---------------------
 
-.. code:: shell
+.. code:: bash
 
     gunicorn 'abilian.sbe.app.create_app()'
 
