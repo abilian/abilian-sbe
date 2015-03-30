@@ -18,11 +18,7 @@ _dev_requires = pip.req.parse_requirements(
     'etc/dev-requirements.txt', session=session)
 dev_requires = [str(ir.req) for ir in _dev_requires]
 
-print dev_requires
-
-# install_requires = deps.parse_requirements([u'requirements.txt'])
-# dependency_links = deps.parse_dependency_links([u'requirements.txt'])
-# dev_requires = deps.parse_requirements([u'dev-requirements.txt'])
+LONG_DESCRIPTION = open('README.rst', 'r').read()
 
 
 class build(_build):
@@ -47,6 +43,7 @@ setuptools.setup(
   author='Abilian SAS',
   author_email='contact@abilian.com',
   description='Social Business / Enterprise Social Networking platform',
+  long_description=LONG_DESCRIPTION,
   packages=['abilian.sbe'],
   zip_safe=False,
   platforms='any',
