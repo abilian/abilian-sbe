@@ -2,6 +2,7 @@ Core developers:
 
 - Stefane Fermigier
 - Bertrand Mathieu
+- Yvon Bourbotte
 
 Pictures:
 

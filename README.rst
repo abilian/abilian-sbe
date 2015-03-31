@@ -1,3 +1,13 @@
+About
+=====
+
+Abilian SBE (Social Business Engine) is a platform for developing social business applications, and more specifically collaborative / enterprise 2.0 business applications, such as enterprise social networks (ESN).
+
+It is based on the `Abilian Core <http://abilian-core.readthedocs.org/en/latest/>` project which provide the basic services, on top of Flask and SQLAlchemy.
+
+Abilian SBE adds the concept of *communities*, which are collaborative spaces with services such as lightweight document management, discussions, wikis, user timelines.
+
+
 Install
 =======
 
@@ -16,7 +26,7 @@ Prerequisites (native dependencies)
   environment is required.
 
 Get a working application
-=========================
+-------------------------
 
 The following commands will create a virtualenv for the application,
 install a script named ``abilian_sbe``, launch development server and
@@ -39,6 +49,7 @@ You will need to install the following packages using homebrew
 ::
 
     brew install python2.7 jpeg git libmagic poppler imagemagick
+
 
 Testing
 =======
