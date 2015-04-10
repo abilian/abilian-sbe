@@ -7,13 +7,13 @@ from datetime import datetime
 import time
 from os.path import dirname, join
 
-import sqlalchemy as sa
 from sqlalchemy import Column, Unicode, ForeignKey, Boolean, DateTime, \
   Integer, UniqueConstraint, String, and_
 from sqlalchemy.orm import relation, relationship, backref
 
 import whoosh.fields as wf
 
+from abilian.i18n import _l
 from abilian.core.extensions import db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.subjects import Group, User
@@ -25,10 +25,10 @@ from abilian.sbe.apps.documents.models import Folder, Blob
 
 from . import signals
 
-READER = Role('reader')
-WRITER = Role('writer')
+READER = Role('reader', label=_l(u'role_reader'), assignable=False)
+WRITER = Role('writer', label=_l(u'role_writer'), assignable=False)
 MANAGER = Role('manager')
-MEMBER = Role('member')
+MEMBER = Role('member', label=_l(u'role_member'), assignable=False)
 
 VALID_ROLES = (READER, WRITER, MANAGER, MEMBER,)
 

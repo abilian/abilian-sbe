@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-03-26 17:08+0100\n"
-"PO-Revision-Date: 2015-03-26 17:08+0100\n"
+"POT-Creation-Date: 2015-04-10 11:16+0200\n"
+"PO-Revision-Date: 2015-04-10 11:16+0200\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -116,6 +116,18 @@ msgstr "Seuls les images au format PNG ou JPG sont acceptés"
 #: abilian/sbe/apps/communities/forms.py:77
 msgid "Could not decode image file"
 msgstr "Impossible de lire le fichier d'image"
+
+#: abilian/sbe/apps/communities/models.py:28
+msgid "role_reader"
+msgstr "Lecteur"
+
+#: abilian/sbe/apps/communities/models.py:29
+msgid "role_writer"
+msgstr "Contributeur"
+
+#: abilian/sbe/apps/communities/models.py:31
+msgid "role_member"
+msgstr "Membre"
 
 #: abilian/sbe/apps/communities/views.py:161
 msgid "Edit community"
@@ -484,6 +496,21 @@ msgstr "Éditer les propriétés du document"
 msgid "Folder contents"
 msgstr "Contenu du dossier"
 
+#: abilian/sbe/apps/documents/templates/documents/mail_file_sent.fr.txt:1
+#, fuzzy, python-format
+msgid ""
+"\n"
+"%(sender)s vous a envoyé le fichier \"%(filename)s\" depuis l'extranet.\n"
+"\n"
+"Message:\n"
+"\"%(message)s\""
+msgstr ""
+"\n"
+"%(sender)s vous envoie le fichier \"%(filename)s\" depuis l'extranet.\n"
+"\n"
+"Message:\n"
+"\"%(message)s\""
+
 #: abilian/sbe/apps/documents/templates/documents/mail_file_sent.txt:1
 #, python-format
 msgid ""
@@ -579,28 +606,28 @@ msgstr "Ajouter un role local"
 msgid "Add a local role for a user"
 msgstr "Ajouter un role local pour un utilisateur"
 
-#: abilian/sbe/apps/documents/views/documents.py:78
+#: abilian/sbe/apps/documents/views/documents.py:79
 msgid "Document properties successfully edited."
 msgstr "Les propriétés du documents ont été enregistrées."
 
-#: abilian/sbe/apps/documents/views/documents.py:80
+#: abilian/sbe/apps/documents/views/documents.py:81
 #: abilian/sbe/apps/documents/views/folders.py:500
 msgid "You didn't change any property."
 msgstr "Aucun changement."
 
-#: abilian/sbe/apps/documents/views/documents.py:95
+#: abilian/sbe/apps/documents/views/documents.py:96
 msgid "File successfully deleted."
 msgstr "Fichier supprimé avec succès."
 
-#: abilian/sbe/apps/documents/views/documents.py:113
+#: abilian/sbe/apps/documents/views/documents.py:114
 msgid "New version successfully uploaded"
 msgstr "Nouvelle version déposée avec succès"
 
-#: abilian/sbe/apps/documents/views/documents.py:219
+#: abilian/sbe/apps/documents/views/documents.py:220
 msgid "{sender} sent you a file"
 msgstr "{sender} vous envoie un fichier"
 
-#: abilian/sbe/apps/documents/views/documents.py:233
+#: abilian/sbe/apps/documents/views/documents.py:234
 msgid "Email successfully sent"
 msgstr "Email envoyé avec succès"
 
@@ -670,50 +697,50 @@ msgid_plural "%(num)d new document successfully uploaded"
 msgstr[0] "Document ajouté avec succès"
 msgstr[1] "%(num)d documents ajoutés avec succès"
 
-#: abilian/sbe/apps/documents/views/folders.py:652
+#: abilian/sbe/apps/documents/views/folders.py:664
 #, python-format
 msgid "%(file_num)d files and %(folder_num)d folders sucessfully deleted."
 msgstr "%(file_num)d fichiers and %(folder_num)d dossiers supprimés avec succès."
 
-#: abilian/sbe/apps/documents/views/folders.py:656
+#: abilian/sbe/apps/documents/views/folders.py:668
 #, python-format
 msgid "1 file sucessfully deleted."
 msgid_plural "%(num)d files sucessfully deleted."
 msgstr[0] "1 fichier supprimé avec succès"
 msgstr[1] "%(num)d fichiers supprimés avec succès"
 
-#: abilian/sbe/apps/documents/views/folders.py:660
+#: abilian/sbe/apps/documents/views/folders.py:672
 #, python-format
 msgid "1 folder sucessfully deleted."
 msgid_plural "%(num)d folders sucessfully deleted."
 msgstr[0] "1 dossier supprimé avec succès"
 msgstr[1] "%(num)d dossiers supprimés avec succès"
 
-#: abilian/sbe/apps/documents/views/folders.py:664
+#: abilian/sbe/apps/documents/views/folders.py:676
 msgid "No object deleted"
 msgstr "Aucun objet supprimé"
 
-#: abilian/sbe/apps/documents/views/folders.py:676
+#: abilian/sbe/apps/documents/views/folders.py:688
 msgid "Move elements: no elements selected."
 msgstr "Déplacer: aucun élément sélectionné."
 
-#: abilian/sbe/apps/documents/views/folders.py:682
+#: abilian/sbe/apps/documents/views/folders.py:694
 msgid "Move elements: no destination folder selected. Aborted."
 msgstr "Déplacer: pas de dossier de destination. Annulation."
 
-#: abilian/sbe/apps/documents/views/folders.py:689
+#: abilian/sbe/apps/documents/views/folders.py:701
 msgid "Move elements: source and destination folder are identical, nothing done."
 msgstr "Déplacer: le dossier de départ et d'arrivée est le même. Annulation."
 
-#: abilian/sbe/apps/documents/views/folders.py:695
+#: abilian/sbe/apps/documents/views/folders.py:707
 msgid "You are not allowed to move elements from this folder"
 msgstr "Vous n'êtes pas autorisé à déplacer des éléments de ce dossier"
 
-#: abilian/sbe/apps/documents/views/folders.py:699
+#: abilian/sbe/apps/documents/views/folders.py:711
 msgid "You are not allowed to write in folder \"{folder}\""
 msgstr "Vous n'avez pas l'autorisation d'écrire dans le dossier \"{folder}\""
 
-#: abilian/sbe/apps/documents/views/folders.py:713
+#: abilian/sbe/apps/documents/views/folders.py:725
 msgid ""
 "Move elements: destination folder is included in moved elements. Moved "
 "nothing."
@@ -721,7 +748,7 @@ msgstr ""
 "Déplacer: le dossier de destination fait partie des élements à déplacer. "
 "Annulation."
 
-#: abilian/sbe/apps/documents/views/folders.py:729
+#: abilian/sbe/apps/documents/views/folders.py:741
 msgid ""
 "Move elements: canceled, some elements exists in destination folder: "
 "{elements}"
@@ -729,35 +756,35 @@ msgstr ""
 "Déplacer: annulé, certains éléments existent dans le dossier de "
 "destination: {elements}"
 
-#: abilian/sbe/apps/documents/views/folders.py:737
+#: abilian/sbe/apps/documents/views/folders.py:749
 msgid "1 folder"
 msgid_plural "{count} folders"
 msgstr[0] "1 dossier"
 msgstr[1] "{count} dossiers"
 
-#: abilian/sbe/apps/documents/views/folders.py:738
+#: abilian/sbe/apps/documents/views/folders.py:750
 msgid "0 folder"
 msgstr "0 dossier"
 
-#: abilian/sbe/apps/documents/views/folders.py:740
+#: abilian/sbe/apps/documents/views/folders.py:752
 msgid "1 document"
 msgid_plural "{count} documents"
 msgstr[0] "1 document"
 msgstr[1] "{count} documents"
 
-#: abilian/sbe/apps/documents/views/folders.py:742
+#: abilian/sbe/apps/documents/views/folders.py:754
 msgid "0 document"
 msgstr "0 document"
 
-#: abilian/sbe/apps/documents/views/folders.py:744
+#: abilian/sbe/apps/documents/views/folders.py:756
 msgid "{folders} and {documents} moved to {target}"
 msgstr "{folders} et {documents} déplacés vers {target}"
 
-#: abilian/sbe/apps/documents/views/folders.py:778
+#: abilian/sbe/apps/documents/views/folders.py:790
 msgid "An element named \"{name}\" is already present in folder"
 msgstr "Un élément nommé \"{name}\" existe déjà dans le dossier"
 
-#: abilian/sbe/apps/documents/views/folders.py:781
+#: abilian/sbe/apps/documents/views/folders.py:793
 msgid "Cannot rename: \"{name}\" is already present in parent folder"
 msgstr "Ne peut renommer: \"{name}\" existe déjà dans le dossier parent"
 
