@@ -18,6 +18,8 @@ from flask.ext.babel import get_locale
 from celery.task import periodic_task
 from celery.utils.log import get_task_logger
 from celery.schedules import crontab
+
+from abilian.core.signals import activity
 from abilian.core.extensions import celery, mail, db
 from abilian.core.models.subjects import User
 from abilian.i18n import _l, render_template_i18n
@@ -220,24 +222,29 @@ def process_email(message):
     extract community thread post member from reply_to
     persist post in db
   """
-
-  # Extract post destination from To field, (community/forum/thread/member)
+  app = current_app._get_current_object()
+  # Extract post destination from To: field, (community/forum/thread/member)
   to_address = message['To']
-  # Check if to_address has the subtag
+
   if not (has_subtag(to_address)):
     logger.info('Email {} has no subtag, skipping...'.format(to_address))
     return False
+
   try:
     infos = extract_email_destination(to_address)
     locale = infos[0]
     thread_id = infos[1]
     user_id = infos[2]
   except:
-    logger.error('Email {} cannot be converted to locale/thread_id/user.id'.format(to_address))
+    logger.error('Recipient %s cannot be converted to locale/thread_id/user.id',
+                 repr(to_address))
     return False
+
   # Translate marker with locale from email address
-  with current_app.test_request_context('/process_email', headers=[('Accept-Language', locale)]):
+  rq_headers = [('Accept-Language', locale)]
+  with app.test_request_context('/process_email', headers=rq_headers):
     marker = unicode(MAIL_REPLY_MARKER)
+
   # Extract text from message
   try:
     newpost = process(message, marker)
@@ -247,15 +254,17 @@ def process_email(message):
     return False
 
   # Persist post
-  with current_app.test_request_context('/process_email'):
+  with current_app.test_request_context('/process_email', headers=rq_headers):
     g.user = User.query.get(user_id)
     thread = Thread.query.get(thread_id)
+    community = thread.community
+    #FIXME: check membership, send back an informative email in case of an error
     post = thread.create_post(body_html=newpost)
+    activity.send(app, actor=g.user, verb="post", object=post, target=community)
     db.session.commit()
 
   # Notify all parties involved
   send_post_by_email.delay(post.id)
-
   return True
 
 
