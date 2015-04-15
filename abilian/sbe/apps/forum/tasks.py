@@ -6,6 +6,7 @@ from __future__ import absolute_import
 
 import mailbox
 from os.path import expanduser
+import re
 
 import bleach
 import chardet
@@ -158,6 +159,12 @@ def add_paragraph(newpost):
   return newpost
 
 
+def clean_html(newpost):
+  clean = re.sub(r"(<blockquote>.*?<p>.*?</p>.*?</blockquote>)", '', newpost, flags=re.MULTILINE | re.DOTALL)
+  clean = re.sub(r"(<br>.*?<a href=.*?/a>.*?:<br>)", '', clean, flags=re.MULTILINE | re.DOTALL)
+  return clean
+
+
 def process(message, marker):
   """
     Check the message for marker presence and return the text up to it if present
@@ -193,6 +200,7 @@ def process(message, marker):
   if 'html' in content:
     newpost = extract_content(content['html'], marker[:9])
     newpost = add_paragraph(validate_html(newpost))
+    newpost = clean_html(newpost)
   elif 'plain' in content:
     newpost = extract_content(content['plain'], marker)
     newpost = add_paragraph(newpost)
