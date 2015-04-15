@@ -25,7 +25,7 @@ from abilian.core.models.subjects import User
 from abilian.i18n import _l, render_template_i18n
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_TAGS
-from .models import Thread
+from .models import Thread, PostAttachment
 
 
 MAIL_REPLY_MARKER = _l(u'_____Write above this line to post_____')
@@ -119,17 +119,17 @@ def send_post_to_user(community, post, member):
     msg = Message(subject, sender=sender, recipients=[recipient],
                   reply_to=replyto)
   else:
-      msg = Message(subject, sender=sender, recipients=[recipient])
+    msg = Message(subject, sender=sender, recipients=[recipient])
   msg.body = render_template_i18n(
-      "forum/mail/new_message.txt",
-      community=community, post=post, member=member,
-      MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
-      SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,)
+    "forum/mail/new_message.txt",
+    community=community, post=post, member=member,
+    MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
+    SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL, )
   msg.html = render_template_i18n(
-      "forum/mail/new_message.html",
-      community=community, post=post, member=member,
-      MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
-      SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,)
+    "forum/mail/new_message.html",
+    community=community, post=post, member=member,
+    MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
+    SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL, )
 
   logger.debug("Sending new post by email to %s" % member.email)
   try:
@@ -148,7 +148,7 @@ def extract_content(payload, marker):
 
 def validate_html(payload):
   return bleach.clean(payload, tags=ALLOWED_TAGS,
-                              attributes=ALLOWED_ATTRIBUTES, strip=True).strip()
+                      attributes=ALLOWED_ATTRIBUTES, strip=True).strip()
 
 
 def add_paragraph(newpost):
@@ -162,9 +162,22 @@ def add_paragraph(newpost):
 
 
 def clean_html(newpost):
-  clean = re.sub(r"(<blockquote>.*?<p>.*?</p>.*?</blockquote>)", '', newpost, flags=re.MULTILINE | re.DOTALL)
+  clean = re.sub(r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)", '', newpost, flags=re.MULTILINE | re.DOTALL)
   clean = re.sub(r"(<br>.*?<a href=.*?/a>.*?:<br>)", '', clean, flags=re.MULTILINE | re.DOTALL)
   return clean
+
+
+def decode_payload(part):
+  # Get the payload and decode (base64 & quoted printable)
+  payload = part.get_payload(decode=True)
+  if not (isinstance(payload, unicode)):
+    # What about other encodings? -> using chardet
+    if part.get_content_charset() is None:
+      found = chardet.detect(payload)
+      payload = payload.decode(found['encoding'])
+    else:
+      payload = payload.decode(part.get_content_charset())
+  return payload
 
 
 def process(message, marker):
@@ -175,43 +188,35 @@ def process(message, marker):
     :param marker: unicode
     :return: sanitized html upto marker from message
   """
-  content = {}
-  newpost = ''
+  content = {'plain': u'', 'html': u''}
+  attachments = []
   # Iterate all message's parts for text/*
-  for msg in message.walk():
-    if 'text' in msg.get_content_maintype():
-      # Get the payload and decode (base64 & quoted printable)
-      payload = msg.get_payload(decode=True)
-      if not(isinstance(payload, unicode)):
-        # What about other encodings? -> using chardet
-        if msg.get_content_charset() is None:
-          found = chardet.detect(payload)
-          payload = payload.decode(found['encoding'])
-        else:
-          payload = payload.decode(msg.get_content_charset())
+  for part in message.walk():
+    content_type = part.get_content_type()
+    content_disp = part.get('Content-Disposition')
 
-      # Check if our reply marker exist, save the payload in content Dict
-      if marker in payload:
-        content[msg.get_content_subtype()] = payload
+    if content_type in ['text/plain', 'text/html'] and content_disp is None:
+      payload = content[part.get_content_subtype()] + decode_payload(part)
+      content[part.get_content_subtype()] = payload
 
-  if len(content) == 0:
-    logger.error('No marker:{} in email'.format(marker))
-    raise LookupError('No marker:{} in email'.format(marker))
+    if content_disp is not None:
+      attachments.append(
+        {'filename': part.get_filename(),
+         'content_type': part.get_content_type(),
+         'data': part.get_payload(decode=True)})
 
-  # Extract post content (prioritize the use of html over plain)
-  if 'html' in content:
+  if 'html' in content and marker in content['html']:
     newpost = extract_content(content['html'], marker[:9])
     newpost = add_paragraph(validate_html(newpost))
     newpost = clean_html(newpost)
-  elif 'plain' in content:
-    newpost = extract_content(content['plain'], marker)
+  elif 'plain' in content and marker in content['plain']:
+    newpost = extract_content(content['plain'], marker[:9])
     newpost = add_paragraph(newpost)
   else:
-    # Error, bogus message, no text/* part or no marker was found
-    logger.error('No text/ part in email')
-    raise LookupError('No text/ part in email')
+    logger.error('No marker:{} in email'.format(marker))
+    raise LookupError('No marker:{} in email'.format(marker))
 
-  return newpost
+  return newpost, attachments
 
 
 @celery.task(ignore_result=True)
@@ -245,9 +250,9 @@ def process_email(message):
   with app.test_request_context('/process_email', headers=rq_headers):
     marker = unicode(MAIL_REPLY_MARKER)
 
-  # Extract text from message
+  # Extract text and attachments from message
   try:
-    newpost = process(message, marker)
+    newpost, attachments = process(message, marker)
   except Exception as excp:
     logger.error('Could not Process message')
     logger.error(excp)
@@ -258,9 +263,16 @@ def process_email(message):
     g.user = User.query.get(user_id)
     thread = Thread.query.get(thread_id)
     community = thread.community
-    #FIXME: check membership, send back an informative email in case of an error
+    # FIXME: check membership, send back an informative email in case of an error
     post = thread.create_post(body_html=newpost)
-    activity.send(app, actor=g.user, verb="post", object=post, target=community)
+    activity.send(app, actor=g.user, verb='post', object=post, target=community)
+
+    if len(attachments) > 0:
+      for desc in attachments:
+        attachment = PostAttachment(name=desc['filename'])
+        attachment.post = post
+        attachment.set_content(desc['data'], desc['content_type'])
+        db.session.add(attachment)
     db.session.commit()
 
   # Notify all parties involved
@@ -274,7 +286,7 @@ def check_maildir():
     check the MailDir for emails to be injected in Threads
   """
 
-  home = expanduser("~")
+  home = expanduser('~')
   maildirpath = str(Path(home) / 'Maildir')
   src_mdir = mailbox.Maildir(maildirpath,
                              factory=mailbox.MaildirMessage)
@@ -282,12 +294,12 @@ def check_maildir():
   src_mdir.lock()  # Useless but recommended if old mbox is used by error
 
   try:
-      for key, message in src_mdir.iteritems():
-          processed = process_email(message)
+    for key, message in src_mdir.iteritems():
+      processed = process_email(message)
 
-          # delete the message if all went fine
-          if processed:
-            del src_mdir[key]
+      # delete the message if all went fine
+      if processed:
+        del src_mdir[key]
 
   finally:
-      src_mdir.close()  # Flushes all changes to disk then unlocks
+    src_mdir.close()  # Flushes all changes to disk then unlocks
