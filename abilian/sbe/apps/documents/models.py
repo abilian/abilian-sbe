@@ -30,7 +30,6 @@ from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.subjects import User, Group
 from abilian.core.models.blob import Blob
 from abilian.core.entities import db, Entity
-from abilian.core.extensions import celery
 from abilian.services.conversion import converter
 from abilian.services.security import InheritSecurity, security, Anonymous, \
     Admin
@@ -554,7 +553,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     if not self.antivirus_required:
       return True
 
-    if celery.conf.CELERY_ALWAYS_EAGER:
+    if current_app.conf.get('CELERY_ALWAYS_EAGER', False):
       async_conversion(self)
       return True
 

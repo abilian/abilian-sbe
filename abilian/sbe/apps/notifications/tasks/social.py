@@ -4,17 +4,16 @@
 from __future__ import absolute_import
 
 from datetime import timedelta, datetime
+
 from sqlalchemy import and_, or_
 from validate_email import validate_email
-
-from celery.task import periodic_task
 from celery.schedules import crontab
-
 from flask import current_app as app
 from flask.ext.mail import Message
 from flask.ext.security.utils import md5
 
 from abilian.i18n import render_template_i18n
+from abilian.core.celery import periodic_task
 from abilian.core.models.subjects import User
 from abilian.services.activity import ActivityEntry
 from abilian.services.auth.views import get_serializer
