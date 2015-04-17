@@ -15,8 +15,8 @@ from itsdangerous import URLSafeSerializer
 from flask import current_app, g
 from flask.ext.mail import Message
 from flask.ext.babel import get_locale
-from celery.task import periodic_task
 from celery import shared_task
+from abilian.core.celery import periodic_task
 from celery.utils.log import get_task_logger
 from celery.schedules import crontab
 
@@ -34,6 +34,14 @@ MAIL_REPLY_MARKER = _l(u'_____Write above this line to post_____')
 # logger = logging.getLogger(__package__)
 # Celery logger
 logger = get_task_logger(__name__)
+
+
+def init_app(app):
+  global check_maildir
+  if app.config['INCOMING_MAIL_USE_MAILDIR']:
+    make_task = periodic_task(run_every=crontab(minute='*', ),
+                             ignore_result=True)
+    check_maildir = make_task(check_maildir)
 
 
 @shared_task(ignore_result=True)
@@ -281,12 +289,13 @@ def process_email(message):
   return True
 
 
-@periodic_task(run_every=crontab(minute='*', ), ignore_result=True)
 def check_maildir():
   """
-    check the MailDir for emails to be injected in Threads
-  """
+  Check the MailDir for emails to be injected in Threads.
 
+  This task is registered only if `INCOMING_MAIL_USE_MAILDIR` is True. By
+  default it is run every minute.
+  """
   home = expanduser('~')
   maildirpath = str(Path(home) / 'Maildir')
   src_mdir = mailbox.Maildir(maildirpath,
