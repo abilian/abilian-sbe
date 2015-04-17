@@ -231,10 +231,10 @@ def process(message, marker):
 @shared_task(ignore_result=True)
 def process_email(message):
   """
-    email.message object from command line script
-    Run message (parsed email) processing chain
-    extract community thread post member from reply_to
-    persist post in db
+  Email.Message object from command line script Run message (parsed email).
+
+  Processing chain extract community thread post member from reply_to persist
+  post in db
   """
   app = current_app._get_current_object()
   # Extract post destination from To: field, (community/forum/thread/member)

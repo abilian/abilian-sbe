@@ -8,11 +8,12 @@ import logging
 import fileinput
 from email.parser import FeedParser
 
-from flask.ext.script import Manager
+from flask_script import Manager
 
 from .tasks import process_email, check_maildir
 
 logger = logging.getLogger(__name__)
+
 
 manager = Manager(description='SBE forum commands',
                   help='SBE forum commands')

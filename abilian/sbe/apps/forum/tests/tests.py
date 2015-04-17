@@ -197,7 +197,7 @@ def get_emailmessage_from_file(filename='notification.email'):
 
 class CommandsTest(TestCase):
   @patch('fileinput.input')
-  @patch('abilian.sbe.apps.forum.tasks.process_email.delay')
+  @patch('abilian.sbe.apps.forum.commands.process_email')
   def test_parse_forum_email(self, mock_process_email, mock_email):
     """
         No processing is tested only parsing into a email.message
@@ -210,9 +210,9 @@ class CommandsTest(TestCase):
     inject_email()
 
     # assert the email is read
-    assert mock_email.has_been_called()
+    assert mock_email.called
     # assert a call on the celery task was made implying a message creation
-    assert mock_process_email.has_been_called()
+    assert mock_process_email.delay.called
 
 
 class TasksTest(BaseTestCase):
