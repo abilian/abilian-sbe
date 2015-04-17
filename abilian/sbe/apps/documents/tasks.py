@@ -7,12 +7,12 @@ from __future__ import absolute_import
 import logging
 from contextlib import contextmanager
 
-from celery import group, current_task
+from celery import shared_task
 from guess_language import guessLanguageName
 
 from abilian.services.conversion import ConversionError
 from abilian.services import get_service, converter
-from abilian.core.extensions import celery, db
+from abilian.core.extensions import db
 
 
 logger = logging.getLogger(__package__)
@@ -38,7 +38,7 @@ def get_document(document_id, session=None):
     doc_session.close()
 
 
-@celery.task(ignore_result=True)
+@shared_task(ignore_result=True)
 def process_document(document_id):
   """
   Run document processing chain
@@ -66,7 +66,7 @@ def _run_antivirus(document):
   return None
 
 
-@celery.task(ignore_result=True)
+@shared_task(ignore_result=True)
 def antivirus_scan(document_id):
   """
   Return antivirus.scan() result
@@ -77,7 +77,7 @@ def antivirus_scan(document_id):
     return _run_antivirus(document)
 
 
-@celery.task(ignore_result=True)
+@shared_task(ignore_result=True)
 def preview_document(document_id):
   """Computes the document preview images with its default preview size.
   """
@@ -94,7 +94,7 @@ def preview_document(document_id):
                   exc_info=True, extra={'stack': True})
 
 
-@celery.task(ignore_result=True)
+@shared_task(ignore_result=True)
 def convert_document_content(document_id):
   """Converts document content.
   """

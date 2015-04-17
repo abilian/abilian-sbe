@@ -16,11 +16,12 @@ from flask import current_app, g
 from flask.ext.mail import Message
 from flask.ext.babel import get_locale
 from celery.task import periodic_task
+from celery import shared_task
 from celery.utils.log import get_task_logger
 from celery.schedules import crontab
 
 from abilian.core.signals import activity
-from abilian.core.extensions import celery, mail, db
+from abilian.core.extensions import mail, db
 from abilian.core.models.subjects import User
 from abilian.i18n import _l, render_template_i18n
 
@@ -35,7 +36,7 @@ MAIL_REPLY_MARKER = _l(u'_____Write above this line to post_____')
 logger = get_task_logger(__name__)
 
 
-@celery.task(ignore_result=True)
+@shared_task(ignore_result=True)
 def send_post_by_email(post_id):
   """Send a post to community members by email.
   """
@@ -219,7 +220,7 @@ def process(message, marker):
   return newpost, attachments
 
 
-@celery.task(ignore_result=True)
+@shared_task(ignore_result=True)
 def process_email(message):
   """
     email.message object from command line script
