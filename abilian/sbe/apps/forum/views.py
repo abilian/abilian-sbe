@@ -1,3 +1,10 @@
+# coding=utf-8
+"""
+Forum views
+"""
+from __future__ import absolute_import
+
+import logging
 from datetime import date
 from itertools import groupby
 from urllib import quote
@@ -114,6 +121,14 @@ def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
   return kw
 
 
+def is_post_send_email_enabled(community, user=None):
+  if user is None:
+    user = current_user
+
+  return (g.community.type == 'participative'
+          or g.community.has_permission(user, 'manage'))
+
+
 @route('/<int:thread_id>/')
 @default_view(forum, Thread, 'thread_id', kw_func=default_view_kw)
 @default_view(forum, Post, None, kw_func=post_kw_view_func)
@@ -125,6 +140,10 @@ def thread(thread_id):
   if not thread:
     abort(404)
   form = CommentForm()
+
+  if not is_post_send_email_enabled(thread.community):
+    del form['send_by_email']
+
   return render_template('forum/thread.html', thread=thread, form=form)
 
 
@@ -148,11 +167,9 @@ def thread_post(thread_id):
     app = current_app._get_current_object()
     community = g.community._model
     activity.send(app, actor=g.user, verb="post", object=post, target=community)
-
     db.session.commit()
-    if form.send_by_email.data and \
-        (g.community.type == 'participative'
-         or g.community.has_permission(current_user, 'manage')):
+
+    if is_post_send_email_enabled(thread.community) and form.send_by_email.data:
       send_post_by_email.delay(post.id)
 
     return redirect(url_for(thread))
