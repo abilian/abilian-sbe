@@ -35,6 +35,7 @@ OBJ_TEMPLATE = Template(
   u'<a href="{{ object_url|safe }}">{{ object_name }}</a>'
 )
 
+
 class ActivityEntryPresenter(BasePresenter):
   @property
   def object_url(self):
@@ -98,11 +99,13 @@ class ActivityEntryPresenter(BasePresenter):
   def body(self):
     if isinstance(self.object, Thread):
       body = bleach.clean(self.object.posts[0].body_html, tags=[], strip=True)
+      body = Markup(body).unescape()
       if len(body) > 400:
         body = body[0:400] + u"…"
       return body
     elif isinstance(self.object, Post):
       body = bleach.clean(self.object.body_html, tags=[], strip=True)
+      body = Markup(body).unescape()
       if len(body) > 400:
         body = body[0:400] + u"…"
       return body
