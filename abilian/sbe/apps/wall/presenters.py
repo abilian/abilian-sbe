@@ -7,6 +7,7 @@ import traceback
 import bleach
 from jinja2 import Template, Markup
 from flask.ext.babel import gettext as _, lazy_gettext as _l
+from flask import render_template_string
 
 from abilian.core.util import BasePresenter
 from abilian.web.util import url_for
@@ -34,6 +35,27 @@ MESSAGES = {
 OBJ_TEMPLATE = Template(
   u'<a href="{{ object_url|safe }}">{{ object_name }}</a>'
 )
+
+POST_BODY_TEMPLATE = u'''
+  <span class="body">"<a href="{{ object_url |safe }}">{{ body }}</a>"
+  {%- if post.attachments %}
+  <div id="attachments">
+    <ul>
+      {%- for attachment in post.attachments %}
+      <li>
+        <span class="attachment-item">
+          <img src="{{ attachment.icon }}""
+              alt=""/>
+          <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
+          ({{ attachment.content_length|filesize }})
+        </span>
+      </li>
+      {%- endfor %}
+    </ul>
+  </div>
+  {%- endif %}
+  </span>
+ '''
 
 
 class ActivityEntryPresenter(BasePresenter):
@@ -96,18 +118,23 @@ class ActivityEntryPresenter(BasePresenter):
       traceback.print_exc()
       raise
 
+  @property
   def body(self):
     if isinstance(self.object, Thread):
       body = bleach.clean(self.object.posts[0].body_html, tags=[], strip=True)
       body = Markup(body).unescape()
       if len(body) > 400:
         body = body[0:400] + u"…"
-      return body
+      body = render_template_string(POST_BODY_TEMPLATE,
+                                    object_url=self.object_url, body=body, post=self.object.posts[0])
+      return Markup(body)
     elif isinstance(self.object, Post):
       body = bleach.clean(self.object.body_html, tags=[], strip=True)
       body = Markup(body).unescape()
       if len(body) > 400:
         body = body[0:400] + u"…"
-      return body
+      body = render_template_string(POST_BODY_TEMPLATE,
+                                    object_url=self.object_url, body=body, post=self.object)
+      return Markup(body)
     else:
       return ""
