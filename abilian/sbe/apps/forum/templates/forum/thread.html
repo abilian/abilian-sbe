@@ -150,7 +150,7 @@
           action="{{ url_for(".thread_delete", thread_id=thread.id, community_id=g.community.slug) }}"
           method="POST" style="margin-bottom: 0;">
 
-          {{ csrf_field }}
+          {{ csrf.field() }}
           
           <div class="modal-header">
             <button class="close" data-dismiss="modal">&times;</button>
