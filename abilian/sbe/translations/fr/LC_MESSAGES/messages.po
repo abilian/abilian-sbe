@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-04-10 11:16+0200\n"
-"PO-Revision-Date: 2015-04-10 11:16+0200\n"
+"POT-Creation-Date: 2015-04-23 16:52+0200\n"
+"PO-Revision-Date: 2015-04-23 16:51+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -38,7 +38,7 @@ msgid "Wiki"
 msgstr "Wiki"
 
 #: abilian/sbe/apps/communities/actions.py:54
-#: abilian/sbe/apps/forum/views.py:39
+#: abilian/sbe/apps/forum/views.py:46
 msgid "Conversations"
 msgstr "Conversations"
 
@@ -180,6 +180,7 @@ msgstr "Détruire la communauté"
 #: abilian/sbe/apps/forum/templates/forum/new_thread.html:29
 #: abilian/sbe/apps/forum/templates/forum/thread.html:79
 #: abilian/sbe/apps/forum/templates/forum/thread.html:165
+#: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:82
 #: abilian/sbe/apps/preferences/templates/preferences/sbe_notifications.html:19
 #: abilian/sbe/apps/social/templates/social/invite.html:30
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:48
@@ -260,7 +261,7 @@ msgstr "Déplacer vers un autre dossier"
 
 #: abilian/sbe/apps/documents/actions.py:125
 #: abilian/sbe/apps/documents/actions.py:205
-#: abilian/sbe/apps/forum/actions.py:30 abilian/sbe/apps/wiki/actions.py:43
+#: abilian/sbe/apps/forum/actions.py:35 abilian/sbe/apps/wiki/actions.py:43
 msgid "Delete"
 msgstr "Supprimer"
 
@@ -484,6 +485,7 @@ msgstr "Êtes-vous sûr de vouloir supprimer le fichier \"{filename}\" ?"
 
 #: abilian/sbe/apps/documents/templates/documents/document.html:228
 #: abilian/sbe/apps/forum/templates/forum/thread.html:167
+#: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:84
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:50
 msgid "Really Delete"
 msgstr "Supprimer"
@@ -796,21 +798,22 @@ msgstr "Le nom du document ne peut être vide."
 msgid "\"{original}\" already present in folder, renamed \"{name}\""
 msgstr "\"{original}\" déjà présent dans le dossier, renommé en \"{name}\""
 
-#: abilian/sbe/apps/forum/actions.py:26
+#: abilian/sbe/apps/forum/actions.py:29
 #: abilian/sbe/apps/forum/templates/forum/new_thread.html:7
 msgid "Start a new conversation"
 msgstr "Démarrer une conversation"
 
-#: abilian/sbe/apps/forum/actions.py:27
+#: abilian/sbe/apps/forum/actions.py:30
 #: abilian/sbe/apps/forum/templates/forum/archives.html:7
 #: abilian/sbe/apps/forum/templates/forum/index.html:7
 msgid "Recent conversations"
 msgstr "Conversations récentes"
 
-#: abilian/sbe/apps/forum/actions.py:28
+#: abilian/sbe/apps/forum/actions.py:31
 msgid "Archives"
 msgstr "Archives"
 
+#: abilian/sbe/apps/forum/actions.py:32 abilian/sbe/apps/forum/actions.py:36
 #: abilian/sbe/apps/forum/forms.py:62 abilian/sbe/apps/forum/forms.py:76
 msgid "Attachments"
 msgstr "Pièces-jointes"
@@ -819,15 +822,15 @@ msgstr "Pièces-jointes"
 msgid "Send by email?"
 msgstr "Envoyer par email?"
 
-#: abilian/sbe/apps/forum/tasks.py:28
+#: abilian/sbe/apps/forum/tasks.py:32
 msgid "_____Write above this line to post_____"
 msgstr "_____Écrivez au-dessus de cette ligne pour répondre_____"
 
-#: abilian/sbe/apps/forum/views.py:106 abilian/sbe/apps/forum/views.py:161
+#: abilian/sbe/apps/forum/views.py:135 abilian/sbe/apps/forum/views.py:212
 msgid "Please fix the errors below"
 msgstr "Veuillez corriger les erreurs ci-dessous"
 
-#: abilian/sbe/apps/forum/views.py:182
+#: abilian/sbe/apps/forum/views.py:233
 msgid "Thread {title} deleted."
 msgstr "La converation \"{title}\" a été supprimée."
 
@@ -835,6 +838,14 @@ msgstr "La converation \"{title}\" a été supprimée."
 #: abilian/sbe/apps/forum/templates/forum/index.html:15
 msgid "No message has been posted to this community yet"
 msgstr "Aucun message"
+
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:8
+msgid "Recent conversations attachments"
+msgstr "Pièces jointes des conversations récentes"
+
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:17
+msgid "No attachment has been posted to this community yet"
+msgstr "Aucun attachement n'a encore été publié dans cette communautée"
 
 #: abilian/sbe/apps/forum/templates/forum/index.html:20
 msgid "All conversations"
@@ -858,6 +869,7 @@ msgid "Post this message"
 msgstr "Envoyer ce message"
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:12
+#: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:12
 msgid "Back to conversation list"
 msgstr "Revenir à la liste des conversations"
 
@@ -870,10 +882,12 @@ msgid "Post this comment"
 msgstr "Envoyer ce commentaire"
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:157
+#: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:74
 msgid "Delete Thread"
 msgstr "Supprimer cette discussion"
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:161
+#: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:78
 msgid "Are you sure you want to delete this thread?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette discussion?"
 
@@ -1051,50 +1065,50 @@ msgstr "Profil enregistré"
 msgid "Error occured"
 msgstr "Une erreur est survenue"
 
-#: abilian/sbe/apps/wall/presenters.py:22
+#: abilian/sbe/apps/wall/presenters.py:23
 msgid "has started conversation \"{object}\""
 msgstr "a démarré la conversation \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:23
+#: abilian/sbe/apps/wall/presenters.py:24
 msgid "has participated in conversation \"{object}\""
 msgstr "a participé à la conversation \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:24
+#: abilian/sbe/apps/wall/presenters.py:25
 msgid "has published document \"{object}\""
 msgstr "a publié le document \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:25
+#: abilian/sbe/apps/wall/presenters.py:26
 msgid "has created wiki page \"{object}\""
 msgstr "a créé la page wiki \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:27
+#: abilian/sbe/apps/wall/presenters.py:28
 msgid "has updated document \"{object}\""
 msgstr "a mis à jour le document \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:28
+#: abilian/sbe/apps/wall/presenters.py:29
 msgid "has updated wiki page \"{object}\""
 msgstr "a mis à jour la page wiki \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:30
-#: abilian/sbe/apps/wall/presenters.py:84
+#: abilian/sbe/apps/wall/presenters.py:31
+#: abilian/sbe/apps/wall/presenters.py:107
 msgid "has joined the community {object}."
 msgstr "a rejoint la communauté {object}."
 
-#: abilian/sbe/apps/wall/presenters.py:31
-#: abilian/sbe/apps/wall/presenters.py:87
+#: abilian/sbe/apps/wall/presenters.py:32
+#: abilian/sbe/apps/wall/presenters.py:110
 msgid "has left the community {object}."
 msgstr "a quitté la communauté {object}."
 
-#: abilian/sbe/apps/wall/presenters.py:70
-#: abilian/sbe/apps/wall/presenters.py:79
+#: abilian/sbe/apps/wall/presenters.py:93
+#: abilian/sbe/apps/wall/presenters.py:102
 msgid " in the community {target}."
 msgstr "dans la communauté {target}"
 
-#: abilian/sbe/apps/wall/presenters.py:75
+#: abilian/sbe/apps/wall/presenters.py:98
 msgid "has posted an object of type {object_type} called \"{object}\""
 msgstr "a ajouté un objet du type {object_type} nommé \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:90
+#: abilian/sbe/apps/wall/presenters.py:113
 msgid "has done action \"{verb}\" on object \"{object}\"."
 msgstr "a effectué l'action \"{verb}\" sur l'objet \"{object}\"."
 

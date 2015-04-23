@@ -1,0 +1,90 @@
+{% extends "community/_base.html" %}
+
+{%- from "macros/box.html" import m_box_content, m_box_menu %}
+{% from "forum/macros.html" import m_postattachments %}
+
+{%- block content %}
+    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
+
+    {#  TODO #}
+    <p>
+      <a href="{{ url_for(".index", community_id=g.community.slug) }}">
+        <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
+    </p>
+
+    <div class="thread-header">
+      <div class="author">
+        {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
+        <a href="{{ author_href }}">
+          <img class="avatar pull-left" width="55" height="55"
+               src="{{ user_photo_url(thread.creator, size=55) }}">
+        </a>
+        <div><a href="{{ author_href }}">{{ thread.creator }}</a></div>
+        <div>{{ thread.created_at | datetimeformat }}</div>
+      </div>
+      <h2>{{ thread.title }}</h2>
+    </div>
+
+    {%- if thread.posts|length > 1 %}
+      <div class="comments">
+        {%- for post in thread.posts %}
+          {{ m_postattachments(post) }}
+        {%- endfor %}
+      </div>
+    {%- endif %}
+
+{%- endblock %}
+
+{%- block sidebar %}
+  {%- call m_box_menu() %}
+    <ul class="nav nav-list">
+      {%- set content_actions = actions.for_category('forum:thread') %}
+      {%- set global_actions = actions.for_category('forum:global') %}
+
+      {%- for action in content_actions %}
+        <li>{{ action.render() }}</li>
+      {%- endfor %}
+
+      {%- if content_actions and global_actions %}
+        <li class="divider"></li>
+      {%- endif %}
+
+      {%- for action in global_actions %}
+        <li>{{ action.render() }}</li>
+      {%- endfor %}
+    </ul>
+  {%- endcall %}
+{%- endblock %}
+
+
+{%- block modals %}
+  <div class="modal fade" id="modal-delete" role="dialog"
+      data-keyboard="true">
+
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form
+          action="{{ url_for(".thread_delete", thread_id=thread.id, community_id=g.community.slug) }}"
+          method="POST" style="margin-bottom: 0;">
+
+          {{ csrf.field() }}
+          
+          <div class="modal-header">
+            <button class="close" data-dismiss="modal">&times;</button>
+            <h3>{{ _("Delete Thread") }}</h3>
+          </div>
+
+          <div class="modal-body">
+            {{ _('Are you sure you want to delete this thread?') }}
+          </div>
+
+          <div class="modal-footer">
+            <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+            <button type="submit"
+                    class="btn btn-danger">{{ _("Really Delete") }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+{%- endblock %}

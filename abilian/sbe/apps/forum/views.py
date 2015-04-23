@@ -10,7 +10,7 @@ from itertools import groupby
 from urllib import quote
 
 from flask import g, render_template, redirect, request, \
-    current_app, abort, flash, make_response
+  current_app, abort, flash, make_response
 from flask.ext.babel import format_date, gettext as _
 from flask.ext.login import current_user
 
@@ -51,8 +51,8 @@ def init_forum_values(endpoint, values):
 @route('/')
 @require_access
 def index():
-  query = Thread.query\
-    .filter(Thread.community_id == g.community.id)\
+  query = Thread.query \
+    .filter(Thread.community_id == g.community.id) \
     .order_by(Thread.created_at.desc())
   has_more = query.count() > MAX_THREADS
   threads = query.limit(MAX_THREADS).all()
@@ -60,28 +60,50 @@ def index():
                          threads=threads, has_more=has_more)
 
 
-@route('/archives/')
-@require_access
-def archives():
+def group_monthly(entities_list):
   # We're using Python's groupby instead of SA's group_by here
   # because it's easier to support both SQLite and Postgres this way.
-
-  all_threads = Thread.query \
-    .filter(Thread.community_id == g.community.id) \
-    .order_by(Thread.created_at.desc()).all()
-
-  def grouper(thread):
-    return thread.created_at.year, thread.created_at.month
+  def grouper(entity):
+    return entity.created_at.year, entity.created_at.month
 
   def format_month(year, month):
     month = format_date(date(year, month, 1), "MMMM").capitalize()
     return u"%s %s" % (month, year)
 
-  grouped_threads = groupby(all_threads, grouper)
-  grouped_threads = [(format_month(year, month), list(threads))
-                     for (year, month), threads in grouped_threads]
-  return render_template("forum/archives.html",
+  grouped_entities = groupby(entities_list, grouper)
+  grouped_entities = [(format_month(year, month), list(entities))
+                      for (year, month), entities in grouped_entities]
+  return grouped_entities
+
+
+@route('/archives/')
+@require_access
+def archives():
+  all_threads = Thread.query \
+    .filter(Thread.community_id == g.community.id) \
+    .order_by(Thread.created_at.desc()).all()
+
+  grouped_threads = group_monthly(all_threads)
+  return render_template('forum/archives.html',
                          grouped_threads=grouped_threads)
+
+
+@route('/attachments/')
+@require_access
+def attachments():
+  all_threads = Thread.query \
+    .filter(Thread.community_id == g.community.id) \
+    .order_by(Thread.created_at.desc()).all()
+  all_posts = []
+  for thread in all_threads:
+    for post in thread.posts:
+      if hasattr(post, 'attachments'):
+        all_posts.append(post)
+  all_posts.sort(key=lambda entity: entity.created_at)
+  all_posts.reverse()
+  grouped_posts = group_monthly(all_posts)
+  return render_template('forum/attachments.html',
+                         grouped_posts=grouped_posts)
 
 
 @route('/new_thread/')
@@ -105,7 +127,8 @@ def new_thread_post():
                            request.files.getlist('attachments'))
     db.session.commit()
     if form.send_by_email.data and \
-        (g.community.type == 'participative' or g.community.has_permission(current_user, 'manage')):
+        (g.community.type == 'participative' or
+         g.community.has_permission(current_user, 'manage')):
       post = thread.posts[0]
       send_post_by_email.delay(post.id)
     return redirect(url_for(thread))
@@ -125,8 +148,8 @@ def is_post_send_email_enabled(community, user=None):
   if user is None:
     user = current_user
 
-  return (g.community.type == 'participative'
-          or g.community.has_permission(user, 'manage'))
+  return (g.community.type == 'participative' or
+          g.community.has_permission(user, 'manage'))
 
 
 @route('/<int:thread_id>/')
@@ -145,6 +168,18 @@ def thread(thread_id):
     del form['send_by_email']
 
   return render_template('forum/thread.html', thread=thread, form=form)
+
+
+@route('/<int:thread_id>/attachments')
+@require_access
+def thread_attachments(thread_id):
+  thread = Thread.query.get(thread_id)
+  actions.context['object'] = thread
+
+  if not thread:
+    abort(404)
+
+  return render_template('forum/thread_attachments.html', thread=thread)
 
 
 @route('/<int:thread_id>/', methods=['POST'])
