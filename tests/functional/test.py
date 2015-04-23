@@ -12,7 +12,6 @@ import socket
 import tempfile
 import shutil
 import multiprocessing
-from pathlib import Path
 import pytest
 import pytest_splinter.plugin  # noqa
 from werkzeug.serving import select_ip_version
