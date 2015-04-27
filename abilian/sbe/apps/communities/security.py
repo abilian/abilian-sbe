@@ -5,7 +5,7 @@ Decorators and helpers to check access to communities.
 from functools import wraps
 
 from flask import g, abort, current_app
-from flask.ext.login import current_user
+from flask.ext.login import current_user, login_required
 
 
 def require_admin(func):
@@ -50,10 +50,20 @@ def check_access(community=None, user=None):
 
 
 def has_access(community=None, user=None):
-  if not community:
-    community = g.community
   if not user:
     user = current_user
+  if user.is_anonymous():
+    return False
+
   security = current_app.services['security']
   is_admin = security.has_role(user, 'admin')
-  return is_admin or community.get_role(user) is not None
+  if is_admin:
+    return True
+
+  if not community:
+    community = getattr(g, 'community', None)
+
+  if community is not None:
+    return community.get_role(user) is not None
+
+  return False

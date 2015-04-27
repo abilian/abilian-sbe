@@ -14,7 +14,7 @@ from flask import (
     render_template, g, redirect, url_for, abort,
     request, current_app, session,
 )
-from flask.ext.login import current_user
+from flask.ext.login import current_user, login_required
 
 from abilian.core.extensions import db
 from abilian.core.signals import activity
@@ -39,6 +39,7 @@ communities = Blueprint("communities", __name__,
 route = communities.route
 add_url = communities.add_url_rule
 communities.record_once(register_actions)
+
 
 @communities.record_once
 def register_context_processors(state):
@@ -103,6 +104,7 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
 # Routes
 #
 @route("/")
+@login_required
 def index():
   query = Community.query
   sort_order = request.args.get('sort', u'').strip()
@@ -229,6 +231,7 @@ route('/_default_image')(
                                       set_expire=True,
                                       image=_DEFAULT_IMAGE,)
 )
+
 
 class CommunityImageView(image_views.BlobView):
   id_arg = 'blob_id'

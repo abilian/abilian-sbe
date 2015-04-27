@@ -3,6 +3,7 @@ The blueprint for this app.
 """
 
 from flask import Blueprint, redirect, g, url_for, render_template
+from flask.ext.login import login_required
 
 from abilian.core import signals
 from abilian.core.util import get_params
@@ -25,9 +26,10 @@ route = social.route
 
 
 @social.before_request
+@login_required
 def before_request():
-  g.groups = g.user.groups
-  g.groups.sort(lambda x, y: cmp(x.name, y.name))
+    g.groups = g.user.groups
+    g.groups.sort(lambda x, y: cmp(x.name, y.name))
 
 
 @route("/")
