@@ -44,7 +44,8 @@ class MembersMenuAction(Action):
 _actions = (
   # Navigation
   NavItem('section', 'communities', title=_l(u'Communities'),
-          url=lambda context: url_for_orig('communities.index')),
+          url=lambda context: url_for_orig('communities.index'),
+          condition=lambda ctx: current_user.is_authenticated()),
   # Tabs
   CommunityTabAction('communities:tabs', 'wall', _l(u'Activities')),
   CommunityTabAction('communities:tabs', 'documents', _l(u'Documents'),
