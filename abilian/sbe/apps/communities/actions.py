@@ -7,6 +7,7 @@ from abilian.web.nav import NavItem
 
 __all__ = ['register_actions']
 
+
 def url_for(endpoint, **kw):
   return url_for_orig(endpoint, community_id=g.community.slug, **kw)
 
