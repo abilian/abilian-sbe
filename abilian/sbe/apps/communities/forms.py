@@ -5,7 +5,7 @@ import PIL
 from flask import request
 from flask.ext.babel import lazy_gettext as _l, gettext as _
 from wtforms.fields import BooleanField, TextField, TextAreaField
-from wtforms.validators import ValidationError, required
+from wtforms.validators import ValidationError, required, optional
 
 from abilian.web.forms import Form
 from abilian.web.forms.fields import Select2Field, FileField
@@ -23,7 +23,7 @@ class CommunityForm(Form):
       widget=TextArea(resizeable="vertical"),)
 
   image = FileField(label=_l('Image'), widget=ImageInput(width=65, height=65),
-                    allow_delete=False)
+                    validators=[optional()])
 
   type = Select2Field(label=_(u"Type"), validators=[required()],
                       filters=(strip,),
