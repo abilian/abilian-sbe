@@ -41,7 +41,7 @@ ifndef VIRTUAL_ENV
 	@echo "********************************************************************"
 	@exit 1;
 endif
-	pip install -r etc/deps.txt
+	pip install -r requirements.txt
 	pip install -e .
 	@mkdir -pv "$(INSTANCE_FOLDER)"
 	@cp -v "etc/config_dev.py" "$(INSTANCE_FOLDER)/config.py"
