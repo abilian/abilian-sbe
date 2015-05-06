@@ -4,7 +4,6 @@ Forum views
 """
 from __future__ import absolute_import
 
-import logging
 from datetime import date
 from itertools import groupby
 from urllib import quote
@@ -22,7 +21,6 @@ from abilian.web import nav, url_for
 
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import default_view_kw
-from abilian.sbe.apps.communities.security import require_access
 
 from .forms import ThreadForm, CommentForm
 from .models import Thread, Post, PostAttachment
@@ -49,7 +47,6 @@ def init_forum_values(endpoint, values):
 
 
 @route('/')
-@require_access
 def index():
   query = Thread.query \
     .filter(Thread.community_id == g.community.id) \
@@ -77,7 +74,6 @@ def group_monthly(entities_list):
 
 
 @route('/archives/')
-@require_access
 def archives():
   all_threads = Thread.query \
     .filter(Thread.community_id == g.community.id) \
@@ -89,7 +85,6 @@ def archives():
 
 
 @route('/attachments/')
-@require_access
 def attachments():
   all_threads = Thread.query \
     .filter(Thread.community_id == g.community.id) \
@@ -107,14 +102,12 @@ def attachments():
 
 
 @route('/new_thread/')
-@require_access
 def new_thread():
   form = ThreadForm()
   return render_template("forum/new_thread.html", form=form)
 
 
 @route('/new_thread/', methods=['POST'])
-@require_access
 def new_thread_post():
   action = request.form.get('_action')
   if action != 'post':
@@ -155,7 +148,6 @@ def is_post_send_email_enabled(community, user=None):
 @route('/<int:thread_id>/')
 @default_view(forum, Thread, 'thread_id', kw_func=default_view_kw)
 @default_view(forum, Post, None, kw_func=post_kw_view_func)
-@require_access
 def thread(thread_id):
   thread = Thread.query.get(thread_id)
   actions.context['object'] = thread
@@ -171,7 +163,6 @@ def thread(thread_id):
 
 
 @route('/<int:thread_id>/attachments')
-@require_access
 def thread_attachments(thread_id):
   thread = Thread.query.get(thread_id)
   actions.context['object'] = thread
@@ -183,7 +174,6 @@ def thread_attachments(thread_id):
 
 
 @route('/<int:thread_id>/', methods=['POST'])
-@require_access
 def thread_post(thread_id):
   thread = Thread.query.get(thread_id)
   if not thread:
@@ -246,7 +236,6 @@ def attachment_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
 @route('/<int:thread_id>/posts/<int:post_id>/attachment/<int:attachment_id>')
 @default_view(forum, PostAttachment, 'attachment_id',
               kw_func=attachment_kw_view_func)
-@require_access
 def attachment_download(thread_id, post_id, attachment_id):
   thread = Thread.query.get(thread_id)
   post = Post.query.get(post_id)
