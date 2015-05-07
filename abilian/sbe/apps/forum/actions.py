@@ -28,14 +28,23 @@ class ForumModalAction(ModalActionMixin, ThreadAction):
 
 
 _actions = (
-  ForumAction('forum:global', 'new_thread', _l(u'Start a new conversation'), icon='plus'),
-  ForumAction('forum:global', 'index', _l(u'Recent conversations'), icon='list'),
+  ForumAction('forum:global', 'new_thread',
+              _l(u'Start a new conversation'), icon='plus'
+  ),
+  ForumAction('forum:global', 'index',
+              _l(u'Recent conversations'), icon='list'
+  ),
   ForumAction('forum:global', 'archives', _l(u'Archives'), icon='calendar'),
-  ForumAction('forum:global', 'attachments', _l(u'Attachments'), icon='file',
-              condition=is_in_thread),
-
-  ForumModalAction('forum:thread', 'delete', _l(u'Delete'), url='#modal-delete', icon='trash'),
-  ThreadAction('forum:thread', 'attachments', _l(u'Attachments'), url='attachments', icon='file'),
+  ForumAction('forum:global', 'attachments',
+              _l(u'Attachments'), icon='file',
+              condition=is_in_thread
+  ),
+  ForumModalAction('forum:thread', 'delete', _l(u'Delete'),
+                   url='#modal-delete', icon='trash'
+  ),
+  ThreadAction('forum:thread', 'attachments',
+               _l(u'Attachments'), url='attachments', icon='file'
+  ),
 )
 
 
