@@ -136,7 +136,7 @@ class ViewTestCase(CommunityBaseTestCase):
         content = u"shiny thread message"
         url = url_for("forum.new_thread", community_id=self.community.slug)
         data = dict(title=title, message=content)
-        data['_action'] = u"post"
+        data['__action'] = u"create"
         data['send_by_email'] = u"y"
         response = self.client.post(url, data=data)
         self.assertStatus(response, 302)

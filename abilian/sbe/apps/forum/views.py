@@ -8,16 +8,17 @@ from datetime import date
 from itertools import groupby
 from urllib import quote
 
+import sqlalchemy as sa
 from flask import g, render_template, redirect, request, \
   current_app, abort, flash, make_response
-from flask.ext.babel import format_date, gettext as _
-from flask.ext.login import current_user
+from flask_login import current_user
 
+from abilian.i18n import _, _l
 from abilian.core.signals import activity
 from abilian.core.extensions import db
-from abilian.web.action import actions
+from abilian.web.action import actions, ButtonAction
 from abilian.web.views import default_view
-from abilian.web import nav, url_for
+from abilian.web import nav, url_for, views
 
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import default_view_kw
@@ -34,6 +35,15 @@ forum = Blueprint("forum", __name__,
                   url_prefix="/forum",
                   template_folder="templates")
 route = forum.route
+
+def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
+  """
+  kwargs for Post default view
+  """
+  kw = default_view_kw(kw, obj.thread, obj_type, obj_id, **kwargs)
+  kw['thread_id'] = obj.thread_id
+  kw['_anchor'] = u'post_{:d}'.format(obj.id)
+  return kw
 
 
 @forum.url_value_preprocessor
@@ -101,128 +111,138 @@ def attachments():
                          grouped_posts=grouped_posts)
 
 
-@route('/new_thread/')
-def new_thread():
-  form = ThreadForm()
-  return render_template("forum/new_thread.html", form=form)
+class BaseThreadView(object):
+  Model = Thread
+  Form = ThreadForm
+  pk = 'thread_id'
+  base_template = 'community/_base.html'
+
+  def can_send_by_mail(self):
+    return (g.community.type == 'participative'
+            or g.community.has_permission(current_user, 'manage'))
+
+  def prepare_args(self, args, kwargs):
+    args, kwargs = super(BaseThreadView, self).prepare_args(args, kwargs)
+    if not self.can_send_by_mail():
+      del self.form['send_by_email']
+
+    return args, kwargs
+
+  def index_url(self):
+    return url_for(".index", community_id=g.community.slug)
+
+  def view_url(self):
+    return url_for(self.obj)
 
 
-@route('/new_thread/', methods=['POST'])
-def new_thread_post():
-  action = request.form.get('_action')
-  if action != 'post':
-    return redirect(url_for(".index", community_id=g.community.slug))
+class ThreadView(BaseThreadView, views.ObjectView):
+  methods = ['GET', 'HEAD']
+  Form = CommentForm
+  template = 'forum/thread.html'
 
-  form = ThreadForm(request.form)
-
-  if form.validate():
-    thread = create_thread(form.title.data, form.message.data,
-                           request.files.getlist('attachments'))
-    db.session.commit()
-    if form.send_by_email.data and \
-        (g.community.type == 'participative' or
-         g.community.has_permission(current_user, 'manage')):
-      post = thread.posts[0]
-      send_post_by_email.delay(post.id)
-    return redirect(url_for(thread))
-  else:
-    flash(_(u"Please fix the errors below"), "error")
-    return render_template('forum/new_thread.html', form=form)
+  @property
+  def template_kwargs(self):
+    kw = super(ThreadView, self).template_kwargs
+    kw['thread'] = self.obj
+    return kw
 
 
-def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
-  kw = default_view_kw(kw, obj.thread, obj_type, obj_id, **kwargs)
-  kw['thread_id'] = obj.thread_id
-  kw['_anchor'] = u'post_{:d}'.format(obj.id)
-  return kw
+thread_view = ThreadView.as_view('thread')
+default_view(forum, Post, None, kw_func=post_kw_view_func)(thread_view)
+default_view(forum, Thread, 'thread_id', kw_func=default_view_kw)(thread_view)
+
+route('/<int:thread_id>/')(thread_view)
+route('/<int:thread_id>/attachments')(
+  ThreadView.as_view('thread_attachments',
+                     template='forum/thread_attachments.html')
+)
 
 
-def is_post_send_email_enabled(community, user=None):
-  if user is None:
-    user = current_user
+class ThreadCreate(BaseThreadView, views.ObjectCreate):
+  POST_BUTTON = ButtonAction('form', 'create', btn_class='primary',
+                             title=_l(u'Post this message'))
 
-  return (g.community.type == 'participative' or
-          g.community.has_permission(user, 'manage'))
+  def init_object(self, args, kwargs):
+    args, kwargs = super(ThreadCreate, self).init_object(args, kwargs)
+    self.thread = self.obj
+    return args, kwargs
 
+  def before_populate_obj(self):
+    del self.form['attachments']
+    self.message_body = self.form.message.data
+    del self.form['message']
+    self.send_by_email = self.form.send_by_email.data and self.can_send_by_mail()
+    del self.form['send_by_email']
 
-@route('/<int:thread_id>/')
-@default_view(forum, Thread, 'thread_id', kw_func=default_view_kw)
-@default_view(forum, Post, None, kw_func=post_kw_view_func)
-def thread(thread_id):
-  thread = Thread.query.get(thread_id)
-  actions.context['object'] = thread
+  def after_populate_obj(self):
+    if self.thread.community is None:
+      self.thread.community = g.community._model
 
-  if not thread:
-    abort(404)
-  form = CommentForm()
+    self.post = self.thread.create_post(body_html=self.message_body)
+    session = sa.orm.object_session(self.thread)
 
-  if not is_post_send_email_enabled(thread.community):
-    del form['send_by_email']
+    for f in request.files.getlist('attachments'):
+      name = f.filename
+      if not isinstance(name, unicode):
+        name = unicode(f.filename, encoding='utf-8', errors='ignore')
 
-  return render_template('forum/thread.html', thread=thread, form=form)
+      if not name:
+        continue
 
+      attachment = PostAttachment(name=name)
+      attachment.post = self.post
+      attachment.set_content(f.read(), f.content_type)
+      session.add(attachment)
 
-@route('/<int:thread_id>/attachments')
-def thread_attachments(thread_id):
-  thread = Thread.query.get(thread_id)
-  actions.context['object'] = thread
+  def commit_success(self):
+    if self.send_by_email:
+      send_post_by_email.delay(self.post.id)
 
-  if not thread:
-    abort(404)
+  @property
+  def activity_target(self):
+    return self.thread.community
 
-  return render_template('forum/thread_attachments.html', thread=thread)
-
-
-@route('/<int:thread_id>/', methods=['POST'])
-def thread_post(thread_id):
-  thread = Thread.query.get(thread_id)
-  if not thread:
-    abort(404)
-
-  action = request.form.get('_action')
-  if action != 'post':
-    return redirect(url_for(thread))
-
-  form = CommentForm(request.form)
-  if form.validate():
-    post = thread.create_post(body_html=form.message.data)
-    create_post_attachments(post, request.files.getlist('attachments'))
-
-    # Send signal
-    app = current_app._get_current_object()
-    community = g.community._model
-    activity.send(app, actor=g.user, verb="post", object=post, target=community)
-    db.session.commit()
-
-    if is_post_send_email_enabled(thread.community) and form.send_by_email.data:
-      send_post_by_email.delay(post.id)
-
-    return redirect(url_for(thread))
-
-  else:
-    flash(_(u"Please fix the errors below"), "error")
-    return render_template('forum/thread.html', thread=thread, form=form)
+  def get_form_buttons(self, *args, **kwargs):
+    return [self.POST_BUTTON, views.object.CANCEL_BUTTON]
 
 
-@route('/<int:thread_id>/delete', methods=['POST'])
-def thread_delete(thread_id):
-  thread = Thread.query.get(thread_id)
-  if not thread:
-    abort(404)
+route('/new_thread/')(ThreadCreate.as_view('new_thread',
+                                           view_endpoint='.thread'))
 
-  posts = thread.posts
-  # FIXME: should be taken care of by the cascade but that doesn't work.
-  for post in posts:
-    db.session.delete(post)
-  db.session.delete(thread)
 
-  app = current_app._get_current_object()
-  community = g.community._model
-  activity.send(app, actor=g.user, verb="delete", object=thread, target=community)
+class ThreadPostCreate(ThreadCreate):
+  methods = ['POST']
+  Form = CommentForm
+  Model = Post
 
-  db.session.commit()
-  flash(_(u"Thread {title} deleted.".format(title=thread.title)))
-  return redirect(url_for(".index", community_id=g.community.slug))
+  def init_object(self, args, kwargs):
+    # we DO want to skip ThreadCreate.init_object. hence super is not based on
+    # ThreadPostCreate
+    args, kwargs = super(ThreadCreate, self).init_object(args, kwargs)
+    thread_id = kwargs.pop(self.pk, None)
+    self.thread = Thread.query.get(thread_id)
+    return args, kwargs
+
+  def after_populate_obj(self):
+    super(ThreadPostCreate, self).after_populate_obj()
+    session = sa.orm.object_session(self.obj)
+    session.expunge(self.obj)
+    self.obj = self.post
+
+
+route('/<int:thread_id>/')(ThreadPostCreate.as_view('thread_post',
+                                                    view_endpoint='.thread'))
+
+
+class ThreadDelete(BaseThreadView, views.ObjectDelete):
+  methods = ['POST']
+  _message_success = _(u'Thread "{title}" deleted.')
+
+  def message_success(self):
+    return unicode(self._message_success).format(title=self.obj.title)
+
+
+route('/<int:thread_id>/delete')(ThreadDelete.as_view('thread_delete'))
 
 
 def attachment_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
@@ -254,20 +274,6 @@ def attachment_download(thread_id, post_id, attachment_id):
   )
   response.headers['content-disposition'] = content_disposition
   return response
-
-
-def create_thread(title, message, files=()):
-  thread = Thread(title=title, community=g.community)
-  post = Post(thread=thread, body_html=message)
-  create_post_attachments(post, files)
-  db.session.add(thread)
-
-  # Send signal
-  app = current_app._get_current_object()
-  community = g.community._model
-  activity.send(app, actor=g.user, verb="post", object=thread, target=community)
-
-  return thread
 
 
 def create_post_attachments(post, files):

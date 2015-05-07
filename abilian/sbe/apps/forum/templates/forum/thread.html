@@ -71,11 +71,10 @@
       {%- endif %}
 
       <div class="form-actions">
-        <button type="submit" class="btn btn-primary" name="_action"
-            value="post">
+        <button type="submit" class="btn btn-primary" name="__action" value="create">
           {{ _("Post this comment") }}
         </button>
-        <button type="submit" class="btn cancel" name="_action" value="cancel">
+        <button type="submit" class="btn cancel" name="__action" value="cancel">
           {{ _("Cancel") }}
         </button>
       </div>
@@ -163,8 +162,7 @@
 
           <div class="modal-footer">
             <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
-            <button type="submit"
-                    class="btn btn-danger">{{ _("Really Delete") }}</button>
+            <button type="submit" name="__action" value="delete" class="btn btn-danger">{{ _("Really Delete") }}</button>
           </div>
         </form>
       </div>
