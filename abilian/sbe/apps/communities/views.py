@@ -161,7 +161,7 @@ class BaseCommunityView(object):
 class CommunityEdit(BaseCommunityView, views.ObjectEdit):
   template = 'community/edit.html'
   title = _l("Edit community")
-  decorators = [require_admin, tab('settings')]
+  decorators = views.ObjectEdit.decorators + (require_admin, tab('settings'),)
 
   def breadcrumb(self):
     return nav.BreadcrumbItem(label=_(u'Settings'),
@@ -198,7 +198,7 @@ add_url("/<string:community_id>/settings",
 
 class CommunityCreate(views.ObjectCreate, CommunityEdit):
   title = _l("Create community")
-  decorators = [require_admin]
+  decorators = views.ObjectCreate.decorators + (require_admin,)
   template = views.ObjectCreate.template
   base_template = views.ObjectCreate.base_template
 
