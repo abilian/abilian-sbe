@@ -3,9 +3,11 @@ About
 
 Abilian SBE (Social Business Engine) is a platform for developing social business applications, and more specifically collaborative / enterprise 2.0 business applications, such as enterprise social networks (ESN).
 
-It is based on the `Abilian Core <http://abilian-core.readthedocs.org/en/latest/>` project which provide the basic services, on top of Flask and SQLAlchemy.
+It is based on the `Abilian Core <http://abilian-core.readthedocs.org/en/latest/>`_ project which provide the basic services, on top of Flask and SQLAlchemy.
 
 Abilian SBE adds the concept of *communities*, which are collaborative spaces with services such as lightweight document management, discussions, wikis, user timelines.
+
+Abilian SBE is currently alpha software and evolving quickly. OTOH, it's already used by several major customers in production, since mid 2013.
 
 
 Install
@@ -15,13 +17,13 @@ Prerequisites (native dependencies)
 -----------------------------------
 
 - Python 2.7, ``virtualenv``, ``pip``
-- `Redis <http://redis.io/>`__
+- `Redis <http://redis.io/>`_
 - Sqlite, or a postgresql database.
 - A few image manipulation libraries (``libpng``, ``libjpeg``...)
 - ``poppler-utils``, ``unoconv``, ``LibreOffice``, ``ImageMagick``.
 - `{Less} <http://lesscss.org/>`__ css pre-processor
 - A Java environment (JRE 1.7 for example). The `closure compiler
-  <https://developers.google.com/closure/compiler/>`__ is used for minifying
+  <https://developers.google.com/closure/compiler/>`_ is used for minifying
   javascript files. You don't have to install the compiler yourself, but a Java
   environment is required.
 
@@ -68,7 +70,7 @@ Run ``make test-with-coverage``.
 Full test suite
 ---------------
 
-Install `tox <http://pypi.python.org/pypi/tox>`__. Run ``tox -e ALL``.
+Install `tox <http://pypi.python.org/pypi/tox>`_. Run ``tox -e ALL``.
 
 2 environments are available:
 
