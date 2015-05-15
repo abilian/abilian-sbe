@@ -25,13 +25,6 @@ social = Blueprint("social", __name__,
 route = social.route
 
 
-@social.before_request
-@login_required
-def before_request():
-    g.groups = g.user.groups
-    g.groups.sort(lambda x, y: cmp(x.name, y.name))
-
-
 @route("/")
 def home():
   ctx = {}
