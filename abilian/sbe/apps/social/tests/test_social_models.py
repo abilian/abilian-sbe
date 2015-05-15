@@ -66,8 +66,8 @@ class TestUsers(TestCase):
     assert user.is_member_of(group)
     assert len(group.members) == 1
     assert len(user.groups) == 1
-    assert group.members == [user]
-    assert user.groups == [group]
+    assert group.members == {user}
+    assert user.groups == {group}
 
     user.leave(group)
 
