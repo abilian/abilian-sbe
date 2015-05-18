@@ -5,7 +5,7 @@ from __future__ import absolute_import
 
 import sqlalchemy as sa
 
-from abilian.services.security import security
+from abilian.services.security import security, READ
 
 from .models import CmisObject, Folder, Document
 
@@ -171,7 +171,7 @@ class Repository(object):
     """
     current = obj
     while current.parent is not None:
-      if not self.has_permission(user, 'read', current):
+      if not self.has_permission(user, READ, current):
         return False
       current = current.parent
     return True

@@ -5,7 +5,7 @@ from flask.ext.babel import gettext as _
 from werkzeug.exceptions import NotFound, Forbidden, InternalServerError
 
 from abilian.core.signals import activity
-from abilian.services.security import security
+from abilian.services.security import security, Admin, WRITE, MANAGE
 from abilian.web import url_for
 
 from ..repository import repository
@@ -155,7 +155,7 @@ def check_read_access(obj):
     raise NotFound()
   if not security.running:
     return True
-  if security.has_role(g.user, "admin"):
+  if security.has_role(g.user, Admin):
     return True
   if repository.has_access(g.user, obj):
     return True
@@ -172,10 +172,11 @@ def check_write_access(obj):
     raise NotFound()
   if not security.running:
     return
-  if security.has_role(g.user, "admin"):
+  if security.has_role(g.user, Admin):
     return
+
   if (repository.has_access(g.user, obj)
-      and repository.has_permission(g.user, "write", obj)):
+      and repository.has_permission(g.user, WRITE, obj)):
     return
   raise Forbidden()
 
@@ -191,10 +192,10 @@ def check_manage_access(obj):
     raise NotFound()
   if not security.running:
     return
-  if security.has_role(g.user, "admin"):
+  if security.has_role(g.user, Admin):
     return
   if (repository.has_access(g.user, obj)
-      and repository.has_permission(g.user, "manage", obj)):
+      and repository.has_permission(g.user, MANAGE, obj)):
     return
   raise Forbidden()
 
