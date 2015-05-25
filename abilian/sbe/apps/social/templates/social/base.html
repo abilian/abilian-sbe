@@ -32,13 +32,15 @@
 
         {% call m_box(_("Latest visitors"), color="orange") %}
           <ul class="latest-visitors">
+            {%- set img_online = url_for('abilian_sbe_static', filename='img/greendot.png') %}
             {%- for user in g.sidebars.latest_visitors %}
               <li><a href="{{ url_for(user) }}">
-                <img class="avatar" src="{{ user_photo_url(user, size=20) }}"
-                     alt="" /> {{ user.name }}
+                <img class="avatar" src="{{ user_photo_url(user, size=20) }}" alt="" />
+                {{ user.name }}
               </a>
               {%- if user.is_online %}
-              <img src="{{ url_for('abilian_sbe_static', filename='img/greendot.png') }}" alt="" />{%- endif %}
+                <img src="{{ img_online }}" alt="" />
+              {%- endif %}
               </li>
             {%- endfor %}
           </ul>
