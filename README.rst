@@ -92,7 +92,9 @@ Build Status
 
 The project is under continuous integration with Travis:
 
-|Build Status|
-
-.. |Build Status| image:: https://travis-ci.org/abilian/abilian-sbe.svg?branch=master
+.. image:: https://travis-ci.org/abilian/abilian-sbe.svg?branch=master
    :target: https://travis-ci.org/abilian/abilian-sbe
+
+.. image:: https://coveralls.io/repos/abilian/abilian-sbe/badge.svg?branch=master
+   :target: https://coveralls.io/r/abilian/abilian-sbe?branch=master
+
