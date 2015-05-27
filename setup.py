@@ -10,7 +10,7 @@ from setuptools.command.develop import develop as _develop
 
 import pip
 
-session = session=pip.download.PipSession()
+session = pip.download.PipSession()
 _install_requires = pip.req.parse_requirements(
     'requirements.txt', session=session)
 install_requires = [str(ir.req) for ir in _install_requires]

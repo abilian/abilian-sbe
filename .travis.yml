@@ -12,9 +12,6 @@ services:
 addons:
   postgresql: "9.3"
 
-cache:
-  directories:
-    - $HOME/.pip-cache
 
 # Install OS dependencies
 before_install:
@@ -27,9 +24,8 @@ before_install:
 # Install Python dependencies
 install:
   - pip install -U 'pip>=7'
-  - pip install -r etc/dev-requirements.txt --download-cache $HOME/.pip-cache
-  - pip install -r etc/git-requirements.txt --download-cache $HOME/.pip-cache
-  - pip install -e .
+  - pip install -e '.[dev]'
+  - pip install -r etc/git-requirements.txt
   - pip --version
   - pip list
 
