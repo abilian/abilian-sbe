@@ -1,5 +1,5 @@
 # Abilian Core
-abilian-core>=0.3.5,<0.4
+abilian-core>=0.3.6,<0.4
 
 # Used for language detection in the document management app.
 # TODO: replace by langid ?
