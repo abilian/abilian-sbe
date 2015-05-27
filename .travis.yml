@@ -26,7 +26,7 @@ before_install:
 
 # Install Python dependencies
 install:
-  - pip install -U 'pip>=6'
+  - pip install -U 'pip>=7'
   - pip install -r etc/dev-requirements.txt --download-cache $HOME/.pip-cache
   - pip install -r etc/git-requirements.txt --download-cache $HOME/.pip-cache
   - pip install -e .
