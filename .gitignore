@@ -14,6 +14,7 @@ conf
 .travis-solo
 .cache
 
+build
 whoosh*
 yaka.db
 tmp
@@ -22,7 +23,6 @@ dist
 tests/cache
 tests/tmp
 tests/extra_files
-maxid.data
 sandbox
 results
 htmlcov
