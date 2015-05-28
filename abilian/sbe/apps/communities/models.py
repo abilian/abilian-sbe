@@ -12,6 +12,7 @@ from sqlalchemy import Column, Unicode, ForeignKey, Boolean, DateTime, \
 from sqlalchemy.orm import relation, relationship, backref
 
 import whoosh.fields as wf
+from flask import current_app
 
 from abilian.i18n import _l
 from abilian.core.extensions import db
@@ -271,11 +272,15 @@ class Community(Entity):
         security.ungrant_role(principal, role, self.folder)
 
   def get_role(self, user):
-    """Returns the current user's role in this community.
+    """
+    Returns the current user's role in this community.
     """
     M = Membership
-    membership = M.query.filter(
-      and_(M.community_id == self.id, M.user_id == user.id)).first()
+    membership = current_app.db.session()\
+        .query(M.role)\
+        .filter(and_(M.community_id == self.id,
+                     M.user_id == user.id))\
+        .first()
 
     return membership.role if membership else None
 
