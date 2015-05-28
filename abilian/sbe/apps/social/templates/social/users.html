@@ -96,9 +96,9 @@
        });
     }
 
-     Abilian.fn.onAppInit(
-       requirejs(['jquery', 'jquery.dataTables'], initUsersTable)
-     );
+       Abilian.fn.onAppInit(
+           function() { requirejs(['jquery', 'jquery.dataTables'], initUsersTable) }
+       );
    }(window, document));
   </script>
   {%- enddeferJS %}

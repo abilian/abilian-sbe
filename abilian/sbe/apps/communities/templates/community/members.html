@@ -97,8 +97,10 @@
        });
      }
 
-     Abilian.fn.onAppInit(
-       requirejs(['jquery', 'jquery.dataTables'], initMembersTable)
+       Abilian.fn.onAppInit(
+           function() {
+               requirejs(['jquery', 'jquery.dataTables'], initMembersTable)
+           }
      );
      }(window, document));
     </script>
