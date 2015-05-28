@@ -18,19 +18,20 @@ from abilian.core.extensions import db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.subjects import Group, User
 from abilian.core.entities import Entity
-from abilian.services.security import Role, security, RoleType, Admin
+from abilian.services.security import (
+  Role, security, RoleType, Admin,
+  Reader as READER,
+  Writer as WRITER,
+  Manager as MANAGER,
+)
 
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.documents.models import Folder, Blob
 
 from . import signals
 
-READER = Role('reader', label=_l(u'role_reader'), assignable=False)
-WRITER = Role('writer', label=_l(u'role_writer'), assignable=False)
-MANAGER = Role('manager')
 MEMBER = Role('member', label=_l(u'role_member'), assignable=False)
-
-VALID_ROLES = (READER, WRITER, MANAGER, MEMBER,)
+VALID_ROLES = frozenset((READER, WRITER, MANAGER, MEMBER,))
 
 
 class Membership(db.Model):
@@ -221,6 +222,8 @@ class Community(Entity):
         local_role = MANAGER
 
       current_roles = set(security.get_roles(user, self.folder))
+      current_roles &= VALID_ROLES  # ensure we don't remove roles not managed
+                                    # by us
       for role_to_ungrant in current_roles - set((local_role,)):
         security.ungrant_role(user, role_to_ungrant, self.folder)
 
@@ -242,7 +245,8 @@ class Community(Entity):
     self.membership_count -= 1
 
     if self.folder:
-      roles = security.get_roles(user, self.folder)
+      roles = set(security.get_roles(user, self.folder))
+      roles &= VALID_ROLES  # ensure we don't remove roles not managed by us
       for role in roles:
         security.ungrant_role(user, role, self.folder)
 

@@ -14,7 +14,10 @@ from abilian.services.security import Admin
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.testing import BaseTestCase
 
-from ..models import Community, community_content, CommunityIdColumn
+from ..models import (
+  Community, community_content, CommunityIdColumn,
+  MEMBER,
+)
 from .. import views, signals
 from .base import CommunityIndexingTestCase as BaseIndexingTestCase
 
@@ -94,7 +97,7 @@ class CommunityDbTestCase(BaseTestCase):
     l = self.community.memberships
     assert len(l) == 1
     assert l[0].user == user
-    assert l[0].role == "member"
+    assert l[0].role is MEMBER
 
     when_set.assert_called_once_with(self.community,
                                      is_new=True,
@@ -102,7 +105,7 @@ class CommunityDbTestCase(BaseTestCase):
     assert not when_removed.called
     when_set.reset_mock()
 
-    assert self.community.get_role(user) == "member"
+    assert self.community.get_role(user) is MEMBER
 
     assert self.community.get_memberships() == [l[0]]
     assert self.community.get_memberships('member') == [l[0]]
