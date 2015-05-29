@@ -179,7 +179,7 @@ def get_string_from_file(filename='notification.email'):
     Load a test email return as string
   """
   filepath = Path(__file__).parent / 'data' / filename
-  with filepath.open('r') as email_file:
+  with filepath.open('rt', encoding='utf-8') as email_file:
     email_string = email_file.read()
   return email_string
 
