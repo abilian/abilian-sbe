@@ -44,7 +44,7 @@ def init_app(app):
     check_maildir = make_task(check_maildir)
 
 
-@shared_task(ignore_result=True)
+@shared_task()
 def send_post_by_email(post_id):
   """Send a post to community members by email.
   """
