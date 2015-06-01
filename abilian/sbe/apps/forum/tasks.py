@@ -122,6 +122,7 @@ def send_post_to_user(community, post, member):
   config = current_app.config
   sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
   SBE_FORUM_REPLY_BY_MAIL = config.get('SBE_FORUM_REPLY_BY_MAIL', False)
+
   if SBE_FORUM_REPLY_BY_MAIL and config['MAIL_ADDRESS_TAG_CHAR'] is not None:
     name = sender.rsplit('@', 1)[0]
     domain = sender.rsplit('@', 1)[1]
@@ -130,18 +131,21 @@ def send_post_to_user(community, post, member):
                   reply_to=replyto)
   else:
     msg = Message(subject, sender=sender, recipients=[recipient])
+
   msg.body = render_template_i18n(
     "forum/mail/new_message.txt",
     community=community, post=post, member=member,
     MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
-    SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL, )
+    SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,
+  )
   msg.html = render_template_i18n(
     "forum/mail/new_message.html",
     community=community, post=post, member=member,
     MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
-    SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL, )
+    SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,
+  )
+  logger.debug("Sending new post by email to %r", member.email)
 
-  logger.debug("Sending new post by email to %s" % member.email)
   try:
     mail.send(msg)
   except:
@@ -242,7 +246,7 @@ def process_email(message):
   to_address = message['To']
 
   if not (has_subtag(to_address)):
-    logger.info('Email {} has no subtag, skipping...'.format(to_address))
+    logger.info('Email %r has no subtag, skipping...', to_address)
     return False
 
   try:
@@ -251,8 +255,9 @@ def process_email(message):
     thread_id = infos[1]
     user_id = infos[2]
   except:
-    logger.error('Recipient %s cannot be converted to locale/thread_id/user.id',
-                 repr(to_address))
+    logger.error('Recipient %r cannot be converted to locale/thread_id/user.id',
+                 to_address,
+                 exc_info=True)
     return False
 
   # Translate marker with locale from email address
@@ -263,9 +268,8 @@ def process_email(message):
   # Extract text and attachments from message
   try:
     newpost, attachments = process(message, marker)
-  except Exception as excp:
-    logger.error('Could not Process message')
-    logger.error(excp)
+  except:
+    logger.error('Could not Process message', exc_info=True)
     return False
 
   # Persist post
