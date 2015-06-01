@@ -59,13 +59,79 @@ def send_post_by_email(post_id):
 
     thread = post.thread
     community = thread.community
+    logger.info("Sending new post by email to members of community %r",
+                community.name)
 
-    logger.info("Sending new post by email to members of community %s"
-                % community.name)
-    for member in community.members:
-      if not member.can_login:
-        continue
-      send_post_to_user(community, post, member)
+    CHUNK_SIZE = 20
+    members_id = [member.id for member in community.members
+                  if member.can_login]
+    chunk = []
+    for idx, member_id in enumerate(members_id):
+      chunk.append(member_id)
+      if idx % CHUNK_SIZE == 0:
+        batch_send_post_to_users.apply_async((post.id, chunk))
+        chunk = []
+
+    if chunk:
+      batch_send_post_to_users.apply_async((post.id, chunk))
+
+
+@shared_task(max_retries=10, rate_limit='12/m')
+def batch_send_post_to_users(post_id, members_id, failed_ids=None):
+  """
+  task run from send_post_by_email; auto-retry for mails that could not be
+  successfully sent.
+
+  Task default rate limit is 6/min.: there is at least 5 seconds between 2
+  batches.
+
+  During retry, if all `members_id` fails again, the task is retried
+  5min. later, then 10, 20, 40... up to 10 times before giving up. This ensures
+  retries up to approximatively 3 days and 13 hours after initial attempt
+  (geometric series is: 5min * (1-2**10) / 1-2) = 5115 mins).
+  """
+  from .models import Post
+
+  if not members_id:
+    return
+
+  post = Post.query.get(post_id)
+  if post is None:
+    # deleted after task queued, but before task run
+    return
+
+  failed = set()
+  successfully_sent = []
+  thread = post.thread
+  community = thread.community
+  user_filter = (User.id.in_(members_id) if len(members_id) > 1
+                 else User.id == members_id[0])
+  users = User.query.filter(user_filter).all()
+
+  for user in users:
+    try:
+      with current_app.test_request_context('/send_post_by_email'):
+        send_post_to_user(community, post, user)
+    except:
+      failed.add(user.id)
+    else:
+      successfully_sent.append(user.id)
+
+  if failed:
+    if failed_ids is not None:
+      failed_ids = set(failed_ids)
+
+    if failed == failed_ids:
+      # 5 minutes * (2** retry count)
+      countdown = 300 * 2 ** batch_send_post_to_users.request.retries
+      batch_send_post_to_users.retry([post_id, list(failed)],
+                                     countdown=countdown)
+    else:
+      batch_send_post_to_users.apply_async([post_id, list(failed)])
+
+  return {'post_id': post_id,
+          'successfully_sent': successfully_sent,
+          'failed': list(failed),}
 
 
 def build_reply_email_address(name, post, member, domain):
