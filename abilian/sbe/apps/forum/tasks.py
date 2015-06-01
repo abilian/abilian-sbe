@@ -46,7 +46,8 @@ def init_app(app):
 
 @shared_task()
 def send_post_by_email(post_id):
-  """Send a post to community members by email.
+  """
+  Send a post to community members by email.
   """
   from .models import Post
 
@@ -228,7 +229,7 @@ def process(message, marker):
   return newpost, attachments
 
 
-@shared_task(ignore_result=True)
+@shared_task()
 def process_email(message):
   """
   Email.Message object from command line script Run message (parsed email).
