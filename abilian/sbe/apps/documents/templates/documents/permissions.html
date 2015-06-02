@@ -349,6 +349,10 @@
 
 {% block js %}
   <script type="text/javascript">
+require(
+    ['Abilian', 'jquery'],
+    function(Abilian, $) {
+        
     Abilian.fn.onAppInit(function() {
       $("#deactivate_inheritance").click(function() {
         var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="deactivate_inheritance" /></form>');
@@ -385,5 +389,6 @@
       $("input#user-select").attr("value", "");
 
     });
+});
   </script>
 {% endblock %}

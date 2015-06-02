@@ -72,34 +72,35 @@
 
   {%- deferJS %}
   <script type="text/javascript">
-   'use strict';	       
-   (function(window, document, undefined) {
+'use strict';
+require(
+    ['Abilian', 'jquery', 'jquery.dataTables'],
+    function(Abilian, $, jqDT) {
 
-     function initUsersTable() {
-       var users_table = $('#users-table').dataTable({
-         aoColumns: [
-           { asSorting: [] },
-           { asSorting: [ "asc", "desc" ] },
-           { asSorting: [ "asc", "desc" ] },
-           { asSorting: [ "asc", "desc" ] }
-         ],
-         {# see http://datatables.net/ref #}
-         sPaginationType: "bootstrap",
-         bFilter:         true,
-         bLengthChange:   false,
-         bStateSave:      true,
-         iDisplayLength:  50,
-         //sDom:           'lrtip',
-         bProcessing: true,
-         bServerSide: true,
-         sAjaxSource: "{{ url_for(".users_dt_json") }}"
-       });
+        function initUsersTable() {
+            var users_table = $('#users-table').dataTable({
+                aoColumns: [
+                    { asSorting: [] },
+                    { asSorting: [ "asc", "desc" ] },
+                    { asSorting: [ "asc", "desc" ] },
+                    { asSorting: [ "asc", "desc" ] }
+                ],
+                {# see http://datatables.net/ref #}
+                sPaginationType: "bootstrap",
+                bFilter:         true,
+                bLengthChange:   false,
+                bStateSave:      true,
+                iDisplayLength:  50,
+                //sDom:           'lrtip',
+                bProcessing: true,
+                bServerSide: true,
+                sAjaxSource: "{{ url_for(".users_dt_json") }}"
+            });
+        }
+
+        Abilian.fn.onAppInit(initUsersTable)
     }
-
-       Abilian.fn.onAppInit(
-           function() { requirejs(['jquery', 'jquery.dataTables'], initUsersTable) }
-       );
-   }(window, document));
+);
   </script>
   {%- enddeferJS %}
 

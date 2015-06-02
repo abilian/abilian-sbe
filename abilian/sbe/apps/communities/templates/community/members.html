@@ -76,33 +76,32 @@
 
     {%- deferJS %}
     <script type="text/javascript">
-   'use strict';	       
-   (function(window, document, undefined) {
+     'use strict';
+     require(
+         ['Abilian', 'jquery', 'jquery.dataTables'],
+         function(Abilian, $, jqDT) {
 
-     function initMembersTable() {
-       var id = "#{{ table_id }}"; // Should be unique enough
-       $(id).dataTable({
-         aoColumns:       [
-           { bVisible: false },
-           { bVisible: false },
-           { aDataSort: [0, 1], asSorting: [ "asc", "desc" ] },
-           { asSorting: [ "asc", "desc" ] }
-           {% if is_manager %}
-           , { }
-           {% endif %}
-         ],
-         sPaginationType: "bootstrap",
-         bFilter:         true,
-         bLengthChange:   false
-       });
-     }
+             function initMembersTable() {
+                 var id = "#{{ table_id }}"; // Should be unique enough
+                 $(id).dataTable({
+                     aoColumns:       [
+                         { bVisible: false },
+                         { bVisible: false },
+                         { aDataSort: [0, 1], asSorting: [ "asc", "desc" ] },
+                         { asSorting: [ "asc", "desc" ] }
+                         {% if is_manager %}
+                         , { }
+                         {% endif %}
+                     ],
+                     sPaginationType: "bootstrap",
+                     bFilter:         true,
+                     bLengthChange:   false
+                 });
+             }
 
-       Abilian.fn.onAppInit(
-           function() {
-               requirejs(['jquery', 'jquery.dataTables'], initMembersTable)
-           }
+             Abilian.fn.onAppInit(initMembersTable);
+         }
      );
-     }(window, document));
     </script>
     {%- enddeferJS %}
     <div class="clearfix"></div>
@@ -148,9 +147,12 @@
 
   {%- deferJS %}
   <script type="text/javascript">
-   jQuery(window).on(
-     Abilian.events.appInit,
-     function() {
+require(
+    ['Abilian', 'jquery'],
+    function(Abilian, $) {
+
+     Abilian.fn.onAppInit(
+         function() {
        $("#user-select")
             .attr("style", "min-width: 220px")
             .select2({
@@ -184,6 +186,7 @@
 
        $("#s2id_user-select a span").text("");
        $("input#user-select").attr("value", "");
+         });
     });
   </script>
   {%- enddeferJS %}

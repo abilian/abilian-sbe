@@ -24,7 +24,7 @@
 {% endblock %}
 
 {% block modals %}
-  {% if page %}
+  {%- if page %}
     {#  FIXME: copy-pasted from Documents. #}
     <div class="modal fade" id="modal-delete" role="dialog"
          data-keyboard="true">
@@ -81,9 +81,12 @@
       </div>
     </div>
 
-    {%- deferJS %}
-    <script type="text/javascript">
- $(document).ready(function() {
+{%- deferJS %}
+<script type="text/javascript">
+require(
+    ['Abilian', 'jquery', 'bootbox'],
+    function(Abilian, $, bootbox) {        
+        function setupDeleteButtons() {
     $('#attachments li form > button[value="delete"]')
         .click(function(e) {
             e.preventDefault();        
@@ -91,7 +94,7 @@
             var button_form = $(this.form);
             var filename = $button.closest('li').find('a').text();
             var msg =  '<h2>"' + filename + '"</h2>'
-                       + '<p class="lead">{{ _("Delete attachment?") }}</p>';
+                     + '<p class="lead">{{ _("Delete attachment?") }}</p>';
             bootbox.confirm(msg,
                             function(confirm) {
                                 if (confirm) {
@@ -100,13 +103,17 @@
                                                'name': 'action',
                                                'value': $button.attr('value')});
                                   button_form.append(action_val);
-                                  button_form.submit();
+                                    button_form.submit();
                                 }
                             });
         })
         .removeAttr('disabled');
- });
-    </script>
-    {%- enddeferJS %}
-  {% endif %}
+        }
+
+        Abilian.fn.onAppInit(setupDeleteButtons);
+    }
+ );
+</script>
+{%- enddeferJS %}
+{%- endif %}
 {% endblock %}
