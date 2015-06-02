@@ -9,14 +9,13 @@ from itertools import groupby
 from urllib import quote
 
 import sqlalchemy as sa
-from flask import g, render_template, redirect, request, \
-  current_app, abort, flash, make_response
+from flask import g, render_template, request, abort, make_response
 from flask_login import current_user
+from flask_babel import format_date
 
 from abilian.i18n import _, _l
-from abilian.core.signals import activity
 from abilian.core.extensions import db
-from abilian.web.action import actions, ButtonAction
+from abilian.web.action import ButtonAction
 from abilian.web.views import default_view
 from abilian.web import nav, url_for, views
 
