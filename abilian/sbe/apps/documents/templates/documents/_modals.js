@@ -35,6 +35,7 @@ function setupFolderModal(Abilian, $) {
         });
     };
 
+    {%- if doc %}
     // Simple document viewer...
     function setupDocumentViewer() {
         var imgSrc = $("img.preview").attr("src"),
@@ -96,6 +97,7 @@ function setupFolderModal(Abilian, $) {
             return true;
         }
     }
+    {%- endif %}
 
     Abilian.fn.onAppInit(function() {
         setupModalFolderInputnameCheck(
@@ -112,7 +114,9 @@ function setupFolderModal(Abilian, $) {
         $('#modal-edit input[type="text"]').preventEnterKey();
         $('#modal-new-folder input[type="text"]').preventEnterKey();
 
+        {%- if doc %}
         setupDocumentViewer();
+        {%- endif %}
     });
 }
     require(['Abilian', 'jquery'], setupFolderModal);
