@@ -553,7 +553,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     if not self.antivirus_required:
       return True
 
-    if current_app.conf.get('CELERY_ALWAYS_EAGER', False):
+    if current_app.config.get('CELERY_ALWAYS_EAGER', False):
       async_conversion(self)
       return True
 

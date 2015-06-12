@@ -58,6 +58,10 @@ class TestBlobs(BaseTests):
     self.session.add(doc)
     self.session.commit()
 
+    # coverage
+    self.app.config['ANTIVIRUS_CHECK_REQUIRED'] = True
+    doc.ensure_antivirus_scheduled()
+
   def test_antivirus_properties(self):
     root = Folder(title=u"root")
     doc = Document(parent=root, title=u"test")
