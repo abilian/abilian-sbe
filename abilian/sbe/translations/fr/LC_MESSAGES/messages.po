@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-15 18:38+0200\n"
+"POT-Creation-Date: 2015-06-15 21:20+0200\n"
 "PO-Revision-Date: 2015-04-23 16:51+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language-Team: fr <LL@li.org>\n"
@@ -1097,6 +1097,10 @@ msgid "has posted an object of type {object_type} called \"{object}\""
 msgstr "a ajouté un objet de type {object_type} nommé \"{object}\""
 
 #: abilian/sbe/apps/wall/presenters.py:114
+msgid "has updated object {object}."
+msgstr "a mis à jour l'objet \"{object}\""
+
+#: abilian/sbe/apps/wall/presenters.py:117
 msgid "has done action \"{verb}\" on object \"{object}\"."
 msgstr "a effectué l'action \"{verb}\" sur l'objet \"{object}\"."
 

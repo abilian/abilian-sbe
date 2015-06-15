@@ -110,6 +110,9 @@ class ActivityEntryPresenter(BasePresenter):
       elif entry.verb == 'leave':
         msg = _(u'has left the community {object}.').format(**ctx)
 
+      elif entry.verb == 'update':
+        msg = _(u'has updated object {object}.').format(**ctx)
+
       else:
         msg = _(u'has done action "{verb}" on object "{object}".').format(**ctx)
 
