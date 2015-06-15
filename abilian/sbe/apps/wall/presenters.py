@@ -27,6 +27,7 @@ MESSAGES = {
 
   ('update', Document): _l(u'has updated document "{object}"'),
   ('update', WikiPage): _l(u'has updated wiki page "{object}"'),
+  ('update', Community): _l(u'has updated community "{object}"'),
 
   ('join', Community): _l(u'has joined the community {object}.'),
   ('leave', Community): _l(u'has left the community {object}.'),
