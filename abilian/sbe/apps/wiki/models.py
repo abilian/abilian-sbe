@@ -16,7 +16,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 
 from abilian.core.entities import Entity, db, SEARCHABLE
 from abilian.core.models.subjects import User
-from abilian.services.comments.service import Commentable
 
 from abilian.sbe.apps.communities.models import (
   Community, CommunityIdColumn, community_content,
@@ -30,7 +29,7 @@ __all__ = ['WikiPage']
 
 
 @community_content
-class WikiPage(Entity, Commentable):
+class WikiPage(Entity):
   __tablename__ = 'wiki_page'
 
   # : The title for this page
