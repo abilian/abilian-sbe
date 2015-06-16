@@ -21,7 +21,7 @@
           <table class="table table-striped table-condensed community-list">
             {%- for community in my_communities %}
               <tr>
-                <td class="avatar">
+                <td class="logo">
                   <a href="{{ url_for(community) }}">
                     <img src="{{ community_image_url(community, s=65) }}" />
                   </a>
