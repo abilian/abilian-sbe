@@ -53,10 +53,11 @@ class CommunityForm(Form):
   # FIXME: code duplicated from the user edit form (UserProfileForm).
   # Needs to be refactored.
   def validate_image(self, field):
-    data = request.files.get('image')
+    data = request.form.get('image')
     if not data:
       return
 
+    data = field.data
     filename = data.filename
     valid = any(map(filename.lower().endswith, ('.png', '.jpg', '.jpeg')))
 
@@ -68,13 +69,13 @@ class CommunityForm(Form):
     if not img_type in ('png', 'jpeg'):
       raise ValidationError(_(u'Only PNG or JPG image files are accepted'))
 
-    data.stream.seek(0)
+    data.seek(0)
     try:
       # check this is actually an image file
-      im = PIL.Image.open(data.stream)
+      im = PIL.Image.open(data)
       im.load()
     except:
       raise ValidationError(_(u'Could not decode image file'))
 
-    data.stream.seek(0)
+    data.seek(0)
     field.data = data

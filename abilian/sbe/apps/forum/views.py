@@ -9,7 +9,7 @@ from itertools import groupby
 from urllib import quote
 
 import sqlalchemy as sa
-from flask import g, render_template, request, abort, make_response
+from flask import g, render_template, request, abort, make_response, current_app
 from flask_login import current_user
 from flask_babel import format_date
 
@@ -179,18 +179,28 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
 
     self.post = self.thread.create_post(body_html=self.message_body)
     session = sa.orm.object_session(self.thread)
+    uploads = current_app.extensions['uploads']
 
-    for f in request.files.getlist('attachments'):
-      name = f.filename
+    for handle in request.form.getlist('attachments'):
+      fileobj = uploads.get_file(current_user, handle)
+      if fileobj is None:
+        continue
+
+      meta = uploads.get_metadata(current_user, handle)
+      name = meta.get('filename', handle)
+      mimetype = meta.get('mimetype', None)
+
       if not isinstance(name, unicode):
-        name = unicode(f.filename, encoding='utf-8', errors='ignore')
+        name = unicode(name, encoding='utf-8', errors='ignore')
 
       if not name:
         continue
 
       attachment = PostAttachment(name=name)
       attachment.post = self.post
-      attachment.set_content(f.read(), f.content_type)
+
+      with fileobj.open('rb') as f:
+        attachment.set_content(f.read(), mimetype)
       session.add(attachment)
 
   def commit_success(self):
@@ -273,18 +283,3 @@ def attachment_download(thread_id, post_id, attachment_id):
   )
   response.headers['content-disposition'] = content_disposition
   return response
-
-
-def create_post_attachments(post, files):
-  for f in files:
-    name = f.filename
-    if not isinstance(name, unicode):
-      name = unicode(f.filename, encoding='utf-8', errors='ignore')
-
-    if not name:
-      continue
-
-    attachment = PostAttachment(name=name)
-    attachment.post = post
-    attachment.set_content(f.read(), f.content_type)
-    db.session.add(attachment)
