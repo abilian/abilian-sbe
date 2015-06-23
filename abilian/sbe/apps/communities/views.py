@@ -152,7 +152,7 @@ class BaseCommunityView(object):
     image = self.obj.image
     kwargs = dict()
     if image and 'community' in g:
-      setattr(image, 'url', image_url(g.community))
+      setattr(image, 'url', image_url(self.obj, s=500))
       kwargs['image'] = image
 
     return kwargs
@@ -187,6 +187,7 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
       self.obj.type = type
       self.obj.update_roles_on_folder()
     del form.type
+
 
 
 add_url("/<string:community_id>/settings",
