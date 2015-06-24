@@ -51,8 +51,7 @@ celery = BaseCelery(loader=CeleryLoader)
 
 class Application(BaseApplication):
 
-  APP_PLUGINS = (
-    'abilian.web.search',
+  APP_PLUGINS = BaseApplication.APP_PLUGINS + (
     "abilian.sbe.apps.main",
     "abilian.sbe.apps.notifications",
     "abilian.sbe.apps.preferences",
