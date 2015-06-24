@@ -77,14 +77,3 @@ class Like(Entity):
 
   content = Column(UnicodeText, info=SEARCHABLE|dict(index_to=('text',)))
   message_id = Column(Integer, ForeignKey(Message.id), nullable=False)
-
-
-#class FeedEntry(db.Model):
-#
-#  __tablename__ = 'feedentry'
-
-
-class Attachment(Entity):
-  __tablename__ = 'attachment'
-
-  content = Column(LargeBinary)

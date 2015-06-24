@@ -310,18 +310,6 @@ def search_users():
   users = list(User.search_query(q).all())
   return make_json_response(users)
 
-
-#
-# Attachments
-#
-@restapi.route("/attachments", methods=['POST'])
-@login_required
-def create_attachment():
-  # TODO
-  # attachment = request.files['attachment']
-  return make_json_response({}, 201)
-
-
 #
 # Activity Streams
 #
