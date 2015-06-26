@@ -1,4 +1,5 @@
 (function() {
+    'use strict';
 function setupUpload(Abilian, $, FileAPI) {
     var form_data = {action: "upload"};
     form_data[Abilian.csrf_fieldname] = Abilian.csrf_token;
@@ -57,7 +58,7 @@ function setupUpload(Abilian, $, FileAPI) {
         });
 
     form_data = null;
-}
+};
 
- require(['Abilian', 'jquery', 'FileAPI'], setupUpload);
-}());
+ require(['Abilian', 'jquery', 'FileAPI', 'jquery.fileapi'], setupUpload);
+})();
