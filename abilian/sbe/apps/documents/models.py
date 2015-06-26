@@ -540,13 +540,11 @@ class Document(BaseContent, PathAndSecurityIndexable):
   size = Column(Integer)
   page_num = Column(Integer, default=1)
 
+  #FIXME: use Entity.meta instead
   #: Stores extra metadata as a JSON column
   extra_metadata_json = Column(UnicodeText, info=dict(auditable=False))
 
   sbe_type = 'cmis:document'
-
-  meta = True  # for now
-  sharing = True
 
   # antivirus status
   def ensure_antivirus_scheduled(self):
