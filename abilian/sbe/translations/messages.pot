@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.1.2.dev17+ng5ebc82f.d20150615\n"
+"Project-Id-Version: abilian-sbe 0.1.2.dev26+nga559ac8.d20150630\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-15 21:20+0200\n"
+"POT-Creation-Date: 2015-06-30 15:57+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,7 +45,7 @@ msgid "Conversations"
 msgstr ""
 
 #: abilian/sbe/apps/communities/actions.py:58
-#: abilian/sbe/apps/communities/views.py:270
+#: abilian/sbe/apps/communities/views.py:271
 #: abilian/sbe/apps/communities/templates/community/members.html:6
 #: abilian/sbe/apps/social/templates/social/groups.html:39
 msgid "Members"
@@ -110,12 +110,12 @@ msgstr ""
 msgid "A community with this name already exists"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:64
-#: abilian/sbe/apps/communities/forms.py:69
+#: abilian/sbe/apps/communities/forms.py:65
+#: abilian/sbe/apps/communities/forms.py:70
 msgid "Only PNG or JPG image files are accepted"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:77
+#: abilian/sbe/apps/communities/forms.py:78
 msgid "Could not decode image file"
 msgstr ""
 
@@ -127,25 +127,25 @@ msgstr ""
 msgid "Edit community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:196
+#: abilian/sbe/apps/communities/views.py:197
 msgid "Community settings saved successfully."
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:200
+#: abilian/sbe/apps/communities/views.py:201
 msgid "Create community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:206
+#: abilian/sbe/apps/communities/views.py:207
 #: abilian/sbe/apps/communities/templates/community/home.html:59
 msgid "Create new community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:209
+#: abilian/sbe/apps/communities/views.py:210
 #, python-format
 msgid "Community %(name)s created successfully"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:224
+#: abilian/sbe/apps/communities/views.py:225
 msgid "Community destroyed."
 msgstr ""
 
@@ -798,7 +798,7 @@ msgstr ""
 msgid "Post this message"
 msgstr ""
 
-#: abilian/sbe/apps/forum/views.py:238
+#: abilian/sbe/apps/forum/views.py:248
 msgid "Thread \"{title}\" deleted."
 msgstr ""
 

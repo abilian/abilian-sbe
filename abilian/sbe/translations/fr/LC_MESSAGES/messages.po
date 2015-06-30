@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-06-15 21:20+0200\n"
-"PO-Revision-Date: 2015-04-23 16:51+0100\n"
+"POT-Creation-Date: 2015-06-30 15:57+0200\n"
+"PO-Revision-Date: 2015-06-30 15:57+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -43,7 +43,7 @@ msgid "Conversations"
 msgstr "Conversations"
 
 #: abilian/sbe/apps/communities/actions.py:58
-#: abilian/sbe/apps/communities/views.py:270
+#: abilian/sbe/apps/communities/views.py:271
 #: abilian/sbe/apps/communities/templates/community/members.html:6
 #: abilian/sbe/apps/social/templates/social/groups.html:39
 msgid "Members"
@@ -108,12 +108,12 @@ msgstr "A un forum"
 msgid "A community with this name already exists"
 msgstr "Une communauté ayant le même nom existe déjà"
 
-#: abilian/sbe/apps/communities/forms.py:64
-#: abilian/sbe/apps/communities/forms.py:69
+#: abilian/sbe/apps/communities/forms.py:65
+#: abilian/sbe/apps/communities/forms.py:70
 msgid "Only PNG or JPG image files are accepted"
 msgstr "Seuls les images au format PNG ou JPG sont acceptés"
 
-#: abilian/sbe/apps/communities/forms.py:77
+#: abilian/sbe/apps/communities/forms.py:78
 msgid "Could not decode image file"
 msgstr "Impossible de lire le fichier d'image"
 
@@ -125,25 +125,25 @@ msgstr "Membre"
 msgid "Edit community"
 msgstr "Éditer la communauté"
 
-#: abilian/sbe/apps/communities/views.py:196
+#: abilian/sbe/apps/communities/views.py:197
 msgid "Community settings saved successfully."
 msgstr "Les paramètres de la communautés ont été enregistrés"
 
-#: abilian/sbe/apps/communities/views.py:200
+#: abilian/sbe/apps/communities/views.py:201
 msgid "Create community"
 msgstr "Créer une communauté"
 
-#: abilian/sbe/apps/communities/views.py:206
+#: abilian/sbe/apps/communities/views.py:207
 #: abilian/sbe/apps/communities/templates/community/home.html:59
 msgid "Create new community"
 msgstr "Créer une communauté"
 
-#: abilian/sbe/apps/communities/views.py:209
+#: abilian/sbe/apps/communities/views.py:210
 #, python-format
 msgid "Community %(name)s created successfully"
 msgstr "Communauté %(name)s créé avec succès"
 
-#: abilian/sbe/apps/communities/views.py:224
+#: abilian/sbe/apps/communities/views.py:225
 msgid "Community destroyed."
 msgstr "Communauté supprimée"
 
@@ -510,7 +510,7 @@ msgid ""
 "\"%(message)s\""
 msgstr ""
 "\n"
-"%(sender)s vous envoie le fichier \"%(filename)s\" depuis l'extranet.\n"
+"%(sender)s vous a envoyé le fichier \"%(filename)s\" depuis l'extranet.\n"
 "\n"
 "Message:\n"
 "\"%(message)s\""
@@ -818,7 +818,7 @@ msgstr "_____Écrivez au-dessus de cette ligne pour répondre_____"
 msgid "Post this message"
 msgstr "Envoyer ce message"
 
-#: abilian/sbe/apps/forum/views.py:238
+#: abilian/sbe/apps/forum/views.py:248
 msgid "Thread \"{title}\" deleted."
 msgstr "La conversation \"{title}\" a été supprimée."
 
@@ -967,10 +967,12 @@ msgid ""
 "Please enter the email addresses of people you'd like to invite to the "
 "community. Enter one email address per line."
 msgstr ""
+"Veuillez saisir les adresses email des personnes que vous souhaitez "
+"inviter dans cette communauté. Merci de saisir une adresse par ligne."
 
 #: abilian/sbe/apps/social/templates/social/invite.html:13
 msgid "Emails"
-msgstr ""
+msgstr "Emails"
 
 #: abilian/sbe/apps/social/templates/social/invite.html:20
 msgid "Personnalized message"
@@ -978,7 +980,7 @@ msgstr "Message personnalisé"
 
 #: abilian/sbe/apps/social/templates/social/invite.html:29
 msgid "Invite"
-msgstr ""
+msgstr "Invitation"
 
 #: abilian/sbe/apps/social/templates/social/macros.html:85
 msgid "Audit log"
@@ -1027,11 +1029,11 @@ msgstr "Votre nouveau groupe a été créé"
 
 #: abilian/sbe/apps/social/views/invites.py:36
 msgid "Action aborted"
-msgstr ""
+msgstr "Action abandonnée"
 
 #: abilian/sbe/apps/social/views/invites.py:57
 msgid "Invitation sent"
-msgstr ""
+msgstr "Invitation envoyée"
 
 #: abilian/sbe/apps/social/views/users.py:47
 msgid "Images"
