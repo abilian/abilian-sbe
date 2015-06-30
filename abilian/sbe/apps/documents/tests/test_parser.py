@@ -1,5 +1,3 @@
-from unittest import TestCase
-
 from ..cmis.parser import Entry
 
 XML_ENTRY = """\
@@ -46,15 +44,13 @@ XML_ENTRY_WITH_CONTENT = """\
 """
 
 
-class ParserTestCase(TestCase):
+def test_parse_folder_entry():
+  e = Entry(XML_ENTRY)
+  assert e.name == "Toto Titi"
+  assert e.type == "cmis:folder"
 
-  def test_folder_entry(self):
-    e = Entry(XML_ENTRY)
-    self.assertEquals(e.name, "Toto Titi")
-    self.assertEquals(e.type, "cmis:folder")
-
-  def test_document_entry(self):
-    e = Entry(XML_ENTRY_WITH_CONTENT)
-    self.assertEquals(e.name, "testDocument")
-    self.assertEquals(e.type, "cmis:document")
-    self.assertEquals(e.content, "Test content string")
+def test_parse_document_entry():
+  e = Entry(XML_ENTRY_WITH_CONTENT)
+  assert e.name == "testDocument"
+  assert e.type == "cmis:document"
+  assert e.content == "Test content string"

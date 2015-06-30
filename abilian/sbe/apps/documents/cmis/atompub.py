@@ -159,9 +159,9 @@ def getRepositoryInfo():
   log.debug("repositoryInfo called")
 
   root_folder = repository.root_folder
-  args = {'ROOT': ROOT, 'root_folder': root_folder}
+  ctx = {'ROOT': ROOT, 'root_folder': root_folder}
 
-  result = render_template("cmis/service.xml", **args)
+  result = render_template("cmis/service.xml", **ctx)
   response = Response(result, mimetype=MIME_TYPE_ATOM_SERVICE)
   return response
 

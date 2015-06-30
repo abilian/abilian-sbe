@@ -11,72 +11,70 @@ def check_editable(object):
       assert hasattr(object, k)
 
 
-class TestFolder(TestCase):
+def test_title_prevails():
+  f = Folder(name=u'name', title=u'title')
+  assert f.title == u'title'
+  assert f.name == u'title'
 
-  def test_title_prevails(self):
-    f = Folder(name=u'name', title=u'title')
-    assert f.title == u'title'
-    assert f.name == u'title'
+  f = Folder(name=u'name', title=None)
+  assert f.title == u'name'
+  assert f.name == u'name'
 
-    f = Folder(name=u'name', title=None)
-    assert f.title == u'name'
-    assert f.name == u'name'
-
-    f = Folder(name=u'name')
-    assert f.title == u'name'
-    assert f.name == u'name'
+  f = Folder(name=u'name')
+  assert f.title == u'name'
+  assert f.name == u'name'
 
 
-  def test_folder_editables(self):
-    root = Folder(title="/")
-    check_editable(root)
+def test_folder_editables():
+  root = Folder(title="/")
+  check_editable(root)
 
-  def test_folder_can_create_documents(self):
-    root = Folder(title="/")
+def test_folder_can_create_documents():
+  root = Folder(title="/")
 
-    document = root.create_document("doc")
+  document = root.create_document("doc")
 
-    assert len(root.children) == 1
-    assert document.title == "doc"
-    assert document.path == "/doc"
-    assert document in root.documents
-    assert document in root.children
-    assert document.parent == root
+  assert len(root.children) == 1
+  assert document.title == "doc"
+  assert document.path == "/doc"
+  assert document in root.documents
+  assert document in root.children
+  assert document.parent == root
 
-  def test_folder_can_create_subfolders(self):
-    root = Folder(title="/")
+def test_folder_can_create_subfolders():
+  root = Folder(title="/")
 
-    subfolder = root.create_subfolder("folder")
-    assert len(root.children) == 1
-    assert subfolder.title == "folder"
-    assert subfolder.path == "/folder"
-    assert subfolder in root.subfolders
-    assert subfolder in root.children
-    assert subfolder.parent == root
+  subfolder = root.create_subfolder("folder")
+  assert len(root.children) == 1
+  assert subfolder.title == "folder"
+  assert subfolder.path == "/folder"
+  assert subfolder in root.subfolders
+  assert subfolder in root.children
+  assert subfolder.parent == root
 
-  def test_nested_subobjects(self):
-    root = Folder(title="/")
-    subfolder = root.create_subfolder("folder1")
-    subsubfolder = subfolder.create_subfolder("folder2")
-    document = subfolder.create_document("doc")
+def test_nested_subobjects():
+  root = Folder(title="/")
+  subfolder = root.create_subfolder("folder1")
+  subsubfolder = subfolder.create_subfolder("folder2")
+  document = subfolder.create_document("doc")
 
-    assert len(root.children) == 1
-    assert len(subfolder.children) == 2
-    assert subsubfolder.title == "folder2"
-    assert subsubfolder.path == "/folder1/folder2"
-    assert document.title == "doc"
-    assert document.path == "/folder1/doc"
+  assert len(root.children) == 1
+  assert len(subfolder.children) == 2
+  assert subsubfolder.title == "folder2"
+  assert subsubfolder.path == "/folder1/folder2"
+  assert document.title == "doc"
+  assert document.path == "/folder1/doc"
 
-    assert root.get_object_by_path("/folder1") == subfolder
-    assert root.get_object_by_path("/folder1/folder2") == subsubfolder
-    assert root.get_object_by_path("/folder1/doc") == document
+  assert root.get_object_by_path("/folder1") == subfolder
+  assert root.get_object_by_path("/folder1/folder2") == subsubfolder
+  assert root.get_object_by_path("/folder1/doc") == document
 
-  def test_folder_is_clonable(self):
-    root = Folder(title="/")
-    clone = root.clone()
+def test_folder_is_clonable():
+  root = Folder(title="/")
+  clone = root.clone()
 
-    assert clone.title == root.title
-    assert clone.path == root.path
+  assert clone.title == root.title
+  assert clone.path == root.path
 
 
 # FIXME: skipped for now as these tests break other tests down the line (in wiki).
