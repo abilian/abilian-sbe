@@ -269,6 +269,9 @@ class Folder(CmisObject, PathAndSecurityIndexable):
   __indexation_args__['index_to'] = index_to
   del index_to
 
+  _indexable_roles_and_users = PathAndSecurityIndexable.\
+                               _indexable_roles_and_users
+
   parent = relationship(
     "Folder",
     primaryjoin=(lambda: foreign(CmisObject._parent_id) == remote(Folder.id)),
@@ -496,6 +499,9 @@ class Document(BaseContent, PathAndSecurityIndexable):
   index_to += (('text', ('text',)),)
   __indexation_args__['index_to'] = index_to
   del index_to
+
+  _indexable_roles_and_users = PathAndSecurityIndexable.\
+                               _indexable_roles_and_users
 
   parent = relationship(
     "Folder",

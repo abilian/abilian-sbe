@@ -19,6 +19,7 @@ from abilian.core.extensions import db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.subjects import Group, User
 from abilian.core.entities import Entity
+from abilian.services.indexing import indexable_role
 from abilian.services.security import (
   Role, security, RoleType, Admin,
   Reader as READER,
@@ -79,7 +80,25 @@ def community_content(cls):
      (('community_slug', _whoosh_community_slug_field),),),
   )
   cls.__indexation_args__['index_to'] = index_to
+
+  def _indexable_roles_and_users(self):
+    if not self.community:
+      return []
+    return indexable_roles_and_users(self.community)
+
+  cls._indexable_roles_and_users = property(_indexable_roles_and_users)
   return cls
+
+
+def indexable_roles_and_users(community):
+  """
+  Mixin to use to replace Entity._indexable_roles_and_users.
+
+  Will be removed when communities are upgraded to use standard role based
+  access (by setting permissions and using security service).
+  """
+  return u' '.join(indexable_role(user)
+                   for user in community.members)
 
 
 class Community(Entity):
@@ -300,6 +319,10 @@ class Community(Entity):
 
   def touch(self):
     self.last_active_at = datetime.utcnow()
+
+  @property
+  def _indexable_roles_and_users(self):
+    return indexable_roles_and_users(self)
 
 
 _whoosh_community_id_field = wf.NUMERIC(numtype=int, bits=64, signed=False,
