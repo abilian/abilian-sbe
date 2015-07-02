@@ -140,6 +140,11 @@ class Community(Entity):
   #: Memberships for this community.
   memberships = relationship(Membership, cascade="all, delete-orphan")
 
+  #: direct access to :class:`User` members
+  members = relationship(User,
+                         secondary=Membership.__table__,
+                         backref=backref('communities', lazy='select'),)
+
   #: Number of members in this community.
   membership_count = Column(Integer, default=0, nullable=False,
                             info=NOT_AUDITABLE)
@@ -208,10 +213,6 @@ class Community(Entity):
     if role:
       memberships = memberships.filter(M.role == role)
     return memberships.all()
-
-  @property
-  def members(self):
-    return [m.user for m in self.get_memberships()]
 
   def set_membership(self, user, role):
     """
