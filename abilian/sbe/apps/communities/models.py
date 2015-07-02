@@ -187,6 +187,7 @@ class Community(Entity):
     self.members_can_send_by_email = False
     Entity.__init__(self, **kw)
     if self.has_documents and not self.folder:
+      #FIXME: this should be done in documents by using signals
       name = self.name
       if not name:
         # during creation, we may have to provide a temporary name for
@@ -205,6 +206,7 @@ class Community(Entity):
   def rename(self, name):
     self.name = name
     if self.folder:
+      #FIXME: use signals
       self.folder.name = name
 
   def get_memberships(self, role=None):
@@ -229,6 +231,7 @@ class Community(Entity):
     M = Membership
     membership = M.query \
       .filter(and_(M.user_id == user.id, M.community_id == self.id)).first()
+
     if not membership:
       membership = Membership(community=self, user=user, role=role)
       db.session.add(membership)
@@ -238,6 +241,7 @@ class Community(Entity):
       membership.role = role
 
     if self.folder:
+      #FIXME: this should be done in documents using signal membership_set
       local_role = WRITER if self.type == 'participative' else READER
       if role == MANAGER:
         local_role = MANAGER
@@ -267,6 +271,7 @@ class Community(Entity):
     self.membership_count -= 1
 
     if self.folder:
+      #FIXME: this should be done in documents using signal membership_removed
       roles = set(security.get_roles(user, self.folder, no_group_roles=True))
       roles &= VALID_ROLES  # ensure we don't remove roles not managed by us
       for role in roles:
