@@ -222,7 +222,8 @@ class Community(Entity):
       if role == MANAGER:
         local_role = MANAGER
 
-      current_roles = set(security.get_roles(user, self.folder))
+      current_roles = set(security.get_roles(user, self.folder,
+                                             no_group_roles=True))
       current_roles &= VALID_ROLES  # ensure we don't remove roles not managed
                                     # by us
       for role_to_ungrant in current_roles - set((local_role,)):
@@ -246,7 +247,7 @@ class Community(Entity):
     self.membership_count -= 1
 
     if self.folder:
-      roles = set(security.get_roles(user, self.folder))
+      roles = set(security.get_roles(user, self.folder, no_group_roles=True))
       roles &= VALID_ROLES  # ensure we don't remove roles not managed by us
       for role in roles:
         security.ungrant_role(user, role, self.folder)
