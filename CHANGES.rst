@@ -1,6 +1,31 @@
 Changelog for Abilian SBE
 =========================
 
+0.1.3 (unreleased)
+------------------
+
+TODO
+
+
+0.1.2 (2015-07-15)
+------------------
+
+Improvements
+~~~~~~~~~~~~
+
+- Design / CSS
+
+Fixes
+~~~~~
+
+- Fix sqlalchemy connection issues with Celery tasks
+
+Refactoring
+~~~~~~~~~~~
+
+- JS: Use requirejs
+
+
 0.1.1 (2015-05-27)
 ------------------
 
