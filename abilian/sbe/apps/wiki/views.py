@@ -90,7 +90,7 @@ class BasePageView(object):
     Template render arguments. You can override `base_template` for
     instance. Only `view` and `form` cannot be overriden.
     """
-    kw = {}
+    kw = super(BasePageView, self).template_kwargs
     kw['page'] = self.obj
     return kw
 
