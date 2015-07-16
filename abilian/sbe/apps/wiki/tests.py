@@ -3,8 +3,8 @@ from __future__ import absolute_import
 
 import re
 from urllib import quote_plus
-from mock import MagicMock, patch
 
+from mock import MagicMock, patch
 import markdown
 from flask import url_for, g
 from abilian.core.models.subjects import User
@@ -12,9 +12,7 @@ from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.tests.base import (
   CommunityBaseTestCase, CommunityIndexingTestCase
 )
-
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
-
 from .models import WikiPage
 from . import views
 
@@ -133,7 +131,7 @@ class TestsViews(WikiBaseTestCase):
 
     response = self.client.get(
       url_for("wiki.page", title='Home', community_id=self.community.slug))
-    self.assertStatus(response, 200)
+    assert response.status_code == 200
 
   def test_create_page_initial_form(self):
     g.community = self.community
@@ -147,27 +145,28 @@ class TestsViews(WikiBaseTestCase):
     url = url_for("wiki.page_new", community_id=self.community.slug)
     url += '?title=Some+page+name'
     response = self.client.get(url)
-    self.assertStatus(response, 200)
+    assert response.status_code == 200
     # make sure the title is filled when comming from wikilink
     self.assertIn('value="Some page name"', response.data)
 
     title = 'Some page'
+    body = "LuuP3jai"
     url = url_for("wiki.page_new", community_id=self.community.slug)
-    data = dict(title=title, body_src="abc")
-    data['__action'] = "create"
+    data = dict(title=title, body_src=body, __action="create")
     response = self.client.post(url, data=data)
-    self.assertStatus(response, 302)
+    assert response.status_code == 302
 
     url = url_for("wiki.page", community_id=self.community.slug, title=title)
     response = self.client.get(url)
-    self.assertStatus(response, 200)
+    assert response.status_code == 200
+    self.assertIn(body, response.data)
 
     # edit
     url = url_for("wiki.page_edit",
                   community_id=self.community.slug,
                   title=title)
     response = self.client.get(url)
-    self.assertStatus(response, 200)
+    assert response.status_code == 200
 
     # Slightly hackish way to get the page_id
     line = [l for l in response.data.split("\n") if 'name="page_id"' in l][0]
@@ -177,20 +176,20 @@ class TestsViews(WikiBaseTestCase):
     url = url_for("wiki.page_changes", community_id=self.community.slug,
                   title=title)
     response = self.client.get(url)
-    self.assertStatus(response, 200)
+    assert response.status_code == 200
 
     url = url_for("wiki.page_source", community_id=self.community.slug,
                   title=title)
     response = self.client.get(url)
-    self.assertStatus(response, 200)
+    assert response.status_code == 200
 
     url = url_for("wiki.page_edit", community_id=self.community.slug)
     data = dict(title=title, page_id=page_id, body_src="abc def")
     data['__action'] = 'edit'
     response = self.client.post(url, data=data)
-    self.assertStatus(response, 302)
+    assert response.status_code == 302
 
     url = url_for("wiki.page_compare", rev0="on", rev1="on",
                   community_id=self.community.slug, title=title)
     response = self.client.get(url)
-    self.assertStatus(response, 200)
+    assert response.status_code == 200
