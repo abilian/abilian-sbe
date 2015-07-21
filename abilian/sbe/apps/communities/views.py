@@ -7,11 +7,10 @@ import hashlib
 from functools import wraps
 
 from flask import (
-    render_template, g, redirect, url_for, abort,
-    request, current_app, session,
+    render_template, g, redirect, url_for, request, current_app, session,
 )
 from flask_login import current_user, login_required
-from werkzeug.exceptions import NotFound, BadRequest
+from werkzeug.exceptions import NotFound, BadRequest, InternalServerError
 from pathlib import Path
 from whoosh.searching import Hit
 from abilian.core.extensions import db
@@ -186,7 +185,6 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
     del form.type
 
 
-
 add_url("/<string:community_id>/settings",
         view_func=CommunityEdit.as_view(
           'settings',
@@ -308,7 +306,7 @@ def members_post():
     membership_id = int(request.form['membership'])
     membership = Membership.query.get(membership_id)
     if membership.user_id != user_id:
-      abort(500)
+      raise InternalServerError()
 
     community.remove_membership(user)
 
