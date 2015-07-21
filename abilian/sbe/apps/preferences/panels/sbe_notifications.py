@@ -3,8 +3,9 @@
 This panel manages user setting for email reminders related to the SBE
 (social netowking) app.
 """
-from flask import render_template, redirect, url_for, request, flash, abort
+from flask import render_template, redirect, url_for, request, flash
 from flask import current_app as app
+from werkzeug.exceptions import InternalServerError
 from wtforms import BooleanField
 
 from abilian.core.extensions import db
@@ -30,7 +31,7 @@ class SbeNotificationsPanel(PreferencePanel):
   def get(self):
     # Manual security check, should be done by the framework instead.
     if not self.is_accessible():
-      abort(500)
+      raise InternalServerError()
 
     preferences = app.services['preferences']
     data = {}
@@ -48,7 +49,7 @@ class SbeNotificationsPanel(PreferencePanel):
   def post(self):
     # Manual security check, should be done by the framework instead.
     if not self.is_accessible():
-      abort(500)
+      raise InternalServerError()
 
     if request.form['_action'] == 'cancel':
       return redirect(url_for(".sbe_notifications"))

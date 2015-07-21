@@ -4,10 +4,9 @@
 from __future__ import absolute_import
 
 from flask import g, render_template
-
 from abilian.web.action import actions
-from abilian.sbe.apps.communities.blueprint import Blueprint
 
+from abilian.sbe.apps.communities.blueprint import Blueprint
 from .util import get_recent_entries
 from .presenters import ActivityEntryPresenter
 

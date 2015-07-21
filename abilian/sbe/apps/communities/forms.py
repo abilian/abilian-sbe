@@ -1,12 +1,11 @@
 import imghdr
 from string import strip
+
 import PIL
-
 from flask import request
-from flask.ext.babel import lazy_gettext as _l, gettext as _
-from wtforms.fields import BooleanField, TextField, TextAreaField
+from flask_babel import lazy_gettext as _l, gettext as _
+from wtforms.fields import BooleanField, TextAreaField, StringField
 from wtforms.validators import ValidationError, required, optional
-
 from abilian.web.forms import Form
 from abilian.web.forms.fields import Select2Field, FileField
 from abilian.web.forms.widgets import TextArea, ImageInput, BooleanWidget
@@ -16,7 +15,7 @@ from .models import Community
 
 
 class CommunityForm(Form):
-  name = TextField(label=_l(u"Name"), validators=[required()])
+  name = StringField(label=_l(u"Name"), validators=[required()])
   description = TextAreaField(
       label=_l(u"Description"),
       validators=[required(), length(max=500)],

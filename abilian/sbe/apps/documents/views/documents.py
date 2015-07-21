@@ -6,10 +6,10 @@ from __future__ import absolute_import
 from urllib import quote
 
 from flask import (redirect, request, make_response, flash, g,
-                   current_app, render_template, abort)
-from flask.ext.mail import Message
-from flask.ext.babel import gettext as _
-
+                   current_app, render_template)
+from flask_mail import Message
+from flask_babel import gettext as _
+from werkzeug.exceptions import NotFound
 from abilian.i18n import render_template_i18n
 from abilian.core.extensions import db, mail
 from abilian.core.signals import activity
@@ -22,11 +22,9 @@ from abilian.web.views import default_view
 from abilian.web import csrf, url_for
 
 from abilian.sbe.apps.communities.views import default_view_kw
-
 from ..tasks import preview_document, convert_document_content
 from ..repository import repository
 from ..models import Document
-
 from .util import get_document, check_read_access, breadcrumbs_for, \
   check_write_access, edit_object, match, check_manage_access
 from .views import documents
@@ -130,8 +128,8 @@ def document_download(doc_id):
     not match(doc.content_type, ("text/plain", "application/pdf", "image/*")):
     # Note: we omit text/html for security reasons.
     quoted_filename = quote(doc.title.encode('utf8'))
-    response.headers[
-      'content-disposition'] = 'attachment;filename="%s"' % quoted_filename
+    response.headers['content-disposition'] \
+      = 'attachment;filename="{}"'.format(quoted_filename)
 
   return response
 
@@ -194,7 +192,7 @@ def refresh_preview(doc_id):
   """
   doc = get_document(doc_id)
   if not doc:
-    abort(404)
+    raise NotFound()
 
   ct = doc.find_content_type(doc.content_type)
   if ct != doc.content_type:

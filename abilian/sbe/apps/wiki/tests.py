@@ -5,7 +5,7 @@ import re
 from urllib import quote_plus
 
 from mock import MagicMock, patch
-import markdown
+from markdown import Markdown
 from flask import url_for, g
 from abilian.core.models.subjects import User
 
@@ -28,7 +28,7 @@ def test_wikilink_extension():
   ctx = {}
   ctx['extensions'] = [extension, 'toc']
   ctx['output_format'] = 'html5'
-  md = markdown.Markdown(**ctx)
+  md = Markdown(**ctx)
 
   page_exists_mock = MagicMock(return_value=True)
   with patch('abilian.sbe.apps.wiki.forms.page_exists', page_exists_mock):

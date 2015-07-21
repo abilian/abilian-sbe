@@ -6,16 +6,13 @@ from __future__ import absolute_import
 import logging
 import pkgutil
 from cgi import escape
-from os.path import dirname, join
 
 from flask import (
-    request, redirect, g, abort, jsonify,
+    request, redirect, g, jsonify,
     current_app, Response, render_template, flash
 )
-
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import or_, and_, func, asc, desc, nullslast
-
 from abilian.i18n import _, _l
 from abilian.core.models.subjects import User
 from abilian.core.extensions import db
@@ -23,6 +20,7 @@ from abilian.web import url_for
 from abilian.web.views import default_view, ObjectEdit
 from abilian.web.views.images import user_photo_url
 from abilian.web.filters import age
+from werkzeug.exceptions import InternalServerError
 
 from abilian.sbe.apps.communities.models import Membership
 from abilian.sbe.apps.wall.views import get_recent_entries
@@ -30,7 +28,6 @@ from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from ..forms import UserProfileForm, UserProfileViewForm
 from .social import social
 from .util import Env
-
 
 logger = logging.getLogger(__name__)
 
@@ -239,7 +236,7 @@ def users_json():
   q = request.args.get("q").replace("%", " ").lower()
 
   if not q or len(q) < 2:
-    abort(500)
+    raise InternalServerError()
 
   query = User.query\
     .filter(or_(func.lower(User.first_name).like(q + "%"),

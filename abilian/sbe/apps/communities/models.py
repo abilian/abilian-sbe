@@ -7,13 +7,11 @@ from datetime import datetime
 import time
 from os.path import dirname, join
 
+from flask import current_app
 from sqlalchemy import Column, Unicode, ForeignKey, Boolean, DateTime, \
   Integer, UniqueConstraint, String, and_
 from sqlalchemy.orm import relation, relationship, backref
-
 import whoosh.fields as wf
-from flask import current_app
-
 from abilian.i18n import _l
 from abilian.core.extensions import db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
@@ -29,7 +27,6 @@ from abilian.services.security import (
 
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.documents.models import Folder, Blob
-
 from . import signals
 
 MEMBER = Role('member', label=_l(u'role_member'), assignable=False)

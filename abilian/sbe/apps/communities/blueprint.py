@@ -5,7 +5,8 @@ from __future__ import absolute_import
 
 from abilian.i18n import _
 from abilian.web import nav
-from flask import g, Blueprint as BaseBlueprint, abort
+from flask import g, Blueprint as BaseBlueprint
+from werkzeug.exceptions import NotFound
 
 from . import security
 from .models import Community
@@ -69,6 +70,6 @@ def pull_community(endpoint, values):
                                            url=wall_url)
       g.breadcrumb.append(breadcrumb_item)
     else:
-      abort(404)
+      raise NotFound()
   except KeyError:
     pass

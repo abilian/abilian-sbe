@@ -8,23 +8,22 @@ from datetime import date
 from itertools import groupby
 from urllib import quote
 
-import sqlalchemy as sa
-from flask import g, render_template, request, abort, make_response, current_app
+from flask import g, render_template, request, make_response, current_app
 from flask_login import current_user
 from flask_babel import format_date
-
+from werkzeug.exceptions import NotFound
+import sqlalchemy as sa
 from abilian.i18n import _, _l
-from abilian.core.extensions import db
 from abilian.web.action import ButtonAction
 from abilian.web.views import default_view
 from abilian.web import nav, url_for, views
 
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import default_view_kw
-
 from .forms import ThreadForm, CommentForm
 from .models import Thread, Post, PostAttachment
 from .tasks import send_post_by_email
+
 
 
 # TODO: move to config
@@ -273,7 +272,7 @@ def attachment_download(thread_id, post_id, attachment_id):
   if (not (thread and post and attachment)
       or post.thread is not thread
       or attachment.post is not post):
-    abort(404)
+    raise NotFound()
 
   response = make_response(attachment.content)
   response.headers['content-length'] = attachment.content_length

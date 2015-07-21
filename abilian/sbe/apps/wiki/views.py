@@ -8,13 +8,13 @@ from os.path import dirname, join
 from urllib import quote
 
 from flask import g, render_template, redirect, request, \
-  flash, current_app, abort, make_response
+  flash, current_app, make_response
 from markdown import markdown
 from markupsafe import Markup
 import sqlalchemy as sa
 from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.exceptions import NotFound
 from whoosh.searching import Hit
-
 from abilian.i18n import _, _n, _l
 from abilian.core.signals import activity
 from abilian.core.extensions import db
@@ -27,10 +27,8 @@ from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import (
   default_view_kw as community_dv_kw,
 )
-
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
-
 
 wiki = Blueprint("wiki", __name__,
                  url_prefix="/wiki",
@@ -348,7 +346,7 @@ def attachment_download():
   try:
     page = get_page_by_title(title)
   except NoResultFound:
-    abort(404)
+    raise NotFound()
 
   attachment = WikiPageAttachment.query.get(attachment_id)
   assert attachment is not None and attachment.wikipage is page
@@ -370,7 +368,7 @@ def attachment_upload():
   try:
     page = get_page_by_title(title)
   except NoResultFound:
-    abort(404)
+    raise NotFound()
 
   files = request.files.getlist('attachments')
   saved_count = 0
@@ -411,7 +409,7 @@ def attachment_delete():
   try:
     page = get_page_by_title(title)
   except NoResultFound:
-    abort(404)
+    raise NotFound()
 
   attachment = WikiPageAttachment.query.get(attachment_id)
   assert attachment is not None and attachment.wikipage is page

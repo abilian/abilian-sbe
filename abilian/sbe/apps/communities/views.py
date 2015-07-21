@@ -5,17 +5,15 @@ from __future__ import absolute_import
 
 import hashlib
 from functools import wraps
-from pathlib import Path
 
-from whoosh.searching import Hit
-
-from werkzeug.exceptions import NotFound, BadRequest
 from flask import (
     render_template, g, redirect, url_for, abort,
     request, current_app, session,
 )
-from flask.ext.login import current_user, login_required
-
+from flask_login import current_user, login_required
+from werkzeug.exceptions import NotFound, BadRequest
+from pathlib import Path
+from whoosh.searching import Hit
 from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.core.models.subjects import User
@@ -24,7 +22,6 @@ from abilian.web.views import images as image_views
 from abilian.i18n import _, _l
 
 from abilian.sbe.apps.documents.models import Document
-
 from .actions import register_actions
 from .forms import CommunityForm
 from .models import Community, Membership
@@ -333,7 +330,7 @@ def doc(doc_id):
   doc = Document.query.get(doc_id)
 
   if doc is None:
-    abort(404)
+    raise NotFound()
 
   folder = doc.parent
   while True:

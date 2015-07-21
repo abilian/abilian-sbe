@@ -4,8 +4,8 @@ import uuid
 import os.path
 
 from lxml.etree import XMLSyntaxError
-from flask import Blueprint, request, current_app, abort
-from werkzeug.exceptions import NotFound
+from flask import Blueprint, request, current_app
+from werkzeug.exceptions import NotFound, Forbidden
 from werkzeug.wrappers import BaseResponse as Response
 from werkzeug.datastructures import Headers
 
@@ -47,7 +47,7 @@ def log_request():
 @webdav.before_request
 def only_admin():
   if not current_app.services('security').has_role(user, "admin"):
-    abort(403)
+    raise Forbidden()
 
 
 @webdav.after_request

@@ -2,13 +2,11 @@
 Not used!
 """
 
+from flask import render_template, request, redirect, g, url_for, flash
+from flask_babel import gettext as _
+from flask_mail import Message as Email
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Text
-
-from flask import render_template, request, redirect, g, url_for, flash
-from flask.ext.babel import gettext as _
-from flask.ext.mail import Message as Email
-
 from abilian.core.extensions import db, mail
 
 from .social import social

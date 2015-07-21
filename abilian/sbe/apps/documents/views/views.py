@@ -5,7 +5,7 @@ Document management blueprint.
 from __future__ import absolute_import
 
 from flask import g
-from flask.ext.babel import gettext as _
+from flask_babel import gettext as _
 from abilian.web import nav
 from abilian.sbe.apps.communities.blueprint import Blueprint
 

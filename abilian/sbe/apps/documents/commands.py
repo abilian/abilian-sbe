@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 
 import sqlalchemy as sa
-from flask.ext.script import Manager
+from flask_script import Manager
 
 from . import tasks
 from .models import Document

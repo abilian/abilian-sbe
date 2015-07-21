@@ -4,10 +4,10 @@ Some functions to retrieve activity entries.
 """
 # TODO: move to the activity service ?
 
-from flask import g, abort, current_app
-from flask.ext.login import current_user
+from flask import g, current_app
+from flask_login import current_user
+from werkzeug.exceptions import Forbidden
 import sqlalchemy as sa
-
 from abilian.core.extensions import db
 from abilian.services.activity import ActivityEntry
 
@@ -21,7 +21,7 @@ def get_recent_entries(num=20, user=None, community=None):
   # Check just in case
   if not current_user.has_role('admin'):
     if community and not community.has_member(current_user):
-      abort(403)
+      raise Forbidden()
 
   query = AE.query.options(sa.orm.joinedload(AE.object))
 

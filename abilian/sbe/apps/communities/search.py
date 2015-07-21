@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 
 from flask import g
-from flask.ext.login import current_user
+from flask_login import current_user
 import whoosh.query as wq
 import whoosh.fields as wf
 

@@ -5,13 +5,12 @@ from __future__ import absolute_import
 
 from datetime import timedelta, datetime
 
+from flask import current_app as app
+from flask_mail import Message
+from flask_security.utils import md5
 from sqlalchemy import and_, or_
 from validate_email import validate_email
 from celery.schedules import crontab
-from flask import current_app as app
-from flask.ext.mail import Message
-from flask.ext.security.utils import md5
-
 from abilian.i18n import render_template_i18n
 from abilian.core.celery import periodic_task
 from abilian.core.models.subjects import User
@@ -22,7 +21,6 @@ from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.forum.models import Thread, Post
 from abilian.sbe.apps.wiki.models import WikiPage
-
 from .. import TOKEN_SERIALIZER_NAME
 
 

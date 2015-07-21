@@ -5,19 +5,16 @@ First cut at a notification system.
 from __future__ import absolute_import
 
 from flask import current_app as app, request
-from flask.ext.login import current_user
+from flask_login import current_user
 from werkzeug.exceptions import InternalServerError, Forbidden
-
 from abilian.i18n import render_template_i18n
 from abilian.core.extensions import db, csrf
 from abilian.core.models.subjects import User
 from abilian.services.auth.views import get_token_status
+
 from abilian.sbe.apps.notifications import TOKEN_SERIALIZER_NAME
-
 from ..tasks.social import send_daily_social_digest_to
-
 from . import notifications
-
 
 __all__ = []
 

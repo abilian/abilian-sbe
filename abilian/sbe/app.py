@@ -7,15 +7,16 @@ and activation.
 """
 from __future__ import absolute_import
 
-import os, sys, subprocess
+import os
+import sys
+import subprocess
 import logging
-from pathlib import Path
 
-import jinja2
-from werkzeug.serving import BaseWSGIServer
 from flask import current_app
 from flask_script import Manager, Command
-
+import jinja2
+from werkzeug.serving import BaseWSGIServer
+from pathlib import Path
 from abilian.app import Application as BaseApplication
 from abilian.core.extensions import db
 from abilian.core.commands import setup_abilian_commands
@@ -23,11 +24,12 @@ from abilian.services import converter
 from abilian.core.celery import (
   FlaskLoader as CeleryBaseLoader, FlaskCelery as BaseCelery
 )
+
 from .apps.documents.repository import repository
 from .extension import sbe
 
+
 # Used for side effects, do not remove
-import abilian.web.forms  # noqa
 
 
 __all__ = ['create_app', 'db']

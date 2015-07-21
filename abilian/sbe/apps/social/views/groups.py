@@ -1,11 +1,11 @@
 # coding=utf-8
-from flask import (render_template, redirect, flash, url_for, request,
-                   g, abort, make_response, jsonify, current_app)
-
-from flask.ext.babel import gettext as _
 from os.path import join, dirname
-from sqlalchemy import func
 
+from flask import (render_template, redirect, flash, url_for, request,
+                   g, make_response, jsonify, current_app)
+from flask_babel import gettext as _
+from werkzeug.exceptions import NotFound, InternalServerError
+from sqlalchemy import func
 from abilian.core.models.subjects import User, Group
 from abilian.core.extensions import db
 from abilian.web import csrf
@@ -14,7 +14,6 @@ from abilian.services.image import crop_and_resize
 from abilian.services.security import security
 
 from ..forms import GroupForm
-
 from .social import social
 from .util import Env
 
@@ -161,7 +160,7 @@ def group_mugshot(group_id):
   group = Group.query.get(group_id)
 
   if not group:
-    abort(404)
+    raise NotFound()
 
   if group.photo:
     data = group.photo
@@ -185,7 +184,7 @@ def groups_json():
   q = request.args.get("q").replace("%", " ").lower()
 
   if not q or len(q) < 2:
-    abort(500)
+    raise InternalServerError()
 
   query = Group.query
   #query = query.filter(func.lower(Group.name).like(q + "%"))

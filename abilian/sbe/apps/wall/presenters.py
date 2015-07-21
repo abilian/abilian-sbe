@@ -4,11 +4,11 @@
 from __future__ import absolute_import
 
 import traceback
+
+from flask import render_template_string
+from flask_babel import gettext as _, lazy_gettext as _l
 import bleach
 from jinja2 import Template, Markup
-from flask.ext.babel import gettext as _, lazy_gettext as _l
-from flask import render_template_string
-
 from abilian.core.util import BasePresenter
 from abilian.web.util import url_for
 

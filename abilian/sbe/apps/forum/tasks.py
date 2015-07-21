@@ -8,18 +8,17 @@ import mailbox
 from os.path import expanduser
 import re
 
+from flask import current_app, g
+from flask_mail import Message
+from flask_babel import get_locale
+from celery import shared_task
+from celery.utils.log import get_task_logger
+from celery.schedules import crontab
 import bleach
 import chardet
 from pathlib import Path
 from itsdangerous import URLSafeSerializer
-from flask import current_app, g
-from flask.ext.mail import Message
-from flask.ext.babel import get_locale
-from celery import shared_task
 from abilian.core.celery import periodic_task
-from celery.utils.log import get_task_logger
-from celery.schedules import crontab
-
 from abilian.core.signals import activity
 from abilian.core.extensions import mail, db
 from abilian.core.models.subjects import User
@@ -27,7 +26,6 @@ from abilian.i18n import _l, render_template_i18n
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_TAGS
 from .models import Thread, PostAttachment
-
 
 MAIL_REPLY_MARKER = _l(u'_____Write above this line to post_____')
 
@@ -242,8 +240,10 @@ def add_paragraph(newpost):
 
 
 def clean_html(newpost):
-  clean = re.sub(r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)", '', newpost, flags=re.MULTILINE | re.DOTALL)
-  clean = re.sub(r"(<br>.*?<a href=.*?/a>.*?:<br>)", '', clean, flags=re.MULTILINE | re.DOTALL)
+  clean = re.sub(r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)",
+                 '', newpost, flags=re.MULTILINE | re.DOTALL)
+  clean = re.sub(r"(<br>.*?<a href=.*?/a>.*?:<br>)",
+                 '', clean, flags=re.MULTILINE | re.DOTALL)
   return clean
 
 
@@ -263,6 +263,7 @@ def decode_payload(part):
 def process(message, marker):
   """
     Check the message for marker presence and return the text up to it if present
+
     :raises LookupError otherwise.
     :param message: email.Message()
     :param marker: unicode
@@ -305,7 +306,7 @@ def process_email(message):
   Email.Message object from command line script Run message (parsed email).
 
   Processing chain extract community thread post member from reply_to persist
-  post in db
+  post in db.
   """
   app = current_app._get_current_object()
   # Extract post destination from To: field, (community/forum/thread/member)

@@ -6,8 +6,7 @@ and currently not used.
 import json
 
 from flask import request, Blueprint, g, make_response
-from flask.ext.login import login_required
-
+from flask_login import login_required
 from abilian.core import signals
 from abilian.core.util import get_params
 from abilian.core.models.subjects import User, Group
@@ -49,7 +48,6 @@ def create_user():
   user = User(**d)
   db.session.add(user)
   db.session.commit()
-  signals.entity_created.send(user)
   return make_json_response(user, 201)
 
 
@@ -88,9 +86,6 @@ def update_user(user_id):
   d = get_params(User.__editable__)
   user.update(d)
   db.session.commit()
-  # XXX: or user_updated?
-  signals.entity_deleted.send(user)
-  signals.entity_created.send(user)
   return make_json_response(user)
 
 
@@ -101,7 +96,6 @@ def delete_user(user_id):
   user = User.query.get(user_id)
   db.session.delete(user)
   db.session.commit()
-  signals.entity_deleted.send(user)
   return make_response("", 204)
 
 
@@ -185,7 +179,6 @@ def create_group():
   group = Group(**d)
   db.session.add(group)
   db.session.commit()
-  signals.entity_created.send(group)
   return make_json_response(group, 201)
 
 
@@ -208,7 +201,6 @@ def create_message():
   message = Message(creator_id=g.user.id, **d)
   db.session.add(message)
   db.session.commit()
-  signals.entity_created.send(message)
   return make_json_response(message, 201)
 
 
@@ -236,8 +228,6 @@ def update_message(message_id):
   d = get_params(["content"])
   message.update(d)
   db.session.commit()
-  # XXX: or add new signal, 'message_updated'?
-  signals.entity_updated.send(message)
   return make_json_response(message)
 
 
@@ -248,7 +238,6 @@ def delete_message(message_id):
   message = Message.query.get(message_id)
   db.session.delete(message)
   db.session.commit()
-  signals.entity_deleted.send(message)
   return make_response("", 204)
 
 

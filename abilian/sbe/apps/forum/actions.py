@@ -1,7 +1,7 @@
 # coding=utf-8
 
 from flask import g, url_for
-from flask.ext.babel import lazy_gettext as _l
+from flask_babel import lazy_gettext as _l
 from abilian.web.action import actions, Action, ModalActionMixin
 
 

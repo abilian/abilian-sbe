@@ -1,4 +1,4 @@
-from flask.ext.babel import lazy_gettext as _l
+from flask_babel import lazy_gettext as _l
 from abilian.core.util import BasePresenter
 
 

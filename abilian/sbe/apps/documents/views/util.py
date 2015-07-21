@@ -1,9 +1,8 @@
 import re
 
 from flask import flash, current_app, request, g
-from flask.ext.babel import gettext as _
+from flask_babel import gettext as _
 from werkzeug.exceptions import NotFound, Forbidden, InternalServerError
-
 from abilian.core.signals import activity
 from abilian.services.security import security, Admin, WRITE, MANAGE
 from abilian.web import url_for

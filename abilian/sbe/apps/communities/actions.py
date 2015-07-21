@@ -1,7 +1,7 @@
 # coding=utf-8
 from flask import g, url_for as url_for_orig
-from flask.ext.babel import lazy_gettext as _l
-from flask.ext.login import current_user
+from flask_babel import lazy_gettext as _l
+from flask_login import current_user
 from abilian.web.action import actions, Action, Endpoint
 from abilian.web.nav import NavItem
 

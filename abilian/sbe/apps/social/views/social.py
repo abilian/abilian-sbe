@@ -2,16 +2,13 @@
 The blueprint for this app.
 """
 
-from flask import Blueprint, redirect, g, url_for, render_template
-from flask.ext.login import login_required
-
+from flask import Blueprint, redirect, url_for, render_template
 from abilian.core import signals
 from abilian.core.util import get_params
 from abilian.core.extensions import db
 
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.util import get_recent_entries
-
 from ..models import Message
 
 
@@ -55,6 +52,4 @@ def share():
   #db.engine.execute(tagging.insert(), values)
 
   db.session.commit()
-  signals.entity_created.send(message)
-
   return redirect(url_for(".home"))
