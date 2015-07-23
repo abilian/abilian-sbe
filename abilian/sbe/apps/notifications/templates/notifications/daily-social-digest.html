@@ -23,7 +23,8 @@
       <h3>New documents</h3>
 
       {% for doc in digest.new_documents %}
-        <p><a href="{{ url_for("documents.document_view",community_id=digest.community.slug,
+        <p><a href="{{ url_for("documents.document_view",
+                               community_id=digest.community.slug,
                                doc_id=doc.id, _external=True,
                                _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ doc }}</a><br>
           <small>Posted by {{ doc.creator }}.</small>
@@ -77,6 +78,6 @@
   <a href="{{ url_for("preferences.index", _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}">Preferences</a>
    page.
   <br>
-  You can unsubscribe by following 
+  You can unsubscribe by following
   <a href="{{ url_for("notifications.unsubscribe_sbe", token=token, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}">this link</a>.
 {% endblock %}

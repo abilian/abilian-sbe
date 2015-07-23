@@ -89,10 +89,11 @@ def send_daily_social_digest_to(user):
 
   token = generate_unsubscribe_token(user)
   msg = Message(subject, sender=sender, recipients=[recipient])
+  ctx = {'digests': digests, 'token': token}
   msg.body = render_template_i18n("notifications/daily-social-digest.txt",
-                             digests=digests, token=token)
+                                  **ctx)
   msg.html = render_template_i18n("notifications/daily-social-digest.html",
-                             digests=digests, token=token)
+                                  **ctx)
 
   mail.send(msg)
   return 1

@@ -5,12 +5,12 @@ First cut at a notification system.
 from __future__ import absolute_import
 
 from flask import current_app as app, request
-from flask_login import current_user
-from werkzeug.exceptions import InternalServerError, Forbidden
+from werkzeug.exceptions import InternalServerError
 from abilian.i18n import render_template_i18n
 from abilian.core.extensions import db, csrf
 from abilian.core.models.subjects import User
 from abilian.services.auth.views import get_token_status
+from abilian.sbe.apps.communities.security import require_admin
 
 from abilian.sbe.apps.notifications import TOKEN_SERIALIZER_NAME
 from ..tasks.social import send_daily_social_digest_to
@@ -20,12 +20,9 @@ __all__ = []
 
 route = notifications.route
 
-
+@require_admin
 @route("/debug/social/")
 def debug_social():
-  if not current_user.has_role("admin"):
-    raise Forbidden()
-
   email = request.args['email']
   user = User.query.filter(User.email == email).one()
   status = send_daily_social_digest_to(user)
