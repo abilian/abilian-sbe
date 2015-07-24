@@ -37,12 +37,19 @@ ALLOWED_TAGS = [
     'u',
     'img',
 ]
+
 ALLOWED_ATTRIBUTES = {
-    'a': ['href', 'title'],
-    'abbr': ['title'],
-    'acronym': ['title'],
-    'img': ['src'],
+  '*': ['title'],
+  'p': ['style'],
+  'a': ['href', 'title'],
+  'abbr': ['title'],
+  'acronym': ['title'],
+  'img': ['src', 'alt', 'title'],
 }
+
+ALLOWED_STYLES = [
+  'text-align',
+]
 
 WIDGET_ALLOWED = {}
 for attr in ALLOWED_TAGS:
@@ -69,7 +76,9 @@ class CommentForm(Form):
 
   def validate_message(self, field):
     field.data = bleach.clean(field.data, tags=ALLOWED_TAGS,
-                              attributes=ALLOWED_ATTRIBUTES, strip=True)
+                              attributes=ALLOWED_ATTRIBUTES,
+                              styles=ALLOWED_STYLES,
+                              strip=True)
 
 
 class ThreadForm(CommentForm):

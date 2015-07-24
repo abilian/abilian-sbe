@@ -24,7 +24,7 @@ from abilian.core.extensions import mail, db
 from abilian.core.models.subjects import User
 from abilian.i18n import _l, render_template_i18n
 
-from .forms import ALLOWED_ATTRIBUTES, ALLOWED_TAGS
+from .forms import ALLOWED_ATTRIBUTES, ALLOWED_TAGS, ALLOWED_STYLES
 from .models import Thread, PostAttachment
 
 MAIL_REPLY_MARKER = _l(u'_____Write above this line to post_____')
@@ -226,7 +226,8 @@ def extract_content(payload, marker):
 
 def validate_html(payload):
   return bleach.clean(payload, tags=ALLOWED_TAGS,
-                      attributes=ALLOWED_ATTRIBUTES, strip=True).strip()
+                      attributes=ALLOWED_ATTRIBUTES,
+                      styles=ALLOWED_STYLES, strip=True).strip()
 
 
 def add_paragraph(newpost):
