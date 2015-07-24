@@ -5,7 +5,7 @@
 
       <form id="fileupload"
           action="{{ url_for(".document_upload", doc_id=doc.id, community_id=doc.community.slug) }}"
-          method="POST" enctype="multipart/form-data" style="margin-bottom: 0;">
+          method="POST" enctype="multipart/form-data">
         {{ csrf_token }}
 
         <div class="modal-header">
@@ -42,7 +42,7 @@
     <div class="modal-content">
       <form
           action="{{ url_for(".document_send", doc_id=doc.id, community_id=doc.community.slug) }}"
-          method="POST" style="margin-bottom: 0;">
+          method="POST">
         {{ csrf_token }}
 
         <div class="modal-header">
@@ -56,7 +56,7 @@
 
             <div class="input-group">
               <span class="input-group-addon">@</span>
-              <input class="form-control col-md-3" id="prependedInput"
+              <input class="form-control" id="prependedInput"
                   type="text" name="recipient"
                   value="{{ request.args.get('recipient', '') }} "/>
             </div>
@@ -64,9 +64,9 @@
 
           <div class="form-group">
             <label class="control-label">{{ _("Message") }}</label>
-              <textarea name="message"
-                  class="form-control col-md-6 resizeable-vertical" rows="6"
-                  placeholder="{{ _('Message...') }}">{{ request.args.get('message', '') }}</textarea>
+            <textarea name="message"
+                class="form-control resizeable-vertical" rows="6"
+                placeholder="{{ _('Message...') }}">{{ request.args.get('message', '') }}</textarea>
           </div>
         </div>
 
@@ -84,7 +84,7 @@
     <div class="modal-content">
       <form
           action="{{ url_for(".document_delete", doc_id=doc.id, community_id=doc.community.slug) }}"
-          method="POST" style="margin-bottom: 0;">
+          method="POST">
         {{ csrf_token }}
 
         <div class="modal-header">
@@ -111,7 +111,7 @@
     <div class="modal-content">
       <form method="POST"
           action="{{ url_for(".document_edit", doc_id=doc.id, community_id=doc.community.slug) }}"
-          enctype="multipart/form-data" style="margin-bottom: 0;">
+          enctype="multipart/form-data">
 
         {{ csrf_token }}
 

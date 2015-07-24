@@ -5,7 +5,7 @@
 
       <form method="POST" class="form-horizontal"
           action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
-          enctype="multipart/form-data" style="margin-bottom: 0;">
+          enctype="multipart/form-data">
         {{ csrf_token }}
         <input type="hidden" name="action" value="add-group-role"/>
 
@@ -62,7 +62,7 @@
 
       <form method="POST" class="form-horizontal"
           action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
-          enctype="multipart/form-data" style="margin-bottom: 0;">
+          enctype="multipart/form-data">
         {{ csrf_token }}
         <input type="hidden" name="action" value="add-user-role"/>
 

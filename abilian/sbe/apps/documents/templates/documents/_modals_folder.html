@@ -6,8 +6,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form method="POST" class="b-upload b-upload_multi"
-          action="{{ folder_post_url }}" enctype="multipart/form-data"
-          style="margin-bottom: 0;">
+          action="{{ folder_post_url }}" enctype="multipart/form-data">
         {{ csrf_token }}
 
         <div class="modal-header">
@@ -92,7 +91,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form method="POST" name="modal-move-files" action="{{ folder_post_url }}"
-          enctype="multipart/form-data" style="margin-bottom: 0;">
+          enctype="multipart/form-data">
 
         {{ csrf_token }}
         <div class="modal-header">{{ _("Move files or documents") }}</div>
@@ -127,7 +126,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form method="POST" action="{{ folder_post_url }}"
-          enctype="multipart/form-data" style="margin-bottom: 0;" role="form">
+          enctype="multipart/form-data" role="form">
         {{ csrf_token }}
 
         <div class="modal-header">
@@ -169,7 +168,7 @@
     <div class="modal-content">
 
       <form method="POST" action="{{ folder_post_url }}"
-          enctype="multipart/form-data" style="margin-bottom: 0;">
+          enctype="multipart/form-data">
         {{ csrf_token }}
 
         <div class="modal-header">
