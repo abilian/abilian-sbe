@@ -98,3 +98,11 @@ The project is under continuous integration with Travis:
 .. image:: https://coveralls.io/repos/abilian/abilian-sbe/badge.svg?branch=master
    :target: https://coveralls.io/r/abilian/abilian-sbe?branch=master
 
+Links
+=====
+
+- `Discussion list (Google Groups) <https://groups.google.com/forum/#!foru      m/abilian-users>`_
+- `Documentation <http://docs.abilian.com/>`_
+- `GitHub repository <https://github.com/abilian/abilian-sbe>`_
+- `Corporate support <http://www.abilian.com>`_
+
