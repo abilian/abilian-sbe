@@ -2,13 +2,13 @@
 {% extends "base.html" %}
 
 {% block header %}
-  <h1 style="margin-bottom: 0.6em;">
+  <h1 class="community-header">
     <img src="{{ community_image_url(g.community, s=55) }}"/>
     {{ _("Community") }}: {{ g.community.name }}
   </h1>
   {%- set tabs = actions.for_category('communities:tabs') %}
 
-  <ul class="nav nav-tabs community-tabs" id="community-tabs" style="margin-bottom: 0.6em;">
+  <ul class="nav nav-tabs community-tabs" id="community-tabs">
     {%- for tab in tabs %}
       <li {% if tab.is_current() %}class="active"{% endif %}>{{ tab.render() }}</li>
     {%- endfor %}

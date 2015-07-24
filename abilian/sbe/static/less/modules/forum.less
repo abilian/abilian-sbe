@@ -1,5 +1,4 @@
-/* Forum home page */
-
+// Forum home page (thread list)
 ul.threads {
   margin: 0;
 
@@ -17,15 +16,16 @@ ul.threads {
       position: relative;
       min-height: @avatar-full-height;
       display: block;
-      padding: 5px;
-      padding-bottom: @line-height-computed;
+      padding: 5px 5px @line-height-computed;
       margin-left: 65px;
       text-align: left;
       border-left: 2px solid #FF7F66;
       background: #fafafa;
       .border-right-radius(@border-radius-small);
 
-      > h4 { margin-top: 0; }
+      > h4 {
+        margin-top: 0;
+      }
 
       .details {
         .datetime {
@@ -40,16 +40,19 @@ ul.threads {
         /* on screens large enough, put author and comments at bottom of .entry */
         .details {
           position: absolute;
-          bottom: 0; left: 0;
+          bottom: 0;
+          left: 0;
           padding: 5px;
         }
+
         .comments {
-        position: absolute;
-        bottom: 0; right: 0;
-        padding: 5px;
+          position: absolute;
+          bottom: 0;
+          right: 0;
+          padding: 5px;
         }
       }
-    }     
+    }
 
     .avatar {
       float: left;
@@ -61,8 +64,8 @@ ul.threads {
         border-radius: 50% !important;
         -webkit-border-radius: 50% !important;
         -moz-border-radius: 50% !important;
-        }
       }
+    }
   }
 
   /* archives */
@@ -74,15 +77,23 @@ ul.threads {
       padding: 2px 10px;
     }
 
-    .comments { color: grey; }
+    .comments {
+      color: grey;
+    }
   }
-} /* ul.threads */
+}
 
-/* A thread view */
+// A single thread view
+.thread-title {
+  font-size: 2em;
+}
+
 .comments {
   hr {
     margin: 10px 0 10px 0;
   }
 
-  .comment .date { color: grey; }
+  .comment .date {
+    color: grey;
+  }
 }

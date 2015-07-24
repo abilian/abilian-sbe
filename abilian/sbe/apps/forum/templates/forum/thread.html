@@ -22,8 +22,8 @@
         <div><a href="{{ author_href }}">{{ thread.creator }}</a></div>
         <div>{{ thread.created_at | datetimeformat }}</div>
       </div>
-      <h2>{{ thread.title }}</h2>
 
+      <h2 class="thread-title">{{ thread.title }}</h2>
     </div>
 
     <hr style="margin-top: 5px;">
@@ -150,7 +150,7 @@
           method="POST" style="margin-bottom: 0;">
 
           {{ csrf.field() }}
-          
+
           <div class="modal-header">
             <button class="close" data-dismiss="modal">&times;</button>
             <h3>{{ _("Delete Thread") }}</h3>

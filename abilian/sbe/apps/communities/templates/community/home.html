@@ -5,60 +5,61 @@
 {% block header %}{% endblock %}
 
 {% block content %}
-      {%- call m_box(title=_("My communities")) %}
-        {%- set is_admin = current_user.has_role('admin') %}
+  {%- call m_box(title=_("My communities")) %}
+    {%- set is_admin = current_user.has_role('admin') %}
 
-        <div class="form-group pull-right">
-          <form action=".">
-            <select name="sort" class="form-control" onchange="this.form.submit()">
-              <option value="alpha" {% if not sort_order=='activity' %}selected{% endif %}>{{ _("Sort alphabetically") }}</option>
-              <option value="activity" {% if sort_order=='activity' %}selected{% endif %}>{{ _("Sort by activity") }}</option>
-            </select>
-          </form>
-        </div>
+    <div class="form-group pull-right">
+      <form action=".">
+        <select name="sort" class="form-control" onchange="this.form.submit()">
+          <option value="alpha"
+              {% if not sort_order=='activity' %}selected{% endif %}>{{ _("Sort alphabetically") }}</option>
+          <option value="activity"
+              {% if sort_order=='activity' %}selected{% endif %}>{{ _("Sort by activity") }}</option>
+        </select>
+      </form>
+    </div>
 
-        {%- if my_communities %}
-          <table class="table table-striped table-condensed community-list">
-            {%- for community in my_communities %}
-              <tr>
-                <td class="logo">
-                  <a href="{{ url_for(community) }}">
-                    <img src="{{ community_image_url(community, s=65) }}" />
-                  </a>
-                </td>
-                <td>
-                  <a href="{{ url_for(community) }}">
-                    <div class="profile">
-                      <div class="name">{{ community.name }}</div>
-                      <div class="description">{{ community.description }}</div>
-                      <div class="stats">
-                        <i class="fa fa-user"></i> {{ community.membership_count }}
-                        -
-                        <i class="fa fa-file"></i> {{ community.document_count }}
-                        -
-                        <i class="fa fa-time"></i> {{ community.last_active_at | age }}
-                      </div>
-                    </div>
-                  </a>
-                </td>
-              </tr>
-            {%- endfor %}
-          </table>
-        {% else %}
-          {{ _("You're not a member of a community yet.") }}
-        {% endif %}
+    {%- if my_communities %}
+      <table class="table table-striped table-condensed community-list">
+        {%- for community in my_communities %}
+          <tr>
+            <td class="logo">
+              <a href="{{ url_for(community) }}">
+                <img src="{{ community_image_url(community, s=65) }}"/>
+              </a>
+            </td>
+            <td>
+              <a href="{{ url_for(community) }}">
+                <div class="profile">
+                  <div class="name">{{ community.name }}</div>
+                  <div class="description">{{ community.description }}</div>
+                  <div class="stats">
+                    <i class="fa fa-user"></i> {{ community.membership_count }}
+                    -
+                    <i class="fa fa-file"></i> {{ community.document_count }}
+                    -
+                    <i class="fa fa-time"></i> {{ community.last_active_at | age }}
+                  </div>
+                </div>
+              </a>
+            </td>
+          </tr>
+        {%- endfor %}
+      </table>
+    {% else %}
+      {{ _("You're not a member of a community yet.") }}
+    {% endif %}
 
-      {% endcall %}
+  {% endcall %}
 {% endblock %}
 
 {% block sidebar %}
-      {% if current_user.has_role("admin") %}
-        {% call m_box_menu() %}
-          <div style="padding: 15px;">
-            <a class="btn btn-default" style="white-space: normal;"
-                href="{{ url_for(".new") }}">{{ _("Create new community") }}</a>
-          </div>
-        {% endcall %}
-      {% endif %}
-    </div>
+  {% if current_user.has_role("admin") %}
+    {% call m_box_menu() %}
+      <div style="padding: 15px;">
+        <a class="btn btn-default" style="white-space: normal;"
+            href="{{ url_for(".new") }}">{{ _("Create new community") }}</a>
+      </div>
+    {% endcall %}
+  {% endif %}
 {% endblock %}

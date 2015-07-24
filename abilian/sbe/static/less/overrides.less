@@ -1,0 +1,66 @@
+/////////////////////////////////////////////////////////////////////////////
+// Overrides
+/////////////////////////////////////////////////////////////////////////////
+
+// Overrides (from project "MPR", to be dispatched properly here or in Core)
+
+// Reduce default font sizes, and use relative sizes...
+
+@font-size-h1: floor((@font-size-base * 1.7));
+@font-size-h2: floor((@font-size-base * 1.5));
+@font-size-h3: ceil((@font-size-base * 1.35));
+@font-size-h4: ceil((@font-size-base * 1.25));
+@font-size-h5: @font-size-base;
+@font-size-h6: ceil((@font-size-base * 0.85));
+
+.panel-title {
+  font-size: 1.1em;
+}
+
+table.community-list tr td .name {
+  font-size: 1.15em;
+}
+
+// Remove white space on the left of activity streams
+.activities {
+  padding: 0;
+}
+
+// Reduce excessive white space
+.panel .panel-body h2 {
+  margin-top: 0;
+}
+
+.latest-visitors li {
+  padding-top: 2px;
+}
+
+.panel-heading {
+  padding: 8px 15px;
+}
+
+// TODO: add a specific class in template instead.
+.panel .nav > li > a {
+  padding: 5px;
+}
+
+.form-group {
+  margin-bottom: 10px;
+}
+
+// datetimepicker inline the fields for <768px
+// after @screen-sm-min .form-inline kicks in
+@media (max-width: @screen-sm-min) {
+  .input-group {
+
+    &.date {
+      float: left;
+      width: 140px;
+    }
+
+    &.bootstrap-timepicker {
+      width: 140px;
+      padding-left: 10px;
+    }
+  }
+}

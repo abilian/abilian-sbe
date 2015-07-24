@@ -1,0 +1,116 @@
+// help / tips
+div.tip {
+  border-top: 1px solid #E5E5E5;
+  border-bottom: 1px solid #E5E5E5;
+}
+
+.tip h4 {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.clearfix:after {
+  content: ".";
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+
+.clear {
+  clear: both;
+}
+
+.search-result .pagination {
+  text-align: center;
+}
+
+/* faceted search */
+li.facet-item {
+  cursor: pointer;
+}
+
+li.facet-item img {
+  vertical-align: -1px;
+}
+
+/* image-gallery in user.html */
+ul.image-gallery {
+  list-style: none;
+}
+
+ul.image-gallery li {
+  float: left;
+  position: relative;
+  margin: 10px;
+}
+
+/* jQuery-collapse */
+h3.main {
+  padding: 5px 0 5px 5px;
+  border-radius: 4px;
+  text-decoration: none;
+  margin: 10px 0 10px 0;
+  line-height: 1;
+  background: #eee;
+}
+
+h3.main a {
+  color: #333;
+  text-decoration: none;
+}
+
+h3[data-toggle="collapse"] {
+  padding: 5px 0 5px 25px;
+  text-decoration: none;
+  margin: 10px 0 10px 0;
+  line-height: 1;
+
+  cursor: pointer;
+  background: #eee url("../icons/round-minus-16.png") no-repeat 4px center;
+}
+
+h3[data-toggle="collapse"].collapsed {
+  background-image: url("../icons/round-plus-16.png");
+}
+
+div.collapsable div.collapse {
+  margin-bottom: 1em;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+/* CUSTOM */
+/////////////////////////////////////////////////////////////////////////////
+
+#session img {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  vertical-align: top;
+  margin-right: 6px;
+  border: none;
+  cursor: pointer;
+  border-image: initial;
+}
+
+/* attachments */
+#attachments {
+  padding: 0.5em;
+
+  ul {
+    margin: 0;
+    padding-left: 0;
+  }
+  li {
+    display: block;
+    margin: 0;
+
+    img {
+      vertical-align: text-bottom;
+    }
+  }
+  button {
+    border: none;
+  }
+}
+
