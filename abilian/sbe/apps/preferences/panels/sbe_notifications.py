@@ -17,7 +17,7 @@ from abilian.web.forms import Form, widgets
 
 class SbeNotificationsForm(Form):
   daily = BooleanField(
-    label=u"Recevoir par mail un résumé quotidien des activités dans les communautés",
+    label=_(u"Receive by email a daily digest of activities in your communities"),
     widget=widgets.BooleanWidget(on_off_mode=True))
 
 
