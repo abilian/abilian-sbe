@@ -5,6 +5,7 @@ First cut at a notification system.
 from __future__ import absolute_import
 
 from flask import current_app as app, request
+from flask.ext.login import current_user
 from werkzeug.exceptions import InternalServerError
 from abilian.i18n import render_template_i18n
 from abilian.core.extensions import db, csrf
@@ -13,7 +14,7 @@ from abilian.services.auth.views import get_token_status
 from abilian.sbe.apps.communities.security import require_admin
 
 from abilian.sbe.apps.notifications import TOKEN_SERIALIZER_NAME
-from ..tasks.social import send_daily_social_digest_to
+from ..tasks.social import send_daily_social_digest_to, make_message
 from . import notifications
 
 __all__ = []
@@ -23,12 +24,19 @@ route = notifications.route
 @require_admin
 @route("/debug/social/")
 def debug_social():
-  email = request.args['email']
-  user = User.query.filter(User.email == email).one()
+  email = request.args.get('email')
+  if email:
+    user = User.query.filter(User.email == email).one()
+  else:
+    email = current_user.email
+    user = current_user
+
+  msg = make_message(user)
+
   status = send_daily_social_digest_to(user)
 
   if status:
-    return u"Message sent to %s." % email
+    return msg.html
   else:
     return "No message sent."
 

@@ -8,7 +8,7 @@ from functools import wraps
 
 from flask import (
     render_template, g, redirect, url_for, request, current_app, session,
-)
+    flash)
 from flask_login import current_user, login_required
 from werkzeug.exceptions import NotFound, BadRequest, InternalServerError
 from pathlib import Path
@@ -286,10 +286,15 @@ def members_post():
   community = g.community._model
   action = request.form.get("action")
 
+  user_id = request.form.get("user")
+  if not user_id:
+    flash(_(u"You must provide a user."), 'error')
+    return redirect(url_for(".members", community_id=community.slug))
+  user_id = int(user_id)
+  user = User.query.get(user_id)
+
   if action in ('add-user-role', 'set-user-role',):
     role = request.form.get("role").lower()
-    user_id = int(request.form["user"])
-    user = User.query.get(user_id)
 
     community.set_membership(user, role)
 
@@ -298,11 +303,9 @@ def members_post():
       activity.send(app, actor=user, verb="join", object=community)
 
     db.session.commit()
-    return redirect(url_for(".members", community_id=community.slug))
+    return redirect(url_for('.members', community_id=community.slug))
 
   elif action == 'delete':
-    user_id = int(request.form['user'])
-    user = User.query.get(user_id)
     membership_id = int(request.form['membership'])
     membership = Membership.query.get(membership_id)
     if membership.user_id != user_id:
@@ -336,6 +339,6 @@ def doc(doc_id):
     if parent.is_root_folder:
       break
     folder = parent
-  community = Community.query.filter(Community.folder_id == folder.id).one()
+  target_community = Community.query.filter(Community.folder_id == folder.id).one()
   return redirect(url_for("documents.document_view",
-                          community_id=community.slug, doc_id=doc.id))
+                          community_id=target_community.slug, doc_id=doc.id))

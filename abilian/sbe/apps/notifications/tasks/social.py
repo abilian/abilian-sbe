@@ -55,6 +55,16 @@ def send_daily_social_digest_to(user):
   Return 1 if mail sent, 0 otherwise.
   """
   mail = app.extensions['mail']
+
+  message = make_message(user)
+  if message:
+    mail.send(message)
+    return 1
+  else:
+    return 0
+
+
+def make_message(user):
   config = app.config
   sbe_config = config['ABILIAN_SBE']
   sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
@@ -65,6 +75,7 @@ def send_daily_social_digest_to(user):
   digests = []
 
   happened_after = datetime.utcnow() - timedelta(days=1)
+
   for membership in user.communautes_membership:
     community = membership.community
     if not community:
@@ -85,7 +96,7 @@ def send_daily_social_digest_to(user):
       digests.append(digest)
 
   if not digests:
-    return 0
+    return None
 
   token = generate_unsubscribe_token(user)
   msg = Message(subject, sender=sender, recipients=[recipient])
@@ -94,9 +105,7 @@ def send_daily_social_digest_to(user):
                                   **ctx)
   msg.html = render_template_i18n("notifications/daily-social-digest.html",
                                   **ctx)
-
-  mail.send(msg)
-  return 1
+  return msg
 
 
 def generate_unsubscribe_token(user):
