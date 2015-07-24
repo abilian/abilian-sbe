@@ -24,6 +24,10 @@ route = notifications.route
 @require_admin
 @route("/debug/social/")
 def debug_social():
+  """Send a digest to current user, or user with given email.
+
+  Also displays the email in the browser as a result.
+  """
   email = request.args.get('email')
   if email:
     user = User.query.filter(User.email == email).one()

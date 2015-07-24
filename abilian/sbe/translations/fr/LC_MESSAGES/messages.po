@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-24 11:19+0200\n"
+"POT-Creation-Date: 2015-07-24 14:31+0200\n"
 "PO-Revision-Date: 2015-06-30 15:57+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language-Team: fr <LL@li.org>\n"
@@ -146,6 +146,10 @@ msgstr "Communauté %(name)s créé avec succès"
 #: abilian/sbe/apps/communities/views.py:220
 msgid "Community destroyed."
 msgstr "Communauté supprimée"
+
+#: abilian/sbe/apps/communities/views.py:291
+msgid "You must provide a user."
+msgstr "Vous devez spécifier un utilisateur."
 
 #: abilian/sbe/apps/communities/templates/community/_base.html:7
 msgid "Community"
@@ -878,11 +882,11 @@ msgstr "Êtes-vous sûr de vouloir supprimer cette discussion?"
 msgid "Receive by email a daily digest of activities in your communities"
 msgstr "Recevoir par mail un résumé quotidien des activités dans mes communautés"
 
-#: abilian/sbe/apps/preferences/panels/sbe_notifications.py:27
+#: abilian/sbe/apps/preferences/panels/sbe_notifications.py:26
 msgid "Community notifications"
 msgstr "Notifications des communautés"
 
-#: abilian/sbe/apps/preferences/panels/sbe_notifications.py:68
+#: abilian/sbe/apps/preferences/panels/sbe_notifications.py:67
 msgid "Preferences saved."
 msgstr "Préférences enregistrées."
 
