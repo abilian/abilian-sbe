@@ -44,10 +44,10 @@
          /* debug: true, */
          rules:       rules,
          highlight:   function(label) {
-           $(label).closest('.control-group').addClass('error');
+           $(label).closest('.form-group').addClass('error');
          },
          unhighlight: function(label) {
-           $(label).closest('.control-group').removeClass('error');
+           $(label).closest('.form-group').removeClass('error');
          },
        });
      });

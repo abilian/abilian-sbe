@@ -241,110 +241,8 @@
 
 
 {% block modals %}
-  {% include "documents/_modals.html" %}
-
-  <!-- MORE modals ! -->
-  <div class="modal fade" id="modal-add-group-local-role" role="dialog" data-keyboard="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        
-        <form method="POST" class="form-horizontal"
-              action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
-              enctype="multipart/form-data" style="margin-bottom: 0;">
-              {{ csrf_token }}
-              <input type="hidden" name="action" value="add-group-role" />
-
-              <div class="modal-header">
-                <button class="close" data-dismiss="modal">&times;</button>
-                <h3>{{ _("Add a local role for a group") }}</h3>
-              </div>
-
-              <div class="modal-body">
-                <div class="control-group">
-                  <label class="control-label"
-                         for="group-select">{{ _("Group") }}</label>
-
-                         <div class="controls">
-                           <select data-toggle="select2" id="group-select" name="group">
-                             {% for group in all_groups %}
-                               <option value="{{ group.id }}">{{ group.name }}</option>
-                             {% endfor %}
-                           </select>
-                         </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label"
-                         for="role-select-for-group">{{ _("Role") }}</label>
-
-                         <div class="controls">
-                           <select data-toggle="select2" id="role-select-for-group" name="role">
-                             <option value="reader">{{ _("Reader") }}</option>
-                             <option value="writer">{{ _("Writer") }}</option>
-                             <option value="manager">{{ _("Manager") }}</option>
-                           </select>
-                         </div>
-                </div>
-
-              </div>
-
-              <div class="modal-footer">
-                <button data-dismiss="modal" class="btn btn-default">{{ _("Cancel") }}</button>
-                <button class="btn btn-primary" type="submit" name="action"
-                        value="add-local-role">{{ _("Add local role") }}</button>
-              </div>
-        </form>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="modal-add-user-local-role" role="dialog" data-keyboard="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-
-        <form method="POST" class="form-horizontal"
-              action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
-              enctype="multipart/form-data" style="margin-bottom: 0;">
-              {{ csrf_token }}
-              <input type="hidden" name="action" value="add-user-role" />
-
-              <div class="modal-header">
-                <button class="close" data-dismiss="modal">&times;</button>
-                <h3>{{ _("Add a local role for a user") }}</h3>
-              </div>
-
-              <div class="modal-body">
-                <div class="control-group">
-                  <label class="control-label" for="user-select">User</label>
-
-                  <div class="controls">
-                    <input type="text" id="user-select" name="user" />
-                  </div>
-                </div>
-
-                <div class="control-group">
-                  <label class="control-label" for="role-select">Role</label>
-
-                  <div class="controls">
-                    <select data-toggle="select2" id="role-select" name="role">
-                      <option value="reader">Reader</option>
-                      <option value="writer">Writer</option>
-                      <option value="manager">Manager</option>
-                    </select>
-                  </div>
-                </div>
-
-              </div>
-
-              <div class="modal-footer">
-                <button data-dismiss="modal" class="btn btn-default">Cancel</button>
-                <button class="btn btn-primary" type="submit" name="action"
-                        value="add-local-role">{{ _("Add local role") }}</button>
-              </div>
-        </form>
-      </div>
-    </div>
-  </div>
+  {% include "documents/_modals_folder.html" %}
+  {% include "documents/_modals_roles.html" %}
 {% endblock %}
 
 {% block js %}
@@ -352,7 +250,7 @@
 require(
     ['Abilian', 'jquery'],
     function(Abilian, $) {
-        
+
     Abilian.fn.onAppInit(function() {
       $("#deactivate_inheritance").click(function() {
         var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="deactivate_inheritance" /></form>');

@@ -22,7 +22,7 @@
   {% if field.widget.input_type == 'hidden' %}
     <!-- pass -->
   {% elif field.errors %}
-    <div class="control-group error">
+    <div class="form-group error">
       {% set css_class = 'has_error ' + kwargs.pop('class', '') %}
       <label class="control-label"
           for="input-{{ field.name }}">{{ field.label }}</label>
@@ -34,7 +34,7 @@
       </div>
     </div>
   {% else %}
-    <div class="control-group">
+    <div class="form-group">
       <label class="control-label"
           for="input-{{ field.name }}">{{ field.label }}</label>
 
