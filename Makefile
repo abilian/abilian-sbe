@@ -123,9 +123,10 @@ boot:
 	./manage.py createadmin admin@example.com admin
 
 clean:
-	find . -name "*.pyc" | xargs rm -f
-	find . -name .DS_Store | xargs rm -f
-	find . -name __pycache__ | xargs rm -rf
+	find . -name "*.pyc" -delete
+	find . -name .DS_Store -delete
+	find . -name __pycache__ -delete
+	find . -type d -empty -delete
 	rm -rf instance/data instance/cache instance/tmp instance/webassets instance/whoosh
 	rm -f migration.log
 	rm -rf build dist
