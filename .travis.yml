@@ -2,6 +2,8 @@ language: python
 python:
   - "2.7"
 
+sudo: false
+
 env:
   - SQLALCHEMY_DATABASE_URI="sqlite://"
   - SQLALCHEMY_DATABASE_URI="postgres://postgres@localhost/abilian_sbe"
@@ -11,15 +13,17 @@ services:
 
 addons:
   postgresql: "9.3"
-
+  apt:
+    packages:
+      - poppler-utils
+      - nodejs
 
 # Install OS dependencies
 before_install:
- - sudo rm -rf /dev/shm && sudo ln -s /run/shm /dev/shm
- - sudo apt-add-repository -y ppa:chris-lea/node.js
- - sudo apt-get update
- - sudo apt-get install -y poppler-utils nodejs
- - sudo npm install -g less
+  - export NPM_CONFIG_PREFIX=~/npm-packages
+  - mkdir "${NPM_CONFIG_PREFIX}"
+  - npm install -g less
+  - export PATH=~/npm-packages/bin:$PATH
 
 # Install Python dependencies
 install:
