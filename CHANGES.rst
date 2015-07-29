@@ -1,11 +1,15 @@
 Changelog for Abilian SBE
 =========================
 
-0.1.3 (unreleased)
+0.1.4 (unreleased)
 ------------------
 
-TODO
+TODO.
 
+0.1.3 (2015-07-29)
+------------------
+
+- Various CSS and HTML improvements / fixes.
 
 0.1.2 (2015-07-15)
 ------------------
