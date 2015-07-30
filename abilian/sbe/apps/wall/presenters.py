@@ -91,7 +91,7 @@ class ActivityEntryPresenter(BasePresenter):
       if msg:
         msg = msg.format(**ctx)
         if entry.target and not ignore_community:
-          msg += _(u' in the community {target}.').format(**ctx)
+          msg += u" " + _(u'in the community {target}.').format(**ctx)
         else:
           msg += u"."
 
@@ -100,7 +100,7 @@ class ActivityEntryPresenter(BasePresenter):
                 u'called "{object}"').format(**ctx)
 
         if entry.target and not ignore_community:
-          msg += _(u' in the community {target}.').format(**ctx)
+          msg += u" " + _(u'in the community {target}.').format(**ctx)
         else:
           msg += u"."
 

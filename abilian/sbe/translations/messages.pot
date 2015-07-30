@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.1.3.dev9+ng87c369f.d20150724\n"
+"Project-Id-Version: abilian-sbe 0.1.4.dev0+ng61cb69e.d20150730\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-24 14:31+0200\n"
+"POT-Creation-Date: 2015-07-30 17:03+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -61,9 +61,9 @@ msgid "List members"
 msgstr ""
 
 #: abilian/sbe/apps/communities/forms.py:18
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:136
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:172
-#: abilian/sbe/apps/documents/templates/documents/document.html:252
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:125
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:139
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:182
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:16
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:90
 #: abilian/sbe/apps/social/forms.py:37
@@ -71,9 +71,9 @@ msgid "Name"
 msgstr ""
 
 #: abilian/sbe/apps/communities/forms.py:20
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:142
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:177
-#: abilian/sbe/apps/documents/templates/documents/document.html:260
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:134
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:147
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:189
 #: abilian/sbe/apps/social/forms.py:41
 msgid "Description"
 msgstr ""
@@ -136,7 +136,7 @@ msgid "Create community"
 msgstr ""
 
 #: abilian/sbe/apps/communities/views.py:202
-#: abilian/sbe/apps/communities/templates/community/home.html:59
+#: abilian/sbe/apps/communities/templates/community/home.html:61
 msgid "Create new community"
 msgstr ""
 
@@ -166,15 +166,15 @@ msgid "Destroy community"
 msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/edit.html:39
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:71
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:112
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:148
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:183
-#: abilian/sbe/apps/documents/templates/documents/document.html:161
-#: abilian/sbe/apps/documents/templates/documents/document.html:199
-#: abilian/sbe/apps/documents/templates/documents/document.html:226
-#: abilian/sbe/apps/documents/templates/documents/document.html:270
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:292
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:30
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:74
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:100
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:143
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:74
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:113
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:156
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:197
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:49
 #: abilian/sbe/apps/forum/templates/forum/new_thread.html:29
 #: abilian/sbe/apps/forum/templates/forum/thread.html:78
 #: abilian/sbe/apps/forum/templates/forum/thread.html:164
@@ -194,15 +194,15 @@ msgstr ""
 msgid "My communities"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/home.html:14
+#: abilian/sbe/apps/communities/templates/community/home.html:15
 msgid "Sort alphabetically"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/home.html:15
+#: abilian/sbe/apps/communities/templates/community/home.html:17
 msgid "Sort by activity"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/home.html:48
+#: abilian/sbe/apps/communities/templates/community/home.html:50
 msgid "You're not a member of a community yet."
 msgstr ""
 
@@ -224,7 +224,7 @@ msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/members.html:56
 #: abilian/sbe/apps/communities/templates/community/members.html:139
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:284
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:40
 msgid "Manager"
 msgstr ""
 
@@ -237,9 +237,9 @@ msgid "User"
 msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/members.html:136
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:33
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:17
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:91
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:278
 msgid "Role"
 msgstr ""
 
@@ -290,12 +290,12 @@ msgid "View in browser"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:193
-#: abilian/sbe/apps/documents/templates/documents/document.html:144
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:13
 msgid "Upload new version"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:198
-#: abilian/sbe/apps/documents/templates/documents/document.html:179
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:50
 msgid "Send by email"
 msgstr ""
 
@@ -317,7 +317,7 @@ msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:54
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:97
-#: abilian/sbe/apps/forum/forms.py:57 abilian/sbe/apps/wiki/forms.py:36
+#: abilian/sbe/apps/forum/forms.py:64 abilian/sbe/apps/wiki/forms.py:36
 msgid "Title"
 msgstr ""
 
@@ -342,48 +342,109 @@ msgstr ""
 msgid "This folder is currently empty. Why don't you upload some content?"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:15
-#: abilian/sbe/apps/wiki/templates/wiki/_base.html:67
-msgid "Upload new files"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:22
-msgid "Add files to selection"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:65
-msgid "Uncompress ZIP files"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:73
-#: abilian/sbe/apps/documents/templates/documents/document.html:162
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:32
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:76
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:77
 msgid "Upload"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:95
-msgid "Move files or documents"
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:55
+msgid "Recipient"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:114
-msgid "Move to selected folder"
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:66
+#: abilian/sbe/apps/forum/forms.py:69 abilian/sbe/apps/wiki/forms.py:78
+msgid "Message"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:131
-msgid "Edit folder properties"
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:69
+msgid "Message..."
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:150
-#: abilian/sbe/apps/documents/templates/documents/document.html:272
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:75
+msgid "Send"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:92
+msgid "Delete File"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:96
+msgid "Are you sure you want to delete the file \"{filename}\" ?"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:102
+#: abilian/sbe/apps/forum/templates/forum/thread.html:165
+#: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:84
+#: abilian/sbe/apps/wiki/templates/wiki/_base.html:50
+msgid "Really Delete"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:120
+msgid "Edit document properties"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:145
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:158
 msgid "Save changes"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:167
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:14
+#: abilian/sbe/apps/wiki/templates/wiki/_base.html:67
+msgid "Upload new files"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:21
+msgid "Add files to selection"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:66
+msgid "Uncompress ZIP files"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:97
+msgid "Move files or documents"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:116
+msgid "Move to selected folder"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:134
+msgid "Edit folder properties"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:176
 msgid "Create a new folder"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals.html:185
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:199
 msgid "Create folder"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:14
+msgid "Add a local role for a group"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:20
+msgid "Group"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:38
+msgid "Reader"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:39
+msgid "Writer"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:51
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:100
+msgid "Add local role"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:71
+msgid "Add a local role for a user"
 msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/document.html:10
@@ -448,42 +509,6 @@ msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/document.html:96
 msgid "Creator"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:184
-msgid "Recipient"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:193
-#: abilian/sbe/apps/forum/forms.py:62 abilian/sbe/apps/wiki/forms.py:78
-msgid "Message"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:195
-msgid "Message..."
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:200
-msgid "Send"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:218
-msgid "Delete File"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:222
-msgid "Are you sure you want to delete the file \"{filename}\" ?"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:228
-#: abilian/sbe/apps/forum/templates/forum/thread.html:165
-#: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:84
-#: abilian/sbe/apps/wiki/templates/wiki/_base.html:50
-msgid "Really Delete"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:247
-msgid "Edit document properties"
 msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/folder.html:9
@@ -563,31 +588,6 @@ msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:218
 msgid "Audit Log"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:259
-msgid "Add a local role for a group"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:265
-msgid "Group"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:282
-msgid "Reader"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:283
-msgid "Writer"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:294
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:342
-msgid "Add local role"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/permissions.html:313
-msgid "Add a local role for a user"
 msgstr ""
 
 #: abilian/sbe/apps/documents/views/documents.py:77
@@ -784,11 +784,11 @@ msgid "Archives"
 msgstr ""
 
 #: abilian/sbe/apps/forum/actions.py:39 abilian/sbe/apps/forum/actions.py:46
-#: abilian/sbe/apps/forum/forms.py:66
+#: abilian/sbe/apps/forum/forms.py:73
 msgid "Attachments"
 msgstr ""
 
-#: abilian/sbe/apps/forum/forms.py:68
+#: abilian/sbe/apps/forum/forms.py:75
 msgid "Send by email?"
 msgstr ""
 
@@ -1076,7 +1076,7 @@ msgstr ""
 
 #: abilian/sbe/apps/wall/presenters.py:94
 #: abilian/sbe/apps/wall/presenters.py:103
-msgid " in the community {target}."
+msgid "in the community {target}."
 msgstr ""
 
 #: abilian/sbe/apps/wall/presenters.py:99
