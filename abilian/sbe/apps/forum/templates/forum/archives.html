@@ -1,12 +1,12 @@
-{% extends "community/_base.html" %}
+{% extends "forum/_base.html" %}
 
 {% from "macros/box.html" import m_box_menu, m_box_content %}
 
-
 {% block content %}
-  {% call m_box_content(_("Recent conversations")) %}
+  {% call m_box_content(_("Archives")) %}
     {% for month, threads in grouped_threads %}
       <h2>{{ month }}</h2>
+
       <ul class="threads-archives">
         {% for thread in threads %}
           {{ m_thread(thread) }}
@@ -15,17 +15,6 @@
     {% else %}
       <p>{{ _("No message has been posted to this community yet") }}</p>
     {% endfor %}
-  {% endcall %}
-{% endblock %}
-
-{% block sidebar %}
-  {% call m_box_menu() %}
-    <ul class="nav nav-list">
-      {%- set global_actions = actions.for_category('forum:global') %}
-      {%- for action in global_actions %}
-        <li>{{ action.render() }}</li>
-      {%- endfor %}
-    </ul>
   {% endcall %}
 {% endblock %}
 

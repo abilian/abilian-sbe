@@ -1,4 +1,4 @@
-{% extends "community/_base.html" %}
+{% extends "forum/_base.html" %}
 
 {% from "macros/box.html" import m_box_menu, m_box_content %}
 
@@ -17,19 +17,8 @@
 
     {% if has_more or True %}
       <hr>
-      <p><a href="{{ url_for(".archives", community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
+      <p><a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
     {% endif %}
-  {% endcall %}
-{% endblock %}
-
-{% block sidebar %}
-  {% call m_box_menu() %}
-    <ul class="nav nav-list">
-      {%- set global_actions = actions.for_category('forum:global') %}
-      {%- for action in global_actions %}
-        <li>{{ action.render() }}</li>
-      {%- endfor %}
-    </ul>
   {% endcall %}
 {% endblock %}
 
@@ -70,7 +59,7 @@
         {% set last_post_creator = thread.posts[-1].creator %}
         <span class="hidden-xs">
           {{ _("Last comment by") }}
-          <a href="{{ url_for("social.user", user_id=last_post_creator.id) }}">{{ last_post_creator.name }}</a>
+          <a href="{{ url_for('social.user', user_id=last_post_creator.id) }}">{{ last_post_creator.name }}</a>
         </span>
         {%- endif %}
       </div>

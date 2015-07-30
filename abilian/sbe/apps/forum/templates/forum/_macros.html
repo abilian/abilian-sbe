@@ -1,32 +1,35 @@
 {%- macro m_postinfos(post) %}
   {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
   {%- set thread_href = url_for(".thread", thread_id=post.thread_id, community_id=g.community.slug) %}
-    <div class="post-infos">
-      <span class="date"><small>{{ post.created_at | datetimeformat }}</small></span>,
-      <a href="{{ url_for(post) }}"><small>{{ post.thread.title }}</small></a>,
-      <i class="fa fa-user"></i>&nbsp;<a href="{{ author_href }}"><small>{{ post.creator }}</small></a>
-    </div>
+  <div class="post-infos">
+    <span class="date"><small>{{ post.created_at | datetimeformat }}</small></span>,
+    <a href="{{ url_for(post) }}">
+      <small>{{ post.thread.title }}</small>
+    </a>,
+    <i class="fa fa-user"></i>&nbsp;<a href="{{ author_href }}">
+    <small>{{ post.creator }}</small>
+  </a>
+  </div>
 {%- endmacro %}
 
 {%- macro m_postattachments(post) %}
-    {%- if post.attachments %}
+  {%- if post.attachments %}
     <hr style="margin-top: 0px;margin-bottom: 0px;">
-      <div id="attachments">
-        <ul>
+    <div id="attachments">
+      <ul>
         {{ m_postinfos(post) }}
-          {%- for attachment in post.attachments %}
-            <li>
+        {%- for attachment in post.attachments %}
+          <li>
 
               <span class="attachment-item">
                 <img src="{{ attachment.icon }}" style="vertical-align: middle;"
-                     alt=""/>
+                    alt=""/>
                 <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
                 ({{ attachment.content_length|filesize }})
               </span>
-            </li>
-          {%- endfor %}
-        </ul>
-      </div>
-
-    {%- endif %}
+          </li>
+        {%- endfor %}
+      </ul>
+    </div>
+  {%- endif %}
 {%- endmacro %}

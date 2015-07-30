@@ -25,7 +25,6 @@ from .models import Thread, Post, PostAttachment
 from .tasks import send_post_by_email
 
 
-
 # TODO: move to config
 MAX_THREADS = 30
 

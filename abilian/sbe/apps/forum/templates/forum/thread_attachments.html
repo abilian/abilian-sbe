@@ -1,14 +1,13 @@
 {% extends "community/_base.html" %}
 
-{%- from "macros/box.html" import m_box_content, m_box_menu %}
-{% from "forum/macros.html" import m_postattachments %}
+{%- from "macros/box.html" import m_box_content, m_box_menu -%}
+{%- from "forum/_macros.html" import m_postattachments -%}
+{%- set is_manager = g.community.has_permission(current_user, 'manage') %}
 
 {%- block content %}
-    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
-
     {#  TODO #}
     <p>
-      <a href="{{ url_for(".index", community_id=g.community.slug) }}">
+      <a href="{{ url_for('.index', community_id=g.community.slug) }}">
         <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
     </p>
 
@@ -64,11 +63,11 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <form
-          action="{{ url_for(".thread_delete", thread_id=thread.id, community_id=g.community.slug) }}"
+          action="{{ url_for('.thread_delete', thread_id=thread.id, community_id=g.community.slug) }}"
           method="POST" style="margin-bottom: 0;">
 
           {{ csrf.field() }}
-          
+
           <div class="modal-header">
             <button class="close" data-dismiss="modal">&times;</button>
             <h3>{{ _("Delete Thread") }}</h3>

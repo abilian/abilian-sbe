@@ -1,55 +1,65 @@
 {% extends "community/_base.html" %}
 
-{%- from "macros/box.html" import m_box_content, m_box_menu %}
-{% from "macros/form.html" import m_field %}
+{%- from "macros/box.html" import m_box_content, m_box_menu -%}
+{%- from "macros/form.html" import m_field -%}
+
+{%- set is_manager = g.community.has_permission(current_user, 'manage') -%}
+{%- set author_href = url_for("social.user", user_id=thread.creator.id) -%}
+{%- set post = thread.posts[0] -%}
 
 {%- block content %}
-    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
+  {#  TODO #}
+  <p>
+    <a href="{{ url_for('.index', community_id=g.community.slug) }}">
+      <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
+  </p>
 
-    {#  TODO #}
-    <p>
-      <a href="{{ url_for(".index", community_id=g.community.slug) }}">
-        <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
-    </p>
+  <article>
+    <h2 class="thread-title">{{ thread.title }}</h2>
 
-    <div class="thread-header">
-      <div class="author">
-        {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
-        <a href="{{ author_href }}">
-          <img class="avatar pull-left" width="55" height="55"
-               src="{{ user_photo_url(thread.creator, size=55) }}">
-        </a>
-        <div><a href="{{ author_href }}">{{ thread.creator }}</a></div>
-        <div>{{ thread.created_at | datetimeformat }}</div>
-      </div>
-
-      <h2 class="thread-title">{{ thread.title }}</h2>
+    <div class="thread-byline">
+      {{ _("Posted by") }}
+      <a href="{{ author_href }}">{{ thread.creator }}</a>
+      {{ _("on") }}
+      {{ thread.created_at | datetimeformat }}
     </div>
 
-    <hr style="margin-top: 5px;">
-    {%- set post = thread.posts[0] %}
-    {{ post.body_html|safe }}
+    <hr class="clearfix" style="margin-top: 5px;">
 
-    {%- if post.attachments %}
-      <div id="attachments">
-        <ul>
-          {%- for attachment in post.attachments %}
-            <li>
-              <span class="attachment-item">
-                <img src="{{ attachment.icon }}" style="vertical-align: middle;"
-                    alt=""/>
-                <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
-                ({{ attachment.content_length|filesize }})
-              </span>
-            </li>
-          {%- endfor %}
-        </ul>
+    <div class="media">
+      <div class="media-left">
+        <a href="{{ author_href }}">
+          <img class="media-object avatar" width="55" height="55"
+               alt=""
+               src="{{ user_photo_url(thread.creator, size=55) }}">
+        </a>
       </div>
-    {%- endif %}
+
+      <div class="media-body">
+        {{ post.body_html|safe }}
+
+        {%- if post.attachments %}
+          <div id="attachments">
+            <ul>
+              {%- for attachment in post.attachments %}
+                <li>
+                  <span class="attachment-item">
+                    <img src="{{ attachment.icon }}" style="vertical-align: middle;"
+                        alt=""/>
+                    <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
+                    ({{ attachment.content_length|filesize }})
+                  </span>
+                </li>
+              {%- endfor %}
+            </ul>
+          </div>
+        {%- endif %}
+      </div>
+    </div>
 
     {%- if thread.posts|length > 1 %}
       <hr />
-      <h3>Comments</h3>
+      <h3>{{ _("Answers and comments") }}</h3>
 
       <div class="comments">
         {%- for post in thread.posts[1:] %}
@@ -59,61 +69,84 @@
     {%- endif %}
 
     <hr />
-    <h3>{{ _("Post a comment") }}</h3>
-    <form action="." method="POST" enctype="multipart/form-data">
-      {{ form.csrf_token }}
 
-      {{ m_field(form.message, class_="resizeable-vertical", rows=10) }}
-      {{ m_field(form.attachments) }}
-
-      {%- if g.community.type == 'participative' or is_manager %}
-        {{ m_field(form.send_by_email) }}
-      {%- endif %}
-
-      <div class="form-actions">
-        <button type="submit" class="btn btn-primary" name="__action" value="create">
-          {{ _("Post this comment") }}
-        </button>
-        <button type="submit" class="btn cancel" name="__action" value="cancel">
-          {{ _("Cancel") }}
-        </button>
+    <div class="media">
+      <div class="media-left">
+        <a href="{{ author_href }}">
+          <img class="media-object avatar" width="55" height="55"
+               alt=""
+               src="{{ user_photo_url(current_user, size=55) }}">
+        </a>
       </div>
 
-    </form>
+      <div class="media-body">
+        <h3 style="margin-top: 0;">{{ _("Post a comment") }}</h3>
+        <form action="." method="POST" enctype="multipart/form-data">
+          {{ form.csrf_token }}
 
+          {{ m_field(form.message, class_="resizeable-vertical", rows=10) }}
+          {{ m_field(form.attachments) }}
+
+          {%- if g.community.type == 'participative' or is_manager %}
+            {{ m_field(form.send_by_email) }}
+          {%- endif %}
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" name="__action" value="create">
+              {{ _("Post this comment") }}
+            </button>
+            <button type="submit" class="btn cancel" name="__action" value="cancel">
+              {{ _("Cancel") }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </article>
 {%- endblock %}
+
 
 {%- macro m_post(post) %}
   {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
-  {%- set author_img = user_photo_url(post.creator, size=45) %}
+  {%- set author_img = user_photo_url(post.creator, size=55) %}
 
-  <hr />
-  <a id="post_{{ post.id }}"></a>
-  <div class="comment">
-    <a href="{{ author_href }}"><b>{{ post.creator }}</b></a>,
-    <span class="date">{{ post.created_at | datetimeformat }}</span>
-
-    <div class="comment-body">
-      {{ post.body_html|safe }}
+  <div class="media" style="margin-bottom: 1em;">
+    <div class="media-left">
+      <a href="{{ author_href }}">
+        <img class="media-object avatar" width="55" height="55"
+             alt=""
+             src="{{ author_img }}">
+      </a>
     </div>
 
-    {%- if post.attachments %}
-      <div id="attachments">
-        <ul>
-          {%- for attachment in post.attachments %}
-            <li>
-              <span class="attachment-item">
-                <img src="{{ attachment.icon }}" style="vertical-align: middle;"
-                     alt=""/>
-                <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
-                ({{ attachment.content_length|filesize }})
-              </span>
-            </li>
-          {%- endfor %}
-        </ul>
-      </div>
-    {%- endif %}
+    <div class="media-body">
+      <a id="post_{{ post.id }}"></a>
+      <div class="comment">
+        <a href="{{ author_href }}"><b>{{ post.creator }}</b></a>,
+        <span class="date">{{ post.created_at | datetimeformat }}</span>
 
+        <div class="comment-body">
+          {{ post.body_html|safe }}
+        </div>
+
+        {%- if post.attachments %}
+          <div id="attachments">
+            <ul>
+              {%- for attachment in post.attachments %}
+                <li>
+                  <span class="attachment-item">
+                    <img src="{{ attachment.icon }}" style="vertical-align: middle;"
+                         alt=""/>
+                    <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
+                    ({{ attachment.content_length|filesize }})
+                  </span>
+                </li>
+              {%- endfor %}
+            </ul>
+          </div>
+        {%- endif %}
+      </div>
+    </div>
   </div>
 {%- endmacro %}
 
@@ -146,7 +179,7 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <form
-          action="{{ url_for(".thread_delete", thread_id=thread.id, community_id=g.community.slug) }}"
+          action="{{ url_for('.thread_delete', thread_id=thread.id, community_id=g.community.slug) }}"
           method="POST" style="margin-bottom: 0;">
 
           {{ csrf.field() }}

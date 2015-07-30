@@ -1,0 +1,14 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_menu %}
+
+{% block sidebar %}
+  {% call m_box_menu() %}
+    <ul class="nav nav-list">
+      {%- set global_actions = actions.for_category('forum:global') %}
+      {%- for action in global_actions %}
+        <li>{{ action.render() }}</li>
+      {%- endfor %}
+    </ul>
+  {% endcall %}
+{% endblock %}
