@@ -2,28 +2,28 @@
 """
 Forum views
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 from datetime import date
 from itertools import groupby
 from urllib import quote
 
-from flask import g, render_template, request, make_response, current_app
-from flask_login import current_user
-from flask_babel import format_date
-from werkzeug.exceptions import NotFound
 import sqlalchemy as sa
 from abilian.i18n import _, _l
-from abilian.web.action import ButtonAction
-from abilian.web.views import default_view
-from abilian.web import nav, url_for, views
-
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import default_view_kw
-from .forms import ThreadForm, CommentForm
-from .models import Thread, Post, PostAttachment
-from .tasks import send_post_by_email
+from abilian.web import nav, url_for, views
+from abilian.web.action import ButtonAction
+from abilian.web.views import default_view
+from flask import current_app, g, make_response, render_template, request
+from flask_babel import format_date
+from flask_login import current_user
+from sqlalchemy.orm import joinedload
+from werkzeug.exceptions import NotFound
 
+from .forms import CommentForm, ThreadForm
+from .models import Post, PostAttachment, Thread
+from .tasks import send_post_by_email
 
 # TODO: move to config
 MAX_THREADS = 30
@@ -93,17 +93,22 @@ def archives():
 
 @route('/attachments/')
 def attachments():
+  # XXX: there is probably a way to optimize this and the big loop below...
   all_threads = Thread.query \
     .filter(Thread.community_id == g.community.id) \
+    .options(joinedload('posts')) \
+    .options(joinedload('posts.attachments')) \
     .order_by(Thread.created_at.desc()).all()
-  all_posts = []
+
+  posts_with_attachements = []
   for thread in all_threads:
     for post in thread.posts:
-      if hasattr(post, 'attachments'):
-        all_posts.append(post)
-  all_posts.sort(key=lambda entity: entity.created_at)
-  all_posts.reverse()
-  grouped_posts = group_monthly(all_posts)
+      if getattr(post, 'attachments', None):
+        posts_with_attachements.append(post)
+  posts_with_attachements.sort(key=lambda post: post.created_at)
+  posts_with_attachements.reverse()
+
+  grouped_posts = group_monthly(posts_with_attachements)
   return render_template('forum/attachments.html',
                          grouped_posts=grouped_posts)
 

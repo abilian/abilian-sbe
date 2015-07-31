@@ -20,13 +20,12 @@
         {{ m_postinfos(post) }}
         {%- for attachment in post.attachments %}
           <li>
-
-              <span class="attachment-item">
-                <img src="{{ attachment.icon }}" style="vertical-align: middle;"
-                    alt=""/>
-                <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
-                ({{ attachment.content_length|filesize }})
-              </span>
+            <span class="attachment-item">
+              <img src="{{ attachment.icon }}" style="vertical-align: middle;"
+                  alt=""/>
+              <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
+              ({{ attachment.content_length|filesize }})
+            </span>
           </li>
         {%- endfor %}
       </ul>
