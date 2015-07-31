@@ -1,0 +1,17 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_menu %}
+
+{# TODO: manage actions outside of the template #}
+{% block sidebar %}
+  {% call m_box_menu() %}
+    <ul class="nav nav-list">
+      <li><a
+          href="{{ url_for(".index", community_id=g.community.slug) }}">{{ _("Activity stream") }}</a>
+      </li>
+      <li><a
+          href="{{ url_for(".files", community_id=g.community.slug) }}">{{ _("All files in this community") }}</a>
+      </li>
+    </ul>
+  {% endcall %}
+{% endblock %}
