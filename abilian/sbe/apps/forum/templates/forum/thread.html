@@ -8,6 +8,7 @@
 {%- set post = thread.posts[0] -%}
 
 {%- block content %}
+  {% call m_box_content() %}
   {#  TODO #}
   <p>
     <a href="{{ url_for('.index', community_id=g.community.slug) }}">
@@ -103,6 +104,7 @@
       </div>
     </div>
   </article>
+  {% endcall %}
 {%- endblock %}
 
 

@@ -4,7 +4,7 @@
 {% block header %}
   <h1 class="community-header">
     <img src="{{ community_image_url(g.community, s=55) }}"/>
-    {{ _("Community") }}: {{ g.community.name }}
+    {{ g.community.name }}
   </h1>
   {%- set tabs = actions.for_category('communities:tabs') %}
 
