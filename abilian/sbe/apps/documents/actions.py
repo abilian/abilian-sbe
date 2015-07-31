@@ -163,11 +163,11 @@ _actions = (
     permission='manage'),
 
   # Document actions ##########
-  # download "inline"
+  # View / preview in browser
   DocumentAction(
-      'documents:content', 'download', _l(u'View in browser'),
+      'documents:content', 'preview', _l(u'View in browser'),
       icon='eye-open',
-      url=lambda ctx: url_for('.document_download', doc_id=ctx['object'].id),
+      url=lambda ctx: url_for('.document_preview', doc_id=ctx['object'].id),
       condition=(
           lambda ctx:
           ctx['object'].antivirus_ok

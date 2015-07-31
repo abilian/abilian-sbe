@@ -42,9 +42,9 @@
     <h3 class="main">{{ _('Preview') }}</h3>
 
     <div class="preview" style="max-width: {{ doc.preview_size }}px;">
-      <img
-          src="{{ url_for(".document_preview", doc_id=doc.id, community_id=doc.community.slug, size=doc.preview_size) }}"
-          alt="" class="preview" data-page="0" />
+      <img src="{{ url_for(".document_preview_image",
+          community_id=g.community.slug, doc_id=doc.id,
+          size=doc.preview_size) }}"  alt="" class="preview" data-page="0"/>
 
       {%- if has_preview %}
         <div class="preview-nav">

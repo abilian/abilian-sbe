@@ -20,8 +20,8 @@ from abilian.web.action import actions
 from abilian.web.frontend import add_to_recent_items
 from abilian.web.views import default_view
 from abilian.web import csrf, url_for
-
 from abilian.sbe.apps.communities.views import default_view_kw
+
 from ..tasks import preview_document, convert_document_content
 from ..repository import repository
 from ..models import Document
@@ -140,8 +140,8 @@ def preview_missing_image():
   return response
 
 
-@route("/doc/<int:doc_id>/preview")
-def document_preview(doc_id):
+@route("/doc/<int:doc_id>/preview_image")
+def document_preview_image(doc_id):
   """Returns a preview (image) for the file given by its id."""
 
   doc = get_document(doc_id)
@@ -232,6 +232,28 @@ def document_send(doc_id):
 
   return redirect(url_for(doc))
 
+
+@route("/doc/<int:doc_id>/preview")
+def document_preview(doc_id):
+  doc = get_document(doc_id)
+  if not doc.antivirus_ok:
+    return "Waiting for antivirus to finish"
+
+  if doc.content_type == "application/pdf":
+    return redirect(url_for(".document_view_pdf", community_id=g.community.slug, doc_id=doc.id))
+
+  else:
+    return redirect(url_for(".document_download", community_id=g.community.slug, doc_id=doc.id))
+
+
+@route("/doc/<int:doc_id>/view_pdf")
+def document_view_pdf(doc_id):
+  doc = get_document(doc_id)
+  if not doc.antivirus_ok:
+    return "Waiting for antivirus to finish"
+
+  return render_template("documents/view_pdf.html",
+                         pdf_url=url_for(".document_download", community_id=g.community.slug, doc_id=doc.id))
 
 #
 # Tagging (currently not used!)

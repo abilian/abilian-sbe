@@ -11,23 +11,20 @@ import unittest
 
 from werkzeug.datastructures import FileStorage
 from flask import g, get_flashed_messages
-
 from abilian.web.util import url_for
-
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.communities.models import WRITER
 from abilian.sbe.apps.communities.tests.base import (
-    CommunityBaseTestCase, CommunityIndexingTestCase,
+  CommunityBaseTestCase, CommunityIndexingTestCase,
 )
-from abilian.sbe.apps.documents.models import(
-    Folder, db, Document,
-    PathAndSecurityIndexable,
+from abilian.sbe.apps.documents.models import (
+  Folder, db, Document,
+  PathAndSecurityIndexable,
 )
-
 from abilian.sbe.apps.documents.views import util as view_util
 
-class BaseTests(CommunityBaseTestCase):
 
+class BaseTests(CommunityBaseTestCase):
   init_data = True
   no_login = True
 
@@ -49,7 +46,6 @@ class BaseTests(CommunityBaseTestCase):
 
 
 class TestBlobs(BaseTests):
-
   def test_document(self):
     root = Folder(title=u"root")
     doc = Document(parent=root, title=u"test")
@@ -130,7 +126,6 @@ class TestBlobs(BaseTests):
 
 
 class IndexingTestCase(CommunityIndexingTestCase):
-
   def test_folder_indexed(self):
     folder = Folder(title=u'Folder 1', parent=self.community.folder)
     self.session.add(folder)
@@ -160,7 +155,6 @@ class IndexingTestCase(CommunityIndexingTestCase):
 
 
 class TestViews(CommunityIndexingTestCase, BaseTests):
-
   def setUp(self):
     super(TestViews, self).setUp()
     self.community.type = 'participative'
@@ -199,7 +193,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
       self.assertEquals(
         response.headers['Location'],
         u'http://localhost/communities/{}/docs/folder/{}'
-          u''.format(self.community.slug, self.folder.id),
+        u''.format(self.community.slug, self.folder.id),
       )
 
   def _test_upload(self, title, content_type, test_preview=True,
@@ -207,7 +201,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
     data = {
       'file': (self.open_file(title), title, content_type),
       'action': 'upload',
-      }
+    }
 
     folder = self.community.folder
     url = url_for("documents.folder_post",
@@ -224,7 +218,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
     self.assert_200(response)
 
     url = url_for("documents.document_download",
-                  community_id=self.community.slug, doc_id=doc.id)
+                  community_id=self.community.slug,
+                  doc_id=doc.id)
     response = self.get(url)
     self.assert_200(response)
     assert response.headers['Content-Type'] == content_type
@@ -233,9 +228,9 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
     assert response.data == content
 
     if test_preview:
-      url = url_for("documents.document_preview",
-                    community_id=self.community.slug, doc_id=doc.id,
-                    size=500)
+      url = url_for("documents.document_preview_image",
+                    community_id=self.community.slug,
+                    doc_id=doc.id, size=500)
       response = self.get(url)
       if assert_preview_available:
         self.assert_200(response)
@@ -273,7 +268,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
   def test_binary_upload(self):
     NAME = u"random.bin"
     with self.client_login(self.user.email, password='azerty'):
-      self._test_upload(NAME, "application/octet-stream", assert_preview_available=False)
+      self._test_upload(NAME, "application/octet-stream",
+                        assert_preview_available=False)
 
   def test_explore_archive(self):
     from abilian.sbe.apps.documents.views.folders import explore_archive
@@ -284,14 +280,14 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
     fd = self.open_file('content.zip')
     archive_content = explore_archive(fd, u'content.zip', uncompress=True)
-    result = { u'/'.join(path) + u'/' + f.filename
-                for path, f in archive_content }
+    result = {u'/'.join(path) + u'/' + f.filename
+              for path, f in archive_content}
     assert result == {
-        u'existing-doc/file.txt',
-        u'existing-doc/subfolder_in_renamed/doc.txt',
-        u'folder 1/doc.txt',
-        u'folder 1/dos cp437: é.txt',
-        u'folder 1/osx: utf-8: é.txt'
+      u'existing-doc/file.txt',
+      u'existing-doc/subfolder_in_renamed/doc.txt',
+      u'folder 1/doc.txt',
+      u'folder 1/dos cp437: é.txt',
+      u'folder 1/osx: utf-8: é.txt'
     }
 
   def test_zip_upload_uncompress(self):
@@ -305,9 +301,9 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                   u'content.zip',
                   'application/zip'))
     data = {
-        'file': files,
-        'action': 'upload',
-        'uncompress_files': True
+      'file': files,
+      'action': 'upload',
+      'uncompress_files': True
     }
     url = url_for("documents.folder_post",
                   community_id=self.community.slug,
@@ -328,7 +324,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
       data = {
         'file': (self.open_file(title), title, content_type),
         'action': 'upload',
-        }
+      }
       folder = self.community.folder
       url = url_for("documents.folder_post",
                     community_id=self.community.slug, folder_id=folder.id)
@@ -363,7 +359,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
       data = {
         'file': (self.open_file(title), title, content_type),
         'action': 'upload',
-        }
+      }
       url = url_for("documents.folder_post",
                     community_id=self.community.slug, folder_id=my_folder.id)
       response = self.client.post(url, data=data)
@@ -380,7 +376,6 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
       zipfile = ZipFile(StringIO(response.data))
       assert zipfile.namelist() == ['my folder/' + title]
 
-
   def test_document_send_by_mail(self):
     mail = self.app.extensions['mail']
     folder = self.community.folder
@@ -395,7 +390,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         data = {
           'file': (StringIO('file content'), filename, content_type),
           'action': 'upload',
-          }
+        }
         url = url_for("documents.folder_post",
                       community_id=self.community.slug, folder_id=folder.id)
         self.client.post(url, data=data)
@@ -405,8 +400,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
       def get_send_url(doc_id):
         return url_for('documents.document_send',
-                        community_id=self.community.slug,
-                        doc_id=doc_id)
+                       community_id=self.community.slug,
+                       doc_id=doc_id)
 
       # mail ascii filename
       with mail.record_messages() as outbox:
@@ -417,8 +412,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         assert len(outbox) == 1
         msg = outbox[0]
         self.assertEquals(
-            msg.subject,
-            u'[Abilian Test] Unknown sent you a file'
+          msg.subject,
+          u'[Abilian Test] Unknown sent you a file'
         )
         assert msg.recipients == [u'dest@example.com']
         expected_disposition = attachment('ascii title.txt')
@@ -438,18 +433,19 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
           u'[Abilian Test] Unknown sent you a file'
         )
         self.assertEquals(msg.recipients, [u'dest@example.com'])
-        expected_disposition = attachment_utf8('utf-8%20est%20arriv%C3%A9%21.txt')
+        expected_disposition = attachment_utf8(
+          'utf-8%20est%20arriv%C3%A9%21.txt')
         msg = str(msg)
         self.assertTrue(expected_disposition in msg,
                         (expected_disposition, msg))
 
 
 class TestPathIndexable(unittest.TestCase):
-
   class MockPath(PathAndSecurityIndexable):
     def __init__(self, id, parent=None):
       self.id = id
       self.parent = parent
+
 
   def setUp(self):
     id_gen = count()
