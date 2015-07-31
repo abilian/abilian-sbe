@@ -99,13 +99,14 @@ def get_attachments_from_forum():
 
 
 def get_attachments_from_dms():
+  # FIXME: huge performance issues here, needs to be refactored.
   documents = Document.query.all()
   documents = [doc for doc in documents if doc.community == g.community]
 
   def is_visible(obj):
     return security.has_permission(current_user, READ, obj)
 
-  documents = [doc for doc in documents if is_visible(obj)]
+  documents = [doc for doc in documents if is_visible(doc)]
 
   attachments = []
   for doc in documents:
