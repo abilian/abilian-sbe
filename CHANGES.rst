@@ -4,8 +4,9 @@ Changelog for Abilian SBE
 0.1.4 (unreleased)
 ------------------
 
+- Fix 'refresh preview' action on documents
 - UX/UI improvements
-
+  
 0.1.3 (2015-07-29)
 ------------------
 
