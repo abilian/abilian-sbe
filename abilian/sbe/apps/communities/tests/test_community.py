@@ -226,9 +226,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
     with self.client_login(user, 'azerty'):
       response = self.client.get(url)
       assert response.status_code == 302
-      self.assertEquals(
-        response.headers['Location'],
-        u'http://localhost/communities/{}/wall'.format(self.community.slug))
+      assert response.headers['Location'] == \
+        u'http://localhost/communities/{}/wall/'.format(self.community.slug))
 
   def test_community_settings(self):
     url = url_for('communities.settings', community_id=self.community.slug)
