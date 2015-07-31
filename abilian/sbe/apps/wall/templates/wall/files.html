@@ -1,0 +1,19 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+{% from "macros/activity.html" import m_activities %}
+
+{% block content %}
+  {%- call m_box_content(_("Files")) %}
+
+    {% for month, docs in grouped_docs %}
+      <h2>{{ month }}</h2>
+
+      {% for doc in docs %}
+        <p>
+          {{ doc.date|date }} <a href="{{ doc.url }}">{{ doc.doc.name }}</a>
+        </p>
+      {% endfor %}
+    {% endfor %}
+  {%- endcall %}
+{% endblock %}
