@@ -100,15 +100,15 @@ def attachments():
     .options(joinedload('posts.attachments')) \
     .order_by(Thread.created_at.desc()).all()
 
-  posts_with_attachements = []
+  posts_with_attachments = []
   for thread in all_threads:
     for post in thread.posts:
       if getattr(post, 'attachments', None):
-        posts_with_attachements.append(post)
-  posts_with_attachements.sort(key=lambda post: post.created_at)
-  posts_with_attachements.reverse()
+        posts_with_attachments.append(post)
+  posts_with_attachments.sort(key=lambda post: post.created_at)
+  posts_with_attachments.reverse()
 
-  grouped_posts = group_monthly(posts_with_attachements)
+  grouped_posts = group_monthly(posts_with_attachments)
   return render_template('forum/attachments.html',
                          grouped_posts=grouped_posts)
 

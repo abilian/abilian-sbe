@@ -1109,7 +1109,7 @@ msgid "View"
 msgstr ""
 
 #: abilian/sbe/apps/wiki/actions.py:39
-msgid "Upload an attachement"
+msgid "Upload an attachment"
 msgstr ""
 
 #: abilian/sbe/apps/wiki/actions.py:41

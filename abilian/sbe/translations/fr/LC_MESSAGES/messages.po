@@ -836,7 +836,7 @@ msgstr "Pièces jointes des conversations récentes"
 
 #: abilian/sbe/apps/forum/templates/forum/attachments.html:18
 msgid "No attachment has been posted to this community yet"
-msgstr "Aucun attachement n'a encore été publié dans cette communautée"
+msgstr "Aucune pièce jointe n'a encore été publié dans cette communautée"
 
 #: abilian/sbe/apps/forum/templates/forum/index.html:20
 msgid "All conversations"
@@ -1132,8 +1132,8 @@ msgid "View"
 msgstr "Voir"
 
 #: abilian/sbe/apps/wiki/actions.py:39
-msgid "Upload an attachement"
-msgstr "Ajouter une pièce-jointe"
+msgid "Upload an attachment"
+msgstr "Ajouter une pièce jointe"
 
 #: abilian/sbe/apps/wiki/actions.py:41
 msgid "Source"
@@ -1227,7 +1227,7 @@ msgstr "Êtes-vous sûr de vouloir supprimer la page \"{title}\" ?"
 
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:97
 msgid "Delete attachment?"
-msgstr "Supprimer la pièce-jointe?"
+msgstr "Supprimer la pièce jointe?"
 
 #: abilian/sbe/apps/wiki/templates/wiki/changes.html:6
 #: abilian/sbe/apps/wiki/templates/wiki/compare.html:7

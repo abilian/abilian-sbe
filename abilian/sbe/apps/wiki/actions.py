@@ -38,7 +38,7 @@ _actions = (
   WikiPageAction('wiki:page', 'edit', _l(u'Edit'),
                  endpoint='.page_edit', icon='pencil'),
   WikiPageModalAction('wiki:page', 'upload_attachment',
-                      _l(u'Upload an attachement'),
+                      _l(u'Upload an attachment'),
                       url='#upload-files', icon='plus'),
   WikiPageAction('wiki:page', 'source', _l(u'Source'),
                  endpoint='.page_source', icon=FAIcon('code')),
