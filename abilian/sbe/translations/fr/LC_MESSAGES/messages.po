@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  \n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-07-30 18:51+0200\n"
-"PO-Revision-Date: 2015-06-30 15:57+0100\n"
+"POT-Creation-Date: 2015-07-31 15:24+0200\n"
+"PO-Revision-Date: 2015-07-31 15:25+0200\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -836,7 +836,7 @@ msgstr "Pièces jointes des conversations récentes"
 
 #: abilian/sbe/apps/forum/templates/forum/attachments.html:18
 msgid "No attachment has been posted to this community yet"
-msgstr "Aucune pièce jointe n'a encore été publié dans cette communautée"
+msgstr "Aucune pièce jointe n'a encore été publié dans cette communauté"
 
 #: abilian/sbe/apps/forum/templates/forum/index.html:20
 msgid "All conversations"
