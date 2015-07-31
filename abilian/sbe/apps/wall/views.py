@@ -8,10 +8,12 @@ from itertools import groupby
 from abilian.sbe.apps.documents.models import Document
 
 from abilian.sbe.apps.forum.models import Thread
+from abilian.services.security import security, READ
 from flask import g, render_template, current_app
 from abilian.web.action import actions
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from flask.ext.babel import format_date
+from flask.ext.login import current_user
 
 from sqlalchemy.orm import joinedload
 
@@ -97,8 +99,13 @@ def get_attachments_from_forum():
 
 
 def get_attachments_from_dms():
-  # FIXME: this doesn't filter docs on community !!!
   documents = Document.query.all()
+  documents = [doc for doc in documents if doc.community == g.community]
+
+  def is_visible(obj):
+    return security.has_permission(current_user, READ, obj)
+
+  documents = [doc for doc in documents if is_visible(obj)]
 
   attachments = []
   for doc in documents:
