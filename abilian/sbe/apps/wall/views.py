@@ -3,10 +3,9 @@
 """
 from __future__ import absolute_import
 from datetime import date
-from itertools import groupby
+from itertools import groupby, chain
 
-from abilian.sbe.apps.documents.models import Document
-
+from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.forum.models import Thread
 from abilian.services.security import security, READ
 from flask import g, render_template, current_app
@@ -41,13 +40,26 @@ def index():
 
 @route('/files')
 def files():
-  actions.context['object'] = g.community._model
+  community = g.community._model
+  actions.context['object'] = community
 
-  files1 = get_attachments_from_forum()
-  files2 = get_attachments_from_dms()
-  files = files1 + files2
+  files = []
+  try:
+    files1 = get_attachments_from_forum(community)
+    files += files1
+  except:
+    pass
+
+  try:
+    files2 = get_attachments_from_dms(community)
+    files += files2
+  except:
+    pass
+
   files = sorted(files, key=lambda doc: doc.date)
-  files = reversed(files)
+  files = list(reversed(files))
+  if len(files) > 50:
+    files = files[0:50]
 
   grouped_docs = group_monthly(files)
 
@@ -61,20 +73,9 @@ class Attachment(object):
     self.date = date
 
 
-# Or use:
-# from attr import attributes, attr
-#
-# @attributes
-# class Attachment(object):
-#   url = attr()
-#   doc = attr()
-#   #blob = attr()
-#   date = attr()
-
-
-def get_attachments_from_forum():
+def get_attachments_from_forum(community):
   all_threads = Thread.query \
-    .filter(Thread.community_id == g.community.id) \
+    .filter(Thread.community_id == community.id) \
     .options(joinedload('posts')) \
     .options(joinedload('posts.attachments')) \
     .order_by(Thread.created_at.desc()).all()
@@ -98,15 +99,30 @@ def get_attachments_from_forum():
   return attachments
 
 
-def get_attachments_from_dms():
-  # FIXME: huge performance issues here, needs to be refactored.
-  documents = Document.query.all()
-  documents = [doc for doc in documents if doc.community == g.community]
+# FIXME: significant performance issues here, needs to be refactored.
+def get_folders(community):
+  def flatten(list_of_lists):
+    return chain(*list_of_lists)
 
-  def is_visible(obj):
-    return security.has_permission(current_user, READ, obj)
+  root = community.folder
+  folders = {root}
+  while True:
+    subfolders = set(flatten([f.subfolders for f in folders]))
+    subfolders = {f for f in subfolders if not f in folders}
+    subfolders = security.filter_with_permission(g.user, "read", subfolders,
+                                                 inherit=True)
+    if len(subfolders) == 0:
+      break
+    folders.update(subfolders)
+  return folders
 
-  documents = [doc for doc in documents if is_visible(doc)]
+
+# FIXME: significant performance issues here, needs to be refactored.
+def get_attachments_from_dms(community):
+  folders = get_folders(community)
+  folder_ids = sorted([f.id for f in folders])
+
+  documents = Document.query.filter(Document._parent_id.in_(folder_ids)).all()
 
   attachments = []
   for doc in documents:
