@@ -5,17 +5,15 @@ from __future__ import absolute_import
 from datetime import date
 from itertools import groupby, chain
 
-from abilian.sbe.apps.documents.models import Document, Folder
-from abilian.sbe.apps.forum.models import Thread
-from abilian.services.security import security, READ
+from abilian.services.security import security
 from flask import g, render_template, current_app
 from abilian.web.action import actions
-from abilian.sbe.apps.communities.blueprint import Blueprint
 from flask.ext.babel import format_date
-from flask.ext.login import current_user
-
 from sqlalchemy.orm import joinedload
 
+from abilian.sbe.apps.documents.models import Document, Folder
+from abilian.sbe.apps.forum.models import Thread
+from abilian.sbe.apps.communities.blueprint import Blueprint
 from .util import get_recent_entries
 from .presenters import ActivityEntryPresenter
 
@@ -43,25 +41,20 @@ def files():
   community = g.community._model
   actions.context['object'] = community
 
-  files = []
-  try:
-    files1 = get_attachments_from_forum(community)
-    files += files1
-  except:
-    pass
+  all_files = []
+  if community.has_forum:
+    all_files += get_attachments_from_forum(community)
 
-  try:
-    files2 = get_attachments_from_dms(community)
-    files += files2
-  except:
-    pass
+  if community.has_documents:
+    all_files += get_attachments_from_dms(community)
 
-  files = sorted(files, key=lambda doc: doc.date)
-  files = list(reversed(files))
-  if len(files) > 50:
-    files = files[0:50]
+  all_files = sorted(all_files, key=lambda doc: doc.date)
+  all_files = list(reversed(all_files))
+  # TODO: batch
+  if len(all_files) > 50:
+    all_files = all_files[0:50]
 
-  grouped_docs = group_monthly(files)
+  grouped_docs = group_monthly(all_files)
 
   return render_template("wall/files.html", grouped_docs=grouped_docs)
 
@@ -101,23 +94,26 @@ def get_attachments_from_forum(community):
 
 # FIXME: significant performance issues here, needs to be refactored.
 def get_folders(community):
-  def flatten(list_of_lists):
-    return chain(*list_of_lists)
+  def get_subfolders(folders):
+    folder_ids = [f.id for f in folders]
+    result = set(Folder.query.filter(Folder._parent_id.in_(folder_ids)).all())
+    return result
 
   root = community.folder
   folders = {root}
+  folders_of_rank_n = folders
   while True:
-    subfolders = set(flatten([f.subfolders for f in folders]))
-    subfolders = {f for f in subfolders if not f in folders}
-    subfolders = security.filter_with_permission(g.user, "read", subfolders,
-                                                 inherit=True)
-    if len(subfolders) == 0:
+    folders_of_rank_n = get_subfolders(folders_of_rank_n)
+    filtered_folders_of_rank_n = security.filter_with_permission(
+      g.user, "read", folders_of_rank_n, inherit=True)
+    if len(filtered_folders_of_rank_n) == 0:
       break
-    folders.update(subfolders)
+    folders.update(filtered_folders_of_rank_n)
+    folders_of_rank_n = filtered_folders_of_rank_n
   return folders
 
 
-# FIXME: significant performance issues here, needs to be refactored.
+# FIXME: significant performance issues here, needs major refactoring
 def get_attachments_from_dms(community):
   folders = get_folders(community)
   folder_ids = sorted([f.id for f in folders])
