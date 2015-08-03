@@ -14,7 +14,7 @@ from abilian.i18n import render_template_i18n
 from abilian.core.extensions import db, mail
 from abilian.core.signals import activity
 from abilian.services import audit_service
-from abilian.services.image import resize
+from abilian.services.image import resize, FIT
 from abilian.services.conversion import converter
 from abilian.web.action import actions
 from abilian.web.frontend import add_to_recent_items
@@ -168,7 +168,7 @@ def document_preview_image(doc_id):
   elif doc.content_type.startswith("image/"):
     image = doc.content
     if size:
-      image = resize(image, size)
+      image = resize(image, size, size, mode=FIT)
   else:
     page = int(request.args.get("page", 0))
     try:

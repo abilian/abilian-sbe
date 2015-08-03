@@ -10,7 +10,7 @@ from abilian.core.models.subjects import User, Group
 from abilian.core.extensions import db
 from abilian.web import csrf
 from abilian.web.views import default_view
-from abilian.services.image import crop_and_resize
+from abilian.services.image import resize, CROP
 from abilian.services.security import security
 
 from ..forms import GroupForm
@@ -168,7 +168,7 @@ def group_mugshot(group_id):
     data = DEFAULT_GROUP_MUGSHOT
 
   if size:
-    data = crop_and_resize(data, size)
+    data = resize(data, size, size, mode=CROP)
 
   response = make_response(data)
   response.headers['content-type'] = 'image/jpeg'
