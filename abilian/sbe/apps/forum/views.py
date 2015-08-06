@@ -125,7 +125,10 @@ class BaseThreadView(object):
 
   def prepare_args(self, args, kwargs):
     args, kwargs = super(BaseThreadView, self).prepare_args(args, kwargs)
+    self.send_by_email = False
+
     if not self.can_send_by_mail():
+      # remove from html form and avoid validation errors
       del self.form['send_by_email']
 
     return args, kwargs
@@ -173,8 +176,10 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
     del self.form['attachments']
     self.message_body = self.form.message.data
     del self.form['message']
-    self.send_by_email = self.form.send_by_email.data and self.can_send_by_mail()
-    del self.form['send_by_email']
+    if 'send_by_email' in self.form:
+      self.send_by_email = (self.can_send_by_mail()
+                            and self.form.send_by_email.data)
+      del self.form['send_by_email']
 
   def after_populate_obj(self):
     if self.thread.community is None:

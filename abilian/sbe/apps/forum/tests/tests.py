@@ -12,7 +12,7 @@ from email.parser import FeedParser
 from flask import url_for
 from abilian.core.models.subjects import User
 
-from abilian.sbe.apps.communities.models import MANAGER
+from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.testing import BaseTestCase
 from abilian.sbe.apps.communities.tests.base import (
   CommunityBaseTestCase, CommunityIndexingTestCase,
@@ -94,11 +94,19 @@ class IndexingTestCase(CommunityIndexingTestCase):
       assert hit['object_key'] == thread_other.object_key
 
 
-class ViewTestCase(CommunityBaseTestCase):
+class NoLoginViewTest(CommunityBaseTestCase):
+  """
+  Test correct url response, without login or security involved
+  """
   def test(self):
     response = self.client.get(
       url_for("forum.index", community_id=self.community.slug))
     self.assert200(response)
+
+
+class ViewTestCase(CommunityBaseTestCase):
+  no_login = False
+  SERVICES = ('security',)
 
   def test_posts_ordering(self):
     thread = Thread(community=self.community, title=u'test ordering')
@@ -129,50 +137,95 @@ class ViewTestCase(CommunityBaseTestCase):
     self.session.add(self.user)
     self.community.set_membership(self.user, MANAGER)
     self.session.commit()
+    self.client_login(self.user.email, self.user.password)
 
     mail = self.app.extensions['mail']
     with mail.record_messages() as outbox:
-        title = u"Brand new thread"
-        content = u"shiny thread message"
-        url = url_for("forum.new_thread", community_id=self.community.slug)
-        data = dict(title=title, message=content)
-        data['__action'] = u"create"
-        data['send_by_email'] = u"y"
-        response = self.client.post(url, data=data)
-        self.assertStatus(response, 302)
+      title = u"Brand new thread"
+      content = u"shiny thread message"
+      url = url_for("forum.new_thread", community_id=self.community.slug)
+      data = dict(title=title, message=content)
+      data['__action'] = u"create"
+      data['send_by_email'] = u"y"
+      response = self.client.post(url, data=data)
+      self.assertStatus(response, 302)
 
-        # extract the thread_id from the redirection url in response
-        threadid = response.location.rsplit('/', 2)[1]
+      # extract the thread_id from the redirection url in response
+      threadid = response.location.rsplit('/', 2)[1]
 
-        # retrieve the new thread, make sur it has the message
-        url = url_for("forum.thread", thread_id=threadid,
-                      community_id=self.community.slug, title=title)
-        response = self.client.get(url)
-        self.assertStatus(response, 200)
-        self.assertIn(content, response.data.decode("utf-8"))
+      # retrieve the new thread, make sur it has the message
+      url = url_for("forum.thread", thread_id=threadid,
+                    community_id=self.community.slug, title=title)
+      response = self.client.get(url)
+      self.assertStatus(response, 200)
+      self.assertIn(content, response.data.decode("utf-8"))
 
-        # check the email was sent with the new thread
-        assert len(outbox) == 1
-        assert outbox[0].subject == u'[My Community] Brand new thread'
+      # check the email was sent with the new thread
+      assert len(outbox) == 1
+      assert outbox[0].subject == u'[My Community] Brand new thread'
 
     # reset the outbox for checking threadpost email
     with mail.record_messages() as outbox:
-        content = data['message'] = u"my cherished post"
-        del data['title']
-        response = self.client.post(url, data=data)
-        self.assertStatus(response, 302)
+      content = data['message'] = u"my cherished post"
+      del data['title']
+      response = self.client.post(url, data=data)
+      self.assertStatus(response, 302)
 
-        # retrieve the new thread, make sur it has the message
-        url = url_for("forum.thread", thread_id=threadid,
-                      community_id=self.community.slug, title=title)
-        response = self.client.get(url)
-        self.assertStatus(response, 200)
-        self.assertIn(content, response.data.decode("utf-8"))
+      # retrieve the new thread, make sur it has the message
+      url = url_for("forum.thread", thread_id=threadid,
+                    community_id=self.community.slug, title=title)
+      response = self.client.get(url)
+      self.assertStatus(response, 200)
+      self.assertIn(content, response.data.decode("utf-8"))
 
-        # check the email was sent with the new threadpost
-        assert len(outbox) == 1
-        assert unicode(outbox[0].subject) == u'[My Community] Brand new thread'
+      # check the email was sent with the new threadpost
+      assert len(outbox) == 1
+      assert unicode(outbox[0].subject) == u'[My Community] Brand new thread'
 
+
+  def test_create_thread_informative(self):
+    """
+    Test with 'informative' community. No mail sent, unless user is MANAGER
+    """
+    assert self.community.type == 'informative'
+    # create a new user, add him/her to the current community
+    self.user = User(email=u'user_1@example.com', password='azerty',
+                     can_login=True)
+    self.session.add(self.user)
+    self.community.set_membership(self.user, MEMBER)
+    self.session.commit()
+
+    title = u"Brand new thread"
+    content = u"shiny thread message"
+    url = url_for("forum.new_thread", community_id=self.community.slug)
+    data = dict(title=title, message=content)
+    data['__action'] = u"create"
+
+    mail = self.app.extensions['mail']
+    self.client_login(self.user.email, self.user.password)
+
+    with mail.record_messages() as outbox:
+      data['send_by_email'] = u"y" # actually should not be in html form
+      response = self.client.post(url, data=data)
+      self.assertStatus(response, 302)
+      assert len(outbox) == 0
+
+    self.community.set_membership(self.user, MANAGER)
+    self.session.commit()
+
+    with mail.record_messages() as outbox:
+      data['send_by_email'] = u"y" # should be in html form
+      response = self.client.post(url, data=data)
+      self.assertStatus(response, 302)
+      assert len(outbox) == 1
+
+    with mail.record_messages() as outbox:
+      del data['send_by_email']
+      response = self.client.post(url, data=data)
+      self.assertStatus(response, 302)
+      assert len(outbox) == 0
+
+    self.client_logout()
 
 def get_string_from_file(filename='notification.email'):
   """
