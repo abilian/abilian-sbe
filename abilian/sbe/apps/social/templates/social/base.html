@@ -20,16 +20,6 @@
           </ul>
         {% endcall %}
 
-{#        {% call m_box(_("My communities"), color="orange", with_toolbar=True) %}#}
-{#          <ul>#}
-{#            {% for community in g.sidebars.my_communities %}#}
-{#              <li><a#}
-{#                  href="{{ url_for("communities.community", community_id=community.slug) }}">{{ community.name }}</a>#}
-{#              </li>#}
-{#            {% endfor %}#}
-{#          </ul>#}
-{#        {% endcall %}#}
-
         {% call m_box(_("Latest visitors"), color="orange") %}
           <ul class="latest-visitors">
             {%- set img_online = url_for('abilian_sbe_static', filename='img/greendot.png') %}

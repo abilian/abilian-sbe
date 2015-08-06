@@ -1,3 +1,8 @@
+"""
+Default ("home") page for social apps.
+"""
+
+
 def register_plugin(app):
   from .views.social import social
   from .views import users, groups, sidebars  # noqa

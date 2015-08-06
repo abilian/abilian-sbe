@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 from flask import g
 
 from abilian.core.models.subjects import User
+from flask.ext.login import current_user
+from abilian.sbe.apps.communities.models import Community, Membership
 from abilian.sbe.apps.social.views.social import social
 
 
@@ -29,10 +31,12 @@ class Sidebars(object):
 
   @property
   def my_communities(self):
-    return []
-    # TODO: filter by permission
-    # TODO: limit
-    #return Community.query.all()
+    query = Community.query
+    query = query.order_by(Community.last_active_at.desc())
+    if not current_user.has_role('admin'):
+      # Filter with permissions
+      query = query.join(Membership).filter(Membership.user == current_user)
+    return query.limit(10).all()
 
   @property
   def all_communities(self):
