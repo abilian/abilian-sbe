@@ -1,16 +1,26 @@
 Changelog for Abilian SBE
 =========================
 
-0.1.4 (unreleased)
+0.1.5 (unreleased)
 ------------------
 
+FILL ME.
+
+
+0.1.4 (2015-08-07)
+------------------
+
+- Add "wall of attachments" in communities
+- Use pdfjs to preview documents on browsers
 - Fix 'refresh preview' action on documents
 - UX/UI improvements
-  
+
+
 0.1.3 (2015-07-29)
 ------------------
 
 - Various CSS and HTML improvements / fixes.
+
 
 0.1.2 (2015-07-15)
 ------------------
