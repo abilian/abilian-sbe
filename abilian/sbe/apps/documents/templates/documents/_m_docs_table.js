@@ -2,9 +2,9 @@
 (
 function() {
 function setupDocTable(Abilian, $, jqDT, bootbox) {
-    'use strict';        
-    Abilian.fn.onAppInit(function() {     
-        
+    'use strict';
+    Abilian.fn.onAppInit(function() {
+
         $.fn.dataTableExt.afnFiltering.push(
             function(oSettings, aData, iDataIndex) {
                 var filter_value = $("#filter").val();
@@ -40,11 +40,11 @@ function setupDocTable(Abilian, $, jqDT, bootbox) {
         objects_table.fnFilter(filter.val());
 
         $("a[href='#select-all']").click(function(e) {
-            $("input[name='object-selected']").attr('checked', true);
+            $("input[name='object-selected']").prop('checked', true);
             e.preventDefault();
         });
         $("a[href='#unselect-all']").click(function(e) {
-            $("input[name='object-selected']").attr('checked', false);
+            $("input[name='object-selected']").prop('checked', false);
             e.preventDefault();
         });
 
