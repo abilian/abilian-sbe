@@ -4,9 +4,9 @@ First cut at a notification system.
 """
 from __future__ import absolute_import
 
+from werkzeug.exceptions import MethodNotAllowed
 from flask import current_app as app, request
 from flask.ext.login import current_user
-from werkzeug.exceptions import InternalServerError
 from abilian.i18n import render_template_i18n
 from abilian.core.extensions import db, csrf
 from abilian.core.models.subjects import User
@@ -62,6 +62,5 @@ def unsubscribe_sbe(token):
     db.session.commit()
     return render_template_i18n("notifications/unsubscribed.html",
                            token=token)
-
   else:
-    raise InternalServerError()
+    raise MethodNotAllowed()
