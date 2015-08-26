@@ -11,9 +11,11 @@ from flask_security.utils import md5
 from sqlalchemy import and_, or_
 from validate_email import validate_email
 from celery.schedules import crontab
+
 from abilian.i18n import render_template_i18n
 from abilian.core.celery import periodic_task
 from abilian.core.models.subjects import User
+from abilian.web import url_for
 from abilian.services.activity import ActivityEntry
 from abilian.services.auth.views import get_serializer
 
@@ -68,13 +70,19 @@ def make_message(user):
   config = app.config
   sbe_config = config['ABILIAN_SBE']
   sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
-
   recipient = user.email
   subject = sbe_config['DAILY_SOCIAL_DIGEST_SUBJECT']
-
   digests = []
-
   happened_after = datetime.utcnow() - timedelta(days=1)
+  list_id = u'"{} daily digest" <daily.digest.{}>'.format(
+    config['SITE_NAME'],
+    config.get('SERVER_NAME', u'example.com'),
+  )
+  base_extra_headers = {
+    'List-Id': list_id,
+    'List-Post': 'NO',
+    'Auto-Submitted': 'auto-generated',
+  }
 
   for membership in user.communautes_membership:
     community = membership.community
@@ -90,8 +98,10 @@ def make_message(user):
                  and_(AE.object_type == community.object_type,
                       AE.object_id == community.id),))
         ).all()
+
     for activity in activities:
       digest.update_from_activity(activity, user)
+
     if not digest.is_empty():
       digests.append(digest)
 
@@ -99,8 +109,16 @@ def make_message(user):
     return None
 
   token = generate_unsubscribe_token(user)
-  msg = Message(subject, sender=sender, recipients=[recipient])
-  ctx = {'digests': digests, 'token': token}
+  unsubscribe_url = url_for('notifications.unsubscribe_sbe',
+                            token=token,
+                            _external=True,
+                            _scheme=config['PREFERRED_URL_SCHEME'])
+  extra_headers = dict(base_extra_headers)
+  extra_headers['List-Unsubscribe'] = u'<{}>'.format(unsubscribe_url)
+
+  msg = Message(subject, sender=sender, recipients=[recipient],
+                extra_headers=extra_headers)
+  ctx = {'digests': digests, 'token': token, 'unsubscribe_url': unsubscribe_url}
   msg.body = render_template_i18n("notifications/daily-social-digest.txt",
                                   **ctx)
   msg.html = render_template_i18n("notifications/daily-social-digest.html",
