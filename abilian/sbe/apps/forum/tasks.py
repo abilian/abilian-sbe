@@ -7,6 +7,11 @@ from __future__ import absolute_import
 import mailbox
 from os.path import expanduser
 import re
+from pathlib import Path
+
+import bleach
+import chardet
+from itsdangerous import URLSafeSerializer
 
 from flask import current_app, g
 from flask_mail import Message
@@ -14,10 +19,8 @@ from flask_babel import get_locale
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from celery.schedules import crontab
-import bleach
-import chardet
-from pathlib import Path
-from itsdangerous import URLSafeSerializer
+
+from abilian.web import url_for
 from abilian.core.celery import periodic_task
 from abilian.core.signals import activity
 from abilian.core.extensions import mail, db
@@ -186,15 +189,31 @@ def send_post_to_user(community, post, member):
   config = current_app.config
   sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
   SBE_FORUM_REPLY_BY_MAIL = config.get('SBE_FORUM_REPLY_BY_MAIL', False)
+  SERVER_NAME = config.get('SERVER_NAME', u'example.com')
+  list_id = u'"{} forum" <forum.{}.{}>'.format(community.name,
+                                               community.slug, SERVER_NAME)
+  forum_url = url_for('forum.index', community_id=community.slug,
+                      _external=True)
+  forum_archive = url_for('forum.archives', community_id=community.slug,
+                          _external=True)
+
+  extra_headers = {
+    'List-Id': list_id,
+    'List-Archive': u'<{}>'.format(forum_archive),
+    'List-Post': '<{}>'.format(forum_url),
+    'X-Auto-Response-Suppress': 'All',
+    'Auto-Submitted': 'auto-generated',
+  }
 
   if SBE_FORUM_REPLY_BY_MAIL and config['MAIL_ADDRESS_TAG_CHAR'] is not None:
     name = sender.rsplit('@', 1)[0]
     domain = sender.rsplit('@', 1)[1]
     replyto = build_reply_email_address(name, post, member, domain)
     msg = Message(subject, sender=sender, recipients=[recipient],
-                  reply_to=replyto)
+                  reply_to=replyto, extra_headers=extra_headers)
   else:
-    msg = Message(subject, sender=sender, recipients=[recipient])
+    msg = Message(subject, sender=sender, recipients=[recipient],
+                  extra_headers=extra_headers)
 
   msg.body = render_template_i18n(
     "forum/mail/new_message.txt",

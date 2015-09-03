@@ -82,6 +82,8 @@ def make_message(user):
     'List-Id': list_id,
     'List-Post': 'NO',
     'Auto-Submitted': 'auto-generated',
+    'X-Auto-Response-Suppress': 'All',
+    'Precedence': 'bulk',
   }
 
   for membership in user.communautes_membership:
