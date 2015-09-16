@@ -176,6 +176,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
     del self.form['attachments']
     self.message_body = self.form.message.data
     del self.form['message']
+
     if 'send_by_email' in self.form:
       self.send_by_email = (self.can_send_by_mail()
                             and self.form.send_by_email.data)
@@ -186,6 +187,9 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
       self.thread.community = g.community._model
 
     self.post = self.thread.create_post(body_html=self.message_body)
+    obj_meta = self.post.meta.setdefault('abilian.sbe.forum', {})
+    obj_meta['send_by_email'] = self.send_by_email
+
     session = sa.orm.object_session(self.thread)
     uploads = current_app.extensions['uploads']
 
@@ -213,7 +217,12 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
 
   def commit_success(self):
     if self.send_by_email:
-      send_post_by_email.delay(self.post.id)
+      task = send_post_by_email.delay(self.post.id)
+      meta = self.post.meta.setdefault('abilian.sbe.forum', {})
+      meta['send_post_by_email_task'] = task.id
+      self.post.meta.changed()
+      session = sa.orm.object_session(self.post)
+      session.commit()
 
   @property
   def activity_target(self):
