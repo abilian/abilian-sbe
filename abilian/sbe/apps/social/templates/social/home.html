@@ -9,41 +9,5 @@
 {% endblock %}
 
 {% block sidebar %}
-  {% call m_box_menu() %}
-    <ul class="nav nav-list">
-      {# TODO: user url_for() #}
-      <li><a href="/social/">{{ _("My feed") }}</a></li>
-      <li><a href="{{ url_for(g.user) }}">{{ _("My profile") }}</a></li>
-      <li><a href="/social/users/">{{ _("User directory") }}</a></li>
-    </ul>
-  {% endcall %}
-
-
-  {% call m_box(_("My communities"), color="orange") %}
-    <ul class="nav nav-list">
-      {% set communities = g.sidebars.my_communities %}
-      {% for community in communities %}
-        <li><a
-            href="{{ url_for("communities.community", community_id=community.slug) }}">{{ community.name }}</a>
-        </li>
-      {% endfor %}
-    </ul>
-  {% endcall %}
-
-
-  {% call m_box(_("Latest visitors"), color="orange") %}
-    <ul class="latest-visitors">
-      {%- set img_online = url_for('abilian_sbe_static', filename='img/greendot.png') %}
-      {%- for user in g.sidebars.latest_visitors %}
-        <li><a href="{{ url_for(user) }}">
-          <img class="avatar" src="{{ user_photo_url(user, size=20) }}" alt=""/>
-          {{ user.name }}
-        </a>
-          {%- if user.is_online %}
-            <img src="{{ img_online }}" alt=""/>
-          {%- endif %}
-        </li>
-      {%- endfor %}
-    </ul>
-  {%- endcall %}
+  {% include "social/_sidebar.html" %}
 {%- endblock %}
