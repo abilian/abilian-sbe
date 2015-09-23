@@ -424,8 +424,8 @@ function ($, api){
 
 			var evt = {
 				  xhr: xhr
-				, file: this.xhr.currentFile
-				, files: this.xhr.files
+				, file: xhr.file
+				, files: xhr.files
 				, widget: this
 			};
 
