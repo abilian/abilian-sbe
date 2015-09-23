@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.1.4.dev28+ng6ca74b5\n"
+"Project-Id-Version: abilian-sbe 0.1.4.dev31+nga7bc8f3.d20150923\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-18 15:46+0200\n"
+"POT-Creation-Date: 2015-09-23 14:55+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -187,7 +187,7 @@ msgid "Destroy"
 msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/home.html:8
-#: abilian/sbe/apps/social/templates/social/home.html:22
+#: abilian/sbe/apps/social/templates/social/_sidebar.html:13
 msgid "My communities"
 msgstr ""
 
@@ -300,6 +300,10 @@ msgstr ""
 msgid "Refresh preview"
 msgstr ""
 
+#: abilian/sbe/apps/documents/templates/documents/_m_docs_table.js:70
+msgid "Delete selected elements?"
+msgstr ""
+
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:21
 msgid "Select all"
 msgstr ""
@@ -337,6 +341,14 @@ msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:114
 msgid "This folder is currently empty. Why don't you upload some content?"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modal_upload.js:29
+msgid "Error - File not uploaded"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modal_upload.js:36
+msgid "Error: maximum file size exceeded"
 msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_modals_document.html:32
@@ -892,24 +904,20 @@ msgstr ""
 msgid "Name is required."
 msgstr ""
 
-#: abilian/sbe/apps/social/templates/social/base.html:17
-#: abilian/sbe/apps/social/templates/social/home.html:15
+#: abilian/sbe/apps/social/templates/social/_sidebar.html:6
 msgid "My feed"
 msgstr ""
 
-#: abilian/sbe/apps/social/templates/social/base.html:18
-#: abilian/sbe/apps/social/templates/social/home.html:16
+#: abilian/sbe/apps/social/templates/social/_sidebar.html:7
 msgid "My profile"
 msgstr ""
 
-#: abilian/sbe/apps/social/templates/social/base.html:19
-#: abilian/sbe/apps/social/templates/social/home.html:17
+#: abilian/sbe/apps/social/templates/social/_sidebar.html:8
 #: abilian/sbe/apps/social/templates/social/users.html:7
 msgid "User directory"
 msgstr ""
 
-#: abilian/sbe/apps/social/templates/social/base.html:23
-#: abilian/sbe/apps/social/templates/social/home.html:34
+#: abilian/sbe/apps/social/templates/social/_sidebar.html:25
 msgid "Latest visitors"
 msgstr ""
 
