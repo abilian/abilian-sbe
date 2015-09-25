@@ -8,7 +8,7 @@ from functools import wraps
 
 from flask import (
     render_template, g, redirect, url_for, request, current_app, session,
-    flash)
+    flash, jsonify)
 from flask_login import current_user, login_required
 from werkzeug.exceptions import NotFound, BadRequest, InternalServerError
 from pathlib import Path
@@ -127,6 +127,30 @@ def index():
                     kw_func=default_view_kw)
 def community():
   return redirect(url_for("wall.index", community_id=g.community.slug))
+
+
+@route("/json2")
+def list_json2():
+  """
+JSON endpoint, used for filling select boxes dynamically.
+
+  """
+  args = request.args
+  cls = Community
+
+  q = args.get("q").replace("%", " ")
+  if not q or len(q) < 2:
+    raise BadRequest()
+
+  query = db.session.query(cls.id, cls.name)
+  query = query.filter(cls.name.ilike("%" + q + "%"))\
+               .distinct()\
+               .order_by(cls.name)\
+               .limit(50)
+  all = query.all()
+
+  result = {'results': [ { 'id': r[0], 'text': r[1]} for r in all ] }
+  return jsonify(result)
 
 
 # edit views
