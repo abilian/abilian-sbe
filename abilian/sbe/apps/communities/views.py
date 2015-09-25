@@ -243,7 +243,7 @@ add_url("/<string:community_id>/destroy",
           'delete',
           message_success=_l(u"Community destroyed.")))
 
-## Community Image
+# Community Image
 _DEFAULT_IMAGE = Path(__file__).parent / u'data' / u'community.png'
 _DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open('rb').read()).hexdigest()
 route('/_default_image')(
@@ -262,7 +262,7 @@ class CommunityImageView(image_views.BlobView):
       raise NotFound()
 
     kwargs[self.id_arg] = community.image.id
-     #image = open(join(dirname(__file__), "data", "community.png"), 'rb')
+    # image = open(join(dirname(__file__), "data", "community.png"), 'rb')
     return super(CommunityImageView, self).prepare_args(args, kwargs)
 
 
