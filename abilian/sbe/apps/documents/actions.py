@@ -1,7 +1,7 @@
 # coding=utf-8
 from flask import g, url_for as url_for_orig
 from flask_babel import lazy_gettext as _l
-from abilian.web.action import actions, Action, ModalActionMixin
+from abilian.web.action import actions, Action, ModalActionMixin, FAIcon
 from abilian.services.security import security
 
 from .repository import repository
@@ -135,6 +135,10 @@ _actions = (
   FolderAction(
     'documents:content', 'view', _l(u'List content'), icon='list',
     url=lambda ctx: url_for(".folder_view", folder_id=ctx['object'].id),),
+  # Descendants
+  FolderAction(
+    'documents:content', 'descendants', _l(u'View descendants'), icon=FAIcon('tree'),
+    url=lambda ctx: url_for(".descendants_view", folder_id=ctx['object'].id),),
   # upload
   FolderModalAction(
     'documents:content', 'upload_files', _l('Upload file(s)'),

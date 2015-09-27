@@ -12,6 +12,7 @@ import fnmatch
 from functools import partial
 from cStringIO import StringIO
 from datetime import datetime
+from pprint import pprint
 from urllib import quote
 from zipfile import ZipFile, is_zipfile
 from werkzeug.exceptions import InternalServerError
@@ -37,7 +38,7 @@ from abilian.web import csrf, http, url_for
 
 from abilian.sbe.apps.communities.views import default_view_kw
 from ..repository import repository
-from ..models import Folder
+from ..models import Folder, Document
 from .util import (
   get_folder, check_manage_access, get_document,
   check_read_access, breadcrumbs_for, check_write_access, create_document,
@@ -809,3 +810,34 @@ def check_valid_name():
     result['help_text'] = help_text.format(name=title)
 
   return jsonify(result)
+
+
+@route("/folder/<int:folder_id>/descendants")
+def descendants_view(folder_id):
+  folder = get_folder(folder_id)
+  bc = breadcrumbs_for(folder)
+  actions.context['object'] = folder
+
+  descendants = []
+  def visit(folder, level=0):
+    children = folder.filtered_children
+    children.sort(key=lambda obj: obj.name)
+
+    for child in children:
+      if not isinstance(child, Folder):
+        continue
+      descendants.append((level, "F", child))
+      visit(child, level+1)
+
+    for child in children:
+      if not isinstance(child, Document):
+        continue
+      descendants.append((level, "D", child))
+
+  visit(folder, 0)
+
+  ctx = dict(folder=folder,
+             descendants=descendants,
+             breadcrumbs=bc,
+             csrf_token=csrf.field(), )
+  return render_template("documents/descendants.html", **ctx)
