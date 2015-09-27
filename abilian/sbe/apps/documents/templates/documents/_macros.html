@@ -78,11 +78,12 @@
               {%- endif %}
             </td>
             <td>
-              <a href="{{ url_for("social.user", user_id=obj.owner.id) }}"><img
-                  alt=""
-                  src="{{ user_photo_url(obj.owner, size=20) }}"
+              {% set owner = obj.owner %}
+              <a href="{{ url_for("social.user", user_id=owner.id) }}"
+                  title="{{ owner.name }}"><img alt="{{ owner.name }}"
+                  src="{{ user_photo_url(owner, size=20) }}"
                   style="vertical-align: middle;">
-                {{ obj.owner.name }}</a>
+                {{ owner.short_name }}</a>
             </td>
             <td class="hide">{{ obj.created_at.isoformat() }} </td>
             <td>{{ obj.created_at|age }}</td>
