@@ -38,7 +38,7 @@ def get_document(document_id, session=None):
     doc_session.close()
 
 
-@shared_task(ignore_result=True)
+@shared_task
 def process_document(document_id):
   """
   Run document processing chain
@@ -66,7 +66,7 @@ def _run_antivirus(document):
   return None
 
 
-@shared_task(ignore_result=True)
+@shared_task
 def antivirus_scan(document_id):
   """
   Return antivirus.scan() result
@@ -77,7 +77,7 @@ def antivirus_scan(document_id):
     return _run_antivirus(document)
 
 
-@shared_task(ignore_result=True)
+@shared_task
 def preview_document(document_id):
   """Computes the document preview images with its default preview size.
   """
@@ -94,7 +94,7 @@ def preview_document(document_id):
                   exc_info=True, extra={'stack': True})
 
 
-@shared_task(ignore_result=True)
+@shared_task
 def convert_document_content(document_id):
   """Converts document content.
   """
