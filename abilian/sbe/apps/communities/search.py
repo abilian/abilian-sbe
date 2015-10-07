@@ -3,6 +3,8 @@
 """
 from __future__ import absolute_import
 
+import logging
+
 from flask import g
 from flask_login import current_user
 import whoosh.query as wq
@@ -11,8 +13,20 @@ import whoosh.fields as wf
 from .models import Membership
 
 
+logger = logging.getLogger(__name__)
+
 _COMMUNITY_CONTENT_FIELDNAME = 'is_community_content'
 _COMMUNITY_CONTENT_FIELD = wf.BOOLEAN()
+
+_COMMUNITY_ID_FIELD = wf.NUMERIC(numtype=int, bits=64, signed=False,
+                                        stored=True, unique=False)
+_COMMUNITY_SLUG_FIELD = wf.ID(stored=True)
+
+_FIELDS = [
+  (_COMMUNITY_CONTENT_FIELDNAME, _COMMUNITY_CONTENT_FIELD),
+  ('community_id', _COMMUNITY_ID_FIELD),
+  ('community_slug', _COMMUNITY_SLUG_FIELD),
+]
 
 def init_app(app):
   """
@@ -23,9 +37,16 @@ def init_app(app):
   indexing.register_value_provider(mark_non_community_content)
 
   for name, schema in indexing.schemas.items():
-    if _COMMUNITY_CONTENT_FIELDNAME not in schema:
-      schema.add(_COMMUNITY_CONTENT_FIELDNAME,
-                 _COMMUNITY_CONTENT_FIELD)
+    for fieldname, field in _FIELDS:
+      if fieldname in schema:
+        if schema[fieldname] is not field:
+          logger.warning('Field "%s" already in schema %r, replacing with '
+                         'expected fieldtype instance', fieldname, schema)
+          del schema._fields[fieldname]
+        else:
+          continue
+
+      schema.add(fieldname, field)
 
 
 def filter_user_communities():

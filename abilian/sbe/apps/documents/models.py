@@ -62,12 +62,6 @@ def icon_exists(filename):
 #
 # Domain classes
 #
-_whoosh_community_id = ('community_id',
-                        wf.NUMERIC(numtype=int, bits=64, signed=False,
-                                   stored=True, unique=False),)
-_whoosh_community_slug_field = ('community_slug', wf.ID(stored=True),)
-
-
 class CmisObject(Entity, InheritSecurity):
   """
   (Abstract) Base class for CMIS objects.
@@ -81,8 +75,8 @@ class CmisObject(Entity, InheritSecurity):
   __indexation_args__ = {}
   __indexation_args__.update(Entity.__indexation_args__)
   index_to = Entity.__indexation_args__.setdefault('index_to', ())
-  index_to += (('community.id', (_whoosh_community_id,)),
-               ('community.slug', (_whoosh_community_slug_field,)),
+  index_to += (('community.id', ('community_id',)),
+               ('community.slug', ('community_slug',)),
                )
   __indexation_args__['index_to'] = index_to
   del index_to

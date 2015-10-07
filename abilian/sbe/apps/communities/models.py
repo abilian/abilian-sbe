@@ -73,8 +73,7 @@ def community_content(cls):
   cls.community_slug = property(community_slug)
   index_to = cls.__indexation_args__.setdefault('index_to', ())
   index_to += (
-    ('community_slug',
-     (('community_slug', _whoosh_community_slug_field),),),
+    ('community_slug', ('community_slug',),),
   )
   cls.__indexation_args__['index_to'] = index_to
 
@@ -328,17 +327,12 @@ class Community(Entity):
     return indexable_roles_and_users(self)
 
 
-_whoosh_community_id_field = wf.NUMERIC(numtype=int, bits=64, signed=False,
-                                        stored=True, unique=False)
-_whoosh_community_slug_field = wf.ID(stored=True)
-
-
 def CommunityIdColumn():
   return Column(
     ForeignKey(Community.id),
     nullable=False,
     info=SEARCHABLE | dict(
       index_to=(
-        ('community_id', _whoosh_community_id_field,),
+        ('community_id', ('community_id',)),
       )),
   )
