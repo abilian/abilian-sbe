@@ -86,7 +86,7 @@
                 {{ owner.short_name }}</a>
             </td>
             <td class="hide">{{ obj.created_at.isoformat() }} </td>
-            <td>{{ obj.created_at|age }}</td>
+            <td>{{ obj.created_at|age(add_direction=False) }}</td>
           </tr>
         {%- endfor %}
         </tbody>
