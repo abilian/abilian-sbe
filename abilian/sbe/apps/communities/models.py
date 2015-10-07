@@ -16,6 +16,7 @@ from abilian.i18n import _l
 from abilian.core.extensions import db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.subjects import Group, User
+from abilian.core.models.blob import Blob
 from abilian.core.entities import Entity
 from abilian.services.indexing import indexable_role
 from abilian.services.security import (
@@ -26,7 +27,7 @@ from abilian.services.security import (
 )
 
 from abilian.sbe.apps.documents.repository import repository
-from abilian.sbe.apps.documents.models import Folder, Blob
+from abilian.sbe.apps.documents.models import Folder
 from . import signals
 
 MEMBER = Role('member', label=_l(u'role_member'), assignable=False)
