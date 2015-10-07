@@ -6,17 +6,23 @@
 
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
 
+{% macro user_markup(user) %}
+  <a href="{{ url_for("social.user", user_id=doc.creator.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
+    {{ user }}
+  </a>
+{% endmacro %}
+
 {% block content %}
   {% call m_box_content(title=_("Document view")) %}
 
-    <div style="margin: 5px 0;">
-      <i class="fa fa-file-o fa-lg"></i>
-      {{ m_breadcrumbs2(breadcrumbs) }}
-    </div>
-
-    <hr>
-
     {%- if doc.antivirus_required %}
+      <div style="margin: 5px 0;">
+        <i class="fa fa-file-o fa-lg"></i>
+        {{ m_breadcrumbs2(breadcrumbs) }}
+      </div>
+
+      <hr />
+
       <p class="small alert alert-warning">
       <span class="fa-stack">
         <i class="fa fa-search fa-stack-2x"></i>
@@ -32,7 +38,30 @@
     {%- endif %}
 
 
-    <h2 style="margin-top: 0;">{{ doc.title }}</h2>
+    <div>
+      {%- if doc.antivirus_ok %}
+        <a class="btn btn-default pull-right"
+           href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
+          <i class="glyphicon glyphicon-download"></i>
+          {{ _('Download') }} (<small>{{ doc.content_length|filesize  }}</small>)
+        </a>
+      {%- endif %}
+      <h2><i class="fa fa-file-o fa-lg"></i>
+        {{ m_breadcrumbs2(breadcrumbs) }}
+      </h2>
+      <div>
+        <small>
+          {{ _('Created: %(date)s (%(age)s) by %(creator)s',
+               date=(doc.created_at | datetimeformat('short')),
+              age=doc.created_at | age,
+              creator=user_markup(doc.creator)) }}
+          {%- if doc.updated_at != doc.created_at %}
+            <br />
+            {{ _('Last modification: %(date_age)s', date_age=doc.updated_at|age) }}
+          {%- endif %}
+        </small>
+      </div>
+    </div>
 
     {%- if doc.description %}
       <p>{{ doc.description }}</p>
@@ -57,19 +86,6 @@
       {%- endif %}
     </div>
 
-    <div class="collapsable">
-      <h3 class="main collapsed" data-toggle="collapse"
-          href="#doc_properties">{{ _('Properties') }}</h3>
-
-      <div id="doc_properties" class="collapse">
-        {{ m_table([
-          (_('File name'), doc.title),
-          (_('Size'), doc.content_length|filesize),
-          (_('Content type (MIME)'), doc.content_type or ''),
-          (_('Language'), doc.language or ''),
-         ]) }}
-      </div>
-
       {%- if doc.extra_metadata %}
         <h3 class="main collapsed" data-toggle="collapse"
             href="#doc_extra_metadata">Extra Metadata</h3>
@@ -79,39 +95,8 @@
         </div>
       {%- endif %}
 
-      <h3 class="main collapsed" data-toggle="collapse"
-          href="#doc_dates">{{ _('Dates') }}</h3>
-
-      <div id="doc_dates" class="collapse">
-        <p>{{ _('Created on') }}: {{ doc.created_at|date_age }}</p>
-
-        <p>{{ _('Last modified on') }}: {{ doc.updated_at|date_age }}</p>
-      </div>
-
-      <h3 class="main collapsed" data-toggle="collapse"
-          href="#doc_people">{{ _('People') }}</h3>
-
-      <div id="doc_people" class="collapse">
-        <p>
-          {{ _('Creator') }}: <a
-            href="{{ url_for("social.user", user_id=doc.creator.id) }}"><img
-            alt=""
-            src="{{ user_photo_url(doc.creator, size=16) }}"/>
-          {{ doc.creator }}</a>
-        </p>
-
-        <p>
-          {{ _('Owner') }}: <a
-            href="{{ url_for("social.user", user_id=doc.owner.id) }}"><img
-            alt=""
-            src="{{ user_photo_url(doc.owner, size=16) }}"/>
-          {{ doc.owner }}</a>
-        </p>
-      </div>
-
       {{ m_audit_log(audit_entries) }}
 
-    </div>
   {% endcall %}
 {% endblock %}
 

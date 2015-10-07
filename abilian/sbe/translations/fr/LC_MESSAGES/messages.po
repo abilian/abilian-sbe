@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-09-27 18:25+0200\n"
-"PO-Revision-Date: 2015-09-23 16:15+0200\n"
+"POT-Creation-Date: 2015-10-07 16:48+0200\n"
+"PO-Revision-Date: 2015-10-07 16:49+0200\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
@@ -244,6 +244,7 @@ msgstr "Ajouter"
 
 #: abilian/sbe/apps/documents/actions.py:117
 #: abilian/sbe/apps/documents/actions.py:184
+#: abilian/sbe/apps/documents/templates/documents/document.html:44
 msgid "Download"
 msgstr "Télécharger"
 
@@ -319,29 +320,27 @@ msgid "Filter..."
 msgstr "Filtrer..."
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:54
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:97
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:98
 #: abilian/sbe/apps/forum/forms.py:64 abilian/sbe/apps/wiki/forms.py:36
 msgid "Title"
 msgstr "Titre"
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:55
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:98
-#: abilian/sbe/apps/documents/templates/documents/document.html:67
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:99
 msgid "Size"
 msgstr "Taille"
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:56
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:99
-#: abilian/sbe/apps/documents/templates/documents/document.html:104
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:100
 msgid "Owner"
 msgstr "Propriétaire"
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:58
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:101
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:102
 msgid "Age"
 msgstr "Age"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:114
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:115
 msgid "This folder is currently empty. Why don't you upload some content?"
 msgstr "Ce dossier est vide. Et si vous y ajoutiez quelques fichiers?"
 
@@ -462,69 +461,47 @@ msgstr "Ajouter un role local pour un utilisateur"
 msgid "Folder descendants"
 msgstr "Descendants du dossiers"
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:10
+#: abilian/sbe/apps/documents/templates/documents/document.html:16
 msgid "Document view"
 msgstr "Document"
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:25
+#: abilian/sbe/apps/documents/templates/documents/document.html:31
 msgid "Waiting for virus check..."
 msgstr "En attente de vérification antivirus..."
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:30
+#: abilian/sbe/apps/documents/templates/documents/document.html:36
 msgid "Virus found. Access disabled."
 msgstr "Virus détecté! Accès désactivé."
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:42
+#: abilian/sbe/apps/documents/templates/documents/document.html:51
+#, python-format
+msgid "Created: %(date)s (%(age)s) by %(creator)s"
+msgstr "Créé le: %(date)s (%(age)s) par %(creator)s"
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:57
+#, python-format
+msgid "Last modification: %(date_age)s"
+msgstr "Dernière modification: %(date_age)s"
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:68
 msgid "Preview"
 msgstr "Aperçu"
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:52
+#: abilian/sbe/apps/documents/templates/documents/document.html:78
 msgid "Previous"
 msgstr "Précédent"
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:53
+#: abilian/sbe/apps/documents/templates/documents/document.html:79
 msgid "Next"
 msgstr "Suivant"
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:56
+#: abilian/sbe/apps/documents/templates/documents/document.html:82
 msgid "Document preview not yet available"
 msgstr "Pas d'aperçu disponible"
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:62
-msgid "Properties"
-msgstr "Propriétés"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:66
-msgid "File name"
-msgstr "Nom du fichier"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:68
-msgid "Content type (MIME)"
-msgstr "Type de contenu (MIME)"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:69
-msgid "Language"
-msgstr "Langage"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:83
-msgid "Dates"
-msgstr "Dates"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:86
-msgid "Created on"
-msgstr "Créé le"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:88
-msgid "Last modified on"
-msgstr "Dernière modification le"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:92
+#: abilian/sbe/apps/documents/templates/documents/document.html:96
 msgid "People"
 msgstr "Personnes"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:96
-msgid "Creator"
-msgstr "Créateur"
 
 #: abilian/sbe/apps/documents/templates/documents/folder.html:9
 msgid "Folder contents"
@@ -1361,4 +1338,28 @@ msgstr "(source)"
 
 #~ msgid "Community"
 #~ msgstr "Communauté"
+
+#~ msgid "Properties"
+#~ msgstr "Propriétés"
+
+#~ msgid "File name"
+#~ msgstr "Nom du fichier"
+
+#~ msgid "Content type (MIME)"
+#~ msgstr "Type de contenu (MIME)"
+
+#~ msgid "Language"
+#~ msgstr "Langage"
+
+#~ msgid "Dates"
+#~ msgstr "Dates"
+
+#~ msgid "Created on"
+#~ msgstr "Créé le"
+
+#~ msgid "Last modified on"
+#~ msgstr "Dernière modification le"
+
+#~ msgid "Creator"
+#~ msgstr "Créateur"
 

@@ -179,14 +179,6 @@ _actions = (
                                              'text/plain',
                                              'application/pdf'))
   ),
-  # download "attached"
-  DocumentAction(
-      'documents:content', 'download_attachment', _l(u'Download'),
-      icon='download',
-      url=lambda ctx: url_for('.document_download', doc_id=ctx['object'].id,
-                              attach=True),
-      condition=(lambda ctx: ctx['object'].antivirus_ok),
-  ),
   # edit
   DocumentModalAction(
     'documents:content', 'edit', _l(u'Edit'),
