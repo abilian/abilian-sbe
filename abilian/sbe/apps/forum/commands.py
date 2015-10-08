@@ -27,12 +27,13 @@ def inject_email():
   forward it in a celery task to be persisted.
   """
   parser = FeedParser()
-
+  message = None
   try:
     # iterate over stdin
     for line in fileinput.input('-'):
       parser.feed(line)
-
+  except:
+    logger.error('Error during email parsing', exc_info=True)
   finally:
     # close the parser to generate a email.message
     message = parser.close()
