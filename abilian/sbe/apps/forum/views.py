@@ -188,6 +188,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
 
     self.post = self.thread.create_post(body_html=self.message_body)
     obj_meta = self.post.meta.setdefault('abilian.sbe.forum', {})
+    obj_meta['origin'] = u'web'
     obj_meta['send_by_email'] = self.send_by_email
 
     session = sa.orm.object_session(self.thread)

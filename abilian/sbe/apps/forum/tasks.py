@@ -365,6 +365,9 @@ def process_email(message):
     community = thread.community
     # FIXME: check membership, send back an informative email in case of an error
     post = thread.create_post(body_html=newpost)
+    obj_meta = post.meta.setdefault('abilian.sbe.forum', {})
+    obj_meta['origin'] = u'email'
+    obj_meta['send_by_email'] = True
     activity.send(app, actor=g.user, verb='post', object=post, target=community)
 
     if len(attachments) > 0:
