@@ -26,7 +26,9 @@ from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 class Thread(Entity):
   """
   A thread contains conversations among forum participants.
-  The discussions in a thread may be sorted in chronological order or threaded by reply.
+
+  The discussions in a thread may be sorted in chronological order or threaded
+  by reply.
 
   (= Thread in SIOC, Message in ICOM 1.0).
   """
@@ -42,25 +44,6 @@ class Thread(Entity):
   #: The thread title (aka subject)
   _title = Column('title', Unicode(255), nullable=False,
                   default=u"", info=SEARCHABLE)
-
-  #: The number of posts in the thread
-  #post_count = Column(Integer, nullable=False, default=0)
-
-  #: The number of time the thread has been viewed
-  #view_count = Column(Integer, nullable=False, default=0)
-
-  #: Is the thread sticky? [Not used]
-  #sticky = Column(Integer, nullable=False, default=False)
-
-  #: Is it open or closed?
-  #closed = Column(Integer, nullable=False, default=False)
-
-  #: List of subscribers (users who receive email alerts on updates)
-  # TODO
-
-  # TODO
-  #last_post_id = Column(ForeignKey(lambda : Post.id), nullable=True)
-  #last_post = relationship(lambda : Post)
 
   # title is defined has an hybrid property to allow name <-> title sync (2 way)
   @hybrid_property
@@ -179,21 +162,3 @@ class PostAttachment(BaseContent, CmisObject):
                       backref=backref('attachments', lazy='select',
                                       order_by='PostAttachment.name',
                                       cascade='all, delete-orphan'))
-
-# class Vote(db.Model):
-#   id = Column(Integer, primary_key=True, info=SYSTEM)
-#
-#   #: Who voted
-#   voter_id = Column(ForeignKey(User.id))
-#
-#   #:
-#   voter = relationship(User)
-#
-#   #: On which post
-#   post_id = Column(ForeignKey(Post.id))
-#
-#   #:
-#   post = relationship(Post, backref='voters')
-#
-#   #: The vote value, usually 0, +1 or -1
-#   value = Column(Integer, nullable=False)
