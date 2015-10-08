@@ -1,10 +1,10 @@
 {% extends "community/_base.html" %}
 
+{%- from "macros/user.html" import m_user_link, m_user_photo %}
 {%- from "macros/box.html" import m_box_content, m_box_menu -%}
 {%- from "macros/form.html" import m_field -%}
 
 {%- set is_manager = g.community.has_permission(current_user, 'manage') -%}
-{%- set author_href = url_for("social.user", user_id=thread.creator.id) -%}
 {%- set post = thread.posts[0] -%}
 
 {%- block content %}
@@ -19,21 +19,18 @@
     <h2 class="thread-title">{{ thread.title }}</h2>
 
     <div class="thread-byline">
-      {{ _("Posted by") }}
-      <a href="{{ author_href }}">{{ thread.creator }}</a>
-      {{ _("on") }}
-      {{ thread.created_at | datetimeformat }}
+      {{ _("Posted by %(creator)s", creator=m_user_link(thread.creator)) }}
+      –
+      {{ thread.created_at | age(date_threshold='day') }}
     </div>
 
     <hr class="clearfix" style="margin-top: 5px;">
 
     <div class="media">
       <div class="media-left">
-        <a href="{{ author_href }}">
-          <img class="media-object avatar" width="55" height="55"
-               alt=""
-               src="{{ user_photo_url(thread.creator, size=55) }}">
-        </a>
+        {% call m_user_link(thread.creator) %}
+          {{ m_user_photo(thread.creator, size=55) }}
+        {% endcall %}
       </div>
 
       <div class="media-body">
@@ -73,11 +70,9 @@
 
     <div class="media">
       <div class="media-left">
-        <a href="{{ author_href }}">
-          <img class="media-object avatar" width="55" height="55"
-               alt=""
-               src="{{ user_photo_url(current_user, size=55) }}">
-        </a>
+        {% call m_user_link(current_user) %}
+          {{ m_user_photo(current_user, size=55) }}
+        {% endcall %}
       </div>
 
       <div class="media-body">
@@ -109,23 +104,20 @@
 
 
 {%- macro m_post(post) %}
-  {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
-  {%- set author_img = user_photo_url(post.creator, size=55) %}
-
   <div class="media" style="margin-bottom: 1em;">
     <div class="media-left">
-      <a href="{{ author_href }}">
-        <img class="media-object avatar" width="55" height="55"
-             alt=""
-             src="{{ author_img }}">
-      </a>
+      {% call m_user_link(post.creator) %}
+        {{ m_user_photo(post.creator, size=55) }}
+      {% endcall %}
     </div>
 
     <div class="media-body">
       <a id="post_{{ post.id }}"></a>
       <div class="comment">
-        <a href="{{ author_href }}"><b>{{ post.creator }}</b></a>,
-        <span class="date">{{ post.created_at | datetimeformat }}</span>
+        {% call m_user_link(post.creator) %}
+          <b>{{ post.creator }}</b>
+        {% endcall %}
+        <span class="date">{{ post.created_at | age(date_threshold='day') }}</span>
 
         <div class="comment-body">
           {{ post.body_html|safe }}
@@ -140,7 +132,7 @@
                     <img src="{{ attachment.icon }}" style="vertical-align: middle;"
                          alt=""/>
                     <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
-                    ({{ attachment.content_length|filesize }})
+                    ({{ attachment.content_length | filesize }})
                   </span>
                 </li>
               {%- endfor %}

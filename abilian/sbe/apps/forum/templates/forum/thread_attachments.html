@@ -1,5 +1,6 @@
 {% extends "community/_base.html" %}
 
+{%-  from "macros/user.html" import m_user_link, m_user_photo %}
 {%- from "macros/box.html" import m_box_content, m_box_menu -%}
 {%- from "forum/_macros.html" import m_postattachments -%}
 {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
@@ -13,13 +14,11 @@
 
     <div class="thread-header">
       <div class="author">
-        {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
-        <a href="{{ author_href }}">
-          <img class="avatar pull-left" width="55" height="55"
-               src="{{ user_photo_url(thread.creator, size=55) }}">
-        </a>
-        <div><a href="{{ author_href }}">{{ thread.creator }}</a></div>
-        <div>{{ thread.created_at | datetimeformat }}</div>
+        {% call m_user_link(thread.creator, css="pull-left") %}
+          {{ m_user_photo(thread.creator, size=55) }}
+        {% endcall %}
+        <div>{{ m_user_link(thread.creator) }}</div>
+        <div>{{ thread.created_at | age(date_threshold='day') }}</div>
       </div>
       <h2>{{ thread.title }}</h2>
     </div>

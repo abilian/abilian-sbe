@@ -1,5 +1,7 @@
 {% extends "forum/_base.html" %}
 
+{%- from "macros/user.html" import m_user_link, m_user_photo %}
+
 {% from "macros/box.html" import m_box_menu, m_box_content %}
 
 
@@ -24,28 +26,22 @@
 
 
 {% macro m_thread(thread) %}
-  {%- set author_href = url_for("social.user", user_id=thread.creator.id) %}
-  {%- set author_img = user_photo_url(thread.creator, size=45) %}
-  {%- set author_name = thread.creator.name %}
   {%- set thread_href = url_for(thread) %}
   {%- set thread_length = thread.posts|length %}
 
   <li>
-    <a class="avatar" href="{{ author_href }}" title="{{ author_name }}">
-      <img title="{{ author_name }}" alt="" src="{{ author_img }}" />
-    </a>
+    {% call m_user_link(thread.creator) %}
+      {{ m_user_photo(thread.creator, size=45) }}
+      {%- endcall %}
 
     <div class="entry">
       <h4><a href="{{ thread_href }}">{{ thread.title }}</a></h4>
 
       <div class="details">
-        {{ _("by") }}
-        <a href="{{ author_href }}" class="name">{{ author_name }}</a>
+        {{ _("by %(creator)s", creator=m_user_link(thread.creator)) }}
         –
         <span class="datetime">
-          {%- trans date=thread.created_at|dateformat('long'),
-                    time=thread.created_at|timeformat('short')
-          %}{{ date }} at {{ time }}{%- endtrans %}
+          {{ thread.created_at | age(date_threshold='day') }}
         </span>
       </div>
 
@@ -58,12 +54,10 @@
         {%- if thread_length > 1 %}
         {% set last_post_creator = thread.posts[-1].creator %}
         <span class="hidden-xs">
-          {{ _("Last comment by") }}
-          <a href="{{ url_for('social.user', user_id=last_post_creator.id) }}">{{ last_post_creator.name }}</a>
+          {{ _("Last comment by %(creator)s", creator=m_user_link(last_post_creator)) }}
         </span>
         {%- endif %}
       </div>
     </div>
   </li>
 {% endmacro %}
-

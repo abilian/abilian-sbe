@@ -1,13 +1,17 @@
+{% from "macros/user.html" import m_user_link, m_user_photo %}
+
 {%- macro m_postinfos(post) %}
   {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
   {%- set thread_href = url_for(".thread", thread_id=post.thread_id, community_id=g.community.slug) %}
   <div class="post-infos">
-    <span class="date"><small>{{ post.created_at | datetimeformat }}</small></span>,
+    <span class="date"><small>{{ post.created_at | age(date_threshold='day') }}</small></span>,
     <a href="{{ url_for(post) }}">
       <small>{{ post.thread.title }}</small>
     </a>,
-    <i class="fa fa-user"></i>&nbsp;<a href="{{ author_href }}">
-    <small>{{ post.creator }}</small>
+    {% call m_user_link(post.creator) %}
+      {{ m_user_photo(post.creator, size=15) }}
+      <small>{{ post.creator }}</small>
+    {% endcall %}
   </a>
   </div>
 {%- endmacro %}
