@@ -272,6 +272,86 @@ class ThreadDelete(BaseThreadView, views.ObjectDelete):
 route('/<int:thread_id>/delete')(ThreadDelete.as_view('thread_delete'))
 
 
+class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
+  Form = CommentForm
+  Model = Post
+  pk = 'object_id'
+
+  def can_send_by_mail(self):
+    # post edit: don't notify every time
+    return False
+
+  def init_object(self, args, kwargs):
+    # we DO want to skip ThreadCreate.init_object. hence super is not based on
+    # ThreadPostCreate
+    args, kwargs = super(ThreadPostEdit, self).init_object(args, kwargs)
+    thread_id = kwargs.pop('thread_id', None)
+    self.thread = self.obj.thread
+    assert thread_id == self.thread.id
+    return args, kwargs
+
+  def get_form_kwargs(self):
+    kwargs = super(ThreadPostEdit, self).get_form_kwargs()
+    kwargs['message'] = self.obj.body_html
+    return kwargs
+
+  def before_populate_obj(self):
+    self.message_body = self.form.message.data
+    del self.form['message']
+
+    self.send_by_email = False
+    if 'send_by_email' in self.form:
+      del self.form['send_by_email']
+
+    self.attachments_to_remove = self.form['attachments'].delete_files_index
+    del self.form['attachments']
+
+  def after_populate_obj(self):
+    session = sa.orm.object_session(self.obj)
+    uploads = current_app.extensions['uploads']
+    self.obj.body_html = self.message_body
+
+    attachments_to_remove = []
+    for idx in self.attachments_to_remove:
+      try:
+        idx = int(idx)
+      except ValueError:
+        continue
+
+      if idx > len(self.obj.attachments):
+        continue
+
+      attachments_to_remove.append(self.obj.attachments[idx])
+
+    for att in attachments_to_remove:
+      session.delete(att)
+
+    for handle in request.form.getlist('attachments'):
+      fileobj = uploads.get_file(current_user, handle)
+      if fileobj is None:
+        continue
+
+      meta = uploads.get_metadata(current_user, handle)
+      name = meta.get('filename', handle)
+      mimetype = meta.get('mimetype', None)
+
+      if not isinstance(name, unicode):
+        name = unicode(name, encoding='utf-8', errors='ignore')
+
+      if not name:
+        continue
+
+      attachment = PostAttachment(name=name, post=self.obj)
+
+      with fileobj.open('rb') as f:
+        attachment.set_content(f.read(), mimetype)
+      session.add(attachment)
+
+
+route('/<int:thread_id>/<int:object_id>/edit')(
+  ThreadPostEdit.as_view('post_edit')
+)
+
 def attachment_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
   post = obj.post
   kw = default_view_kw(kw, post.thread, obj_type, obj_id, **kwargs)
