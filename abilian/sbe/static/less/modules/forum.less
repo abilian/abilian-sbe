@@ -84,16 +84,30 @@ ul.threads {
 }
 
 // A single thread view
-.thread-title {
-  font-size: 2em;
+.thread {
+  h2 { font-size: 2em; }
+
+  .posts {
+    .list-unstyled();    
+  }
 }
 
-.comments {
-  hr {
-    margin: 10px 0 10px 0;
-  }
+.post {
+  margin-bottom: 1em;
 
-  .comment .date {
+  .date {
+    .small();
     color: grey;
+  };
+
+  .media-body {
+    border-left: 2px solid #FF7F66;
+    padding-top: 0.5em;
+    padding-left: 0.5em;
+
+    .attachments img {
+      vertical-align: middle;
+    }
   }
 }
+

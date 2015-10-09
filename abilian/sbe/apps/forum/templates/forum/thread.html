@@ -14,14 +14,18 @@
       <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
   </p>
 
-  <article>
-    <h2 class="thread-title">{{ thread.title }}</h2>
+  <article class="thread">
+    <h2>{{ thread.title }}</h2>
 
     <hr class="clearfix" style="margin-top: 5px;">
 
+    <ul class="posts">
     {%- for post in thread.posts %}
-      {{ m_post(post) }}
+      <li>
+        {{ m_post(post) }}
+      </li>
     {%- endfor %}
+    </ul>
 
     <hr />
 
@@ -61,7 +65,7 @@
 
 
 {%- macro m_post(post) %}
-  <div class="media" style="margin-bottom: 1em;">
+  <div class="post media">
     <div class="media-left">
       {% call m_user_link(post.creator) %}
         {{ m_user_photo(post.creator, size=55) }}
@@ -70,40 +74,40 @@
 
     <div class="media-body">
       <a id="post_{{ post.id }}"></a>
-      <div class="comment">
+
+      <div>
         {% call m_user_link(post.creator) %}
           <b>{{ post.creator }}</b>
         {% endcall %}
         <span class="date">{{ post.created_at | age(date_threshold='day') }}</span>
-
         {%- if current_user == post.creator %}
-          <a class="btn btn-default pull-right" href="{{ url_for('.post_edit', community_id=post.thread.community.slug, thread_id=post.thread.id, object_id=post.id) }}">
+          <a href="{{ url_for('.post_edit', community_id=post.thread.community.slug, thread_id=post.thread.id, object_id=post.id) }}">
             <i class="fa fa-edit"></i>
             {{ _('Edit') }}
           </a>
         {%- endif %}
-
-        <div class="comment-body">
-          {{ post.body_html|safe }}
-        </div>
-
-        {%- if post.attachments %}
-          <div id="attachments">
-            <ul>
-              {%- for attachment in post.attachments %}
-                <li>
-                  <span class="attachment-item">
-                    <img src="{{ attachment.icon }}" style="vertical-align: middle;"
-                         alt=""/>
-                    <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
-                    ({{ attachment.content_length | filesize }})
-                  </span>
-                </li>
-              {%- endfor %}
-            </ul>
-          </div>
-        {%- endif %}
       </div>
+
+      <div class="body">
+        {{ post.body_html|safe }}
+      </div>
+
+      {%- if post.attachments %}
+        <div class="attachments">
+          <ul>
+            {%- for attachment in post.attachments %}
+              <li>
+                <span class="attachment-item">
+                  <img src="{{ attachment.icon }}" />
+                  <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
+                    ({{ attachment.content_length | filesize }})
+                </span>
+              </li>
+            {%- endfor %}
+          </ul>
+        </div>
+      {%- endif %}
+
     </div>
   </div>
 {%- endmacro %}

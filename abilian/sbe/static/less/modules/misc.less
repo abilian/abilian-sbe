@@ -94,10 +94,11 @@ div.collapsable div.collapse {
 }
 
 /* attachments */
-#attachments {
+.attachments {
   padding: 0.5em;
 
   ul {
+    .list-unstyled();
     margin: 0;
     padding-left: 0;
   }
@@ -114,3 +115,6 @@ div.collapsable div.collapse {
   }
 }
 
+#attachments {
+  .attachments();
+}
