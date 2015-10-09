@@ -26,7 +26,7 @@
       {{ m_post_edit_link(post) }}
     </div>
 
-    <div class="media">
+    <div class="media post">
       <div class="media-left">
         {% call m_user_link(thread.creator) %}
           {{ m_user_photo(thread.creator, size=55) }}
@@ -38,7 +38,9 @@
       </div>
     </div>
 
+    {%- if thread.posts|length > 1 %}
     <hr class="clearfix" style="margin-top: 5px;">
+    {%- endif %}
 
     <ul class="posts">
     {%- for post in thread.posts[1:] %}
@@ -114,6 +116,14 @@
       </ul>
     </div>
   {%- endif %}
+
+  {%- for entry in post.history %}
+    <div class="history">
+      {%- set date = entry.date|datetimeparse|age(date_threshold='day') %}
+      {{ _('edited by %(user)s - %(date)s', user=entry.user, date=date) }}
+      {%- if entry.reason %}<q class="reason">{{ entry.reason }}</q>{%- endif %}
+    </div>
+  {%- endfor %}
 {%- endmacro %}
 
 {%- macro m_post(post) %}

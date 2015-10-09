@@ -4,12 +4,13 @@ Forum views
 """
 from __future__ import absolute_import, print_function
 
-from datetime import date
+from datetime import datetime, date
 from itertools import groupby
 from urllib import quote
 
 import sqlalchemy as sa
 from abilian.i18n import _, _l
+from abilian.core.util import utc_dt
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.web import nav, url_for, views
@@ -21,7 +22,7 @@ from flask_login import current_user
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import NotFound
 
-from .forms import CommentForm, ThreadForm
+from .forms import PostForm, ThreadForm, PostEditForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
 
@@ -127,7 +128,7 @@ class BaseThreadView(object):
     args, kwargs = super(BaseThreadView, self).prepare_args(args, kwargs)
     self.send_by_email = False
 
-    if not self.can_send_by_mail():
+    if not self.can_send_by_mail() and 'send_by_email' in self.form:
       # remove from html form and avoid validation errors
       del self.form['send_by_email']
 
@@ -142,7 +143,7 @@ class BaseThreadView(object):
 
 class ThreadView(BaseThreadView, views.ObjectView):
   methods = ['GET', 'HEAD']
-  Form = CommentForm
+  Form = PostForm
   template = 'forum/thread.html'
 
   @property
@@ -239,7 +240,7 @@ route('/new_thread/')(ThreadCreate.as_view('new_thread',
 
 class ThreadPostCreate(ThreadCreate):
   methods = ['POST']
-  Form = CommentForm
+  Form = PostForm
   Model = Post
 
   def init_object(self, args, kwargs):
@@ -273,7 +274,7 @@ route('/<int:thread_id>/delete')(ThreadDelete.as_view('thread_delete'))
 
 
 class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
-  Form = CommentForm
+  Form = PostEditForm
   Model = Post
   pk = 'object_id'
 
@@ -298,6 +299,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
   def before_populate_obj(self):
     self.message_body = self.form.message.data
     del self.form['message']
+    self.reason = self.form.reason.data
 
     self.send_by_email = False
     if 'send_by_email' in self.form:
@@ -310,6 +312,13 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
     session = sa.orm.object_session(self.obj)
     uploads = current_app.extensions['uploads']
     self.obj.body_html = self.message_body
+    obj_meta = self.obj.meta.setdefault('abilian.sbe.forum', {})
+    history = obj_meta.setdefault('history', [])
+    history.append(dict(user_id=current_user.id,
+                        user=unicode(current_user),
+                        date=utc_dt(datetime.utcnow()).isoformat(),
+                        reason=self.form.reason.data,))
+    self.obj.meta['abilian.sbe.forum'] = obj_meta # trigger change for SA
 
     attachments_to_remove = []
     for idx in self.attachments_to_remove:

@@ -112,6 +112,10 @@ class Post(Entity):
   def title(self):
     return self.name
 
+  @property
+  def history(self):
+    return self.meta.get('abilian.sbe.forum', {}).get('history', [])
+
 
 class ThreadIndexAdapter(SAAdapter):
   """

@@ -59,20 +59,19 @@ for attr in ALLOWED_TAGS:
   WIDGET_ALLOWED[attr] = allowed
 
 
-# instantiate this one before CommentForm fields, so that it is listed first
+# instantiate this one before PostForm fields, so that it is listed first
 # when Threadform is displayed
 _TITLE_FIELD = StringField(label=_l(u"Title"),
                           filters=(strip,),
                           validators=[required()])
 
-class CommentForm(Form):
+class BasePostForm(Form):
   message = TextAreaField(label=_l("Message"),
                           widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
                           filters=(strip,),
                           validators=[required()])
   attachments = FileField(label=_l(u'Attachments'), multiple=True,
                           validators=[optional()])
-  send_by_email = BooleanField(label=_l(u"Send by email?"), default=True)
 
   def validate_message(self, field):
     field.data = bleach.clean(field.data, tags=ALLOWED_TAGS,
@@ -81,5 +80,16 @@ class CommentForm(Form):
                               strip=True)
 
 
-class ThreadForm(CommentForm):
+class PostForm(BasePostForm):
+  send_by_email = BooleanField(label=_l(u"Send by email?"), default=True)
+
+
+class ThreadForm(PostForm):
   title = _TITLE_FIELD
+
+
+class PostEditForm(BasePostForm):
+  reason = StringField(label=_l(u'Reason'),
+                       description=_l(u'Description of your edit'),
+                       filters=(strip,),
+                       validators=(optional(),),)
