@@ -9,3 +9,6 @@ guess-language-spirit>=0.5.1,<0.6
 
 # Charset detection
 chardet
+
+# need by folder: export to xls
+xlwt
