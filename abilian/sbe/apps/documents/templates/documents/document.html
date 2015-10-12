@@ -40,7 +40,7 @@
 
     <div>
       {%- if doc.antivirus_ok %}
-        <a class="btn btn-default pull-right"
+        <a class="btn btn-success btn-lg pull-right"
            href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
           <i class="glyphicon glyphicon-download"></i>
           {{ _('Download') }} (<small>{{ doc.content_length|filesize  }}</small>)
