@@ -1,6 +1,8 @@
 # Abilian Core
 abilian-core>=0.4.0,<0.5
 
+validate_email
+
 # Used for language detection in the document management app.
 # TODO: replace by langid ?
 guess-language-spirit>=0.5.1,<0.6
