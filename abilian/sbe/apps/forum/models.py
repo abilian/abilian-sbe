@@ -22,6 +22,15 @@ from abilian.sbe.apps.communities.models import (
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 
 
+class ThreadClosedError(RuntimeError):
+
+  def __init__(self, thread):
+    super(ThreadClosedError, self).__init__(
+      'The thread {!r} is closed. No modification allowed on its posts: '
+      'creation, edition, deletion'.format(thread),)
+    self.thread = thread
+
+
 @community_content
 class Thread(Entity):
   """
@@ -58,6 +67,12 @@ class Thread(Entity):
     if self.name != title:
       self.name = title
 
+  posts = relationship('Post',
+                       primaryjoin='Thread.id == Post.thread_id',
+                       order_by='Post.created_at',
+                       cascade="all, delete-orphan",
+                       back_populates='thread',)
+
   @property
   def closed(self):
     """
@@ -69,8 +84,10 @@ class Thread(Entity):
   def closed(self, value):
     self.meta.setdefault('abilian.sbe.forum', {})['closed'] = bool(value)
 
-
   def create_post(self, **kw):
+    if self.closed:
+      raise ThreadClosedError(self)
+
     kw['name'] = self.name
     post = Post(**kw)
     post.thread = self
@@ -101,10 +118,8 @@ class Post(Entity):
   #: The thread this post belongs to
   thread_id = Column(ForeignKey(Thread.id), nullable=False)
   thread = relationship(Thread,
-                        foreign_keys=[thread_id],
-                        backref=backref('posts',
-                                        order_by='Post.created_at',
-                                        cascade="all, delete-orphan"))
+                        foreign_keys=thread_id,
+                        back_populates='posts')
 
   #: The post this post is a reply to, if any (currently not used)
   parent_post_id = Column(ForeignKey("forum_post.id"), nullable=True)
@@ -161,10 +176,29 @@ def _thread_change_sync_name(post, new_thread, old_thread, initiator):
   """
   Change name on thread change
   """
-  if new_thread == old_thread:
+  if new_thread == old_thread or new_thread is None:
     return new_thread
   post.name = new_thread.name
   return new_thread
+
+
+@sa.event.listens_for(Thread.posts, 'append')
+@sa.event.listens_for(Thread.posts, 'remove')
+@sa.event.listens_for(Thread.posts, 'set')
+def _guard_closed_thread_collection(thread, value, *args):
+  '''
+  Prevent add/remove/replace posts on a closed thread
+  '''
+  if isinstance(thread, Post):
+    thread = thread.thread
+    if thread is None:
+      return
+
+  if thread.closed:
+    raise ThreadClosedError(thread)
+
+  return value
+
 
 
 class PostAttachment(BaseContent, CmisObject):

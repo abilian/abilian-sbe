@@ -9,6 +9,7 @@ from mock import Mock, patch
 from pathlib import Path
 from email.parser import FeedParser
 
+import pytest
 from flask import url_for
 from abilian.core.models.subjects import User
 
@@ -18,7 +19,7 @@ from abilian.sbe.apps.communities.tests.base import (
   CommunityBaseTestCase, CommunityIndexingTestCase,
 )
 
-from ..models import Thread, Post
+from ..models import Thread, Post, ThreadClosedError
 from ..commands import inject_email
 from ..tasks import (
   process, extract_email_destination, build_reply_email_address,
@@ -46,6 +47,43 @@ class Test(TestCase):
     thread.closed = 1
     assert thread.closed is True
     assert thread.meta['abilian.sbe.forum']['closed'] is True
+
+  def test_thread_closed_guard(self):
+    thread = Thread(title=u'Test Thread')
+    thread.create_post()
+    thread.closed = True
+
+    with pytest.raises(ThreadClosedError):
+      thread.create_post()
+
+    p = Post(body_html=u'ok')
+
+    with pytest.raises(ThreadClosedError):
+      p.thread = thread
+
+    thread.closed = False
+    p.thread = thread
+    assert len(thread.posts) == 2
+
+    thread.closed = True
+    with pytest.raises(ThreadClosedError):
+      del thread.posts[0]
+
+    assert len(thread.posts) == 2
+
+    with pytest.raises(ThreadClosedError):
+      # actually thread.posts will be replaced by `[]` and we can't prevent
+      # this, but exception has been raised
+      thread.posts = []
+
+    thread.closed = False
+    thread.posts = [p]
+    thread.closed = True
+    assert thread.posts == [p]
+    assert p.thread is thread
+    with pytest.raises(ThreadClosedError):
+      p.thread = None
+
 
   def test_change_thread_copy_name(self):
     thread = Thread(title=u'thread 1')
