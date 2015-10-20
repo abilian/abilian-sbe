@@ -44,8 +44,11 @@ table.community-list tr td .name {
 }
 
 // TODO: add a specific class in template instead.
-.panel .nav > li > a {
-  padding: 5px;
+.panel .nav > li {
+  & > a,
+  & button.btn-link {
+    padding: 5px;
+  }
 }
 
 .form-group {
