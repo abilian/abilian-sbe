@@ -58,6 +58,18 @@ class Thread(Entity):
     if self.name != title:
       self.name = title
 
+  @property
+  def closed(self):
+    """
+    True if this thread doesn't accept more posts.
+    """
+    return self.meta.get('abilian.sbe.forum', {}).get('closed', False)
+
+  @closed.setter
+  def closed(self, value):
+    self.meta.setdefault('abilian.sbe.forum', {})['closed'] = bool(value)
+
+
   def create_post(self, **kw):
     kw['name'] = self.name
     post = Post(**kw)

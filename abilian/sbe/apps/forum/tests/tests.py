@@ -26,7 +26,7 @@ from ..tasks import (
 
 
 class Test(TestCase):
-  def test(self):
+  def test_create_post(self):
     thread = Thread(title="Test thread")
     post = thread.create_post()
     assert post in thread.posts
@@ -35,6 +35,17 @@ class Test(TestCase):
     thread.title = u'new title'
     assert thread.name == u'new title'
     assert post.name == u'new title'
+
+  def test_closed_property(self):
+    thread = Thread(title=u'Test Thread')
+    assert thread.closed is False
+    thread.closed = True
+    assert thread.closed is True
+    thread.closed = 0
+    assert thread.closed is False
+    thread.closed = 1
+    assert thread.closed is True
+    assert thread.meta['abilian.sbe.forum']['closed'] is True
 
   def test_change_thread_copy_name(self):
     thread = Thread(title=u'thread 1')
@@ -226,6 +237,7 @@ class ViewTestCase(CommunityBaseTestCase):
       assert len(outbox) == 0
 
     self.client_logout()
+
 
 def get_string_from_file(filename='notification.email'):
   """
