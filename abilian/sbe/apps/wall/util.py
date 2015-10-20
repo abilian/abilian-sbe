@@ -9,6 +9,7 @@ from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 import sqlalchemy as sa
 from abilian.core.extensions import db
+from abilian.services.security import Admin, Reader
 from abilian.services.activity import ActivityEntry
 
 from abilian.sbe.apps.communities.models import Membership
@@ -19,7 +20,7 @@ def get_recent_entries(num=20, user=None, community=None):
   AE = ActivityEntry
 
   # Check just in case
-  if not current_user.has_role('admin'):
+  if not current_user.has_role(Admin):
     if community and not community.has_member(current_user):
       raise Forbidden()
 
@@ -64,7 +65,7 @@ def get_recent_entries(num=20, user=None, community=None):
       continue
 
     if (isinstance(entry.object, (Folder, Document))
-        and not security.has_role(current_user, 'reader', entry.object)):
+        and not security.has_role(current_user, Reader, entry.object)):
         continue
 
     entries.append(entry)
