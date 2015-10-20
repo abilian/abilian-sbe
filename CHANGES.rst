@@ -4,7 +4,7 @@ Changelog for Abilian SBE
 0.1.5 (unreleased)
 ------------------
 
-FILL ME.
+- Fix global activity stream for non-admin users
 
 
 0.1.4 (2015-08-07)

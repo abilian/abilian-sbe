@@ -35,13 +35,15 @@ def get_recent_entries(num=20, user=None, community=None):
   # Security check
   #
   # we use communities ids instead of object because as of sqlalchemy 0.8 the
-  # 'in_' operator cannot use with relationships, only foreign keys values
-  if not community and not current_user.has_role('admin'):
+  # 'in_' operator cannot be used with relationships, only foreign keys values
+  if not community and not current_user.has_role(Admin):
     M = Membership
     communities = M.query\
       .filter(M.user_id == current_user.id)\
       .values(M.community_id)
 
+    communities = list(communities) # convert generator to list: we'll need it
+                                    # twice in query filtering
     if not communities:
       return []
 
