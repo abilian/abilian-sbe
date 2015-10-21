@@ -9,6 +9,14 @@ from itertools import groupby
 from urllib import quote
 
 import sqlalchemy as sa
+from sqlalchemy.orm import joinedload
+from werkzeug.exceptions import NotFound, BadRequest
+from flask import (
+  current_app, g, make_response, render_template, request, flash,
+)
+from flask_babel import format_date
+from flask_login import current_user
+
 from abilian.i18n import _, _l
 from abilian.core.util import utc_dt
 from abilian.sbe.apps.communities.blueprint import Blueprint
@@ -16,11 +24,6 @@ from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.web import nav, url_for, views
 from abilian.web.action import ButtonAction
 from abilian.web.views import default_view
-from flask import current_app, g, make_response, render_template, request
-from flask_babel import format_date
-from flask_login import current_user
-from sqlalchemy.orm import joinedload
-from werkzeug.exceptions import NotFound
 
 from .forms import PostForm, ThreadForm, PostEditForm
 from .models import Post, PostAttachment, Thread
@@ -239,6 +242,9 @@ route('/new_thread/')(ThreadCreate.as_view('new_thread',
 
 
 class ThreadPostCreate(ThreadCreate):
+  """
+  Add a new post to a thread
+  """
   methods = ['POST']
   Form = PostForm
   Model = Post
@@ -271,6 +277,38 @@ class ThreadDelete(BaseThreadView, views.ObjectDelete):
 
 
 route('/<int:thread_id>/delete')(ThreadDelete.as_view('thread_delete'))
+
+
+class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
+  """
+  Close / Re-open a thread
+  """
+  methods = ['POST']
+  _VALID_ACTIONS = {u'close', u'reopen'}
+  CLOSED_MSG = _l(u'The thread is now closed for edition and new '
+                  u'contributions.')
+  REOPENED_MSG = _l(u'The thread is now re-opened for edition and new '
+                    u'contributions.')
+
+  def prepare_args(self, args, kwargs):
+    args, kwargs = super(ThreadCloseView, self).prepare_args(args, kwargs)
+    action = kwargs['action'] = request.form.get('action')
+
+    if action not in self._VALID_ACTIONS:
+      raise BadRequest(u'Unknown action: {!r}'.format(action))
+
+    return args, kwargs
+
+  def post(self, action=None):
+    is_closed = (action == u'close')
+    self.obj.closed = is_closed
+    sa.orm.object_session(self.obj).commit()
+
+    msg = self.CLOSED_MSG if is_closed else self.REOPENED_MSG
+    flash(unicode(msg))
+    return self.redirect(url_for(self.obj))
+
+route('/<int:thread_id>/close')(ThreadCloseView.as_view('thread_close'))
 
 
 class ThreadPostEdit(BaseThreadView, views.ObjectEdit):

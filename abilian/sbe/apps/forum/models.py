@@ -83,6 +83,7 @@ class Thread(Entity):
   @closed.setter
   def closed(self, value):
     self.meta.setdefault('abilian.sbe.forum', {})['closed'] = bool(value)
+    self.meta.changed()
 
   def create_post(self, **kw):
     if self.closed:
