@@ -9,7 +9,7 @@ from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 import sqlalchemy as sa
 from abilian.core.extensions import db
-from abilian.services.security import Admin, Reader
+from abilian.services.security import Admin, READ
 from abilian.services.activity import ActivityEntry
 
 from abilian.sbe.apps.communities.models import Membership
@@ -55,6 +55,7 @@ def get_recent_entries(num=20, user=None, community=None):
   entries = []
   deleted = False
   security = current_app.services['security']
+  has_permission = security.has_permission
 
   for entry in query.yield_per(limit):
     if len(entries) >= num:
@@ -67,7 +68,9 @@ def get_recent_entries(num=20, user=None, community=None):
       continue
 
     if (isinstance(entry.object, (Folder, Document))
-        and not security.has_role(current_user, Reader, entry.object)):
+        and not has_permission(current_user, READ,
+                               obj=entry.object,
+                               inherit=True)):
         continue
 
     entries.append(entry)
