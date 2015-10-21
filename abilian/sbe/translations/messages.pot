@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.1.4.dev53+ng67249d6.d20151009\n"
+"Project-Id-Version: abilian-sbe 0.1.4.dev67+ng985f08d.d20151021\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-10-09 18:20+0200\n"
+"POT-Creation-Date: 2015-10-21 16:53+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -40,7 +40,7 @@ msgid "Wiki"
 msgstr ""
 
 #: abilian/sbe/apps/communities/actions.py:56
-#: abilian/sbe/apps/forum/views.py:52
+#: abilian/sbe/apps/forum/views.py:55
 msgid "Conversations"
 msgstr ""
 
@@ -172,8 +172,8 @@ msgstr ""
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder.html:197
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:49
 #: abilian/sbe/apps/forum/templates/forum/new_thread.html:28
-#: abilian/sbe/apps/forum/templates/forum/thread.html:79
-#: abilian/sbe/apps/forum/templates/forum/thread.html:197
+#: abilian/sbe/apps/forum/templates/forum/thread.html:80
+#: abilian/sbe/apps/forum/templates/forum/thread.html:199
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:80
 #: abilian/sbe/apps/preferences/templates/preferences/sbe_notifications.html:19
 #: abilian/sbe/apps/social/templates/social/invite.html:30
@@ -255,7 +255,7 @@ msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:124
 #: abilian/sbe/apps/documents/actions.py:200
-#: abilian/sbe/apps/forum/actions.py:42 abilian/sbe/apps/wiki/actions.py:47
+#: abilian/sbe/apps/forum/actions.py:69 abilian/sbe/apps/wiki/actions.py:47
 msgid "Delete"
 msgstr ""
 
@@ -274,7 +274,7 @@ msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:149
 #: abilian/sbe/apps/documents/actions.py:184
-#: abilian/sbe/apps/forum/templates/forum/thread.html:94
+#: abilian/sbe/apps/forum/templates/forum/thread.html:96
 #: abilian/sbe/apps/wiki/actions.py:38
 msgid "Edit"
 msgstr ""
@@ -386,7 +386,7 @@ msgid "Are you sure you want to delete the file \"{filename}\" ?"
 msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_modals_document.html:102
-#: abilian/sbe/apps/forum/templates/forum/thread.html:198
+#: abilian/sbe/apps/forum/templates/forum/thread.html:200
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:82
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:50
 msgid "Really Delete"
@@ -758,24 +758,32 @@ msgstr ""
 msgid "\"{original}\" already present in folder, renamed \"{name}\""
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:32
+#: abilian/sbe/apps/forum/actions.py:59
 #: abilian/sbe/apps/forum/templates/forum/new_thread.html:8
 msgid "Start a new conversation"
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:35
+#: abilian/sbe/apps/forum/actions.py:62
 #: abilian/sbe/apps/forum/templates/forum/index.html:9
 msgid "Recent conversations"
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:37
+#: abilian/sbe/apps/forum/actions.py:64
 #: abilian/sbe/apps/forum/templates/forum/archives.html:6
 msgid "Archives"
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:39 abilian/sbe/apps/forum/actions.py:46
+#: abilian/sbe/apps/forum/actions.py:66 abilian/sbe/apps/forum/actions.py:86
 #: abilian/sbe/apps/forum/forms.py:73
 msgid "Attachments"
+msgstr ""
+
+#: abilian/sbe/apps/forum/actions.py:73
+msgid "Close thread"
+msgstr ""
+
+#: abilian/sbe/apps/forum/actions.py:79
+msgid "Re-open thread"
 msgstr ""
 
 #: abilian/sbe/apps/forum/forms.py:84
@@ -794,13 +802,21 @@ msgstr ""
 msgid "_____Write above this line to post_____"
 msgstr ""
 
-#: abilian/sbe/apps/forum/views.py:169
+#: abilian/sbe/apps/forum/views.py:173
 #: abilian/sbe/apps/forum/templates/forum/new_thread.html:24
 msgid "Post this message"
 msgstr ""
 
-#: abilian/sbe/apps/forum/views.py:267
+#: abilian/sbe/apps/forum/views.py:274
 msgid "Thread \"{title}\" deleted."
+msgstr ""
+
+#: abilian/sbe/apps/forum/views.py:289
+msgid "The thread is now closed for edition and new contributions."
+msgstr ""
+
+#: abilian/sbe/apps/forum/views.py:291
+msgid "The thread is now re-opened for edition and new contributions."
 msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/archives.html:16
@@ -825,7 +841,7 @@ msgstr ""
 msgid "by %(creator)s"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:57
+#: abilian/sbe/apps/forum/templates/forum/index.html:58
 #, python-format
 msgid "Last comment by %(creator)s"
 msgstr ""
@@ -840,25 +856,25 @@ msgstr ""
 msgid "Posted by %(creator)s"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:63
+#: abilian/sbe/apps/forum/templates/forum/thread.html:64
 msgid "Post a comment"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:76
+#: abilian/sbe/apps/forum/templates/forum/thread.html:77
 msgid "Post this comment"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:123
+#: abilian/sbe/apps/forum/templates/forum/thread.html:125
 #, python-format
 msgid "edited by %(user)s - %(date)s"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:189
+#: abilian/sbe/apps/forum/templates/forum/thread.html:191
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:72
 msgid "Delete Thread"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:193
+#: abilian/sbe/apps/forum/templates/forum/thread.html:195
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:76
 msgid "Are you sure you want to delete this thread?"
 msgstr ""
