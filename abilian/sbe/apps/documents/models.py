@@ -1,8 +1,11 @@
+# coding=utf-8
 """
 Entity objects for the Document Management applications.
 
 TODO: move to an independent service / app.
 """
+from __future__ import absolute_import
+
 import logging
 import threading
 import hashlib
@@ -324,10 +327,10 @@ class Folder(CmisObject, PathAndSecurityIndexable):
       return None
 
   def __repr__(self):
-    return "<%s.%s id=%s name=%s path=%s at 0x%x>" % (
+    return "<%s.%s id=%r name=%r path=%r at 0x%x>" % (
       self.__class__.__module__, self.__class__.__name__,
-      repr(self.id), repr(self.title), repr(self.path),
-      id(self))
+      self.id, self.title, self.path, id(self)
+    )
 
   #
   # Security related methods
@@ -657,9 +660,9 @@ class Document(BaseContent, PathAndSecurityIndexable):
     async_conversion(self)
 
   def __repr__(self):
-    return "<Document id=%s name=%s path=%s content_length=%d>" % (
-      self.id, self.title.encode('ascii', errors='ignore'),
-      self.path.encode('ascii', errors='ignore'), self.content_length)
+    return "<Document id=%r name=%r path=%r content_length=%d at 0x%x>" % (
+      self.id, self.title, self.path, self.content_length, id(self),
+    )
 
 
 def icon_for(content_type):
