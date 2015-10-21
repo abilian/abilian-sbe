@@ -22,7 +22,7 @@
       {{ _("Posted by %(creator)s", creator=m_user_link(thread.creator)) }}
       –
       {{ thread.created_at | age(date_threshold='day') }}
-
+      {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
       {{ m_post_edit_link(post) }}
     </div>
 
@@ -50,6 +50,7 @@
     {%- endfor %}
     </ul>
 
+   {%- if not is_closed %}
     <hr />
 
     <div class="media">
@@ -82,13 +83,14 @@
         </form>
       </div>
     </div>
+    {%- endif %}
   </article>
   {% endcall %}
 {%- endblock %}
 
 {# macros #}
 {%- macro m_post_edit_link(post) %}
-  {%- if current_user == post.creator or g.is_manager %}
+  {%- if not is_closed and (current_user == post.creator or g.is_manager) %}
     <a href="{{ url_for('.post_edit', community_id=post.thread.community.slug, thread_id=post.thread.id, object_id=post.id) }}">
       <i class="fa fa-edit"></i>
       {{ _('Edit') }}

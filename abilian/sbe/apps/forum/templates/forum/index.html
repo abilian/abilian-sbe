@@ -43,6 +43,7 @@
         <span class="datetime">
           {{ thread.created_at | age(date_threshold='day') }}
         </span>
+        {%- if thread.closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
       </div>
 
       <div class="comments">

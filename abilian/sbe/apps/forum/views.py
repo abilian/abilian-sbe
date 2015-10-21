@@ -153,6 +153,7 @@ class ThreadView(BaseThreadView, views.ObjectView):
   def template_kwargs(self):
     kw = super(ThreadView, self).template_kwargs
     kw['thread'] = self.obj
+    kw['is_closed'] = self.obj.closed
     return kw
 
 
