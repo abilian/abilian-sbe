@@ -1,9 +1,13 @@
 # coding=utf-8
-from flask import g, url_for as url_for_orig
-from flask_babel import lazy_gettext as _l
-from abilian.web.action import actions, Action, ModalActionMixin, FAIcon
-from abilian.services.security import security
+"""
+"""
+from __future__ import absolute_import
 
+from flask import g, url_for as url_for_orig
+
+from abilian.i18n import _l
+from abilian.web.action import actions, Action, ModalActionMixin, FAIcon
+from abilian.services.security import security, WRITE, MANAGE
 from .repository import repository
 
 
@@ -119,10 +123,10 @@ _actions = (
   FolderButtonAction(
     'documents:folder-listing', 'move-files', _l(u'Move to another folder'),
     icon='move', url='#modal-move-files', modal=True,
-    permission='write'),
+    permission=WRITE),
   FolderButtonAction(
     'documents:folder-listing', 'delete', _l(u'Delete'),
-    permission='write',
+    permission=WRITE,
     icon='trash', css_class='btn-danger'),
 
   # Folder left bar actions ##########
@@ -143,17 +147,17 @@ _actions = (
   FolderModalAction(
     'documents:content', 'upload_files', _l('Upload file(s)'),
     icon='upload', url='#modal-upload-files',
-    permission='write'),
+    permission=WRITE),
   # edit
   FolderModalAction(
     'documents:content', 'edit', _l('Edit'),
     icon='pencil', url='#modal-edit',
-    permission='write'),
+    permission=WRITE),
   # new folder
   FolderModalAction(
     'documents:content', 'new_folder', _l('New folder'),
     icon='plus', url='#modal-new-folder',
-    permission='write'),
+    permission=WRITE),
 
   # # members
   # FolderAction(
@@ -164,7 +168,7 @@ _actions = (
   FolderPermisionsAction(
     'documents:content', 'permissions', _l('Permissions'), icon='lock',
     url=lambda ctx: url_for(".permissions", folder_id=ctx['object'].id),
-    permission='manage'),
+    permission=MANAGE),
 
   # Document actions ##########
   # View / preview in browser
@@ -183,30 +187,30 @@ _actions = (
   DocumentModalAction(
     'documents:content', 'edit', _l(u'Edit'),
     icon='pencil', url='#modal-edit',
-    permission='write'),
+    permission=WRITE),
   # upload-new
   DocumentModalAction(
       'documents:content', 'upload', _l(u'Upload new version'),
       icon='upload', url='#modal-upload-new-version',
-      permission='write'),
+    permission=WRITE),
   # send by email
   DocumentModalAction(
       'documents:content', 'send_by_email', _l(u'Send by email'),
       icon='envelope', url='#modal-send-by-email',
       condition=lambda ctx: ctx['object'].antivirus_ok,
-      permission='write'),
+      permission=WRITE),
   # delete
   DocumentModalAction(
       'documents:content', 'delete', _l(u'Delete'),
       icon='trash', url='#modal-delete',
-      permission='write'),
+      permission=WRITE),
   # refresh preview
   DocumentAction(
       'documents:content', 'refresh_preview', _l(u'Refresh preview'),
       icon='refresh',
       url=lambda ctx: url_for('.refresh_preview', doc_id=ctx['object'].id),
       condition=lambda ctx: ctx['object'].antivirus_ok,
-      permission='manage',),
+      permission=MANAGE,),
   )
 
 
