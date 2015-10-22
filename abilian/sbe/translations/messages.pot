@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.1.4.dev67+ng985f08d.d20151021\n"
+"Project-Id-Version: abilian-sbe 0.1.4.dev70+ng3655276\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-10-21 16:53+0200\n"
+"POT-Creation-Date: 2015-10-22 15:23+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -244,64 +244,72 @@ msgstr ""
 msgid "Add"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:117
+#: abilian/sbe/apps/documents/actions.py:145
 #: abilian/sbe/apps/documents/templates/documents/document.html:46
 msgid "Download"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:120
+#: abilian/sbe/apps/documents/actions.py:148
 msgid "Move to another folder"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:124
-#: abilian/sbe/apps/documents/actions.py:200
+#: abilian/sbe/apps/documents/actions.py:152
+#: abilian/sbe/apps/documents/actions.py:244
 #: abilian/sbe/apps/forum/actions.py:69 abilian/sbe/apps/wiki/actions.py:47
 msgid "Delete"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:131
-#: abilian/sbe/apps/documents/actions.py:136
+#: abilian/sbe/apps/documents/actions.py:159
+#: abilian/sbe/apps/documents/actions.py:164
 msgid "List content"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:140
+#: abilian/sbe/apps/documents/actions.py:168
 msgid "View descendants"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:144
+#: abilian/sbe/apps/documents/actions.py:172
 msgid "Upload file(s)"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:149
-#: abilian/sbe/apps/documents/actions.py:184
+#: abilian/sbe/apps/documents/actions.py:177
+#: abilian/sbe/apps/documents/actions.py:212
 #: abilian/sbe/apps/forum/templates/forum/thread.html:96
 #: abilian/sbe/apps/wiki/actions.py:38
 msgid "Edit"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:154
+#: abilian/sbe/apps/documents/actions.py:182
 msgid "New folder"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:165
+#: abilian/sbe/apps/documents/actions.py:193
 msgid "Permissions"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:172
+#: abilian/sbe/apps/documents/actions.py:200
 msgid "View in browser"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:189
+#: abilian/sbe/apps/documents/actions.py:217
+msgid "Checkin (Download for edit)"
+msgstr ""
+
+#: abilian/sbe/apps/documents/actions.py:224
+msgid "Checkout (release edit lock)"
+msgstr ""
+
+#: abilian/sbe/apps/documents/actions.py:232
 #: abilian/sbe/apps/documents/templates/documents/_modals_document.html:13
 msgid "Upload new version"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:194
+#: abilian/sbe/apps/documents/actions.py:238
 #: abilian/sbe/apps/documents/templates/documents/_modals_document.html:50
 msgid "Send by email"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:205
+#: abilian/sbe/apps/documents/actions.py:249
 msgid "Refresh preview"
 msgstr ""
 
@@ -485,19 +493,24 @@ msgstr ""
 msgid "Last modification: %(date_age)s"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:71
+#: abilian/sbe/apps/documents/templates/documents/document.html:65
+#, python-format
+msgid "Locked for edition by %(user)s at %(date)s (%(age)s)"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:79
 msgid "Preview"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:81
+#: abilian/sbe/apps/documents/templates/documents/document.html:89
 msgid "Previous"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:82
+#: abilian/sbe/apps/documents/templates/documents/document.html:90
 msgid "Next"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:85
+#: abilian/sbe/apps/documents/templates/documents/document.html:93
 msgid "Document preview not yet available"
 msgstr ""
 
@@ -580,28 +593,28 @@ msgstr ""
 msgid "Audit Log"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:77
+#: abilian/sbe/apps/documents/views/documents.py:80
 msgid "Document properties successfully edited."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:79
+#: abilian/sbe/apps/documents/views/documents.py:82
 #: abilian/sbe/apps/documents/views/folders.py:501
 msgid "You didn't change any property."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:94
+#: abilian/sbe/apps/documents/views/documents.py:97
 msgid "File successfully deleted."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:112
+#: abilian/sbe/apps/documents/views/documents.py:114
 msgid "New version successfully uploaded"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:217
+#: abilian/sbe/apps/documents/views/documents.py:252
 msgid "{sender} sent you a file"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:231
+#: abilian/sbe/apps/documents/views/documents.py:266
 msgid "Email successfully sent"
 msgstr ""
 
