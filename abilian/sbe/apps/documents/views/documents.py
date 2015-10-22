@@ -4,13 +4,16 @@
 from __future__ import absolute_import
 
 from urllib import quote
+from datetime import datetime
 
+import sqlalchemy as sa
+from werkzeug.exceptions import NotFound, BadRequest
 from flask import (redirect, request, make_response, flash, g,
                    current_app, render_template)
 from flask_mail import Message
-from flask_babel import gettext as _
-from werkzeug.exceptions import NotFound
-from abilian.i18n import render_template_i18n
+from flask_login import current_user
+
+from abilian.i18n import _, render_template_i18n
 from abilian.core.extensions import db, mail
 from abilian.core.signals import activity
 from abilian.services import audit_service
@@ -103,18 +106,17 @@ def document_upload(doc_id):
 
   fd = request.files['file']
   doc.set_content(fd.read(), fd.content_type)
+  del doc.lock
 
   self = current_app._get_current_object()
   activity.send(self, actor=g.user, verb="update", object=doc)
-
   db.session.commit()
-
   flash(_(u"New version successfully uploaded"), "success")
   return redirect(url_for(doc))
 
 
 @route("/doc/<int:doc_id>/download")
-def document_download(doc_id):
+def document_download(doc_id, attach=None):
   """Download the file content."""
   doc = get_document(doc_id)
 
@@ -122,15 +124,48 @@ def document_download(doc_id):
   response.headers['content-length'] = doc.content_length
   response.headers['content-type'] = doc.content_type
 
-  attach = request.args.get('attach')
-  if attach or \
-    not match(doc.content_type, ("text/plain", "application/pdf", "image/*")):
+  if attach is None:
+    attach = request.args.get('attach')
+
+  if(attach or
+     not match(doc.content_type, ("text/plain", "application/pdf", "image/*"))):
     # Note: we omit text/html for security reasons.
     quoted_filename = quote(doc.title.encode('utf8'))
     response.headers['content-disposition'] \
       = 'attachment;filename="{}"'.format(quoted_filename)
 
   return response
+
+
+@route('/doc/<int:doc_id>/checkin_checkout', methods=['POST'])
+def checkin_checkout(doc_id):
+  doc = get_document(doc_id)
+  action = request.form.get('action')
+
+  if action not in (u'checkin', u'checkout'):
+    raise BadRequest(u'Unknown action: %r' % action)
+
+  session = sa.orm.object_session(doc)
+
+  if action == u'checkin':
+    doc.lock = current_user
+    d = doc.updated_at
+    # prevent change of last modification date
+    doc.updated_at = datetime.utcnow()
+    session.flush()
+    doc.updated_at = d
+    session.commit()
+    return document_download(doc_id, attach=True)
+
+  if action == u'checkout':
+    del doc.lock
+    d = doc.updated_at
+    # prevent change of last modification date
+    doc.updated_at = datetime.utcnow()
+    session.flush()
+    doc.updated_at = d
+    session.commit()
+    return redirect(url_for(doc))
 
 
 def preview_missing_image():

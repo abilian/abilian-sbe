@@ -115,6 +115,30 @@ class RootFolderAction(CmisContentAction):
     return ctx['object'] is repository.root_folder
 
 
+_checkin_template_action = u'''
+<form method="POST" action="{{ url }}" encoding="multipart/form-data" target="_new">
+  {{ csrf.field() }}
+  <button type="submit" class="btn btn-link" name="action"
+          value="{{ action.name}}"
+     onclick="window.setTimeout(function () { window.location.reload() }, 500)">
+    {%- if action.icon %}{{ action.icon }} {% endif %}
+    {{ action.title }}
+  </button>
+</form>
+'''
+
+_checkout_template_action = u'''
+<form method="POST" action="{{ url }}" encoding="multipart/form-data">
+  {{ csrf.field() }}
+  <button type="submit" class="btn btn-link" name="action"
+          value="{{ action.name}}">
+    {%- if action.icon %}{{ action.icon }} {% endif %}
+    {{ action.title }}
+  </button>
+</form>
+'''
+
+
 _actions = (
   # Folder listing action buttons ##########
   FolderButtonAction(
@@ -188,10 +212,26 @@ _actions = (
     'documents:content', 'edit', _l(u'Edit'),
     icon='pencil', url='#modal-edit',
     permission=WRITE),
+  # Checkin / Checkout
+  DocumentAction(
+    'documents:content', 'checkin', _l(u'Checkin (Download for edit)'),
+    icon='download',
+    url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
+    condition=lambda ctx: ctx['object'].lock is None,
+    template_string=_checkin_template_action,
+  ),
+  DocumentAction(
+    'documents:content', 'checkout', _l(u'Checkout (release edit lock)'),
+    icon=FAIcon('unlock'),
+    url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
+    condition=lambda ctx: ctx['object'].lock is not None,
+    template_string=_checkout_template_action,
+  ),
   # upload-new
   DocumentModalAction(
-      'documents:content', 'upload', _l(u'Upload new version'),
-      icon='upload', url='#modal-upload-new-version',
+    'documents:content', 'upload', _l(u'Upload new version'),
+    icon='upload', url='#modal-upload-new-version',
+    condition=lambda ctx: ctx['object'].lock and ctx['object'].lock.is_owner(),
     permission=WRITE),
   # send by email
   DocumentModalAction(

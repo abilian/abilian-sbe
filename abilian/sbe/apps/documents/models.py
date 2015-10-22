@@ -16,6 +16,7 @@ import pkg_resources
 import uuid
 
 from flask import json, g, url_for, current_app
+from flask_login import current_user
 
 import sqlalchemy as sa
 from sqlalchemy import event
@@ -33,11 +34,13 @@ from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.subjects import User, Group
 from abilian.core.models.blob import Blob
 from abilian.core.entities import db, Entity
+from abilian.core.util import utcnow
 from abilian.services.conversion import converter
 from abilian.services.security import InheritSecurity, security, Anonymous, \
     Admin
 from abilian.services.indexing import indexable_role
 
+from .lock import Lock
 from . import tasks
 
 
@@ -613,6 +616,10 @@ class Document(BaseContent, PathAndSecurityIndexable):
     self.pdf_blob = None
     self.text_blob = None
 
+  def set_content(self, content, content_type=None):
+    super(Document, self).set_content(content, content_type)
+    async_conversion(self)
+
   @property
   def pdf(self):
     return self.pdb_blob and self.pdf_blob.value
@@ -655,14 +662,65 @@ class Document(BaseContent, PathAndSecurityIndexable):
   def file_name(self):
     return self.title
 
-  def set_content(self, content, content_type=None):
-    super(Document, self).set_content(content, content_type)
-    async_conversion(self)
-
   def __repr__(self):
     return "<Document id=%r name=%r path=%r content_length=%d at 0x%x>" % (
       self.id, self.title, self.path, self.content_length, id(self),
     )
+
+  # locking management; used for checkin/checkout - this could be generalized to
+  # any entity
+  @property
+  def lock(self):
+    """
+    :returns: either `None` if no lock or current lock is expired; either the
+    current valid :class:`Lock` instance.
+    """
+    lock = self.meta.setdefault('abilian.sbe.documents', {}).get('lock')
+    if lock:
+      lock = Lock(**lock)
+      if lock.expired:
+        lock = None
+
+    return lock
+
+  @lock.setter
+  def lock(self, user):
+    """
+    Allow to do `document.lock = user` to set a lock for user
+
+    If user is None, the lock is released
+    """
+    if user is None:
+      del self.lock
+      return
+
+    self.set_lock(user=user)
+
+  @lock.deleter
+  def lock(self):
+    """
+    Remove lock, if any. `del document.lock` can be safely done even if no lock
+    is set.
+    """
+    meta = self.meta.setdefault('abilian.sbe.documents', {})
+    if 'lock' in meta:
+      del meta['lock']
+      self.meta.changed()
+
+  def set_lock(self, user=None):
+    if user is None:
+      user = current_user
+
+    lock = self.lock
+    if lock and not lock.is_owner(user=user):
+      raise RuntimeError('This document is already locked by another user')
+
+    meta = self.meta.setdefault('abilian.sbe.documents', {})
+    lock = Lock.new()
+    meta['lock'] = lock.as_dict()
+    self.meta.changed()
+
+
 
 
 def icon_for(content_type):

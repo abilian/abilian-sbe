@@ -7,7 +7,7 @@
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
 
 {% macro user_markup(user) %}
-  <a href="{{ url_for("social.user", user_id=doc.creator.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
+  <a href="{{ url_for("social.user", user_id=user.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
     {{ user }}
   </a>
 {% endmacro %}
@@ -53,11 +53,19 @@
         <small>
           {{ _('Created: %(date)s (%(age)s) by %(creator)s',
                date=(doc.created_at | datetimeformat('short')),
-              age=doc.created_at | age,
+              age=doc.created_at | age(add_direction=False),
               creator=user_markup(doc.creator)) }}
           {%- if doc.updated_at != doc.created_at %}
             <br />
-            {{ _('Last modification: %(date_age)s', date_age=doc.updated_at|age) }}
+            {{ _('Last modification: %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
+            {%- set lock = doc.lock %}
+            {%- if lock %}
+              <div class="lock">
+                <i class="fa fa-lock"></i>
+              {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
+                  user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
+              </div>
+            {%- endif %}
           {%- endif %}
         </small>
       </div>
