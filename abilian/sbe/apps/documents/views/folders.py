@@ -12,7 +12,6 @@ import fnmatch
 from functools import partial
 from cStringIO import StringIO
 from datetime import datetime
-from pprint import pprint
 from urllib import quote
 from zipfile import ZipFile, is_zipfile
 from werkzeug.exceptions import InternalServerError
