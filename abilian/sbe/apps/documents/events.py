@@ -10,6 +10,8 @@ from abilian.sbe.apps.communities.signals import (
   membership_set, membership_removed
 )
 
+from .search import reindex_tree
+
 @membership_set.connect
 def new_community_member(community, membership, is_new, **kwargs):
   if not community.folder:
@@ -31,8 +33,9 @@ def new_community_member(community, membership, is_new, **kwargs):
 
   if local_role not in current_roles:
     security.grant_role(user, local_role, community.folder)
-  
 
+  reindex_tree(community.folder)
+    
 @membership_removed.connect
 def remove_community_member(community, membership, **kwargs):
   if not community.folder:
@@ -44,3 +47,4 @@ def remove_community_member(community, membership, **kwargs):
   for role in roles:
     security.ungrant_role(user, role, community.folder)
   
+  reindex_tree(community.folder)

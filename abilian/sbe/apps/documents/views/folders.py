@@ -38,6 +38,7 @@ from abilian.web import csrf, http, url_for
 from abilian.sbe.apps.communities.views import default_view_kw
 from ..repository import repository
 from ..models import Folder, Document
+from ..search import reindex_tree
 from .util import (
   get_folder, check_manage_access, get_document,
   check_read_access, breadcrumbs_for, check_write_access, create_document,
@@ -237,6 +238,7 @@ def permissions_update(folder_id):
 
     security.set_inherit_security(folder, inherit_security)
     db.session.add(folder)
+    reindex_tree(folder)
     db.session.commit()
     return redirect(url_for(".permissions",
                             folder_id=folder_id,
@@ -248,6 +250,7 @@ def permissions_update(folder_id):
     user = User.query.get(user_id)
 
     security.grant_role(user, role, folder)
+    reindex_tree(folder)
     db.session.commit()
     return redirect(url_for(".permissions",
                             folder_id=folder_id,
@@ -259,6 +262,7 @@ def permissions_update(folder_id):
     group = Group.query.get(group_id)
 
     security.grant_role(group, role, folder)
+    reindex_tree(folder)
     db.session.commit()
     return redirect(url_for(".permissions",
                             folder_id=folder_id,
@@ -286,6 +290,7 @@ def permissions_update(folder_id):
                 'or by group membership)'),
               'error')
       else:
+        reindex_tree(folder)
         transaction.commit()
         flash(_(u"Role {role} for user {user} removed on folder {folder}"
         ).format(role=role, user=user.name, folder=folder.name),
@@ -308,6 +313,7 @@ def permissions_update(folder_id):
         flash(_(u"Role {role} for group {group} removed on folder {folder}"
         ).format(role=role, group=group.name, folder=folder.name),
               "success")
+        reindex_tree(folder)
         transaction.commit()
 
     db.session.commit()
