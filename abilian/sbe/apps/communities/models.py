@@ -11,7 +11,7 @@ from flask import current_app
 from sqlalchemy import Column, Unicode, ForeignKey, Boolean, DateTime, \
   Integer, UniqueConstraint, String, and_
 from sqlalchemy.orm import relation, relationship, backref
-import whoosh.fields as wf
+
 from abilian.i18n import _l
 from abilian.core.extensions import db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
@@ -237,22 +237,6 @@ class Community(Entity):
       is_new = False
       membership.role = role
 
-    if self.folder:
-      #FIXME: this should be done in documents using signal membership_set
-      local_role = WRITER if self.type == 'participative' else READER
-      if role == MANAGER:
-        local_role = MANAGER
-
-      current_roles = set(security.get_roles(user, self.folder,
-                                             no_group_roles=True))
-      current_roles &= VALID_ROLES  # ensure we don't remove roles not managed
-                                    # by us
-      for role_to_ungrant in current_roles - set((local_role,)):
-        security.ungrant_role(user, role_to_ungrant, self.folder)
-
-      if local_role not in current_roles:
-        security.grant_role(user, local_role, self.folder)
-
     signals.membership_set.send(self, membership=membership, is_new=is_new)
 
   def remove_membership(self, user):
@@ -266,13 +250,6 @@ class Community(Entity):
     signals.membership_removed.send(self, membership=membership)
     db.session.delete(membership)
     self.membership_count -= 1
-
-    if self.folder:
-      #FIXME: this should be done in documents using signal membership_removed
-      roles = set(security.get_roles(user, self.folder, no_group_roles=True))
-      roles &= VALID_ROLES  # ensure we don't remove roles not managed by us
-      for role in roles:
-        security.ungrant_role(user, role, self.folder)
 
   def update_roles_on_folder(self):
     if self.folder:
