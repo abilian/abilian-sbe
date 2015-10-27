@@ -3,17 +3,20 @@
 """
 from __future__ import absolute_import
 from datetime import date
-from itertools import groupby, chain
+from itertools import groupby, islice
 
-from abilian.services.security import security
-from flask import g, render_template, current_app
-from abilian.web.action import actions
-from flask.ext.babel import format_date
+import whoosh
+import whoosh.query as wq
 from sqlalchemy.orm import joinedload
+from flask import g, render_template, current_app
+from flask_babel import format_date
 
-from abilian.sbe.apps.documents.models import Document, Folder
+from abilian.web import url_for
+from abilian.web.action import actions
+from abilian.sbe.apps.documents.models import Document, icon_for
 from abilian.sbe.apps.forum.models import Thread
 from abilian.sbe.apps.communities.blueprint import Blueprint
+
 from .util import get_recent_entries
 from .presenters import ActivityEntryPresenter
 
@@ -49,22 +52,25 @@ def files():
     all_files += get_attachments_from_dms(community)
 
   all_files = sorted(all_files, key=lambda doc: doc.date)
-  all_files = list(reversed(all_files))
-  # TODO: batch
-  if len(all_files) > 50:
-    all_files = all_files[0:50]
-
+  all_files = islice(reversed(all_files), 0, 50)
   grouped_docs = group_monthly(all_files)
 
   return render_template("wall/files.html", grouped_docs=grouped_docs)
 
 
 class Attachment(object):
-  def __init__(self, url, doc, date):
+  def __init__(self, url, name, owner, date, content_length, content_type):
     self.url = url
-    self.doc = doc
+    self.name = name
+    self.owner = owner
     self.date = date
+    self.content_length = content_length
+    self.content_type = content_type
 
+  @property
+  def icon(self):
+    return icon_for(self.content_type)
+    
 
 def get_attachments_from_forum(community):
   all_threads = Thread.query \
@@ -86,44 +92,26 @@ def get_attachments_from_forum(community):
   for post in posts_with_attachments:
     for att in post.attachments:
       url = current_app.default_view.url_for(att)
-      attachment = Attachment(url, att, att.created_at)
+      attachment = Attachment(url, att.name, unicode(att.owner),
+                              att.created_at, att.content_length, att.content_type)
       attachments.append(attachment)
 
   return attachments
 
 
-# FIXME: significant performance issues here, needs to be refactored.
-def get_folders(community):
-  def get_subfolders(folders):
-    folder_ids = [f.id for f in folders]
-    result = set(Folder.query.filter(Folder._parent_id.in_(folder_ids)).all())
-    return result
-
-  root = community.folder
-  folders = {root}
-  folders_of_rank_n = folders
-  while True:
-    folders_of_rank_n = get_subfolders(folders_of_rank_n)
-    filtered_folders_of_rank_n = security.filter_with_permission(
-      g.user, "read", folders_of_rank_n, inherit=True)
-    if len(filtered_folders_of_rank_n) == 0:
-      break
-    folders.update(filtered_folders_of_rank_n)
-    folders_of_rank_n = filtered_folders_of_rank_n
-  return folders
-
-
 # FIXME: significant performance issues here, needs major refactoring
 def get_attachments_from_dms(community):
-  folders = get_folders(community)
-  folder_ids = sorted([f.id for f in folders])
-
-  documents = Document.query.filter(Document._parent_id.in_(folder_ids)).all()
+  svc = current_app.services['indexing']
+  filters = wq.And([wq.Term('community_id', community.id),
+                    wq.Term('object_type', Document.entity_type)])
+  sortedby = whoosh.sorting.FieldFacet('created_at', reverse=True)
+  documents = svc.search(u'', filter=filters, sortedby=sortedby, limit=50)
 
   attachments = []
   for doc in documents:
-    url = current_app.default_view.url_for(doc)
-    attachment = Attachment(url, doc, doc.created_at)
+    url = url_for(doc)
+    attachment = Attachment(url, doc['name'], doc['owner_name'], doc['created_at'],
+                            doc['content_length'], doc['content_type'])
     attachments.append(attachment)
 
   return attachments

@@ -12,17 +12,15 @@
       {% for doc in docs %}
         <p>
           <span class="attachment-item">
-            {{ doc.doc.owner }} -
+            {{ doc.owner }} -
 
-            <img src="{{ doc.doc.icon }}" style="vertical-align: middle;"
+            <img src="{{ doc.icon }}" style="vertical-align: middle;"
                 alt=""/>
-            <a href="{{ doc.url }}">{{ doc.doc.name }}</a>
-            ({{ doc.doc.content_length|filesize }})
+            <a href="{{ doc.url }}">{{ doc.name }}</a>
+            ({{ doc.content_length|filesize }})
           </span>
         </p>
       {% endfor %}
     {% endfor %}
   {%- endcall %}
 {% endblock %}
-
-
