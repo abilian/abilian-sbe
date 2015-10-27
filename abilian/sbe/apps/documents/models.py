@@ -34,7 +34,6 @@ from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.subjects import User, Group
 from abilian.core.models.blob import Blob
 from abilian.core.entities import db, Entity
-from abilian.core.util import utcnow
 from abilian.services.conversion import converter
 from abilian.services.security import InheritSecurity, security, Anonymous, \
     Admin

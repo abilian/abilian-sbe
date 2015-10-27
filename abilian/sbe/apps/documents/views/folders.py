@@ -29,7 +29,7 @@ from abilian.i18n import _, _n
 from abilian.core.models.subjects import User, Group
 from abilian.core.extensions import db
 from abilian.core.signals import activity
-from abilian.services.security import security, Role
+from abilian.services.security import security, Role, READ, WRITE
 from abilian.web.action import actions
 from abilian.web.views import default_view
 
@@ -77,12 +77,12 @@ def folder_json(folder_id):
   folder_url = partial(url_for, '.folder_json')
   result = {}
   has_permission = security.has_permission
-  result['current_folder_selectable'] = has_permission(g.user, "write", folder,
+  result['current_folder_selectable'] = has_permission(g.user, WRITE, folder,
                                                        inherit=True)
   folders = result['folders'] = []
   bc = result['breadcrumbs'] = []
   subfolders = sorted((f for f in folder.subfolders
-                       if has_permission(g.user, "read", f, inherit=True)),
+                       if has_permission(g.user, READ, f, inherit=True)),
                       key=lambda f: f.title)
 
   parent = folder
