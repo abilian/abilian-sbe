@@ -174,7 +174,7 @@ _actions = (
     permission=WRITE),
   # edit
   FolderModalAction(
-    'documents:content', 'edit', _l('Edit'),
+    'documents:content', 'edit', _l('Edit properties'),
     icon='pencil', url='#modal-edit',
     permission=WRITE),
   # new folder
@@ -209,7 +209,7 @@ _actions = (
   ),
   # edit
   DocumentModalAction(
-    'documents:content', 'edit', _l(u'Edit'),
+    'documents:content', 'edit', _l(u'Edit properties'),
     icon='pencil', url='#modal-edit',
     permission=WRITE),
   # Checkin / Checkout
