@@ -1,6 +1,7 @@
 {% extends "community/_base.html" %}
 
 {% from "macros/box.html" import m_box_content, m_box_menu %}
+{% from "macros/user.html" import m_user_link, m_user_photo %}
 
 {% block content %}
   {% call m_box_content(_("Members")) %}
@@ -19,29 +20,42 @@
       <tr>
         <th class="hide">Last Name</th>
         <th class="hide">First Name</th>
-        <th>Nom</th>
-        <th>Role</th>
+        <th>{{ _('Name') }}</th>
+        <th class="hide">{# last activity seconds since epoch #}</th>
+        <th>{{ _('Last activity in this community') }}</th>
+        <th>{{ _('Role') }}</th>
         {% if is_manager %}
-        <th>Action</th>
+        <th>{{ _('Action') }}</th>
         {% endif %}
       </tr>
       </thead>
 
       <tbody>
-      {% for user, m_id, role in memberships %}
+      {% for user, m_id, role, last_activity_date in memberships %}
         <tr>
           <td class="hide">{{ user.last_name }}</td>
           <td class="hide">{{ user.first_name }}</td>
           <td>
-            {%- if not user.can_login %}
-            <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i><s>
-            {%- endif %}
+            <div class="media">
+              <div class="media-left">
+                {% call m_user_link(user, css="media-object") %}
+                  {{ m_user_photo(user, size="32") }}
+                {%- endcall %}
+              </div>
 
-            <a href="{{ url_for("social.user", user_id=user.id) }}">{{ user.name }}</a>
-            <br />
-            (<i>{{ user.email }}</i>)
-            {%- if not user.can_login %}</s>{%- endif %}
+              <div class="media-body">
+                {%- if not user.can_login %}
+                  <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i><s>
+                {%- endif %}
+                {{ m_user_link(user) }}
+                <br />
+                (<i>{{ user.email }}</i>)
+                {%- if not user.can_login %}</s>{%- endif %}
+              </div>
+            </div>
           </td>
+          <td class="hide">{{ seconds_since_epoch(last_activity_date) }}</td>
+          <td>{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</td>
           {%- if not is_manager %}
             <td>{{ _(role) }}</td>
           {%- else %}
@@ -52,7 +66,7 @@
                 <input type="hidden" name="user" value="{{ user.id }}" />
                 <input type="hidden" name="action" value="set-user-role" />
                 <select onchange="this.form.submit();" id="role-select" name="role" class="form-control" style="width: auto;">
-                  <option value="member" default="default" {%- if role == 'member' %}selected="selected"{%- endif %}>{{ _("Member") }}</option>
+                  <option value="member" default="default" {%- if role == 'member' %} selected="selected"{%- endif %}>{{ _("Member") }}</option>
                   <option value="manager" {%- if role == 'manager' %}selected="selected"{%- endif %}>{{ _("Manager") }}</option>
                 </select>
               </form>
@@ -88,7 +102,9 @@
                          { bVisible: false },
                          { bVisible: false },
                          { aDataSort: [0, 1], asSorting: [ "asc", "desc" ] },
-                         { asSorting: [ "asc", "desc" ] }
+                         { bVisible: false },
+                         { aDataSort: [3], asSorting: [ "asc", "desc" ] },
+                         { asSorting: [ "asc", "desc" ]}
                          {% if is_manager %}
                          , { }
                          {% endif %}
@@ -110,12 +126,14 @@
 
 {% block sidebar %}
   {% call m_box_menu() %}
+    {%- set actions = actions.for_category('members:menu') %}
+    {%- if actions %}
     <ul class="nav nav-list">
-      {%- set actions = actions.for_category('members:menu') %}
       {%- for action in actions %}
         <li>{{ action.render() }}</li>
       {%- endfor %}
     </ul>
+    {%- endif %}
   {% endcall %}
 {% endblock %}
 
@@ -161,11 +179,11 @@ require(
            url:         "{{ url_for("social.users_json") }}",
            dataType:    'json',
            quietMillis: 100,
-           data:        function(term, page) { 
-             return { q: term, with_membership: {{ g.community.id | tojson }} }; 
+           data:        function(term, page) {
+             return { q: term, with_membership: {{ g.community.id | tojson }} };
            },
            results:     function(data, page) {
-             return {results: data.results, more: false}; 
+             return {results: data.results, more: false};
            }
          },
          allowClear:    true,
@@ -180,7 +198,7 @@ require(
            if (state.email) {
              text += ' <br /><i>' + escapeMarkup(state.email) + '</i> ';
            }
-           return text;             
+           return text;
          }
        });
 

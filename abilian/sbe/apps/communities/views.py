@@ -5,7 +5,10 @@ from __future__ import absolute_import
 
 import hashlib
 from functools import wraps
+from datetime import datetime
 
+import pytz
+import sqlalchemy as sa
 from flask import (
     render_template, g, redirect, url_for, request, current_app, session,
     flash, jsonify)
@@ -13,9 +16,12 @@ from flask_login import current_user, login_required
 from werkzeug.exceptions import NotFound, BadRequest, InternalServerError
 from pathlib import Path
 from whoosh.searching import Hit
+
 from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.core.models.subjects import User
+from abilian.core.util import utc_dt
+from abilian.services.activity import ActivityEntry
 from abilian.web import csrf, nav, views
 from abilian.web.views import images as image_views
 from abilian.i18n import _, _l
@@ -28,6 +34,13 @@ from .security import require_admin, require_manage
 from .blueprint import Blueprint
 
 __all__ = ['communities']
+
+EPOCH = datetime.fromtimestamp(0.0, tz=pytz.utc)
+
+def seconds_since_epoch(dt):
+  if not dt:
+    return 0
+  return int((utc_dt(dt) - EPOCH).total_seconds())
 
 communities = Blueprint("communities", __name__,
                         set_community_id_prefix=False,
@@ -291,14 +304,25 @@ def members():
     url=nav.Endpoint('communities.members', community_id=g.community.slug))
   )
 
-  memberships = User.query\
-      .join(Membership)\
-      .filter(Membership.community == g.community)\
-      .add_columns(Membership.id, Membership.role)\
-      .order_by(User.last_name.asc(), User.first_name.asc())\
-      .all()
+  last_activity_date = sa.sql.functions.max(ActivityEntry.happened_at)\
+                                       .label('last_activity_date')                    
+  memberships = User\
+    .query\
+    .options(sa.orm.undefer('photo'))\
+    .join(Membership)\
+    .outerjoin(ActivityEntry,
+               sa.sql.and_(ActivityEntry.actor_id == User.id,
+                           ActivityEntry.target_id == Membership.community_id))\
+    .filter(Membership.community == g.community)\
+    .add_columns(Membership.id,
+                 Membership.role,
+                 last_activity_date,)\
+    .group_by(User, Membership.id, Membership.role)\
+    .order_by(User.last_name.asc(), User.first_name.asc())\
+    .all()
 
   return render_template("community/members.html",
+                         seconds_since_epoch=seconds_since_epoch,
                          memberships=memberships,
                          csrf_token=csrf.field())
 
