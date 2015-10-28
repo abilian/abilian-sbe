@@ -37,11 +37,7 @@ class CommunityTabAction(Action):
   def is_current(self):
     return g.current_tab == self.name
 
-
-class MembersMenuAction(Action):
-
-  Endpoint = CommunityEndpoint
-
+  
 _actions = (
   # Navigation
   NavItem('section', 'communities', title=_l(u'Communities'),
@@ -61,9 +57,6 @@ _actions = (
                      icon='cog',
                      condition=lambda ctx: current_user.has_role("admin"),
                      endpoint="communities.settings"),
-  # Members
-  MembersMenuAction('members:menu', 'index', _l(u'List members'),
-                    icon='list', endpoint="communities.members"),
 )
 
 

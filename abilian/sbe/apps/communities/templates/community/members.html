@@ -125,16 +125,16 @@
 {% endblock %}
 
 {% block sidebar %}
-  {% call m_box_menu() %}
-    {%- set actions = actions.for_category('members:menu') %}
-    {%- if actions %}
-    <ul class="nav nav-list">
-      {%- for action in actions %}
-        <li>{{ action.render() }}</li>
-      {%- endfor %}
-    </ul>
-    {%- endif %}
-  {% endcall %}
+  {%- set actions = actions.for_category('members:menu') %}
+  {%- if actions %}
+    {% call m_box_menu() %}
+      <ul class="nav nav-list">
+        {%- for action in actions %}
+          <li>{{ action.render() }}</li>
+        {%- endfor %}
+      </ul>
+    {% endcall %}
+  {%- endif %}
 {% endblock %}
 
 
