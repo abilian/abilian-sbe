@@ -165,7 +165,8 @@ _actions = (
     url=lambda ctx: url_for(".folder_view", folder_id=ctx['object'].id),),
   # Descendants
   FolderAction(
-    'documents:content', 'descendants', _l(u'View descendants'), icon=FAIcon('tree'),
+    'documents:content', 'descendants', _l(u'View descendants'),
+    icon=FAIcon('code-fork fa-rotate-90'),
     url=lambda ctx: url_for(".descendants_view", folder_id=ctx['object'].id),),
   # upload
   FolderModalAction(
