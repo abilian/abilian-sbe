@@ -23,11 +23,11 @@
       {% for level, type, obj in descendants %}
         <li style="margin-left: {{ level*1.5 }}em; padding-top: 3px; padding-bottom: 3px;">
           <a href="{{ url_for(obj) }}">
-            <img src="{{ obj.icon }}" style="height: 16px; width: 16px;">
+            <img src="{{ get_icon(obj) }}" style="height: 16px; width: 16px;">
             {% if type == 'F' %}
-              <b>{{ obj.name }}</b>
+              <b>{{ obj['name'] }}</b>
             {% else %}
-              {{ obj.name }}
+              {{ obj['name'] }}
             {% endif %}
           </a>
         </li>

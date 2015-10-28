@@ -14,10 +14,11 @@ from cStringIO import StringIO
 from datetime import datetime
 from urllib import quote
 from zipfile import ZipFile, is_zipfile
+
 from werkzeug.exceptions import InternalServerError
-
 from xlwt import Workbook, easyxf
-
+import whoosh
+import whoosh.query as wq
 from flask import (g, redirect, request, make_response, flash,
                    current_app, send_file, jsonify,
                    render_template_string, Markup, render_template)
@@ -37,7 +38,7 @@ from abilian.web import csrf, http, url_for
 
 from abilian.sbe.apps.communities.views import default_view_kw
 from ..repository import repository
-from ..models import Folder, Document
+from ..models import Folder, Document, icon_for, icon_url, icon_exists
 from ..search import reindex_tree
 from .util import (
   get_folder, check_manage_access, get_document,
@@ -823,26 +824,49 @@ def descendants_view(folder_id):
   bc = breadcrumbs_for(folder)
   actions.context['object'] = folder
 
+  root_path_ids = folder._indexable_parent_ids + u'/{}'.format(folder.id)
+  svc = current_app.services['indexing']
+  filters = wq.And([wq.Term('community_id', folder.community.id),
+                    wq.Term('parent_ids', root_path_ids),
+                    wq.Or([wq.Term('object_type', Folder.entity_type),
+                           wq.Term('object_type', Document.entity_type),]),
+                  ])
+
+  results = svc.search(u'', filter=filters, limit=None)
+  by_path = {}
+  for hit in results:
+    by_path.setdefault(hit['parent_ids'], []).append(hit)
+
+  for children in by_path.values():
+    children.sort(key=lambda hit: (hit['object_type'], hit['name'].lower()))
+    
   descendants = []
-  def visit(folder, level=0):
-    children = folder.filtered_children
-    children.sort(key=lambda obj: obj.name)
+  def visit(path_id, level=0):
+    children = by_path.get(path_id, ())
 
     for child in children:
-      if not isinstance(child, Folder):
-        continue
-      descendants.append((level, "F", child))
-      visit(child, level+1)
+      is_folder = child['object_type'] == Folder.entity_type
+      type_letter = u'F' if is_folder else u'D'
+      descendants.append((level, type_letter, child))
+      
+      if is_folder:
+        path_id = child['parent_ids'] + u'/{}'.format(child['id'])
+        visit(path_id, level+1)
 
-    for child in children:
-      if not isinstance(child, Document):
-        continue
-      descendants.append((level, "D", child))
-
-  visit(folder, 0)
+  visit(root_path_ids, 0)
 
   ctx = dict(folder=folder,
              descendants=descendants,
              breadcrumbs=bc,
+             get_icon=get_icon_for_hit,
              csrf_token=csrf.field(), )
   return render_template("documents/descendants.html", **ctx)
+
+
+def get_icon_for_hit(hit):
+  if hit['object_type'] == Folder.entity_type:
+    return icon_url('folder.png')
+
+  content_type = hit['content_type']
+  icon = icon_for(content_type)
+  return icon
