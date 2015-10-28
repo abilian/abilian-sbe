@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2015-10-28 11:15+0100\n"
-"PO-Revision-Date: 2015-10-28 11:16+0100\n"
+"PO-Revision-Date: 2015-10-28 11:23+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
 "Language-Team: fr <LL@li.org>\n"
@@ -466,7 +466,7 @@ msgstr "Ajouter un role local pour un utilisateur"
 
 #: abilian/sbe/apps/documents/templates/documents/descendants.html:9
 msgid "Folder descendants"
-msgstr "Descendants du dossiers"
+msgstr "Descendants du dossier"
 
 #: abilian/sbe/apps/documents/templates/documents/document.html:16
 msgid "Document view"
