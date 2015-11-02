@@ -6,7 +6,7 @@ sudo: false
 
 env:
   global:
-    - LD_LIBRARY_PATH="~/sqlite-3.9.1/lib"
+    - LD_LIBRARY_PATH=~/sqlite-3.9.1/lib
   matrix:
     - SQLALCHEMY_DATABASE_URI="sqlite://"
     - SQLALCHEMY_DATABASE_URI="postgres://postgres@localhost/abilian_sbe"
@@ -27,8 +27,10 @@ before_install:
   - mkdir "${NPM_CONFIG_PREFIX}"
   - npm install -g less
   - export PATH=~/npm-packages/bin:$PATH
-  - wget 'http://jenkins.abilian.com/_fixtures/libsqlite-3.9.1-bin.tar.gz'
+  - wget 'http://jenkins.abilian.com/_fixtures/libsqlite-3.9.1-precise-bin.tar.gz'
   - tar xpvzf libsqlite-3.9.1-bin.tar.gz -C ~
+  - echo $LD_LIBRARY_PATH
+  - ls ~/sqlite-3.9.1/lib
 
 # Install Python dependencies
 install:
