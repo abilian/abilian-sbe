@@ -11,7 +11,7 @@ then
 fi
 . ./bin/activate
 
-pip install 'setuptools>=0.8'
+pip install -U setuptools
 
 echo "Installing Abilian SBE and dependencies"
 pip install -r ../requirements.txt
