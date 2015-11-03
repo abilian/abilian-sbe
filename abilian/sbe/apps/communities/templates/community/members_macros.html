@@ -1,0 +1,13 @@
+{% import "community/members_std_macros.html" as std %}
+
+{% macro thead() %}
+  {{ std.std_thead() }}
+{% endmacro %}
+
+{% macro table_config() %}
+  {{ std.std_table_config() }}
+{% endmacro %}
+
+{% macro member_row(user, m_id, role, last_activity_date) %}
+  {{ std.std_member_row(user, m_id, role, last_activity_date }}
+{% endmacro %}
