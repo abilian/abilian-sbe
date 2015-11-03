@@ -15,6 +15,7 @@ from abilian.web.util import url_for
 
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.documents.models import Document
+from abilian.sbe.apps.documents.views.util import breadcrumbs_for as doc_breadcrumb
 from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.wiki.models import WikiPage
 
@@ -61,6 +62,29 @@ POST_BODY_TEMPLATE = u'''
   </span>
  '''
 
+DOCUMENT_BODY_TEMPLATE = u'''
+<div class="body">
+  <div>
+    <img src="{{ obj.icon }}" style="vertical-align: middle;" alt=""/>
+    {% for p in parents[:-1] %}
+    <a href="{{ p.path }}">{{ p.label }}</a> <span class="divider">/</span>
+    {% endfor %}
+
+    <a href="{{ url_for(obj) }}">{{ obj.name }}</a>
+  </div>
+  <div>
+  {%- if obj.antivirus_ok %}
+    <a href="{{ url_for('documents.document_download',
+                         community_id=obj.community.slug,
+                         doc_id=obj.id,
+                         attach=True) }}">
+      <i class="glyphicon glyphicon-download"></i>
+      {{ _('Download') }} (<small>{{ obj.content_length|filesize  }}</small>)
+    </a>
+  {%- endif %}
+  </div>
+</div>
+'''
 
 class ActivityEntryPresenter(BasePresenter):
   @property
@@ -142,6 +166,14 @@ class ActivityEntryPresenter(BasePresenter):
         body = body[0:400] + u"…"
       body = render_template_string(POST_BODY_TEMPLATE,
                                     object_url=self.object_url, body=body, post=self.object)
+      return Markup(body)
+    elif isinstance(self.object, Document):
+      parents = doc_breadcrumb(self.object)
+      body = render_template_string(
+        DOCUMENT_BODY_TEMPLATE,
+        obj=self.object,
+        parents = parents
+      )
       return Markup(body)
     else:
       return ""
