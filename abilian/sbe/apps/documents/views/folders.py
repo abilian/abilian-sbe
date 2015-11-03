@@ -838,8 +838,9 @@ def descendants_view(folder_id):
     by_path.setdefault(hit['parent_ids'], []).append(hit)
 
   for children in by_path.values():
-    children.sort(key=lambda hit: (hit['object_type'], hit['name'].lower()))
-    
+    children.sort(key=lambda hit: (hit['object_type'] != Folder.entity_type,
+                                   hit['name'].lower()))
+
   descendants = []
   def visit(path_id, level=0):
     children = by_path.get(path_id, ())
