@@ -17,7 +17,6 @@ from zipfile import ZipFile, is_zipfile
 
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
-import whoosh
 import whoosh.query as wq
 from flask import (g, redirect, request, make_response, flash,
                    current_app, send_file, jsonify,
@@ -38,7 +37,7 @@ from abilian.web import csrf, http, url_for
 
 from abilian.sbe.apps.communities.views import default_view_kw
 from ..repository import repository
-from ..models import Folder, Document, icon_for, icon_url, icon_exists
+from ..models import Folder, Document, icon_for, icon_url
 from ..search import reindex_tree
 from .util import (
   get_folder, check_manage_access, get_document,
@@ -834,8 +833,16 @@ def descendants_view(folder_id):
 
   results = svc.search(u'', filter=filters, limit=None)
   by_path = {}
+  owner_ids = set()
   for hit in results:
     by_path.setdefault(hit['parent_ids'], []).append(hit)
+    owner_type, owner_id = hit['owner'].split(u':')
+    if owner_type == u'user':
+      try:
+        owner_id = int(owner_id)
+        owner_ids.add(owner_id)
+      except ValueError:
+        pass
 
   for children in by_path.values():
     children.sort(key=lambda hit: (hit['object_type'] != Folder.entity_type,
@@ -849,15 +856,23 @@ def descendants_view(folder_id):
       is_folder = child['object_type'] == Folder.entity_type
       type_letter = u'F' if is_folder else u'D'
       descendants.append((level, type_letter, child))
-      
+
       if is_folder:
         path_id = child['parent_ids'] + u'/{}'.format(child['id'])
         visit(path_id, level+1)
 
   visit(root_path_ids, 0)
 
+  owners = dict()
+  owners_q = User.query\
+                 .filter(User.id.in_(owner_ids)) \
+                 .add_column(sa.sql.func.concat('user:', User.id).label('key'))
+  for user, key in owners_q:
+    owners[key] = user
+
   ctx = dict(folder=folder,
              descendants=descendants,
+             owners=owners,
              breadcrumbs=bc,
              get_icon=get_icon_for_hit,
              csrf_token=csrf.field(), )

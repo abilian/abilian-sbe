@@ -2,6 +2,7 @@
 
 {% from "macros/box.html" import m_box_content, m_box_menu %}
 {% from "macros/recent.html" import m_recent_items with context %}
+{% from "macros/user.html" import m_user_avatar as m_user %}
 
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
 
@@ -30,6 +31,14 @@
               {{ obj['name'] }}
             {% endif %}
           </a>
+          <small>
+            {{ obj['created_at'] |datetimeformat(format='short') }}
+            {%- set owner = owners.get(obj['owner']) %}
+            {%- if owner %}
+              {{ _('Owner') }}: {{ m_user(owner) }}
+            {%- endif %}
+          </small>
+
         </li>
       {% endfor %}
     </ul>
