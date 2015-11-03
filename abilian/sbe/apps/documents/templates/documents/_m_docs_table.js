@@ -20,9 +20,11 @@ function setupDocTable(Abilian, $, jqDT, bootbox) {
                 { bVisible: false, sType: "string" },
                 { aDataSort: [1, 2], asSorting: [ "asc", "desc" ], sWidth: "31%" },
                 { aDataSort: [1, 4], asSorting: [ "asc", "desc" ], sWidth: "8%"  },
-                { aDataSort: [1, 5], asSorting: [ "asc", "desc" ], sWidth: "18%"  },
+                { "bVisible": false },
+                { "bVisible": false },
+                { aDataSort: [5, 6, 1], asSorting: [ "asc", "desc" ], sWidth: "18%"  },
                 { bVisible: false, sType: "date"},
-                { aDataSort: [1, 6], asSorting: [ "asc", "desc" ], sWidth: "12%"  }
+                { aDataSort: [1, 8], asSorting: [ "asc", "desc" ], sWidth: "12%"  }
             ],
             //{# see http://datatables.net/ref #}
 

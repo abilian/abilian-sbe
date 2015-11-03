@@ -53,6 +53,8 @@
           <th class="hide">title for sorting</th>
           <th style="width: 39%;">{{ _("Title") }}</th>
           <th style="width: 10%;">{{ _("Size") }}</th>
+          <th class="hide">Last Name</th>
+          <th class="hide">First Name</th>
           <th style="width: 25%;">{{ _("Owner") }}</th>
           <th class="hide">date</th>
           <th style="width: 25%;">{{ _("Age") }}</th>
@@ -77,8 +79,10 @@
                 {{ obj.content_length|filesize }}
               {%- endif %}
             </td>
+            {% set owner = obj.owner %}
+            <td class="hide">{{ owner.last_name }}</td>
+            <td class="hide">{{ owner.first_name }}</td>
             <td>
-              {% set owner = obj.owner %}
               <a href="{{ url_for("social.user", user_id=owner.id) }}"
                   title="{{ owner.name }}"><img alt="{{ owner.name }}"
                   src="{{ user_photo_url(owner, size=20) }}"
