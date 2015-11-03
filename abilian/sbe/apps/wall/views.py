@@ -70,7 +70,7 @@ class Attachment(object):
   @property
   def icon(self):
     return icon_for(self.content_type)
-    
+
 
 def get_attachments_from_forum(community):
   all_threads = Thread.query \

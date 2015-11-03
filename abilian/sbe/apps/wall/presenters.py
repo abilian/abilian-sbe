@@ -3,12 +3,13 @@
 """
 from __future__ import absolute_import
 
-import traceback
+import logging
 
-from flask import render_template_string
-from flask_babel import gettext as _, lazy_gettext as _l
 import bleach
 from jinja2 import Template, Markup
+from flask import render_template_string
+
+from abilian.i18n import _, _l
 from abilian.core.util import BasePresenter
 from abilian.web.util import url_for
 
@@ -17,6 +18,8 @@ from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.wiki.models import WikiPage
 
+
+logger = logging.getLogger(__name__)
 
 # Poor man's pattern matching.
 MESSAGES = {
@@ -119,7 +122,7 @@ class ActivityEntryPresenter(BasePresenter):
       return Markup(msg)
 
     except:
-      traceback.print_exc()
+      logger.exception('Exception while presenting activity message')
       raise
 
   @property
