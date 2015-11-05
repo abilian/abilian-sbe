@@ -54,6 +54,18 @@ def splinter_webdriver(request):
   return 'phantomjs'
 
 
+@pytest.fixture(scope='session')
+def splinter_driver_kwargs():
+    """Webdriver kwargs."""
+    # set resourceTimeout in the hope it will help jenkins kill phantomjs after
+    # tests
+    return dict(
+      desired_capabilities={
+        'phantomjs.page.settings.resourceTimeout': '30000', # 30s
+      },
+    )
+
+
 @pytest.fixture(scope='module')
 def instance_path(request):
   """
