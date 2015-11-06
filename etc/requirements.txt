@@ -16,4 +16,4 @@ chardet
 # need by folder: export to xls
 xlwt
 
-openpyxl
+openpyxl>=2.3.0
