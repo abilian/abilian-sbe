@@ -459,7 +459,11 @@ class BaseContent(CmisObject):
       # absent or generic content type: try to find something more useful to be
       # able to do preview/indexing/...
       guessed_content_type = mimetypes.guess_type(self.title, strict=False)[0]
-      if guessed_content_type:
+      if (guessed_content_type
+          and guessed_content_type != 'application/vnd.ms-office.activeX'):
+        # mimetypes got an update: "random.bin" would be guessed as
+        # 'application/vnd.ms-office.activeX'... not so useful in a document
+        # repository
         content_type = guessed_content_type
 
     return content_type
