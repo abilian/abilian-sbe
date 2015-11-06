@@ -4,6 +4,7 @@ Changelog for Abilian SBE
 0.1.5 (unreleased)
 ------------------
 
+- Members: export listing in xslx format
 - Documents are reindexed on permissions or membership change
 - Conversations can be closed by admin for edit/new comments/deletion
 - Fix global activity stream for non-admin users

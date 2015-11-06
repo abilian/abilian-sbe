@@ -4,24 +4,32 @@
 from __future__ import absolute_import
 
 import hashlib
+import logging
+from operator import attrgetter
 from functools import wraps
 from datetime import datetime
+from pathlib import Path
+import cStringIO as StringIO
+from time import strftime, gmtime
 
 import pytz
 import sqlalchemy as sa
+from whoosh.searching import Hit
+import openpyxl
+from openpyxl.writer.write_only import WriteOnlyCell
+from werkzeug.exceptions import NotFound, BadRequest, InternalServerError
 from flask import (
     render_template, g, redirect, url_for, request, current_app, session,
     flash, jsonify)
 from flask_login import current_user, login_required
-from werkzeug.exceptions import NotFound, BadRequest, InternalServerError
-from pathlib import Path
-from whoosh.searching import Hit
+
 
 from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.core.models.subjects import User
 from abilian.core.util import utc_dt
 from abilian.services.activity import ActivityEntry
+from abilian.services.security import Role
 from abilian.web import csrf, nav, views
 from abilian.web.views import images as image_views
 from abilian.i18n import _, _l
@@ -34,6 +42,8 @@ from .security import require_admin, require_manage
 from .blueprint import Blueprint
 
 __all__ = ['communities']
+
+logger = logging.getLogger(__name__)
 
 EPOCH = datetime.fromtimestamp(0.0, tz=pytz.utc)
 
@@ -296,16 +306,12 @@ def image_url(community, **kwargs):
   return url_for('communities.image', **kwargs)
 
 
-@route("/<string:community_id>/members")
-@tab('members')
-def members():
-  g.breadcrumb.append(nav.BreadcrumbItem(
-    label=_(u'Members'),
-    url=nav.Endpoint('communities.members', community_id=g.community.slug))
-  )
-
+def _members_query():
+  """
+  Helper used in members views
+  """
   last_activity_date = sa.sql.functions.max(ActivityEntry.happened_at)\
-                                       .label('last_activity_date')                    
+                                       .label('last_activity_date')
   memberships = User\
     .query\
     .options(sa.orm.undefer('photo'))\
@@ -318,8 +324,19 @@ def members():
                  Membership.role,
                  last_activity_date,)\
     .group_by(User, Membership.id, Membership.role)\
-    .order_by(User.last_name.asc(), User.first_name.asc())\
-    .all()
+    .order_by(User.last_name.asc(), User.first_name.asc())
+
+  return memberships
+
+
+@route("/<string:community_id>/members")
+@tab('members')
+def members():
+  g.breadcrumb.append(nav.BreadcrumbItem(
+    label=_(u'Members'),
+    url=nav.Endpoint('communities.members', community_id=g.community.slug))
+  )
+  memberships = _members_query().all()
 
   return render_template("community/members.html",
                          seconds_since_epoch=seconds_since_epoch,
@@ -370,6 +387,101 @@ def members_post():
   else:
     raise BadRequest('Unknown action: {}'.format(repr(action)))
 
+MEMBERS_EXPORT_HEADERS = [
+    _l(u'Name'),
+    _l(u'email'),
+    _l(u'Last activity in this community'),
+    _l(u'Role'),
+]
+
+MEMBERS_EXPORT_ATTRS = [
+  'User',
+  'User.email',
+  'last_activity_date',
+  'role',
+]
+
+HEADER_FONT = openpyxl.styles.Font(bold=True)
+HEADER_ALIGN = openpyxl.styles.Alignment(horizontal='center', vertical='top',
+                                         wrapText=True)
+XLSX_MIME = u'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+@route("/<string:community_id>/members/excel")
+@tab('members')
+def members_excel_export():
+  community = g.community
+  attributes = [attrgetter(a) for a in MEMBERS_EXPORT_ATTRS]
+  BaseModel = current_app.db.Model
+  wb = openpyxl.Workbook()
+
+  if wb.worksheets:
+    wb.remove_sheet(wb.active)
+
+  ws_title = _(u'%(community)s members', community=community.name)
+  ws = wb.create_sheet(title=ws_title)
+  row = 0
+  cells = []
+
+  cols_width = []
+  for col, label in enumerate(MEMBERS_EXPORT_HEADERS, 1):
+    value = unicode(label)
+    cell = WriteOnlyCell(ws, value=value)
+    cell.font = HEADER_FONT
+    cell.alignment = HEADER_ALIGN
+    cells.append(cell)
+    cols_width.append(len(value) + 1)
+
+  ws.append(cells)
+
+  for membership_info in _members_query().all():
+      row +=1
+      cells = []
+      for col, getter in enumerate(attributes):
+        value = None
+        try:
+          value = getter(membership_info)
+        except AttributeError:
+          pass
+
+        if isinstance(value, (BaseModel, Role)):
+          value = unicode(value)
+
+        cell = WriteOnlyCell(ws, value=value)
+        cells.append(value)
+
+        # estimate width
+        value = unicode(cell.value)
+        width = max(len(l) for l in value.split(u'\n')) + 1
+        cols_width[col] = max(width, cols_width[col])
+
+      ws.append(cells)
+
+  # adjust columns width
+  MIN_WIDTH = 3
+  MAX_WIDTH = openpyxl.utils.units.BASE_COL_WIDTH * 4
+
+  for idx, width in enumerate(cols_width, 1):
+    letter = openpyxl.utils.get_column_letter(idx)
+    width = min(max(width, MIN_WIDTH), MAX_WIDTH)
+    ws.column_dimensions[letter].width = width
+
+  fd = StringIO.StringIO()
+  wb.save(fd)
+  fd.seek(0)
+
+  response = current_app.response_class(
+    fd,
+    mimetype=XLSX_MIME,
+  )
+
+  filename = u'{}-members-{}.xlsx'.format(
+    community.name,
+    strftime("%d:%m:%Y-%H:%M:%S", gmtime())
+  )
+  response.headers['content-disposition'] = \
+      'attachment;filename="{}"'.format(filename)
+
+  return response
 
 #
 # Hack to redirect from urls used by the search engine.

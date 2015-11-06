@@ -5,14 +5,21 @@
 
 {% block content %}
   {% call m_box_content(_("Members")) %}
-    {% set is_manager = g.community.has_permission(current_user, 'manage') %}
+    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
 
-    {% if is_manager %}
+    {%- if is_manager %}
       {{ add_member() }}
-    {% endif %}
+    {%- endif %}
 
     <h2>{{ _("Current members") }}</h2>
-    <p>(<i class="glyphicon glyphicon-lock"></i>: {{ _('account disabled') }})</p>
+    <p class="clearfix">
+      (<i class="glyphicon glyphicon-lock"></i>: {{ _('account disabled') }})
+      {%- if is_manager  %}
+        <a class="btn btn-info pull-right" href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
+          <i class="fa fa-justify"></i> {{ _('Download list') }}
+        </a>
+      {%- endif %}
+    </p>
 
     {% set table_id = uuid() %}
     <table class="table table-condensed table-striped" id="{{ table_id }}">
