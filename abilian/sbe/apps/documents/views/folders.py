@@ -485,6 +485,9 @@ def folder_post(folder_id):
   elif action == 'move':
     return move_multiple(folder)
 
+  elif action == 'change-owner':
+    return change_owner(folder)
+
   else:
     # Probably an error or a hack attempt.
     # Logger will inform sentry if enabled
@@ -773,6 +776,20 @@ def create_subfolder(folder):
   description = request.form.get("description", u"")
   subfolder = folder.create_subfolder(title)
   subfolder.description = description
+
+  db.session.commit()
+  return redirect(url_for(folder))
+
+
+def change_owner(folder):
+  check_write_access(folder)
+  items = itertools.chain(*get_selected_objects(folder))
+
+  user_id = request.form.get('new_owner', type=int)
+  user = User.query.get(user_id)
+
+  for item in items:
+    item.owner = user
 
   db.session.commit()
   return redirect(url_for(folder))

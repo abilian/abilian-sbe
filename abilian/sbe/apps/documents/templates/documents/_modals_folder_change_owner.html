@@ -1,0 +1,98 @@
+<div class="modal fade" id="modal-change-owner" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form method="POST" action="{{ folder_post_url }}"
+            enctype="multipart/form-data">
+        {{ csrf_token }}
+
+        <div class="modal-header">
+          <button class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">{{ _("Change owner of selected files") }}</h4>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="control-label"
+                   for="new_owner">{{ _("New owner") }}</label>
+            <input type="text" name="new_owner" value=""
+                   class="form-control"/>
+            <span class="help-block hide"></span>
+          </div>
+
+          <div class="hide selected-items"></div>
+        </div>
+
+        <div class="modal-footer">
+          <button data-dismiss="modal"
+                  class="btn btn-default">{{ _("Cancel") }}</button>
+          <button class="btn btn-primary" type="submit" name="action"
+                  value="change-owner">{{ _("Change owner") }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{%- deferJS %}
+<script type="text/javascript">
+ require(
+     ['Abilian', 'jquery'],
+     function(Abilian, $) {
+
+         Abilian.fn.onAppInit(
+             function() {
+                 var modal = $('#modal-change-owner'),
+                     input = modal.find('input[name="new_owner"]');
+
+                 input.attr("style", "min-width: 220px")
+                      .select2({
+                          minimumInputLength: 2,
+                          ajax: {
+                            url: "{{ url_for("social.users_json") }}",
+                            dataType: 'json',
+                            quietMillis: 100,
+                            data: function(term, page) {
+                                return {
+                                    q: term,
+                                    with_membership: {{ g.community.id | tojson }}
+                                };
+                            },
+                            results: function(data, page) {
+                                return {results: data.results, more: false};
+                            }
+                        },
+                        allowClear: false,
+                        formatResult: function(state, container, query, escapeMarkup) {
+                            var markup = [], text;
+                            window.Select2.util.markMatch(state.name, query.term, markup, escapeMarkup);
+                            text = '<b>' + markup.join("") + '</b>';
+                            if (state.role) {
+                                text+= ' <small class="label label-default pull-right">'
+                                     + escapeMarkup(state.role)
+                                     + '</small> ';
+                            }
+
+                            if (state.email) {
+                                text += ' <br /><i>' + escapeMarkup(state.email) + '</i> ';
+                            }
+                            return text;
+                        }
+                    });
+
+                 $("#s2id_new_owner-select a span").text("");
+                 input.attr("value", "");
+
+                 modal.on('show.bs.modal', function () {
+                     var listing_form = $(document.forms["folder-listing"]),
+                         elements = listing_form.find("input[name='object-selected']:checked"),
+                         container = modal.find('.selected-items');
+                     container.empty();
+                     elements.clone()
+                             .attr('type', 'hidden')
+                             .appendTo(container);
+                 });
+             });
+     });
+</script>
+  {%- enddeferJS %}

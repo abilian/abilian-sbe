@@ -152,7 +152,11 @@ _actions = (
     'documents:folder-listing', 'delete', _l(u'Delete'),
     permission=WRITE,
     icon='trash', css_class='btn-danger'),
-
+  FolderButtonAction(
+    'documents:folder-listing', 'change-owner', _l(u'Change owner'),
+    icon='user', url='#modal-change-owner', modal=True,
+    permission=WRITE,
+  ),
   # Folder left bar actions ##########
   # view
   RootFolderAction(
