@@ -1,0 +1,83 @@
+<div class="modal fade" id="modal-upload-files" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" class="b-upload b-upload_multi"
+            action="{{ folder_post_url }}" enctype="multipart/form-data">
+        {{ csrf_token }}
+
+        <div class="modal-header">
+          <button class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">{{ _("Upload new files") }}</h4>
+        </div>
+
+        <div class="modal-body">
+          <div class="multiupload">
+            <div class="btn btn-default btn-small btn-file js-fileapi-wrapper">
+              <span class="glyphicon glyphicon-plus"></span>
+              <span>{{ _('Add files to selection') }}</span>
+              <input name="file" type="file">
+            </div>
+
+            <ul class="list-group js-files b-upload__files">
+
+              <li class="list-group-item js-file-tpl">
+                <div class="media b-thumb" data-id="<%=uid%>"
+                     title="<%-name%> (<%-sizeText%>)">
+                  <div class="pull-left b-thumb__preview">
+                    <div class="media-object b-thumb__preview__pic"
+                         style="width: 40px; height: 40px"></div>
+                  </div>
+
+                  <div class="pull-right">
+                    <div style="display: inline-block; width: 10em;">
+                      <div class="progress">
+                        <div class="progress-bar" role="progressbar"></div>
+                      </div>
+                    </div>
+
+                    <div class="hidden btn btn-default pull-right statusicon">
+                      <span class="glyphicon"></span>
+                    </div>
+
+                    <div class="btn btn-danger b-thumb__del"
+                         data-fileapi="file.remove">
+                      <span class="glyphicon glyphicon-minus"></span>
+                    </div>
+                  </div>
+
+                  <div class="media-body">
+                    <div class="b-thumb__name">
+                      <h4 class="list-group-item-heading"><%-name%></h4>
+                      <span>(<%-sizeText%>)</span>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+
+          <div class="checkbox">
+            <label>
+              <input type="checkbox" name="uncompress_files" value="true"/>
+              {{ _('Uncompress ZIP files') }}
+            </label>
+          </div>
+        </div>
+        <!-- modal-body -->
+
+        <div class="modal-footer">
+          <button data-dismiss="modal"
+                  class="btn btn-default">{{ _("Cancel") }}</button>
+          <div class="js-upload btn btn-success btn-small">
+            <span>{{ _("Upload") }}</span>
+          </div>
+        </div>
+        {%- deferJS %}
+        <script type="text/javascript">
+         {%- include "documents/_modal_upload.js" %}
+        </script>
+        {%- enddeferJS %}
+      </form>
+    </div>
+  </div>
+</div>
