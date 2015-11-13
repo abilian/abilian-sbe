@@ -1,0 +1,26 @@
+<div class="modal fade" id="modal-delete" role="dialog" data-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form
+          action="{{ url_for(".document_delete", doc_id=doc.id, community_id=doc.community.slug) }}"
+          method="POST">
+        {{ csrf_token }}
+
+        <div class="modal-header">
+          <button class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">{{ _("Delete File") }}</h4>
+        </div>
+
+        <div class="modal-body">
+          {{ _('Are you sure you want to delete the file "{filename}" ?').format(filename=doc.title) }}
+        </div>
+
+        <div class="modal-footer">
+          <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+          <button type="submit"
+                  class="btn btn-danger">{{ _("Really Delete") }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

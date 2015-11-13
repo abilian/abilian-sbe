@@ -16,7 +16,9 @@ STATIC_DIR = pkg_resources.resource_filename(__name__, 'static')
 LESSCSS_FILE = str(Path(STATIC_DIR, 'less', 'abilian-sbe.less'))
 JS = ('js/sbe-datatable.js',
       'js/jquery.fileapi.js',
-      'js/folder.js',)
+      'js/folder.js',
+      'js/folder_edit.js',
+)
 
 
 class AbilianSBE(object):

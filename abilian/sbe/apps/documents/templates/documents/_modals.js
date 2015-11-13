@@ -3,37 +3,6 @@
     'use strict';
 
 function setupFolderModal(Abilian, $) {
-    function setupModalFolderInputnameCheck(modal, object_id, action) {
-        var $submit = modal.find('button.btn-primary'),
-            $input = modal.find('input[name="title"]'),
-            $help_span = $input.next('span.help-block'),
-            $control_group = $input.closest('div.form-group');
-
-        $submit.on('click', function(e) {
-            var title = $input.val();
-            $.ajax(
-                '{{ url_for(".check_valid_name", community_id=g.community.slug) }}',
-                { async: false,
-                  cache: false,
-                  data: { object_id: object_id,
-                          title: title,
-                          action: action },
-                  success: function(data) {
-                      var valid = data.valid;
-                      if (!valid) {
-                          e.preventDefault();
-                          $control_group.addClass('has-error');
-                          $help_span.text(data.help_text);
-                          $help_span.removeClass('hide');
-                      } else {
-                          $control_group.removeClass('has-error');
-                          $help_span.text('');
-                          $help_span.addClass('hide');
-                      }
-                  }
-                });
-        });
-    };
 
     {%- if doc %}
     // Simple document viewer...
@@ -97,27 +66,13 @@ function setupFolderModal(Abilian, $) {
             return true;
         }
     }
-    {%- endif %}
 
     Abilian.fn.onAppInit(function() {
-        setupModalFolderInputnameCheck(
-            $('#modal-edit'),
-            '{{ doc.id if doc else folder.id }}',
-            '{%- if doc %}document{% else %}folder{% endif %}-edit'
-        );
-        setupModalFolderInputnameCheck(
-            $('#modal-new-folder'),
-            '{{ folder.id }}',
-            'new'
-        );
-
-        $('#modal-edit input[type="text"]').preventEnterKey();
-        $('#modal-new-folder input[type="text"]').preventEnterKey();
-
-        {%- if doc %}
         setupDocumentViewer();
-        {%- endif %}
+
     });
+    {%- endif %}
+
 }
     require(['Abilian', 'jquery'], setupFolderModal);
 }());

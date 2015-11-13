@@ -1,0 +1,42 @@
+<div class="modal fade" id="modal-send-by-email" role="dialog"
+     data-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form
+          action="{{ url_for(".document_send", doc_id=doc.id, community_id=doc.community.slug) }}"
+          method="POST">
+        {{ csrf_token }}
+
+        <div class="modal-header">
+          <button class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">{{ _("Send by email") }}</h4>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="control-label">{{ _("Recipient") }}</label>
+
+            <div class="input-group">
+              <span class="input-group-addon">@</span>
+              <input class="form-control" id="prependedInput"
+                     type="text" name="recipient"
+                     value="{{ request.args.get('recipient', '') }} "/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label">{{ _("Message") }}</label>
+            <textarea name="message"
+                      class="form-control resizeable-vertical" rows="6"
+                      placeholder="{{ _('Message...') }}">{{ request.args.get('message', '') }}</textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+          <button class="btn btn-primary" type="submit">{{ _("Send") }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

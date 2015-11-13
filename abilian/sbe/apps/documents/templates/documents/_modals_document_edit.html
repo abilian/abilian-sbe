@@ -1,36 +1,39 @@
-<div class="modal fade" id="modal-edit" role="dialog">
+<div class="modal fade" id="modal-edit" role="dialog" data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" action="{{ folder_post_url }}"
-            enctype="multipart/form-data" role="form">
+      <form method="POST"
+            action="{{ url_for(".document_edit", doc_id=doc.id, community_id=doc.community.slug) }}"
+            enctype="multipart/form-data">
+
         {{ csrf_token }}
 
         <div class="modal-header">
           <button class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">{{ _("Edit folder properties") }}</h4>
+          <h4 class="modal-title">{{ _("Edit document properties") }}</h4>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label class="control-label" for="inputName">{{ _('Name') }}</label>
+            <label class="control-label" for="inputName">{{ _("Name") }}</label>
+
             <input type="text" class="form-control" id="inputName" name="title"
                    data-check-url="{{ url_for(".check_valid_name", community_id=g.community.slug) }}"
-                   value="{{ folder.title }}"/>
+                   value="{{ doc.title }}">
             <span class="help-block"></span>
           </div>
 
           <div class="form-group">
             <label class="control-label"
                    for="inputDescription">{{ _("Description") }}</label>
-            <textarea rows="5" class="form-control not-resizeable"
-                      id="inputDescription"
-                      name="description">{{ folder.description }}</textarea>
+
+            <textarea class="form-control resizeable-vertical" rows="5"
+                      cols="80" id="inputDescription"
+                      name="description">{{ doc.description }}</textarea>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button data-dismiss="modal"
-                  class="btn btn-default">{{ _("Cancel") }}</button>
+          <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
           <button class="btn btn-primary" type="submit" name="action"
                   value="edit">{{ _("Save changes") }}</button>
         </div>
@@ -47,8 +50,8 @@
          Abilian.fn.onAppInit(function() {
              setupFolderEdit(
                  $('#modal-edit'),
-                 '{{ folder.id }}',
-                 'folder-edit');
+                 '{{ doc.id }}',
+                 'document-edit');
 
              $('#modal-edit input[type="text"]').preventEnterKey();
          });

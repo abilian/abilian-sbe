@@ -1,0 +1,37 @@
+<div class="modal fade" id="modal-upload-new-version" role="dialog"
+     data-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <form id="fileupload"
+            action="{{ url_for(".document_upload", doc_id=doc.id, community_id=doc.community.slug) }}"
+            method="POST" enctype="multipart/form-data">
+        {{ csrf_token }}
+
+        <div class="modal-header">
+          <button class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">{{ _("Upload new version") }}</h4>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <input type="file" name="file"/>
+          </div>
+          {# Doesn't work currently.
+           <div class="fileupload fileupload-new" data-fileupload="file">
+           <div class="fileupload-preview uneditable-input span5"></div>
+           <span class="btn btn-file"><span class="fileupload-new">{{ _("Select file") }}</span><span class="fileupload-exists">{{ _("Change") }}</span></span>
+           <a href="#" class="btn fileupload-exists" data-dismiss="fileupload">{{ _("Remove") }}</a>
+           </div>
+           #}
+        </div>
+
+        <div class="modal-footer">
+          <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+          <button class="btn btn-primary"
+                  type="submit">{{ _("Upload") }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

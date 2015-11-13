@@ -37,3 +37,20 @@
     </div>
   </div>
 </div>
+
+
+{% deferJS %}
+<script type="text/javascript">
+ require(
+     ['Abilian', 'SBEFolderEditSetup'],
+     function(Abilian, setupFolderEdit) {
+         Abilian.fn.onAppInit(function() {
+             setupFolderEdit($('#modal-new-folder'),
+                             '{{ folder.id }}',
+                             'new');
+         });
+         $('#modal-new-folder input[type="text"]').preventEnterKey();
+
+     });
+</script>
+{%- enddeferJS %}
