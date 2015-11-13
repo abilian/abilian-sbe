@@ -418,6 +418,10 @@ def members_excel_export():
     wb.remove_sheet(wb.active)
 
   ws_title = _(u'%(community)s members', community=community.name)
+  ws_title = ws_title.strip()
+  if len(ws_title) > 31:
+    # sheet title cannot exceed 31 char. max length
+    ws_title = ws_title[:30] + u'…'
   ws = wb.create_sheet(title=ws_title)
   row = 0
   cells = []
