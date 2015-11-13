@@ -155,7 +155,7 @@ _actions = (
   FolderButtonAction(
     'documents:folder-listing', 'change-owner', _l(u'Change owner'),
     icon='user', url='#modal-change-owner', modal=True,
-    permission=WRITE,
+    permission=MANAGE,
   ),
   # Folder left bar actions ##########
   # view

@@ -782,7 +782,7 @@ def create_subfolder(folder):
 
 
 def change_owner(folder):
-  check_write_access(folder)
+  check_manage_access(folder)
   items = itertools.chain(*get_selected_objects(folder))
 
   user_id = request.form.get('new_owner', type=int)
