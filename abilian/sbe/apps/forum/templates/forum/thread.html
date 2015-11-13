@@ -90,7 +90,7 @@
 
 {# macros #}
 {%- macro m_post_edit_link(post) %}
-  {%- if not is_closed and (current_user == post.creator or g.is_manager) %}
+  {%- if not is_closed and (g.user == post.owner or g.is_manager) %}
     <a href="{{ url_for('.post_edit', community_id=post.thread.community.slug, thread_id=post.thread.id, object_id=post.id) }}">
       <i class="fa fa-edit"></i>
       {{ _('Edit') }}
