@@ -11,19 +11,16 @@
          var container = $('.preview-container'),
              img = container.find('img.preview'),
              imgSrc = img.attr('src'),
-             previewNav = container.find('.preview-nav'),
              previewPrev = container.find('.preview-prev'),
              previewNext = container.find('.preview-next'),
              pageNum = container.data('pageNum');
 
          function showNav() {
              $(document).bind('keydown', keyDown);
-             previewNav.stop().fadeTo(150, 1);
          }
 
          function hideNav() {
              $(document).unbind('keydown', keyDown);
-             previewNav.stop().fadeTo(150, 0);
          }
 
          if (pageNum > 1) {

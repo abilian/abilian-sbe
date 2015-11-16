@@ -1,51 +1,49 @@
 /* Document preview */
 
 img.preview {
+  display: block;
   border: 1px black;
+  margin: 0px auto;
 }
 
 .preview-container {
-  &-nav {
-    display: none;
-    background: #0c3b3d;
-    width: 64px;
-    height: 32px;
-    padding: 5px;
+  position: relative;
+  
+  .preview-nav-button {
     position: absolute;
-    top: 215px;
-    left: 720px;
-    border-radius: 5px 5px;
-    -moz-border-radius: 5px 5px;
-    -webkit-border-radius: 5px 5px;
-
-    a {
-      display: block;
-      overflow: hidden;
-      text-indent: -900em;
-      height: 22px;
-      float: left;
-      padding: 5px;
-      border-radius: 5px;
-      -moz-border-radius: 5px;
-      -khtml-border-radius: 5px;
-      -webkit-border-radius: 5px;
-
-      &:hover {
-        background-color: #a1c436;
-        cursor: pointer;
-      }
-    }
-  } /* .preview-nav */
-
-  &-prev {
-    width: 22px;
-    background: url(../../images/prev.png) no-repeat center;
+    top: 0px;
+    left: 0px;
+    bottom: 0px;
+    display: block;
+    z-index: 100;
+    width: 15%;
+    text-align: center;
+    color: transparent;
+    opacity: 0.9;
+    
+    &:hover {
+      color: #0c3b3d;      
+      cursor: pointer;
     }
 
-  &-next {
-    width: 22px;
-    background: url(../../images/next.png) no-repeat center;
+    .fa {
+      display: inline-block;
+      position: absolute;
+      top: 50%;
     }
+  }  /* .preview-nav */
+  
+  .preview-prev .fa {
+      left: 50%;
+  }
+  .preview-next {
+    right: 0px;
+    left: auto;
+    
+    .fa {
+      right: 50%;
+    }
+  }
 }
 
 /* folder / documents objects table */
