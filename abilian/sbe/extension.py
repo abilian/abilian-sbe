@@ -19,6 +19,7 @@ JS = ('js/sbe-datatable.js',
       'js/folder.js',
       'js/folder_edit.js',
       'js/folder_upload.js',
+      'js/document_viewer.js',
 )
 
 

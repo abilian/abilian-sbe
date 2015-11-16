@@ -78,7 +78,7 @@
 
     <h3 class="main">{{ _('Preview') }}</h3>
 
-    <div class="preview" style="max-width: {{ doc.preview_size }}px;">
+    <div class="preview-container" style="max-width: {{ doc.preview_size }}px;" data-page-num="{{ doc.page_num }}">
       <img src="{{ url_for(".document_preview_image",
           community_id=g.community.slug, doc_id=doc.id,
           size=doc.preview_size) }}"  alt="" class="preview" data-page="0"/>
@@ -106,6 +106,17 @@
       {{ m_audit_log(audit_entries) }}
 
   {% endcall %}
+
+  {% deferJS %}
+    <script type="text/javascript">
+     require(
+         ['Abilian', 'SBEDocumentViewerSetup'],
+         function(Abilian, viewerSetup) {
+             Abilian.fn.onAppInit(viewerSetup);
+         });
+    </script>
+  {% enddeferJS %}
+
 {% endblock %}
 
 {% block sidebar %}
@@ -123,11 +134,4 @@
 
 {% block modals %}
   {% include "documents/_modals_document.html" %}
-{% endblock %}
-
-
-{% block js %}
-  <script type="text/javascript">
-    {% include "documents/_modals.js" %}
-  </script>
 {% endblock %}
