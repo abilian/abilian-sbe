@@ -170,7 +170,7 @@ def checkin_checkout(doc_id):
 
 def preview_missing_image():
   response = redirect(
-    url_for('static', filename='images/preview_missing.png'))
+    url_for('abilian_sbe_static', filename='images/preview_missing.png'))
   response.headers['Cache-Control'] = 'no-cache'
   return response
 
