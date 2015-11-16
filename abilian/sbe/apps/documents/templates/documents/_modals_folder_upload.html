@@ -72,12 +72,26 @@
             <span>{{ _("Upload") }}</span>
           </div>
         </div>
-        {%- deferJS %}
-        <script type="text/javascript">
-         {%- include "documents/_modal_upload.js" %}
-        </script>
-        {%- enddeferJS %}
       </form>
     </div>
   </div>
 </div>
+
+{%- deferJS %}
+<script text="text/javascript">
+ require(
+     ['Abilian', 'SBEFolderUploadSetup'],
+     function(Abilian, setupFolderUpload) {
+         var messages = {
+             fileUploadError: {{ _('Error - File not uploaded')|tojson }},
+             fileTooLargeError: {{ _('Error: maximum file size exceeded')|tojson }}
+         };
+
+         Abilian.fn.onAppInit(function() {
+             setupFolderUpload('modal-upload-files',
+                               {{ folder_post_url|tojson }},
+                               messages);
+         });
+     });
+</script>
+{%- enddeferJS %}
