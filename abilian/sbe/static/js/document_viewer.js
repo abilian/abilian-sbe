@@ -25,6 +25,9 @@
 
          if (pageNum > 1) {
              container.hover(showNav, hideNav);
+         } else {
+             previewPrev.hide();
+             previewNext.hide();
          }
 
          // TODO: what if we want to go past the last page?
