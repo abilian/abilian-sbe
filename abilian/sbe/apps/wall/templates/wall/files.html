@@ -17,7 +17,9 @@
             <img src="{{ doc.icon }}" style="vertical-align: middle;"
                 alt=""/>
             <a href="{{ doc.url }}">{{ doc.name }}</a>
-            ({{ doc.content_length|filesize }})
+            {%- if doc.content_length %}
+              ({{ doc.content_length|filesize }})
+            {%- endif %}
           </span>
         </p>
       {% endfor %}

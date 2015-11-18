@@ -110,8 +110,10 @@ def get_attachments_from_dms(community):
   attachments = []
   for doc in documents:
     url = url_for(doc)
-    attachment = Attachment(url, doc['name'], doc['owner_name'], doc['created_at'],
-                            doc['content_length'], doc['content_type'])
+    attachment = Attachment(url, doc['name'], doc['owner_name'],
+                            doc['created_at'],
+                            doc.get('content_length', None),
+                            doc.get('content_type', u''),)
     attachments.append(attachment)
 
   return attachments
