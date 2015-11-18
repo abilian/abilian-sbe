@@ -483,7 +483,7 @@ def members_excel_export():
     strftime("%d:%m:%Y-%H:%M:%S", gmtime())
   )
   response.headers['content-disposition'] = \
-      'attachment;filename="{}"'.format(filename)
+      u'attachment;filename="{}"'.format(filename)
 
   return response
 
