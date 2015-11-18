@@ -52,7 +52,7 @@ def init_forum_values(endpoint, values):
   g.current_tab = 'forum'
 
   g.breadcrumb.append(
-    nav.BreadcrumbItem(label=_(u'Conversations'),
+    nav.BreadcrumbItem(label=_l(u'Conversations'),
                        url=nav.Endpoint('forum.index',
                                         community_id=g.community.slug)))
 

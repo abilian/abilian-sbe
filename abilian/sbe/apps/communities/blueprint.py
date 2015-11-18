@@ -3,7 +3,7 @@
 """
 from __future__ import absolute_import
 
-from abilian.i18n import _
+from abilian.i18n import _l
 from abilian.web import nav
 from flask import g, Blueprint as BaseBlueprint
 from werkzeug.exceptions import NotFound
@@ -57,7 +57,7 @@ def pull_community(endpoint, values):
   """
   g.nav['active'] = 'section:communities'
   g.breadcrumb.append(
-    nav.BreadcrumbItem(label=_(u'Communities'),
+    nav.BreadcrumbItem(label=_l(u'Communities'),
                        url=nav.Endpoint('communities.index')))
 
   try:

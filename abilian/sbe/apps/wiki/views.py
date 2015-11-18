@@ -41,7 +41,7 @@ def init_wiki_values(endpoint, values):
   g.current_tab = 'wiki'
 
   endpoint = nav.Endpoint('wiki.index', community_id=g.community.slug)
-  g.breadcrumb.append(nav.BreadcrumbItem(label=_(u'Wiki'), url=endpoint))
+  g.breadcrumb.append(nav.BreadcrumbItem(label=_l(u'Wiki'), url=endpoint))
 
   title = request.args.get('title', u'').strip()
   if title and title != 'Home':

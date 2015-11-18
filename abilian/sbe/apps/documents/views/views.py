@@ -5,7 +5,8 @@ Document management blueprint.
 from __future__ import absolute_import
 
 from flask import g
-from flask_babel import gettext as _
+
+from abilian.i18n import _l
 from abilian.web import nav
 from abilian.sbe.apps.communities.blueprint import Blueprint
 
@@ -26,6 +27,6 @@ def init_document_values(endpoint, values):
   g.current_tab = 'documents'
 
   g.breadcrumb.append(
-    nav.BreadcrumbItem(label=_(u'Documents'),
+    nav.BreadcrumbItem(label=_l(u'Documents'),
                        url=nav.Endpoint('documents.index',
                                         community_id=g.community.slug)))
