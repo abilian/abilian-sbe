@@ -26,7 +26,7 @@ from abilian.sbe.apps.wiki.models import WikiPage
 from .. import TOKEN_SERIALIZER_NAME
 
 
-@periodic_task(run_every=crontab(hour=8, minute=0, ))
+@periodic_task(run_every=crontab(hour=10, minute=0, ))
 def send_daily_social_digest_task():
   # a request_context is required when rendering templates
   with app.test_request_context('/send_daily_social_updates'):
