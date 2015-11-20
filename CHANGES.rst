@@ -1,7 +1,13 @@
 Changelog for Abilian SBE
 =========================
 
-0.1.5 (unreleased)
+0.1.6 (unreleased)
+------------------
+
+TODO
+
+
+0.1.5 (2015-11-20)
 ------------------
 
 - Members: export listing in xslx format
