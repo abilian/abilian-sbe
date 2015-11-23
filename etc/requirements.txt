@@ -1,5 +1,5 @@
 # Abilian Core
-abilian-core>=0.4.0,<0.5
+abilian-core
 
 validate_email
 
