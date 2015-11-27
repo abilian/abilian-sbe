@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.1.4.dev106+ngd4f2fe2\n"
+"Project-Id-Version: abilian-sbe 0.1.7.dev0+ng0e15c4f.d20151127\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-11-10 14:54+0100\n"
+"POT-Creation-Date: 2015-11-27 15:16+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,7 +30,7 @@ msgid "Activities"
 msgstr ""
 
 #: abilian/sbe/apps/communities/actions.py:48
-#: abilian/sbe/apps/documents/views/views.py:29
+#: abilian/sbe/apps/documents/views/views.py:30
 #: abilian/sbe/apps/social/views/users.py:43
 msgid "Documents"
 msgstr ""
@@ -59,7 +59,7 @@ msgstr ""
 #: abilian/sbe/apps/communities/forms.py:18
 #: abilian/sbe/apps/communities/views.py:391
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:11
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:125
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:17
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:15
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:17
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:16
@@ -69,8 +69,8 @@ msgid "Name"
 msgstr ""
 
 #: abilian/sbe/apps/communities/forms.py:20
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:134
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:23
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:27
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:24
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:24
 #: abilian/sbe/apps/social/forms.py:41
 msgid "Description"
@@ -183,12 +183,12 @@ msgid "Destroy community"
 msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/edit.html:39
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:30
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:74
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:100
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:143
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:19
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:36
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:36
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:30
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_change_owner.html:28
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:32
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:33
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_move.html:24
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:32
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:70
@@ -328,21 +328,17 @@ msgid "Checkout (release edit lock)"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:237
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:13
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:13
 msgid "Upload new version"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:243
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:50
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:12
 msgid "Send by email"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:254
 msgid "Refresh preview"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_m_docs_table.js:72
-msgid "Delete selected elements?"
 msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:21
@@ -357,85 +353,81 @@ msgstr ""
 msgid "Filter..."
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:54
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:102
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:48
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:96
 #: abilian/sbe/apps/forum/forms.py:64 abilian/sbe/apps/wiki/forms.py:36
 msgid "Title"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:55
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:103
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:49
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:97
 msgid "Size"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:58
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:104
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:52
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:100
 #: abilian/sbe/apps/documents/templates/documents/descendants.html:38
 msgid "Owner"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:60
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:106
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:54
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:102
 msgid "Age"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:119
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:109
+msgid "Delete selected elements?"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:123
 msgid "This folder is currently empty. Why don't you upload some content?"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modal_upload.js:29
-msgid "Error - File not uploaded"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modal_upload.js:36
-msgid "Error: maximum file size exceeded"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:32
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:72
-#: abilian/sbe/apps/wiki/templates/wiki/_base.html:77
-msgid "Upload"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:55
-msgid "Recipient"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:66
-#: abilian/sbe/apps/forum/forms.py:69 abilian/sbe/apps/wiki/forms.py:78
-msgid "Message"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:69
-msgid "Message..."
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:75
-msgid "Send"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:92
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:11
 msgid "Delete File"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:96
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:15
 msgid "Are you sure you want to delete the file \"{filename}\" ?"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:102
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:21
 #: abilian/sbe/apps/forum/templates/forum/thread.html:200
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:82
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:50
 msgid "Really Delete"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:120
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:12
 msgid "Edit document properties"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document.html:145
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:34
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:38
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:35
 msgid "Save changes"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:17
+msgid "Recipient"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:28
+#: abilian/sbe/apps/forum/forms.py:69 abilian/sbe/apps/wiki/forms.py:78
+msgid "Message"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:31
+msgid "Message..."
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:37
+msgid "Send"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:32
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:72
+#: abilian/sbe/apps/wiki/templates/wiki/_base.html:77
+msgid "Upload"
 msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_change_owner.html:11
@@ -477,6 +469,14 @@ msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:62
 msgid "Uncompress ZIP files"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:86
+msgid "Error - File not uploaded"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:87
+msgid "Error: maximum file size exceeded"
 msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:14
@@ -539,15 +539,17 @@ msgstr ""
 msgid "Preview"
 msgstr ""
 
+#: abilian/sbe/apps/documents/templates/documents/document.html:87
 #: abilian/sbe/apps/documents/templates/documents/document.html:89
 msgid "Previous"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:90
+#: abilian/sbe/apps/documents/templates/documents/document.html:91
+#: abilian/sbe/apps/documents/templates/documents/document.html:93
 msgid "Next"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:93
+#: abilian/sbe/apps/documents/templates/documents/document.html:107
 msgid "Document preview not yet available"
 msgstr ""
 
@@ -1156,7 +1158,7 @@ msgid "has posted an object of type {object_type} called \"{object}\""
 msgstr ""
 
 #: abilian/sbe/apps/wall/presenters.py:141
-msgid "has updated object {object}."
+msgid "has updated {object_type} {object}."
 msgstr ""
 
 #: abilian/sbe/apps/wall/presenters.py:144
