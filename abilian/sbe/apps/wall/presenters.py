@@ -86,6 +86,7 @@ DOCUMENT_BODY_TEMPLATE = u'''
 </div>
 '''
 
+
 class ActivityEntryPresenter(BasePresenter):
   @property
   def object_url(self):
@@ -172,7 +173,7 @@ class ActivityEntryPresenter(BasePresenter):
       body = render_template_string(
         DOCUMENT_BODY_TEMPLATE,
         obj=self.object,
-        parents = parents
+        parents=parents
       )
       return Markup(body)
     else:
