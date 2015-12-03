@@ -131,7 +131,7 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
 
   return {'post_id': post_id,
           'successfully_sent': successfully_sent,
-          'failed': list(failed),}
+          'failed': list(failed), }
 
 
 def build_reply_email_address(name, post, member, domain):
