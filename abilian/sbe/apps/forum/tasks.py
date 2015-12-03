@@ -259,10 +259,18 @@ def add_paragraph(newpost):
 
 
 def clean_html(newpost):
+  #cleans leftover empty blockquotes
   clean = re.sub(r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)",
                  '', newpost, flags=re.MULTILINE | re.DOTALL)
-  clean = re.sub(r"(<br>.*?<a href=.*?/a>.*?:<br>)",
-                 '', clean, flags=re.MULTILINE | re.DOTALL)
+
+  # this cleans auto generated reponse text (<br>timedate <a email /a><br>)
+  # we reverse the string because re.sub replaces
+  #  LEFTMOST NON-OVERLAPPING OCCURRENCES, and we only want the last match
+  # in the string
+  clean = re.sub(r"(>rb<.*?>a.*?=ferh\sa<.*?>rb<)",
+                 '', clean[::-1], flags=re.MULTILINE | re.DOTALL)
+  clean = clean[::-1]
+
   return clean
 
 
