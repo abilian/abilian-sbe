@@ -16,6 +16,7 @@
             <label class="control-label"
                    for="inputName2">{{ _("Name") }}</label>
             <input type="text" id="inputName2" name="title" value=""
+                   data-check-url="{{ url_for(".check_valid_name", community_id=g.community.slug) }}"
                    class="form-control"/>
             <span class="help-block hide"></span>
           </div>
