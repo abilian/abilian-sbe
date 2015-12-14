@@ -192,8 +192,9 @@ class BaseCommunityView(object):
     return url_for(self.view_endpoint, community_id=self.obj.slug)
 
   def get_form_kwargs(self):
+    kwargs = super(BaseCommunityView, self).get_form_kwargs()
+
     image = self.obj.image
-    kwargs = dict()
     if image and 'community' in g:
       setattr(image, 'url', image_url(self.obj, s=500))
       kwargs['image'] = image
@@ -211,11 +212,6 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
                               icon='cog',
                               url=nav.Endpoint('communities.settings',
                                                community_id=g.community.slug))
-
-  def get_form_kwargs(self):
-    kwargs = views.ObjectEdit.get_form_kwargs(self)
-    kwargs.update(BaseCommunityView.get_form_kwargs(self))
-    return kwargs
 
   def before_populate_obj(self):
     form = self.form
