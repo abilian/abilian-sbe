@@ -42,6 +42,7 @@ class Blueprint(BaseBlueprint):
 
     BaseBlueprint.__init__(self, *args, **kwargs)
     self.url_value_preprocessor(pull_community)
+    self.url_value_preprocessor(init_current_tab)
     self.before_request(check_access)
 
 
@@ -49,6 +50,13 @@ def check_access():
   if hasattr(g, 'community'):
     # communities.index is not inside a community, for example
     security.check_access(g.community)
+
+
+def init_current_tab(endpoint, values):
+  """
+  ensure g.current_tab exists
+  """
+  g.current_tab = None
 
 
 def pull_community(endpoint, values):
