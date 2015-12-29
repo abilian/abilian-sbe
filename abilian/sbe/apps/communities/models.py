@@ -3,14 +3,20 @@
 """
 from __future__ import absolute_import
 
+import logging
 from datetime import datetime
 import time
 from os.path import dirname, join
 
-from flask import current_app
-from sqlalchemy import Column, Unicode, ForeignKey, Boolean, DateTime, \
-  Integer, UniqueConstraint, String, and_
+from blinker import ANY
+import sqlalchemy as sa
+from sqlalchemy import (
+  Column, Unicode, ForeignKey, Boolean, DateTime,
+  Integer, UniqueConstraint, String, and_,
+)
 from sqlalchemy.orm import relation, relationship, backref
+from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE
+from flask import current_app
 
 from abilian.i18n import _l
 from abilian.core.extensions import db
@@ -29,6 +35,8 @@ from abilian.services.security import (
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.documents.models import Folder
 from . import signals
+
+logger = logging.getLogger(__name__)
 
 MEMBER = Role('member', label=_l(u'role_member'), assignable=False)
 VALID_ROLES = frozenset((READER, WRITER, MANAGER, MEMBER,))
@@ -130,9 +138,10 @@ class Community(Entity):
                     cascade='all, delete-orphan',
                     backref=backref('_community', lazy='select', uselist=False))
 
-  #: The group this community is related to (members).
-  group_id = Column(ForeignKey(Group.id))
-  group = relation(Group, primaryjoin=(group_id == Group.id))
+  #: The group this community is linked to, if any. Memberships are then
+  #: reflected
+  group_id = Column(ForeignKey(Group.id), nullable=True, unique=True)
+  group = relation(Group, foreign_keys=group_id, lazy='select')
 
   #: Memberships for this community.
   memberships = relationship(Membership, cascade="all, delete-orphan")
@@ -224,14 +233,17 @@ class Community(Entity):
     if role not in VALID_ROLES:
       raise ValueError("Invalid role: {}".format(role))
 
+    session = sa.orm.object_session(self) or db.session()
     is_new = True
     M = Membership
-    membership = M.query \
-      .filter(and_(M.user_id == user.id, M.community_id == self.id)).first()
+    membership = session.query(M) \
+                        .filter(and_(M.user_id == user.id,
+                                     M.community_id == self.id))\
+                        .first()
 
     if not membership:
       membership = Membership(community=self, user=user, role=role)
-      db.session.add(membership)
+      session.add(membership)
       self.membership_count += 1
     else:
       is_new = False
@@ -247,9 +259,9 @@ class Community(Entity):
       raise KeyError(
         "User {} is not a member of community {}".format(user, self))
 
-    signals.membership_removed.send(self, membership=membership)
     db.session.delete(membership)
     self.membership_count -= 1
+    signals.membership_removed.send(self, membership=membership)
 
   def update_roles_on_folder(self):
     if self.folder:
@@ -314,3 +326,149 @@ def CommunityIdColumn():
         ('community_id', ('community_id',)),
       )),
   )
+
+
+# Handlers to keep community/group members in sync
+#
+_PROCESSED_ATTR = '__sbe_community_group_sync_processed__'
+
+@signals.membership_set.connect_via(ANY)
+def _membership_added(sender, membership, is_new):
+  if not is_new:
+    return
+
+  if getattr(membership.user, _PROCESSED_ATTR, False) is OP_APPEND:
+    return
+
+  if sender.group and membership.user not in sender.group.members:
+    logger.debug('_membership_added(%r, %r, %r) user: %r',
+                 sender, membership, is_new, membership.user)
+    setattr(membership.user, _PROCESSED_ATTR, OP_APPEND)
+    sender.group.members.add(membership.user)
+
+
+@signals.membership_removed.connect_via(ANY)
+def membership_removed(sender, membership):
+  if getattr(membership.user, _PROCESSED_ATTR, False) is OP_REMOVE:
+    return
+
+  if sender.group and membership.user in sender.group.members:
+    logger.debug('_membership_removed(%r, %r) user: %r',
+                 sender, membership, membership.user)
+    setattr(membership.user, _PROCESSED_ATTR, OP_REMOVE)
+    sender.group.members.discard(membership.user)
+
+
+@sa.event.listens_for(Community.members, 'append')
+@sa.event.listens_for(Community.members, 'remove')
+def _on_member_change(community, user, initiator):
+  group = community.group
+  if not group:
+    return
+
+  logger.debug('_on_member_change(%r, %r, op=%r)',
+               community, user, initiator.op)
+
+  if getattr(user, _PROCESSED_ATTR, False) is initiator.op:
+    return
+
+  setattr(user, _PROCESSED_ATTR, initiator.op)
+
+  if initiator.op is OP_APPEND:
+    if user not in group.members:
+      group.members.add(user)
+
+  elif initiator.op is OP_REMOVE:
+    if user in group.members:
+      group.members.discard(user)
+
+
+@sa.event.listens_for(Community.group, 'set', active_history=True)
+def _on_linked_group_change(community, value, oldvalue, initiator):
+  if value == oldvalue:
+    return
+
+  logger.debug('_on_linked_group_change(%r, %r, %r)',
+               community, value, oldvalue)
+
+  if oldvalue is not None and oldvalue.members:
+    logger.debug('_on_linked_group_change(%r, %r, %r): oldvalue clear()',
+                 community, value, oldvalue)
+    oldvalue.members.clear()
+
+  members = set(community.members)
+  if value is not None and value.members != members:
+    logger.debug('_on_linked_group_change(%r, %r, %r): set value.members',
+                 community, value, oldvalue)
+    value.members = members
+
+
+def _safe_get_community(group):
+  session = sa.orm.object_session(group)
+  if not session:
+    return None
+
+  with session.no_autoflush:
+    try:
+      return session.query(Community)\
+                    .filter(Community.group == group)\
+                    .options(sa.orm.joinedload(Community.group),
+                             sa.orm.joinedload(Community.members))\
+                    .one()
+    except sa.orm.exc.NoResultFound:
+      return None
+
+
+@sa.event.listens_for(Group.members, 'append')
+@sa.event.listens_for(Group.members, 'remove')
+def _on_group_member_change(group, user, initiator):
+  community = _safe_get_community(group)
+
+  if not community:
+    return
+
+  op = initiator.op
+  if getattr(user, _PROCESSED_ATTR, False) is op:
+    return
+
+  is_present = user in community.members
+  setattr(user, _PROCESSED_ATTR, op)
+  logger.debug('_on_group_member_change(%r, %r, op=%r) community: %r',
+               group, user, initiator.op, community)
+
+  if ((op is OP_APPEND and is_present)
+      or (op is OP_REMOVE and not is_present)):
+    return
+
+  if op is OP_APPEND:
+    community.set_membership(user, MEMBER)
+
+  elif op is OP_REMOVE:
+    community.remove_membership(user)
+
+
+
+@sa.event.listens_for(Group.members, 'set', active_history=True)
+def _on_group_members_replace(group, value, oldvalue, initiator):
+  if value == oldvalue:
+    return
+
+  community = _safe_get_community(group)
+  if not community:
+    return
+
+  members = set(community.members)
+  logger.debug('_on_group_members_replace(%r, %r, %r) community: %r',
+               group, value,  oldvalue, community)
+
+  for u in members - value:
+    if getattr(u, _PROCESSED_ATTR, False) is OP_REMOVE:
+      continue
+    setattr(u, _PROCESSED_ATTR, OP_REMOVE)
+    community.remove_membership(u)
+
+  for u in value - members:
+    if getattr(u, _PROCESSED_ATTR, False) is OP_APPEND:
+      continue
+    setattr(u, _PROCESSED_ATTR, OP_APPEND)
+    community.set_membership(u, MEMBER)

@@ -26,7 +26,7 @@ from flask_login import current_user, login_required
 
 from abilian.core.extensions import db
 from abilian.core.signals import activity
-from abilian.core.models.subjects import User
+from abilian.core.models.subjects import User, Group
 from abilian.core.util import utc_dt
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
@@ -226,6 +226,14 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
       self.obj.type = type
       self.obj.update_roles_on_folder()
     del form.type
+
+    self.linked_group = form.linked_group.data or None
+    if self.linked_group:
+      self.linked_group = Group.query.get(int(self.linked_group))
+    del form.linked_group
+
+  def after_populate_obj(self):
+    self.obj.group = self.linked_group
 
 
 add_url("/<string:community_id>/settings",

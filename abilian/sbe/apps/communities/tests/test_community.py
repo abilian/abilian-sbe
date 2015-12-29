@@ -243,6 +243,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
       data = {'__action': u'edit',
               'name': u'edited community',
               'description': u'my community',
+              'linked_group': u'',
               'type': 'participative',
       }
       response = self.client.post(url, data=data)

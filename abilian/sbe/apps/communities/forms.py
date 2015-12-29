@@ -1,17 +1,49 @@
+# coding=utf-8
+"""
+"""
+from __future__ import absolute_import
+
 import imghdr
 from string import strip
 
 import PIL
-from flask import request
+import sqlalchemy as sa
+from flask import request, render_template
 from flask_babel import lazy_gettext as _l, gettext as _
-from wtforms.fields import BooleanField, TextAreaField, StringField
+from wtforms.fields import (
+  BooleanField, TextAreaField, StringField, IntegerField,
+)
 from wtforms.validators import ValidationError, required, optional
-from abilian.web.forms import Form
+
+from abilian.core.models.subjects import Group
+from abilian.web.forms import Form, FormPermissions
 from abilian.web.forms.fields import Select2Field, FileField
 from abilian.web.forms.widgets import TextArea, ImageInput, BooleanWidget
 from abilian.web.forms.validators import length
 
 from .models import Community
+
+
+def _group_choices():
+  m_prop = Group.members.property
+  membership = m_prop.secondary
+  query = Group.query.session.query(
+    Group.id,
+    Group.name,
+    Community.name.label('community'),
+    sa.sql.func.count(membership.c.user_id).label('members_count'),)
+  query = query.outerjoin(m_prop.secondary, m_prop.primaryjoin)\
+               .outerjoin(Community, Community.group.property.primaryjoin)\
+               .group_by(Group.id, Group.name, Community.name)\
+               .order_by(sa.sql.func.lower(Group.name))
+  choices = [(u'', u'')]
+  for g in query:
+    label = u'{} ({:d} membres)'.format(g.name, g.members_count)
+    if g.community:
+      label += u' — Communauté: {}'.format(g.community)
+    choices.append((unicode(g.id), label))
+
+  return choices
 
 
 class CommunityForm(Form):
@@ -20,6 +52,12 @@ class CommunityForm(Form):
       label=_l(u"Description"),
       validators=[required(), length(max=500)],
       widget=TextArea(resizeable="vertical"),)
+
+  linked_group = Select2Field(
+    label=_l(u'Linked to group'),
+    description=_l(u'Manages a group of users through this community members.'),
+    choices=_group_choices,
+  )
 
   image = FileField(label=_l('Image'), widget=ImageInput(width=65, height=65),
                     validators=[optional()])
