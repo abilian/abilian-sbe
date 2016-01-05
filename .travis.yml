@@ -35,6 +35,8 @@ before_install:
 # Install Python dependencies
 install:
   - pip install -U 'pip>=7'
+  - pip install -U future
+  - pip install -U guess-language-spirit
   - pip install -e '.[dev]'
   - pip install -r etc/git-requirements.txt
   - pip --version
