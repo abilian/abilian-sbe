@@ -141,6 +141,7 @@ class CommunityDigest(object):
   def __init__(self, community):
     self.community = community
 
+    self.seen_entities = set()
     self.new_members = []
     self.new_documents = []
     self.updated_documents = []
@@ -166,6 +167,12 @@ class CommunityDigest(object):
       self.new_members.append(actor)
 
     elif activity.verb == 'post':
+      if obj is None:
+        return
+      if obj.id in self.seen_entities:
+        return
+      self.seen_entities.add(obj.id)
+
       if isinstance(obj, Document) and repository.has_access(user, obj):
         self.new_documents.append(obj)
       elif isinstance(obj, WikiPage):
@@ -176,11 +183,13 @@ class CommunityDigest(object):
         self.updated_conversations.append(obj.thread)
 
     elif activity.verb == 'update':
+      if obj is None:
+        return
+      if obj.id in self.seen_entities:
+        return
+      self.seen_entities.add(obj.id)
+
       if isinstance(obj, Document) and repository.has_access(user, obj):
-        if obj in self.new_documents:
-          return
         self.updated_documents.append(obj)
       elif isinstance(obj, WikiPage):
-        if obj in self.new_wiki_pages:
-          return
         self.updated_wiki_pages.append(obj)
