@@ -91,19 +91,26 @@ def make_message(user):
     if not community:
       # TODO: should not happen but it does. Fix root cause instead.
       continue
+    # create an empty digest
     digest = CommunityDigest(community)
     AE = ActivityEntry
-    activities = AE.query.filter(
+    activities = AE.query\
+      .order_by(AE.happened_at.asc()) \
+      .filter(
         and_(AE.happened_at > happened_after,
              or_(and_(AE.target_type == community.object_type,
                       AE.target_id == community.id),
                  and_(AE.object_type == community.object_type,
                       AE.object_id == community.id),))
-        ).all()
+      ) \
+      .all()
 
+    # fill the internal digest lists with infos
+    # seen_entities, new_members, new_documents, updated_documents ...
     for activity in activities:
       digest.update_from_activity(activity, user)
 
+    # save the current digest in the master digests list
     if not digest.is_empty():
       digests.append(digest)
 
@@ -146,7 +153,7 @@ class CommunityDigest(object):
     self.new_documents = []
     self.updated_documents = []
     self.new_conversations = []
-    self.updated_conversations = []
+    self.updated_conversations = {}
     self.new_wiki_pages = []
     self.updated_wiki_pages = []
 
@@ -180,7 +187,17 @@ class CommunityDigest(object):
       elif isinstance(obj, Thread):
         self.new_conversations.append(obj)
       elif isinstance(obj, Post):
-        self.updated_conversations.append(obj.thread)
+        if obj.thread.id in self.seen_entities:
+          # this post's Thread has already been seen in another Activity
+          # exclude it to avoid duplicates but save the Post's actor
+          self.updated_conversations[obj.thread]['actors'].append(actor)
+          return
+        # Mark this post's Thread as seen to avoid duplicates
+        self.seen_entities.add(obj.thread.id)
+        # save actor and oldest/first modified Post in thread
+        # oldest post because Activities are ordered_by Asc(A.happened_at)
+        self.updated_conversations[obj.thread] = {'actors': [actor],
+                                                  'post': obj}
 
     elif activity.verb == 'update':
       if obj is None:

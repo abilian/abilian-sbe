@@ -40,10 +40,11 @@ Dans la communauté: {{ digest.community.name }}
   {%- endfor %}
 {% endif %}
 {%- if digest.updated_conversations %}
-  Conversations mises à jour:
-  {%- for thread in digest.updated_conversations %}
+  Nouveaux commentaires dans les conversations:
+  {%- for thread, info in digest.updated_conversations.items() %}
     * {{ thread }}
-      ({{ url_for("forum.thread", community_id=digest.community.slug, thread_id=thread.id, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }})
+      par {{ info['actors']|join(', ')}}
+      ({{ url_for(info['post'], _external=True)}})
   {%- endfor %}
 {%- endif %}
 {%- endfor %}
