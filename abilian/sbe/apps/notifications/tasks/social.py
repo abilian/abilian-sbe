@@ -158,10 +158,10 @@ class CommunityDigest(object):
     self.updated_wiki_pages = []
 
   def is_empty(self):
-    return (not self.new_members and not self.new_documents
-            and not self.updated_documents and not self.new_conversations
-            and not self.updated_conversations and not self.new_wiki_pages
-            and not self.updated_wiki_pages)
+    return (not self.new_members and not self.new_documents and not
+            self.updated_documents and not self.new_conversations and not
+            self.updated_conversations and not self.new_wiki_pages and not
+            self.updated_wiki_pages)
 
   def update_from_activity(self, activity, user):
     actor = activity.actor
