@@ -147,9 +147,12 @@ class Community(Entity):
   memberships = relationship(Membership, cascade="all, delete-orphan")
 
   #: direct access to :class:`User` members
-  members = relationship(User,
-                         secondary=Membership.__table__,
-                         backref=backref('communities', lazy='select'),)
+  members = relationship(
+    User,
+    secondary=Membership.__table__,
+    viewonly=True,
+    backref=backref('communities', lazy='select', viewonly=True),
+  )
 
   #: Number of members in this community.
   membership_count = Column(Integer, default=0, nullable=False,
