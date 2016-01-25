@@ -8,15 +8,15 @@ from string import strip
 
 import PIL
 import sqlalchemy as sa
-from flask import request, render_template
+from flask import request
 from flask_babel import lazy_gettext as _l, gettext as _
 from wtforms.fields import (
-  BooleanField, TextAreaField, StringField, IntegerField,
+  BooleanField, TextAreaField, StringField,
 )
 from wtforms.validators import ValidationError, required, optional
 
 from abilian.core.models.subjects import Group
-from abilian.web.forms import Form, FormPermissions
+from abilian.web.forms import Form
 from abilian.web.forms.fields import Select2Field, FileField
 from abilian.web.forms.widgets import TextArea, ImageInput, BooleanWidget
 from abilian.web.forms.validators import length
@@ -35,8 +35,10 @@ def _group_choices():
   query = query.outerjoin(m_prop.secondary, m_prop.primaryjoin)\
                .outerjoin(Community, Community.group.property.primaryjoin)\
                .group_by(Group.id, Group.name, Community.name)\
-               .order_by(sa.sql.func.lower(Group.name))
+               .order_by(sa.sql.func.lower(Group.name))\
+               .autoflush(False)
   choices = [(u'', u'')]
+
   for g in query:
     label = u'{} ({:d} membres)'.format(g.name, g.members_count)
     if g.community:
