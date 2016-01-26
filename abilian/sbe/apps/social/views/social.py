@@ -25,7 +25,7 @@ route = social.route
 @route("/")
 def home():
   ctx = {}
-  entries = get_recent_entries()
+  entries = get_recent_entries(num=50)
   entries = ActivityEntryPresenter.wrap_collection(entries)
   ctx['activity_entries'] = entries
 
