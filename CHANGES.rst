@@ -1,7 +1,7 @@
 Changelog for Abilian SBE
 =========================
 
-0.1.6 (unreleased)
+0.1.6 (2016-01-29)
 ------------------
 
 - Communities can be linked to a group. Members are 2-way synced.
