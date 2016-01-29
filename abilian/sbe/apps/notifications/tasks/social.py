@@ -187,17 +187,17 @@ class CommunityDigest(object):
       elif isinstance(obj, Thread):
         self.new_conversations.append(obj)
       elif isinstance(obj, Post):
-        if obj.thread.id in self.seen_entities:
+        if obj.thread.id not in self.seen_entities:
+          # save actor and oldest/first modified Post in thread
+          # oldest post because Activities are ordered_by Asc(A.happened_at)
+          self.updated_conversations[obj.thread] = {'actors': [actor],
+                                                    'post': obj}
+          # Mark this post's Thread as seen to avoid duplicates
+          self.seen_entities.add(obj.thread.id)
+        elif obj.thread not in self.new_conversations:
           # this post's Thread has already been seen in another Activity
           # exclude it to avoid duplicates but save the Post's actor
           self.updated_conversations[obj.thread]['actors'].append(actor)
-          return
-        # Mark this post's Thread as seen to avoid duplicates
-        self.seen_entities.add(obj.thread.id)
-        # save actor and oldest/first modified Post in thread
-        # oldest post because Activities are ordered_by Asc(A.happened_at)
-        self.updated_conversations[obj.thread] = {'actors': [actor],
-                                                  'post': obj}
 
     elif activity.verb == 'update':
       if obj is None:
