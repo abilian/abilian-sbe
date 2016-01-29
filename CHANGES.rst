@@ -1,6 +1,12 @@
 Changelog for Abilian SBE
 =========================
 
+0.1.9 (2016-01-29)
+------------------
+
+- Fix error when sending the daily digest.
+
+
 0.1.8 (2016-01-29)
 ------------------
 
