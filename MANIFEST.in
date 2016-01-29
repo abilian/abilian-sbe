@@ -1,3 +1,10 @@
+include *.rst *.txt *.ini *.py *.cfg *.yml
 recursive-include etc *
 recursive-include docs *
-recursive-include tests *.py
+recursive-include abilian *
+recursive-include tools *
+recursive-include tests *
+prune sandbox
+prune tmp
+prune instance
+prune .git
