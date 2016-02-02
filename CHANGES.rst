@@ -1,8 +1,8 @@
 Changelog for Abilian SBE
 =========================
 
-- forum reply by mail: changed reply adress so that it's local part never exceed
-  64 characters length
+- forum reply by mail: changed reply address so that it's local part never
+  exceeds 64 characters length
 
   
 0.1.8 (2016-01-29)

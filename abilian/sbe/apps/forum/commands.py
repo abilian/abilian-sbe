@@ -31,6 +31,10 @@ def inject_email(filename=u'-'):
   """
   parser = FeedParser()
   message = None
+
+  if logger.level is logging.NOTSET:
+    logger.setLevel(logging.INFO)
+
   try:
     # iterate over stdin
     for line in fileinput.input(filename):
@@ -51,9 +55,14 @@ def inject_email(filename=u'-'):
     if len(message.defects) == 0:
       process_email.delay(message)
     else:
-      logger.error('email has defects')
+      logger.error('email has defects, message content:\n'
+                   '------ START -------\n'
+                   '%s'
+                   '\n------ END -------\n',
+                   message,
+                   extra={ 'stack': True, })
   else:
-    logger.error('no email was parsed from stdin')
+    logger.error('no email was parsed from stdin', extra={ 'stack': True, })
 
 
 @manager.command
