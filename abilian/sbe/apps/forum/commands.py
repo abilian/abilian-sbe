@@ -20,8 +20,10 @@ manager = Manager(description='SBE forum commands',
                   help='SBE forum commands')
 
 
-@manager.command
-def inject_email():
+@manager.option('-f', '--filename',
+                help='email filename; defaults to standard input',
+                default=u'-', required=False,)
+def inject_email(filename=u'-'):
   """
   Reads one email from stdin,
   parse it,
@@ -31,7 +33,7 @@ def inject_email():
   message = None
   try:
     # iterate over stdin
-    for line in fileinput.input('-'):
+    for line in fileinput.input(filename):
       parser.feed(line)
   except KeyboardInterrupt:
     logger.info('Aborted by user, exiting.')
