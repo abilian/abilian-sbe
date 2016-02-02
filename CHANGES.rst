@@ -1,12 +1,16 @@
 Changelog for Abilian SBE
 =========================
 
+- forum reply by mail: changed reply adress so that it's local part never exceed
+  64 characters length
+
+  
 0.1.8 (2016-01-29)
 ------------------
 
 - Fix packaging issue (missing .mo files).
 
-
+  
 0.1.7 (2016-01-29)
 ------------------
 

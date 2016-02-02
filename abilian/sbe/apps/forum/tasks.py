@@ -7,11 +7,13 @@ from __future__ import absolute_import
 import mailbox
 from os.path import expanduser
 import re
+import base64
+import hashlib
 from pathlib import Path
 
 import bleach
 import chardet
-from itsdangerous import URLSafeSerializer
+from itsdangerous import Serializer
 
 from flask import current_app, g
 from flask_mail import Message
@@ -134,6 +136,29 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
           'failed': list(failed), }
 
 
+def build_local_part(name, uid):
+  """
+  build local part as 'name-uid-digest', ensuring length < 64.
+  """
+  tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
+  key = current_app.config['SECRET_KEY']
+  serializer = Serializer(key)
+  signature = serializer.dumps(uid.decode('utf-8'))
+  digest = hashlib.md5(signature).digest()
+  digest = base64.b32encode(digest).split('=', 1)[0] # remove base32 padding
+  digest = unicode(digest)
+  local_part = name + tag + uid + u'-' + digest
+
+  if len(local_part) > 64:
+    if (len(local_part) - len(digest) -1) > 64:
+      # even without digest, it's too long
+      raise ValueError('Cannot build reply address: local part exceeds 64 '
+                       'characters')
+    local_part = local_part[:64]
+
+  return local_part
+
+
 def build_reply_email_address(name, post, member, domain):
   """
     Builds a reply-to email address
@@ -144,16 +169,14 @@ def build_reply_email_address(name, post, member, domain):
   :param member: User() to get user.id
   :param domain: (str)  the last domain name of the email address
   :return: (unicode)    reply address for forum in the form
-    test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
+    test+P-fr-3-4-SDB7T5DXNZPD5YAHHVIKVOE2PM@testcase.app.tld
 
-    the hidden parameters are:  locale/post.thread_id/user.id
+    'P' for 'post' - locale - thread id - user id - signature digest
   """
-  tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
-  key = current_app.config['SECRET_KEY']
   locale = get_locale()
-  serializer = URLSafeSerializer(key)
-  uid = u'/'.join([str(locale), str(post.thread_id), str(member.id)])
-  return name + tag + serializer.dumps(uid.decode('utf-8')) + u'@' + domain
+  uid = u'-'.join([u'P', str(locale), str(post.thread_id), str(member.id)])
+  local_part = build_local_part(name, uid)
+  return local_part + u'@' + domain
 
 
 def extract_email_destination(address):
@@ -162,12 +185,19 @@ def extract_email_destination(address):
   :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
   :return: List() of splitted values
   """
-  name = address.rsplit('@', 1)[0]
+  local_part = address.rsplit('@', 1)[0]
   tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
-  key = current_app.config['SECRET_KEY']
-  serializer = URLSafeSerializer(key)
-  values = name.rsplit(tag, 1)[1]
-  return serializer.loads(values).split('/')
+  name, ident = local_part.rsplit(tag, 1)
+  uid, digest = ident.rsplit('-', 1)
+  signed_local_part = build_local_part(name, uid)
+
+  if local_part != signed_local_part:
+    raise ValueError('Invalid signature in reply address')
+
+  values = uid.split(u'-')
+  header = values.pop(0)
+  assert header == u'P'
+  return values
 
 
 def has_subtag(address):

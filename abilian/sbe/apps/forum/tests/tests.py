@@ -331,7 +331,7 @@ class CommandsTest(TestCase):
 
 class TasksTest(BaseTestCase):
   def test_build_reply_email_address(self):
-    expected_reply_address = 'test+ImZyLzMvNCI.aFudLVO157NrKAGXIj-1Z2kne7E@testcase.app.tld'
+    expected_reply_address = 'test+P-fr-3-4-LJXUDQHH3ELLN4KZSLLSA7SHWI@testcase.app.tld'
     self.app.config['MAIL_ADDRESS_TAG_CHAR'] = u'+'
     post = Mock()
     post.id = 2
@@ -345,7 +345,7 @@ class TasksTest(BaseTestCase):
   def test_extract_mail_destination(self):
     self.app.config['MAIL_ADDRESS_TAG_CHAR'] = u'+'
     self.app.config['MAIL_SENDER'] = u'test@testcase.app.tld'
-    test_address = 'test+ImZyLzMvNCI.aFudLVO157NrKAGXIj-1Z2kne7E@testcase.app.tld'
+    test_address = 'test+test+P-fr-3-4-LJXUDQHH3ELLN4KZSLLSA7SHWI@testcase.app.tld'
     infos = extract_email_destination(test_address)
     self.assertIn(u'fr', infos[0])  # locale
     self.assertIn(u'3', infos[1])  # thread_id
