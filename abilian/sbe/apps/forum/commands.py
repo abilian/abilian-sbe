@@ -4,6 +4,7 @@
 """
 from __future__ import absolute_import
 
+import sys
 import logging
 import fileinput
 from email.parser import FeedParser
@@ -32,8 +33,12 @@ def inject_email():
     # iterate over stdin
     for line in fileinput.input('-'):
       parser.feed(line)
+  except KeyboardInterrupt:
+    logger.info('Aborted by user, exiting.')
+    sys.exit(1)
   except:
     logger.error('Error during email parsing', exc_info=True)
+    sys.exit(1)
   finally:
     # close the parser to generate a email.message
     message = parser.close()
