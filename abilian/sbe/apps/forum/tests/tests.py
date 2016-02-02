@@ -317,6 +317,17 @@ class CommandsTest(TestCase):
     # assert a call on the celery task was made implying a message creation
     assert mock_process_email.delay.called
 
+    ##
+    mock_email.reset_mock()
+    mock_process_email.delay.reset_mock()
+    assert not mock_email.called
+    assert not mock_process_email.delay.called
+
+    mock_email.return_value = get_string_from_file('defects.email')
+    inject_email()
+    assert mock_email.called
+    assert not mock_process_email.delay.called
+
 
 class TasksTest(BaseTestCase):
   def test_build_reply_email_address(self):
