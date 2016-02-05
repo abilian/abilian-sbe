@@ -147,3 +147,11 @@ tidy: clean
 
 update-pot:
 	python setup.py extract_messages update_catalog compile_catalog
+
+
+release:
+	rm -rf /tmp/abilian-sbe
+	git clone . /tmp/abilian-sbe
+	cd /tmp/abilian-sbe ; python setup.py sdist
+	cd /tmp/abilian-sbe ; python setup.py sdist upload
+
