@@ -142,12 +142,12 @@ def checkin_checkout(doc_id):
   doc = get_document(doc_id)
   action = request.form.get('action')
 
-  if action not in (u'checkin', u'checkout'):
+  if action not in (u'checkout', u'lock', u'unlock'):
     raise BadRequest(u'Unknown action: %r' % action)
 
   session = sa.orm.object_session(doc)
 
-  if action == u'checkin':
+  if action in (u'lock', u'checkout'):
     doc.lock = current_user
     d = doc.updated_at
     # prevent change of last modification date
@@ -155,9 +155,13 @@ def checkin_checkout(doc_id):
     session.flush()
     doc.updated_at = d
     session.commit()
-    return document_download(doc_id, attach=True)
 
-  if action == u'checkout':
+    if action == u'lock':
+      return redirect(url_for(doc))
+    elif action == u'checkout':
+      return document_download(doc_id, attach=True)
+
+  if action == u'unlock':
     del doc.lock
     d = doc.updated_at
     # prevent change of last modification date

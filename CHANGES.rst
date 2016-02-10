@@ -1,6 +1,8 @@
 Changelog for Abilian SBE
 =========================
 
+- Documents: can upload a new version if nobody has locked the document.
+
 0.1.10 (2016-02-05)
 -------------------
 

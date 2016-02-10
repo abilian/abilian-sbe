@@ -127,7 +127,7 @@ _checkin_template_action = u'''
 </form>
 '''
 
-_checkout_template_action = u'''
+_lock_template_action = u'''
 <form method="POST" action="{{ url }}" encoding="multipart/form-data">
   {{ csrf.field() }}
   <button type="submit" class="btn btn-link" name="action"
@@ -219,24 +219,32 @@ _actions = (
     permission=WRITE),
   # Checkin / Checkout
   DocumentAction(
-    'documents:content', 'checkin', _l(u'Checkin (Download for edit)'),
+    'documents:content', 'checkout', _l(u'Checkout (Download for edit)'),
     icon='download',
     url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
     condition=lambda ctx: ctx['object'].lock is None,
     template_string=_checkin_template_action,
   ),
+  # DocumentAction(
+  #   'documents:content', 'lock', _l(u'Lock for edit'),
+  #   icon='lock',
+  #   url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
+  #   condition=lambda ctx: ctx['object'].lock is None,
+  #   template_string=_lock_template_action,
+  # ),
   DocumentAction(
-    'documents:content', 'checkout', _l(u'Checkout (release edit lock)'),
+    'documents:content', 'unlock', _l(u'Unlock'),
     icon=FAIcon('unlock'),
     url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
     condition=lambda ctx: ctx['object'].lock is not None,
-    template_string=_checkout_template_action,
+    template_string=_lock_template_action,
   ),
-  # upload-new
+  # upload-new / checkin
   DocumentModalAction(
     'documents:content', 'upload', _l(u'Upload new version'),
     icon='upload', url='#modal-upload-new-version',
-    condition=lambda ctx: ctx['object'].lock and ctx['object'].lock.is_owner(),
+    # either not locked, either user is owner
+    condition=lambda ctx: not ctx['object'].lock or ctx['object'].lock.is_owner(),
     permission=WRITE),
   # send by email
   DocumentModalAction(
