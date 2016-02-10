@@ -10,10 +10,10 @@ from flask_mail import Message
 from flask_security.utils import md5
 from sqlalchemy import and_, or_
 from validate_email import validate_email
+from celery import shared_task
 from celery.schedules import crontab
 
 from abilian.i18n import render_template_i18n
-from abilian.core.celery import periodic_task
 from abilian.core.models.subjects import User
 from abilian.web import url_for
 from abilian.services.activity import ActivityEntry
@@ -26,7 +26,14 @@ from abilian.sbe.apps.wiki.models import WikiPage
 from .. import TOKEN_SERIALIZER_NAME
 
 
-@periodic_task(run_every=crontab(hour=10, minute=0, ))
+DIGEST_TASK_NAME = __name__ + '.send_daily_social_digest_task'
+DEFAULT_DIGEST_SCHEDULE = {
+  'task': DIGEST_TASK_NAME,
+  'schedule': crontab(hour=10, minute=0, )
+}
+
+
+@shared_task
 def send_daily_social_digest_task():
   # a request_context is required when rendering templates
   with app.test_request_context('/send_daily_social_updates'):
