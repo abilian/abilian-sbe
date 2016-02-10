@@ -32,8 +32,8 @@ DEFAULT_DIGEST_SCHEDULE = {
   'schedule': crontab(hour=10, minute=0, )
 }
 
-
-@shared_task
+# expires after 1 day - 10 minutes
+@shared_task(expires=85800)
 def send_daily_social_digest_task():
   # a request_context is required when rendering templates
   with app.test_request_context('/send_daily_social_updates'):
