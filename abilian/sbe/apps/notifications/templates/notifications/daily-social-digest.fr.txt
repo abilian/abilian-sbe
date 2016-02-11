@@ -40,11 +40,30 @@ Dans la communauté: {{ digest.community.name }}
   {%- endfor %}
 {% endif %}
 {%- if digest.updated_conversations %}
+
   Nouveaux commentaires dans les conversations:
   {%- for thread, info in digest.updated_conversations.items() %}
     * {{ thread }}
       par {{ info['actors']|join(', ')}}
-      ({{ url_for(info['post'], _external=True)}})
+      ({{ url_for(info['post'], _external=True, _scheme=config['PREFERRED_URL_SCHEME'])}})
+  {%- endfor %}
+{%- endif %}
+{%- if digest.new_wiki_pages %}
+
+  Nouvelles pages de wiki
+  {%- for page in digest.new_wiki_pages %}
+    * {{ page.title }}
+      par {{ page.creator }}.
+      ({{ url_for('wiki.page', community_id=digest.community.slug, title=page.title, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }})
+  {%- endfor %}
+{%- endif %}
+{%- if digest.updated_wiki_pages %}
+
+  Pages de wiki mises à jour
+  {%- for page, actors in digest.updated_wiki_pages.items() %}
+    * {{ page.title }}
+      par {% for actor, changes in actors.items() %}{{ actor}}{%if changes > 1%}(x{{changes}}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}
+      ({{ url_for('wiki.page', community_id=digest.community.slug, title=page.title, _external=True, _scheme=config['PREFERRED_URL_SCHEME'])}}">{{ page }})
   {%- endfor %}
 {%- endif %}
 {%- endfor %}

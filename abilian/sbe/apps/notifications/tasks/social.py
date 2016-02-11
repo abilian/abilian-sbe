@@ -116,7 +116,8 @@ def make_message(user):
     # seen_entities, new_members, new_documents, updated_documents ...
     for activity in activities:
       digest.update_from_activity(activity, user)
-
+    # if activities:
+    #   import ipdb; ipdb.set_trace()
     # save the current digest in the master digests list
     if not digest.is_empty():
       digests.append(digest)
@@ -162,7 +163,7 @@ class CommunityDigest(object):
     self.new_conversations = []
     self.updated_conversations = {}
     self.new_wiki_pages = []
-    self.updated_wiki_pages = []
+    self.updated_wiki_pages = {}
 
   def is_empty(self):
     return (not self.new_members and not self.new_documents and not
@@ -216,4 +217,11 @@ class CommunityDigest(object):
       if isinstance(obj, Document) and repository.has_access(user, obj):
         self.updated_documents.append(obj)
       elif isinstance(obj, WikiPage):
-        self.updated_wiki_pages.append(obj)
+        if obj in self.updated_wiki_pages:
+          page = self.updated_wiki_pages[obj]
+          if actor in page:
+            page[actor] += 1
+          else:
+            page[actor] = 1
+        else:
+          self.updated_wiki_pages[obj] = {actor: 1}

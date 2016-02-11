@@ -8,63 +8,91 @@
   {% for digest in digests %}
     <h2>Dans la communauté: {{ digest.community.name }}</h2>
 
-    {% if digest.new_members %}
+    {%- if digest.new_members %}
       <h3>Nouveaux membres</h3>
 
-      {% for user in digest.new_members %}
+      {%- for user in digest.new_members %}
         <p>
           <a href="{{ url_for("social.user", user_id=user.id, _external=True,
                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ user }}</a>
         </p>
-      {% endfor %}
-    {% endif %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if digest.new_documents %}
 
-    {% if digest.new_documents %}
       <h3>Nouveaux documents</h3>
 
-      {% for doc in digest.new_documents %}
+      {%- for doc in digest.new_documents %}
         <p><a href="{{ url_for("documents.document_view",community_id=digest.community.slug,
                                doc_id=doc.id, _external=True,
                                _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ doc }}</a><br>
           <small>Posté par {{ doc.creator }}.</small>
         </p>
-      {% endfor %}
-    {% endif %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if digest.updated_documents %}
 
-    {% if digest.updated_documents %}
       <h3>Documents mis à jour</h3>
 
-      {% for doc in digest.updated_documents %}
+      {%- for doc in digest.updated_documents %}
         <p><a href="{{ url_for("documents.document_view",
                                community_id=digest.community.slug,
                                doc_id=doc.id, _external=True,
                                _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ doc }}</a>.
         </p>
-      {% endfor %}
-    {% endif %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if digest.new_conversations %}
 
-    {% if digest.new_conversations %}
       <h3>Nouvelles conversations</h3>
 
-      {% for thread in digest.new_conversations %}
+      {%- for thread in digest.new_conversations %}
         <p><a href="{{ url_for("forum.thread",
                                community_id=digest.community.slug,
                                thread_id=thread.id, _external=True,
                                _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ thread }}</a><br>
           <small>Posté par {{ thread.creator }}.</small>
         </p>
-      {% endfor %}
-    {% endif %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if digest.updated_conversations %}
 
-    {% if digest.updated_conversations %}
       <h3>Nouveaux commentaires dans les conversations</h3>
 
-      {% for thread, info in digest.updated_conversations.items() %}
-        <p><a href="{{ url_for(info['post'], _external=True)}}">{{ thread }}</a><br>
+      {%- for thread, info in digest.updated_conversations.items() %}
+        <p><a href="{{ url_for(info['post'], _external=True,
+                               _scheme=config['PREFERRED_URL_SCHEME'])}}">{{ thread }}</a><br>
           par {{ info['actors']|join(', ')}}
         </p>
-      {% endfor %}
-    {% endif %}
+      {%- endfor %}
+    {%- endif %}
+    {%- if digest.new_wiki_pages %}
+
+      <h3>Nouvelles pages de wiki</h3>
+
+      {%- for page in digest.new_wiki_pages %}
+        <p><a href="{{ url_for('wiki.page',
+                               community_id=digest.community.slug,
+                               title=page.title, _external=True,
+                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ page }}</a><br>
+          <small>par {{ page.creator }}.</small>
+        </p>
+      {%- endfor %}
+    {%- endif %}
+    {%- if digest.updated_wiki_pages %}
+
+      <h3>Pages de wiki mises à jour</h3>
+
+      {%- for page, actors in digest.updated_wiki_pages.items() %}
+        <p><a href="{{ url_for('wiki.page',
+                               community_id=digest.community.slug,
+                               title=page.title, _external=True,
+                               _scheme=config['PREFERRED_URL_SCHEME'])}}">{{ page }}</a><br>
+          <small>par {% for actor, changes in actors.items() %}{{ actor}}{%if changes > 1%}(x{{changes}}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}.</small>
+        </p>
+      {%- endfor %}
+    {%- endif %}
+
   {% endfor %}
 {% endblock %}
 
