@@ -9,6 +9,15 @@ Abilian SBE adds the concept of *communities*, which are collaborative spaces wi
 
 Abilian SBE is currently alpha software and evolving quickly. OTOH, it's already used by several major customers in production, since mid 2013.
 
+Screenshots
+-----------
+
+.. image:: https://raw.githubusercontent.com/abilian/abilian-core/master/docs/images/screenshot-1.png
+
+.. image:: https://raw.githubusercontent.com/abilian/abilian-core/master/docs/images/screenshot-2.png
+
+.. image:: https://raw.githubusercontent.com/abilian/abilian-core/master/docs/images/screenshot-3.png
+
 
 Install
 =======
