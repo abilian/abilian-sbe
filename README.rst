@@ -12,11 +12,11 @@ Abilian SBE is currently alpha software and evolving quickly. OTOH, it's already
 Screenshots
 -----------
 
-.. image:: https://raw.githubusercontent.com/abilian/abilian-core/master/docs/images/screenshot-1.png
+.. image:: https://raw.githubusercontent.com/abilian/abilian-sbe/master/docs/images/screenshot-3.png
 
-.. image:: https://raw.githubusercontent.com/abilian/abilian-core/master/docs/images/screenshot-2.png
+.. image:: https://raw.githubusercontent.com/abilian/abilian-sbe/master/docs/images/screenshot-2.png
 
-.. image:: https://raw.githubusercontent.com/abilian/abilian-core/master/docs/images/screenshot-3.png
+.. image:: https://raw.githubusercontent.com/abilian/abilian-sbe/master/docs/images/screenshot-1.png
 
 
 Install
