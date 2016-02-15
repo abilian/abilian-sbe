@@ -211,13 +211,8 @@ class CommunityDigest(object):
     elif activity.verb == 'update':
       if obj is None:
         return
-      if obj.id in self.seen_entities:
-        return
-      self.seen_entities.add(obj.id)
-
-      if isinstance(obj, Document) and repository.has_access(user, obj):
-        self.updated_documents.append(obj)
-      elif isinstance(obj, WikiPage):
+      # special case for Wikipage, we want to know each updater
+      if isinstance(obj, WikiPage):
         if obj in self.updated_wiki_pages:
           page = self.updated_wiki_pages[obj]
           if actor in page:
@@ -226,3 +221,13 @@ class CommunityDigest(object):
             page[actor] = 1
         else:
           self.updated_wiki_pages[obj] = {actor: 1}
+
+      # fast return for all other objects
+      if obj.id in self.seen_entities:
+        return
+      self.seen_entities.add(obj.id)
+
+      # all objects here need to be accounted only once
+      if isinstance(obj, Document) and repository.has_access(user, obj):
+        self.updated_documents.append(obj)
+
