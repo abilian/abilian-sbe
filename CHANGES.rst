@@ -1,7 +1,16 @@
 Changelog for Abilian SBE
 =========================
 
+0.2.1 (2016-02-15)
+------------------
+
 - Documents: can upload a new version if nobody has locked the document.
+- Fix daily notifications (for wiki pages).
+
+0.2.0 (2016-02-12)
+------------------
+
+Time for a minor release.
 
 0.1.10 (2016-02-05)
 -------------------
