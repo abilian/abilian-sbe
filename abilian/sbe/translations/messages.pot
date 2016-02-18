@@ -7,16 +7,16 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.1.11.dev3+ng1a33804.d20160210\n"
+"Project-Id-Version: abilian-sbe 0.2.2.dev0+ng6ce6835.d20160218\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-02-10 14:17+0100\n"
+"POT-Creation-Date: 2016-02-18 15:05+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.0\n"
+"Generated-By: Babel 2.2.0\n"
 
 #: abilian/sbe/apps/communities/actions.py:43
 #: abilian/sbe/apps/communities/blueprint.py:68

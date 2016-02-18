@@ -1,20 +1,23 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) 2014 Free Software Foundation, Inc.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+# French translations for abilian-sbe.
+# Copyright (C) 2016 ORGANIZATION
+# This file is distributed under the same license as the abilian-sbe
+# project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-02-10 14:17+0100\n"
+"POT-Creation-Date: 2016-02-18 15:05+0100\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
+"Language: fr\n"
 "Language-Team: fr <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.0\n"
+"Generated-By: Babel 2.2.0\n"
 
 #: abilian/sbe/apps/communities/actions.py:43
 #: abilian/sbe/apps/communities/blueprint.py:68
@@ -1002,7 +1005,7 @@ msgstr "Répertoire des utilisateurs"
 
 #: abilian/sbe/apps/social/templates/social/_sidebar.html:25
 msgid "Latest visitors"
-msgstr "Dernier visiteurs"
+msgstr "Derniers utilisateurs actifs"
 
 #: abilian/sbe/apps/social/templates/social/group.html:73
 msgid "Group admins"
