@@ -38,6 +38,9 @@ DEFAULT_DIGEST_SCHEDULE = {
 def send_daily_social_digest_task():
   # a request_context is required when rendering templates
   with app.test_request_context('/send_daily_social_updates'):
+    config = current_app.config
+    if not config.get('PRODUCTION') or config.get("DEMO"):
+      return
     send_daily_social_digest()
 
 
