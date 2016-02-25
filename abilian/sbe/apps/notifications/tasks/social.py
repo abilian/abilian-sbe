@@ -5,7 +5,7 @@ from __future__ import absolute_import
 
 from datetime import timedelta, datetime
 
-from flask import current_app as app
+from flask import current_app
 from flask_mail import Message
 from flask_security.utils import md5
 from sqlalchemy import and_, or_
@@ -37,7 +37,7 @@ DEFAULT_DIGEST_SCHEDULE = {
 @shared_task(expires=85800)
 def send_daily_social_digest_task():
   # a request_context is required when rendering templates
-  with app.test_request_context('/send_daily_social_updates'):
+  with current_app.test_request_context('/send_daily_social_updates'):
     config = current_app.config
     if not config.get('PRODUCTION') or config.get("DEMO"):
       return
@@ -46,7 +46,7 @@ def send_daily_social_digest_task():
 
 def send_daily_social_digest():
   for user in User.query.filter(User.can_login == True).all():
-    preferences = app.services['preferences']
+    preferences = current_app.services['preferences']
     prefs = preferences.get_preferences(user)
 
     if not prefs.get('sbe:notifications:daily', False):
@@ -59,7 +59,7 @@ def send_daily_social_digest():
     try:
       send_daily_social_digest_to(user)
     except:
-      app.logger.error('Error sending daily social digest', exc_info=True)
+      current_app.logger.error('Error sending daily social digest', exc_info=True)
 
 
 def send_daily_social_digest_to(user):
@@ -67,7 +67,7 @@ def send_daily_social_digest_to(user):
 
   Return 1 if mail sent, 0 otherwise.
   """
-  mail = app.extensions['mail']
+  mail = current_app.extensions['mail']
 
   message = make_message(user)
   if message:
@@ -78,7 +78,7 @@ def send_daily_social_digest_to(user):
 
 
 def make_message(user):
-  config = app.config
+  config = current_app.config
   sbe_config = config['ABILIAN_SBE']
   sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
   recipient = user.email
