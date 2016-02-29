@@ -5,7 +5,7 @@ abilian-core>=0.5
 validate_email
 
 # Language detection
-langid>=1.1,>1.2
+langid>=1.1,<1.2
 
 # Charset detection
 chardet
