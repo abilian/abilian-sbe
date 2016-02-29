@@ -1,19 +1,15 @@
 # Abilian Core
-abilian-core
+abilian-core>=0.5
 
+# Email validation (when sending digests)
 validate_email
 
-# Used for language detection in the document management app.
-# TODO: replace by langid ?
-# guess-language-spirit needs 3to2 if no pre-built wheel is present in cache or
-# local devpi
-3to2
-guess-language-spirit>=0.5.1,<0.6
+# Language detection
+langid>=1.1,>1.2
 
 # Charset detection
 chardet
 
-# need by folder: export to xls
+# needed by folder: export to xls
 xlwt
-
 openpyxl>=2.3.0

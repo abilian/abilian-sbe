@@ -38,17 +38,17 @@ def get_recent_entries(num=20, user=None, community=None):
   # 'in_' operator cannot be used with relationships, only foreign keys values
   if not community and not current_user.has_role(Admin):
     M = Membership
-    communities = M.query\
+    community_ids = M.query\
       .filter(M.user_id == current_user.id)\
       .values(M.community_id)
 
-    communities = list(communities) # convert generator to list: we'll need it
-                                    # twice in query filtering
-    if not communities:
+    community_ids = list(community_ids) # convert generator to list: we'll need it
+                                        # twice in query filtering
+    if not community_ids:
       return []
 
-    query = query.filter(sa.or_(AE.target_id.in_(communities),
-                                AE.object_id.in_(communities)))
+    query = query.filter(sa.or_(AE.target_id.in_(community_ids),
+                                AE.object_id.in_(community_ids)))
 
   query = query.order_by(AE.happened_at.desc()).limit(1000)
   limit = min(num * 2, 100)  # get twice entries as needed, but ceil to 100

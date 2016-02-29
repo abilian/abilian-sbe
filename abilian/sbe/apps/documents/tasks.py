@@ -8,7 +8,6 @@ import logging
 from contextlib import contextmanager
 
 from celery import shared_task
-from guess_language import guessLanguageName
 
 from abilian.services.conversion import ConversionError
 from abilian.services import get_service, converter
@@ -16,6 +15,7 @@ from abilian.core.extensions import db
 
 
 logger = logging.getLogger(__package__)
+
 
 @contextmanager
 def get_document(document_id, session=None):
@@ -136,6 +136,7 @@ def convert_document_content(document_id):
       logger.error("Other issue: %s", str(e), **error_kwargs)
 
     if document.text:
-      document.language = guessLanguageName(document.text)
+      import langid
+      document.language = langid.classify(document.text)[0]
 
     document.page_num = document.extra_metadata.get("PDF:Pages", 1)
