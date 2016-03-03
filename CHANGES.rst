@@ -1,6 +1,11 @@
 Changelog for Abilian SBE
 =========================
 
+0.2.2 (2016-03-03)
+------------------
+
+- Get rid of guess-language-spirit. Use langid instead.
+
 0.2.1 (2016-02-15)
 ------------------
 
