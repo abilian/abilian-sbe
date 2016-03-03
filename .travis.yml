@@ -10,7 +10,7 @@ env:
   matrix:
     - SQLALCHEMY_DATABASE_URI="sqlite://"
     - SQLALCHEMY_DATABASE_URI="postgres://postgres@localhost/abilian_sbe"
-  
+
 services:
   - redis-server
 
@@ -34,10 +34,7 @@ before_install:
 
 # Install Python dependencies
 install:
-  - pip install -U 'pip>=7'
-  - pip install -U 3to2
-  - pip install -U 'guess-language-spirit>=0.5.1,<0.6'
-  - pip install -U future
+  - pip install -U 'pip>=8'
   - pip install -e '.[dev]'
   - pip install -r etc/git-requirements.txt
   - pip --version
@@ -61,7 +58,7 @@ after_success:
   - codecov
 
 notifications:
-  slack: 
+  slack:
     rooms:
       - abilian:dTtRD7DHS4Dw3jfRrqytQWU6#code
     on_success: change
