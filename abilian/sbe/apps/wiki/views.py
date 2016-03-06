@@ -370,7 +370,8 @@ def attachment_download():
         raise NotFound()
 
     attachment = WikiPageAttachment.query.get(attachment_id)
-    assert attachment is not None and attachment.wikipage is page
+    assert attachment is not None
+    assert attachment.wikipage is page
 
     response = make_response(attachment.content)
     response.headers['content-length'] = attachment.content_length
@@ -433,7 +434,8 @@ def attachment_delete():
         raise NotFound()
 
     attachment = WikiPageAttachment.query.get(attachment_id)
-    assert attachment is not None and attachment.wikipage is page
+    assert attachment is not None
+    assert attachment.wikipage is page
 
     if request.form.get('action') == 'delete':
         name = attachment.name
