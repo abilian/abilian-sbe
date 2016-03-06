@@ -165,21 +165,21 @@ def list_json2():
     """
     JSON endpoint, used for filling select boxes dynamically.
     """
+    # TODO: make generic ?
     args = request.args
-    cls = Community
 
     q = args.get("q").replace("%", " ")
     if not q or len(q) < 2:
         raise BadRequest()
 
-    query = db.session.query(cls.id, cls.name)
-    query = query.filter(cls.name.ilike("%" + q + "%"))\
-                 .distinct()\
-                 .order_by(cls.name)\
-                 .limit(50)
-    all = query.all()
+    query = db.session.query(Community.id, Community.name) \
+        .filter(Community.name.ilike("%" + q + "%")) \
+        .distinct() \
+        .order_by(Community.name) \
+        .limit(50)
+    query_result = query.all()
 
-    result = {'results': [{'id': r[0], 'text': r[1]} for r in all]}
+    result = {'results': [{'id': r[0], 'text': r[1]} for r in query_result]}
     return jsonify(result)
 
 
