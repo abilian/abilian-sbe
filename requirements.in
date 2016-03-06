@@ -1,0 +1,15 @@
+# Abilian Core
+abilian-core>=0.5
+
+# Email validation (when sending digests)
+validate_email
+
+# Language detection
+langid>=1.1,<1.2
+
+# Charset detection
+chardet
+
+# needed by folder: export to xls
+xlwt
+openpyxl>=2.3.0
