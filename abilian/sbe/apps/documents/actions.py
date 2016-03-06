@@ -3,116 +3,119 @@
 """
 from __future__ import absolute_import
 
-from flask import g, url_for as url_for_orig
+from flask import url_for as url_for_orig
+from flask import g
 
 from abilian.i18n import _l
-from abilian.web.action import actions, Action, ModalActionMixin, FAIcon
-from abilian.services.security import security, WRITE, MANAGE
+from abilian.services.security import MANAGE, WRITE, security
+from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
+
 from .repository import repository
 
 
 def url_for(endpoint, **kw):
-  return url_for_orig(endpoint, community_id=g.community.slug, **kw)
+    return url_for_orig(endpoint, community_id=g.community.slug, **kw)
 
 
 class CmisContentAction(Action):
-  sbe_type = None
-  permission = None
+    sbe_type = None
+    permission = None
 
-  def __init__(self, *args, **kwargs):
-    if 'permission' in kwargs:
-      self.permission = kwargs.pop('permission')
+    def __init__(self, *args, **kwargs):
+        if 'permission' in kwargs:
+            self.permission = kwargs.pop('permission')
 
-    Action.__init__(self, *args, **kwargs)
+        Action.__init__(self, *args, **kwargs)
 
-  def pre_condition(self, ctx):
-    obj = ctx['object']
-    ok = obj.sbe_type == self.sbe_type
+    def pre_condition(self, ctx):
+        obj = ctx['object']
+        ok = obj.sbe_type == self.sbe_type
 
-    if ok and self.permission is not None:
-      ok = self.has_access(self.permission, obj)
+        if ok and self.permission is not None:
+            ok = self.has_access(self.permission, obj)
 
-    return ok
+        return ok
 
-  def has_access(self, permission, obj):
-    return repository.has_permission(g.user, permission, obj)
+    def has_access(self, permission, obj):
+        return repository.has_permission(g.user, permission, obj)
 
 
 class BaseFolderAction(CmisContentAction):
-  """ Apply to all folders, including root folder
+    """ Apply to all folders, including root folder
   """
-  sbe_type = u'cmis:folder'
+    sbe_type = u'cmis:folder'
 
 
 class FolderButtonAction(BaseFolderAction):
+    """
   """
-  """
-  _std_template_string = (
-    u'<button class="btn {{ action.css_class }}" name="action" '
-    u'value="{{ action.name }}" title="{{ action.title }}">'
-    u'{{ action.icon }}</button>')
+    _std_template_string = (
+        u'<button class="btn {{ action.css_class }}" name="action" '
+        u'value="{{ action.name }}" title="{{ action.title }}">'
+        u'{{ action.icon }}</button>')
 
-  _modal_template_string = (
-    u'<a class="btn {{ action.css_class }}" href="{{ url }}" '
-    u'data-toggle="modal" role="button" title="{{ action.title }}">'
-    u'{{ action.icon }}</a>')
+    _modal_template_string = (
+        u'<a class="btn {{ action.css_class }}" href="{{ url }}" '
+        u'data-toggle="modal" role="button" title="{{ action.title }}">'
+        u'{{ action.icon }}</a>')
 
-  def __init__(self, *args, **kwargs):
-    self.modal = False
+    def __init__(self, *args, **kwargs):
+        self.modal = False
 
-    if 'modal' in kwargs:
-      self.modal = kwargs.pop('modal')
+        if 'modal' in kwargs:
+            self.modal = kwargs.pop('modal')
 
-    css_class = kwargs.pop('css_class', u'btn-default')
-    self.CSS_CLASS = self.CSS_CLASS + u' ' + css_class
+        css_class = kwargs.pop('css_class', u'btn-default')
+        self.CSS_CLASS = self.CSS_CLASS + u' ' + css_class
 
-    BaseFolderAction.__init__(self, *args, **kwargs)
+        BaseFolderAction.__init__(self, *args, **kwargs)
 
-  @property
-  def template_string(self):
-    return (self._modal_template_string
-            if self.modal
-            else self._std_template_string)
+    @property
+    def template_string(self):
+        return (self._modal_template_string if self.modal else
+                self._std_template_string)
 
 
 class FolderAction(BaseFolderAction):
-  """ Apply to all folders except root folder
+    """ Apply to all folders except root folder
   """
-  sbe_type = u'cmis:folder'
+    sbe_type = u'cmis:folder'
 
-  def pre_condition(self, ctx):
-    return (super(FolderAction, self).pre_condition(ctx)
-            and ctx['object'] is not repository.root_folder)
+    def pre_condition(self, ctx):
+        return (super(FolderAction, self).pre_condition(ctx) and
+                ctx['object'] is not repository.root_folder)
 
 
 class FolderPermisionsAction(BaseFolderAction):
-  """ Apply to all folders except root folder
+    """ Apply to all folders except root folder
   """
-  sbe_type = u'cmis:folder'
+    sbe_type = u'cmis:folder'
 
-  def pre_condition(self, ctx):
-    return (super(BaseFolderAction, self).pre_condition(ctx)
-            and ctx['object'].depth > 1)
+    def pre_condition(self, ctx):
+        return (super(BaseFolderAction, self).pre_condition(ctx) and
+                ctx['object'].depth > 1)
 
 
 class FolderModalAction(ModalActionMixin, FolderAction):
-  """
+    """
   """
 
+
 class DocumentAction(CmisContentAction):
-  sbe_type = u'cmis:document'
+    sbe_type = u'cmis:document'
 
 
 class DocumentModalAction(ModalActionMixin, DocumentAction):
-  """
+    """
   """
 
 
 class RootFolderAction(CmisContentAction):
-  """ Apply only for root folder
+    """ Apply only for root folder
   """
-  def pre_condition(self, ctx):
-    return ctx['object'] is repository.root_folder
+
+    def pre_condition(self, ctx):
+        return ctx['object'] is repository.root_folder
 
 
 _checkin_template_action = u'''
@@ -140,68 +143,68 @@ _lock_template_action = u'''
 
 
 _actions = (
-  # Folder listing action buttons ##########
-  FolderButtonAction(
+    # Folder listing action buttons ##########
+    FolderButtonAction(
     'documents:folder-listing', 'download', _l(u'Download'),
     icon='download'),
-  FolderButtonAction(
+    FolderButtonAction(
     'documents:folder-listing', 'move-files', _l(u'Move to another folder'),
     icon='move', url='#modal-move-files', modal=True,
     permission=WRITE),
-  FolderButtonAction(
+    FolderButtonAction(
     'documents:folder-listing', 'delete', _l(u'Delete'),
     permission=WRITE,
     icon='trash', css_class='btn-danger'),
-  FolderButtonAction(
+    FolderButtonAction(
     'documents:folder-listing', 'change-owner', _l(u'Change owner'),
     icon='user', url='#modal-change-owner', modal=True,
     permission=MANAGE,
-  ),
-  # Folder left bar actions ##########
-  # view
-  RootFolderAction(
+    ),
+    # Folder left bar actions ##########
+    # view
+    RootFolderAction(
     'documents:content', 'view', _l(u'List content'), icon='list',
     condition=(lambda ctx: security.has_role(g.user, "admin")),
     url=lambda ctx: url_for(".folder_view", folder_id=ctx['object'].id),),
-  # view
-  FolderAction(
+    # view
+    FolderAction(
     'documents:content', 'view', _l(u'List content'), icon='list',
     url=lambda ctx: url_for(".folder_view", folder_id=ctx['object'].id),),
-  # Descendants
-  FolderAction(
+    # Descendants
+    FolderAction(
     'documents:content', 'descendants', _l(u'View descendants'),
     icon=FAIcon('code-fork fa-rotate-90'),
     url=lambda ctx: url_for(".descendants_view", folder_id=ctx['object'].id),),
-  # upload
-  FolderModalAction(
+    # upload
+    FolderModalAction(
     'documents:content', 'upload_files', _l('Upload file(s)'),
     icon='upload', url='#modal-upload-files',
     permission=WRITE),
-  # edit
-  FolderModalAction(
+    # edit
+    FolderModalAction(
     'documents:content', 'edit', _l('Edit properties'),
     icon='pencil', url='#modal-edit',
     permission=WRITE),
-  # new folder
-  FolderModalAction(
+    # new folder
+    FolderModalAction(
     'documents:content', 'new_folder', _l('New folder'),
     icon='plus', url='#modal-new-folder',
     permission=WRITE),
 
-  # # members
-  # FolderAction(
-  #   'documents:content', 'members', _l('Members'), icon='user',
-  #   url=lambda ctx: url_for(".members", folder_id=ctx['object'].id)),
+    # # members
+    # FolderAction(
+    #   'documents:content', 'members', _l('Members'), icon='user',
+    #   url=lambda ctx: url_for(".members", folder_id=ctx['object'].id)),
 
-  # permissions
-  FolderPermisionsAction(
+    # permissions
+    FolderPermisionsAction(
     'documents:content', 'permissions', _l('Permissions'), icon='lock',
     url=lambda ctx: url_for(".permissions", folder_id=ctx['object'].id),
     permission=MANAGE),
 
-  # Document actions ##########
-  # View / preview in browser
-  DocumentAction(
+    # Document actions ##########
+    # View / preview in browser
+    DocumentAction(
       'documents:content', 'preview', _l(u'View in browser'),
       icon='eye-open',
       url=lambda ctx: url_for('.document_preview', doc_id=ctx['object'].id),
@@ -211,65 +214,65 @@ _actions = (
           and ctx['object'].content_type in ('text/html',
                                              'text/plain',
                                              'application/pdf'))
-  ),
-  # edit
-  DocumentModalAction(
+    ),
+    # edit
+    DocumentModalAction(
     'documents:content', 'edit', _l(u'Edit properties'),
     icon='pencil', url='#modal-edit',
     permission=WRITE),
-  # Checkin / Checkout
-  DocumentAction(
+    # Checkin / Checkout
+    DocumentAction(
     'documents:content', 'checkout', _l(u'Checkout (Download for edit)'),
     icon='download',
     url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
     condition=lambda ctx: ctx['object'].lock is None,
     template_string=_checkin_template_action,
-  ),
-  # DocumentAction(
-  #   'documents:content', 'lock', _l(u'Lock for edit'),
-  #   icon='lock',
-  #   url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
-  #   condition=lambda ctx: ctx['object'].lock is None,
-  #   template_string=_lock_template_action,
-  # ),
-  DocumentAction(
+    ),
+    # DocumentAction(
+    #   'documents:content', 'lock', _l(u'Lock for edit'),
+    #   icon='lock',
+    #   url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
+    #   condition=lambda ctx: ctx['object'].lock is None,
+    #   template_string=_lock_template_action,
+    # ),
+    DocumentAction(
     'documents:content', 'unlock', _l(u'Unlock'),
     icon=FAIcon('unlock'),
     url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
     condition=lambda ctx: ctx['object'].lock is not None,
     template_string=_lock_template_action,
-  ),
-  # upload-new / checkin
-  DocumentModalAction(
+    ),
+    # upload-new / checkin
+    DocumentModalAction(
     'documents:content', 'upload', _l(u'Upload new version'),
     icon='upload', url='#modal-upload-new-version',
     # either not locked, either user is owner
     condition=lambda ctx: not ctx['object'].lock or ctx['object'].lock.is_owner(),
     permission=WRITE),
-  # send by email
-  DocumentModalAction(
+    # send by email
+    DocumentModalAction(
       'documents:content', 'send_by_email', _l(u'Send by email'),
       icon='envelope', url='#modal-send-by-email',
       condition=lambda ctx: ctx['object'].antivirus_ok,
       permission=WRITE),
-  # delete
-  DocumentModalAction(
+    # delete
+    DocumentModalAction(
       'documents:content', 'delete', _l(u'Delete'),
       icon='trash', url='#modal-delete',
       permission=WRITE),
-  # refresh preview
-  DocumentAction(
+    # refresh preview
+    DocumentAction(
       'documents:content', 'refresh_preview', _l(u'Refresh preview'),
       icon='refresh',
       url=lambda ctx: url_for('.refresh_preview', doc_id=ctx['object'].id),
       condition=lambda ctx: ctx['object'].antivirus_ok,
       permission=MANAGE,),
-  )
+)
 
 
 def register_actions(state):
-  if not actions.installed(state.app):
-    return
+    if not actions.installed(state.app):
+        return
 
-  with state.app.app_context():
-    actions.register(*_actions)
+    with state.app.app_context():
+        actions.register(*_actions)

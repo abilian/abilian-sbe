@@ -45,12 +45,13 @@ XML_ENTRY_WITH_CONTENT = """\
 
 
 def test_parse_folder_entry():
-  e = Entry(XML_ENTRY)
-  assert e.name == "Toto Titi"
-  assert e.type == "cmis:folder"
+    e = Entry(XML_ENTRY)
+    assert e.name == "Toto Titi"
+    assert e.type == "cmis:folder"
+
 
 def test_parse_document_entry():
-  e = Entry(XML_ENTRY_WITH_CONTENT)
-  assert e.name == "testDocument"
-  assert e.type == "cmis:document"
-  assert e.content == "Test content string"
+    e = Entry(XML_ENTRY_WITH_CONTENT)
+    assert e.name == "testDocument"
+    assert e.type == "cmis:document"
+    assert e.content == "Test content string"

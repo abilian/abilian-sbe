@@ -1,14 +1,12 @@
 DAV_PROPS = ['creationdate', 'displayname', 'getcontentlanguage',
-             'getcontentlength', 'getcontenttype', 'getetag',
-             'getlastmodified', 'lockdiscovery', 'resourcetype', 'source',
-             'supportedlock']
+             'getcontentlength', 'getcontenttype', 'getetag', 'getlastmodified',
+             'lockdiscovery', 'resourcetype', 'source', 'supportedlock']
 
 # DAV level 1
 #OPTIONS = 'GET, HEAD, COPY, MOVE, POST, PUT, PROPFIND, PROPPATCH, OPTIONS, '\
 #          'MKCOL, DELETE, TRACE, REPORT'
 OPTIONS = 'GET, HEAD, POST, PUT, DELETE, OPTIONS, TRACE, PROPFIND, '\
           'PROPPATCH, MKCOL, COPY, MOVE' # + ', LOCK, UNLOCK'
-
 
 HTTP_CONTINUE = 100
 HTTP_SWITCHING_PROTOCOLS = 101

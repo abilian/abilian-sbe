@@ -7,13 +7,13 @@ from abilian.sbe.extension import sbe
 
 
 def register_plugin(app):
-  sbe.init_app(app)
+    sbe.init_app(app)
 
-  # Used for side-effect
-  from . import events  # noqa
+    # Used for side-effect
+    from . import events  # noqa
 
-  from .views import communities
-  app.register_blueprint(communities)
+    from .views import communities
+    app.register_blueprint(communities)
 
-  from . import search
-  search.init_app(app)
+    from . import search
+    search.init_app(app)

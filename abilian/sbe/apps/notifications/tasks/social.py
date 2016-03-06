@@ -3,234 +3,239 @@
 """
 from __future__ import absolute_import
 
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 
+from celery import shared_task
+from celery.schedules import crontab
 from flask import current_app
 from flask_mail import Message
 from flask_security.utils import md5
 from sqlalchemy import and_, or_
 from validate_email import validate_email
-from celery import shared_task
-from celery.schedules import crontab
 
-from abilian.i18n import render_template_i18n
 from abilian.core.models.subjects import User
-from abilian.web import url_for
-from abilian.services.activity import ActivityEntry
-from abilian.services.auth.views import get_serializer
-
+from abilian.i18n import render_template_i18n
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import repository
-from abilian.sbe.apps.forum.models import Thread, Post
+from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.wiki.models import WikiPage
-from .. import TOKEN_SERIALIZER_NAME
+from abilian.services.activity import ActivityEntry
+from abilian.services.auth.views import get_serializer
+from abilian.web import url_for
 
+from .. import TOKEN_SERIALIZER_NAME
 
 DIGEST_TASK_NAME = __name__ + '.send_daily_social_digest_task'
 DEFAULT_DIGEST_SCHEDULE = {
-  'task': DIGEST_TASK_NAME,
-  'schedule': crontab(hour=10, minute=0, )
+    'task': DIGEST_TASK_NAME,
+    'schedule': crontab(hour=10,
+                        minute=0,)
 }
 
 
 # expires after 1 day - 10 minutes
 @shared_task(expires=85800)
 def send_daily_social_digest_task():
-  # a request_context is required when rendering templates
-  with current_app.test_request_context('/send_daily_social_updates'):
-    config = current_app.config
-    if not config.get('PRODUCTION') or config.get("DEMO"):
-      return
-    send_daily_social_digest()
+    # a request_context is required when rendering templates
+    with current_app.test_request_context('/send_daily_social_updates'):
+        config = current_app.config
+        if not config.get('PRODUCTION') or config.get("DEMO"):
+            return
+        send_daily_social_digest()
 
 
 def send_daily_social_digest():
-  for user in User.query.filter(User.can_login == True).all():
-    preferences = current_app.services['preferences']
-    prefs = preferences.get_preferences(user)
+    for user in User.query.filter(User.can_login == True).all():
+        preferences = current_app.services['preferences']
+        prefs = preferences.get_preferences(user)
 
-    if not prefs.get('sbe:notifications:daily', False):
-      continue
+        if not prefs.get('sbe:notifications:daily', False):
+            continue
 
-    # Defensive programming.
-    if not validate_email(user.email):
-      continue
+        # Defensive programming.
+        if not validate_email(user.email):
+            continue
 
-    try:
-      send_daily_social_digest_to(user)
-    except:
-      current_app.logger.error('Error sending daily social digest', exc_info=True)
+        try:
+            send_daily_social_digest_to(user)
+        except:
+            current_app.logger.error('Error sending daily social digest',
+                                     exc_info=True)
 
 
 def send_daily_social_digest_to(user):
-  """Send to a given user a daily digest of activities in its communities.
+    """Send to a given user a daily digest of activities in its communities.
 
   Return 1 if mail sent, 0 otherwise.
   """
-  mail = current_app.extensions['mail']
+    mail = current_app.extensions['mail']
 
-  message = make_message(user)
-  if message:
-    mail.send(message)
-    return 1
-  else:
-    return 0
+    message = make_message(user)
+    if message:
+        mail.send(message)
+        return 1
+    else:
+        return 0
 
 
 def make_message(user):
-  config = current_app.config
-  sbe_config = config['ABILIAN_SBE']
-  sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
-  recipient = user.email
-  subject = sbe_config['DAILY_SOCIAL_DIGEST_SUBJECT']
-  digests = []
-  happened_after = datetime.utcnow() - timedelta(days=1)
-  list_id = u'"{} daily digest" <daily.digest.{}>'.format(
-    config['SITE_NAME'],
-    config.get('SERVER_NAME', u'example.com'),
-  )
-  base_extra_headers = {
-    'List-Id': list_id,
-    'List-Post': 'NO',
-    'Auto-Submitted': 'auto-generated',
-    'X-Auto-Response-Suppress': 'All',
-    'Precedence': 'bulk',
-  }
+    config = current_app.config
+    sbe_config = config['ABILIAN_SBE']
+    sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
+    recipient = user.email
+    subject = sbe_config['DAILY_SOCIAL_DIGEST_SUBJECT']
+    digests = []
+    happened_after = datetime.utcnow() - timedelta(days=1)
+    list_id = u'"{} daily digest" <daily.digest.{}>'.format(
+        config['SITE_NAME'],
+        config.get('SERVER_NAME', u'example.com'),)
+    base_extra_headers = {
+        'List-Id': list_id,
+        'List-Post': 'NO',
+        'Auto-Submitted': 'auto-generated',
+        'X-Auto-Response-Suppress': 'All',
+        'Precedence': 'bulk',
+    }
 
-  for membership in user.communautes_membership:
-    community = membership.community
-    if not community:
-      # TODO: should not happen but it does. Fix root cause instead.
-      continue
-    # create an empty digest
-    digest = CommunityDigest(community)
-    AE = ActivityEntry
-    activities = AE.query\
-      .order_by(AE.happened_at.asc()) \
-      .filter(
-        and_(AE.happened_at > happened_after,
-             or_(and_(AE.target_type == community.object_type,
-                      AE.target_id == community.id),
-                 and_(AE.object_type == community.object_type,
-                      AE.object_id == community.id),))
-      ) \
-      .all()
+    for membership in user.communautes_membership:
+        community = membership.community
+        if not community:
+            # TODO: should not happen but it does. Fix root cause instead.
+            continue
+        # create an empty digest
+        digest = CommunityDigest(community)
+        AE = ActivityEntry
+        activities = AE.query\
+          .order_by(AE.happened_at.asc()) \
+          .filter(
+            and_(AE.happened_at > happened_after,
+                 or_(and_(AE.target_type == community.object_type,
+                          AE.target_id == community.id),
+                     and_(AE.object_type == community.object_type,
+                          AE.object_id == community.id),))
+          ) \
+          .all()
 
-    # fill the internal digest lists with infos
-    # seen_entities, new_members, new_documents, updated_documents ...
-    for activity in activities:
-      digest.update_from_activity(activity, user)
-    # if activities:
-    #   import ipdb; ipdb.set_trace()
-    # save the current digest in the master digests list
-    if not digest.is_empty():
-      digests.append(digest)
+        # fill the internal digest lists with infos
+        # seen_entities, new_members, new_documents, updated_documents ...
+        for activity in activities:
+            digest.update_from_activity(activity, user)
+        # if activities:
+        #   import ipdb; ipdb.set_trace()
+        # save the current digest in the master digests list
+        if not digest.is_empty():
+            digests.append(digest)
 
-  if not digests:
-    return None
+    if not digests:
+        return None
 
-  token = generate_unsubscribe_token(user)
-  unsubscribe_url = url_for('notifications.unsubscribe_sbe',
-                            token=token,
-                            _external=True,
-                            _scheme=config['PREFERRED_URL_SCHEME'])
-  extra_headers = dict(base_extra_headers)
-  extra_headers['List-Unsubscribe'] = u'<{}>'.format(unsubscribe_url)
+    token = generate_unsubscribe_token(user)
+    unsubscribe_url = url_for('notifications.unsubscribe_sbe',
+                              token=token,
+                              _external=True,
+                              _scheme=config['PREFERRED_URL_SCHEME'])
+    extra_headers = dict(base_extra_headers)
+    extra_headers['List-Unsubscribe'] = u'<{}>'.format(unsubscribe_url)
 
-  msg = Message(subject, sender=sender, recipients=[recipient],
-                extra_headers=extra_headers)
-  ctx = {'digests': digests, 'token': token, 'unsubscribe_url': unsubscribe_url}
-  msg.body = render_template_i18n("notifications/daily-social-digest.txt",
-                                  **ctx)
-  msg.html = render_template_i18n("notifications/daily-social-digest.html",
-                                  **ctx)
-  return msg
+    msg = Message(subject,
+                  sender=sender,
+                  recipients=[recipient],
+                  extra_headers=extra_headers)
+    ctx = {'digests': digests,
+           'token': token,
+           'unsubscribe_url': unsubscribe_url}
+    msg.body = render_template_i18n("notifications/daily-social-digest.txt",
+                                    **ctx)
+    msg.html = render_template_i18n("notifications/daily-social-digest.html",
+                                    **ctx)
+    return msg
 
 
 def generate_unsubscribe_token(user):
-  """Generates a unique unsubscription token for the specified user.
+    """Generates a unique unsubscription token for the specified user.
 
   :param user: The user to work with
   """
-  data = [str(user.id), md5(user.password)]
-  return get_serializer(TOKEN_SERIALIZER_NAME).dumps(data)
+    data = [str(user.id), md5(user.password)]
+    return get_serializer(TOKEN_SERIALIZER_NAME).dumps(data)
 
 
 class CommunityDigest(object):
-  def __init__(self, community):
-    self.community = community
 
-    self.seen_entities = set()
-    self.new_members = []
-    self.new_documents = []
-    self.updated_documents = []
-    self.new_conversations = []
-    self.updated_conversations = {}
-    self.new_wiki_pages = []
-    self.updated_wiki_pages = {}
+    def __init__(self, community):
+        self.community = community
 
-  def is_empty(self):
-    return (not self.new_members and not self.new_documents and not
-            self.updated_documents and not self.new_conversations and not
-            self.updated_conversations and not self.new_wiki_pages and not
-            self.updated_wiki_pages)
+        self.seen_entities = set()
+        self.new_members = []
+        self.new_documents = []
+        self.updated_documents = []
+        self.new_conversations = []
+        self.updated_conversations = {}
+        self.new_wiki_pages = []
+        self.updated_wiki_pages = {}
 
-  def update_from_activity(self, activity, user):
-    actor = activity.actor
-    obj = activity.object
+    def is_empty(self):
+        return (not self.new_members and not self.new_documents and
+                not self.updated_documents and not self.new_conversations and
+                not self.updated_conversations and not self.new_wiki_pages and
+                not self.updated_wiki_pages)
 
-    # TODO ?
-    #target = activity.target
+    def update_from_activity(self, activity, user):
+        actor = activity.actor
+        obj = activity.object
 
-    if activity.verb == 'join':
-      self.new_members.append(actor)
+        # TODO ?
+        #target = activity.target
 
-    elif activity.verb == 'post':
-      if obj is None:
-        return
-      if obj.id in self.seen_entities:
-        return
-      self.seen_entities.add(obj.id)
+        if activity.verb == 'join':
+            self.new_members.append(actor)
 
-      if isinstance(obj, Document) and repository.has_access(user, obj):
-        self.new_documents.append(obj)
-      elif isinstance(obj, WikiPage):
-        self.new_wiki_pages.append(obj)
-      elif isinstance(obj, Thread):
-        self.new_conversations.append(obj)
-      elif isinstance(obj, Post):
-        if obj.thread.id not in self.seen_entities:
-          # save actor and oldest/first modified Post in thread
-          # oldest post because Activities are ordered_by Asc(A.happened_at)
-          self.updated_conversations[obj.thread] = {'actors': [actor],
-                                                    'post': obj}
-          # Mark this post's Thread as seen to avoid duplicates
-          self.seen_entities.add(obj.thread.id)
-        elif obj.thread not in self.new_conversations:
-          # this post's Thread has already been seen in another Activity
-          # exclude it to avoid duplicates but save the Post's actor
-          self.updated_conversations[obj.thread]['actors'].append(actor)
+        elif activity.verb == 'post':
+            if obj is None:
+                return
+            if obj.id in self.seen_entities:
+                return
+            self.seen_entities.add(obj.id)
 
-    elif activity.verb == 'update':
-      if obj is None:
-        return
-      # special case for Wikipage, we want to know each updater
-      if isinstance(obj, WikiPage):
-        if obj in self.updated_wiki_pages:
-          page = self.updated_wiki_pages[obj]
-          if actor in page:
-            page[actor] += 1
-          else:
-            page[actor] = 1
-        else:
-          self.updated_wiki_pages[obj] = {actor: 1}
+            if isinstance(obj, Document) and repository.has_access(user, obj):
+                self.new_documents.append(obj)
+            elif isinstance(obj, WikiPage):
+                self.new_wiki_pages.append(obj)
+            elif isinstance(obj, Thread):
+                self.new_conversations.append(obj)
+            elif isinstance(obj, Post):
+                if obj.thread.id not in self.seen_entities:
+                    # save actor and oldest/first modified Post in thread
+                    # oldest post because Activities are ordered_by Asc(A.happened_at)
+                    self.updated_conversations[obj.thread] = {'actors': [actor],
+                                                              'post': obj}
+                    # Mark this post's Thread as seen to avoid duplicates
+                    self.seen_entities.add(obj.thread.id)
+                elif obj.thread not in self.new_conversations:
+                    # this post's Thread has already been seen in another Activity
+                    # exclude it to avoid duplicates but save the Post's actor
+                    self.updated_conversations[obj.thread]['actors'].append(
+                        actor)
 
-      # fast return for all other objects
-      if obj.id in self.seen_entities:
-        return
-      self.seen_entities.add(obj.id)
+        elif activity.verb == 'update':
+            if obj is None:
+                return
+            # special case for Wikipage, we want to know each updater
+            if isinstance(obj, WikiPage):
+                if obj in self.updated_wiki_pages:
+                    page = self.updated_wiki_pages[obj]
+                    if actor in page:
+                        page[actor] += 1
+                    else:
+                        page[actor] = 1
+                else:
+                    self.updated_wiki_pages[obj] = {actor: 1}
 
-      # all objects here need to be accounted only once
-      if isinstance(obj, Document) and repository.has_access(user, obj):
-        self.updated_documents.append(obj)
+            # fast return for all other objects
+            if obj.id in self.seen_entities:
+                return
+            self.seen_entities.add(obj.id)
 
+            # all objects here need to be accounted only once
+            if isinstance(obj, Document) and repository.has_access(user, obj):
+                self.updated_documents.append(obj)

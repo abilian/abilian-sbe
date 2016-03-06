@@ -1,7 +1,7 @@
 """Main views.
 """
 
-from flask import render_template, Blueprint
+from flask import Blueprint, render_template
 
 __all__ = []
 
@@ -14,8 +14,7 @@ route = blueprint.route
 #
 @route("/")
 def home():
-  return render_template("index.html")
-
+    return render_template("index.html")
 
 # TODO
 # @route("/help/")
