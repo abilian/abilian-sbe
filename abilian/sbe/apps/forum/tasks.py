@@ -80,7 +80,7 @@ def send_post_by_email(post_id):
 @shared_task(max_retries=10, rate_limit='12/m')
 def batch_send_post_to_users(post_id, members_id, failed_ids=None):
     """
-    task run from send_post_by_email; auto-retry for mails that could not be
+    Task run from send_post_by_email; auto-retry for mails that could not be
     successfully sent.
 
     Task default rate limit is 6/min.: there is at least 5 seconds between 2
@@ -138,7 +138,7 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
 
 def build_local_part(name, uid):
     """
-    build local part as 'name-uid-digest', ensuring length < 64.
+    Build local part as 'name-uid-digest', ensuring length < 64.
     """
     tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
     key = current_app.config['SECRET_KEY']
@@ -162,8 +162,7 @@ def build_local_part(name, uid):
 
 def build_reply_email_address(name, post, member, domain):
     """
-    Builds a reply-to email address
-    embedding the locale, thread_id and user.id
+    Build a reply-to email address embedding the locale, thread_id and user.id.
 
     :param name: (str)    first part of an email address
     :param post: Post()   to get post.thread_id
@@ -181,8 +180,7 @@ def build_reply_email_address(name, post, member, domain):
 
 
 def extract_email_destination(address):
-    """
-    Returns the values encoded in the email address.
+    """Return the values encoded in the email address.
 
     :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
     :return: List() of splitted values
@@ -203,12 +201,11 @@ def extract_email_destination(address):
 
 
 def has_subtag(address):
-    """
-    Returns True if a subtag (defined in the config.py as 'MAIL_ADDRESS_TAG_CHAR')
+    """Return True if a subtag (defined in the config.py as 'MAIL_ADDRESS_TAG_CHAR')
     was found in the name part of the address
 
     :param address: email adress
-    :return: Boolean
+    :rtype: Boolean
     """
     name = address.rsplit('@', 1)[0]
     tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
@@ -444,8 +441,7 @@ def process_email(message):
 
 
 def check_maildir():
-    """
-    Check the MailDir for emails to be injected in Threads.
+    """Check the MailDir for emails to be injected in Threads.
 
     This task is registered only if `INCOMING_MAIL_USE_MAILDIR` is True. By
     default it is run every minute.

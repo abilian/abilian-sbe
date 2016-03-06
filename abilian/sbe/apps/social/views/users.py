@@ -246,7 +246,7 @@ def users_json():
                     func.lower(User.last_name).like(q + "%"))) \
         .order_by(func.lower(User.last_name))
 
-    with_membership = request.args.get('with_membership', None)
+    with_membership = request.args.get('with_membership')
     if with_membership is not None:
         # provide membership info for a community
         with_membership = int(with_membership)
