@@ -41,8 +41,7 @@ class CmisContentAction(Action):
 
 
 class BaseFolderAction(CmisContentAction):
-    """ Apply to all folders, including root folder
-  """
+    """Apply to all folders, including root folder."""
     sbe_type = u'cmis:folder'
 
 

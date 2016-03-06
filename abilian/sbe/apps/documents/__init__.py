@@ -12,7 +12,7 @@ def register_plugin(app):
     from .views import documents
     from .models import setup_listener
     from .commands import manager
-    from . import events
+    from . import signals
     from . import lock
 
     app.register_blueprint(documents)

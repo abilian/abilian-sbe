@@ -116,8 +116,8 @@ def convert_document_content(document_id):
                 document.pdf = converter.to_pdf(*conversion_args)
             except ConversionError as e:
                 document.pdf = ""
-                logger.info("Conversion to PDF failed: %s", str(e), **
-                            error_kwargs)
+                logger.info("Conversion to PDF failed: %s", str(e),
+                            **error_kwargs)
 
         try:
             document.text = converter.to_text(document.content_digest,

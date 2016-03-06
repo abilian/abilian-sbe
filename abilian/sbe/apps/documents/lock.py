@@ -17,8 +17,8 @@ DEFAULT_LIFETIME = 3600
 
 class Lock(object):
     """
-  Represent a lock on a document
-  """
+    Represent a lock on a document
+    """
 
     def __init__(self, user_id, user, date, *args, **kwargs):
         self.user_id = user_id
@@ -38,8 +38,8 @@ class Lock(object):
 
     def as_dict(self):
         """
-    return a dict suitable for serialization to JSON
-    """
+        return a dict suitable for serialization to JSON
+        """
         return dict(user_id=self.user_id,
                     user=self.user,
                     date=self.date.isoformat())
@@ -47,8 +47,8 @@ class Lock(object):
     @staticmethod
     def from_dict(d):
         """
-    Deserialize from a `dict` created by :meth:`as_dict`.
-    """
+        Deserialize from a `dict` created by :meth:`as_dict`.
+        """
         return Lock(**d)
 
     @property

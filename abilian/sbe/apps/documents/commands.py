@@ -15,15 +15,13 @@ manager = Manager(description='SBE documents actions',
 
 @manager.command
 def antivirus():
-    """
-  Schedule documents to antivirus scan.
-  """
-    documents = Document.query\
-        .filter(Document.content_blob != None)\
+    """Schedule documents to antivirus scan."""
+
+    documents = Document.query \
+        .filter(Document.content_blob != None) \
         .options(sa.orm.noload('creator'),
                  sa.orm.noload('owner'),
-                 sa.orm.joinedload('content_blob')
-        )
+                 sa.orm.joinedload('content_blob'))
 
     total = 0
     count = 0

@@ -65,9 +65,8 @@ def icon_exists(filename):
 # Domain classes
 #
 class CmisObject(Entity, InheritSecurity):
-    """
-  (Abstract) Base class for CMIS objects.
-  """
+    """(Abstract) Base class for CMIS objects."""
+
     # normally set by communities.models.community_content,
     # but we have to fix a circ.dep to use it
     is_community_content = True
@@ -452,10 +451,10 @@ class BaseContent(CmisObject):
     def find_content_type(self, content_type=None):
         """ Find possibly more appropriate content_type for this instance.
 
-    if `content_type` is a binary one, try to find a better one based on
-    content name so that 'xxx.pdf' is not flagged as binary/octet-stream for
-    example
-    """
+        If `content_type` is a binary one, try to find a better one based on
+        content name so that 'xxx.pdf' is not flagged as binary/octet-stream for
+        example
+        """
         if not content_type or content_type in ('application/octet-stream',
                                                 'binary/octet-stream',
                                                 'application/binary'):
@@ -493,8 +492,7 @@ class BaseContent(CmisObject):
 
 
 class Document(BaseContent, PathAndSecurityIndexable):
-    """A document, in the CMIS sense.
-  """
+    """A document, in the CMIS sense."""
     __tablename__ = None
 
     __indexable__ = True
@@ -517,7 +515,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         backref=backref('documents',
                         lazy="joined",
                         order_by='Document.title',
-                        cascade='all, delete-orphan'),)
+                        cascade='all, delete-orphan'))
 
     PREVIEW_SIZE = 700
 
@@ -552,7 +550,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     language = Column(Text,
                       info=dict(searchable=True,
-                                index_to=[('language', wf.ID(stored=True))]),)
+                                index_to=[('language', wf.ID(stored=True))]))
     size = Column(Integer)
     page_num = Column(Integer, default=1)
 
@@ -585,24 +583,24 @@ class Document(BaseContent, PathAndSecurityIndexable):
     @property
     def antivirus_scanned(self):
         """
-    True if antivirus task was run, even if antivirus didn't return a result
-    """
+        True if antivirus task was run, even if antivirus didn't return a result
+        """
         return self.content_blob and 'antivirus' in self.content_blob.meta
 
     @property
     def antivirus_status(self):
         """
-    True: antivirus has scanned file: no virus
-    False: antivirus has scanned file: virus detected
-    None: antivirus task was run, but antivirus didn't return a result
-    """
+        True: antivirus has scanned file: no virus
+        False: antivirus has scanned file: virus detected
+        None: antivirus task was run, but antivirus didn't return a result
+        """
         return self.content_blob and self.content_blob.meta.get('antivirus')
 
     @property
     def antivirus_required(self):
         """
-    True if antivirus doesn't need to be run
-    """
+        True if antivirus doesn't need to be run
+        """
         required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
         return required and (not self.antivirus_scanned or
                              self.antivirus_status is None)
@@ -610,8 +608,8 @@ class Document(BaseContent, PathAndSecurityIndexable):
     @property
     def antivirus_ok(self):
         """
-    True if user can safely access document content
-    """
+        True if user can safely access document content
+        """
         required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
         if required:
             return self.antivirus_status is True
@@ -684,9 +682,9 @@ class Document(BaseContent, PathAndSecurityIndexable):
     @property
     def lock(self):
         """
-    :returns: either `None` if no lock or current lock is expired; either the
-    current valid :class:`Lock` instance.
-    """
+        :returns: either `None` if no lock or current lock is expired; either the
+        current valid :class:`Lock` instance.
+        """
         lock = self.meta.setdefault('abilian.sbe.documents', {}).get('lock')
         if lock:
             lock = Lock(**lock)
@@ -698,10 +696,10 @@ class Document(BaseContent, PathAndSecurityIndexable):
     @lock.setter
     def lock(self, user):
         """
-    Allow to do `document.lock = user` to set a lock for user
+        Allow to do `document.lock = user` to set a lock for user
 
-    If user is None, the lock is released
-    """
+        If user is None, the lock is released
+        """
         if user is None:
             del self.lock
             return
@@ -711,9 +709,9 @@ class Document(BaseContent, PathAndSecurityIndexable):
     @lock.deleter
     def lock(self):
         """
-    Remove lock, if any. `del document.lock` can be safely done even if no lock
-    is set.
-    """
+        Remove lock, if any. `del document.lock` can be safely done even if no lock
+        is set.
+        """
         meta = self.meta.setdefault('abilian.sbe.documents', {})
         if 'lock' in meta:
             del meta['lock']

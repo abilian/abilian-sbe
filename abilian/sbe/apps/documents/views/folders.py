@@ -418,8 +418,9 @@ def permissions_export(folder_id):
 
 
 def iter_permissions(folder, user):
-    """ Iterator returning permissions settings on folder and its subfolders tree.
-  """
+    """
+    Iterator returning permissions settings on folder and its subfolders tree.
+    """
     if not security.has_permission(user, "manage", folder, inherit=True):
         raise StopIteration
 
@@ -476,9 +477,9 @@ def iter_permissions(folder, user):
 @csrf.protect
 def folder_post(folder_id):
     """
-  A POST on a folder can result on several different actions (depending on the
-  `action` parameter).
-  """
+    A POST on a folder can result on several different actions (depending on the
+    `action` parameter).
+    """
     folder = get_folder(folder_id)
     action = request.form.get("action")
 
@@ -537,12 +538,12 @@ ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate(u'*/')))
 
 def explore_archive(fd, filename=None, uncompress=False):
     """
-  Given an uploaded file descriptor, return it or a list of archive
-  content.
+    Given an uploaded file descriptor, return it or a list of archive
+    content.
 
-  Yield tuple(filepath, file-like object), where filepath is a list
-  whose components are directories and last one is filename.
-  """
+    Yield tuple(filepath, file-like object), where filepath is a list
+    whose components are directories and last one is filename.
+    """
     if filename is None:
         filename = fd.filename
 
@@ -821,8 +822,8 @@ def change_owner(folder):
 @route("/folder/check_valid_name")
 @http.nocache
 def check_valid_name():
-    """ Check if name is valid for content creation in this folder
-  """
+    """Check if name is valid for content creation in this folder."""
+
     object_id = int(request.args.get('object_id'))
     action = request.args.get('action')
     title = request.args.get('title')
@@ -865,10 +866,10 @@ def descendants_view(folder_id):
 
     root_path_ids = folder._indexable_parent_ids + u'/{}'.format(folder.id)
     svc = current_app.services['indexing']
-    filters = wq.And([wq.Term('community_id', folder.community.id),
-                      wq.Term('parent_ids', root_path_ids),
-                      wq.Or([wq.Term('object_type', Folder.entity_type),
-                             wq.Term('object_type', Document.entity_type),]),])
+    filters = wq.And([wq.Term('community_id', folder.community.id), wq.Term(
+        'parent_ids', root_path_ids), wq.Or([wq.Term(
+            'object_type', Folder.entity_type), wq.Term(
+                'object_type', Document.entity_type)])])
 
     results = svc.search(u'', filter=filters, limit=None)
     by_path = {}
@@ -905,9 +906,9 @@ def descendants_view(folder_id):
     visit(root_path_ids, 0)
 
     owners = dict()
-    owners_q = User.query\
-                   .filter(User.id.in_(owner_ids)) \
-                   .add_column(sa.sql.func.concat('user:', User.id).label('key'))
+    owners_q = User.query \
+        .filter(User.id.in_(owner_ids)) \
+        .add_column(sa.sql.func.concat('user:', User.id).label('key'))
     for user, key in owners_q:
         owners[key] = user
 

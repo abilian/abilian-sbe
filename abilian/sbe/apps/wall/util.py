@@ -38,13 +38,12 @@ def get_recent_entries(num=20, user=None, community=None):
     # 'in_' operator cannot be used with relationships, only foreign keys values
     if not community and not current_user.has_role(Admin):
         M = Membership
-        community_ids = M.query\
-          .filter(M.user_id == current_user.id)\
-          .values(M.community_id)
+        community_ids = M.query \
+            .filter(M.user_id == current_user.id) \
+            .values(M.community_id)
 
-        community_ids = list(community_ids
-                            )  # convert generator to list: we'll need it
-        # twice in query filtering
+        # convert generator to list: we'll need it twice during query filtering
+        community_ids = list(community_ids)
         if not community_ids:
             return []
 
@@ -52,7 +51,8 @@ def get_recent_entries(num=20, user=None, community=None):
             AE.target_id.in_(community_ids), AE.object_id.in_(community_ids)))
 
     query = query.order_by(AE.happened_at.desc()).limit(1000)
-    limit = min(num * 2, 100)  # get twice entries as needed, but ceil to 100
+    # get twice entries as needed, but ceil to 100
+    limit = min(num * 2, 100)
     entries = []
     deleted = False
     security = current_app.services['security']

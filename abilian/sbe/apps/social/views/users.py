@@ -37,7 +37,7 @@ DEFAULT_USER_MUGSHOT = pkgutil.get_data('abilian.sbe',
 def make_tabs(user):
     return [
       dict(id='profile', label=_(u'Profile'), link=url_for(user, tab='profile')),
-      #dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
+      # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
       dict(id='documents', label=_(u'Documents'), link=url_for(user, tab='documents')),
       dict(id='images', label=_(u'Images'), link=url_for(user, tab='images')),
       dict(id='audit', label=_(u'Audit'), link=url_for(user, tab='audit')),
@@ -81,9 +81,9 @@ def users_dt_json():
         # TODO: gérer les accents
         filter = or_(
             func.lower(User.first_name).like("%" + search + "%"),
-            func.lower(User.last_name).like("%" + search + "%"),)
-        q = q.filter(filter)\
-             .reset_joinpoint()
+            func.lower(User.last_name).like("%" + search + "%"))
+        q = q.filter(filter) \
+            .reset_joinpoint()
 
     count = q.count()
     SORT_COLS = {
@@ -241,30 +241,29 @@ def users_json():
     if not q or len(q) < 2:
         raise InternalServerError()
 
-    query = User.query\
-      .filter(or_(func.lower(User.first_name).like(q + "%"),
-                  func.lower(User.last_name).like(q + "%")))\
-      .order_by(func.lower(User.last_name))
+    query = User.query \
+        .filter(or_(func.lower(User.first_name).like(q + "%"),
+                    func.lower(User.last_name).like(q + "%"))) \
+        .order_by(func.lower(User.last_name))
 
     with_membership = request.args.get('with_membership', None)
     if with_membership is not None:
         # provide membership info for a community
         with_membership = int(with_membership)
-        query = query\
+        query = query \
             .outerjoin(Membership,
                        and_(Membership.user.expression,
-                            Membership.community_id == with_membership))\
+                            Membership.community_id == with_membership)) \
             .add_columns(Membership.role)
 
     exclude_community = request.args.get('exclude_community', None)
     if exclude_community is not None:
         exclude_community = int(exclude_community)
-        exclude = ~Membership.query\
-            .filter(
-                Membership.user.expression,
-                Membership.community_id == exclude_community)\
+        exclude = ~Membership.query \
+            .filter(Membership.user.expression,
+                    Membership.community_id == exclude_community) \
             .options(sa.orm.noload('user'),
-                     sa.orm.noload('community'))\
+                     sa.orm.noload('community')) \
             .exists()
         query = query.filter(exclude)
 

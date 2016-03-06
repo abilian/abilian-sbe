@@ -60,9 +60,9 @@ def filter_user_communities():
     filter_q = wq.Term(_COMMUNITY_CONTENT_FIELDNAME, False)
 
     if not current_user.is_anonymous():
-        ids = Membership.query\
-            .filter(Membership.user == current_user)\
-            .order_by(Membership.community_id.asc())\
+        ids = Membership.query \
+            .filter(Membership.user == current_user) \
+            .order_by(Membership.community_id.asc()) \
             .values(Membership.community_id)
         communities = [wq.Term('community_id', i[0]) for i in ids]
 

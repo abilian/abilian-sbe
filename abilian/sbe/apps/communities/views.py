@@ -72,9 +72,9 @@ def register_context_processors(state):
 
 def tab(tab_name):
     """
-  Decorator for view functions to set the current "section" this view
-  belongs to.
-  """
+    Decorator for view functions to set the current "section" this view
+    belongs to.
+    """
 
     def decorator(f):
 
@@ -90,15 +90,15 @@ def tab(tab_name):
 
 def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
     """
-  Helper for using :func:`abilian.web.views.default_view` on objects that
-  belongs to a community. This function should be used as `kw_func`::
+    Helper for using :func:`abilian.web.views.default_view` on objects that
+    belongs to a community. This function should be used as `kw_func`::
 
       @default_view(blueprint, Model, kw_func=default_view_kw)
       @blueprint.route("/<object_id>")
       def view():
          ...
 
-  """
+    """
     is_community = obj_type == Community.entity_type
     community_id = kw.get('community_id')
 
@@ -163,9 +163,8 @@ def community():
 @route("/json2")
 def list_json2():
     """
-JSON endpoint, used for filling select boxes dynamically.
-
-  """
+    JSON endpoint, used for filling select boxes dynamically.
+    """
     args = request.args
     cls = Community
 

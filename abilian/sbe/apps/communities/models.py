@@ -94,11 +94,11 @@ def community_content(cls):
 
 def indexable_roles_and_users(community):
     """
-  Mixin to use to replace Entity._indexable_roles_and_users.
+    Mixin to use to replace Entity._indexable_roles_and_users.
 
-  Will be removed when communities are upgraded to use standard role based
-  access (by setting permissions and using security service).
-  """
+    Will be removed when communities are upgraded to use standard role based
+    access (by setting permissions and using security service).
+    """
     return u' '.join(indexable_role(user) for user in community.members)
 
 
@@ -247,9 +247,9 @@ class Community(Entity):
         is_new = True
         M = Membership
         membership = session.query(M) \
-                            .filter(and_(M.user_id == user.id,
-                                         M.community_id == self.id))\
-                            .first()
+            .filter(and_(M.user_id == user.id,
+                         M.community_id == self.id)) \
+            .first()
 
         if not membership:
             membership = Membership(community=self, user=user, role=role)

@@ -14,19 +14,19 @@ from .models import CmisObject
 
 def reindex_tree(obj):
     """
-  Schedule reindexing `obj` and all of its descendants.
+    Schedule reindexing `obj` and all of its descendants.
 
-  Generally needed to update indexed security.
-  """
+    Generally needed to update indexed security.
+    """
     assert isinstance(obj, CmisObject)
 
     svc = current_app.services['indexing']
     if not svc.running:
         return
 
-    descendants = sa.select([CmisObject.id, CmisObject._parent_id])\
-                    .where(CmisObject._parent_id == sa.bindparam('ancestor_id'))\
-                    .cte(name='descendants', recursive=True)
+    descendants = sa.select([CmisObject.id, CmisObject._parent_id]) \
+        .where(CmisObject._parent_id == sa.bindparam('ancestor_id')) \
+        .cte(name='descendants', recursive=True)
     da = descendants.alias()
     CA = sa.orm.aliased(CmisObject)
     d_ids = sa.select([CA.id, CA._parent_id])
@@ -41,10 +41,10 @@ def reindex_tree(obj):
     # in "to_update" without needing to do it apart.
     entity_ids_q = sa.union(
         sa.select([descendants.c.id]), sa.select([sa.bindparam('ancestor_id')]))
-    q = session.query(Entity)\
-               .filter(Entity.id.in_(entity_ids_q)) \
-               .options(sa.orm.noload('*')) \
-               .params(ancestor_id=obj.id)
+    q = session.query(Entity) \
+        .filter(Entity.id.in_(entity_ids_q)) \
+        .options(sa.orm.noload('*')) \
+        .params(ancestor_id=obj.id)
 
     to_update = svc.app_state.to_update
     key = 'changed'

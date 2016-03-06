@@ -4,7 +4,6 @@ The blueprint for this app.
 
 from flask import Blueprint, redirect, render_template, url_for
 
-from abilian.core import signals
 from abilian.core.extensions import db
 from abilian.core.util import get_params
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
