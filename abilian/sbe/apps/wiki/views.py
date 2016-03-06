@@ -123,8 +123,6 @@ class BasePageView(object):
 
 
 class PageView(BasePageView, ObjectView):
-    """
-  """
     template = 'wiki/page.html'
     view_endpoint = '.page'
     decorators = [
@@ -395,24 +393,23 @@ def attachment_upload():
     files = request.files.getlist('attachments')
     saved_count = 0
 
-    if len(files) > 0:
-        for f in files:
-            name = f.filename
-            if not isinstance(name, unicode):
-                name = unicode(f.filename, encoding='utf-8', errors='ignore')
+    for f in files:
+        name = f.filename
+        if not isinstance(name, unicode):
+            name = unicode(f.filename, encoding='utf-8', errors='ignore')
 
-            if not name:
-                continue
+        # FIXME: do something instead of just skipping the attachement
+        if not name:
+            continue
 
-            attachment = WikiPageAttachment(name=name)
-            attachment.wikipage = page
-            attachment.set_content(f.read(), f.content_type)
-            db.session.add(attachment)
-            saved_count += 1
-
-        db.session.commit()
+        attachment = WikiPageAttachment(name=name)
+        attachment.wikipage = page
+        attachment.set_content(f.read(), f.content_type)
+        db.session.add(attachment)
+        saved_count += 1
 
     if saved_count:
+        db.session.commit()
         flash(
             _n(u"One new document successfully uploaded",
                u"%(num)d new document successfully uploaded",

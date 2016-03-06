@@ -40,8 +40,8 @@ route = forum.route
 
 def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
     """
-  kwargs for Post default view
-  """
+    kwargs for Post default view
+    """
     kw = default_view_kw(kw, obj.thread, obj_type, obj_id, **kwargs)
     kw['thread_id'] = obj.thread_id
     kw['_anchor'] = u'post_{:d}'.format(obj.id)
@@ -61,8 +61,8 @@ def init_forum_values(endpoint, values):
 @route('/')
 def index():
     query = Thread.query \
-      .filter(Thread.community_id == g.community.id) \
-      .order_by(Thread.created_at.desc())
+        .filter(Thread.community_id == g.community.id) \
+        .order_by(Thread.created_at.desc())
     has_more = query.count() > MAX_THREADS
     threads = query.limit(MAX_THREADS).all()
     return render_template("forum/index.html",
@@ -101,10 +101,10 @@ def archives():
 def attachments():
     # XXX: there is probably a way to optimize this and the big loop below...
     all_threads = Thread.query \
-      .filter(Thread.community_id == g.community.id) \
-      .options(joinedload('posts')) \
-      .options(joinedload('posts.attachments')) \
-      .order_by(Thread.created_at.desc()).all()
+        .filter(Thread.community_id == g.community.id) \
+        .options(joinedload('posts')) \
+        .options(joinedload('posts.attachments')) \
+        .order_by(Thread.created_at.desc()).all()
 
     posts_with_attachments = []
     for thread in all_threads:
@@ -209,7 +209,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
 
             meta = uploads.get_metadata(current_user, handle)
             name = meta.get('filename', handle)
-            mimetype = meta.get('mimetype', None)
+            mimetype = meta.get('mimetype')
 
             if not isinstance(name, unicode):
                 name = unicode(name, encoding='utf-8', errors='ignore')
@@ -246,9 +246,7 @@ route('/new_thread/')(ThreadCreate.as_view('new_thread',
 
 
 class ThreadPostCreate(ThreadCreate):
-    """
-  Add a new post to a thread
-  """
+    """Add a new post to a thread."""
     methods = ['POST']
     Form = PostForm
     Model = Post
@@ -256,7 +254,7 @@ class ThreadPostCreate(ThreadCreate):
     def init_object(self, args, kwargs):
         # we DO want to skip ThreadCreate.init_object. hence super is not based on
         # ThreadPostCreate
-        args, kwargs = super(ThreadCreate, self).init_object(args, kwargs)
+        args, kwargs = super(ThreadPostCreate, self).init_object(args, kwargs)
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
         return args, kwargs
@@ -284,9 +282,7 @@ route('/<int:thread_id>/delete')(ThreadDelete.as_view('thread_delete'))
 
 
 class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
-    """
-  Close / Re-open a thread
-  """
+    """Close / Re-open a thread."""
     methods = ['POST']
     _VALID_ACTIONS = {u'close', u'reopen'}
     CLOSED_MSG = _l(u'The thread is now closed for edition and new '
@@ -385,7 +381,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
 
             meta = uploads.get_metadata(current_user, handle)
             name = meta.get('filename', handle)
-            mimetype = meta.get('mimetype', None)
+            mimetype = meta.get('mimetype')
 
             if not isinstance(name, unicode):
                 name = unicode(name, encoding='utf-8', errors='ignore')

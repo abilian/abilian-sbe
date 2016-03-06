@@ -77,10 +77,10 @@ class Attachment(object):
 
 def get_attachments_from_forum(community):
     all_threads = Thread.query \
-      .filter(Thread.community_id == community.id) \
-      .options(joinedload('posts')) \
-      .options(joinedload('posts.attachments')) \
-      .order_by(Thread.created_at.desc()).all()
+        .filter(Thread.community_id == community.id) \
+        .options(joinedload('posts')) \
+        .options(joinedload('posts.attachments')) \
+        .order_by(Thread.created_at.desc()).all()
 
     posts_with_attachments = []
     for thread in all_threads:
@@ -118,8 +118,8 @@ def get_attachments_from_dms(community):
                                 doc['name'],
                                 doc['owner_name'],
                                 doc['created_at'],
-                                doc.get('content_length', None),
-                                doc.get('content_type', u''),)
+                                doc.get('content_length'),
+                                doc.get('content_type', u''))
         attachments.append(attachment)
 
     return attachments

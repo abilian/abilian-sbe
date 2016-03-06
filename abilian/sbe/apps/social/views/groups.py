@@ -61,9 +61,9 @@ def group_json(group_id):
     q = request.args.get("q", u'').lower()
     if q:
         members = filter(
-          lambda u: any([term.startswith(q)
+          lambda u: any(term.startswith(q)
                         for name in (u.first_name.lower(), u.last_name.lower())
-                        for term in name.split()]),
+                        for term in name.split()),
           members)
 
     result = {'results': [{'id': obj.id, 'text': obj.name} for obj in members]}
@@ -125,9 +125,9 @@ def groups_new():
     # TODO later
     return
 
-    e = Env()
-    e.form = GroupForm()
-    return render_template("social/groups-new.html", **e)
+    # e = Env()
+    # e.form = GroupForm()
+    # return render_template("social/groups-new.html", **e)
 
 
 @social.route("/groups/new", methods=['POST'])
@@ -135,20 +135,20 @@ def groups_new_post():
     # TODO later
     return
 
-    form = GroupForm()
-
-    if form.validate():
-        group = Group()
-        form.populate_obj(group)
-        db.session.add(group)
-        db.session.commit()
-        flash(_(u"Your new group has been created"), category='info')
-        return redirect(url_for('.group_home', group_id=group.id))
-
-    else:
-        e = Env()
-        e.form = form
-        return render_template("social/groups-new.html", **e)
+    # form = GroupForm()
+    #
+    # if form.validate():
+    #     group = Group()
+    #     form.populate_obj(group)
+    #     db.session.add(group)
+    #     db.session.commit()
+    #     flash(_(u"Your new group has been created"), category='info')
+    #     return redirect(url_for('.group_home', group_id=group.id))
+    #
+    # else:
+    #     e = Env()
+    #     e.form = form
+    #     return render_template("social/groups-new.html", **e)
 
 
 # TODO: duplicated code (with user_mugshot). Extract common method.

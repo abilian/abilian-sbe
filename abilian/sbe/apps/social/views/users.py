@@ -256,7 +256,7 @@ def users_json():
                             Membership.community_id == with_membership)) \
             .add_columns(Membership.role)
 
-    exclude_community = request.args.get('exclude_community', None)
+    exclude_community = request.args.get('exclude_community')
     if exclude_community is not None:
         exclude_community = int(exclude_community)
         exclude = ~Membership.query \
