@@ -48,8 +48,8 @@ def init_app(app):
 @shared_task()
 def send_post_by_email(post_id):
     """
-  Send a post to community members by email.
-  """
+    Send a post to community members by email.
+    """
     from .models import Post
 
     with current_app.test_request_context('/send_post_by_email'):
@@ -80,17 +80,17 @@ def send_post_by_email(post_id):
 @shared_task(max_retries=10, rate_limit='12/m')
 def batch_send_post_to_users(post_id, members_id, failed_ids=None):
     """
-  task run from send_post_by_email; auto-retry for mails that could not be
-  successfully sent.
+    task run from send_post_by_email; auto-retry for mails that could not be
+    successfully sent.
 
-  Task default rate limit is 6/min.: there is at least 5 seconds between 2
-  batches.
+    Task default rate limit is 6/min.: there is at least 5 seconds between 2
+    batches.
 
-  During retry, if all `members_id` fails again, the task is retried
-  5min. later, then 10, 20, 40... up to 10 times before giving up. This ensures
-  retries up to approximatively 3 days and 13 hours after initial attempt
-  (geometric series is: 5min * (1-2**10) / 1-2) = 5115 mins).
-  """
+    During retry, if all `members_id` fails again, the task is retried
+    5min. later, then 10, 20, 40... up to 10 times before giving up. This ensures
+    retries up to approximatively 3 days and 13 hours after initial attempt
+    (geometric series is: 5min * (1-2**10) / 1-2) = 5115 mins).
+    """
     from .models import Post
 
     if not members_id:
@@ -138,8 +138,8 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
 
 def build_local_part(name, uid):
     """
-  build local part as 'name-uid-digest', ensuring length < 64.
-  """
+    build local part as 'name-uid-digest', ensuring length < 64.
+    """
     tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
     key = current_app.config['SECRET_KEY']
     serializer = Serializer(key)
@@ -165,15 +165,15 @@ def build_reply_email_address(name, post, member, domain):
     Builds a reply-to email address
     embedding the locale, thread_id and user.id
 
-  :param name: (str)    first part of an email address
-  :param post: Post()   to get post.thread_id
-  :param member: User() to get user.id
-  :param domain: (str)  the last domain name of the email address
-  :return: (unicode)    reply address for forum in the form
+    :param name: (str)    first part of an email address
+    :param post: Post()   to get post.thread_id
+    :param member: User() to get user.id
+    :param domain: (str)  the last domain name of the email address
+    :return: (unicode)    reply address for forum in the form
     test+P-fr-3-4-SDB7T5DXNZPD5YAHHVIKVOE2PM@testcase.app.tld
 
     'P' for 'post' - locale - thread id - user id - signature digest
-  """
+    """
     locale = get_locale()
     uid = u'-'.join([u'P', str(locale), str(post.thread_id), str(member.id)])
     local_part = build_local_part(name, uid)
@@ -183,9 +183,10 @@ def build_reply_email_address(name, post, member, domain):
 def extract_email_destination(address):
     """
     Returns the values encoded in the email address.
-  :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
-  :return: List() of splitted values
-  """
+
+    :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
+    :return: List() of splitted values
+    """
     local_part = address.rsplit('@', 1)[0]
     tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
     name, ident = local_part.rsplit(tag, 1)
@@ -205,9 +206,10 @@ def has_subtag(address):
     """
     Returns True if a subtag (defined in the config.py as 'MAIL_ADDRESS_TAG_CHAR')
     was found in the name part of the address
+
     :param address: email adress
     :return: Boolean
-  """
+    """
     name = address.rsplit('@', 1)[0]
     tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
     return (tag in name)
@@ -291,9 +293,8 @@ def validate_html(payload):
 
 
 def add_paragraph(newpost):
-    """
-    Adds surrounding <p>newpost</p> if necessary
-  """
+    """Add surrounding <p>newpost</p> if necessary."""
+
     newpost = newpost.strip()
     if not newpost.startswith(u'<p>'):
         newpost = u'<p>' + newpost + u'</p>'
@@ -301,7 +302,8 @@ def add_paragraph(newpost):
 
 
 def clean_html(newpost):
-    #cleans leftover empty blockquotes
+    """Clean leftover empty blockquotes."""
+
     clean = re.sub(r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)",
                    '',
                    newpost,
@@ -321,7 +323,8 @@ def clean_html(newpost):
 
 
 def decode_payload(part):
-    # Get the payload and decode (base64 & quoted printable)
+    """Get the payload and decode (base64 & quoted printable)."""
+
     payload = part.get_payload(decode=True)
     if not (isinstance(payload, unicode)):
         # What about other encodings? -> using chardet
@@ -335,13 +338,13 @@ def decode_payload(part):
 
 def process(message, marker):
     """
-    Check the message for marker presence and return the text up to it if present
+    Check the message for marker presence and return the text up to it if present.
 
     :raises LookupError otherwise.
     :param message: email.Message()
     :param marker: unicode
     :return: sanitized html upto marker from message
-  """
+    """
     content = {'plain': u'', 'html': u''}
     attachments = []
     # Iterate all message's parts for text/*
@@ -375,11 +378,11 @@ def process(message, marker):
 @shared_task()
 def process_email(message):
     """
-  Email.Message object from command line script Run message (parsed email).
+    Email.Message object from command line script Run message (parsed email).
 
-  Processing chain extract community thread post member from reply_to persist
-  post in db.
-  """
+    Processing chain extract community thread post member from reply_to persist
+    post in db.
+    """
     app = current_app._get_current_object()
     # Extract post destination from To: field, (community/forum/thread/member)
     to_address = message['To']
@@ -428,12 +431,11 @@ def process_email(message):
                       object=post,
                       target=community)
 
-        if len(attachments) > 0:
-            for desc in attachments:
-                attachment = PostAttachment(name=desc['filename'])
-                attachment.post = post
-                attachment.set_content(desc['data'], desc['content_type'])
-                db.session.add(attachment)
+        for desc in attachments:
+            attachment = PostAttachment(name=desc['filename'])
+            attachment.post = post
+            attachment.set_content(desc['data'], desc['content_type'])
+            db.session.add(attachment)
         db.session.commit()
 
     # Notify all parties involved
@@ -443,11 +445,11 @@ def process_email(message):
 
 def check_maildir():
     """
-  Check the MailDir for emails to be injected in Threads.
+    Check the MailDir for emails to be injected in Threads.
 
-  This task is registered only if `INCOMING_MAIL_USE_MAILDIR` is True. By
-  default it is run every minute.
-  """
+    This task is registered only if `INCOMING_MAIL_USE_MAILDIR` is True. By
+    default it is run every minute.
+    """
     home = expanduser('~')
     maildirpath = str(Path(home) / 'Maildir')
     src_mdir = mailbox.Maildir(maildirpath, factory=mailbox.MaildirMessage)

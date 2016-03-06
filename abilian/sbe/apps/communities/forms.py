@@ -27,15 +27,13 @@ def _group_choices():
     m_prop = Group.members.property
     membership = m_prop.secondary
     query = Group.query.session.query(
-        Group.id,
-        Group.name,
-        Community.name.label('community'),
-        sa.sql.func.count(membership.c.user_id).label('members_count'),)
-    query = query.outerjoin(m_prop.secondary, m_prop.primaryjoin)\
-                 .outerjoin(Community, Community.group.property.primaryjoin)\
-                 .group_by(Group.id, Group.name, Community.name)\
-                 .order_by(sa.sql.func.lower(Group.name))\
-                 .autoflush(False)
+        Group.id, Group.name, Community.name.label('community'),
+        sa.sql.func.count(membership.c.user_id).label('members_count'))
+    query = query.outerjoin(m_prop.secondary, m_prop.primaryjoin) \
+        .outerjoin(Community, Community.group.property.primaryjoin) \
+        .group_by(Group.id, Group.name, Community.name) \
+        .order_by(sa.sql.func.lower(Group.name)) \
+        .autoflush(False)
     choices = [(u'', u'')]
 
     for g in query:
@@ -51,13 +49,13 @@ class CommunityForm(Form):
     name = StringField(label=_l(u"Name"), validators=[required()])
     description = TextAreaField(label=_l(u"Description"),
                                 validators=[required(), length(max=500)],
-                                widget=TextArea(resizeable="vertical"),)
+                                widget=TextArea(resizeable="vertical"))
 
     linked_group = Select2Field(
         label=_l(u'Linked to group'),
         description=_l(
             u'Manages a group of users through this community members.'),
-        choices=_group_choices,)
+        choices=_group_choices)
 
     image = FileField(label=_l('Image'),
                       widget=ImageInput(width=65,
@@ -83,8 +81,7 @@ class CommunityForm(Form):
             # form is bound to an existing object, name is not empty
             if name != field.object_data:
                 # name changed: check for duplicates
-                if len(list(Community.query.filter(Community.name ==
-                                                   name).values('id'))) > 0:
+                if Community.query.filter(Community.name == name).count() > 0:
                     raise ValidationError(_(u"A community with this name already exists"))
 
     def validate_description(self, field):

@@ -24,13 +24,9 @@ manager = Manager(description='SBE forum commands', help='SBE forum commands')
                 default=u'-',
                 required=False,)
 def inject_email(filename=u'-'):
-    """
-  Reads one email from stdin,
-  parse it,
-  forward it in a celery task to be persisted.
-  """
+    """Read one email from stdin, parse it, forward it in a celery task to be persisted."""
+
     parser = FeedParser()
-    message = None
 
     if logger.level is logging.NOTSET:
         logger.setLevel(logging.INFO)
@@ -52,7 +48,7 @@ def inject_email(filename=u'-'):
 
     if message:
         # make sure no email.errors are present
-        if len(message.defects) == 0:
+        if not message.defects:
             process_email.delay(message)
         else:
             logger.error('email has defects, message content:\n'
@@ -68,9 +64,8 @@ def inject_email(filename=u'-'):
 @manager.command
 def check_email():
     """
-  Reads one email from current user Maildir,
-  parse it,
-  forward it in a celery task to be persisted.
-  """
+    Read one email from current user Maildir, parse it, forward it in a celery task to be persisted.
+    """
 
+    # FIXME: doesn't appear legit.
     check_maildir.delay()
