@@ -42,7 +42,7 @@ setuptools.setup(
   license='LGPL',
   author='Abilian SAS',
   author_email='contact@abilian.com',
-  description='Social Business / Enterprise Social Networking platform',
+  description='Social Business platform, including: document management, wiki, forum, enterprise social networking, and more',
   long_description=LONG_DESCRIPTION,
   packages=['abilian.sbe'],
   zip_safe=False,

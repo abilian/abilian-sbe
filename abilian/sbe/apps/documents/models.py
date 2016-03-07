@@ -758,10 +758,11 @@ def async_conversion(document):
 
 
 def _trigger_conversion_tasks(session):
-    if (session is
-            not db.session()  # this commit is not from the application session
-            or
-            session.transaction.nested):  # inside a sub-transaction: not yet written in DB
+    if (
+            # this commit is not from the application session
+            session is not db.session()
+            # inside a sub-transaction: not yet written in DB
+            or session.transaction.nested):
         return
 
     document_queue = _get_documents_queue()

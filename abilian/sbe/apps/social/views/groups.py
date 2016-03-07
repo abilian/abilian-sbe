@@ -151,9 +151,9 @@ def groups_new_post():
     #     return render_template("social/groups-new.html", **e)
 
 
-# TODO: duplicated code (with user_mugshot). Extract common method.
 @social.route("/groups/<int:group_id>/mugshot")
 def group_mugshot(group_id):
+    # TODO: duplicated code (with user_mugshot). Extract common method.
     size = int(request.args.get('s', 55))
     if size > 500:
         raise ValueError("Error, size = %d" % size)
