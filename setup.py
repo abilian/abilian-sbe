@@ -38,7 +38,7 @@ class develop(_develop):
 setuptools.setup(
   name='abilian-sbe',
   use_scm_version=True,
-  url='http://docs.abilian.com/',
+  url='https://github.com/abilian/abilian-sbe',
   license='LGPL',
   author='Abilian SAS',
   author_email='contact@abilian.com',
