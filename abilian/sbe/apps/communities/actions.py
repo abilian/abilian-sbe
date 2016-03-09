@@ -70,7 +70,7 @@ _actions = (
                        _l(u'Settings'),
                        icon='cog',
                        condition=lambda ctx: current_user.has_role("admin"),
-                       endpoint="communities.settings"),)
+                       endpoint="communities.settings"))
 
 
 def register_actions(state):

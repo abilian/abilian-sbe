@@ -89,8 +89,8 @@ def group_monthly(entities_list):
 @route('/archives/')
 def archives():
     all_threads = Thread.query \
-      .filter(Thread.community_id == g.community.id) \
-      .order_by(Thread.created_at.desc()).all()
+        .filter(Thread.community_id == g.community.id) \
+        .order_by(Thread.created_at.desc()).all()
 
     grouped_threads = group_monthly(all_threads)
     return render_template('forum/archives.html',
@@ -99,7 +99,6 @@ def archives():
 
 @route('/attachments/')
 def attachments():
-    # XXX: there is probably a way to optimize this and the big loop below...
     all_threads = Thread.query \
         .filter(Thread.community_id == g.community.id) \
         .options(joinedload('posts')) \

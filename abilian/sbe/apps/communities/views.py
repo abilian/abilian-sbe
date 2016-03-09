@@ -305,9 +305,7 @@ route("/<string:community_id>/image")(image)
 
 
 def image_url(community, **kwargs):
-    """
-  return proper URL for image url
-  """
+    """Return proper URL for image url."""
     if not community or not community.image:
         kwargs['md5'] = _DEFAULT_IMAGE_MD5
         return url_for('communities.community_default_image', **kwargs)
@@ -318,24 +316,21 @@ def image_url(community, **kwargs):
 
 
 def _members_query():
-    """
-  Helper used in members views
-  """
-    last_activity_date = sa.sql.functions.max(ActivityEntry.happened_at)\
-                                         .label('last_activity_date')
-    memberships = User\
-      .query\
-      .options(sa.orm.undefer('photo'))\
-      .join(Membership)\
-      .outerjoin(ActivityEntry,
-                 sa.sql.and_(ActivityEntry.actor_id == User.id,
-                             ActivityEntry.target_id == Membership.community_id))\
-      .filter(Membership.community == g.community)\
-      .add_columns(Membership.id,
-                   Membership.role,
-                   last_activity_date,)\
-      .group_by(User, Membership.id, Membership.role)\
-      .order_by(User.last_name.asc(), User.first_name.asc())
+    """Helper used in members views."""
+    last_activity_date = sa.sql.functions.max(ActivityEntry.happened_at) \
+        .label('last_activity_date')
+    memberships = User.query \
+        .options(sa.orm.undefer('photo')) \
+        .join(Membership) \
+        .outerjoin(ActivityEntry,
+                   sa.sql.and_(ActivityEntry.actor_id == User.id,
+                               ActivityEntry.target_id == Membership.community_id)) \
+        .filter(Membership.community == g.community) \
+        .add_columns(Membership.id,
+                     Membership.role,
+                     last_activity_date) \
+        .group_by(User, Membership.id, Membership.role) \
+        .order_by(User.last_name.asc(), User.first_name.asc())
 
     return memberships
 
@@ -508,8 +503,8 @@ def doc(doc_id):
         if parent.is_root_folder:
             break
         folder = parent
-    target_community = Community.query.filter(Community.folder_id ==
-                                              folder.id).one()
+    target_community = Community.query \
+        .filter(Community.folder_id == folder.id).one()
     return redirect(url_for("documents.document_view",
                             community_id=target_community.slug,
                             doc_id=doc.id))

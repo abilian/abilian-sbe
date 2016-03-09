@@ -39,9 +39,7 @@ VALID_ROLES = frozenset((READER, WRITER, MANAGER, MEMBER,))
 
 
 class Membership(db.Model):
-    """
-  Objects that represent the membership of someone in a community.
-  """
+    """Represents the membership of someone in a community."""
     __tablename__ = 'community_membership'
 
     id = Column(Integer, primary_key=True)
@@ -70,9 +68,9 @@ class Membership(db.Model):
 
 def community_content(cls):
     """
-  Class decorator to mark models considered as community content. This is
-  required for proper indexation.
-  """
+    Class decorator to mark models considered as community content. This is
+    required for proper indexation.
+    """
     cls.is_community_content = True
 
     def community_slug(self):
@@ -103,9 +101,7 @@ def indexable_roles_and_users(community):
 
 
 class Community(Entity):
-    """
-  Ad-hoc objects that hold properties about a community.
-  """
+    """Ad-hoc objects that hold properties about a community."""
     __indexation_args__ = {}
     __indexation_args__.update(Entity.__indexation_args__)
     index_to = __indexation_args__.setdefault('index_to', ())
@@ -234,9 +230,9 @@ class Community(Entity):
 
     def set_membership(self, user, role):
         """
-    Add a member with the given role, or set the role of an existing
-    member.
-    """
+        Add a member with the given role, or set the role of an existing
+        member.
+        """
         assert isinstance(user, User)
         role = Role(role)
 
@@ -294,14 +290,12 @@ class Community(Entity):
                 security.ungrant_role(principal, role, self.folder)
 
     def get_role(self, user):
-        """
-    Returns the current user's role in this community.
-    """
+        """Returns the given user's role in this community."""
         M = Membership
-        membership = current_app.db.session()\
-            .query(M.role)\
+        membership = current_app.db.session() \
+            .query(M.role) \
             .filter(and_(M.community_id == self.id,
-                         M.user_id == user.id))\
+                         M.user_id == user.id)) \
             .first()
 
         return membership.role if membership else None
@@ -332,7 +326,7 @@ def CommunityIdColumn():
         ForeignKey(Community.id),
         nullable=False,
         info=SEARCHABLE | dict(index_to=(('community_id', ('community_id',)),
-                                        )),)
+                                        )))
 
 # Handlers to keep community/group members in sync
 #
@@ -417,11 +411,11 @@ def _safe_get_community(group):
 
     with session.no_autoflush:
         try:
-            return session.query(Community)\
-                          .filter(Community.group == group)\
-                          .options(sa.orm.joinedload(Community.group),
-                                   sa.orm.joinedload(Community.members))\
-                          .one()
+            return session.query(Community) \
+                .filter(Community.group == group) \
+                .options(sa.orm.joinedload(Community.group),
+                         sa.orm.joinedload(Community.members)) \
+                .one()
         except sa.orm.exc.NoResultFound:
             return None
 

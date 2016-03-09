@@ -32,14 +32,13 @@ class ThreadClosedError(RuntimeError):
 
 @community_content
 class Thread(Entity):
+    """A thread contains conversations among forum participants.
+
+    The discussions in a thread may be sorted in chronological order or threaded
+    by reply.
+
+    (= Thread in SIOC, Message in ICOM 1.0).
     """
-  A thread contains conversations among forum participants.
-
-  The discussions in a thread may be sorted in chronological order or threaded
-  by reply.
-
-  (= Thread in SIOC, Message in ICOM 1.0).
-  """
     __tablename__ = 'forum_thread'
 
     community_id = CommunityIdColumn()
@@ -77,9 +76,7 @@ class Thread(Entity):
 
     @property
     def closed(self):
-        """
-    True if this thread doesn't accept more posts.
-    """
+        """True if this thread doesn't accept more posts."""
         return self.meta.get('abilian.sbe.forum', {}).get('closed', False)
 
     @closed.setter
@@ -110,11 +107,10 @@ def _thread_sync_name_title(entity, new_value, old_value, initiator):
 
 
 class Post(Entity):
-    """
-  A post is a message in a forum discussion thread.
+    """A post is a message in a forum discussion thread.
 
-  (= Post in DiscussionMessage in ICOM 1.0).
-  """
+    (= Post in DiscussionMessage in ICOM 1.0).
+    """
     __tablename__ = 'forum_post'
     __indexable__ = False  # content is indexed at thread level
 
@@ -148,9 +144,7 @@ class Post(Entity):
 
 
 class ThreadIndexAdapter(SAAdapter):
-    """
-  Index a thread and its posts
-  """
+    """Index a thread and its posts."""
 
     @staticmethod
     def can_adapt(obj_cls):
@@ -166,9 +160,7 @@ class ThreadIndexAdapter(SAAdapter):
 # event listener to sync name with thread's name
 @sa.event.listens_for(Thread.name, "set", active_history=True)
 def _thread_sync_name(thread, new_value, old_value, initiator):
-    """
-  Synchronize name with thread's name.
-  """
+    """Synchronize name with thread's name."""
     if new_value == old_value:
         return new_value
 
@@ -179,9 +171,7 @@ def _thread_sync_name(thread, new_value, old_value, initiator):
 
 @sa.event.listens_for(Post.thread, "set", active_history=True)
 def _thread_change_sync_name(post, new_thread, old_thread, initiator):
-    """
-  Change name on thread change
-  """
+    """Change name on thread change."""
     if new_thread == old_thread or new_thread is None:
         return new_thread
     post.name = new_thread.name
@@ -192,9 +182,7 @@ def _thread_change_sync_name(post, new_thread, old_thread, initiator):
 @sa.event.listens_for(Thread.posts, 'remove')
 @sa.event.listens_for(Thread.posts, 'set')
 def _guard_closed_thread_collection(thread, value, *args):
-    '''
-  Prevent add/remove/replace posts on a closed thread
-  '''
+    """Prevent add/remove/replace posts on a closed thread."""
     if isinstance(thread, Post):
         thread = thread.thread
         if thread is None:

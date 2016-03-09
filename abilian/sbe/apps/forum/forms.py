@@ -91,4 +91,4 @@ class PostEditForm(BasePostForm):
     reason = StringField(label=_l(u'Reason'),
                          description=_l(u'Description of your edit'),
                          filters=(strip,),
-                         validators=(optional(),),)
+                         validators=(optional(),))

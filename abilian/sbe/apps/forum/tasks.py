@@ -47,9 +47,7 @@ def init_app(app):
 
 @shared_task()
 def send_post_by_email(post_id):
-    """
-    Send a post to community members by email.
-    """
+    """Send a post to community members by email."""
     from .models import Post
 
     with current_app.test_request_context('/send_post_by_email'):

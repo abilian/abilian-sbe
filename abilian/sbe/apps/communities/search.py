@@ -32,9 +32,7 @@ _FIELDS = [
 
 
 def init_app(app):
-    """
-  Add community fields to indexing service schema
-  """
+    """Add community fields to indexing service schema."""
     indexing = app.services['indexing']
     indexing.register_search_filter(filter_user_communities)
     indexing.register_value_provider(mark_non_community_content)
