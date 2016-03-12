@@ -172,10 +172,10 @@ class CmisObject(Entity, InheritSecurity):
 @event.listens_for(CmisObject.name, "set", propagate=True, active_history=True)
 def _cmis_sync_name_title(entity, new_value, old_value, initiator):
     """
-  Synchronize CmisObject name -> title.
-  CmisObject.title -> name is done via hybrid_property, avoiding infinite
-  loop (since "set" is received before attribute has received value)
-  """
+    Synchronize CmisObject name -> title.
+    CmisObject.title -> name is done via hybrid_property, avoiding infinite
+    loop (since "set" is received before attribute has received value)
+    """
     if entity.title != new_value:
         entity.title = new_value
     return new_value
@@ -183,8 +183,8 @@ def _cmis_sync_name_title(entity, new_value, old_value, initiator):
 
 class PathAndSecurityIndexable(object):
     """
-  Mixin for folder and documents indexation
-  """
+    Mixin for folder and documents indexation
+    """
     __indexation_args__ = dict(index_to=(
         ('_indexable_parent_ids', ('parent_ids',)),
         ('_indexable_roles_and_users', ('allowed_roles_and_users',)),),)
@@ -198,17 +198,17 @@ class PathAndSecurityIndexable(object):
     @property
     def _indexable_parent_ids(self):
         """
-    returns a string made of ids separated by a slash: "/1/3/4/5", "5" being
-    self.parent.id.
-    """
+        returns a string made of ids separated by a slash: "/1/3/4/5", "5" being
+        self.parent.id.
+        """
         ids = [unicode(obj.id) for obj in self._iter_to_root(skip_self=True)]
         return u'/' + u'/'.join(reversed(ids))
 
     @property
     def _indexable_roles_and_users(self):
         """
-    returns a string made of type:id elements, like "user:2 group:1 user:6"
-    """
+        returns a string made of type:id elements, like "user:2 group:1 user:6"
+        """
         iter_from_root = reversed(list(self._iter_to_root()))
         if self.parent:
             # skip root folder only on non-root folder!
@@ -398,7 +398,7 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
 class BaseContent(CmisObject):
     """ A base class for cmisobject with an attached file
-  """
+    """
     __tablename__ = None
 
     _content_id = Column(Integer, db.ForeignKey(Blob.id))
@@ -630,7 +630,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def pdf(self):
-        return self.pdb_blob and self.pdf_blob.value
+        return self.pdf_blob and self.pdf_blob.value
 
     @pdf.setter
     def pdf(self, value):

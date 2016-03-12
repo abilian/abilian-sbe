@@ -227,8 +227,7 @@ def document_preview_image(doc_id):
 
 @route("/doc/<int:doc_id>/refresh_preview")
 def refresh_preview(doc_id):
-    """ Force to compute a new preview
-  """
+    """ Force to compute a new preview. """
     doc = get_document(doc_id)
     if not doc:
         raise NotFound()
