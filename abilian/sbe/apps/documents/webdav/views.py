@@ -4,6 +4,7 @@ import os.path
 import uuid
 
 from flask import Blueprint, current_app, request
+from flask.ext.login import current_user
 from lxml.etree import XMLSyntaxError
 from werkzeug.datastructures import Headers
 from werkzeug.exceptions import Forbidden, NotFound
@@ -12,7 +13,10 @@ from werkzeug.wrappers import BaseResponse as Response
 from abilian.core.extensions import db
 
 from .. import repository
-from .constants import *
+from .constants import (DAV_PROPS, HTTP_BAD_REQUEST, HTTP_CONFLICT,
+                        HTTP_CREATED, HTTP_METHOD_NOT_ALLOWED,
+                        HTTP_MULTI_STATUS, HTTP_NO_CONTENT, HTTP_OK,
+                        HTTP_PRECONDITION_FAILED, OPTIONS)
 from .xml import MultiStatus, Propfind
 
 webdav = Blueprint("webdav", __name__, url_prefix="/webdav")
@@ -48,7 +52,7 @@ def log_request():
 
 @webdav.before_request
 def only_admin():
-    if not current_app.services('security').has_role(user, "admin"):
+    if not current_app.services('security').has_role(current_user, "admin"):
         raise Forbidden()
 
 
@@ -268,7 +272,8 @@ def lock(path):
     hlist = [('Content-Type', 'text/xml'),
              ('Lock-Token', '<urn:uuid:%s>' % token)]
 
-    return Response(xml, headers=Headers.linked(hlist))  #, status ='423 Locked'
+    return Response(xml,
+                    headers=Headers.linked(hlist))  # , status ='423 Locked'
     """
     public Response lock(@Context UriInfo uriInfo) throws Exception {
         String token = null;

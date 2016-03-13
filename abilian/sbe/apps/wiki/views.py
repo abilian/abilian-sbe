@@ -452,9 +452,9 @@ def attachment_delete():
 @route('/pages')
 def wiki_pages():
     pages = WikiPage.query \
-      .filter(WikiPage.community_id == g.community.id) \
-      .order_by(WikiPage.title)\
-      .all()
+        .filter(WikiPage.community_id == g.community.id) \
+        .order_by(WikiPage.title) \
+        .all()
     return render_template('wiki/all_pages.html', pages=pages)
 
 
@@ -468,13 +468,13 @@ def wiki_help():
 
 @route('/export')
 def wiki_export():
-    return "Not done yet"
     # TODO
+    return "Not done yet"
 
 
-    #
-    # Util
-    #
+#
+# Util
+#
 def get_page_by_title(title):
     title = title.strip()
     page = WikiPage.query\
@@ -485,9 +485,8 @@ def get_page_by_title(title):
 
 
 def create_home_page():
-    default_src = open(join(dirname(__file__), 'data', 'default_page.txt'))\
-      .read()\
-      .decode('utf-8')
+    filename = join(dirname(__file__), 'data', 'default_page.txt')
+    default_src = open(filename).read().decode('utf-8')
     page = WikiPage(title=u"Home", body_src=default_src)
     page.community_id = g.community.id
     db.session.add(page)

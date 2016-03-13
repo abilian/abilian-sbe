@@ -779,8 +779,9 @@ def move_multiple(folder):
 
     db.session.commit()
 
-    msg_f = (_n(u'1 folder', u'{count} folders', count_f) if count_f
-             else  _(u'0 folder')).format(count=count_f)
+    msg_f = (_n(u'1 folder', u'{count} folders', count_f)
+             if count_f
+             else _(u'0 folder')).format(count=count_f)
 
     msg_d = (_n(u'1 document', u'{count} documents', count_d)
              if count_d

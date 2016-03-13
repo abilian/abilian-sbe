@@ -6,7 +6,7 @@ import re
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.query import Query
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Integer, LargeBinary, UnicodeText
+from sqlalchemy.types import Integer, UnicodeText
 
 from abilian.core.entities import SEARCHABLE, Entity
 from abilian.core.extensions import db
@@ -24,8 +24,8 @@ class MessageQuery(Query):
 class Message(Entity):
     """Message aka Status update aka Note.
 
-  See: http://activitystrea.ms/head/activity-schema.html#note
-  """
+    See: http://activitystrea.ms/head/activity-schema.html#note
+    """
     __tablename__ = 'message'
     __indexable__ = False
     __editable__ = ['content']
@@ -60,7 +60,7 @@ class TagApplication(Entity):
 
 class PrivateMessage(Entity):
     """Private messages are like messages, except they are private.
-  """
+    """
 
     __tablename__ = 'private_message'
     __indexable__ = False

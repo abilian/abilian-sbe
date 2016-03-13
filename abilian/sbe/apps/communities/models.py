@@ -325,8 +325,7 @@ def CommunityIdColumn():
     return Column(
         ForeignKey(Community.id),
         nullable=False,
-        info=SEARCHABLE | dict(index_to=(('community_id', ('community_id',)),
-                                        )))
+        info=SEARCHABLE | dict(index_to=(('community_id', ('community_id',)),)))
 
 # Handlers to keep community/group members in sync
 #

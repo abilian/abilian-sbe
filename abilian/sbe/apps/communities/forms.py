@@ -103,7 +103,7 @@ class CommunityForm(Form):
 
         img_type = imghdr.what('ignored', data.read())
 
-        if not img_type in ('png', 'jpeg'):
+        if img_type not in ('png', 'jpeg'):
             raise ValidationError(_(u'Only PNG or JPG image files are accepted'))
 
         data.seek(0)

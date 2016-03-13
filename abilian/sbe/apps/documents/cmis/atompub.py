@@ -132,7 +132,7 @@ def get_object(id):
 #
 # Authentication (basic)
 #
-#@atompub.before_request
+# @atompub.before_request
 def authenticate():
     if not request.authorization:
         raise Unauthorized()
@@ -144,7 +144,7 @@ def authenticate():
         raise Unauthorized()
 
 
-#@atompub.errorhandler(401)
+# @atompub.errorhandler(401)
 def custom_401(error):
     print("custom_401")
     return Response('Authentication required', 401,
@@ -160,11 +160,9 @@ def not_found_error_handler(error):
 #
 # Service Document
 #
+# @render("cmis/service.xml", mimetype=MIME_TYPE_ATOM_SERVICE)
 @route("/")
 @produces(MIME_TYPE_ATOM_SERVICE)
-
-
-#@render("cmis/service.xml", mimetype=MIME_TYPE_ATOM_SERVICE)
 def getRepositoryInfo():
     log.debug("repositoryInfo called")
 
@@ -173,14 +171,13 @@ def getRepositoryInfo():
 
     result = render_template("cmis/service.xml", **ctx)
     response = Response(result, mimetype=MIME_TYPE_ATOM_SERVICE)
+    #return {'root': ROOT}
     return response
 
-    #return {'root': ROOT}
 
-
-    #
-    # Service Collections
-    #
+#
+# Service Collections
+#
 @route("/types")
 def getTypeChildren():
     log.debug("getTypeChildren called")

@@ -38,7 +38,7 @@ class Entry(object):
         else:
             raise Exception("Unknown base object type: %s" % self.obj.sbe_type)
 
-        if not 'no_xml_header' in options:
+        if 'no_xml_header' not in options:
             result = XML_HEADER + result
 
         return result

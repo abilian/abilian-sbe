@@ -103,6 +103,9 @@ pytest-flakes:
 pep8:
 	pep8 -r *.py abilian tests
 
+flake8:
+	flake8 --max-complexity=8 --config=setup.cfg abilian
+
 clean-code:
 	isort -rc abilian
 	yapf --style google -r -i abilian

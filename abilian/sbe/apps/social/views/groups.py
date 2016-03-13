@@ -14,7 +14,6 @@ from abilian.services.security import security
 from abilian.web import csrf
 from abilian.web.views import default_view
 
-from ..forms import GroupForm
 from .social import social
 from .util import Env
 
@@ -34,7 +33,7 @@ def groups():
                         if group.public or g.user in group.members]
     else:
         e.groups = g.user.groups
-        e.groups.sort(lambda x, y: cmp(x.name, y.name))
+        e.groups.sort(key=lambda x: x.name)
     return render_template("social/groups.html", **e)
 
 
@@ -61,10 +60,10 @@ def group_json(group_id):
     q = request.args.get("q", u'').lower()
     if q:
         members = filter(
-          lambda u: any(term.startswith(q)
-                        for name in (u.first_name.lower(), u.last_name.lower())
-                        for term in name.split()),
-          members)
+            lambda u: any(term.startswith(q)
+                          for name in (u.first_name.lower(), u.last_name.lower())
+                          for term in name.split()),
+            members)
 
     result = {'results': [{'id': obj.id, 'text': obj.name} for obj in members]}
     return jsonify(result)
