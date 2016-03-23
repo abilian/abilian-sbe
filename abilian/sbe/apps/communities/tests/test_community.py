@@ -5,7 +5,6 @@ from __future__ import absolute_import
 
 from unittest import skip
 
-import mock
 import sqlalchemy as sa
 from flask import url_for
 
@@ -14,6 +13,8 @@ from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.testing import BaseTestCase
 from abilian.services.security import Admin
+
+import mock
 
 from .. import signals, views
 from ..models import MEMBER, Community, CommunityIdColumn, community_content

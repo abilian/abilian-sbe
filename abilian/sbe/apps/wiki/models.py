@@ -93,10 +93,10 @@ class WikiPage(Entity):
 @sa.event.listens_for(WikiPage.name, "set", active_history=True)
 def _wiki_sync_name_title(entity, new_value, old_value, initiator):
     """
-  Synchronize wikipage name -> title.
-  wikipage.title -> name is done via hybrid_property, avoiding infinite
-  loop (since "set" is received before attribute has received value)
-  """
+    Synchronize wikipage name -> title.
+    wikipage.title -> name is done via hybrid_property, avoiding infinite
+    loop (since "set" is received before attribute has received value)
+    """
     if entity.title != new_value:
         entity.title = new_value
     return new_value

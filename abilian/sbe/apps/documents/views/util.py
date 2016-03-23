@@ -164,10 +164,10 @@ def check_read_access(obj):
 
 def check_write_access(obj):
     """
-  Checks the current user has appropriate write access on the given object.
-  Will raise appropriates errors in case the object doesn't exist (404),
-  or the current user doesn't have write access on the object (403).
-  """
+    Checks the current user has appropriate write access on the given object.
+    Will raise appropriates errors in case the object doesn't exist (404),
+    or the current user doesn't have write access on the object (403).
+    """
     if not obj:
         raise NotFound()
     if not security.running:
@@ -183,10 +183,10 @@ def check_write_access(obj):
 
 def check_manage_access(obj):
     """
-  Checks the current user has appropriate manage access on the given object.
-  Will raise appropriates errors in case the object doesn't exist (404),
-  or the current user doesn't have manage access on the object (403).
-  """
+    Checks the current user has appropriate manage access on the given object.
+    Will raise appropriates errors in case the object doesn't exist (404),
+    or the current user doesn't have manage access on the object (403).
+    """
 
     if not obj:
         raise NotFound()

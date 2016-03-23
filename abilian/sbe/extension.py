@@ -24,8 +24,8 @@ JS = ('js/sbe-datatable.js',
 
 class AbilianSBE(object):
     """
-  Base extension required by abilian.sbe.apps
-  """
+    Base extension required by abilian.sbe.apps
+    """
 
     def __init__(self, app=None):
         if app is not None:

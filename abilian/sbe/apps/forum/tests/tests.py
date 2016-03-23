@@ -7,9 +7,7 @@ from datetime import datetime, timedelta
 from email.parser import FeedParser
 from unittest import TestCase
 
-import pytest
 from flask import url_for
-from mock import Mock, patch
 from pathlib import Path
 
 from abilian.core.models.subjects import User
@@ -17,6 +15,9 @@ from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
                                                      CommunityIndexingTestCase)
 from abilian.sbe.testing import BaseTestCase
+
+import pytest
+from mock import Mock, patch
 
 from ..commands import inject_email
 from ..models import Post, Thread, ThreadClosedError
@@ -144,8 +145,8 @@ class IndexingTestCase(CommunityIndexingTestCase):
 
 class NoLoginViewTest(CommunityBaseTestCase):
     """
-  Test correct url response, without login or security involved
-  """
+    Test correct url response, without login or security involved
+    """
 
     def test(self):
         response = self.client.get(url_for("forum.index",
@@ -284,9 +285,7 @@ class ViewTestCase(CommunityBaseTestCase):
 
 
 def get_string_from_file(filename='notification.email'):
-    """
-    Load a test email return as string
-  """
+    """Load a test email return as string."""
     filepath = Path(__file__).parent / 'data' / filename
     with filepath.open('rt', encoding='utf-8') as email_file:
         email_string = email_file.read()
@@ -294,9 +293,7 @@ def get_string_from_file(filename='notification.email'):
 
 
 def get_emailmessage_from_file(filename='notification.email'):
-    """
-    Load a mail parse it into a email.message
-  """
+    """Load a mail parse it into a email.message."""
     email_string = get_string_from_file(filename)
     parser = FeedParser()
     parser.feed(email_string)
@@ -312,7 +309,7 @@ class CommandsTest(TestCase):
         """
         No processing is tested only parsing into a email.message
         and verifying inject_email() logic
-    """
+        """
         # first load a test email returned by the mock_email
         mock_email.return_value = get_string_from_file('notification.email')
 

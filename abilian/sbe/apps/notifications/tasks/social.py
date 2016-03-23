@@ -66,8 +66,8 @@ def send_daily_social_digest():
 def send_daily_social_digest_to(user):
     """Send to a given user a daily digest of activities in its communities.
 
-  Return 1 if mail sent, 0 otherwise.
-  """
+    Return 1 if mail sent, 0 otherwise.
+    """
     mail = current_app.extensions['mail']
 
     message = make_message(user)
@@ -154,8 +154,8 @@ def make_message(user):
 def generate_unsubscribe_token(user):
     """Generates a unique unsubscription token for the specified user.
 
-  :param user: The user to work with
-  """
+    :param user: The user to work with
+    """
     data = [str(user.id), md5(user.password)]
     return get_serializer(TOKEN_SERIALIZER_NAME).dumps(data)
 

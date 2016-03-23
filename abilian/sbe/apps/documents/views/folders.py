@@ -68,8 +68,8 @@ def folder_view(folder_id):
 
 @route("/folder/<int:folder_id>/json")
 def folder_json(folder_id):
-    """ return parent folder + subfolders
-  """
+    """Return parent folder + subfolders."""
+
     folder = get_folder(folder_id)
     folder_url = partial(url_for, '.folder_json')
     result = {}

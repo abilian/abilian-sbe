@@ -46,8 +46,7 @@ class BaseFolderAction(CmisContentAction):
 
 
 class FolderButtonAction(BaseFolderAction):
-    """
-  """
+
     _std_template_string = (
         u'<button class="btn {{ action.css_class }}" name="action" '
         u'value="{{ action.name }}" title="{{ action.title }}">'
@@ -76,8 +75,7 @@ class FolderButtonAction(BaseFolderAction):
 
 
 class FolderAction(BaseFolderAction):
-    """ Apply to all folders except root folder
-  """
+    """Apply to all folders except root folder."""
     sbe_type = u'cmis:folder'
 
     def pre_condition(self, ctx):
@@ -86,8 +84,7 @@ class FolderAction(BaseFolderAction):
 
 
 class FolderPermisionsAction(BaseFolderAction):
-    """ Apply to all folders except root folder
-  """
+    """Apply to all folders except root folder."""
     sbe_type = u'cmis:folder'
 
     def pre_condition(self, ctx):
@@ -96,8 +93,7 @@ class FolderPermisionsAction(BaseFolderAction):
 
 
 class FolderModalAction(ModalActionMixin, FolderAction):
-    """
-  """
+    pass
 
 
 class DocumentAction(CmisContentAction):
@@ -105,13 +101,11 @@ class DocumentAction(CmisContentAction):
 
 
 class DocumentModalAction(ModalActionMixin, DocumentAction):
-    """
-  """
+    pass
 
 
 class RootFolderAction(CmisContentAction):
-    """ Apply only for root folder
-  """
+    """Apply only for root folder."""
 
     def pre_condition(self, ctx):
         return ctx['object'] is repository.root_folder

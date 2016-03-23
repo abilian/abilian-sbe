@@ -16,9 +16,9 @@ class SecurityException(Exception):
 
 class Repository(object):
     """
-  A simple document repository, implementing the basic functionalities of the
-  CMIS model.
-  """
+    A simple document repository, implementing the basic functionalities of the
+    CMIS model.
+    """
 
     def __init__(self, app=None):
         if app is not None:
@@ -52,30 +52,27 @@ class Repository(object):
     # Id based navigation
     #
     def get_object_by_id(self, id):
-        """
-    Gets the CMIS object (document or folder) with the given `id`.
+        """Gets the CMIS object (document or folder) with the given `id`.
 
-    Returns None if the object doesn't exist.
-    """
+        Returns None if the object doesn't exist.
+        """
         obj = CmisObject.query.get(id)
         if obj is not None and not isinstance(obj, CmisObject):
             return None
         return obj
 
     def get_folder_by_id(self, id):
-        """
-    Gets the folder with the given `id`.
+        """Gets the folder with the given `id`.
 
-    Returns None if the folder doesn't exist.
-    """
+        Returns None if the folder doesn't exist.
+        """
         return Folder.query.get(id)
 
     def get_document_by_id(self, id):
-        """
-    Gets the document with the given `id`.
+        """Gets the document with the given `id`.
 
-    Returns None if the document doesn't exist.
-    """
+        Returns None if the document doesn't exist.
+        """
         document = Document.query.get(id)
         return document
 
@@ -83,19 +80,17 @@ class Repository(object):
     # Path based navigation
     #
     def get_object_by_path(self, path):
-        """
-    Gets the CMIS object (document or folder) with the given `path`.
+        """Gets the CMIS object (document or folder) with the given `path`.
 
-    Returns None if the object doesn't exist.
-    """
+        Returns None if the object doesn't exist.
+        """
         return self.root_folder.get_object_by_path(path)
 
     def get_folder_by_path(self, path):
-        """
-    Gets the folder with the given `path`.
+        """Gets the folder with the given `path`.
 
-    Returns None if the folder doesn't exist.
-    """
+        Returns None if the folder doesn't exist.
+        """
         obj = self.root_folder.get_object_by_path(path)
         if obj is None or not obj.is_folder:
             return None
@@ -103,11 +98,10 @@ class Repository(object):
             return obj
 
     def get_document_by_path(self, path):
-        """
-    Gets the document with the given `path`.
+        """Gets the document with the given `path`.
 
-    Returns None if the document doesn't exist.
-    """
+        Returns None if the document doesn't exist.
+        """
         obj = self.root_folder.get_object_by_path(path)
         if obj is None or not obj.is_document:
             return None
@@ -166,9 +160,9 @@ class Repository(object):
 
     def has_access(self, user, obj):
         """
-    Checks that user has actual right to reach this object, 'read' permission
-    on each of object's parents.
-    """
+        Checks that user has actual right to reach this object, 'read' permission
+        on each of object's parents.
+        """
         current = obj
         while current.parent is not None:
             if not self.has_permission(user, READ, current):

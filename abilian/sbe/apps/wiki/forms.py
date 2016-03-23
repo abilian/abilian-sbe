@@ -18,9 +18,7 @@ from .models import WikiPage
 
 
 def clean_up(src):
-    """
-  form filter
-  """
+    """Form filter."""
     src = src.replace("\r", "")
     return src
 
@@ -67,10 +65,10 @@ class WikiPageForm(Form):
 
 def page_exists(title):
     title = title.strip()
-    return WikiPage.query\
-        .filter(WikiPage.community_id == g.community.id,
-                WikiPage.title == title)\
-        .count() > 0
+    return WikiPage.query \
+               .filter(WikiPage.community_id == g.community.id,
+                       WikiPage.title == title) \
+               .count() > 0
 
 
 # Not used yet

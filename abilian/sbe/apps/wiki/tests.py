@@ -6,12 +6,13 @@ from urllib import quote_plus
 
 from flask import g, url_for
 from markdown import Markdown
-from mock import MagicMock, patch
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
                                                      CommunityIndexingTestCase)
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
+
+from mock import MagicMock, patch
 
 from . import views
 from .models import WikiPage

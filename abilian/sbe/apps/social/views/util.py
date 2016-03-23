@@ -1,9 +1,9 @@
 #noinspection PyMissingConstructor
 class Env(dict):
     """
-  A dictionnary whose objects can be accessed by '.' notation, saving a few
-  keystrokes.
-  """
+    A dictionnary whose objects can be accessed by '.' notation, saving a few
+    keystrokes.
+    """
 
     def __init__(self, label=None, **kw):
         #self.bread_crumbs = self.breadcrumbs = make_bread_crumbs(label=label)

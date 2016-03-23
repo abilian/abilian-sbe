@@ -5,13 +5,14 @@ from __future__ import absolute_import
 
 from datetime import datetime, timedelta
 
-import mock
 from pytz import UTC
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents import lock
 from abilian.sbe.apps.documents.lock import Lock
 from abilian.testing import BaseTestCase
+
+import mock
 
 
 def test_lock():
