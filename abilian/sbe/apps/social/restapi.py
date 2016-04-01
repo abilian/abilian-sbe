@@ -8,7 +8,6 @@ import json
 from flask import Blueprint, g, make_response, request
 from flask_login import login_required
 
-from abilian.core import signals
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.util import get_params

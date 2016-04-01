@@ -35,7 +35,6 @@ def debug_social():
     if email:
         user = User.query.filter(User.email == email).one()
     else:
-        email = current_user.email
         user = current_user
 
     msg = make_message(user)

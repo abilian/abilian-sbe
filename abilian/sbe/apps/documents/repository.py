@@ -40,9 +40,9 @@ class Repository(object):
 
     def get_object(self, id=None, path=None):
         """
-    Gets the CMIS object (document or folder) with either the given `id` or the
-    given `path`. Returns None if the object doesn't exist.
-    """
+        Gets the CMIS object (document or folder) with either the given `id` or the
+        given `path`. Returns None if the object doesn't exist.
+        """
         if id:
             return self.get_object_by_id(id)
         else:

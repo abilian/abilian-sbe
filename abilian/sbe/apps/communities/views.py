@@ -339,8 +339,8 @@ def _members_query():
 @tab('members')
 def members():
     g.breadcrumb.append(nav.BreadcrumbItem(
-      label=_(u'Members'),
-      url=nav.Endpoint('communities.members', community_id=g.community.slug))
+        label=_(u'Members'),
+        url=nav.Endpoint('communities.members', community_id=g.community.slug))
     )
     memberships = _members_query().all()
 
