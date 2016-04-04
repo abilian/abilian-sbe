@@ -71,7 +71,7 @@ def get_new_filename(folder, name):
                     if n.startswith(prefix) and n.endswith(ext))
         suffixes = [int(val) for val in suffixes if re.match(r'^\d+$', val)]
 
-        index = max(0, 0, *suffixes) + 1  #  0, 0: in case suffixes is empty
+        index = max(0, 0, *suffixes) + 1  # 0, 0: in case suffixes is empty
         name = u'{}-{}{}'.format(name, index, ext)
 
     return name

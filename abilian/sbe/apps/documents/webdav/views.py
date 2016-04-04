@@ -132,7 +132,7 @@ def mkcol(path):
     if parent_folder is None:
         return "Parent collection doesn't exist.", HTTP_CONFLICT, {}
 
-    new_folder = parent_folder.create_subfolder(name=name)
+    new_folder = parent_folder.create_subfolder(name=name)  # noqa
     db.session.commit()
     return "", HTTP_CREATED, {}
 
@@ -219,7 +219,7 @@ def propfind(path):
     print(request.data)
 
     try:
-        propfind = Propfind(request.data)
+        propfind = Propfind(request.data)  # noqa
     except XMLSyntaxError:
         return "Malformed XML document.", HTTP_BAD_REQUEST, {}
 

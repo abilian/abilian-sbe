@@ -20,9 +20,9 @@ class Sidebars(object):
     @property
     def latest_visitors(self):
         return User.query.filter(User.last_active != None) \
-          .order_by(User.last_active.desc()) \
-          .limit(15) \
-          .all()
+            .order_by(User.last_active.desc()) \
+            .limit(15) \
+            .all()
 
     @property
     def active_visitor_count(self):
@@ -35,15 +35,15 @@ class Sidebars(object):
         query = query.order_by(Community.last_active_at.desc())
         if not current_user.has_role('admin'):
             # Filter with permissions
-            query = query.join(Membership).filter(Membership.user ==
-                                                  current_user)
+            query = query.join(Membership) \
+                .filter(Membership.user == current_user)
         return query.limit(10).all()
 
     @property
     def all_communities(self):
         # TODO: limit
         return []
-        #return Community.query.all()
+        # return Community.query.all()
 
 
 @social.before_request

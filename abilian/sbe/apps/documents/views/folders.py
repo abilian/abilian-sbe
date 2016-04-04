@@ -788,7 +788,7 @@ def move_multiple(folder):
              else _(u'0 document')).format(count=count_d)
 
     msg = _(u'{folders} and {documents} moved to {target}').format(
-      folders=msg_f, documents=msg_d, target=target_folder.title)
+        folders=msg_f, documents=msg_d, target=target_folder.title)
     flash(msg, 'success')
 
     return redirect(url_for(folder))

@@ -105,16 +105,14 @@ def make_message(user):
         # create an empty digest
         digest = CommunityDigest(community)
         AE = ActivityEntry
-        activities = AE.query\
-          .order_by(AE.happened_at.asc()) \
-          .filter(
-            and_(AE.happened_at > happened_after,
+        activities = AE.query \
+            .order_by(AE.happened_at.asc()) \
+            .filter(and_(AE.happened_at > happened_after,
                  or_(and_(AE.target_type == community.object_type,
                           AE.target_id == community.id),
                      and_(AE.object_type == community.object_type,
-                          AE.object_id == community.id),))
-          ) \
-          .all()
+                          AE.object_id == community.id), ))) \
+            .all()
 
         # fill the internal digest lists with infos
         # seen_entities, new_members, new_documents, updated_documents ...

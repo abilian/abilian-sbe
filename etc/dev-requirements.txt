@@ -1,9 +1,8 @@
 # Additional packages for development.
 
 # Our favorite test runner with some plugins and CI builder
-pytest>=2.7.0
+pytest
 pytest-xdist
-tox<2.2
 
 # Backport of Python 3 mocking library
 mock>=1.0.1
@@ -30,6 +29,7 @@ sphinx-rtd-theme
 Flask-LinkTester
 
 # Static code analysis
+flake8
 pylama
 pytest-flakes
 pytest-pep8
