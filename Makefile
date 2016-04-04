@@ -143,8 +143,7 @@ clean:
 	rm -rf whoosh tests/whoosh tests/integration/whoosh
 	rm -rf doc/_build
 	rm -rf static/gen static/.webassets-cache
-	rm -rf htmlcov
-	rm -rf junit-py27.xml ghostdriver.log coverage.xml
+	rm -rf htmlcov ghostdriver.log coverage.xml junit*.xml
 	rm -rf tests.functional.test/
 
 tidy: clean
