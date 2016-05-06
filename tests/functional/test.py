@@ -15,7 +15,6 @@ import multiprocessing
 from unittest import skip
 
 import pytest
-import pytest_splinter.plugin  # noqa
 from werkzeug.serving import select_ip_version
 
 from abilian.sbe.app import Application
