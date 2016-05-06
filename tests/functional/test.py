@@ -12,7 +12,6 @@ import socket
 import tempfile
 import shutil
 import multiprocessing
-from unittest import skip
 
 import pytest
 from werkzeug.serving import select_ip_version
@@ -67,9 +66,8 @@ def splinter_driver_kwargs():
 
 @pytest.fixture(scope='module')
 def instance_path(request):
+    """Creates a temporary directory for instance data.
     """
-  creates a temporary directory for instance data
-  """
     tmp_dir = tempfile.mkdtemp(prefix='tmp-pytest-', suffix='-abilian-sbe')
 
     def clear():
@@ -106,6 +104,7 @@ def app(request, instance_path, app_port):
     return app
 
 
+"""
 @skip
 def test_home(browser, app, app_root):
     browser.visit(app_root)
@@ -127,3 +126,4 @@ def test_login(browser, app, app_root):
 @skip
 def test_forgotten_pw(browser, app, app_root):
     browser.visit(app_root + '/user/forgotten_pw')
+"""
