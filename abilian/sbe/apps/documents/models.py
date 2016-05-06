@@ -45,8 +45,8 @@ logger = logging.getLogger(__package__)
 __all__ = ['db', 'Folder', 'Document', 'BaseContent', 'icon_for']
 
 #: A Whoosh analyzer that folds accents and case.
-accent_folder = (RegexTokenizer() | LowercaseFilter()
-                 | CharsetFilter(accent_map))
+accent_folder = (RegexTokenizer() | LowercaseFilter() |
+                 CharsetFilter(accent_map))
 
 ICONS_FOLDER = pkg_resources.resource_filename('abilian.sbe',
                                                'static/fileicons')
@@ -333,17 +333,15 @@ class Folder(CmisObject, PathAndSecurityIndexable):
     #
     @property
     def filtered_children(self):
-        return security.filter_with_permission(g.user,
-                                               "read",
-                                               self.children,
-                                               inherit=True)
+        return security.filter_with_permission(
+            g.user, "read", self.children,
+            inherit=True)
 
     @property
     def filtered_subfolders(self):
-        return security.filter_with_permission(g.user,
-                                               "read",
-                                               self.subfolders,
-                                               inherit=True)
+        return security.filter_with_permission(
+            g.user, "read", self.subfolders,
+            inherit=True)
 
     def get_local_roles_assignments(self):
         local_roles_assignments = security.get_role_assignements(self)

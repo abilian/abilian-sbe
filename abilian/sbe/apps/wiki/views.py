@@ -8,7 +8,6 @@ from os.path import dirname, join
 from urllib import quote
 
 import sqlalchemy as sa
-from abilian.web.nav import BreadcrumbItem
 from flask import (current_app, flash, g, make_response, redirect,
                    render_template, request)
 from markdown import markdown
@@ -24,7 +23,8 @@ from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import \
     default_view_kw as community_dv_kw
 from abilian.web import csrf
-from abilian.web.action import actions, Endpoint
+from abilian.web.action import Endpoint, actions
+from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
 from abilian.web.views import (ObjectCreate, ObjectEdit, ObjectView,
                                default_view)
@@ -50,16 +50,16 @@ def init_wiki_values(endpoint, values):
     if title and title != 'Home':
         g.breadcrumb.append(
             BreadcrumbItem(label=title,
-                               url=Endpoint('wiki.page',
-                                                community_id=g.community.slug,
-                                                title=title)))
+                           url=Endpoint('wiki.page',
+                                        community_id=g.community.slug,
+                                        title=title)))
 
 
 @route('/')
 def index():
-    return redirect(url_for(".page",
-                            title='Home',
-                            community_id=g.community.slug))
+    return redirect(
+        url_for(".page", title='Home',
+                community_id=g.community.slug))
 
 
 def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):

@@ -34,11 +34,11 @@ class WikiPageForm(Form):
     title = StringField(label=_l(u"Title"),
                         filters=(strip,),
                         validators=[required()])
-    body_src = TextAreaField(label=_l("Body"),
-                             filters=(strip, clean_up),
-                             validators=[required()],
-                             widget=TextArea(rows=10,
-                                             resizeable='vertical'),)
+    body_src = TextAreaField(
+        label=_l("Body"),
+        filters=(strip, clean_up),
+        validators=[required()],
+        widget=TextArea(rows=10, resizeable='vertical'),)
 
     message = StringField(label=_l("Commit message"))
     page_id = HiddenField(filters=(int_or_none,), validators=[flaghidden()])

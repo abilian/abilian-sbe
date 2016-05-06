@@ -14,8 +14,6 @@ from time import gmtime, strftime
 import openpyxl
 import pytz
 import sqlalchemy as sa
-from abilian.web.action import Endpoint
-from abilian.web.nav import BreadcrumbItem
 from flask import (current_app, flash, g, jsonify, redirect, render_template,
                    request, session, url_for)
 from flask_login import current_user, login_required
@@ -33,6 +31,8 @@ from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
 from abilian.web import csrf, views
+from abilian.web.action import Endpoint
+from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import images as image_views
 
 from .actions import register_actions
@@ -265,9 +265,9 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
         return _(u"Community %(name)s created successfully", name=self.obj.name)
 
 
-add_url('/new',
-        view_func=CommunityCreate.as_view('new',
-                                          view_endpoint='.community'))
+add_url(
+    '/new',
+    view_func=CommunityCreate.as_view('new', view_endpoint='.community'))
 
 
 class CommunityDelete(BaseCommunityView, views.ObjectDelete):
@@ -276,9 +276,8 @@ class CommunityDelete(BaseCommunityView, views.ObjectDelete):
 
 add_url("/<string:community_id>/destroy",
         methods=['POST'],
-        view_func=CommunityDelete.as_view('delete',
-                                          message_success=_l(
-                                              u"Community destroyed.")))
+        view_func=CommunityDelete.as_view(
+            'delete', message_success=_l(u"Community destroyed.")))
 
 # Community Image
 _DEFAULT_IMAGE = Path(__file__).parent / u'data' / u'community.png'

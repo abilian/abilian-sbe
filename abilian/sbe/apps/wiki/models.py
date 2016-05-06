@@ -32,10 +32,10 @@ class WikiPage(Entity):
 
     community_id = CommunityIdColumn()
     #: The community this page belongs to
-    community = relationship(Community,
-                             primaryjoin=(community_id == Community.id),
-                             backref=backref("wiki",
-                                             cascade="all, delete-orphan"))
+    community = relationship(
+        Community,
+        primaryjoin=(community_id == Community.id),
+        backref=backref("wiki", cascade="all, delete-orphan"))
 
     #: The body, using some markup language (Markdown for now)
     body_src = Column(UnicodeText,

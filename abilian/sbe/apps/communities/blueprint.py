@@ -3,14 +3,13 @@
 """
 from __future__ import absolute_import
 
-from abilian.web.action import Endpoint
-from abilian.web.nav import BreadcrumbItem
 from flask import Blueprint as BaseBlueprint
 from flask import g
 from werkzeug.exceptions import NotFound
 
 from abilian.i18n import _l
-#from abilian.web import nav
+from abilian.web.action import Endpoint
+from abilian.web.nav import BreadcrumbItem
 
 from . import security
 from .models import Community
@@ -65,8 +64,7 @@ def pull_community(endpoint, values):
     """url_value_preprocessor function."""
     g.nav['active'] = 'section:communities'
     g.breadcrumb.append(BreadcrumbItem(label=_l(u'Communities'),
-                                           url=Endpoint(
-                                               'communities.index')))
+                                       url=Endpoint('communities.index')))
 
     try:
         slug = values.pop('community_id')
@@ -74,8 +72,7 @@ def pull_community(endpoint, values):
         if community:
             g.community = CommunityPresenter(community)
             wall_url = Endpoint('wall.index', community_id=community.slug)
-            breadcrumb_item = BreadcrumbItem(label=community.name,
-                                                 url=wall_url)
+            breadcrumb_item = BreadcrumbItem(label=community.name, url=wall_url)
             g.breadcrumb.append(breadcrumb_item)
         else:
             raise NotFound()

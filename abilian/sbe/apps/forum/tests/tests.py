@@ -7,7 +7,9 @@ from datetime import datetime, timedelta
 from email.parser import FeedParser
 from unittest import TestCase
 
+import pytest
 from flask import url_for
+from mock import Mock, patch
 from pathlib import Path
 
 from abilian.core.models.subjects import User
@@ -15,9 +17,6 @@ from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
                                                      CommunityIndexingTestCase)
 from abilian.sbe.testing import BaseTestCase
-
-import pytest
-from mock import Mock, patch
 
 from ..commands import inject_email
 from ..models import Post, Thread, ThreadClosedError

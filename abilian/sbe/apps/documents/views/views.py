@@ -4,12 +4,12 @@ Document management blueprint.
 """
 from __future__ import absolute_import
 
-from abilian.web.action import Endpoint
-from abilian.web.nav import BreadcrumbItem
 from flask import g
 
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.blueprint import Blueprint
+from abilian.web.action import Endpoint
+from abilian.web.nav import BreadcrumbItem
 
 from ..actions import register_actions
 
@@ -29,5 +29,5 @@ def init_document_values(endpoint, values):
 
     g.breadcrumb.append(
         BreadcrumbItem(label=_l(u'Documents'),
-                           url=Endpoint('documents.index',
-                                            community_id=g.community.slug)))
+                       url=Endpoint('documents.index',
+                                    community_id=g.community.slug)))

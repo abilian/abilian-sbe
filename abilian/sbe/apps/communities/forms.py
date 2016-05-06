@@ -58,8 +58,7 @@ class CommunityForm(Form):
         choices=_group_choices)
 
     image = FileField(label=_l('Image'),
-                      widget=ImageInput(width=65,
-                                        height=65),
+                      widget=ImageInput(width=65, height=65),
                       validators=[optional()])
 
     type = Select2Field(label=_(u"Type"), validators=[required()],

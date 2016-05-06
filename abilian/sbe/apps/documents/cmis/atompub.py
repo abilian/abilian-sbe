@@ -416,12 +416,12 @@ def createObject():
     # // XXX: .type() is here because of a bug in resteasy
     # return Response.created(newloc).entity(output).type(MIME_TYPE_ATOM_ENTRY).build();
 
+    #
+    # Feeds
+    #
 
-#
-# Feeds
-#
 
-# Object Parents Feed (GET)
+    # Object Parents Feed (GET)
 @route("/parents")
 def getObjectParents():
     id = request.args.get('id')

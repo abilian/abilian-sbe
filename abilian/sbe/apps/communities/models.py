@@ -52,8 +52,7 @@ class Membership(db.Model):
 
     community_id = Column(
         ForeignKey('community.id'),
-        index=True,
-        nullable=False)
+        index=True, nullable=False)
     community = relationship('Community', lazy='joined')
 
     role = Column(RoleType())  # should be either 'member' or 'manager'
@@ -113,8 +112,7 @@ class Community(Entity):
 
     # : A public description.
     description = Column(
-        Unicode(500),
-        default=u"",
+        Unicode(500), default=u"",
         nullable=False,
         info=SEARCHABLE)
 
@@ -151,16 +149,14 @@ class Community(Entity):
                                            viewonly=True),)
 
     #: Number of members in this community.
-    membership_count = Column(Integer,
-                              default=0,
-                              nullable=False,
-                              info=NOT_AUDITABLE)
+    membership_count = Column(
+        Integer, default=0,
+        nullable=False, info=NOT_AUDITABLE)
 
     #: Number of documents in this community.
-    document_count = Column(Integer,
-                            default=0,
-                            nullable=False,
-                            info=NOT_AUDITABLE)
+    document_count = Column(
+        Integer, default=0,
+        nullable=False, info=NOT_AUDITABLE)
 
     #: Last time something happened in this community
     last_active_at = Column(DateTime,
@@ -437,7 +433,7 @@ def _on_group_member_change(group, user, initiator):
                  user, initiator.op, community)
 
     if ((op is OP_APPEND and is_present) or
-            (op is OP_REMOVE and not is_present)):
+        (op is OP_REMOVE and not is_present)):
         return
 
     if op is OP_APPEND:

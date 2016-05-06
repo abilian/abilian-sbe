@@ -74,19 +74,14 @@ def folder_json(folder_id):
     folder_url = partial(url_for, '.folder_json')
     result = {}
     has_permission = security.has_permission
-    result['current_folder_selectable'] = has_permission(g.user,
-                                                         WRITE,
-                                                         folder,
-                                                         inherit=True)
+    result['current_folder_selectable'] = has_permission(
+        g.user, WRITE, folder, inherit=True)
     folders = result['folders'] = []
     bc = result['breadcrumbs'] = []
     subfolders = sorted(
         (f
          for f in folder.subfolders
-         if has_permission(g.user,
-                           READ,
-                           f,
-                           inherit=True)),
+         if has_permission(g.user, READ, f, inherit=True)),
         key=lambda f: f.title)
 
     parent = folder
@@ -237,10 +232,9 @@ def permissions_update(folder_id):
     if action in ("activate_inheritance", "deactivate_inheritance"):
         inherit_security = (action == "activate_inheritance")
 
-        if not (inherit_security or has_permission(g.user,
-                                                   'manage',
-                                                   folder,
-                                                   inherit=False)):
+        if not (inherit_security or
+                has_permission(g.user, 'manage',
+                               folder, inherit=False)):
             # don't let user shoot himself in the foot
             flash(_(u'You must have the "manager" local role on this folder in '
                     'order to deactivate inheritance.'), u'error')
@@ -293,11 +287,9 @@ def permissions_update(folder_id):
             transaction = db.session.begin_nested()
             security.ungrant_role(user, role, folder)
 
-            if (user == g.user and role == 'manager' and
-                    not has_permission(g.user,
-                                       'manage',
-                                       folder,
-                                       inherit=True)):
+            if (user == g.user and role == 'manager' and not has_permission(
+                    g.user, 'manage', folder,
+                    inherit=True)):
 
                 transaction.rollback()
                 flash(_(u'Cannot remove "manager" local role for yourself: you '
@@ -317,10 +309,9 @@ def permissions_update(folder_id):
             transaction = db.session.begin_nested()
             security.ungrant_role(group, role, folder)
 
-            if (role == 'manager' and not has_permission(g.user,
-                                                         'manage',
-                                                         folder,
-                                                         inherit=True)):
+            if (role == 'manager' and not has_permission(
+                    g.user, 'manage', folder,
+                    inherit=True)):
                 transaction.rollback()
                 flash(_(u'Cannot remove "manager" local role for group "{group}": you'
                         ' don\'t have "manager" role by security inheritance or by '
@@ -737,10 +728,9 @@ def move_multiple(folder):
         flash(_(u'You are not allowed to move elements from this folder'), 'error')
         return redirect(current_folder_url)
 
-    if not security.has_permission(g.user,
-                                   'write',
-                                   target_folder,
-                                   inherit=True):
+    if not security.has_permission(
+            g.user, 'write', target_folder,
+            inherit=True):
         flash(_(u'You are not allowed to write in folder "{folder}"'
         ).format(folder=target_folder.title),
               'error')
