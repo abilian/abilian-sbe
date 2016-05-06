@@ -14,6 +14,8 @@ from time import gmtime, strftime
 import openpyxl
 import pytz
 import sqlalchemy as sa
+from abilian.web.action import Endpoint
+from abilian.web.nav import BreadcrumbItem
 from flask import (current_app, flash, g, jsonify, redirect, render_template,
                    request, session, url_for)
 from flask_login import current_user, login_required
@@ -30,7 +32,7 @@ from abilian.i18n import _, _l
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
-from abilian.web import csrf, nav, views
+from abilian.web import csrf, views
 from abilian.web.views import images as image_views
 
 from .actions import register_actions
@@ -215,9 +217,9 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
     decorators = views.ObjectEdit.decorators + (require_admin, tab('settings'),)
 
     def breadcrumb(self):
-        return nav.BreadcrumbItem(label=_(u'Settings'),
+        return BreadcrumbItem(label=_(u'Settings'),
                                   icon='cog',
-                                  url=nav.Endpoint('communities.settings',
+                                  url=Endpoint('communities.settings',
                                                    community_id=g.community.slug))
 
     def before_populate_obj(self):
@@ -257,7 +259,7 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
     base_template = views.ObjectCreate.base_template
 
     def breadcrumb(self):
-        return nav.BreadcrumbItem(label=_(u'Create new community'))
+        return BreadcrumbItem(label=_(u'Create new community'))
 
     def message_success(self):
         return _(u"Community %(name)s created successfully", name=self.obj.name)
@@ -338,9 +340,9 @@ def _members_query():
 @route("/<string:community_id>/members")
 @tab('members')
 def members():
-    g.breadcrumb.append(nav.BreadcrumbItem(
+    g.breadcrumb.append(BreadcrumbItem(
         label=_(u'Members'),
-        url=nav.Endpoint('communities.members', community_id=g.community.slug))
+        url=Endpoint('communities.members', community_id=g.community.slug))
     )
     memberships = _members_query().all()
 

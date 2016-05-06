@@ -8,6 +8,7 @@ from os.path import dirname, join
 from urllib import quote
 
 import sqlalchemy as sa
+from abilian.web.nav import BreadcrumbItem
 from flask import (current_app, flash, g, make_response, redirect,
                    render_template, request)
 from markdown import markdown
@@ -22,8 +23,8 @@ from abilian.i18n import _, _l, _n
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import \
     default_view_kw as community_dv_kw
-from abilian.web import csrf, nav
-from abilian.web.action import actions
+from abilian.web import csrf
+from abilian.web.action import actions, Endpoint
 from abilian.web.util import url_for
 from abilian.web.views import (ObjectCreate, ObjectEdit, ObjectView,
                                default_view)
@@ -42,14 +43,14 @@ route = wiki.route
 def init_wiki_values(endpoint, values):
     g.current_tab = 'wiki'
 
-    endpoint = nav.Endpoint('wiki.index', community_id=g.community.slug)
-    g.breadcrumb.append(nav.BreadcrumbItem(label=_l(u'Wiki'), url=endpoint))
+    endpoint = Endpoint('wiki.index', community_id=g.community.slug)
+    g.breadcrumb.append(BreadcrumbItem(label=_l(u'Wiki'), url=endpoint))
 
     title = request.args.get('title', u'').strip()
     if title and title != 'Home':
         g.breadcrumb.append(
-            nav.BreadcrumbItem(label=title,
-                               url=nav.Endpoint('wiki.page',
+            BreadcrumbItem(label=title,
+                               url=Endpoint('wiki.page',
                                                 community_id=g.community.slug,
                                                 title=title)))
 
@@ -477,9 +478,9 @@ def wiki_export():
 #
 def get_page_by_title(title):
     title = title.strip()
-    page = WikiPage.query\
+    page = WikiPage.query \
         .filter(WikiPage.community_id == g.community.id,
-                WikiPage.title == title)\
+                WikiPage.title == title) \
         .one()
     return page
 

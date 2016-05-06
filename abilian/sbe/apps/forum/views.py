@@ -9,6 +9,7 @@ from itertools import groupby
 from urllib import quote
 
 import sqlalchemy as sa
+from abilian.web.nav import BreadcrumbItem
 from flask import (current_app, flash, g, make_response, render_template,
                    request)
 from flask_babel import format_date
@@ -20,8 +21,8 @@ from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import default_view_kw
-from abilian.web import nav, url_for, views
-from abilian.web.action import ButtonAction
+from abilian.web import url_for, views
+from abilian.web.action import ButtonAction, Endpoint
 from abilian.web.views import default_view
 
 from .forms import PostEditForm, PostForm, ThreadForm
@@ -53,8 +54,8 @@ def init_forum_values(endpoint, values):
     g.current_tab = 'forum'
 
     g.breadcrumb.append(
-        nav.BreadcrumbItem(label=_l(u'Conversations'),
-                           url=nav.Endpoint('forum.index',
+        BreadcrumbItem(label=_l(u'Conversations'),
+                           url=Endpoint('forum.index',
                                             community_id=g.community.slug)))
 
 

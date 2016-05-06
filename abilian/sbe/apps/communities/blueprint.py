@@ -3,12 +3,14 @@
 """
 from __future__ import absolute_import
 
+from abilian.web.action import Endpoint
+from abilian.web.nav import BreadcrumbItem
 from flask import Blueprint as BaseBlueprint
 from flask import g
 from werkzeug.exceptions import NotFound
 
 from abilian.i18n import _l
-from abilian.web import nav
+#from abilian.web import nav
 
 from . import security
 from .models import Community
@@ -62,8 +64,8 @@ def init_current_tab(endpoint, values):
 def pull_community(endpoint, values):
     """url_value_preprocessor function."""
     g.nav['active'] = 'section:communities'
-    g.breadcrumb.append(nav.BreadcrumbItem(label=_l(u'Communities'),
-                                           url=nav.Endpoint(
+    g.breadcrumb.append(BreadcrumbItem(label=_l(u'Communities'),
+                                           url=Endpoint(
                                                'communities.index')))
 
     try:
@@ -71,8 +73,8 @@ def pull_community(endpoint, values):
         community = Community.query.filter(Community.slug == slug).first()
         if community:
             g.community = CommunityPresenter(community)
-            wall_url = nav.Endpoint('wall.index', community_id=community.slug)
-            breadcrumb_item = nav.BreadcrumbItem(label=community.name,
+            wall_url = Endpoint('wall.index', community_id=community.slug)
+            breadcrumb_item = BreadcrumbItem(label=community.name,
                                                  url=wall_url)
             g.breadcrumb.append(breadcrumb_item)
         else:
