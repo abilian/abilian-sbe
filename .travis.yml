@@ -34,9 +34,10 @@ before_install:
 
 # Install Python dependencies
 install:
-  - pip install -U 'pip>=8'
+  - pip install -U 'pip>=8' 'pip-tools'
+  - pip-sync
   - pip install -e '.[dev]'
-  - pip install -r etc/git-requirements.txt
+  # Debug info
   - pip --version
   - python -c "import sqlite3; print 'SQLITE3:', sqlite3.sqlite_version"
   - pip list
