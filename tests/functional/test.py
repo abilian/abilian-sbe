@@ -12,6 +12,8 @@ import socket
 import tempfile
 import shutil
 import multiprocessing
+from unittest import skip
+
 import pytest
 import pytest_splinter.plugin  # noqa
 from werkzeug.serving import select_ip_version
@@ -107,10 +109,12 @@ def app(request, instance_path, app_port):
   return app
 
 
+@skip
 def test_home(browser, app, app_root):
   browser.visit(app_root)
 
 
+@skip
 def test_login(browser, app, app_root):
   browser.visit(app_root + '/user/login')
   browser.fill('email', "admin@example.com")
@@ -123,5 +127,6 @@ def test_login(browser, app, app_root):
   # assert "Welcome to Abilian" in browser.find_element_by_xpath("/html/body").text
 
 
+@skip
 def test_forgotten_pw(browser, app, app_root):
   browser.visit(app_root + '/user/forgotten_pw')

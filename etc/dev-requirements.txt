@@ -18,8 +18,9 @@ honcho
 
 # Higher level API to Selenium than WebDriver,
 # see http://splinter.cobrateam.info/en/latest/index.html
-splinter>=0.7.0
-pytest-splinter
+# Fails on travis + phantomjs issues...
+#splinter>=0.7.0
+#pytest-splinter
 
 # Documentation generator
 Sphinx

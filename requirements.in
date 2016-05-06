@@ -7,10 +7,8 @@ Flask-Babel<0.10
 # Email validation (when sending digests)
 validate_email
 
-# Language detection
+# Language and charset detection
 langid>=1.1,<1.2
-
-# Charset detection
 chardet
 
 # needed by folder: export to xls
