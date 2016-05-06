@@ -401,6 +401,7 @@ def createObject():
     log_result(result)
     return Response(result, status=201, mimetype=MIME_TYPE_ATOM_ENTRY)
 
+    """
     # TODO:
     # URI newloc = null;
     # try {
@@ -415,15 +416,16 @@ def createObject():
 
     # // XXX: .type() is here because of a bug in resteasy
     # return Response.created(newloc).entity(output).type(MIME_TYPE_ATOM_ENTRY).build();
-
-    #
-    # Feeds
-    #
+    """
 
 
-    # Object Parents Feed (GET)
+#
+# Feeds
+#
 @route("/parents")
 def getObjectParents():
+    """Object Parents Feed (GET).
+    """
     id = request.args.get('id')
     log.debug("getObjectParents called on " + id)
 

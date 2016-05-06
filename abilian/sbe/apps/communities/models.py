@@ -433,7 +433,7 @@ def _on_group_member_change(group, user, initiator):
                  user, initiator.op, community)
 
     if ((op is OP_APPEND and is_present) or
-        (op is OP_REMOVE and not is_present)):
+            (op is OP_REMOVE and not is_present)):
         return
 
     if op is OP_APPEND:
