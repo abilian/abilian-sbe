@@ -69,8 +69,8 @@ class Application(BaseApplication):
 
     def __init__(self, name='abilian_sbe', config=None, **kwargs):
         BaseApplication.__init__(self, name, config=config, **kwargs)
-        self.register_jinja_loaders(jinja2.PackageLoader('abilian.sbe',
-                                                         'templates'))
+        loader = jinja2.PackageLoader('abilian.sbe', 'templates')
+        self.register_jinja_loaders(loader)
 
     def init_extensions(self):
         BaseApplication.init_extensions(self)

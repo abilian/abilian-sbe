@@ -400,7 +400,6 @@ def createObject():
     result = to_xml(new_object)
     log_result(result)
     return Response(result, status=201, mimetype=MIME_TYPE_ATOM_ENTRY)
-
     """
     # TODO:
     # URI newloc = null;
