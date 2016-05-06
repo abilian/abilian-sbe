@@ -29,7 +29,7 @@ class CmisContentAction(Action):
         Action.__init__(self, *args, **kwargs)
 
     def pre_condition(self, ctx):
-        # type: (Dict[str, Any])->bool
+        # type: (Dict[str, Any]) -> bool
         obj = ctx['object']
         ok = obj.sbe_type == self.sbe_type
 
@@ -39,11 +39,13 @@ class CmisContentAction(Action):
         return ok
 
     def has_access(self, permission, obj):
+        # type: (str, Any) -> bool
         return repository.has_permission(g.user, permission, obj)
 
 
 class BaseFolderAction(CmisContentAction):
-    """Apply to all folders, including root folder."""
+    """Apply to all folders, including root folder.
+    """
     sbe_type = u'cmis:folder'
 
 

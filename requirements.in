@@ -14,3 +14,6 @@ chardet
 # needed by folder: export to xls
 xlwt
 openpyxl>=2.3.0
+
+# mypy (experimental)
+typing
