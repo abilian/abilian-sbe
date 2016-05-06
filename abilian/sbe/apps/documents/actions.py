@@ -5,6 +5,7 @@ from __future__ import absolute_import
 
 from flask import url_for as url_for_orig
 from flask import g
+from typing import Any, Dict
 
 from abilian.i18n import _l
 from abilian.services.security import MANAGE, WRITE, security
@@ -28,6 +29,7 @@ class CmisContentAction(Action):
         Action.__init__(self, *args, **kwargs)
 
     def pre_condition(self, ctx):
+        # type: (Dict[str, Any])->bool
         obj = ctx['object']
         ok = obj.sbe_type == self.sbe_type
 

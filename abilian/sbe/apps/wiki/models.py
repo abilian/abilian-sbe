@@ -5,10 +5,9 @@ from __future__ import absolute_import
 
 from datetime import datetime
 
-import sqlalchemy as sa
 from flask import g
 from sqlalchemy import (Column, DateTime, ForeignKey, Integer, Unicode,
-                        UnicodeText, UniqueConstraint)
+                        UnicodeText, UniqueConstraint, event)
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 
@@ -90,7 +89,7 @@ class WikiPage(Entity):
         #return bleach.clean(html, strip=True)
 
 
-@sa.event.listens_for(WikiPage.name, "set", active_history=True)
+@event.listens_for(WikiPage.name, "set", active_history=True)
 def _wiki_sync_name_title(entity, new_value, old_value, initiator):
     """
     Synchronize wikipage name -> title.
@@ -131,7 +130,7 @@ class WikiPageRevision(db.Model):
 
 
 class WikiPageAttachment(BaseContent):
-    __tablename__ = None
+    __tablename__ = None  # type: str
     __indexable__ = False
     __mapper_args__ = {'polymorphic_identity': 'wikipage_attachment'}
     sbe_type = 'wikipage:attachment'

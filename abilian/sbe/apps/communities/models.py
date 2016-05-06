@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from blinker import ANY
 from flask import current_app
 from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
-                        Unicode, UniqueConstraint, and_)
+                        Unicode, UniqueConstraint, and_, event)
 from sqlalchemy.orm import backref, relation, relationship
 from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE
 
@@ -39,7 +39,8 @@ VALID_ROLES = frozenset((READER, WRITER, MANAGER, MEMBER,))
 
 
 class Membership(db.Model):
-    """Represents the membership of someone in a community."""
+    """Represents the membership of someone in a community.
+    """
     __tablename__ = 'community_membership'
 
     id = Column(Integer, primary_key=True)
@@ -66,9 +67,9 @@ class Membership(db.Model):
 
 
 def community_content(cls):
-    """
-    Class decorator to mark models considered as community content. This is
-    required for proper indexation.
+    """Class decorator to mark models considered as community content.
+
+    This is required for proper indexation.
     """
     cls.is_community_content = True
 
@@ -90,8 +91,7 @@ def community_content(cls):
 
 
 def indexable_roles_and_users(community):
-    """
-    Mixin to use to replace Entity._indexable_roles_and_users.
+    """Mixin to use to replace Entity._indexable_roles_and_users.
 
     Will be removed when communities are upgraded to use standard role based
     access (by setting permissions and using security service).
@@ -100,7 +100,8 @@ def indexable_roles_and_users(community):
 
 
 class Community(Entity):
-    """Ad-hoc objects that hold properties about a community."""
+    """Ad-hoc objects that hold properties about a community.
+    """
     __indexation_args__ = {}
     __indexation_args__.update(Entity.__indexation_args__)
     index_to = __indexation_args__.setdefault('index_to', ())
@@ -256,7 +257,8 @@ class Community(Entity):
     def remove_membership(self, user):
         M = Membership
         membership = M.query \
-          .filter(and_(M.user_id == user.id, M.community_id == self.id)).first()
+          .filter(and_(M.user_id == user.id, M.community_id == self.id)) \
+          .first()
         if not membership:
             raise KeyError("User {} is not a member of community {}".format(
                 user, self))
@@ -286,7 +288,8 @@ class Community(Entity):
                 security.ungrant_role(principal, role, self.folder)
 
     def get_role(self, user):
-        """Returns the given user's role in this community."""
+        """Returns the given user's role in this community.
+        """
         M = Membership
         membership = current_app.db.session() \
             .query(M.role) \
@@ -355,8 +358,8 @@ def membership_removed(sender, membership):
         sender.group.members.discard(membership.user)
 
 
-@sa.event.listens_for(Community.members, 'append')
-@sa.event.listens_for(Community.members, 'remove')
+@event.listens_for(Community.members, 'append')
+@event.listens_for(Community.members, 'remove')
 def _on_member_change(community, user, initiator):
     group = community.group
     if not group:
@@ -379,7 +382,7 @@ def _on_member_change(community, user, initiator):
             group.members.discard(user)
 
 
-@sa.event.listens_for(Community.group, 'set', active_history=True)
+@event.listens_for(Community.group, 'set', active_history=True)
 def _on_linked_group_change(community, value, oldvalue, initiator):
     if value == oldvalue:
         return
@@ -415,8 +418,8 @@ def _safe_get_community(group):
             return None
 
 
-@sa.event.listens_for(Group.members, 'append')
-@sa.event.listens_for(Group.members, 'remove')
+@event.listens_for(Group.members, 'append')
+@event.listens_for(Group.members, 'remove')
 def _on_group_member_change(group, user, initiator):
     community = _safe_get_community(group)
 
@@ -443,7 +446,7 @@ def _on_group_member_change(group, user, initiator):
         community.remove_membership(user)
 
 
-@sa.event.listens_for(Group.members, 'set', active_history=True)
+@event.listens_for(Group.members, 'set', active_history=True)
 def _on_group_members_replace(group, value, oldvalue, initiator):
     if value == oldvalue:
         return

@@ -41,9 +41,11 @@ from .util import (breadcrumbs_for, check_manage_access, check_read_access,
                    check_write_access, create_document, edit_object,
                    get_document, get_folder, get_new_filename,
                    get_selected_objects)
-from .views import documents
+from .views import blueprint
 
-route = documents.route
+route = blueprint.route
+
+__all__ = ()
 
 
 @route("/")
@@ -53,7 +55,7 @@ def index():
     return redirect(url)
 
 
-@default_view(documents, Folder, id_attr='folder_id', kw_func=default_view_kw)
+@default_view(blueprint, Folder, id_attr='folder_id', kw_func=default_view_kw)
 @route("/folder/<int:folder_id>")
 def folder_view(folder_id):
     folder = get_folder(folder_id)

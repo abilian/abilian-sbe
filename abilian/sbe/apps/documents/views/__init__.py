@@ -1,5 +1,4 @@
-from .views import documents
-from .documents import *  # noqa
-from .folders import *  # noqa
+from .views import blueprint
+from . import documents, folders  # noqa
 
-__all__ = ['documents']
+__all__ = ('blueprint',)

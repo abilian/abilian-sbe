@@ -30,14 +30,16 @@ from ..repository import repository
 from ..tasks import convert_document_content, preview_document
 from .util import (breadcrumbs_for, check_manage_access, check_read_access,
                    check_write_access, edit_object, get_document, match)
-from .views import documents
+from .views import blueprint
 
-route = documents.route
+route = blueprint.route
 
 MAX_PREVIEW_SIZE = 1000
 
+__all__ = ()
 
-@default_view(documents, Document, id_attr='doc_id', kw_func=default_view_kw)
+
+@default_view(blueprint, Document, id_attr='doc_id', kw_func=default_view_kw)
 @route("/doc/<int:doc_id>")
 def document_view(doc_id):
     doc = get_document(doc_id)

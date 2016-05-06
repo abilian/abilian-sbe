@@ -154,7 +154,7 @@ route('/page/')(PageView.as_view('page'))
 class PageEdit(BasePageView, ObjectEdit):
     # template = 'wiki/page_edit.html'
     title = _("Edit page")
-    last_revision = None
+    last_revision = None  # type: int
     _message_success = _l(u"Wiki page successfully edited.")
 
     def init_object(self, args, kwargs):

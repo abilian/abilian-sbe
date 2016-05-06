@@ -10,7 +10,7 @@ from __future__ import absolute_import
 from itertools import chain
 
 import sqlalchemy as sa
-from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
+from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText, event
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 
@@ -94,10 +94,10 @@ class Thread(Entity):
         return post
 
 
-@sa.event.listens_for(Thread.name, "set", active_history=True)
+@event.listens_for(Thread.name, "set", active_history=True)
 def _thread_sync_name_title(entity, new_value, old_value, initiator):
-    """
-    Synchronize thread name -> title.
+    """Synchronize thread name -> title.
+
     thread.title -> name is done via hybrid_property, avoiding infinite
     loop (since "set" is received before attribute has received value)
     """
@@ -144,7 +144,8 @@ class Post(Entity):
 
 
 class ThreadIndexAdapter(SAAdapter):
-    """Index a thread and its posts."""
+    """Index a thread and its posts.
+    """
 
     @staticmethod
     def can_adapt(obj_cls):
@@ -158,9 +159,10 @@ class ThreadIndexAdapter(SAAdapter):
 
 
 # event listener to sync name with thread's name
-@sa.event.listens_for(Thread.name, "set", active_history=True)
+@event.listens_for(Thread.name, "set", active_history=True)
 def _thread_sync_name(thread, new_value, old_value, initiator):
-    """Synchronize name with thread's name."""
+    """Synchronize name with thread's name.
+    """
     if new_value == old_value:
         return new_value
 
@@ -169,20 +171,22 @@ def _thread_sync_name(thread, new_value, old_value, initiator):
     return new_value
 
 
-@sa.event.listens_for(Post.thread, "set", active_history=True)
+@event.listens_for(Post.thread, "set", active_history=True)
 def _thread_change_sync_name(post, new_thread, old_thread, initiator):
-    """Change name on thread change."""
+    """Change name on thread change.
+    """
     if new_thread == old_thread or new_thread is None:
         return new_thread
     post.name = new_thread.name
     return new_thread
 
 
-@sa.event.listens_for(Thread.posts, 'append')
-@sa.event.listens_for(Thread.posts, 'remove')
-@sa.event.listens_for(Thread.posts, 'set')
+@event.listens_for(Thread.posts, 'append')
+@event.listens_for(Thread.posts, 'remove')
+@event.listens_for(Thread.posts, 'set')
 def _guard_closed_thread_collection(thread, value, *args):
-    """Prevent add/remove/replace posts on a closed thread."""
+    """Prevent add/remove/replace posts on a closed thread.
+    """
     if isinstance(thread, Post):
         thread = thread.thread
         if thread is None:
@@ -195,7 +199,7 @@ def _guard_closed_thread_collection(thread, value, *args):
 
 
 class PostAttachment(BaseContent, CmisObject):
-    __tablename__ = None
+    __tablename__ = None  # type: str  # type: str
     __mapper_args__ = {'polymorphic_identity': 'forum_post_attachment'}
     sbe_type = 'forum_post:attachment'
 

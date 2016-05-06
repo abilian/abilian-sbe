@@ -3,7 +3,7 @@
 
 from flask import Blueprint, render_template
 
-__all__ = []
+__all__ = ()
 
 blueprint = Blueprint("main", __name__, url_prefix="")
 route = blueprint.route

@@ -19,7 +19,7 @@ from abilian.services.auth.views import get_token_status
 from . import notifications
 from ..tasks.social import make_message, send_daily_social_digest_to
 
-__all__ = []
+__all__ = ()
 
 route = notifications.route
 
