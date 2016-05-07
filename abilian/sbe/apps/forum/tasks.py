@@ -47,7 +47,8 @@ def init_app(app):
 
 @shared_task()
 def send_post_by_email(post_id):
-    """Send a post to community members by email."""
+    """Send a post to community members by email.
+    """
     from .models import Post
 
     with current_app.test_request_context('/send_post_by_email'):
@@ -288,7 +289,8 @@ def validate_html(payload):
 
 
 def add_paragraph(newpost):
-    """Add surrounding <p>newpost</p> if necessary."""
+    """Add surrounding <p>newpost</p> if necessary.
+    """
 
     newpost = newpost.strip()
     if not newpost.startswith(u'<p>'):
@@ -297,7 +299,8 @@ def add_paragraph(newpost):
 
 
 def clean_html(newpost):
-    """Clean leftover empty blockquotes."""
+    """Clean leftover empty blockquotes.
+    """
 
     clean = re.sub(r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)",
                    '',
@@ -318,7 +321,8 @@ def clean_html(newpost):
 
 
 def decode_payload(part):
-    """Get the payload and decode (base64 & quoted printable)."""
+    """Get the payload and decode (base64 & quoted printable).
+    """
 
     payload = part.get_payload(decode=True)
     if not (isinstance(payload, unicode)):

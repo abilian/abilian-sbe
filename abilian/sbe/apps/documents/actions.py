@@ -19,8 +19,8 @@ def url_for(endpoint, **kw):
 
 
 class CmisContentAction(Action):
-    sbe_type = None
-    permission = None
+    sbe_type = None  # type: str
+    permission = None  # type: str
 
     def __init__(self, *args, **kwargs):
         if 'permission' in kwargs:
@@ -79,7 +79,8 @@ class FolderButtonAction(BaseFolderAction):
 
 
 class FolderAction(BaseFolderAction):
-    """Apply to all folders except root folder."""
+    """Apply to all folders except root folder.
+    """
     sbe_type = u'cmis:folder'
 
     def pre_condition(self, ctx):
@@ -88,7 +89,8 @@ class FolderAction(BaseFolderAction):
 
 
 class FolderPermisionsAction(BaseFolderAction):
-    """Apply to all folders except root folder."""
+    """Apply to all folders except root folder.
+    """
     sbe_type = u'cmis:folder'
 
     def pre_condition(self, ctx):

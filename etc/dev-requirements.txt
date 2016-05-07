@@ -33,6 +33,3 @@ Flask-LinkTester
 
 # Static code analysis
 flake8
-pylama
-pytest-flakes
-pytest-pep8

@@ -23,6 +23,7 @@ from flask import (Markup, current_app, flash, g, jsonify, make_response,
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
+from typing import List, Any
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
@@ -429,10 +430,10 @@ def iter_permissions(folder, user):
         data['inherit'] = (principal, role) in inherited_roles
 
     def _sort_key(item):
-        """ Sorts by name, groups first. """
+        """Sorts by name, groups first."""
         principal = item[0][0]
         is_user = isinstance(principal, User)
-        item_key = [is_user]
+        item_key = [is_user]  # type: List[Any]
         if is_user:
             last_name = principal.last_name if principal.last_name else u''
             first_name = principal.first_name if principal.first_name else u''

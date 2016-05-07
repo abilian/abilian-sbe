@@ -65,7 +65,8 @@ def icon_exists(filename):
 # Domain classes
 #
 class CmisObject(Entity, InheritSecurity):
-    """(Abstract) Base class for CMIS objects."""
+    """(Abstract) Base class for CMIS objects.
+    """
 
     # normally set by communities.models.community_content,
     # but we have to fix a circ.dep to use it
@@ -171,8 +172,8 @@ class CmisObject(Entity, InheritSecurity):
 
 @event.listens_for(CmisObject.name, "set", propagate=True, active_history=True)
 def _cmis_sync_name_title(entity, new_value, old_value, initiator):
-    """
-    Synchronize CmisObject name -> title.
+    """Synchronize CmisObject name -> title.
+
     CmisObject.title -> name is done via hybrid_property, avoiding infinite
     loop (since "set" is received before attribute has received value)
     """
@@ -183,7 +184,7 @@ def _cmis_sync_name_title(entity, new_value, old_value, initiator):
 
 class PathAndSecurityIndexable(object):
     """
-    Mixin for folder and documents indexation
+    Mixin for folder and documents indexation.
     """
     __indexation_args__ = dict(index_to=(
         ('_indexable_parent_ids', ('parent_ids',)),
@@ -198,7 +199,7 @@ class PathAndSecurityIndexable(object):
     @property
     def _indexable_parent_ids(self):
         """
-        returns a string made of ids separated by a slash: "/1/3/4/5", "5" being
+        Return a string made of ids separated by a slash: "/1/3/4/5", "5" being
         self.parent.id.
         """
         ids = [unicode(obj.id) for obj in self._iter_to_root(skip_self=True)]
@@ -255,15 +256,15 @@ class Folder(CmisObject, PathAndSecurityIndexable):
     __indexable__ = True
     __indexation_args__ = {}
     __indexation_args__.update(CmisObject.__indexation_args__)
-    index_to = tuple()
+    index_to = ()
     index_to += CmisObject.__indexation_args__.setdefault('index_to', ())
     index_to += PathAndSecurityIndexable.__indexation_args__.setdefault(
         'index_to', ())
     __indexation_args__['index_to'] = index_to
     del index_to
 
-    _indexable_roles_and_users = PathAndSecurityIndexable.\
-                                 _indexable_roles_and_users
+    _indexable_roles_and_users = PathAndSecurityIndexable. \
+        _indexable_roles_and_users
 
     parent = relationship(
         "Folder",
@@ -395,7 +396,7 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
 
 class BaseContent(CmisObject):
-    """ A base class for cmisobject with an attached file
+    """A base class for cmisobject with an attached file.
     """
     __tablename__ = None  # type: str  # type: str
 
@@ -447,7 +448,7 @@ class BaseContent(CmisObject):
             self.content_type = content_type
 
     def find_content_type(self, content_type=None):
-        """ Find possibly more appropriate content_type for this instance.
+        """Find possibly more appropriate content_type for this instance.
 
         If `content_type` is a binary one, try to find a better one based on
         content name so that 'xxx.pdf' is not flagged as binary/octet-stream for
@@ -596,8 +597,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def antivirus_required(self):
-        """
-        True if antivirus doesn't need to be run
+        """True if antivirus doesn't need to be run.
         """
         required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
         return required and (not self.antivirus_scanned or
@@ -605,8 +605,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def antivirus_ok(self):
-        """
-        True if user can safely access document content
+        """True if user can safely access document content.
         """
         required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
         if required:
@@ -693,10 +692,9 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @lock.setter
     def lock(self, user):
-        """
-        Allow to do `document.lock = user` to set a lock for user
+        """Allow to do `document.lock = user` to set a lock for user.
 
-        If user is None, the lock is released
+        If user is None, the lock is released.
         """
         if user is None:
             del self.lock
@@ -706,9 +704,9 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @lock.deleter
     def lock(self):
-        """
-        Remove lock, if any. `del document.lock` can be safely done even if no lock
-        is set.
+        """Remove lock, if any.
+
+        `del document.lock` can be safely done even if no lock is set.
         """
         meta = self.meta.setdefault('abilian.sbe.documents', {})
         if 'lock' in meta:

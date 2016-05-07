@@ -9,7 +9,6 @@ from __future__ import absolute_import
 
 from itertools import chain
 
-import sqlalchemy as sa
 from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText, event
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
