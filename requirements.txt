@@ -5,7 +5,7 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 
-abilian-core==0.6.0
+abilian-core==0.6.5
 alembic==0.8.6            # via abilian-core, flask-migrate
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -55,7 +55,7 @@ pandas==0.18.1            # via abilian-core
 passlib==1.6.5            # via flask-security
 pathlib==1.0.1            # via abilian-core
 Pillow==3.2.0             # via abilian-core
-progressbar-latest==2.4   # via abilian-core
+progressbar==2.3          # via abilian-core
 psycopg2==2.6.1           # via abilian-core
 py-bcrypt==0.4            # via abilian-core
 pygeoip==0.3.2            # via abilian-core
@@ -73,9 +73,9 @@ sqlparse==0.1.19          # via abilian-core
 straight.plugin==1.4.0-post-1  # via abilian-core
 typing==3.5.1.0
 validate-email==1.3
-validators==0.10          # via wtforms-components
+validators==0.10.1        # via wtforms-components
 webassets==0.11.1         # via flask-assets
-Werkzeug==0.11.9          # via flask, flask-debugtoolbar, flask-wtf
+werkzeug==0.11.9          # via flask, flask-debugtoolbar, flask-wtf
 Whoosh==2.5.7             # via abilian-core
 WTForms-Alchemy==0.15.0   # via abilian-core
 WTForms-Components==0.10.0  # via abilian-core, wtforms-alchemy
