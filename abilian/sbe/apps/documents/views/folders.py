@@ -21,9 +21,9 @@ from flask import (Markup, current_app, flash, g, jsonify, make_response,
                    redirect, render_template, render_template_string, request,
                    send_file)
 from sqlalchemy import func
+from typing import Any, List
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
-from typing import List, Any
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
@@ -82,8 +82,7 @@ def folder_json(folder_id):
     folders = result['folders'] = []
     bc = result['breadcrumbs'] = []
     subfolders = sorted(
-        (f
-         for f in folder.subfolders
+        (f for f in folder.subfolders
          if has_permission(g.user, READ, f, inherit=True)),
         key=lambda f: f.title)
 
@@ -147,8 +146,7 @@ def permissions(folder_id):
     users_and_local_roles = [(user, role, repository.has_access(user, folder))
                              for user, role in local_roles_assignments
                              if isinstance(user, User)]
-    groups_and_local_roles = [t
-                              for t in local_roles_assignments
+    groups_and_local_roles = [t for t in local_roles_assignments
                               if isinstance(t[0], Group)]
 
     users_and_inherited_roles = groups_and_inherited_roles = ()
@@ -156,12 +154,10 @@ def permissions(folder_id):
     if folder.inherit_security:
         inherited_roles_assignments = folder.get_inherited_roles_assignments()
         users_and_inherited_roles = [
-            (user, role, False)
-            for user, role in inherited_roles_assignments
+            (user, role, False) for user, role in inherited_roles_assignments
             if isinstance(user, User)
         ]
-        groups_and_inherited_roles = [t
-                                      for t in inherited_roles_assignments
+        groups_and_inherited_roles = [t for t in inherited_roles_assignments
                                       if isinstance(t[0], Group)]
 
     query = Group.query
@@ -455,8 +451,7 @@ def iter_permissions(folder, user):
         yield (has_access, identifier, first_name, last_name, role, local,
                inherit, community)
 
-    subfolders = (f
-                  for f in folder.subfolders
+    subfolders = (f for f in folder.subfolders
                   if security.has_permission(user, "manage", folder))
 
     for subfolder in subfolders:
@@ -880,8 +875,7 @@ def descendants_view(folder_id):
 
     for children in by_path.values():
         children.sort(
-            key=
-            lambda hit: (hit['object_type'] != Folder.entity_type, hit['name'].lower()))
+            key=lambda hit: (hit['object_type'] != Folder.entity_type, hit['name'].lower()))
 
     descendants = []
 

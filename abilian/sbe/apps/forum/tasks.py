@@ -63,8 +63,8 @@ def send_post_by_email(post_id):
                     community.name)
 
         CHUNK_SIZE = 20
-        members_id = [member.id
-                      for member in community.members if member.can_login]
+        members_id = [member.id for member in community.members
+                      if member.can_login]
         chunk = []
         for idx, member_id in enumerate(members_id):
             chunk.append(member_id)

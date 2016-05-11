@@ -282,8 +282,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             assert response.status_code == 302
             response.headers['Location'] == 'http://localhost' + url
 
-            membership = [m
-                          for m in self.community.memberships
+            membership = [m for m in self.community.memberships
                           if m.user == self.user_c2][0]
             assert membership.role == 'member'
 
@@ -303,8 +302,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             data = {
                 'action': 'delete',
                 'user': self.user_c2.id,
-                'membership': [m.id
-                               for m in community.memberships
+                'membership': [m.id for m in community.memberships
                                if m.user == self.user_c2][0],
             }
             response = self.client.post(url, data=data)

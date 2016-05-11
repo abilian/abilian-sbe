@@ -83,11 +83,11 @@ class CmisObject(Entity, InheritSecurity):
     del index_to
 
     _title = Column('title', UnicodeText, nullable=False, default=u"")
-    description = Column(
-        UnicodeText,
-        nullable=False,
-        default=u"",
-        info=SEARCHABLE | dict(index_to=('description', 'text')))
+    description = Column(UnicodeText,
+                         nullable=False,
+                         default=u"",
+                         info=SEARCHABLE |
+                         dict(index_to=('description', 'text')))
 
     _parent_id = Column(Integer, ForeignKey('cmisobject.id'), nullable=True)
 
@@ -186,9 +186,10 @@ class PathAndSecurityIndexable(object):
     """
     Mixin for folder and documents indexation.
     """
-    __indexation_args__ = dict(index_to=(
-        ('_indexable_parent_ids', ('parent_ids',)),
-        ('_indexable_roles_and_users', ('allowed_roles_and_users',)),),)
+    __indexation_args__ = dict(index_to=(('_indexable_parent_ids',
+                                          ('parent_ids',)),
+                                         ('_indexable_roles_and_users',
+                                          ('allowed_roles_and_users',)),),)
 
     def _iter_to_root(self, skip_self=False):
         obj = self if not skip_self else self.parent
@@ -268,8 +269,8 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
     parent = relationship(
         "Folder",
-        primaryjoin=(lambda: foreign(CmisObject._parent_id) == remote(Folder.id)
-                    ),
+        primaryjoin=(
+            lambda: foreign(CmisObject._parent_id) == remote(Folder.id)),
         backref=backref('subfolders',
                         lazy="joined",
                         order_by='Folder.title',
