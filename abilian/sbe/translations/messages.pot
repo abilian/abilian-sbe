@@ -7,177 +7,177 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.2.2.dev0+ng6ce6835.d20160218\n"
+"Project-Id-Version: abilian-sbe 0.2.7.dev7+ng5787981.d20160512\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-02-18 15:05+0100\n"
+"POT-Creation-Date: 2016-05-12 12:26+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.2.0\n"
+"Generated-By: Babel 2.3.4\n"
 
-#: abilian/sbe/apps/communities/actions.py:43
-#: abilian/sbe/apps/communities/blueprint.py:68
-#: abilian/sbe/apps/communities/presenters.py:8
+#: abilian/sbe/apps/communities/actions.py:47
+#: abilian/sbe/apps/communities/blueprint.py:66
+#: abilian/sbe/apps/communities/presenters.py:10
 #: abilian/sbe/apps/social/templates/social/user.html:46
 msgid "Communities"
 msgstr ""
 
-#: abilian/sbe/apps/communities/actions.py:47
+#: abilian/sbe/apps/communities/actions.py:51
 msgid "Activities"
 msgstr ""
 
-#: abilian/sbe/apps/communities/actions.py:48
-#: abilian/sbe/apps/documents/views/views.py:30
-#: abilian/sbe/apps/social/views/users.py:43
+#: abilian/sbe/apps/communities/actions.py:54
+#: abilian/sbe/apps/documents/views/views.py:31
+#: abilian/sbe/apps/social/views/users.py:41
 msgid "Documents"
 msgstr ""
 
-#: abilian/sbe/apps/communities/actions.py:50 abilian/sbe/apps/wiki/views.py:44
+#: abilian/sbe/apps/communities/actions.py:58 abilian/sbe/apps/wiki/views.py:47
 msgid "Wiki"
 msgstr ""
 
-#: abilian/sbe/apps/communities/actions.py:52
-#: abilian/sbe/apps/forum/views.py:55
+#: abilian/sbe/apps/communities/actions.py:62
+#: abilian/sbe/apps/forum/views.py:57
 msgid "Conversations"
 msgstr ""
 
-#: abilian/sbe/apps/communities/actions.py:54
-#: abilian/sbe/apps/communities/views.py:340
+#: abilian/sbe/apps/communities/actions.py:66
 #: abilian/sbe/apps/communities/templates/community/members.html:7
+#: abilian/sbe/apps/communities/views.py:343
 #: abilian/sbe/apps/social/templates/social/groups.html:39
 msgid "Members"
 msgstr ""
 
-#: abilian/sbe/apps/communities/actions.py:56
-#: abilian/sbe/apps/communities/views.py:211
+#: abilian/sbe/apps/communities/actions.py:70
+#: abilian/sbe/apps/communities/views.py:220
 msgid "Settings"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:52
-#: abilian/sbe/apps/communities/views.py:395
+#: abilian/sbe/apps/communities/forms.py:49
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:11
+#: abilian/sbe/apps/communities/views.py:399
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:17
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:15
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:17
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:16
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:90
-#: abilian/sbe/apps/social/forms.py:37
+#: abilian/sbe/apps/social/forms.py:35
 msgid "Name"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:54
+#: abilian/sbe/apps/communities/forms.py:50
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:27
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:24
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:25
-#: abilian/sbe/apps/social/forms.py:41
+#: abilian/sbe/apps/social/forms.py:39
 msgid "Description"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:59
+#: abilian/sbe/apps/communities/forms.py:55
 msgid "Linked to group"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:60
+#: abilian/sbe/apps/communities/forms.py:56
 msgid "Manages a group of users through this community members."
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:64
+#: abilian/sbe/apps/communities/forms.py:60
 msgid "Image"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:67
+#: abilian/sbe/apps/communities/forms.py:64
 msgid "Type"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:69
+#: abilian/sbe/apps/communities/forms.py:66
 msgid "informative"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:70
+#: abilian/sbe/apps/communities/forms.py:67
 msgid "participative"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:72
+#: abilian/sbe/apps/communities/forms.py:69
 msgid "Has documents"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:74
+#: abilian/sbe/apps/communities/forms.py:71
 msgid "Has a wiki"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:76
+#: abilian/sbe/apps/communities/forms.py:73
 msgid "Has a forum"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:87
+#: abilian/sbe/apps/communities/forms.py:84
 msgid "A community with this name already exists"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:104
-#: abilian/sbe/apps/communities/forms.py:109
+#: abilian/sbe/apps/communities/forms.py:101
+#: abilian/sbe/apps/communities/forms.py:106
 msgid "Only PNG or JPG image files are accepted"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:117
+#: abilian/sbe/apps/communities/forms.py:114
 msgid "Could not decode image file"
 msgstr ""
 
-#: abilian/sbe/apps/communities/models.py:41
+#: abilian/sbe/apps/communities/models.py:37
 msgid "role_member"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:207
+#: abilian/sbe/apps/communities/views.py:216
 msgid "Edit community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:243
+#: abilian/sbe/apps/communities/views.py:252
 msgid "Community settings saved successfully."
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:247
+#: abilian/sbe/apps/communities/views.py:256
 msgid "Create community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:253
 #: abilian/sbe/apps/communities/templates/community/home.html:61
+#: abilian/sbe/apps/communities/views.py:262
 msgid "Create new community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:256
+#: abilian/sbe/apps/communities/views.py:265
 #, python-format
 msgid "Community %(name)s created successfully"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:271
+#: abilian/sbe/apps/communities/views.py:280
 msgid "Community destroyed."
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:360
+#: abilian/sbe/apps/communities/views.py:363
 msgid "You must provide a user."
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:396
+#: abilian/sbe/apps/communities/views.py:400
 msgid "email"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:397
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:13
+#: abilian/sbe/apps/communities/views.py:401
 msgid "Last activity in this community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:398
 #: abilian/sbe/apps/communities/templates/community/members.html:94
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:14
+#: abilian/sbe/apps/communities/views.py:402
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:33
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:17
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:91
 msgid "Role"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:424
+#: abilian/sbe/apps/communities/views.py:425
 #, python-format
 msgid "%(community)s members"
 msgstr ""
@@ -201,7 +201,6 @@ msgstr ""
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:33
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:70
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:49
-#: abilian/sbe/apps/forum/templates/forum/new_thread.html:28
 #: abilian/sbe/apps/forum/templates/forum/thread.html:80
 #: abilian/sbe/apps/forum/templates/forum/thread.html:199
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:80
@@ -277,22 +276,22 @@ msgstr ""
 msgid "Action"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:145
+#: abilian/sbe/apps/documents/actions.py:146
 #: abilian/sbe/apps/documents/templates/documents/document.html:46
 msgid "Download"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:148
+#: abilian/sbe/apps/documents/actions.py:149
 msgid "Move to another folder"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:152
-#: abilian/sbe/apps/documents/actions.py:257
-#: abilian/sbe/apps/forum/actions.py:69 abilian/sbe/apps/wiki/actions.py:47
+#: abilian/sbe/apps/documents/actions.py:153
+#: abilian/sbe/apps/documents/actions.py:254
+#: abilian/sbe/apps/forum/actions.py:81 abilian/sbe/apps/wiki/actions.py:61
 msgid "Delete"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:156
+#: abilian/sbe/apps/documents/actions.py:157
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_change_owner.html:30
 msgid "Change owner"
 msgstr ""
@@ -311,7 +310,7 @@ msgid "Upload file(s)"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:182
-#: abilian/sbe/apps/documents/actions.py:217
+#: abilian/sbe/apps/documents/actions.py:216
 msgid "Edit properties"
 msgstr ""
 
@@ -327,25 +326,25 @@ msgstr ""
 msgid "View in browser"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:222
+#: abilian/sbe/apps/documents/actions.py:221
 msgid "Checkout (Download for edit)"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:236
+#: abilian/sbe/apps/documents/actions.py:234
 msgid "Unlock"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:244
+#: abilian/sbe/apps/documents/actions.py:241
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:13
 msgid "Upload new version"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:251
+#: abilian/sbe/apps/documents/actions.py:248
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:12
 msgid "Send by email"
 msgstr ""
 
-#: abilian/sbe/apps/documents/actions.py:262
+#: abilian/sbe/apps/documents/actions.py:259
 msgid "Refresh preview"
 msgstr ""
 
@@ -363,7 +362,7 @@ msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:48
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:96
-#: abilian/sbe/apps/forum/forms.py:64 abilian/sbe/apps/wiki/forms.py:36
+#: abilian/sbe/apps/forum/forms.py:60 abilian/sbe/apps/wiki/forms.py:34
 msgid "Title"
 msgstr ""
 
@@ -420,7 +419,7 @@ msgid "Recipient"
 msgstr ""
 
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:28
-#: abilian/sbe/apps/forum/forms.py:69 abilian/sbe/apps/wiki/forms.py:78
+#: abilian/sbe/apps/forum/forms.py:66 abilian/sbe/apps/wiki/forms.py:76
 msgid "Message"
 msgstr ""
 
@@ -635,173 +634,173 @@ msgstr ""
 msgid "Audit Log"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:80
+#: abilian/sbe/apps/documents/views/documents.py:83
 msgid "Document properties successfully edited."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:82
-#: abilian/sbe/apps/documents/views/folders.py:509
+#: abilian/sbe/apps/documents/views/documents.py:85
+#: abilian/sbe/apps/documents/views/folders.py:514
 msgid "You didn't change any property."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:97
+#: abilian/sbe/apps/documents/views/documents.py:100
 msgid "File successfully deleted."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:114
+#: abilian/sbe/apps/documents/views/documents.py:117
 msgid "New version successfully uploaded"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:256
+#: abilian/sbe/apps/documents/views/documents.py:258
 msgid "{sender} sent you a file"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/documents.py:270
+#: abilian/sbe/apps/documents/views/documents.py:272
 msgid "Email successfully sent"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:182
+#: abilian/sbe/apps/documents/views/folders.py:185
 msgid "On {date}, {manager} has activated inheritance"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:184
+#: abilian/sbe/apps/documents/views/folders.py:187
 msgid "On {date}, {manager} has deactivated inheritance"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:186
+#: abilian/sbe/apps/documents/views/folders.py:189
 msgid "On {date}, {manager} has given role \"{role}\" to {principal}"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:188
+#: abilian/sbe/apps/documents/views/folders.py:191
 msgid "On {date}, {manager} has revoked role \"{role}\" from {principal}"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:233
+#: abilian/sbe/apps/documents/views/folders.py:238
 msgid ""
 "You must have the \"manager\" local role on this folder in order to "
 "deactivate inheritance."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:288
+#: abilian/sbe/apps/documents/views/folders.py:294
 msgid ""
 "Cannot remove \"manager\" local role for yourself: you don't have "
 "\"manager\" role (either by security inheritance or by group membership)"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:295
+#: abilian/sbe/apps/documents/views/folders.py:301
 msgid "Role {role} for user {user} removed on folder {folder}"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:308
+#: abilian/sbe/apps/documents/views/folders.py:315
 msgid ""
 "Cannot remove \"manager\" local role for group \"{group}\": you don't "
 "have \"manager\" role by security inheritance or by local role"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:313
+#: abilian/sbe/apps/documents/views/folders.py:320
 msgid "Role {role} for group {group} removed on folder {folder}"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:496
+#: abilian/sbe/apps/documents/views/folders.py:501
 msgid "Unknown action."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:507
+#: abilian/sbe/apps/documents/views/folders.py:512
 msgid "Folder properties successfully edited."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:607
-#: abilian/sbe/apps/wiki/views.py:396
+#: abilian/sbe/apps/documents/views/folders.py:612
+#: abilian/sbe/apps/wiki/views.py:419
 #, python-format
 msgid "One new document successfully uploaded"
 msgid_plural "%(num)d new document successfully uploaded"
 msgstr[0] ""
 msgstr[1] ""
 
-#: abilian/sbe/apps/documents/views/folders.py:673
+#: abilian/sbe/apps/documents/views/folders.py:683
 #, python-format
 msgid "%(file_num)d files and %(folder_num)d folders sucessfully deleted."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:677
+#: abilian/sbe/apps/documents/views/folders.py:687
 #, python-format
 msgid "1 file sucessfully deleted."
 msgid_plural "%(num)d files sucessfully deleted."
 msgstr[0] ""
 msgstr[1] ""
 
-#: abilian/sbe/apps/documents/views/folders.py:681
+#: abilian/sbe/apps/documents/views/folders.py:691
 #, python-format
 msgid "1 folder sucessfully deleted."
 msgid_plural "%(num)d folders sucessfully deleted."
 msgstr[0] ""
 msgstr[1] ""
 
-#: abilian/sbe/apps/documents/views/folders.py:685
+#: abilian/sbe/apps/documents/views/folders.py:695
 msgid "No object deleted"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:697
+#: abilian/sbe/apps/documents/views/folders.py:707
 msgid "Move elements: no elements selected."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:703
+#: abilian/sbe/apps/documents/views/folders.py:713
 msgid "Move elements: no destination folder selected. Aborted."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:710
+#: abilian/sbe/apps/documents/views/folders.py:720
 msgid "Move elements: source and destination folder are identical, nothing done."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:716
+#: abilian/sbe/apps/documents/views/folders.py:726
 msgid "You are not allowed to move elements from this folder"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:720
+#: abilian/sbe/apps/documents/views/folders.py:732
 msgid "You are not allowed to write in folder \"{folder}\""
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:734
+#: abilian/sbe/apps/documents/views/folders.py:746
 msgid ""
 "Move elements: destination folder is included in moved elements. Moved "
 "nothing."
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:750
+#: abilian/sbe/apps/documents/views/folders.py:762
 msgid ""
 "Move elements: canceled, some elements exists in destination folder: "
 "{elements}"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:758
+#: abilian/sbe/apps/documents/views/folders.py:770
 msgid "1 folder"
 msgid_plural "{count} folders"
 msgstr[0] ""
 msgstr[1] ""
 
-#: abilian/sbe/apps/documents/views/folders.py:759
+#: abilian/sbe/apps/documents/views/folders.py:772
 msgid "0 folder"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:761
+#: abilian/sbe/apps/documents/views/folders.py:774
 msgid "1 document"
 msgid_plural "{count} documents"
 msgstr[0] ""
 msgstr[1] ""
 
-#: abilian/sbe/apps/documents/views/folders.py:763
+#: abilian/sbe/apps/documents/views/folders.py:776
 msgid "0 document"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:765
+#: abilian/sbe/apps/documents/views/folders.py:778
 msgid "{folders} and {documents} moved to {target}"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:813
+#: abilian/sbe/apps/documents/views/folders.py:826
 msgid "An element named \"{name}\" is already present in folder"
 msgstr ""
 
-#: abilian/sbe/apps/documents/views/folders.py:816
+#: abilian/sbe/apps/documents/views/folders.py:829
 msgid "Cannot rename: \"{name}\" is already present in parent folder"
 msgstr ""
 
@@ -813,56 +812,58 @@ msgstr ""
 msgid "\"{original}\" already present in folder, renamed \"{name}\""
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:59
-#: abilian/sbe/apps/forum/templates/forum/new_thread.html:8
+#: abilian/sbe/apps/forum/actions.py:64
 msgid "Start a new conversation"
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:62
-#: abilian/sbe/apps/forum/templates/forum/index.html:9
+#: abilian/sbe/apps/forum/actions.py:68
+#: abilian/sbe/apps/forum/templates/forum/index.html:7
 msgid "Recent conversations"
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:64
+#: abilian/sbe/apps/forum/actions.py:72
 #: abilian/sbe/apps/forum/templates/forum/archives.html:6
 msgid "Archives"
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:66 abilian/sbe/apps/forum/actions.py:86
-#: abilian/sbe/apps/forum/forms.py:73
+#: abilian/sbe/apps/forum/actions.py:76 abilian/sbe/apps/forum/actions.py:101
+#: abilian/sbe/apps/forum/forms.py:70
 msgid "Attachments"
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:73
+#: abilian/sbe/apps/forum/actions.py:87
 msgid "Close thread"
 msgstr ""
 
-#: abilian/sbe/apps/forum/actions.py:79
+#: abilian/sbe/apps/forum/actions.py:94
 msgid "Re-open thread"
 msgstr ""
 
-#: abilian/sbe/apps/forum/forms.py:84
+#: abilian/sbe/apps/forum/forms.py:83
 msgid "Send by email?"
 msgstr ""
 
-#: abilian/sbe/apps/forum/forms.py:92
+#: abilian/sbe/apps/forum/forms.py:91
 msgid "Reason"
 msgstr ""
 
-#: abilian/sbe/apps/forum/forms.py:93
+#: abilian/sbe/apps/forum/forms.py:92
 msgid "Description of your edit"
 msgstr ""
 
-#: abilian/sbe/apps/forum/tasks.py:35
+#: abilian/sbe/apps/forum/tasks.py:34
 msgid "_____Write above this line to post_____"
 msgstr ""
 
-#: abilian/sbe/apps/forum/views.py:173
-#: abilian/sbe/apps/forum/templates/forum/new_thread.html:24
+#: abilian/sbe/apps/forum/views.py:175
 msgid "Post this message"
 msgstr ""
 
-#: abilian/sbe/apps/forum/views.py:274
+#: abilian/sbe/apps/forum/views.py:177
+msgid "New conversation"
+msgstr ""
+
+#: abilian/sbe/apps/forum/views.py:276
 msgid "Thread \"{title}\" deleted."
 msgstr ""
 
@@ -875,7 +876,6 @@ msgid "The thread is now re-opened for edition and new contributions."
 msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/archives.html:16
-#: abilian/sbe/apps/forum/templates/forum/index.html:17
 msgid "No message has been posted to this community yet"
 msgstr ""
 
@@ -887,16 +887,20 @@ msgstr ""
 msgid "No attachment has been posted to this community yet"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:22
+#: abilian/sbe/apps/forum/templates/forum/index.html:15
+msgid "No message has been posted to this community yet."
+msgstr ""
+
+#: abilian/sbe/apps/forum/templates/forum/index.html:20
 msgid "All conversations"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:41
+#: abilian/sbe/apps/forum/templates/forum/index.html:38
 #, python-format
 msgid "by %(creator)s"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:58
+#: abilian/sbe/apps/forum/templates/forum/index.html:55
 #, python-format
 msgid "Last comment by %(creator)s"
 msgstr ""
@@ -920,7 +924,7 @@ msgid "Post this comment"
 msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:96
-#: abilian/sbe/apps/wiki/actions.py:38
+#: abilian/sbe/apps/wiki/actions.py:41
 msgid "Edit"
 msgstr ""
 
@@ -947,7 +951,7 @@ msgstr ""
 msgid "Community notifications"
 msgstr ""
 
-#: abilian/sbe/apps/preferences/panels/sbe_notifications.py:67
+#: abilian/sbe/apps/preferences/panels/sbe_notifications.py:66
 msgid "Preferences saved."
 msgstr ""
 
@@ -959,7 +963,7 @@ msgstr ""
 msgid "Save"
 msgstr ""
 
-#: abilian/sbe/apps/social/forms.py:39
+#: abilian/sbe/apps/social/forms.py:37
 msgid "Name is required."
 msgstr ""
 
@@ -1054,7 +1058,7 @@ msgid "Audit log"
 msgstr ""
 
 #: abilian/sbe/apps/social/templates/social/user.html:8
-#: abilian/sbe/apps/social/views/users.py:41
+#: abilian/sbe/apps/social/views/users.py:39
 msgid "Profile"
 msgstr ""
 
@@ -1086,90 +1090,86 @@ msgstr ""
 msgid "Recent activities"
 msgstr ""
 
-#: abilian/sbe/apps/social/views/groups.py:97
+#: abilian/sbe/apps/social/views/groups.py:95
 msgid "Error: No user selected"
 msgstr ""
 
-#: abilian/sbe/apps/social/views/groups.py:145
-msgid "Your new group has been created"
-msgstr ""
-
-#: abilian/sbe/apps/social/views/invites.py:34
+#: abilian/sbe/apps/social/views/invites.py:35
 msgid "Action aborted"
 msgstr ""
 
-#: abilian/sbe/apps/social/views/invites.py:55
+#: abilian/sbe/apps/social/views/invites.py:57
 msgid "Invitation sent"
 msgstr ""
 
-#: abilian/sbe/apps/social/views/users.py:44
+#: abilian/sbe/apps/social/views/users.py:42
 msgid "Images"
 msgstr ""
 
-#: abilian/sbe/apps/social/views/users.py:45
+#: abilian/sbe/apps/social/views/users.py:43
 msgid "Audit"
 msgstr ""
 
-#: abilian/sbe/apps/social/views/users.py:181
+#: abilian/sbe/apps/social/views/users.py:184
 msgid "Profile edited"
 msgstr ""
 
-#: abilian/sbe/apps/social/views/users.py:203
+#: abilian/sbe/apps/social/views/users.py:206
 msgid "Error occured"
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:27
+#: abilian/sbe/apps/wall/presenters.py:26
 msgid "has started conversation \"{object}\""
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:28
+#: abilian/sbe/apps/wall/presenters.py:27
 msgid "has participated in conversation \"{object}\""
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:29
+#: abilian/sbe/apps/wall/presenters.py:28
 msgid "has published document \"{object}\""
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:30
+#: abilian/sbe/apps/wall/presenters.py:29
 msgid "has created wiki page \"{object}\""
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:32
+#: abilian/sbe/apps/wall/presenters.py:30
 msgid "has updated document \"{object}\""
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:33
+#: abilian/sbe/apps/wall/presenters.py:31
 msgid "has updated wiki page \"{object}\""
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:34
+#: abilian/sbe/apps/wall/presenters.py:32
 msgid "has updated community \"{object}\""
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:36
-#: abilian/sbe/apps/wall/presenters.py:136
+#: abilian/sbe/apps/wall/presenters.py:33
+#: abilian/sbe/apps/wall/presenters.py:132
 msgid "has joined the community {object}."
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:37
-#: abilian/sbe/apps/wall/presenters.py:139
+#: abilian/sbe/apps/wall/presenters.py:34
+#: abilian/sbe/apps/wall/presenters.py:135
 msgid "has left the community {object}."
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:122
-#: abilian/sbe/apps/wall/presenters.py:131
+#: abilian/sbe/apps/wall/presenters.py:118
+#: abilian/sbe/apps/wall/presenters.py:127
 msgid "in the community {target}."
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:127
+#: abilian/sbe/apps/wall/presenters.py:123
 msgid "has posted an object of type {object_type} called \"{object}\""
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:142
+#: abilian/sbe/apps/wall/presenters.py:138
 msgid "has updated {object_type} {object}."
 msgstr ""
 
-#: abilian/sbe/apps/wall/presenters.py:145
+#: abilian/sbe/apps/wall/presenters.py:141
 msgid "has done action \"{verb}\" on object \"{object}\"."
 msgstr ""
 
@@ -1181,93 +1181,93 @@ msgstr ""
 msgid "Files"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/actions.py:35
+#: abilian/sbe/apps/wiki/actions.py:36
 msgid "View"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/actions.py:41
+#: abilian/sbe/apps/wiki/actions.py:46
 msgid "Upload an attachment"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/actions.py:43
+#: abilian/sbe/apps/wiki/actions.py:51
 msgid "Source"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/actions.py:45
+#: abilian/sbe/apps/wiki/actions.py:56
 msgid "Changes"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/actions.py:49
+#: abilian/sbe/apps/wiki/actions.py:66
 msgid "New page"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/actions.py:51
+#: abilian/sbe/apps/wiki/actions.py:71
 #: abilian/sbe/apps/wiki/templates/wiki/all_pages.html:6
 msgid "All pages"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/actions.py:53
+#: abilian/sbe/apps/wiki/actions.py:76
 msgid "Syntax help"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/forms.py:39
+#: abilian/sbe/apps/wiki/forms.py:38
 msgid "Body"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/forms.py:45
+#: abilian/sbe/apps/wiki/forms.py:43
 msgid "Commit message"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/forms.py:54
+#: abilian/sbe/apps/wiki/forms.py:52
 msgid "A page with this name already exists. Please use another name."
 msgstr ""
 
-#: abilian/sbe/apps/wiki/forms.py:65
+#: abilian/sbe/apps/wiki/forms.py:63
 msgid "this page has been edited since"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:104
+#: abilian/sbe/apps/wiki/views.py:109
 msgid "This page doesn't exit. You must create it first."
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:150
+#: abilian/sbe/apps/wiki/views.py:156
 msgid "Edit page"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:152
+#: abilian/sbe/apps/wiki/views.py:158
 msgid "Wiki page successfully edited."
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:195
+#: abilian/sbe/apps/wiki/views.py:201
 msgid "You didn't make any change to this page."
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:240
+#: abilian/sbe/apps/wiki/views.py:250
 msgid "Create page"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:241
+#: abilian/sbe/apps/wiki/views.py:251
 msgid "Wiki page successfully created."
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:301
+#: abilian/sbe/apps/wiki/views.py:314
 msgid "You must check exactly 2 revisions."
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:328
+#: abilian/sbe/apps/wiki/views.py:346
 msgid "This page doesn't exist"
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:338
+#: abilian/sbe/apps/wiki/views.py:360
 #, python-format
 msgid "Page %(title)s deleted."
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:399
+#: abilian/sbe/apps/wiki/views.py:422
 msgid "No file uploaded."
 msgstr ""
 
-#: abilian/sbe/apps/wiki/views.py:421
+#: abilian/sbe/apps/wiki/views.py:445
 msgid "Attachment \"{name}\" has been deleted"
 msgstr ""
 
