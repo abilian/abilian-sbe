@@ -174,6 +174,8 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
                                btn_class='primary',
                                title=_l(u'Post this message'))
 
+    title = _("New conversation")
+
     def init_object(self, args, kwargs):
         args, kwargs = super(ThreadCreate, self).init_object(args, kwargs)
         self.thread = self.obj

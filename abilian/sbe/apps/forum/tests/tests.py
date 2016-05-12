@@ -94,8 +94,8 @@ class Test(TestCase):
 
     def test_task_process_email(self):
         """
-      test the process_email function
-    """
+        test the process_email function
+        """
         marker = u'_____Write above this line to post_____'
 
         message = get_emailmessage_from_file('reply.email')
@@ -284,7 +284,8 @@ class ViewTestCase(CommunityBaseTestCase):
 
 
 def get_string_from_file(filename='notification.email'):
-    """Load a test email return as string."""
+    """Load a test email, return as string.
+    """
     filepath = Path(__file__).parent / 'data' / filename
     with filepath.open('rt', encoding='utf-8') as email_file:
         email_string = email_file.read()
@@ -292,7 +293,8 @@ def get_string_from_file(filename='notification.email'):
 
 
 def get_emailmessage_from_file(filename='notification.email'):
-    """Load a mail parse it into a email.message."""
+    """Load a mail parse it into a email.message.
+    """
     email_string = get_string_from_file(filename)
     parser = FeedParser()
     parser.feed(email_string)

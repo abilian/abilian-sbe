@@ -1,9 +1,7 @@
 {% extends "forum/_base.html" %}
 
 {%- from "macros/user.html" import m_user_link, m_user_photo %}
-
 {% from "macros/box.html" import m_box_menu, m_box_content %}
-
 
 {% block content %}
   {% call m_box_content(_("Recent conversations")) %}
@@ -14,7 +12,7 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p>{{ _("No message has been posted to this community yet") }}</p>
+      <p>{{ _("No message has been posted to this community yet.") }}</p>
     {% endif %}
 
     {% if has_more or True %}
@@ -24,7 +22,6 @@
   {% endcall %}
 {% endblock %}
 
-
 {% macro m_thread(thread) %}
   {%- set thread_href = url_for(thread) %}
   {%- set thread_length = thread.posts|length %}
@@ -32,7 +29,7 @@
   <li>
     {% call m_user_link(thread.creator) %}
       {{ m_user_photo(thread.creator, size=45) }}
-      {%- endcall %}
+    {%- endcall %}
 
     <div class="entry">
       <h4><a href="{{ thread_href }}">{{ thread.title }}</a></h4>
@@ -53,8 +50,8 @@
         </a>
 
         {%- if thread_length > 1 %}
-        {% set last_post_creator = thread.posts[-1].creator %}
-        <span class="hidden-xs">
+          {% set last_post_creator = thread.posts[-1].creator %}
+          <span class="hidden-xs">
           {{ _("Last comment by %(creator)s", creator=m_user_link(last_post_creator)) }}
         </span>
         {%- endif %}
