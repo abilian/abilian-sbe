@@ -129,8 +129,7 @@ def convert_document_content(document_id):
         try:
             document.extra_metadata = converter.get_metadata(*conversion_args)
         except ConversionError as e:
-            logger.warning(u"Metadata extraction failed: %s", e,
-                           **error_kwargs)
+            logger.warning(u"Metadata extraction failed: %s", e, **error_kwargs)
         except UnicodeDecodeError as e:
             logger.error(u"Unicode issue: %s", e, **error_kwargs)
         except Exception as e:
