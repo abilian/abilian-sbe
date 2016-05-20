@@ -2,7 +2,7 @@
 """
 Celery tasks related to document transformation and preview.
 """
-from __future__ import absolute_import, unicode_literals
+from __future__ import absolute_import
 
 import logging
 from contextlib import contextmanager
@@ -129,12 +129,12 @@ def convert_document_content(document_id):
         try:
             document.extra_metadata = converter.get_metadata(*conversion_args)
         except ConversionError as e:
-            logger.warning("Metadata extraction failed: %s", str(e),
+            logger.warning(u"Metadata extraction failed: %s", e,
                            **error_kwargs)
         except UnicodeDecodeError as e:
-            logger.error("Unicode issue: %s", str(e), **error_kwargs)
+            logger.error(u"Unicode issue: %s", e, **error_kwargs)
         except Exception as e:
-            logger.error("Other issue: %s", str(e), **error_kwargs)
+            logger.error(u"Other issue: %s", e, **error_kwargs)
 
         if document.text:
             import langid
