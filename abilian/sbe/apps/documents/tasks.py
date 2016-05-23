@@ -11,7 +11,7 @@ from celery import shared_task
 
 from abilian.core.extensions import db
 from abilian.services import converter, get_service
-from abilian.services.conversion import ConversionError
+from abilian.services.conversion import ConversionError, HandlerNotFound
 
 logger = logging.getLogger(__package__)
 
@@ -112,6 +112,8 @@ def convert_document_content(document_id):
         else:
             try:
                 document.pdf = converter.to_pdf(*conversion_args)
+            except HandlerNotFound as e:
+                document.pdf = ""
             except ConversionError as e:
                 document.pdf = ""
                 logger.info("Conversion to PDF failed: %s", str(e),
