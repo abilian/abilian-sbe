@@ -98,7 +98,7 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
         @default_view(blueprint, Model, kw_func=default_view_kw)
         @blueprint.route("/<object_id>")
         def view():
-         ...
+            ...
 
     """
     is_community = obj_type == Community.entity_type
