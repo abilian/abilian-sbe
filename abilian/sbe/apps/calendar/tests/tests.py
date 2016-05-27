@@ -19,6 +19,7 @@ class Test(TestCase):
     def test_create_event(self):
         start = datetime.now()
         event = Event(name="Test thread", start=start)
+        assert event  # TODO
 
 
 class IndexingTestCase(CommunityIndexingTestCase):
