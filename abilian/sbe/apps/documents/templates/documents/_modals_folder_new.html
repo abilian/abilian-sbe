@@ -41,17 +41,17 @@
 
 
 {% deferJS %}
-<script>
- require(
-     ['Abilian', 'SBEFolderEditSetup'],
-     function(Abilian, setupFolderEdit) {
-         Abilian.fn.onAppInit(function() {
-             setupFolderEdit($('#modal-new-folder'),
-                             '{{ folder.id }}',
-                             'new');
-         });
-         $('#modal-new-folder input[type="text"]').preventEnterKey();
+  <script>
+    require(
+        ['Abilian', 'SBEFolderEditSetup'],
+        function (Abilian, setupFolderEdit) {
+          Abilian.fn.onAppInit(function () {
+            setupFolderEdit($('#modal-new-folder'),
+                '{{ folder.id }}',
+                'new');
+          });
+          $('#modal-new-folder input[type="text"]').preventEnterKey();
 
-     });
-</script>
+        });
+  </script>
 {%- enddeferJS %}

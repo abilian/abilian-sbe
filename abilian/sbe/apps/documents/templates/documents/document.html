@@ -21,16 +21,16 @@
         {{ m_breadcrumbs2(breadcrumbs) }}
       </div>
 
-      <hr />
+      <hr/>
 
       <p class="small alert alert-warning">
       <span class="fa-stack">
         <i class="fa fa-search fa-stack-2x"></i>
         <i class="fa fa-bug fa-stack-1x text-danger"></i>
       </span>
-      {% trans %}Waiting for virus check...{% endtrans %}
+        {% trans %}Waiting for virus check...{% endtrans %}
       </p>
-    {%-  elif not doc.antivirus_ok %}
+    {%- elif not doc.antivirus_ok %}
       <p class="alert alert-danger">
         <i class="fa fa-exclamation-triangle"></i>
         {%- trans %}Virus found. Access disabled.{%- endtrans %}
@@ -43,7 +43,9 @@
         <a class="btn btn-success btn-lg pull-right"
            href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
           <i class="glyphicon glyphicon-download"></i>
-          {{ _('Download') }} (<small>{{ doc.content_length|filesize  }}</small>)
+          {{ _('Download') }} (
+          <small>{{ doc.content_length|filesize }}</small>
+          )
         </a>
       {%- endif %}
 
@@ -58,13 +60,13 @@
               age=doc.created_at | age(add_direction=False),
               creator=user_markup(doc.creator)) }}
           {%- if doc.updated_at != doc.created_at %}
-            <br />
+            <br/>
             {{ _('Last modification: %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
             {%- set lock = doc.lock %}
             {%- if lock %}
               <div class="lock">
                 <i class="fa fa-lock"></i>
-              {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
+                {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
                   user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
               </div>
             {%- endif %}
@@ -83,7 +85,7 @@
     <div class="preview-container" data-page-num="{{ doc.page_num }}">
       <img src="{{ url_for(".document_preview_image",
           community_id=g.community.slug, doc_id=doc.id,
-          size=doc.preview_size) }}"  alt="" class="preview" data-page="0"/>
+          size=doc.preview_size) }}" alt="" class="preview" data-page="0"/>
 
       {%- if has_preview %}
         <a class="preview-nav-button preview-prev" title="{{ _('Previous') }}">
@@ -96,13 +98,13 @@
         </a>
 
         {%- deferJS %}
-        <script>
-         require(
-             ['Abilian', 'SBEDocumentViewerSetup'],
-             function(Abilian, viewerSetup) {
-                 Abilian.fn.onAppInit(viewerSetup);
-             });
-        </script>
+          <script>
+            require(
+                ['Abilian', 'SBEDocumentViewerSetup'],
+                function (Abilian, viewerSetup) {
+                  Abilian.fn.onAppInit(viewerSetup);
+                });
+          </script>
         {%- enddeferJS %}
 
       {%- else %}
@@ -110,16 +112,16 @@
       {%- endif %}
     </div>
 
-      {%- if doc.extra_metadata %}
-        <h3 class="main collapsed" data-toggle="collapse"
-            href="#doc_extra_metadata">Extra Metadata</h3>
-        <div id="doc_extra_metadata" class="collapse">
-          {%- set sorted = doc.extra_metadata|dictsort %}
-          {{ m_table(sorted) }}
-        </div>
-      {%- endif %}
+    {%- if doc.extra_metadata %}
+      <h3 class="main collapsed" data-toggle="collapse"
+          href="#doc_extra_metadata">Extra Metadata</h3>
+      <div id="doc_extra_metadata" class="collapse">
+        {%- set sorted = doc.extra_metadata|dictsort %}
+        {{ m_table(sorted) }}
+      </div>
+    {%- endif %}
 
-      {{ m_audit_log(audit_entries) }}
+    {{ m_audit_log(audit_entries) }}
 
   {% endcall %}
 

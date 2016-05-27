@@ -31,7 +31,7 @@
 
           <div class="btn-group pull-right" style="margin-right: 20px;">
             <input id="filter" type="text" class="form-control" placeholder="{{ _("Filter...") }}"
-                style="margin-bottom: 0;">
+                   style="margin-bottom: 0;">
           </div>
 
         </div>
@@ -59,7 +59,7 @@
         {%- for obj in objects %}
           <tr>
             <td><input type="checkbox" name="object-selected"
-                value="{{ obj.sbe_type }}:{{ obj.id }}"></td>
+                       value="{{ obj.sbe_type }}:{{ obj.id }}"></td>
             <td class="hide">{{ obj.object_type }}</td>
             <td class="hide">{{ obj.title }}</td>
             <td>
@@ -78,9 +78,9 @@
             <td class="hide">{{ owner.first_name }}</td>
             <td>
               <a href="{{ url_for("social.user", user_id=owner.id) }}"
-                  title="{{ owner.name }}"><img alt="{{ owner.name }}"
-                  src="{{ user_photo_url(owner, size=20) }}"
-                  style="vertical-align: middle;">
+                 title="{{ owner.name }}"><img alt="{{ owner.name }}"
+                                               src="{{ user_photo_url(owner, size=20) }}"
+                                               style="vertical-align: middle;">
                 {{ owner.short_name }}</a>
             </td>
             <td class="hide">{{ obj.created_at.isoformat() }} </td>
@@ -106,19 +106,17 @@
     </form>
 
     <script type="application/json">
-          {%- set data = {
-              'deleteConfirmMsg': _("Delete selected elements?"),
-           } %}
-          {{ data | tojson | safe }}
+
+
     </script>
 
     {%- deferJS %}
-    <script>
-     require(['Abilian', 'SBEFolderListingSetup'],
-             function(Abilian, setupFolderListing) {
-                 Abilian.fn.onAppInit(setupFolderListing);
-             });
-    </script>
+      <script>
+        require(['Abilian', 'SBEFolderListingSetup'],
+            function (Abilian, setupFolderListing) {
+              Abilian.fn.onAppInit(setupFolderListing);
+            });
+      </script>
     {%- enddeferJS %}
   {%- else %}
     <p>

@@ -43,18 +43,18 @@
 </div>
 
 {%- deferJS %}
-<script>
- require(
-     ['Abilian', 'SBEFolderEditSetup'],
-     function(Abilian, setupFolderEdit) {
-         Abilian.fn.onAppInit(function() {
-             setupFolderEdit(
-                 $('#modal-edit'),
-                 '{{ doc.id }}',
-                 'document-edit');
+  <script>
+    require(
+        ['Abilian', 'SBEFolderEditSetup'],
+        function (Abilian, setupFolderEdit) {
+          Abilian.fn.onAppInit(function () {
+            setupFolderEdit(
+                $('#modal-edit'),
+                '{{ doc.id }}',
+                'document-edit');
 
-             $('#modal-edit input[type="text"]').preventEnterKey();
-         });
-     });
-</script>
+            $('#modal-edit input[type="text"]').preventEnterKey();
+          });
+        });
+  </script>
 {%- enddeferJS %}

@@ -1,11 +1,11 @@
 <div class="modal fade" id="modal-add-group-local-role" role="dialog"
-    data-keyboard="true">
+     data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
 
       <form method="POST" class="form-horizontal"
-          action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
-          enctype="multipart/form-data">
+            action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
+            enctype="multipart/form-data">
         {{ csrf_token }}
         <input type="hidden" name="action" value="add-group-role"/>
 
@@ -17,7 +17,7 @@
         <div class="modal-body">
           <div class="form-group">
             <label class="control-label"
-                for="group-select">{{ _("Group") }}</label>
+                   for="group-select">{{ _("Group") }}</label>
 
             <div class="controls">
               <select data-toggle="select2" id="group-select" name="group">
@@ -30,11 +30,11 @@
 
           <div class="form-group">
             <label class="control-label"
-                for="role-select-for-group">{{ _("Role") }}</label>
+                   for="role-select-for-group">{{ _("Role") }}</label>
 
             <div class="controls">
               <select data-toggle="select2" id="role-select-for-group"
-                  name="role">
+                      name="role">
                 <option value="reader">{{ _("Reader") }}</option>
                 <option value="writer">{{ _("Writer") }}</option>
                 <option value="manager">{{ _("Manager") }}</option>
@@ -46,9 +46,9 @@
 
         <div class="modal-footer">
           <button data-dismiss="modal"
-              class="btn btn-default">{{ _("Cancel") }}</button>
+                  class="btn btn-default">{{ _("Cancel") }}</button>
           <button class="btn btn-primary" type="submit" name="action"
-              value="add-local-role">{{ _("Add local role") }}</button>
+                  value="add-local-role">{{ _("Add local role") }}</button>
         </div>
       </form>
     </div>
@@ -56,13 +56,13 @@
 </div>
 
 <div class="modal fade" id="modal-add-user-local-role" role="dialog"
-    data-keyboard="true">
+     data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
 
       <form method="POST" class="form-horizontal"
-          action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
-          enctype="multipart/form-data">
+            action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
+            enctype="multipart/form-data">
         {{ csrf_token }}
         <input type="hidden" name="action" value="add-user-role"/>
 
@@ -97,7 +97,7 @@
         <div class="modal-footer">
           <button data-dismiss="modal" class="btn btn-default">Cancel</button>
           <button class="btn btn-primary" type="submit" name="action"
-              value="add-local-role">{{ _("Add local role") }}</button>
+                  value="add-local-role">{{ _("Add local role") }}</button>
         </div>
       </form>
     </div>

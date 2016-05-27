@@ -5,6 +5,7 @@ from __future__ import absolute_import, unicode_literals
 
 from unittest import TestCase
 
+from datetime import datetime
 from flask import url_for
 
 from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
@@ -16,14 +17,16 @@ from ..models import Event
 class Test(TestCase):
 
     def test_create_event(self):
-        event = Event(title="Test thread")
+        start = datetime.now()
+        event = Event(name="Test thread", start=start)
 
 
 class IndexingTestCase(CommunityIndexingTestCase):
 
     def test_event_indexed(self):
-        event1 = Event(name="Test event", community=self.community)
-        event2 = Event(name="Test other event", community=self.c2)
+        start = datetime.now()
+        event1 = Event(name="Test event", community=self.community, start=start)
+        event2 = Event(name="Test other event", community=self.c2, start=start)
         self.session.add(event1)
         self.session.add(event2)
         self.session.commit()

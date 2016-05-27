@@ -1,4 +1,5 @@
-<!--suppress XmlUnboundNsPrefix -->{% macro links(object, ROOT) %}
+<!--suppress XmlUnboundNsPrefix -->
+{% macro links(object, ROOT) %}
   <atom:link rel="service" href="{{ ROOT }}" type="application/atomsvc+xml"/>
   <atom:link rel="self" href="{{ ROOT }}/entry?id={{ object.id }}"
   type="application/atom+xml;type=entry" cmisra:id="{{ object.id }}"/>

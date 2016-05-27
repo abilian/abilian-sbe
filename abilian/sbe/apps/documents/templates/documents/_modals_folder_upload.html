@@ -78,20 +78,20 @@
 </div>
 
 {%- deferJS %}
-<script>
- require(
-     ['Abilian', 'SBEFolderUploadSetup'],
-     function(Abilian, setupFolderUpload) {
-         var messages = {
-             fileUploadError: {{ _('Error - File not uploaded')|tojson }},
-             fileTooLargeError: {{ _('Error: maximum file size exceeded')|tojson }}
-         };
+  <script>
+    require(
+        ['Abilian', 'SBEFolderUploadSetup'],
+        function (Abilian, setupFolderUpload) {
+          var messages = {
+            fileUploadError: {{ _('Error - File not uploaded')|tojson }},
+            fileTooLargeError: {{ _('Error: maximum file size exceeded')|tojson }}
+          };
 
-         Abilian.fn.onAppInit(function() {
-             setupFolderUpload('modal-upload-files',
-                               {{ folder_post_url|tojson }},
-                               messages);
-         });
-     });
-</script>
+          Abilian.fn.onAppInit(function () {
+            setupFolderUpload('modal-upload-files',
+                {{ folder_post_url|tojson }},
+                messages);
+          });
+        });
+  </script>
 {%- enddeferJS %}
