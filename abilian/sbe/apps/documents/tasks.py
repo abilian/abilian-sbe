@@ -18,7 +18,7 @@ logger = logging.getLogger(__package__)
 
 @contextmanager
 def get_document(document_id, session=None):
-    """ Context manager that yields (session, document).
+    """Context manager that yields (session, document).
     """
     from .models import Document
 
@@ -39,7 +39,7 @@ def get_document(document_id, session=None):
 
 @shared_task
 def process_document(document_id):
-    """ Run document processing chain.
+    """Run document processing chain.
     """
     with get_document(document_id) as (session, document):
         if document is None:
@@ -66,7 +66,7 @@ def _run_antivirus(document):
 
 @shared_task
 def antivirus_scan(document_id):
-    """ Return antivirus.scan() result
+    """Return antivirus.scan() result
     """
     with get_document(document_id) as (session, document):
         if document is None:
@@ -76,7 +76,7 @@ def antivirus_scan(document_id):
 
 @shared_task
 def preview_document(document_id):
-    """ Compute the document preview images with its default preview size.
+    """Compute the document preview images with its default preview size.
     """
     with get_document(document_id) as (session, document):
         if document is None:
@@ -95,50 +95,51 @@ def preview_document(document_id):
 
 @shared_task
 def convert_document_content(document_id):
-    """ Convert document content.
+    """Convert document content.
     """
-    with get_document(document_id) as (session, document):
-        if document is None:
+    with get_document(document_id) as (session, doc):
+        if doc is None:
             # deleted after task queued, but before task run
             return
 
         error_kwargs = dict(exc_info=True, extra={'stack': True})
 
-        conversion_args = (document.content_digest, document.content,
-                           document.content_type)
+        conversion_args = (doc.content_digest, doc.content,
+                           doc.content_type)
 
-        if document.content_type == "application/pdf":
-            document.pdf = document.content
+        if doc.content_type == "application/pdf":
+            doc.pdf = doc.content
         else:
             try:
-                document.pdf = converter.to_pdf(*conversion_args)
+                doc.pdf = converter.to_pdf(*conversion_args)
             except HandlerNotFound as e:
-                document.pdf = ""
+                doc.pdf = ""
             except ConversionError as e:
-                document.pdf = ""
-                logger.info("Conversion to PDF failed: %s", str(e),
+                doc.pdf = ""
+                logger.info(u"Conversion to PDF failed for document: %s",
+                            doc.name, e,
                             **error_kwargs)
 
         try:
-            document.text = converter.to_text(document.content_digest,
-                                              document.content,
-                                              document.content_type)
+            doc.text = converter.to_text(doc.content_digest,
+                                              doc.content,
+                                              doc.content_type)
         except ConversionError as e:
-            document.text = u""
-            logger.info("Conversion to text failed: %s", str(e), **error_kwargs)
+            doc.text = u""
+            logger.info(u"Conversion to text failed for document %s: %s", doc.name, e, **error_kwargs)
 
-        document.extra_metadata = {}
+        doc.extra_metadata = {}
         try:
-            document.extra_metadata = converter.get_metadata(*conversion_args)
+            doc.extra_metadata = converter.get_metadata(*conversion_args)
         except ConversionError as e:
-            logger.warning(u"Metadata extraction failed: %s", e, **error_kwargs)
+            logger.warning(u"Metadata extraction failed on document %s: %s", doc.name, e, **error_kwargs)
         except UnicodeDecodeError as e:
-            logger.error(u"Unicode issue: %s", e, **error_kwargs)
+            logger.error(u"Unicode issue on document %s: %s", doc.name, e, **error_kwargs)
         except Exception as e:
-            logger.error(u"Other issue: %s", e, **error_kwargs)
+            logger.error(u"Other issue on document %s: %s", doc.name, e, **error_kwargs)
 
-        if document.text:
+        if doc.text:
             import langid
-            document.language = langid.classify(document.text)[0]
+            doc.language = langid.classify(doc.text)[0]
 
-        document.page_num = document.extra_metadata.get("PDF:Pages", 1)
+        doc.page_num = doc.extra_metadata.get("PDF:Pages", 1)

@@ -96,7 +96,7 @@ flake8:
 
 format:
 	isort -rc abilian
-	yapf --style google -r -i abilian
+	yapf --style google -r -i abilian demo tests
 
 #
 # running
