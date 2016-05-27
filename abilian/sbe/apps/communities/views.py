@@ -95,9 +95,9 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
     Helper for using :func:`abilian.web.views.default_view` on objects that
     belongs to a community. This function should be used as `kw_func`::
 
-      @default_view(blueprint, Model, kw_func=default_view_kw)
-      @blueprint.route("/<object_id>")
-      def view():
+        @default_view(blueprint, Model, kw_func=default_view_kw)
+        @blueprint.route("/<object_id>")
+        def view():
          ...
 
     """

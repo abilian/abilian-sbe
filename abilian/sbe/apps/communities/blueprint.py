@@ -56,12 +56,14 @@ def check_access():
 
 
 def init_current_tab(endpoint, values):
-    """Ensure g.current_tab exists."""
+    """Ensure g.current_tab exists.
+    """
     g.current_tab = None
 
 
 def pull_community(endpoint, values):
-    """url_value_preprocessor function."""
+    """url_value_preprocessor function.
+    """
     g.nav['active'] = 'section:communities'
     g.breadcrumb.append(BreadcrumbItem(label=_l(u'Communities'),
                                        url=Endpoint('communities.index')))
