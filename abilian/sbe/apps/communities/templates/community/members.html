@@ -12,6 +12,7 @@
     {%- endif %}
 
     <h2>{{ _("Current members") }}</h2>
+
     <p class="clearfix">
       (<i class="glyphicon glyphicon-lock"></i>: {{ _('account disabled') }})
       {%- if is_manager  %}
@@ -40,7 +41,7 @@
     </script>
 
     {%- deferJS %}
-    <script type="text/javascript">
+    <script>
      'use strict';
      require(
          ['Abilian', 'jquery', 'jquery.dataTables'],
@@ -104,7 +105,7 @@
   </div>
 
   {%- deferJS %}
-  <script type="text/javascript">
+  <script>
 require(
     ['Abilian', 'jquery'],
     function(Abilian, $) {

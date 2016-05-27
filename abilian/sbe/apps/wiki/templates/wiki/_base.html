@@ -28,30 +28,30 @@
     {#  FIXME: copy-pasted from Documents. #}
     <div class="modal fade" id="modal-delete" role="dialog"
          data-keyboard="true">
-         <div class="modal-dialog">
-           <div class="modal-content">
+      <div class="modal-dialog">
+        <div class="modal-content">
 
-             <form
-                action="{{ url_for(".page_delete", community_id=g.community.slug) }}"
-                method="POST" style="margin-bottom: 0;">
-                {{ csrf.field() }}
-                <input type="hidden" name="title" value="{{ page.title }}">
+          <form
+              action="{{ url_for(".page_delete", community_id=g.community.slug) }}"
+              method="POST" style="margin-bottom: 0;">
+            {{ csrf.field() }}
+            <input type="hidden" name="title" value="{{ page.title }}">
 
-                  <div class="modal-header">
-                    <button class="close" data-dismiss="modal">&times;</button>
-                    <h3>{{ _("Delete Wiki Page") }}</h3>
-                  </div>
-                  <div class="modal-body">
-                    {{ _('Are you sure you want to delete the page "{title}" ?').format(title=page.title) }}
-                  </div>
-                  <div class="modal-footer">
-                    <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
-                    <button type="submit"
-                            class="btn btn-danger">{{ _("Really Delete") }}</button>
-                  </div>
-             </form>
-           </div>
-         </div>
+            <div class="modal-header">
+              <button class="close" data-dismiss="modal">&times;</button>
+              <h3>{{ _("Delete Wiki Page") }}</h3>
+            </div>
+            <div class="modal-body">
+              {{ _('Are you sure you want to delete the page "{title}" ?').format(title=page.title) }}
+            </div>
+            <div class="modal-footer">
+              <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+              <button type="submit"
+                      class="btn btn-danger">{{ _("Really Delete") }}</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
     {#  FIXME: copy-pasted from crm/view_with_attachments.html #}
     <div class="modal fade" id="upload-files" role="dialog">
@@ -61,59 +61,61 @@
           <form method="POST"
                 action="{{ url_for(".attachment_upload", community_id=g.community.slug, title=page.title) }}"
                 enctype="multipart/form-data" style="margin-bottom: 0;">
-                {{ csrf.field() }}
-                <div class="modal-header">
-                  <button class="close" data-dismiss="modal">&times;</button>
-                  <h3>{{ _("Upload new files") }}</h3>
-                </div>
+            {{ csrf.field() }}
+            <div class="modal-header">
+              <button class="close" data-dismiss="modal">&times;</button>
+              <h3>{{ _("Upload new files") }}</h3>
+            </div>
 
-                <div class="modal-body">
-                  <input type="file" name="attachments" multiple="multiple" />
-                </div>
+            <div class="modal-body">
+              <input type="file" name="attachments" multiple="multiple"/>
+            </div>
 
-                <div class="modal-footer">
-                  <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
-                  <button class="btn btn-primary" type="submit" name="action"
-                          value="upload">{{ _("Upload") }}</button>
-                </div>
+            <div class="modal-footer">
+              <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+              <button class="btn btn-primary" type="submit" name="action"
+                      value="upload">{{ _("Upload") }}</button>
+            </div>
           </form>
         </div>
       </div>
     </div>
 
-{%- deferJS %}
-<script type="text/javascript">
-require(
-    ['Abilian', 'jquery', 'bootbox'],
-    function(Abilian, $, bootbox) {        
-        function setupDeleteButtons() {
-    $('#attachments li form > button[value="delete"]')
-        .click(function(e) {
-            e.preventDefault();        
-            var $button = $(this);
-            var button_form = $(this.form);
-            var filename = $button.closest('li').find('a').text();
-            var msg =  '<h2>"' + filename + '"</h2>'
-                     + '<p class="lead">{{ _("Delete attachment?") }}</p>';
-            bootbox.confirm(msg,
-                            function(confirm) {
-                                if (confirm) {
-                                  var action_val = $('<input />',
-                                              {'type': 'hidden',
-                                               'name': 'action',
-                                               'value': $button.attr('value')});
-                                  button_form.append(action_val);
-                                    button_form.submit();
-                                }
-                            });
-        })
-        .removeAttr('disabled');
-        }
+    {%- deferJS %}
+      <script>
+        require(
+            ['Abilian', 'jquery', 'bootbox'],
+            function (Abilian, $, bootbox) {
+              function setupDeleteButtons() {
+                $('#attachments li form > button[value="delete"]')
+                    .click(function (e) {
+                      e.preventDefault();
+                      var $button = $(this);
+                      var button_form = $(this.form);
+                      var filename = $button.closest('li').find('a').text();
+                      var msg = '<h2>"' + filename + '"</h2>'
+                          + '<p class="lead">{{ _("Delete attachment?") }}</p>';
+                      bootbox.confirm(msg,
+                          function (confirm) {
+                            if (confirm) {
+                              var action_val = $('<input />',
+                                  {
+                                    'type': 'hidden',
+                                    'name': 'action',
+                                    'value': $button.attr('value')
+                                  });
+                              button_form.append(action_val);
+                              button_form.submit();
+                            }
+                          });
+                    })
+                    .removeAttr('disabled');
+              }
 
-        Abilian.fn.onAppInit(setupDeleteButtons);
-    }
- );
-</script>
-{%- enddeferJS %}
-{%- endif %}
+              Abilian.fn.onAppInit(setupDeleteButtons);
+            }
+        );
+      </script>
+    {%- enddeferJS %}
+  {%- endif %}
 {% endblock %}

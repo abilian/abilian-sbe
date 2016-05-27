@@ -46,9 +46,11 @@
           {{ _('Download') }} (<small>{{ doc.content_length|filesize  }}</small>)
         </a>
       {%- endif %}
+
       <h2><i class="fa fa-file-o fa-lg"></i>
         {{ m_breadcrumbs2(breadcrumbs) }}
       </h2>
+
       <div>
         <small>
           {{ _('Created: %(date)s (%(age)s) by %(creator)s',
@@ -94,7 +96,7 @@
         </a>
 
         {%- deferJS %}
-        <script type="text/javascript">
+        <script>
          require(
              ['Abilian', 'SBEDocumentViewerSetup'],
              function(Abilian, viewerSetup) {

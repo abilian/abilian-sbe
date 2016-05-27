@@ -1,0 +1,17 @@
+{% extends "calendar/_base.html" %}
+
+{% from "macros/box.html" import m_box_menu, m_box_content %}
+
+{% block content %}
+  {% call m_box_content(_("Upcoming events")) %}
+    {% if upcoming_events %}
+      <ul>
+        {% for event in upcomint_events %}
+          <li></li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>{{ _("No event has been posted to this calendar yet.") }}</p>
+    {% endif %}
+  {% endcall %}
+{% endblock %}

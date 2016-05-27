@@ -7,8 +7,8 @@
 {% block body %}
   {% for digest in digests %}
     <h2>In the {{ digest.community.name }} community</h2>
-    {%- if digest.new_members %}
 
+    {%- if digest.new_members %}
       <h3>New members</h3>
 
       {%- for user in digest.new_members %}
@@ -18,8 +18,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.new_documents %}
 
+    {%- if digest.new_documents %}
       <h3>New documents</h3>
 
       {%- for doc in digest.new_documents %}
@@ -31,8 +31,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.updated_documents %}
 
+    {%- if digest.updated_documents %}
       <h3>Updated documents</h3>
 
       {%- for doc in digest.updated_documents %}
@@ -43,8 +43,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.new_conversations %}
 
+    {%- if digest.new_conversations %}
       <h3>New conversations</h3>
 
       {%- for thread in digest.new_conversations %}
@@ -56,8 +56,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.updated_conversations %}
 
+    {%- if digest.updated_conversations %}
       <h3>New comments in conversations</h3>
 
       {%- for thread, info in digest.updated_conversations.items() %}
@@ -67,21 +67,22 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.new_wiki_pages %}
 
+    {%- if digest.new_wiki_pages %}
       <h3>New wiki pages</h3>
 
       {%- for page in digest.new_wiki_pages %}
         <p><a href="{{ url_for('wiki.page',
                                community_id=digest.community.slug,
                                title=page.title, _external=True,
-                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ page }}</a><br>
+                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ page }}</a>
+          <br>
           <small>Posted by {{ page.creator }}.</small>
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.updated_wiki_pages %}
 
+    {%- if digest.updated_wiki_pages %}
       <h3>Updated wiki pages</h3>
 
       {%- for page, actors in digest.updated_wiki_pages.items() %}
@@ -89,7 +90,15 @@
                                community_id=digest.community.slug,
                                title=page.title, _external=True,
                                _scheme=config['PREFERRED_URL_SCHEME'])}}">{{ page }}</a><br>
-        <small>by {% for actor, changes in actors.items() %}{{ actor}}{%if changes > 1%}(x{{changes}}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}.</small>
+        <small>by
+          {% for actor, changes in actors.items() %}{{ actor }}
+            {% if changes > 1 %}(x{{ changes }}){% endif %}
+          {%- if not loop.last %}, {% endif %}
+          {%- endfor %}.
+        </small>
+
+                  {{ actors }}
+
         </p>
       {%- endfor %}
     {%- endif %}
@@ -97,7 +106,7 @@
 {% endblock %}
 
 {% block footer %}
-  You receive this email because you subscribe to communities notifications.
+  You receive this email because you are subscribed to communities notifications.
   <br>
   You can modify your notifications by going to the application's
   <a href="{{ url_for("preferences.index", _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}">Preferences</a>

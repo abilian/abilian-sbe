@@ -104,14 +104,16 @@
         </tfoot>
       </table>
     </form>
+
     <script type="application/json">
           {%- set data = {
               'deleteConfirmMsg': _("Delete selected elements?"),
            } %}
           {{ data | tojson | safe }}
     </script>
+
     {%- deferJS %}
-    <script type="text/javascript">
+    <script>
      require(['Abilian', 'SBEFolderListingSetup'],
              function(Abilian, setupFolderListing) {
                  Abilian.fn.onAppInit(setupFolderListing);

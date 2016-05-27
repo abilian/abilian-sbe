@@ -6,26 +6,26 @@
 
   {% call m_box(_("User directory")) %}
 
-  <form style="margin-bottom: 0;" method="POST">
+    <form style="margin-bottom: 0;" method="POST">
 
-    <table class="table table-striped table-condensed" id="users-table">
-      <thead>
-      <tr>
-        <th style="width: 8%;"></th>
-        <th style="width: 56%;">Nom</th>
-        <th style="width: 18%;">Inscription</th>
-        <th style="width: 18%;">Dernière activité</th>
-      </tr>
-      </thead>
+      <table class="table table-striped table-condensed" id="users-table">
+        <thead>
+        <tr>
+          <th style="width: 8%;"></th>
+          <th style="width: 56%;">Nom</th>
+          <th style="width: 18%;">Inscription</th>
+          <th style="width: 18%;">Dernière activité</th>
+        </tr>
+        </thead>
 
-      <tbody>
-      <tr>
-        <td colspan="4">
-          Loading data...
-        </td>
-      </tr>
+        <tbody>
+        <tr>
+          <td colspan="4">
+            Loading data...
+          </td>
+        </tr>
 
-      {#
+        {#
           <a href="{{ url_for(".user", user_id=user.id) }}"><img src="{{ url_for(".mugshot", user_id=user.id, s=45)  }}"></a>
         </td>
 
@@ -58,53 +58,53 @@
       </tr>
     {% endfor %}
 #}
-      </tbody>
-      <tfoot>
-      <tr>
-        <th style="width: 8%;"></th>
-        <th style="width: 56%;">Nom</th>
-        <th style="width: 18%;">Inscription</th>
-        <th style="width: 18%;">Dernière activité</th>
-      </tr>
-      </tfoot>
-    </table>
-  </form>
+        </tbody>
+        <tfoot>
+        <tr>
+          <th style="width: 8%;"></th>
+          <th style="width: 56%;">Nom</th>
+          <th style="width: 18%;">Inscription</th>
+          <th style="width: 18%;">Dernière activité</th>
+        </tr>
+        </tfoot>
+      </table>
+    </form>
 
-  {%- deferJS %}
-  <script type="text/javascript">
-'use strict';
-require(
-    ['Abilian', 'jquery', 'jquery.dataTables'],
-    function(Abilian, $, jqDT) {
+    {%- deferJS %}
+      <script>
+        'use strict';
+        require(
+            ['Abilian', 'jquery', 'jquery.dataTables'],
+            function (Abilian, $, jqDT) {
 
-        function initUsersTable() {
-            var users_table = $('#users-table').dataTable({
-                aoColumns: [
-                    { asSorting: [] },
-                    { asSorting: [ "asc", "desc" ] },
-                    { asSorting: [ "asc", "desc" ] },
-                    { asSorting: [ "asc", "desc" ] }
-                ],
-                {# see http://datatables.net/ref #}
-                sPaginationType: "bootstrap",
-                bFilter:         true,
-                bLengthChange:   false,
-                bStateSave:      true,
-                iDisplayLength:  50,
-                //sDom:           'lrtip',
-                bProcessing: true,
-                bServerSide: true,
-                sAjaxSource: "{{ url_for(".users_dt_json") }}"
-            });
-        }
+              function initUsersTable() {
+                var users_table = $('#users-table').dataTable({
+                  aoColumns: [
+                    {asSorting: []},
+                    {asSorting: ["asc", "desc"]},
+                    {asSorting: ["asc", "desc"]},
+                    {asSorting: ["asc", "desc"]}
+                  ],
+                  {# see http://datatables.net/ref #}
+                  sPaginationType: "bootstrap",
+                  bFilter: true,
+                  bLengthChange: false,
+                  bStateSave: true,
+                  iDisplayLength: 50,
+                  //sDom:           'lrtip',
+                  bProcessing: true,
+                  bServerSide: true,
+                  sAjaxSource: "{{ url_for(".users_dt_json") }}"
+                });
+              }
 
-        Abilian.fn.onAppInit(initUsersTable)
-    }
-);
-  </script>
-  {%- enddeferJS %}
+              Abilian.fn.onAppInit(initUsersTable)
+            }
+        );
+      </script>
+    {%- enddeferJS %}
 
-  <div style="clear: both;"></div>
+    <div style="clear: both;"></div>
   {% endcall %}
 
 {% endblock %}

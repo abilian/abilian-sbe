@@ -18,8 +18,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.new_documents %}
 
+    {%- if digest.new_documents %}
       <h3>Nouveaux documents</h3>
 
       {%- for doc in digest.new_documents %}
@@ -30,8 +30,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.updated_documents %}
 
+    {%- if digest.updated_documents %}
       <h3>Documents mis à jour</h3>
 
       {%- for doc in digest.updated_documents %}
@@ -42,8 +42,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.new_conversations %}
 
+    {%- if digest.new_conversations %}
       <h3>Nouvelles conversations</h3>
 
       {%- for thread in digest.new_conversations %}
@@ -55,8 +55,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.updated_conversations %}
 
+    {%- if digest.updated_conversations %}
       <h3>Nouveaux commentaires dans les conversations</h3>
 
       {%- for thread, info in digest.updated_conversations.items() %}
@@ -66,8 +66,8 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.new_wiki_pages %}
 
+    {%- if digest.new_wiki_pages %}
       <h3>Nouvelles pages de wiki</h3>
 
       {%- for page in digest.new_wiki_pages %}
@@ -79,16 +79,23 @@
         </p>
       {%- endfor %}
     {%- endif %}
-    {%- if digest.updated_wiki_pages %}
 
+    {%- if digest.updated_wiki_pages %}
       <h3>Pages de wiki mises à jour</h3>
+
 
       {%- for page, actors in digest.updated_wiki_pages.items() %}
         <p><a href="{{ url_for('wiki.page',
                                community_id=digest.community.slug,
                                title=page.title, _external=True,
-                               _scheme=config['PREFERRED_URL_SCHEME'])}}">{{ page }}</a><br>
-          <small>par {% for actor, changes in actors.items() %}{{ actor}}{%if changes > 1%}(x{{changes}}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}.</small>
+                               _scheme=config['PREFERRED_URL_SCHEME'])}}">{{ page }}</a>
+          <br>
+          <small>par
+            {% for actor, changes in actors.items() %}{{ actor }}
+              {%- if changes > 1 %} (x{{ changes }}){% endif %}
+            {%- if not loop.last %}, {% endif -%}
+            {%- endfor %}.
+          </small>
         </p>
       {%- endfor %}
     {%- endif %}

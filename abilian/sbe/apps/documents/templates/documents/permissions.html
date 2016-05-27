@@ -26,9 +26,9 @@
         <tr>
           <td>{%- if not user.can_login %}
             <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i>
-            {%- elif has_access %}
+          {%- elif has_access %}
             <i class="fa fa-check">&nbsp;</i>
-            {%- endif %}
+          {%- endif %}
           </td>
           <td class="hide">{{ user.last_name }}</td>
           <td class="hide">{{ user.first_name }}</td>
@@ -42,8 +42,8 @@
           {%- if controls %}
             <td>
               <button type="submit" name="delete-user-role"
-                  value="{{ "%s:%s" % (role, user.id) }}"
-                  class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
+                      value="{{ "%s:%s" % (role, user.id) }}"
+                      class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
               </button>
             </td>
           {%- endif %}
@@ -54,27 +54,27 @@
   </form>
 
   {%- deferJS %}
-  <script type="text/javascript">
-    $(document).ready(function() {
-      var id = "#{{ table_id }}"; // Should be unique enough
-      $(id).dataTable({
-        aaSorting: [[3, "asc"]],
-        aoColumns:       [
-         { bSortable: false }, // 0: has_access
-         { bVisible: false },  // 1: last_name
-         { bVisible: false }, // 2: first_name
-         { aDataSort: [1, 2], asSorting: [ "asc", "desc" ] }, // 3: fullname
-         { aDataSort: [4, 1, 2], asSorting: [ "asc", "desc" ] }, // 4: role - sort by role then name
-         {%- if controls %}
-         { bSortable: false }
-         {% endif %}
-        ],
-        sPaginationType: "bootstrap",
-        bFilter:         true,
-        bLengthChange:   false
+    <script>
+      $(document).ready(function () {
+        var id = "#{{ table_id }}"; // Should be unique enough
+        $(id).dataTable({
+          aaSorting: [[3, "asc"]],
+          aoColumns: [
+            {bSortable: false}, // 0: has_access
+            {bVisible: false},  // 1: last_name
+            {bVisible: false}, // 2: first_name
+            {aDataSort: [1, 2], asSorting: ["asc", "desc"]}, // 3: fullname
+            {aDataSort: [4, 1, 2], asSorting: ["asc", "desc"]}, // 4: role - sort by role then name
+            {%- if controls %}
+              {bSortable: false}
+            {% endif %}
+          ],
+          sPaginationType: "bootstrap",
+          bFilter: true,
+          bLengthChange: false
+        });
       });
-    });
-  </script>
+    </script>
   {%- enddeferJS %}
 
   <div style="clear: both;"></div>
@@ -105,8 +105,8 @@
           {%- if controls %}
             <td>
               <button type="submit" name="delete-group-role"
-                  value="{{ role }}:{{ group.id }}"
-                  class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
+                      value="{{ role }}:{{ group.id }}"
+                      class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
               </button>
             </td>
           {% endif %}
@@ -117,23 +117,23 @@
   </form>
 
   {%- deferJS %}
-  <script type="text/javascript">
-    $(document).ready(function() {
-      var id = "#{{ table_id }}"; // Should be unique enough
-      $(id).dataTable({
-        aoColumns:       [
-          { asSorting: [ "asc", "desc" ] },
-          { asSorting: [ "asc", "desc" ] },
-          {%- if controls %}
-            { asSorting: [ "asc", "desc" ] }
-          {% endif %}
-        ],
-        sPaginationType: "bootstrap",
-        bFilter:         true,
-        bLengthChange:   false
+    <script>
+      $(document).ready(function () {
+        var id = "#{{ table_id }}"; // Should be unique enough
+        $(id).dataTable({
+          aoColumns: [
+            {asSorting: ["asc", "desc"]},
+            {asSorting: ["asc", "desc"]},
+            {%- if controls %}
+              {asSorting: ["asc", "desc"]}
+            {% endif %}
+          ],
+          sPaginationType: "bootstrap",
+          bFilter: true,
+          bLengthChange: false
+        });
       });
-    });
-  </script>
+    </script>
   {%- enddeferJS %}
   <div style="clear: both;"></div>
 {% endmacro %}
@@ -144,7 +144,7 @@
     <h2 style="margin-top: 0;">{{ _('Manage permissions on <em>{folder}</em>').format(folder=folder.title) }}</h2>
 
     <a class="btn btn-default datatable-export"
-        href="{{ url_for('.permissions_export', folder_id=folder.id, community_id=folder.community.slug) }}"><i
+       href="{{ url_for('.permissions_export', folder_id=folder.id, community_id=folder.community.slug) }}"><i
         class="fa fa-align-justify"></i>{{ _("Export to Excel") }}</a>
 
     <hr/>
@@ -154,7 +154,7 @@
     {% if folder.inherit_security %}
       <i class="fa fa-check-circle-o"></i>{{ _("Activated") }}
       <button class="btn btn-default"
-          id="deactivate_inheritance">{{ _("Deactivate") }}</button>
+              id="deactivate_inheritance">{{ _("Deactivate") }}</button>
     {% else %}
       <i class="fa fa-ban"></i>{{ _("Deactivated") }}
       <button class="btn btn-default" id="activate_inheritance">{{ _("Activate") }}</button>
@@ -246,47 +246,47 @@
 {% endblock %}
 
 {% block js %}
-  <script type="text/javascript">
-require(
-    ['Abilian', 'jquery'],
-    function(Abilian, $) {
+  <script>
+    require(
+        ['Abilian', 'jquery'],
+        function (Abilian, $) {
 
-    Abilian.fn.onAppInit(function() {
-      $("#deactivate_inheritance").click(function() {
-        var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="deactivate_inheritance" /></form>');
-        form.attr("method", "post");
-        form.attr("action", "{{ request.path }}");
-        $(document.body).append(form);
-        form.submit();
-      });
+          Abilian.fn.onAppInit(function () {
+            $("#deactivate_inheritance").click(function () {
+              var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="deactivate_inheritance" /></form>');
+              form.attr("method", "post");
+              form.attr("action", "{{ request.path }}");
+              $(document.body).append(form);
+              form.submit();
+            });
 
-      $("#activate_inheritance").click(function() {
-        var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="activate_inheritance" /></form>');
-        form.attr("method", "post");
-        form.attr("action", "{{ request.path }}");
-        $(document.body).append(form);
-        form.submit();
-      });
+            $("#activate_inheritance").click(function () {
+              var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="activate_inheritance" /></form>');
+              form.attr("method", "post");
+              form.attr("action", "{{ request.path }}");
+              $(document.body).append(form);
+              form.submit();
+            });
 
-      $("#user-select").attr("style", "width: 220px").select2({
-        minimumInputLength: 2,
-        ajax:               {
-          url:         "{{ url_for("social.users_json") }}",
-          dataType:    'json',
-          quietMillis: 100,
-          data:        function(term, page) {
-            return { q: term };
-          },
-          results:     function(data, page) {
-            return {results: data.results, more: false};
-          }
-        },
-        allowClear:         true
-      });
-      $("#s2id_user-select a span").text("");
-      $("input#user-select").attr("value", "");
+            $("#user-select").attr("style", "width: 220px").select2({
+              minimumInputLength: 2,
+              ajax: {
+                url: "{{ url_for("social.users_json") }}",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (term, page) {
+                  return {q: term};
+                },
+                results: function (data, page) {
+                  return {results: data.results, more: false};
+                }
+              },
+              allowClear: true
+            });
+            $("#s2id_user-select a span").text("");
+            $("input#user-select").attr("value", "");
 
-    });
-});
+          });
+        });
   </script>
 {% endblock %}

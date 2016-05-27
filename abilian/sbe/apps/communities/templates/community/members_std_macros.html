@@ -10,8 +10,8 @@
     <th class="hide">First Name</th>
     <th>{{ _('Name') }}</th>
     <th class="hide">{# last activity seconds since epoch #}</th>
-    <th>{{ _('Last activity in this community') }}</th>
-    <th>{{ _('Role') }}</th>
+    <th width="20%">{{ _('Last activity in this community') }}</th>
+    <th width="10%">{{ _('Role') }}</th>
     {% if is_manager %}
       <th>{{ _('Action') }}</th>
     {% endif %}
@@ -20,20 +20,20 @@
 
 {% macro std_table_config() %}
   {
-    "aoColumns": [
-        { "bVisible": false },
-        { "bVisible": false },
-        { "aDataSort": [0, 1], "asSorting": [ "asc", "desc" ] },
-        { "bVisible": false },
-        { "aDataSort": [3], "asSorting": [ "asc", "desc" ] },
-        { "asSorting": [ "asc", "desc" ]}
-      {%- if is_manager %}
-        , { }
-      {% endif %}
-    ],
-    "sPaginationType": "bootstrap",
-    "bFilter":         true,
-    "bLengthChange":   false
+  "aoColumns": [
+  { "bVisible": false },
+  { "bVisible": false },
+  { "aDataSort": [0, 1], "asSorting": [ "asc", "desc" ] },
+  { "bVisible": false },
+  { "aDataSort": [3], "asSorting": [ "asc", "desc" ] },
+  { "asSorting": [ "asc", "desc" ]}
+  {%- if is_manager %}
+    , { }
+  {% endif %}
+  ],
+  "sPaginationType": "bootstrap",
+  "bFilter":         true,
+  "bLengthChange":   false
   }
 {% endmacro %}
 
@@ -54,7 +54,7 @@
           <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i><s>
         {%- endif %}
         {{ m_user_link(user) }}
-        <br />
+        <br/>
         (<i>{{ user.email }}</i>)
         {%- if not user.can_login %}</s>{%- endif %}
       </div>
@@ -69,10 +69,11 @@
       <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
             method="POST" style="display: inline;">
         {{ csrf_token }}
-        <input type="hidden" name="user" value="{{ user.id }}" />
-        <input type="hidden" name="action" value="set-user-role" />
+        <input type="hidden" name="user" value="{{ user.id }}"/>
+        <input type="hidden" name="action" value="set-user-role"/>
         <select onchange="this.form.submit();" id="role-select" name="role" class="form-control" style="width: auto;">
-          <option value="member" default="default" {%- if role == 'member' %} selected="selected"{%- endif %}>{{ _("Member") }}</option>
+          <option value="member" default="default" {%- if role == 'member' %}
+                  selected="selected"{%- endif %}>{{ _("Member") }}</option>
           <option value="manager" {%- if role == 'manager' %}selected="selected"{%- endif %}>{{ _("Manager") }}</option>
         </select>
       </form>
@@ -85,7 +86,7 @@
         <input type="hidden" name="user" value="{{ user.id }}">
         <button type="submit" name="action" value="delete"
                 class="btn btn-danger" data-original-title="" title=""><i
-                                                                           class="fa fa-times"></i></button>
+            class="fa fa-times"></i></button>
       </form>
     </td>
   {% endif %}

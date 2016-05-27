@@ -1,41 +1,43 @@
 {% extends "social/base.html" %}
 
 {% macro m_user_list(users, form_action, form_action_label) %}
-   {%- if users %}
-     {%- if is_admin %}
-     <form action="{{ url_for('.group_post', group_id=group.id) }}" method="POST">
-       {{ csrf_token }}
-       <input type="hidden" name="action" value="{{ form_action }}" />
-     {%- endif %}
-       <table class="table table-striped table-condensed">
-         <tbody>
-           {%- for user in users %}
-             <tr>
-               <td>
-                 <a href="{{ url_for(user) }}">
-                   <img src="{{ user_photo_url(user, size=16) }}" alt="{{ user.name }}" title="{{ user.name }}" style="margin-bottom: 4px;" />
-                   {{ user.name }}
-                 </a>
-               </td>
-               <td>{{ user.email }}</td>
-               {%- if is_admin %}
-               <td>
-                 <button class="btn btn-danger" name="user" value="{{ user.id }}" title="{{ form_action_label }}"><i class="fa fa-ban"></i></button>
-               </td>
-               {%- endif %}
-             </tr>
-           {%- endfor %}
-         </tbody>
-       </table>
-     {%- if is_admin %}
-     </form>
-     {%- endif %}
-   {%- endif %}
+  {%- if users %}
+    {%- if is_admin %}
+      <form action="{{ url_for('.group_post', group_id=group.id) }}" method="POST">
+      {{ csrf_token }}
+      <input type="hidden" name="action" value="{{ form_action }}"/>
+    {%- endif %}
+  <table class="table table-striped table-condensed">
+    <tbody>
+    {%- for user in users %}
+      <tr>
+        <td>
+          <a href="{{ url_for(user) }}">
+            <img src="{{ user_photo_url(user, size=16) }}" alt="{{ user.name }}" title="{{ user.name }}"
+                 style="margin-bottom: 4px;"/>
+            {{ user.name }}
+          </a>
+        </td>
+        <td>{{ user.email }}</td>
+        {%- if is_admin %}
+          <td>
+            <button class="btn btn-danger" name="user" value="{{ user.id }}" title="{{ form_action_label }}"><i
+                class="fa fa-ban"></i></button>
+          </td>
+        {%- endif %}
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+  {%- if is_admin %}
+    </form>
+  {%- endif %}
+  {%- endif %}
 {% endmacro %}
 
 {% block content %}
   <div class="header">
-    <img src="{{ url_for(".group_mugshot", group_id=group.id, s=140) }}" class="avatar avatar-140" alt="" />
+    <img src="{{ url_for(".group_mugshot", group_id=group.id, s=140) }}" class="avatar avatar-140" alt=""/>
 
     <div class="info">
       <h2 class="title">{{ group.name }}</h2>
@@ -52,7 +54,7 @@
       </form>
       #}
     </div>
-         
+
     <ul class="nav nav-tabs clear">
       {%- for tab in tabs %}
         {%- if tab.id == active_tab_id %}
@@ -72,11 +74,11 @@
   #}
   <h3>{{ _("Group admins") }}</h3>
   {%- if is_admin %}
-  <form action="{{ url_for('.group_post', group_id=group.id) }}" method="POST">
-    {{ csrf_token }}
-    <input type="text" id="admin-select" name="user" />
-    <button type="submit" class="btn" name="action" value="add-admin"><i class="fa fa-plus"></i></button>
-  </form>
+    <form action="{{ url_for('.group_post', group_id=group.id) }}" method="POST">
+      {{ csrf_token }}
+      <input type="text" id="admin-select" name="user"/>
+      <button type="submit" class="btn" name="action" value="add-admin"><i class="fa fa-plus"></i></button>
+    </form>
   {%- endif %}
 
   {{ m_user_list(group.admins, 'remove-admin', _('remove from administrators')) }}
@@ -84,55 +86,55 @@
   <h3>{{ _("Group members") }}</h3>
 
   {%- if is_admin %}
-  <form action="{{ url_for('.group_post', group_id=group.id) }}" method="POST">
-    {{ csrf_token }}
-    <input type="text" id="user-select" name="user" />
-    <button type="submit" class="btn" name="action" value="add"><i class="fa fa-plus"></i></button>
-  </form>
+    <form action="{{ url_for('.group_post', group_id=group.id) }}" method="POST">
+      {{ csrf_token }}
+      <input type="text" id="user-select" name="user"/>
+      <button type="submit" class="btn" name="action" value="add"><i class="fa fa-plus"></i></button>
+    </form>
   {%- endif %}
   {{ m_user_list(group.members, 'remove', _('remove from group')) }}
 
 {% endblock %}
 
 {% block js %}
-<script type="text/javascript">
-  $(document).ready(function() {
-    $("#user-select").attr("style", "width: 220px").select2({
-      minimumInputLength: 2,
-      ajax: {
-        url: "{{ url_for("social.users_json") }}",
-        dataType: 'json',
-        quietMillis: 100,
-        data: function (term, page) {
-          return { q: term };
+  <script>
+    $(document).ready(function () {
+      $("#user-select").attr("style", "width: 220px").select2({
+        minimumInputLength: 2,
+        ajax: {
+          url: "{{ url_for("social.users_json") }}",
+          dataType: 'json',
+          quietMillis: 100,
+          data: function (term, page) {
+            return {q: term};
+          },
+          results: function (data, page) {
+            return {results: data.results, more: false};
+          }
         },
-        results: function (data, page) {
-          return {results: data.results, more: false};
-        }
-      },
-      allowClear: true
-    });
-    $("#s2id_user-select a span").text("");
-    $("input#user-select").attr("value", "");
+        allowClear: true
+      });
+      $("#s2id_user-select a span").text("");
+      $("input#user-select").attr("value", "");
 
-    $("#admin-select").attr("style", "width: 220px").select2({
-      minimumInputLength: 2,
-      ajax: {
-        url: "{{ url_for(".group_json", group_id=group.id) }}",
-        dataType: 'json',
-        quietMillis: 100,
-        data: function (term, page) {
-          return { q: term };
+      $("#admin-select").attr("style", "width: 220px").select2({
+        minimumInputLength: 2,
+        ajax: {
+          url: "{{ url_for(".group_json", group_id=group.id) }}",
+          dataType: 'json',
+          quietMillis: 100,
+          data: function (term, page) {
+            return {q: term};
+          },
+          results: function (data, page) {
+            return {results: data.results, more: false};
+          }
         },
-        results: function (data, page) {
-          return {results: data.results, more: false};
-        }
-      },
-      allowClear: true
-    });
-    $("#s2id_admin-select a span").text("");
-    $("input#admin-select").attr("value", "");
+        allowClear: true
+      });
+      $("#s2id_admin-select a span").text("");
+      $("input#admin-select").attr("value", "");
 
-  });
-</script>
+    });
+  </script>
 {% endblock %}
