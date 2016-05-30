@@ -195,7 +195,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             response = self.get(url_for('documents.index',
                                         community_id=self.community.slug))
             self.assert_status(response, 302)
-            self.assertEquals(response.headers['Location'],
+            self.assertEqual(response.headers['Location'],
                               u'http://localhost/communities/{}/docs/folder/{}'
                               u''.format(self.community.slug, self.folder.id),)
 
@@ -419,11 +419,11 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 rv = self.client.post(url,
                                       data={'recipient': 'dest@example.com',
                                             'message': u'Voilà un fichier'})
-                self.assertEquals(rv.status_code, 302,
+                self.assertEqual(rv.status_code, 302,
                                   "expected 302, got:" + rv.status)
                 assert len(outbox) == 1
                 msg = outbox[0]
-                self.assertEquals(msg.subject,
+                self.assertEqual(msg.subject,
                                   u'[Abilian Test] Unknown sent you a file')
                 assert msg.recipients == [u'dest@example.com']
                 expected_disposition = attachment('ascii title.txt')
@@ -439,9 +439,9 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 assert rv.status_code == 302
                 assert len(outbox) == 1
                 msg = outbox[0]
-                self.assertEquals(msg.subject,
+                self.assertEqual(msg.subject,
                                   u'[Abilian Test] Unknown sent you a file')
-                self.assertEquals(msg.recipients, [u'dest@example.com'])
+                self.assertEqual(msg.recipients, [u'dest@example.com'])
                 expected_disposition = attachment_utf8(
                     'utf-8%20est%20arriv%C3%A9%21.txt')
                 msg = str(msg)
@@ -470,4 +470,4 @@ class TestPathIndexable(unittest.TestCase):
                 for o in self.obj._iter_to_root(skip_self=True)] == [2, 1, 0]
 
     def test_indexable_parent_ids(self):
-        self.assertEquals(self.obj._indexable_parent_ids, u'/0/1/2')
+        self.assertEqual(self.obj._indexable_parent_ids, u'/0/1/2')

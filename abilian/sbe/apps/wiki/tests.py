@@ -61,36 +61,36 @@ class TestModels(WikiBaseTestCase):
 
     def test_create_page(self):
         page = WikiPage(title=u"Some page", body_src=u'abc')
-        self.assertEquals(page.title, u'Some page')
-        self.assertEquals(page.name, u'Some page')
-        self.assertEquals(page.body_src, 'abc')
-        self.assertEquals(page.body_html, '<p>abc</p>')
-        self.assertEquals(len(page.revisions), 1)
+        self.assertEqual(page.title, u'Some page')
+        self.assertEqual(page.name, u'Some page')
+        self.assertEqual(page.body_src, 'abc')
+        self.assertEqual(page.body_html, '<p>abc</p>')
+        self.assertEqual(len(page.revisions), 1)
 
         revision = page.revisions[0]
-        self.assertEquals(revision.number, 0)
-        self.assertEquals(revision.author, g.user)
+        self.assertEqual(revision.number, 0)
+        self.assertEqual(revision.author, g.user)
 
     def test_rename_page(self):
         page = WikiPage(title=u"Some page", body_src=u'abc')
-        self.assertEquals(page.title, u'Some page')
-        self.assertEquals(page.name, u'Some page')
+        self.assertEqual(page.title, u'Some page')
+        self.assertEqual(page.name, u'Some page')
         page.title = u'Title Renamed'
-        self.assertEquals(page.title, u'Title Renamed')
-        self.assertEquals(page.name, u'Title Renamed')
+        self.assertEqual(page.title, u'Title Renamed')
+        self.assertEqual(page.name, u'Title Renamed')
 
         page.name = u'Name'
-        self.assertEquals(page.title, u'Name')
-        self.assertEquals(page.name, u'Name')
+        self.assertEqual(page.title, u'Name')
+        self.assertEqual(page.name, u'Name')
 
     def test_create_revision(self):
         page = WikiPage('abc')
         page.create_revision("def", "page updated")
 
-        self.assertEquals(len(page.revisions), 2)
+        self.assertEqual(len(page.revisions), 2)
         last_revision = page.revisions[1]
-        self.assertEquals(last_revision.number, 1)
-        self.assertEquals(last_revision.author, g.user)
+        self.assertEqual(last_revision.number, 1)
+        self.assertEqual(last_revision.author, g.user)
 
 
 class TestIndexing(CommunityIndexingTestCase):
@@ -110,19 +110,19 @@ class TestIndexing(CommunityIndexingTestCase):
         obj_types = (WikiPage.entity_type,)
         with self.login(self.user_no_community):
             res = svc.search(u'community', object_types=obj_types)
-            self.assertEquals(len(res), 0)
+            self.assertEqual(len(res), 0)
 
         with self.login(self.user):
             res = svc.search(u'community', object_types=obj_types)
-            self.assertEquals(len(res), 1)
+            self.assertEqual(len(res), 1)
             hit = res[0]
-            self.assertEquals(hit['object_key'], page.object_key)
+            self.assertEqual(hit['object_key'], page.object_key)
 
         with self.login(self.user_c2):
             res = svc.search(u'community', object_types=obj_types)
-            self.assertEquals(len(res), 1)
+            self.assertEqual(len(res), 1)
             hit = res[0]
-            self.assertEquals(hit['object_key'], page_other.object_key)
+            self.assertEqual(hit['object_key'], page_other.object_key)
 
 
 class TestsViews(WikiBaseTestCase):

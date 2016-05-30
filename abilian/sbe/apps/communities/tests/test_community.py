@@ -247,7 +247,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
                     'type': 'participative',}
             response = self.client.post(url, data=data)
             assert response.status_code == 302
-            self.assertEquals(
+            self.assertEqual(
                 response.headers['Location'],
                 u'http://localhost/communities/{}/'.format(self.community.slug))
 
@@ -310,7 +310,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             }
             response = self.client.post(url, data=data)
             assert response.status_code == 302
-            self.assertEquals(response.headers['Location'],
+            self.assertEqual(response.headers['Location'],
                               u'http://localhost/communities/{}/members'.format(
                                   self.community.slug))
 

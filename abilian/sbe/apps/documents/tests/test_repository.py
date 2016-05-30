@@ -29,8 +29,8 @@ class TestService(BaseTestCase):
         root = self.root
         folder = root.create_subfolder(u"folder")
         db.session.flush()
-        self.assertEquals(folder.title, u'folder')
-        self.assertEquals(folder.name, u'folder')
+        self.assertEqual(folder.title, u'folder')
+        self.assertEqual(folder.name, u'folder')
         assert folder.path == "/folder"
         assert len(root.children) == 1
         assert len(folder.children) == 0
@@ -58,8 +58,8 @@ class TestService(BaseTestCase):
 
         assert len(root.children) == 2
         assert len(folder.children) == 1
-        self.assertEquals(doc_copy.title, "copydoc")
-        self.assertEquals(doc_copy.name, "copydoc")
+        self.assertEqual(doc_copy.title, "copydoc")
+        self.assertEqual(doc_copy.name, "copydoc")
         assert doc_copy.path == "/folder/copydoc"
         assert doc_copy in folder.children
 
@@ -98,13 +98,13 @@ class TestService(BaseTestCase):
         doc = folder.create_document(u"doc")
 
         self.repository.rename_object(doc, u"doc1")
-        self.assertEquals(doc.title, 'doc1')
-        self.assertEquals(doc.name, 'doc1')
+        self.assertEqual(doc.title, 'doc1')
+        self.assertEqual(doc.name, 'doc1')
         assert doc.path == '/folder/doc1'
 
         self.repository.rename_object(folder, u"folder1")
-        self.assertEquals(folder.title, 'folder1')
-        self.assertEquals(folder.name, 'folder1')
+        self.assertEqual(folder.title, 'folder1')
+        self.assertEqual(folder.name, 'folder1')
         assert folder.path == '/folder1'
         assert doc.path == '/folder1/doc1'
 
