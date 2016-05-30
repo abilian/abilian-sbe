@@ -133,11 +133,11 @@ def convert_document_content(document_id):
             logger.warning(u"Metadata extraction failed on document %s: %s",
                            doc.name, e, **error_kwargs)
         except UnicodeDecodeError as e:
-            logger.error(u"Unicode issue on document %s: %s", doc.name, e, **
-                         error_kwargs)
+            logger.error(u"Unicode issue on document %s: %s", doc.name, e,
+                         **error_kwargs)
         except Exception as e:
-            logger.error(u"Other issue on document %s: %s", doc.name, e, **
-                         error_kwargs)
+            logger.error(u"Other issue on document %s: %s", doc.name, e,
+                         **error_kwargs)
 
         if doc.text:
             import langid

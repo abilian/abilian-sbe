@@ -5,12 +5,12 @@ from __future__ import absolute_import
 
 from datetime import datetime, timedelta
 from email.parser import FeedParser
+from pathlib import Path
 from unittest import TestCase
 
 import pytest
 from flask import url_for
 from mock import Mock, patch
-from pathlib import Path
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER

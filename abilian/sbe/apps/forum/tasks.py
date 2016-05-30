@@ -9,6 +9,7 @@ import hashlib
 import mailbox
 import re
 from os.path import expanduser
+from pathlib import Path
 
 import bleach
 import chardet
@@ -19,7 +20,6 @@ from flask import current_app, g
 from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
-from pathlib import Path
 
 from abilian.core.celery import periodic_task
 from abilian.core.extensions import db, mail

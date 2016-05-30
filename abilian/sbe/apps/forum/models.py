@@ -9,7 +9,8 @@ from __future__ import absolute_import
 
 from itertools import chain
 
-from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText, event
+from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
+from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 
@@ -93,7 +94,7 @@ class Thread(Entity):
         return post
 
 
-@event.listens_for(Thread.name, "set", active_history=True)
+@listens_for(Thread.name, "set", active_history=True)
 def _thread_sync_name_title(entity, new_value, old_value, initiator):
     """Synchronize thread name -> title.
 
@@ -158,7 +159,7 @@ class ThreadIndexAdapter(SAAdapter):
 
 
 # event listener to sync name with thread's name
-@event.listens_for(Thread.name, "set", active_history=True)
+@listens_for(Thread.name, "set", active_history=True)
 def _thread_sync_name(thread, new_value, old_value, initiator):
     """Synchronize name with thread's name.
     """
@@ -170,7 +171,7 @@ def _thread_sync_name(thread, new_value, old_value, initiator):
     return new_value
 
 
-@event.listens_for(Post.thread, "set", active_history=True)
+@listens_for(Post.thread, "set", active_history=True)
 def _thread_change_sync_name(post, new_thread, old_thread, initiator):
     """Change name on thread change.
     """
@@ -180,9 +181,9 @@ def _thread_change_sync_name(post, new_thread, old_thread, initiator):
     return new_thread
 
 
-@event.listens_for(Thread.posts, 'append')
-@event.listens_for(Thread.posts, 'remove')
-@event.listens_for(Thread.posts, 'set')
+@listens_for(Thread.posts, 'append')
+@listens_for(Thread.posts, 'remove')
+@listens_for(Thread.posts, 'set')
 def _guard_closed_thread_collection(thread, value, *args):
     """Prevent add/remove/replace posts on a closed thread.
     """

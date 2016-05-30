@@ -9,6 +9,7 @@ import logging
 from datetime import datetime
 from functools import wraps
 from operator import attrgetter
+from pathlib import Path
 from time import gmtime, strftime
 
 import openpyxl
@@ -18,7 +19,6 @@ from flask import (current_app, flash, g, jsonify, redirect, render_template,
                    request, session, url_for)
 from flask_login import current_user, login_required
 from openpyxl.writer.write_only import WriteOnlyCell
-from pathlib import Path
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from whoosh.searching import Hit
 

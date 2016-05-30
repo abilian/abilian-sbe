@@ -11,11 +11,11 @@ import logging
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import jinja2
 from flask import current_app
 from flask_script import Command, Manager
-from pathlib import Path
 from werkzeug.serving import BaseWSGIServer
 
 from abilian.app import Application as BaseApplication

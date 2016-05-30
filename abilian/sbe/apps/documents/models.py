@@ -19,7 +19,7 @@ import sqlalchemy as sa
 import whoosh.fields as wf
 from flask import current_app, g, json, url_for
 from flask_login import current_user
-from sqlalchemy import event
+from sqlalchemy.event import listen, listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, foreign, relationship, remote
 from sqlalchemy.orm.session import Session
@@ -170,7 +170,7 @@ class CmisObject(Entity, InheritSecurity):
         return self.parent and self.parent.community
 
 
-@event.listens_for(CmisObject.name, "set", propagate=True, active_history=True)
+@listens_for(CmisObject.name, "set", propagate=True, active_history=True)
 def _cmis_sync_name_title(entity, new_value, old_value, initiator):
     """Synchronize CmisObject name -> title.
 
@@ -209,7 +209,7 @@ class PathAndSecurityIndexable(object):
     @property
     def _indexable_roles_and_users(self):
         """
-        returns a string made of type:id elements, like "user:2 group:1 user:6"
+        Returns a string made of type:id elements, like "user:2 group:1 user:6"
         """
         iter_from_root = reversed(list(self._iter_to_root()))
         if self.parent:
@@ -774,5 +774,5 @@ def setup_listener():
     if getattr(_trigger_conversion_tasks, mark_attr, False):
         return
 
-    event.listen(Session, "after_commit", _trigger_conversion_tasks)
+    listen(Session, "after_commit", _trigger_conversion_tasks)
     setattr(_trigger_conversion_tasks, mark_attr, True)

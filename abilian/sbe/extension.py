@@ -5,9 +5,9 @@ from __future__ import absolute_import
 
 import logging
 import uuid
+from pathlib import Path
 
 import pkg_resources
-from pathlib import Path
 
 from abilian.core.util import fqcn
 

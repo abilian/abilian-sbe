@@ -11,8 +11,6 @@ from abilian.web.forms.fields import QuerySelect2Field
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import optional, required
 
-#from .widgets import UserPhotoInputWidget
-
 ModelForm = model_form_factory(Form)
 
 

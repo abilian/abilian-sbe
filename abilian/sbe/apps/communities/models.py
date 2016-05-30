@@ -12,7 +12,9 @@ import sqlalchemy as sa
 from blinker import ANY
 from flask import current_app
 from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
-                        Unicode, UniqueConstraint, and_, event)
+                        Unicode, UniqueConstraint, and_)
+from sqlalchemy.event import listens_for
+
 from sqlalchemy.orm import backref, relation, relationship
 from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE
 
@@ -358,8 +360,8 @@ def membership_removed(sender, membership):
         sender.group.members.discard(membership.user)
 
 
-@event.listens_for(Community.members, 'append')
-@event.listens_for(Community.members, 'remove')
+@listens_for(Community.members, 'append')
+@listens_for(Community.members, 'remove')
 def _on_member_change(community, user, initiator):
     group = community.group
     if not group:
@@ -382,7 +384,7 @@ def _on_member_change(community, user, initiator):
             group.members.discard(user)
 
 
-@event.listens_for(Community.group, 'set', active_history=True)
+@listens_for(Community.group, 'set', active_history=True)
 def _on_linked_group_change(community, value, oldvalue, initiator):
     if value == oldvalue:
         return
@@ -418,8 +420,8 @@ def _safe_get_community(group):
             return None
 
 
-@event.listens_for(Group.members, 'append')
-@event.listens_for(Group.members, 'remove')
+@listens_for(Group.members, 'append')
+@listens_for(Group.members, 'remove')
 def _on_group_member_change(group, user, initiator):
     community = _safe_get_community(group)
 
@@ -446,7 +448,7 @@ def _on_group_member_change(group, user, initiator):
         community.remove_membership(user)
 
 
-@event.listens_for(Group.members, 'set', active_history=True)
+@listens_for(Group.members, 'set', active_history=True)
 def _on_group_members_replace(group, value, oldvalue, initiator):
     if value == oldvalue:
         return

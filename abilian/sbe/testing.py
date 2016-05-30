@@ -13,8 +13,8 @@ class BaseTestCase(testing.BaseTestCase):
     config_class = TestConfig
 
     def get_setup_config(self):
-        """ Called before creating application class
-    """
+        """Called before creating application class.
+        """
         config = testing.BaseTestCase.get_setup_config(self)
         if hasattr(self, 'no_login'):
             config.NO_LOGIN = self.no_login

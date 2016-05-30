@@ -7,7 +7,8 @@ from datetime import datetime
 
 from flask import g
 from sqlalchemy import (Column, DateTime, ForeignKey, Integer, Unicode,
-                        UnicodeText, UniqueConstraint, event)
+                        UnicodeText, UniqueConstraint)
+from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 
@@ -89,7 +90,7 @@ class WikiPage(Entity):
         #return bleach.clean(html, strip=True)
 
 
-@event.listens_for(WikiPage.name, "set", active_history=True)
+@listens_for(WikiPage.name, "set", active_history=True)
 def _wiki_sync_name_title(entity, new_value, old_value, initiator):
     """
     Synchronize wikipage name -> title.
