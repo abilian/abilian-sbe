@@ -1,8 +1,5 @@
 # Abilian Core
-abilian-core
-
-# Buggy w/ Flask-Babel 0.10
-Flask-Babel<0.10
+abilian-core>=0.6.10
 
 # Email validation (when sending digests)
 validate_email
