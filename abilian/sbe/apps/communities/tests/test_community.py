@@ -206,6 +206,9 @@ class CommunityIndexingTestCase(BaseIndexingTestCase):
 
 class CommunityWebTestCase(BaseIndexingTestCase):
 
+    # FIXME later
+    SQLALCHEMY_WARNINGS_AS_ERROR = False
+
     def test_index(self):
         with self.client_login(self.user.email, 'azerty'):
             response = self.client.get(url_for("communities.index"))

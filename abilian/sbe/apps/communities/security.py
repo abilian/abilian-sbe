@@ -56,7 +56,7 @@ def check_access(community=None, user=None):
 def has_access(community=None, user=None):
     if not user:
         user = current_user
-    if user.is_anonymous():
+    if user.is_anonymous:
         return False
 
     security = current_app.services['security']
