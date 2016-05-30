@@ -6,7 +6,7 @@ from __future__ import absolute_import
 
 from flask import current_app as app
 from flask import request
-from flask.ext.login import current_user
+from flask_login import current_user
 from werkzeug.exceptions import MethodNotAllowed
 
 from abilian.core.extensions import csrf, db

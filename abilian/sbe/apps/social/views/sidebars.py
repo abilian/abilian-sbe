@@ -8,7 +8,7 @@ cacheable.
 from datetime import datetime, timedelta
 
 from flask import g
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community, Membership
