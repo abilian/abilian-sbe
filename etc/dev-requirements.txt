@@ -10,7 +10,7 @@ pytest-xdist
 mock>=1.0.1
 
 # Coverage
-coverage>=3.7.1,<4.0a1
+coverage>=4.1
 pytest-cov
 
 # Python clone of Foreman, useful to test Heroku config locally
