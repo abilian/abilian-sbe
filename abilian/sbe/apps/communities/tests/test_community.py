@@ -311,7 +311,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             response = self.client.post(url, data=data)
             assert response.status_code == 302
             self.assertEqual(response.headers['Location'],
-                              u'http://localhost/communities/{}/members'.format(
-                                  self.community.slug))
+                             u'http://localhost/communities/{}/members'.format(
+                                 self.community.slug))
 
             assert self.user_c2 not in community.members

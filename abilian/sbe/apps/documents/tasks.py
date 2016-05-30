@@ -104,8 +104,7 @@ def convert_document_content(document_id):
 
         error_kwargs = dict(exc_info=True, extra={'stack': True})
 
-        conversion_args = (doc.content_digest, doc.content,
-                           doc.content_type)
+        conversion_args = (doc.content_digest, doc.content, doc.content_type)
 
         if doc.content_type == "application/pdf":
             doc.pdf = doc.content
@@ -117,26 +116,28 @@ def convert_document_content(document_id):
             except ConversionError as e:
                 doc.pdf = ""
                 logger.info(u"Conversion to PDF failed for document: %s",
-                            doc.name, e,
-                            **error_kwargs)
+                            doc.name, e, **error_kwargs)
 
         try:
-            doc.text = converter.to_text(doc.content_digest,
-                                              doc.content,
-                                              doc.content_type)
+            doc.text = converter.to_text(doc.content_digest, doc.content,
+                                         doc.content_type)
         except ConversionError as e:
             doc.text = u""
-            logger.info(u"Conversion to text failed for document %s: %s", doc.name, e, **error_kwargs)
+            logger.info(u"Conversion to text failed for document %s: %s",
+                        doc.name, e, **error_kwargs)
 
         doc.extra_metadata = {}
         try:
             doc.extra_metadata = converter.get_metadata(*conversion_args)
         except ConversionError as e:
-            logger.warning(u"Metadata extraction failed on document %s: %s", doc.name, e, **error_kwargs)
+            logger.warning(u"Metadata extraction failed on document %s: %s",
+                           doc.name, e, **error_kwargs)
         except UnicodeDecodeError as e:
-            logger.error(u"Unicode issue on document %s: %s", doc.name, e, **error_kwargs)
+            logger.error(u"Unicode issue on document %s: %s", doc.name, e, **
+                         error_kwargs)
         except Exception as e:
-            logger.error(u"Other issue on document %s: %s", doc.name, e, **error_kwargs)
+            logger.error(u"Other issue on document %s: %s", doc.name, e, **
+                         error_kwargs)
 
         if doc.text:
             import langid

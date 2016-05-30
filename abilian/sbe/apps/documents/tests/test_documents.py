@@ -196,8 +196,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                                         community_id=self.community.slug))
             self.assert_status(response, 302)
             self.assertEqual(response.headers['Location'],
-                              u'http://localhost/communities/{}/docs/folder/{}'
-                              u''.format(self.community.slug, self.folder.id),)
+                             u'http://localhost/communities/{}/docs/folder/{}'
+                             u''.format(self.community.slug, self.folder.id),)
 
     def _test_upload(self,
                      title,
@@ -420,11 +420,11 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                                       data={'recipient': 'dest@example.com',
                                             'message': u'Voilà un fichier'})
                 self.assertEqual(rv.status_code, 302,
-                                  "expected 302, got:" + rv.status)
+                                 "expected 302, got:" + rv.status)
                 assert len(outbox) == 1
                 msg = outbox[0]
                 self.assertEqual(msg.subject,
-                                  u'[Abilian Test] Unknown sent you a file')
+                                 u'[Abilian Test] Unknown sent you a file')
                 assert msg.recipients == [u'dest@example.com']
                 expected_disposition = attachment('ascii title.txt')
                 msg = str(msg)
@@ -440,7 +440,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 assert len(outbox) == 1
                 msg = outbox[0]
                 self.assertEqual(msg.subject,
-                                  u'[Abilian Test] Unknown sent you a file')
+                                 u'[Abilian Test] Unknown sent you a file')
                 self.assertEqual(msg.recipients, [u'dest@example.com'])
                 expected_disposition = attachment_utf8(
                     'utf-8%20est%20arriv%C3%A9%21.txt')

@@ -3,9 +3,9 @@
 """
 from __future__ import absolute_import, unicode_literals
 
+from datetime import datetime
 from unittest import TestCase
 
-from datetime import datetime
 from flask import url_for
 
 from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
