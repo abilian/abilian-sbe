@@ -14,7 +14,8 @@ from .social import social
 
 
 class Invite(db.Model):
-    """Tracks a pending invitation to join the community."""
+    """Tracks a pending invitation to join the community.
+    """
 
     __tablename__ = 'invitation'
 

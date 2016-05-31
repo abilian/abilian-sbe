@@ -90,9 +90,13 @@ lint-js:
 lint-python:
 	@echo "--> Linting Python files"
 	@make flake8
-
+	@make mypy
+    
 flake8:
 	flake8 --max-complexity=8 --config=setup.cfg abilian
+
+mypy:
+	mypy --py2 --silent-imports abilian
 
 format:
 	isort -rc abilian

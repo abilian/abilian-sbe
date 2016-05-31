@@ -12,7 +12,7 @@ from flask_login import current_user
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community, Membership
-from abilian.sbe.apps.social.views.social import social
+from .social import social
 
 
 class Sidebars(object):

@@ -48,9 +48,9 @@ def share():
     message = Message(**d)
     db.session.add(message)
 
-    #tags = message.tags
-    #values = [ {'tag': tag, 'message_id': message.id} for tag in tags ]
-    #db.engine.execute(tagging.insert(), values)
+    # tags = message.tags
+    # values = [ {'tag': tag, 'message_id': message.id} for tag in tags ]
+    # db.engine.execute(tagging.insert(), values)
 
     db.session.commit()
     return redirect(url_for(".home"))

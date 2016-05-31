@@ -37,8 +37,7 @@ class Lock(object):
         return Lock(current_user.id, unicode(current_user), utcnow())
 
     def as_dict(self):
-        """
-        return a dict suitable for serialization to JSON
+        """Return a dict suitable for serialization to JSON.
         """
         return dict(user_id=self.user_id,
                     user=self.user,
@@ -46,8 +45,7 @@ class Lock(object):
 
     @staticmethod
     def from_dict(d):
-        """
-        Deserialize from a `dict` created by :meth:`as_dict`.
+        """Deserialize from a `dict` created by :meth:`as_dict`.
         """
         return Lock(**d)
 

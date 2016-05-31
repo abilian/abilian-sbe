@@ -185,7 +185,7 @@ def groups_json():
         raise InternalServerError()
 
     query = Group.query
-    #query = query.filter(func.lower(Group.name).like(q + "%"))
+    # query = query.filter(func.lower(Group.name).like(q + "%"))
     query = query.order_by(func.lower(Group.name))
     all = query.all()
 

@@ -15,7 +15,8 @@ manager = Manager(description='SBE documents actions',
 
 @manager.command
 def antivirus():
-    """Schedule documents to antivirus scan."""
+    """Schedule documents to antivirus scan.
+    """
 
     documents = Document.query \
         .filter(Document.content_blob != None) \
