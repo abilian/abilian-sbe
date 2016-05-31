@@ -1,5 +1,5 @@
 # Abilian Core
-abilian-core>=0.6.10
+abilian-core>=0.6.10.2
 
 # Email validation (when sending digests)
 validate_email
