@@ -1,1 +1,1 @@
--e git+https://github.com/abilian/abilian-core.git@master#egg=Abilian-Core
+-e git+git://github.com/abilian/abilian-core.git@master#egg=Abilian-Core
