@@ -1,0 +1,19 @@
+machine:
+  services:
+    - postgresql
+  environment:
+    POSTGRES_URI: postgres://ubuntu:@localhost/circle_test
+
+dependencies:
+  cache_directories:
+     - "~/.cache/"
+  override:
+    - pip install pip==8.1.1
+    - pip install -U tox
+    - npm install -g less
+    - pip install -r etc/dev-requirements.txt
+
+test:
+  override:
+    - tox
+ 
