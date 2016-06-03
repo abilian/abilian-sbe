@@ -27,7 +27,7 @@ blueprint.record_once(register_actions)
 def init_document_values(endpoint, values):
     g.current_tab = 'documents'
 
-    g.breadcrumb.append(
-        BreadcrumbItem(label=_l(u'Documents'),
-                       url=Endpoint('documents.index',
-                                    community_id=g.community.slug)))
+    g.breadcrumb.append(BreadcrumbItem(label=_l(u'Documents'),
+                                       url=Endpoint(
+                                           'documents.index',
+                                           community_id=g.community.slug)))

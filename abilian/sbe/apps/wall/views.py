@@ -106,8 +106,8 @@ def get_attachments_from_forum(community):
 # FIXME: significant performance issues here, needs major refactoring
 def get_attachments_from_dms(community):
     svc = current_app.services['indexing']
-    filters = wq.And([wq.Term('community_id', community.id), wq.Term(
-        'object_type', Document.entity_type)])
+    filters = wq.And([wq.Term('community_id', community.id),
+                      wq.Term('object_type', Document.entity_type)])
     sortedby = whoosh.sorting.FieldFacet('created_at', reverse=True)
     documents = svc.search(u'', filter=filters, sortedby=sortedby, limit=50)
 

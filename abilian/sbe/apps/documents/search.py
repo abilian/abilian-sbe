@@ -13,8 +13,7 @@ from .models import CmisObject
 
 
 def reindex_tree(obj):
-    """
-    Schedule reindexing `obj` and all of its descendants.
+    """Schedule reindexing `obj` and all of its descendants.
 
     Generally needed to update indexed security.
     """

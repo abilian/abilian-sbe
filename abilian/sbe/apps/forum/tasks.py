@@ -104,8 +104,8 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
     successfully_sent = []
     thread = post.thread
     community = thread.community
-    user_filter = (User.id.in_(members_id) if len(members_id) > 1 else
-                   User.id == members_id[0])
+    user_filter = (User.id.in_(members_id)
+                   if len(members_id) > 1 else User.id == members_id[0])
     users = User.query.filter(user_filter).all()
 
     for user in users:
@@ -124,9 +124,8 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
         if failed == failed_ids:
             # 5 minutes * (2** retry count)
             countdown = 300 * 2**batch_send_post_to_users.request.retries
-            batch_send_post_to_users.retry(
-                [post_id, list(failed)],
-                countdown=countdown)
+            batch_send_post_to_users.retry([post_id, list(failed)],
+                                           countdown=countdown)
         else:
             batch_send_post_to_users.apply_async([post_id, list(failed)])
 

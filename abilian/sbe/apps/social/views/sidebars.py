@@ -12,6 +12,7 @@ from flask_login import current_user
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community, Membership
+
 from .social import social
 
 

@@ -186,10 +186,9 @@ class PathAndSecurityIndexable(object):
     """
     Mixin for folder and documents indexation.
     """
-    __indexation_args__ = dict(index_to=(('_indexable_parent_ids',
-                                          ('parent_ids',)),
-                                         ('_indexable_roles_and_users',
-                                          ('allowed_roles_and_users',)),),)
+    __indexation_args__ = dict(index_to=(
+        ('_indexable_parent_ids', ('parent_ids',)),
+        ('_indexable_roles_and_users', ('allowed_roles_and_users',)),),)
 
     def _iter_to_root(self, skip_self=False):
         obj = self if not skip_self else self.parent
@@ -335,15 +334,17 @@ class Folder(CmisObject, PathAndSecurityIndexable):
     #
     @property
     def filtered_children(self):
-        return security.filter_with_permission(
-            g.user, "read", self.children,
-            inherit=True)
+        return security.filter_with_permission(g.user,
+                                               "read",
+                                               self.children,
+                                               inherit=True)
 
     @property
     def filtered_subfolders(self):
-        return security.filter_with_permission(
-            g.user, "read", self.subfolders,
-            inherit=True)
+        return security.filter_with_permission(g.user,
+                                               "read",
+                                               self.subfolders,
+                                               inherit=True)
 
     def get_local_roles_assignments(self):
         local_roles_assignments = security.get_role_assignements(self)
@@ -357,8 +358,8 @@ class Folder(CmisObject, PathAndSecurityIndexable):
             return []
 
         roles = self.parent.get_local_roles_assignments()
-        inherited_roles = (self.parent.get_inherited_roles_assignments() if
-                           self.parent.inherit_security else [])
+        inherited_roles = (self.parent.get_inherited_roles_assignments()
+                           if self.parent.inherit_security else [])
 
         assignments = set(itertools.chain(roles, inherited_roles))
 
@@ -378,8 +379,8 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
     def members(self):
         local_roles = self.get_local_roles_assignments()
-        inherited_roles = (self.get_inherited_roles_assignments() if
-                           self.inherit_security else [])
+        inherited_roles = (self.get_inherited_roles_assignments()
+                           if self.inherit_security else [])
 
         def _iter_users(roles):
             for principal, user in roles:
@@ -416,15 +417,15 @@ class BaseContent(CmisObject):
         nullable=False,
         server_default=sa.text('0'),
         info=dict(searchable=True,
-                  index_to=(('content_length', wf.NUMERIC(stored=True)),),))
+                  index_to=(('content_length', wf.NUMERIC(stored=True)),)))
 
     #: MIME type of the content stream.
     # TODO: normalize mime type?
-    content_type = Column(
-        Text,
-        default="application/octet-stream",
-        info=dict(searchable=True,
-                  index_to=(('content_type', wf.ID(stored=True)),)),)
+    content_type = Column(Text,
+                          default="application/octet-stream",
+                          info=dict(searchable=True,
+                                    index_to=(
+                                        ('content_type', wf.ID(stored=True)),)))
 
     @property
     def content(self):
@@ -492,7 +493,8 @@ class BaseContent(CmisObject):
 
 
 class Document(BaseContent, PathAndSecurityIndexable):
-    """A document, in the CMIS sense."""
+    """A document, in the CMIS sense.
+    """
     __tablename__ = None  # type: str
 
     __indexable__ = True
@@ -639,8 +641,8 @@ class Document(BaseContent, PathAndSecurityIndexable):
     # `text` is an Unicode value.
     @property
     def text(self):
-        return (self.text_blob.value.decode("utf8") if
-                self.text_blob is not None else u'')
+        return (self.text_blob.value.decode("utf8")
+                if self.text_blob is not None else u'')
 
     @text.setter
     def text(self, value):

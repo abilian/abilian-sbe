@@ -12,6 +12,7 @@ import tempfile
 from cStringIO import StringIO
 from datetime import datetime
 from functools import partial
+from typing import Any, List
 from urllib import quote
 from zipfile import ZipFile, is_zipfile
 
@@ -21,7 +22,6 @@ from flask import (Markup, current_app, flash, g, jsonify, make_response,
                    redirect, render_template, render_template_string, request,
                    send_file)
 from sqlalchemy import func
-from typing import Any, List
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
 
@@ -77,8 +77,10 @@ def folder_json(folder_id):
     folder_url = partial(url_for, '.folder_json')
     result = {}
     has_permission = security.has_permission
-    result['current_folder_selectable'] = has_permission(
-        g.user, WRITE, folder, inherit=True)
+    result['current_folder_selectable'] = has_permission(g.user,
+                                                         WRITE,
+                                                         folder,
+                                                         inherit=True)
     folders = result['folders'] = []
     bc = result['breadcrumbs'] = []
     subfolders = sorted(
@@ -231,9 +233,9 @@ def permissions_update(folder_id):
     if action in ("activate_inheritance", "deactivate_inheritance"):
         inherit_security = (action == "activate_inheritance")
 
-        if not (inherit_security or
-                has_permission(g.user, 'manage',
-                               folder, inherit=False)):
+        if not (inherit_security or has_permission(
+                g.user, 'manage', folder,
+                inherit=False)):
             # don't let user shoot himself in the foot
             flash(_(u'You must have the "manager" local role on this folder in '
                     'order to deactivate inheritance.'), u'error')
@@ -416,8 +418,8 @@ def iter_permissions(folder, user):
 
     community = folder.path
     local_roles = frozenset(folder.get_local_roles_assignments())
-    inherited_roles = frozenset((folder.get_inherited_roles_assignments() if
-                                 folder.inherit_security else []))
+    inherited_roles = frozenset((folder.get_inherited_roles_assignments()
+                                 if folder.inherit_security else []))
 
     result = {}
     for principal, role in (local_roles | inherited_roles):
@@ -515,7 +517,7 @@ def folder_edit(folder):
     return redirect(url_for(folder))
 
 
-ARCHIVE_IGNORE_FILES = {u'__MACOSX/*', u'.DS_Store',}
+ARCHIVE_IGNORE_FILES = {u'__MACOSX/*', u'.DS_Store'}
 # translates patterns to match with any parent directory ((*/)?pattern should
 # match)
 ARCHIVE_IGNORE_FILES = {re.compile(u'(?:.*\\/)?' + fnmatch.translate(pattern))
@@ -855,10 +857,10 @@ def descendants_view(folder_id):
 
     root_path_ids = folder._indexable_parent_ids + u'/{}'.format(folder.id)
     svc = current_app.services['indexing']
-    filters = wq.And([wq.Term('community_id', folder.community.id), wq.Term(
-        'parent_ids', root_path_ids), wq.Or([wq.Term(
-            'object_type', Folder.entity_type), wq.Term(
-                'object_type', Document.entity_type)])])
+    filters = wq.And([wq.Term('community_id', folder.community.id),
+                      wq.Term('parent_ids', root_path_ids), wq.Or(
+                          [wq.Term('object_type', Folder.entity_type),
+                           wq.Term('object_type', Document.entity_type)])])
 
     results = svc.search(u'', filter=filters, limit=None)
     by_path = {}

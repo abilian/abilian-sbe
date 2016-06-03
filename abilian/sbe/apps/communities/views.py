@@ -109,8 +109,8 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
         # override with the slug value.
         if obj:
             if isinstance(obj, (Hit, dict)):
-                community_id = obj.get('slug' if is_community else
-                                       'community_slug')
+                community_id = obj.get('slug'
+                                       if is_community else 'community_slug')
             elif is_community:
                 community_id = obj.slug
             elif community_id is None and hasattr(obj, 'community'):
@@ -214,7 +214,7 @@ class BaseCommunityView(object):
 class CommunityEdit(BaseCommunityView, views.ObjectEdit):
     template = 'community/edit.html'
     title = _l("Edit community")
-    decorators = views.ObjectEdit.decorators + (require_admin, tab('settings'),)
+    decorators = views.ObjectEdit.decorators + (require_admin, tab('settings'))
 
     def breadcrumb(self):
         return BreadcrumbItem(label=_(u'Settings'),
@@ -282,10 +282,10 @@ add_url("/<string:community_id>/destroy",
 # Community Image
 _DEFAULT_IMAGE = Path(__file__).parent / u'data' / u'community.png'
 _DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open('rb').read()).hexdigest()
-route('/_default_image')(
-    image_views.StaticImageView.as_view('community_default_image',
-                                        set_expire=True,
-                                        image=_DEFAULT_IMAGE,))
+route('/_default_image')(image_views.StaticImageView.as_view(
+    'community_default_image',
+    set_expire=True,
+    image=_DEFAULT_IMAGE))
 
 
 class CommunityImageView(image_views.BlobView):
@@ -365,7 +365,7 @@ def members_post():
     user_id = int(user_id)
     user = User.query.get(user_id)
 
-    if action in ('add-user-role', 'set-user-role',):
+    if action in ('add-user-role', 'set-user-role'):
         role = request.form.get("role").lower()
 
         community.set_membership(user, role)
@@ -402,7 +402,7 @@ MEMBERS_EXPORT_HEADERS = [
     _l(u'Role'),
 ]
 
-MEMBERS_EXPORT_ATTRS = ['User', 'User.email', 'last_activity_date', 'role',]
+MEMBERS_EXPORT_ATTRS = ['User', 'User.email', 'last_activity_date', 'role']
 
 HEADER_FONT = openpyxl.styles.Font(bold=True)
 HEADER_ALIGN = openpyxl.styles.Alignment(horizontal='center',
@@ -478,7 +478,7 @@ def members_excel_export():
     wb.save(fd)
     fd.seek(0)
 
-    response = current_app.response_class(fd, mimetype=XLSX_MIME,)
+    response = current_app.response_class(fd, mimetype=XLSX_MIME)
 
     filename = u'{}-members-{}.xlsx'.format(
         community.slug, strftime("%d:%m:%Y-%H:%M:%S", gmtime()))
@@ -505,7 +505,9 @@ def doc(doc_id):
             break
         folder = parent
     target_community = Community.query \
-        .filter(Community.folder_id == folder.id).one()
-    return redirect(url_for("documents.document_view",
-                            community_id=target_community.slug,
-                            doc_id=doc.id))
+        .filter(Community.folder_id == folder.id) \
+        .one()
+    location = url_for("documents.document_view",
+                       community_id=target_community.slug,
+                       doc_id=doc.id)
+    return redirect(location)

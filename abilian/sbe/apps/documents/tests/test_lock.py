@@ -45,8 +45,9 @@ class LockTestCase(BaseTestCase):
 
         # set 30s lifetime
         self.app.config['SBE_LOCK_LIFETIME'] = 30
-        dt_patcher = mock.patch.object(
-            lock, 'utcnow', mock.Mock(wraps=lock.utcnow))
+        dt_patcher = mock.patch.object(lock,
+                                       'utcnow',
+                                       mock.Mock(wraps=lock.utcnow))
         with dt_patcher as mocked:
             created_at = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)
             mocked.return_value = created_at

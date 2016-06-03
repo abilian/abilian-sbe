@@ -20,7 +20,7 @@ class CommunityIndexingTestCase(CommunityBaseTestCase):
     """
 
     no_login = False
-    SERVICES = ('security', 'indexing',)
+    SERVICES = ('security', 'indexing')
 
     def setUp(self):
         super(CommunityIndexingTestCase, self).setUp()

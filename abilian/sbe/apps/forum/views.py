@@ -163,9 +163,9 @@ default_view(forum, Post, None, kw_func=post_kw_view_func)(thread_view)
 default_view(forum, Thread, 'thread_id', kw_func=default_view_kw)(thread_view)
 
 route('/<int:thread_id>/')(thread_view)
-route('/<int:thread_id>/attachments')(
-    ThreadView.as_view('thread_attachments',
-                       template='forum/thread_attachments.html'))
+route('/<int:thread_id>/attachments')(ThreadView.as_view(
+    'thread_attachments',
+    template='forum/thread_attachments.html'))
 
 
 class ThreadCreate(BaseThreadView, views.ObjectCreate):
@@ -426,7 +426,8 @@ def attachment_download(thread_id, post_id, attachment_id):
     response = make_response(attachment.content)
     response.headers['content-length'] = attachment.content_length
     response.headers['content-type'] = attachment.content_type
-    content_disposition = ('attachment;filename="{}"'.format(quote(
-        attachment.name.encode('utf8'))))
+    content_disposition = (
+        'attachment;filename="{}"'.format(quote(attachment.name.encode('utf8')))
+    )
     response.headers['content-disposition'] = content_disposition
     return response

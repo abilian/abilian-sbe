@@ -1,4 +1,4 @@
 from .views import blueprint
-from . import documents, folders  # noqa
+from . import documents, folders
 
 __all__ = ('blueprint',)

@@ -198,8 +198,8 @@ def document_preview_image(doc_id):
         size = MAX_PREVIEW_SIZE
 
     # compute image if size != standard document size
-    get_image = (converter.get_image if size == doc.preview_size else
-                 converter.to_image)
+    get_image = (converter.get_image
+                 if size == doc.preview_size else converter.to_image)
 
     content_type = "image/jpeg"
 

@@ -48,18 +48,18 @@ def init_wiki_values(endpoint, values):
 
     title = request.args.get('title', u'').strip()
     if title and title != 'Home':
-        g.breadcrumb.append(
-            BreadcrumbItem(label=title,
-                           url=Endpoint('wiki.page',
-                                        community_id=g.community.slug,
-                                        title=title)))
+        g.breadcrumb.append(BreadcrumbItem(label=title,
+                                           url=Endpoint(
+                                               'wiki.page',
+                                               community_id=g.community.slug,
+                                               title=title)))
 
 
 @route('/')
 def index():
-    return redirect(
-        url_for(".page", title='Home',
-                community_id=g.community.slug))
+    return redirect(url_for(".page",
+                            title='Home',
+                            community_id=g.community.slug))
 
 
 def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
@@ -234,11 +234,11 @@ class PageEdit(BasePageView, ObjectEdit):
                         self.last_revision.body_src.splitlines(True),
                         current.body_src.splitlines(True)) if not l[0] == u'?'
                 ]
-                field.errors.append(Markup(
-                    render_template('wiki/edit_conflict_error.html',
-                                    current=current,
-                                    current_diff=current_diff,
-                                    edited_diff=edited_diff)))
+                field.errors.append(Markup(render_template(
+                    'wiki/edit_conflict_error.html',
+                    current=current,
+                    current_diff=current_diff,
+                    edited_diff=edited_diff)))
 
         return None
 
@@ -377,8 +377,9 @@ def attachment_download():
     response = make_response(attachment.content)
     response.headers['content-length'] = attachment.content_length
     response.headers['content-type'] = attachment.content_type
-    content_disposition = ('attachment;filename="{}"'.format(quote(
-        attachment.name.encode('utf8'))))
+    content_disposition = (
+        'attachment;filename="{}"'.format(quote(attachment.name.encode('utf8')))
+    )
     response.headers['content-disposition'] = content_disposition
     return response
 

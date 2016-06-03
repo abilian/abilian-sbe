@@ -68,10 +68,11 @@ def get_recent_entries(num=20, user=None, community=None):
             deleted = True
             continue
 
-        if (isinstance(entry.object, (Folder, Document)) and not has_permission(
-                current_user, READ,
-                obj=entry.object,
-                inherit=True)):
+        if (isinstance(entry.object, (Folder, Document)) and
+                not has_permission(current_user,
+                                   READ,
+                                   obj=entry.object,
+                                   inherit=True)):
             continue
 
         entries.append(entry)

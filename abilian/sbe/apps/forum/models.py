@@ -153,8 +153,8 @@ class ThreadIndexAdapter(SAAdapter):
 
     def get_document(self, obj):
         kw = super(ThreadIndexAdapter, self).get_document(obj)
-        kw['text'] = u' '.join(chain(
-            (kw['text'],), [p.body_html for p in obj.posts]))
+        kw['text'] = u' '.join(chain((kw['text'],), [p.body_html
+                                                     for p in obj.posts]))
         return kw
 
 

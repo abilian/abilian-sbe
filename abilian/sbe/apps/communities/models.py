@@ -36,7 +36,7 @@ from . import signals
 logger = logging.getLogger(__name__)
 
 MEMBER = Role('member', label=_l(u'role_member'), assignable=False)
-VALID_ROLES = frozenset((READER, WRITER, MANAGER, MEMBER,))
+VALID_ROLES = frozenset([READER, WRITER, MANAGER, MEMBER])
 
 
 class Membership(db.Model):
@@ -79,7 +79,7 @@ def community_content(cls):
 
     cls.community_slug = property(community_slug)
     index_to = cls.__indexation_args__.setdefault('index_to', ())
-    index_to += (('community_slug', ('community_slug',),),)
+    index_to += (('community_slug', ('community_slug',)),)
     cls.__indexation_args__['index_to'] = index_to
 
     def _indexable_roles_and_users(self):
@@ -148,17 +148,19 @@ class Community(Entity):
                            viewonly=True,
                            backref=backref('communities',
                                            lazy='select',
-                                           viewonly=True),)
+                                           viewonly=True))
 
     #: Number of members in this community.
-    membership_count = Column(
-        Integer, default=0,
-        nullable=False, info=NOT_AUDITABLE)
+    membership_count = Column(Integer,
+                              default=0,
+                              nullable=False,
+                              info=NOT_AUDITABLE)
 
     #: Number of documents in this community.
-    document_count = Column(
-        Integer, default=0,
-        nullable=False, info=NOT_AUDITABLE)
+    document_count = Column(Integer,
+                            default=0,
+                            nullable=False,
+                            info=NOT_AUDITABLE)
 
     #: Last time something happened in this community
     last_active_at = Column(DateTime,
