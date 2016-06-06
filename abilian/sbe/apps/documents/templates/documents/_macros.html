@@ -106,8 +106,10 @@
     </form>
 
     <script type="application/json">
-
-
+        {%- set data = {
+            'deleteConfirmMsg': _("Delete selected elements?"),
+         } %}
+        {{ data | tojson | safe }}
     </script>
 
     {%- deferJS %}
