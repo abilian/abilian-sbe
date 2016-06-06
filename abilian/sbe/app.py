@@ -61,7 +61,7 @@ class Application(BaseApplication):
         "abilian.sbe.apps.wall",
         "abilian.sbe.apps.documents",
         "abilian.sbe.apps.forum",
-        "abilian.sbe.apps.calendar",
+        # "abilian.sbe.apps.calendar",
         "abilian.sbe.apps.communities",
         "abilian.sbe.apps.social",
         "abilian.sbe.apps.preferences",)
