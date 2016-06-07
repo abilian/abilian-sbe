@@ -15,7 +15,7 @@
             };
         $.extend(errorMessages, messages || {});
         formData[Abilian.csrf_fieldname] = Abilian.csrf_token;
-        
+
         function onComplete(evt, ui) {
             /* jshint unused: false */
             if (!hasErrors) {
@@ -75,6 +75,7 @@
                     empty: {show: '.b-upload__hint'},
                     emptyQueue: {hide: '.js-upload'},
                     list: '.js-files',
+                    progress: '[data-fileapi="progress"]',
                     file: {
                         tpl: '.js-file-tpl',
                         preview: {
@@ -83,7 +84,7 @@
                             height: 40
                         },
                         upload: {hide: '.b-thumb__rotate'},
-                        progress: '.progress .progress-bar',
+                        progress: '[data-fileapi="file.progress"]',
                         complete: {}
                     }
                 },

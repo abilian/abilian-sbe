@@ -30,8 +30,8 @@
 
                   <div class="pull-right">
                     <div style="display: inline-block; width: 10em;">
-                      <div class="progress">
-                        <div class="progress-bar" role="progressbar"></div>
+                      <div class="progress" data-fileapi="active.show">
+                        <div class="progress-bar" role="progressbar" data-fileapi="file.progress" style="width: 100%;"></div>
                       </div>
                     </div>
 
@@ -54,6 +54,12 @@
                 </div>
               </li>
             </ul>
+
+            <div class="progress" data-fileapi="active.show">
+              <div class="progress-bar" role="progressbar"
+                   style="width: 0;" data-fileapi="progress">
+              </div>
+            </div>
           </div>
 
           <div class="checkbox">
