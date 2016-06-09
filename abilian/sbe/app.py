@@ -5,7 +5,7 @@ Static configuration for the application.
 TODO: add more (runtime) flexibility in plugin discovery, selection
 and activation.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import logging
 import os
@@ -80,7 +80,7 @@ class Application(BaseApplication):
         converter.init_app(self)
 
 # SBE demo app bootstrap stuff
-_SBE_DEMO_SCRIPT = u'''\
+_SBE_DEMO_SCRIPT = '''\
 #!{BIN_DIR}/python
 from __future__ import absolute_import
 
@@ -101,9 +101,9 @@ def _on_http_server_activate(self, *args, **kwargs):
     _BASE_SERVER_ACTIVATE(self, *args, **kwargs)
     # now we are listening to socket
     host, port = self.server_address
-    if host == u'0.0.0.0':
+    if host == '0.0.0.0':
         # chrome is not ok with 0.0.0.0
-        host = u'localhost'
+        host = 'localhost'
     url = 'http://{host}:{port}/setup'.format(host=host, port=port)
 
     if sys.platform == "win32":
@@ -128,14 +128,14 @@ def setup_sbe_app():
         logger.error('Not in a virtualenv! Aborting.')
         return 1
 
-    bin_dir = Path(sys.prefix) / u'bin'
+    bin_dir = Path(sys.prefix) / 'bin'
 
     if not bin_dir.exists() and bin_dir.is_dir():
         logger.error('%s doesn\'t exists or is not a directory. Aborting',
                      repr(unicode(bin_dir)))
         return 1
 
-    script_file = bin_dir / u'abilian_sbe'
+    script_file = bin_dir / 'abilian_sbe'
     if script_file.exists():
         logger.info('%s already exists. Skipping creation.',
                     repr(unicode(script_file)))
@@ -149,8 +149,8 @@ def setup_sbe_app():
     current_app.config['PRODUCTION'] = True
     current_app.config['DEBUG'] = False
     current_app.config['ASSETS_DEBUG'] = False
-    current_app.config['SITE_NAME'] = u'Abilian SBE'
-    current_app.config['MAIL_SENDER'] = u'abilian-sbe-app@example.com'
+    current_app.config['SITE_NAME'] = 'Abilian SBE'
+    current_app.config['MAIL_SENDER'] = 'abilian-sbe-app@example.com'
 
     logger.info('Prepare CSS & JS files')
     command_manager.handle('abilian_sbe', ['assets', 'build'])

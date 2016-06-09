@@ -12,6 +12,7 @@ import pkg_resources
 from abilian.core.util import fqcn
 
 logger = logging.getLogger(__name__)
+
 STATIC_DIR = pkg_resources.resource_filename(__name__, 'static')
 LESSCSS_FILE = str(Path(STATIC_DIR, 'less', 'abilian-sbe.less'))
 JS = ('js/sbe-datatable.js',
@@ -53,6 +54,8 @@ class AbilianSBE(object):
 
         app.register_asset('js', *JS)
         app.register_asset('css', LESSCSS_FILE)
+
+        # Jinja
         logger.info('Register jinja context processors')
         app.context_processor(inject_template_utils)
 

@@ -21,6 +21,7 @@ import whoosh.query as wq
 from flask import (Markup, current_app, flash, g, jsonify, make_response,
                    redirect, render_template, render_template_string, request,
                    send_file)
+from flask._compat import text_type
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
@@ -385,7 +386,7 @@ def permissions_export(folder_id):
 
         for c, value in enumerate(row):
             if isinstance(value, Role):
-                value = unicode(value)
+                value = text_type(value)
             ws.write(r + row_offset, c, value)
 
         # data grouping exit
@@ -517,14 +518,14 @@ def folder_edit(folder):
     return redirect(url_for(folder))
 
 
-ARCHIVE_IGNORE_FILES = {u'__MACOSX/*', u'.DS_Store'}
+ARCHIVE_IGNORE_FILES_GLOBS = {'__MACOSX/*', '.DS_Store'}
 # translates patterns to match with any parent directory ((*/)?pattern should
 # match)
-ARCHIVE_IGNORE_FILES = {re.compile(u'(?:.*\\/)?' + fnmatch.translate(pattern))
-                        for pattern in ARCHIVE_IGNORE_FILES}
+ARCHIVE_IGNORE_FILES = {re.compile('(?:.*\\/)?' + fnmatch.translate(pattern))
+                        for pattern in ARCHIVE_IGNORE_FILES_GLOBS}
 
 # skip directory names. Directory will be created only if they contains files
-ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate(u'*/')))
+ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate('*/')))
 
 
 def explore_archive(fd, filename=None, uncompress=False):
@@ -539,7 +540,7 @@ def explore_archive(fd, filename=None, uncompress=False):
         filename = fd.filename
 
     if not isinstance(filename, unicode):
-        filename = unicode(fd.filename, errors='ignore')
+        filename = text_type(fd.filename, errors='ignore')
 
     if not uncompress:
         yield [], fd
