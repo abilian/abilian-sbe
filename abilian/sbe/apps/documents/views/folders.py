@@ -903,12 +903,12 @@ def descendants_view(folder_id):
     for user, key in owners_q:
         owners[key] = user
 
-    ctx = dict(folder=folder,
-               descendants=descendants,
-               owners=owners,
-               breadcrumbs=bc,
-               get_icon=get_icon_for_hit,
-               csrf_token=csrf.field(),)
+    ctx = {'folder': folder,
+           'descendants': descendants,
+           'owners': owners,
+           'breadcrumbs': bc,
+           'get_icon': get_icon_for_hit,
+           'csrf_token': csrf.field(),}
     return render_template("documents/descendants.html", **ctx)
 
 
