@@ -4,28 +4,17 @@ Forum views
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-from datetime import date, datetime
-from itertools import groupby
-from urllib import quote
+from datetime import datetime
 
-import sqlalchemy as sa
-from flask import (current_app, flash, g, make_response, render_template,
-                   request)
-from flask_babel import format_date
-from flask_login import current_user
-from sqlalchemy.orm import joinedload
-from werkzeug.exceptions import BadRequest, NotFound
-
-from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
-from abilian.sbe.apps.calendar.forms import EventForm
-from abilian.sbe.apps.calendar.models import Event
-from abilian.sbe.apps.communities.blueprint import Blueprint
-from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.web import url_for, views
-from abilian.web.action import ButtonAction, Endpoint
-from abilian.web.nav import BreadcrumbItem
-from abilian.web.views import default_view
+from abilian.web.action import ButtonAction
+from flask import g, render_template
+
+from ..communities.views import default_view_kw
+from ..communities.blueprint import Blueprint
+from .forms import EventForm
+from .models import Event
 
 blueprint = Blueprint("calendar",
                       __name__,
@@ -36,7 +25,14 @@ route = blueprint.route
 
 @route('/')
 def index():
-    return render_template('calendar/index.html')
+    events = Event.query \
+        .filter(Event.end > datetime.now()) \
+        .order_by(Event.start) \
+        .all()
+    ctx = {
+        'upcoming_events': events,
+    }
+    return render_template('calendar/index.html', **ctx)
 
 
 class BaseEventView(object):
@@ -52,6 +48,23 @@ class BaseEventView(object):
         return url_for(self.obj)
 
 
+class EventView(BaseEventView, views.ObjectView):
+    methods = ['GET', 'HEAD']
+    Form = EventForm
+    template = 'calendar/event.html'
+
+    @property
+    def template_kwargs(self):
+        kw = super(EventView, self).template_kwargs
+        kw['event'] = self.obj
+        return kw
+
+
+event_view = EventView.as_view(b'event')
+views.default_view(blueprint, Event, 'event_id', kw_func=default_view_kw)(event_view)
+route('/<int:event_id>/')(event_view)
+
+
 class EventCreateView(BaseEventView, views.ObjectCreate):
     POST_BUTTON = ButtonAction('form',
                                'create',
@@ -65,12 +78,20 @@ class EventCreateView(BaseEventView, views.ObjectCreate):
         self.event = self.obj
         return args, kwargs
 
+    def after_populate_obj(self):
+        if self.obj.community is None:
+            self.obj.community = g.community._model
+
     @property
     def activity_target(self):
         return self.event.community
 
     def get_form_buttons(self, *args, **kwargs):
         return [self.POST_BUTTON, views.object.CANCEL_BUTTON]
+
+    @property
+    def activity_target(self):
+        return self.obj.community
 
 
 route('/new_event/')(EventCreateView.as_view(b'new_event',

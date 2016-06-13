@@ -4,7 +4,8 @@
 from __future__ import absolute_import, unicode_literals
 
 import bleach
-from wtforms import TextAreaField
+from wtforms import StringField, TextAreaField
+from wtforms.fields.html5 import URLField
 
 from abilian.i18n import _l
 from abilian.web.forms import Form
@@ -58,12 +59,16 @@ for attr in ALLOWED_TAGS:
 
 
 class EventForm(Form):
-    start = DateTimeField(_l("Start"), validators=[required()])
-    end = DateTimeField(_l("End"))
+    title = StringField(label=_l("Title"),
+                        filters=(strip,),
+                        validators=[required()])
 
-    location = TextAreaField(label=_l("Location"),
-                             filters=(strip,),
-                             validators=[required()])
+    start = DateTimeField(_l("Start"), validators=[required()])
+    end = DateTimeField(_l("End"), validators=[required()])
+
+    location = TextAreaField(label=_l("Location"), filters=(strip,))
+
+    url = URLField(label=_l("URL"), filters=(strip,))
 
     description = TextAreaField(
         label=_l("Description"),
@@ -77,3 +82,7 @@ class EventForm(Form):
                                   attributes=ALLOWED_ATTRIBUTES,
                                   styles=ALLOWED_STYLES,
                                   strip=True)
+
+
+EventForm.start.kwargs['raw_data'] = [u" | 09:00"]
+EventForm.end.kwargs['raw_data'] = [u" | 18:00"]

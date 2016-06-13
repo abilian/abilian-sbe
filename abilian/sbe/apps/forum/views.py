@@ -13,18 +13,19 @@ from flask import (current_app, flash, g, make_response, render_template,
                    request)
 from flask_babel import format_date
 from flask_login import current_user
+from six import text_type
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
-from abilian.sbe.apps.communities.blueprint import Blueprint
-from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction, Endpoint
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import default_view
 
+from ..communities.blueprint import Blueprint
+from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
@@ -213,7 +214,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
             mimetype = meta.get('mimetype')
 
             if not isinstance(name, unicode):
-                name = unicode(name, encoding='utf-8', errors='ignore')
+                name = text_type(name, encoding='utf-8', errors='ignore')
 
             if not name:
                 continue
@@ -355,7 +356,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         obj_meta = self.obj.meta.setdefault('abilian.sbe.forum', {})
         history = obj_meta.setdefault('history', [])
         history.append(dict(user_id=current_user.id,
-                            user=unicode(current_user),
+                            user=text_type(current_user),
                             date=utc_dt(datetime.utcnow()).isoformat(),
                             reason=self.form.reason.data,))
         self.obj.meta['abilian.sbe.forum'] = obj_meta  # trigger change for SA
@@ -385,7 +386,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
             mimetype = meta.get('mimetype')
 
             if not isinstance(name, unicode):
-                name = unicode(name, encoding='utf-8', errors='ignore')
+                name = text_type(name, encoding='utf-8', errors='ignore')
 
             if not name:
                 continue

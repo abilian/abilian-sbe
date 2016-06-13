@@ -22,9 +22,13 @@ class Event(Entity):
         primaryjoin=(community_id == Community.id),
         backref=backref('events', cascade="all, delete-orphan"))
 
+    title = Column(Unicode, nullable=False, default="", info=SEARCHABLE)
+
     description = Column(Unicode, nullable=False, default="", info=SEARCHABLE)
 
     location = Column(Unicode, nullable=False, default="", info=SEARCHABLE)
 
     start = Column(DateTime, nullable=False)
     end = Column(DateTime)
+
+    url = Column(Unicode, nullable=False, default="")

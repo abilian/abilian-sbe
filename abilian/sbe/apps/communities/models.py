@@ -218,10 +218,15 @@ class Community(Entity):
             fn = join(dirname(__file__), "data", "community.png")
             self.image = Blob(open(fn).read())
 
+    @property
+    def has_calendar(self):
+        config = current_app.config
+        return bool(config.get("ENABLE_CALENDAR"))
+
     def rename(self, name):
         self.name = name
         if self.folder:
-            #FIXME: use signals
+            # FIXME: use signals
             self.folder.name = name
 
     def get_memberships(self, role=None):
@@ -263,8 +268,8 @@ class Community(Entity):
     def remove_membership(self, user):
         M = Membership
         membership = M.query \
-          .filter(and_(M.user_id == user.id, M.community_id == self.id)) \
-          .first()
+            .filter(and_(M.user_id == user.id, M.community_id == self.id)) \
+            .first()
         if not membership:
             raise KeyError("User {} is not a member of community {}".format(
                 user, self))

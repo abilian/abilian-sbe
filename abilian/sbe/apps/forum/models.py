@@ -126,10 +126,10 @@ class Post(Entity):
 
     #: Markup type (Markdown, Textile...)
     # TODO: markup langage selection + default
-    #markup_type = Column(String, default="Markdown")
+    # markup_type = Column(String, default="Markdown")
 
     #: Source (markup) for the post
-    #body_src = Column(UnicodeText, default=u"", nullable=False)
+    # body_src = Column(UnicodeText, default=u"", nullable=False)
 
     #: HTML rendering of the post
     body_html = Column(UnicodeText, default=u"", nullable=False)

@@ -6,8 +6,8 @@
   {% call m_box_content(_("Upcoming events")) %}
     {% if upcoming_events %}
       <ul>
-        {% for event in upcomint_events %}
-          <li></li>
+        {% for event in upcoming_events %}
+          <li>{{ event.start | dateformat}}: <a href="{{ url_for(event) }}">{{ event.title }}</a></li>
         {% endfor %}
       </ul>
     {% else %}

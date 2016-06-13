@@ -1,0 +1,37 @@
+{% extends "community/_base.html" %}
+
+{%- from "macros/box.html" import m_box_content, m_box_menu -%}
+{%- from "macros/form.html" import m_field -%}
+
+{%- block content %}
+  {% call m_box_content() %}
+    {#  TODO #}
+    <p>
+      <a href="{{ url_for('.index', community_id=g.community.slug) }}">
+        <i class="fa fa-arrow-left"></i> {{ _("Back to calendar") }}</a>
+    </p>
+
+    <article>
+      <h2>{{ event.title }}</h2>
+
+      <p>
+        {{ _("Start") }}: {{ event.start | datetimeformat }}
+      </p>
+      <p>
+        {{ _("End") }}: {{ event.end | datetimeformat }}
+      </p>
+
+      {% if event.location %}
+        <p>{{ event.location }}</p>
+      {% endif %}
+
+      <div style="font-style: italic;">
+        {{ event.description|safe }}
+      </div>
+
+      {% if event.url %}
+        {{ _('More information') }}: <a href="{{ event.url }}">{{ event.url }}</a>
+      {% endif %}
+    </article>
+  {% endcall %}
+{%- endblock %}
