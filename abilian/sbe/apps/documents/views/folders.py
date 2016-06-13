@@ -858,10 +858,13 @@ def descendants_view(folder_id):
 
     root_path_ids = folder._indexable_parent_ids + '/{}'.format(folder.id)
     svc = current_app.services['indexing']
+
+    # yapf: disable
     filters = wq.And([wq.Term('community_id', folder.community.id),
-                      wq.Term('parent_ids', root_path_ids), wq.Or(
-                          [wq.Term('object_type', Folder.entity_type),
-                           wq.Term('object_type', Document.entity_type)])])
+                      wq.Term('parent_ids', root_path_ids),
+                      wq.Or([wq.Term('object_type', Folder.entity_type),
+                             wq.Term('object_type', Document.entity_type)])])
+    # yapf: enable
 
     results = svc.search('', filter=filters, limit=None)
     by_path = {}
