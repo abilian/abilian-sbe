@@ -40,8 +40,10 @@ class Repository(object):
 
     def get_object(self, id=None, path=None):
         """
-        Gets the CMIS object (document or folder) with either the given `id` or the
-        given `path`. Returns None if the object doesn't exist.
+        Get the CMIS object (document or folder) with either the given `id` or the
+        given `path`.
+
+        Returns None if the object doesn't exist.
         """
         if id:
             return self.get_object_by_id(id)
@@ -52,7 +54,7 @@ class Repository(object):
     # Id based navigation
     #
     def get_object_by_id(self, id):
-        """Gets the CMIS object (document or folder) with the given `id`.
+        """Get the CMIS object (document or folder) with the given `id`.
 
         Returns None if the object doesn't exist.
         """
@@ -62,14 +64,14 @@ class Repository(object):
         return obj
 
     def get_folder_by_id(self, id):
-        """Gets the folder with the given `id`.
+        """Get the folder with the given `id`.
 
         Returns None if the folder doesn't exist.
         """
         return Folder.query.get(id)
 
     def get_document_by_id(self, id):
-        """Gets the document with the given `id`.
+        """Get the document with the given `id`.
 
         Returns None if the document doesn't exist.
         """
