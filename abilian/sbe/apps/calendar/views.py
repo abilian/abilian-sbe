@@ -6,13 +6,14 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
 
+from flask import g, render_template
+
 from abilian.i18n import _, _l
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction
-from flask import g, render_template
 
-from ..communities.views import default_view_kw
 from ..communities.blueprint import Blueprint
+from ..communities.views import default_view_kw
 from .forms import EventForm
 from .models import Event
 
@@ -29,9 +30,7 @@ def index():
         .filter(Event.end > datetime.now()) \
         .order_by(Event.start) \
         .all()
-    ctx = {
-        'upcoming_events': events,
-    }
+    ctx = {'upcoming_events': events,}
     return render_template('calendar/index.html', **ctx)
 
 
@@ -61,7 +60,9 @@ class EventView(BaseEventView, views.ObjectView):
 
 
 event_view = EventView.as_view(b'event')
-views.default_view(blueprint, Event, 'event_id', kw_func=default_view_kw)(event_view)
+views.default_view(blueprint,
+                   Event, 'event_id',
+                   kw_func=default_view_kw)(event_view)
 route('/<int:event_id>/')(event_view)
 
 
