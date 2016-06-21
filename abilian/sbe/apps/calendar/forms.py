@@ -8,7 +8,7 @@ from wtforms import StringField, TextAreaField
 from wtforms.fields.html5 import URLField
 
 from abilian.i18n import _l
-from abilian.web.forms import Form
+from abilian.web.forms import Form, ValidationError
 from abilian.web.forms.fields import DateTimeField
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import required
@@ -82,6 +82,10 @@ class EventForm(Form):
                                   attributes=ALLOWED_ATTRIBUTES,
                                   styles=ALLOWED_STYLES,
                                   strip=True)
+
+    def validate_end(self, field):
+        if self.start.data > self.end.data:
+            raise ValidationError(_l("End date/time must be after start"))
 
 
 EventForm.start.kwargs['raw_data'] = [u" | 09:00"]

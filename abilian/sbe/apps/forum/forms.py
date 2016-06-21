@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import bleach
 from wtforms import BooleanField, StringField, TextAreaField
@@ -57,7 +57,7 @@ for attr in ALLOWED_TAGS:
 
 # instantiate this one before PostForm fields, so that it is listed first
 # when Threadform is displayed
-_TITLE_FIELD = StringField(label=_l(u"Title"),
+_TITLE_FIELD = StringField(label=_l("Title"),
                            filters=(strip,),
                            validators=[required()])
 
@@ -67,7 +67,7 @@ class BasePostForm(Form):
                             widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
                             filters=(strip,),
                             validators=[required()])
-    attachments = FileField(label=_l(u'Attachments'),
+    attachments = FileField(label=_l('Attachments'),
                             multiple=True,
                             validators=[optional()])
 
@@ -80,7 +80,7 @@ class BasePostForm(Form):
 
 
 class PostForm(BasePostForm):
-    send_by_email = BooleanField(label=_l(u"Send by email?"), default=True)
+    send_by_email = BooleanField(label=_l("Send by email?"), default=True)
 
 
 class ThreadForm(PostForm):
@@ -88,7 +88,7 @@ class ThreadForm(PostForm):
 
 
 class PostEditForm(BasePostForm):
-    reason = StringField(label=_l(u'Reason'),
-                         description=_l(u'Description of your edit'),
+    reason = StringField(label=_l('Reason'),
+                         description=_l('Description of your edit'),
                          filters=(strip,),
                          validators=(optional(),))

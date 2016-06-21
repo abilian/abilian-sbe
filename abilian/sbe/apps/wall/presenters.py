@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import logging
 
@@ -11,6 +11,7 @@ from jinja2 import Markup, Template
 
 from abilian.core.util import BasePresenter
 from abilian.i18n import _, _l
+from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.views.util import \
@@ -23,21 +24,25 @@ logger = logging.getLogger(__name__)
 
 # Poor man's pattern matching.
 MESSAGES = {
-    ('post', Thread): _l(u'has started conversation "{object}"'),
-    ('post', Post): _l(u'has participated in conversation "{object}"'),
-    ('post', Document): _l(u'has published document "{object}"'),
-    ('post', WikiPage): _l(u'has created wiki page "{object}"'),
-    ('update', Document): _l(u'has updated document "{object}"'),
-    ('update', WikiPage): _l(u'has updated wiki page "{object}"'),
-    ('update', Community): _l(u'has updated community "{object}"'),
-    ('join', Community): _l(u'has joined the community {object}.'),
-    ('leave', Community): _l(u'has left the community {object}.'),
+    ('post', Thread): _l('has started conversation "{object}"'),
+    ('post', Post): _l('has participated in conversation "{object}"'),
+    ('post', Document): _l('has published document "{object}"'),
+    ('post', WikiPage): _l('has created wiki page "{object}"'),
+    ('post', Event): _l('has published event "{object}"'),
+    ('post', Community): _l('has created communauté "{object}"'),
+    #
+    ('update', Document): _l('has updated document "{object}"'),
+    ('update', WikiPage): _l('has updated wiki page "{object}"'),
+    ('update', Community): _l('has updated community "{object}"'),
+    #
+    ('join', Community): _l('has joined the community {object}.'),
+    #
+    ('leave', Community): _l('has left the community {object}.'),
 }
 
-OBJ_TEMPLATE = Template(
-    u'<a href="{{ object_url|safe }}">{{ object_name }}</a>')
+OBJ_TEMPLATE = Template('<a href="{{ object_url|safe }}">{{ object_name }}</a>')
 
-POST_BODY_TEMPLATE = u'''
+POST_BODY_TEMPLATE = '''
   <span class="body">"<a href="{{ object_url |safe }}">{{ body }}</a>"
   {%- if post.attachments %}
   <div id="attachments">
@@ -58,7 +63,7 @@ POST_BODY_TEMPLATE = u'''
   </span>
  '''
 
-DOCUMENT_BODY_TEMPLATE = u'''
+DOCUMENT_BODY_TEMPLATE = '''
 <div class="body">
   <div>
     <img src="{{ obj.icon }}" style="vertical-align: middle;" alt=""/>
@@ -99,7 +104,8 @@ class ActivityEntryPresenter(BasePresenter):
             ctx = {}
             ctx['verb'] = entry.verb
 
-            ctx['object_name'] = entry.object.name
+            ctx['object_name'] = entry.object.name or getattr(entry.object,
+                                                              'title', "???")
             ctx['object_url'] = url_for(entry.object)
             ctx['object_type'] = object_class_localized
             ctx['object'] = OBJ_TEMPLATE.render(**ctx)
@@ -115,30 +121,30 @@ class ActivityEntryPresenter(BasePresenter):
             if msg:
                 msg = msg.format(**ctx)
                 if entry.target and not ignore_community:
-                    msg += u" " + _(u'in the community {target}.').format(**ctx)
+                    msg += " " + _('in the community {target}.').format(**ctx)
                 else:
-                    msg += u"."
+                    msg += "."
 
             elif entry.verb == 'post':
-                msg = _(u'has posted an object of type {object_type} '
-                        u'called "{object}"').format(**ctx)
+                msg = _('has posted an object of type {object_type} '
+                        'called "{object}"').format(**ctx)
 
                 if entry.target and not ignore_community:
-                    msg += u" " + _(u'in the community {target}.').format(**ctx)
+                    msg += " " + _('in the community {target}.').format(**ctx)
                 else:
-                    msg += u"."
+                    msg += "."
 
             elif entry.verb == 'join':
-                msg = _(u'has joined the community {object}.').format(**ctx)
+                msg = _('has joined the community {object}.').format(**ctx)
 
             elif entry.verb == 'leave':
-                msg = _(u'has left the community {object}.').format(**ctx)
+                msg = _('has left the community {object}.').format(**ctx)
 
             elif entry.verb == 'update':
-                msg = _(u'has updated {object_type} {object}.').format(**ctx)
+                msg = _('has updated {object_type} {object}.').format(**ctx)
 
             else:
-                msg = _(u'has done action "{verb}" on object "{object}".').format(**ctx)
+                msg = _('has done action "{verb}" on object "{object}".').format(**ctx)
 
             return Markup(msg)
 
@@ -154,7 +160,7 @@ class ActivityEntryPresenter(BasePresenter):
                                 strip=True)
             body = Markup(body).unescape()
             if len(body) > 400:
-                body = body[0:400] + u"…"
+                body = body[0:400] + "…"
             body = render_template_string(POST_BODY_TEMPLATE,
                                           object_url=self.object_url,
                                           body=body,
@@ -164,7 +170,7 @@ class ActivityEntryPresenter(BasePresenter):
             body = bleach.clean(self.object.body_html, tags=[], strip=True)
             body = Markup(body).unescape()
             if len(body) > 400:
-                body = body[0:400] + u"…"
+                body = body[0:400] + "…"
             body = render_template_string(POST_BODY_TEMPLATE,
                                           object_url=self.object_url,
                                           body=body,

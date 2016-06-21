@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-06-13 14:48+0200\n"
+"POT-Creation-Date: 2016-06-21 16:25+0200\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -62,11 +62,15 @@ msgstr "URL"
 msgid "Description"
 msgstr "Description"
 
-#: abilian/sbe/apps/calendar/views.py:72
+#: abilian/sbe/apps/calendar/forms.py:88
+msgid "End date/time must be after start"
+msgstr "La date/heure de fin doit être postérieure à la date/heure de début"
+
+#: abilian/sbe/apps/calendar/views.py:73
 msgid "Post this event"
 msgstr "Poster cet événement"
 
-#: abilian/sbe/apps/calendar/views.py:74
+#: abilian/sbe/apps/calendar/views.py:75
 msgid "New event"
 msgstr "Nouvel événement"
 
@@ -1200,58 +1204,66 @@ msgstr "Profil enregistré"
 msgid "Error occured"
 msgstr "Une erreur est survenue"
 
-#: abilian/sbe/apps/wall/presenters.py:26
+#: abilian/sbe/apps/wall/presenters.py:28
 msgid "has started conversation \"{object}\""
 msgstr "a démarré la conversation \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:27
+#: abilian/sbe/apps/wall/presenters.py:29
 msgid "has participated in conversation \"{object}\""
 msgstr "a participé à la conversation \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:28
+#: abilian/sbe/apps/wall/presenters.py:30
 msgid "has published document \"{object}\""
 msgstr "a publié le document \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:29
+#: abilian/sbe/apps/wall/presenters.py:31
 msgid "has created wiki page \"{object}\""
 msgstr "a créé la page wiki \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:30
+#: abilian/sbe/apps/wall/presenters.py:32
+msgid "has published event \"{object}\""
+msgstr "a publié l'événement \"{object}\""
+
+#: abilian/sbe/apps/wall/presenters.py:33
+msgid "has created communauté \"{object}\""
+msgstr "a créé la communauté \"{object}\""
+
+#: abilian/sbe/apps/wall/presenters.py:35
 msgid "has updated document \"{object}\""
 msgstr "a mis à jour le document \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:31
+#: abilian/sbe/apps/wall/presenters.py:36
 msgid "has updated wiki page \"{object}\""
 msgstr "a mis à jour la page wiki \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:32
+#: abilian/sbe/apps/wall/presenters.py:37
 msgid "has updated community \"{object}\""
 msgstr "a mis à jour la communauté \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:33
-#: abilian/sbe/apps/wall/presenters.py:132
+#: abilian/sbe/apps/wall/presenters.py:39
+#: abilian/sbe/apps/wall/presenters.py:139
 msgid "has joined the community {object}."
 msgstr "a rejoint la communauté {object}."
 
-#: abilian/sbe/apps/wall/presenters.py:34
-#: abilian/sbe/apps/wall/presenters.py:135
+#: abilian/sbe/apps/wall/presenters.py:41
+#: abilian/sbe/apps/wall/presenters.py:142
 msgid "has left the community {object}."
 msgstr "a quitté la communauté {object}."
 
-#: abilian/sbe/apps/wall/presenters.py:118
-#: abilian/sbe/apps/wall/presenters.py:127
+#: abilian/sbe/apps/wall/presenters.py:125
+#: abilian/sbe/apps/wall/presenters.py:134
 msgid "in the community {target}."
 msgstr "dans la communauté {target}"
 
-#: abilian/sbe/apps/wall/presenters.py:123
+#: abilian/sbe/apps/wall/presenters.py:130
 msgid "has posted an object of type {object_type} called \"{object}\""
 msgstr "a ajouté un objet de type {object_type} nommé \"{object}\""
 
-#: abilian/sbe/apps/wall/presenters.py:138
+#: abilian/sbe/apps/wall/presenters.py:145
 msgid "has updated {object_type} {object}."
 msgstr "a mis à jour {object_type} {object}."
 
-#: abilian/sbe/apps/wall/presenters.py:141
+#: abilian/sbe/apps/wall/presenters.py:148
 msgid "has done action \"{verb}\" on object \"{object}\"."
 msgstr "a effectué l'action \"{verb}\" sur l'objet \"{object}\"."
 
