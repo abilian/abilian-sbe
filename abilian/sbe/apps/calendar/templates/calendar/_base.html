@@ -2,13 +2,23 @@
 
 {% from "macros/box.html" import m_box_menu %}
 
-{% block sidebar %}
-  {% call m_box_menu() %}
+{%- block sidebar %}
+  {%- call m_box_menu() %}
     <ul class="nav nav-list">
+      {%- set content_actions = actions.for_category('calendar:event') %}
       {%- set global_actions = actions.for_category('calendar:global') %}
+
+      {%- for action in content_actions %}
+        <li>{{ action.render() }}</li>
+      {%- endfor %}
+
+      {%- if content_actions and global_actions %}
+        <li class="divider"></li>
+      {%- endif %}
+
       {%- for action in global_actions %}
         <li>{{ action.render() }}</li>
       {%- endfor %}
     </ul>
-  {% endcall %}
-{% endblock %}
+  {%- endcall %}
+{%- endblock %}

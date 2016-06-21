@@ -8,7 +8,7 @@ from datetime import datetime
 
 from flask import g, render_template
 
-from abilian.i18n import _, _l
+from abilian.i18n import _l
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction
 
@@ -72,7 +72,7 @@ class EventCreateView(BaseEventView, views.ObjectCreate):
                                btn_class='primary',
                                title=_l('Post this event'))
 
-    title = _("New event")
+    title = _l("New event")
 
     def init_object(self, args, kwargs):
         args, kwargs = super(EventCreateView, self).init_object(args, kwargs)
@@ -95,5 +95,18 @@ class EventCreateView(BaseEventView, views.ObjectCreate):
         return self.obj.community
 
 
-route('/new_event/')(EventCreateView.as_view(b'new_event',
-                                             view_endpoint='.event'))
+event_create_view = EventCreateView.as_view(b'new_event', view_endpoint='.event')
+route('/new_event/')(event_create_view)
+
+
+class EventEditView(BaseEventView, views.ObjectEdit):
+    POST_BUTTON = ButtonAction('form',
+                               'create',
+                               btn_class='primary',
+                               title=_l('Post this event'))
+
+    title = _l("Edit event")
+
+
+event_edit_view = EventEditView.as_view(b'event_edit', view_endpoint='.event')
+route('/<int:event_id>/edit')(event_edit_view)

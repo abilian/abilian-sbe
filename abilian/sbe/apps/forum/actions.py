@@ -82,6 +82,7 @@ _actions = (
                      condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
                      url='#modal-delete',
                      icon='trash'),
+    #
     ThreadAction('forum:thread',
                  'close',
                  _l('Close thread'),
