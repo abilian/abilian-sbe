@@ -74,18 +74,9 @@ class EventCreateView(BaseEventView, views.ObjectCreate):
 
     title = _l("New event")
 
-    def init_object(self, args, kwargs):
-        args, kwargs = super(EventCreateView, self).init_object(args, kwargs)
-        self.event = self.obj
-        return args, kwargs
-
     def after_populate_obj(self):
         if self.obj.community is None:
             self.obj.community = g.community._model
-
-    @property
-    def activity_target(self):
-        return self.event.community
 
     def get_form_buttons(self, *args, **kwargs):
         return [self.POST_BUTTON, views.object.CANCEL_BUTTON]
