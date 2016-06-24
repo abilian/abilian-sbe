@@ -40,7 +40,7 @@ def reindex_tree(obj):
     # in "to_update" without needing to do it apart.
     entity_ids_q = sa.union(
         sa.select([descendants.c.id]), sa.select([sa.bindparam('ancestor_id')]))
-    q = session.query(Entity) \
+    query = session.query(Entity) \
         .filter(Entity.id.in_(entity_ids_q)) \
         .options(sa.orm.noload('*')) \
         .params(ancestor_id=obj.id)
@@ -48,5 +48,5 @@ def reindex_tree(obj):
     to_update = svc.app_state.to_update
     key = 'changed'
 
-    for item in q.yield_per(1000):
+    for item in query.yield_per(1000):
         to_update.append((key, item))

@@ -900,10 +900,10 @@ def descendants_view(folder_id):
     visit(root_path_ids, 0)
 
     owners = dict()
-    owners_q = User.query \
+    owners_query = User.query \
         .filter(User.id.in_(owner_ids)) \
         .add_column(sa.sql.func.concat('user:', User.id).label('key'))
-    for user, key in owners_q:
+    for user, key in owners_query:
         owners[key] = user
 
     ctx = {'folder': folder,

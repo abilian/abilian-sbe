@@ -74,18 +74,18 @@ def users_dt_json():
 
     end = start + length
 
-    q = User.query
-    total_count = q.count()
+    query = User.query
+    total_count = query.count()
 
     if search:
         # TODO: gérer les accents
         filter = or_(
             func.lower(User.first_name).like("%" + search + "%"),
             func.lower(User.last_name).like("%" + search + "%"))
-        q = q.filter(filter) \
+        query = query.filter(filter) \
             .reset_joinpoint()
 
-    count = q.count()
+    count = query.count()
     SORT_COLS = {
         1: [],  # will be set to [User.last_name, User.first_name]
         2: [User.created_at],
@@ -98,13 +98,13 @@ def users_dt_json():
     order_by = map(direction, columns)
 
     # sqlite does not support 'NULLS FIRST|LAST' in ORDER BY clauses
-    engine = q.session.get_bind(User.__mapper__)
+    engine = query.session.get_bind(User.__mapper__)
     if engine.name != 'sqlite':
         order_by[0] = nullslast(order_by[0])
 
-    q = q.order_by(*order_by)
+    query = query.order_by(*order_by)
 
-    users = q.slice(start, end).all()
+    users = query.slice(start, end).all()
 
     data = []
     MUGSHOT_SIZE = 45
