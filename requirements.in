@@ -14,3 +14,6 @@ openpyxl>=2.3.0
 
 # mypy (experimental)
 typing
+
+# Better FP library than itertools IMHO.
+toolz
