@@ -2,7 +2,7 @@
 """
 Celery tasks related to document transformation and preview.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, unicode_literals
 
 import logging
 from contextlib import contextmanager
@@ -112,31 +112,31 @@ def convert_document_content(document_id):
             try:
                 doc.pdf = converter.to_pdf(*conversion_args)
             except HandlerNotFound as e:
-                doc.pdf = ""
+                doc.pdf = b""
             except ConversionError as e:
-                doc.pdf = ""
-                logger.info(u"Conversion to PDF failed for document: %s",
+                doc.pdf = b""
+                logger.info("Conversion to PDF failed for document %s: %s",
                             doc.name, e, **error_kwargs)
 
         try:
             doc.text = converter.to_text(doc.content_digest, doc.content,
                                          doc.content_type)
         except ConversionError as e:
-            doc.text = u""
-            logger.info(u"Conversion to text failed for document %s: %s",
+            doc.text = ""
+            logger.info("Conversion to text failed for document %s: %s",
                         doc.name, e, **error_kwargs)
 
         doc.extra_metadata = {}
         try:
             doc.extra_metadata = converter.get_metadata(*conversion_args)
         except ConversionError as e:
-            logger.warning(u"Metadata extraction failed on document %s: %s",
+            logger.warning("Metadata extraction failed on document %s: %s",
                            doc.name, e, **error_kwargs)
         except UnicodeDecodeError as e:
-            logger.error(u"Unicode issue on document %s: %s", doc.name, e,
+            logger.error("Unicode issue on document %s: %s", doc.name, e,
                          **error_kwargs)
         except Exception as e:
-            logger.error(u"Other issue on document %s: %s", doc.name, e,
+            logger.error("Other issue on document %s: %s", doc.name, e,
                          **error_kwargs)
 
         if doc.text:

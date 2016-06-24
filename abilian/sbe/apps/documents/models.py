@@ -630,11 +630,13 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def pdf(self):
+        if self.pdf_blob:
+            assert isinstance(self.pdf_blob.value, bytes)
         return self.pdf_blob and self.pdf_blob.value
 
     @pdf.setter
     def pdf(self, value):
-        assert isinstance(value, str)
+        assert isinstance(value, bytes)
         self.pdf_blob = Blob()
         self.pdf_blob.value = value
 
