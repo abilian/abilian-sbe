@@ -86,7 +86,8 @@ class EventCreateView(BaseEventView, views.ObjectCreate):
         return self.obj.community
 
 
-event_create_view = EventCreateView.as_view(b'new_event', view_endpoint='.event')
+event_create_view = EventCreateView.as_view(b'new_event',
+                                            view_endpoint='.event')
 route('/new_event/')(event_create_view)
 
 
