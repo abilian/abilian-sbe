@@ -4,6 +4,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from sqlalchemy import Column, DateTime, Unicode
+from sqlalchemy.event import listens_for
 from sqlalchemy.orm import backref, relationship
 
 from abilian.core.entities import SEARCHABLE, Entity
@@ -32,3 +33,10 @@ class Event(Entity):
     end = Column(DateTime)
 
     url = Column(Unicode, nullable=False, default="")
+
+
+@listens_for(Event.title, "set", active_history=True)
+def _event_sync_name_title(entity, new_value, old_value, initiator):
+    if entity.name != new_value:
+        entity.name = new_value
+    return new_value
