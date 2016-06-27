@@ -456,10 +456,9 @@ class BaseContent(CmisObject):
         content name so that 'xxx.pdf' is not flagged as binary/octet-stream for
         example
         """
-        if not content_type or content_type in ('application/octet-stream',
-                                                'binary/octet-stream',
-                                                'application/binary',
-                                                'multipart/octet-stream'):
+        if not content_type or content_type in (
+                'application/octet-stream', 'binary/octet-stream',
+                'application/binary', 'multipart/octet-stream'):
             # absent or generic content type: try to find something more useful to be
             # able to do preview/indexing/...
             guessed_content_type = mimetypes.guess_type(self.title,

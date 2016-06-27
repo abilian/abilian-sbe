@@ -4,14 +4,14 @@ Forum views
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-from datetime import datetime, date
+from datetime import date, datetime
 
 from flask import g, render_template
+from toolz import groupby
 
 from abilian.i18n import _l
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction
-from toolz import groupby
 
 from ..communities.blueprint import Blueprint
 from ..communities.views import default_view_kw
@@ -31,10 +31,12 @@ def index():
         .filter(Event.end > datetime.now()) \
         .order_by(Event.start) \
         .all()
+
     def get_month(event):
         year = event.start.year
         month = event.start.month
         return date(year, month, 1)
+
     groups = sorted(groupby(get_month, events).items())
     ctx = {'groups': groups,}
     return render_template('calendar/index.html', **ctx)
@@ -46,10 +48,12 @@ def archives():
         .order_by(Event.start) \
         .filter(Event.end <= datetime.now()) \
         .all()
+
     def get_month(event):
         year = event.start.year
         month = event.start.month
         return date(year, month, 1)
+
     groups = sorted(groupby(get_month, events).items())
     ctx = {'groups': groups,}
     return render_template('calendar/archives.html', **ctx)
