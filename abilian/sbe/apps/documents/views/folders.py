@@ -659,7 +659,7 @@ def download_multiple(folder):
         zip_fn,
         mimetype="application/zip",
         as_attachment=True,
-        attachment_filename=quote(folder.title.encode("utf8") + ".zip"))
+        attachment_filename=quote(folder.title.encode("utf8") + b".zip"))
     resp.headers.add('Content-Length', str(size))
     return resp
 
