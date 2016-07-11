@@ -1,3 +1,6 @@
+# Tests fail w/ 1.0.14
+SQLAlchemy==1.0.13
+
 # Abilian Core
 abilian-core>=0.6.10.2
 
