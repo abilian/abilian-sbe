@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import dateutil.parser
 from flask import current_app
 from flask_login import current_user
-from future.utils import raise_from
+from six import raise_from
 
 from abilian.core.util import utcnow
 
