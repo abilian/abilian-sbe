@@ -155,32 +155,32 @@ class ActivityEntryPresenter(BasePresenter):
     @property
     def body(self):
         if isinstance(self.object, Thread):
-            body = bleach.clean(self.object.posts[0].body_html,
-                                tags=[],
-                                strip=True)
+            body = bleach.clean(
+                self.object.posts[0].body_html, tags=[], strip=True)
             body = Markup(body).unescape()
             if len(body) > 400:
                 body = body[0:400] + "…"
-            body = render_template_string(POST_BODY_TEMPLATE,
-                                          object_url=self.object_url,
-                                          body=body,
-                                          post=self.object.posts[0])
+            body = render_template_string(
+                POST_BODY_TEMPLATE,
+                object_url=self.object_url,
+                body=body,
+                post=self.object.posts[0])
             return Markup(body)
         elif isinstance(self.object, Post):
             body = bleach.clean(self.object.body_html, tags=[], strip=True)
             body = Markup(body).unescape()
             if len(body) > 400:
                 body = body[0:400] + "…"
-            body = render_template_string(POST_BODY_TEMPLATE,
-                                          object_url=self.object_url,
-                                          body=body,
-                                          post=self.object)
+            body = render_template_string(
+                POST_BODY_TEMPLATE,
+                object_url=self.object_url,
+                body=body,
+                post=self.object)
             return Markup(body)
         elif isinstance(self.object, Document):
             parents = doc_breadcrumb(self.object)
-            body = render_template_string(DOCUMENT_BODY_TEMPLATE,
-                                          obj=self.object,
-                                          parents=parents)
+            body = render_template_string(
+                DOCUMENT_BODY_TEMPLATE, obj=self.object, parents=parents)
             return Markup(body)
         else:
             return ""

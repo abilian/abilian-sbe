@@ -8,10 +8,10 @@ Also, we're using pytest-splinter
 (https://github.com/pytest-dev/pytest-splinter) to inject the browser as
 a pytest fixture.
 """
+import multiprocessing
+import shutil
 import socket
 import tempfile
-import shutil
-import multiprocessing
 
 import pytest
 from werkzeug.serving import select_ip_version
@@ -59,9 +59,10 @@ def splinter_driver_kwargs():
     """Webdriver kwargs."""
     # set resourceTimeout in the hope it will help jenkins kill phantomjs after
     # tests
-    return dict(desired_capabilities={
-        'phantomjs.page.settings.resourceTimeout': '30000',  # 30s
-    },)
+    return dict(
+        desired_capabilities={
+            'phantomjs.page.settings.resourceTimeout': '30000',  # 30s
+        },)
 
 
 @pytest.fixture(scope='module')

@@ -95,9 +95,8 @@ class CommunityDbTestCase(BaseTestCase):
         assert l[0].user == user
         assert l[0].role is MEMBER
 
-        when_set.assert_called_once_with(self.community,
-                                         is_new=True,
-                                         membership=l[0])
+        when_set.assert_called_once_with(
+            self.community, is_new=True, membership=l[0])
         assert not when_removed.called
         when_set.reset_mock()
 
@@ -118,9 +117,8 @@ class CommunityDbTestCase(BaseTestCase):
 
         assert self.community.get_role(user) == "manager"
 
-        when_set.assert_called_once_with(self.community,
-                                         is_new=False,
-                                         membership=l[0])
+        when_set.assert_called_once_with(
+            self.community, is_new=False, membership=l[0])
         assert not when_removed.called
         when_set.reset_mock()
 
@@ -133,8 +131,8 @@ class CommunityDbTestCase(BaseTestCase):
         assert l == []
 
         assert not when_set.called
-        when_removed.assert_called_once_with(self.community,
-                                             membership=membership)
+        when_removed.assert_called_once_with(
+            self.community, membership=membership)
 
     def test_folder_roles(self):
         user = User.query.first()
@@ -197,8 +195,8 @@ class CommunityIndexingTestCase(BaseIndexingTestCase):
 
     def test_default_view_kw_with_hit(self):
         with self.login(self.user):
-            hit = self.svc.search(u'community',
-                                  object_types=(Community.entity_type,))[0]
+            hit = self.svc.search(
+                u'community', object_types=(Community.entity_type,))[0]
             kw = views.default_view_kw({}, hit, hit['object_type'], hit['id'])
 
         assert kw == {'community_id': self.community.slug}
@@ -225,9 +223,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
         with self.client_login(user, 'azerty'):
             response = self.client.get(url)
             assert response.status_code == 302
-            expected_url = url_for("wall.index",
-                                   community_id=self.community.slug,
-                                   _external=True)
+            expected_url = url_for(
+                "wall.index", community_id=self.community.slug, _external=True)
             assert response.headers['Location'] == expected_url
 
     def test_community_settings(self):
@@ -265,8 +262,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
 
     def test_members(self):
         with self.client_login(self.user.email, 'azerty'):
-            url = url_for("communities.members",
-                          community_id=self.community.slug)
+            url = url_for(
+                "communities.members", community_id=self.community.slug)
             response = self.client.get(url)
             self.assert_200(response)
 

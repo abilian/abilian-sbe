@@ -18,9 +18,8 @@ from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
 import whoosh.query as wq
-from flask import (Markup, current_app, flash, g, jsonify, make_response,
-                   redirect, render_template, render_template_string, request,
-                   send_file)
+from flask import Markup, current_app, flash, g, jsonify, make_response, \
+    redirect, render_template, render_template_string, request, send_file
 from flask._compat import text_type
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError
@@ -39,10 +38,9 @@ from abilian.web.views import default_view
 from ..models import Document, Folder, icon_for, icon_url
 from ..repository import repository
 from ..search import reindex_tree
-from .util import (breadcrumbs_for, check_manage_access, check_read_access,
-                   check_write_access, create_document, edit_object,
-                   get_document, get_folder, get_new_filename,
-                   get_selected_objects)
+from .util import breadcrumbs_for, check_manage_access, check_read_access, \
+    check_write_access, create_document, edit_object, get_document, \
+    get_folder, get_new_filename, get_selected_objects
 from .views import blueprint
 
 route = blueprint.route
@@ -63,10 +61,11 @@ def folder_view(folder_id):
     folder = get_folder(folder_id)
     bc = breadcrumbs_for(folder)
     actions.context['object'] = folder
-    ctx = dict(folder=folder,
-               children=folder.filtered_children,
-               breadcrumbs=bc,
-               csrf_token=csrf.field())
+    ctx = dict(
+        folder=folder,
+        children=folder.filtered_children,
+        breadcrumbs=bc,
+        csrf_token=csrf.field())
     return render_template("documents/folder.html", **ctx)
 
 
@@ -78,15 +77,14 @@ def folder_json(folder_id):
     folder_url = partial(url_for, '.folder_json')
     result = {}
     has_permission = security.has_permission
-    result['current_folder_selectable'] = has_permission(g.user,
-                                                         WRITE,
-                                                         folder,
-                                                         inherit=True)
+    result['current_folder_selectable'] = has_permission(
+        g.user, WRITE, folder, inherit=True)
     folders = result['folders'] = []
     bc = result['breadcrumbs'] = []
     subfolders = sorted(
         (f for f in folder.subfolders
-         if has_permission(g.user, READ, f, inherit=True)),
+         if has_permission(
+             g.user, READ, f, inherit=True)),
         key=lambda f: f.title)
 
     parent = folder
@@ -98,8 +96,8 @@ def folder_json(folder_id):
 
         data = {
             'id': parent.id,
-            'url': folder_url(folder_id=parent.id,
-                              community_id=parent.community.slug),
+            'url': folder_url(
+                folder_id=parent.id, community_id=parent.community.slug),
             'title': parent.title,
         }
         bc.append(data)
@@ -115,8 +113,8 @@ def folder_json(folder_id):
     for folder in subfolders:
         data = {
             'id': folder.id,
-            'url': folder_url(folder_id=folder.id,
-                              community_id=folder.community.slug),
+            'url': folder_url(
+                folder_id=folder.id, community_id=folder.community.slug),
             'title': folder.title,
         }
         folders.append(data)
@@ -202,23 +200,26 @@ def permissions(folder_id):
             elif self.entry.group:
                 principal = render(self._GROUP_FMT, group=self.entry.group)
 
-            self.msg = Markup(msg.format(date=self.date,
-                                         manager=self.manager,
-                                         role=self.entry.role,
-                                         principal=principal))
+            self.msg = Markup(
+                msg.format(
+                    date=self.date,
+                    manager=self.manager,
+                    role=self.entry.role,
+                    principal=principal))
 
     audit_entries = [EntryPresenter(e) for e in security.entries_for(folder)]
     csrf_token = csrf.field()
 
-    ctx = dict(folder=folder,
-               users_and_local_roles=users_and_local_roles,
-               users_and_inherited_roles=users_and_inherited_roles,
-               groups_and_local_roles=groups_and_local_roles,
-               groups_and_inherited_roles=groups_and_inherited_roles,
-               audit_entries=audit_entries,
-               csrf_token=csrf_token,
-               all_groups=all_groups,
-               breadcrumbs=bc)
+    ctx = dict(
+        folder=folder,
+        users_and_local_roles=users_and_local_roles,
+        users_and_inherited_roles=users_and_inherited_roles,
+        groups_and_local_roles=groups_and_local_roles,
+        groups_and_inherited_roles=groups_and_inherited_roles,
+        audit_entries=audit_entries,
+        csrf_token=csrf_token,
+        all_groups=all_groups,
+        breadcrumbs=bc)
 
     return render_template("documents/permissions.html", **ctx)
 
@@ -235,22 +236,25 @@ def permissions_update(folder_id):
         inherit_security = (action == "activate_inheritance")
 
         if not (inherit_security or has_permission(
-                g.user, 'manage', folder,
-                inherit=False)):
+                g.user, 'manage', folder, inherit=False)):
             # don't let user shoot himself in the foot
             flash(_('You must have the "manager" local role on this folder in '
                     'order to deactivate inheritance.'), 'error')
-            return redirect(url_for(".permissions",
-                                    folder_id=folder_id,
-                                    community_id=folder.community.slug))
+            return redirect(
+                url_for(
+                    ".permissions",
+                    folder_id=folder_id,
+                    community_id=folder.community.slug))
 
         security.set_inherit_security(folder, inherit_security)
         db.session.add(folder)
         reindex_tree(folder)
         db.session.commit()
-        return redirect(url_for(".permissions",
-                                folder_id=folder_id,
-                                community_id=folder.community.slug))
+        return redirect(
+            url_for(
+                ".permissions",
+                folder_id=folder_id,
+                community_id=folder.community.slug))
 
     elif action == "add-user-role":
         role = request.form.get("role").lower()
@@ -260,9 +264,11 @@ def permissions_update(folder_id):
         security.grant_role(user, role, folder)
         reindex_tree(folder)
         db.session.commit()
-        return redirect(url_for(".permissions",
-                                folder_id=folder_id,
-                                community_id=folder.community.slug))
+        return redirect(
+            url_for(
+                ".permissions",
+                folder_id=folder_id,
+                community_id=folder.community.slug))
 
     elif action == "add-group-role":
         role = request.form.get("role").lower()
@@ -272,9 +278,11 @@ def permissions_update(folder_id):
         security.grant_role(group, role, folder)
         reindex_tree(folder)
         db.session.commit()
-        return redirect(url_for(".permissions",
-                                folder_id=folder_id,
-                                community_id=folder.community.slug))
+        return redirect(
+            url_for(
+                ".permissions",
+                folder_id=folder_id,
+                community_id=folder.community.slug))
 
     else:
         action, args = request.form.items()[0]
@@ -290,8 +298,7 @@ def permissions_update(folder_id):
             security.ungrant_role(user, role, folder)
 
             if (user == g.user and role == 'manager' and not has_permission(
-                    g.user, 'manage', folder,
-                    inherit=True)):
+                    g.user, 'manage', folder, inherit=True)):
 
                 transaction.rollback()
                 flash(_('Cannot remove "manager" local role for yourself: you '
@@ -312,8 +319,7 @@ def permissions_update(folder_id):
             security.ungrant_role(group, role, folder)
 
             if (role == 'manager' and not has_permission(
-                    g.user, 'manage', folder,
-                    inherit=True)):
+                    g.user, 'manage', folder, inherit=True)):
                 transaction.rollback()
                 flash(_('Cannot remove "manager" local role for group "{group}": you'
                         ' don\'t have "manager" role by security inheritance or by '
@@ -327,9 +333,11 @@ def permissions_update(folder_id):
                 transaction.commit()
 
         db.session.commit()
-        return redirect(url_for(".permissions",
-                                folder_id=folder_id,
-                                community_id=folder.community.slug))
+        return redirect(
+            url_for(
+                ".permissions",
+                folder_id=folder_id,
+                community_id=folder.community.slug))
 
 
 @route("/folder/<int:folder_id>/permissions_export")
@@ -559,8 +567,9 @@ def explore_archive(fd, filename=None, uncompress=False):
                     except UnicodeDecodeError:
                         filename = filename.decode('cp437')
 
-                if any(pattern.match(filename) is not None
-                       for pattern in ARCHIVE_IGNORE_FILES):
+                if any(
+                        pattern.match(filename) is not None
+                        for pattern in ARCHIVE_IGNORE_FILES):
                     continue
 
                 filepath = filename.split('/')
@@ -583,8 +592,8 @@ def upload_new(folder):
     path_cache = {}  # mapping folder path in zip: folder instance
 
     for upload_fd in fds:
-        for filepath, fd in explore_archive(upload_fd,
-                                            uncompress=uncompress_files):
+        for filepath, fd in explore_archive(
+                upload_fd, uncompress=uncompress_files):
             folder = base_folder
             parts = []
             # traverse to final directory, create intermediate if necessary. Folders
@@ -672,11 +681,8 @@ def delete_multiple(folder):
     for obj in docs + folders:
         app = current_app._get_current_object()
         community = g.community._model
-        activity.send(app,
-                      actor=g.user,
-                      verb="delete",
-                      object=obj,
-                      target=community)
+        activity.send(
+            app, actor=g.user, verb="delete", object=obj, target=community)
         repository.delete_object(obj)
 
     if docs + folders:
@@ -730,8 +736,7 @@ def move_multiple(folder):
         return redirect(current_folder_url)
 
     if not security.has_permission(
-            g.user, 'write', target_folder,
-            inherit=True):
+            g.user, 'write', target_folder, inherit=True):
         flash(_('You are not allowed to write in folder "{folder}"'
         ).format(folder=target_folder.title),
               'error')

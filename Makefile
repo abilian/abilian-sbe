@@ -99,8 +99,9 @@ mypy:
 	mypy --py2 --silent-imports abilian
 
 format:
-	isort -rc abilian
-	yapf --style google -r -i abilian demo tests
+	isort -rc abilian demo tests
+	-yapf --style google -r -i abilian demo tests
+	isort -rc abilian demo tests
 
 #
 # running

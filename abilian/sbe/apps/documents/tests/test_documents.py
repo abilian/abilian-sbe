@@ -14,10 +14,10 @@ from werkzeug.datastructures import FileStorage
 
 from abilian.sbe.apps.communities.models import WRITER
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
-from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
-                                                     CommunityIndexingTestCase)
-from abilian.sbe.apps.documents.models import (Document, Folder,
-                                               PathAndSecurityIndexable, db)
+from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
+    CommunityIndexingTestCase
+from abilian.sbe.apps.documents.models import Document, Folder, \
+    PathAndSecurityIndexable, db
 from abilian.sbe.apps.documents.views import util as view_util
 from abilian.web.util import url_for
 
@@ -169,9 +169,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             g.community = CommunityPresenter(self.community)
             name = u'document'
             fs = FileStorage(
-                StringIO(u'content'),
-                filename=name,
-                content_type='text/plain')
+                StringIO(u'content'), filename=name, content_type='text/plain')
             doc = view_util.create_document(self.folder, fs)
             self.session.flush()
             assert doc.parent == self.folder
@@ -179,9 +177,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
             # test upload with same name: should be renamed
             fs = FileStorage(
-                StringIO(u'content'),
-                filename=name,
-                content_type='text/plain')
+                StringIO(u'content'), filename=name, content_type='text/plain')
             doc2 = view_util.create_document(self.folder, fs)
             self.session.flush()
             assert doc2.parent == self.folder
@@ -192,8 +188,9 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
     def test_home(self):
         with self.client_login(self.user.email, password='azerty'):
-            response = self.get(url_for('documents.index',
-                                        community_id=self.community.slug))
+            response = self.get(
+                url_for(
+                    'documents.index', community_id=self.community.slug))
             self.assert_status(response, 302)
             self.assertEqual(response.headers['Location'],
                              u'http://localhost/communities/{}/docs/folder/{}'
@@ -210,23 +207,26 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         }
 
         folder = self.community.folder
-        url = url_for("documents.folder_post",
-                      community_id=self.community.slug,
-                      folder_id=folder.id)
+        url = url_for(
+            "documents.folder_post",
+            community_id=self.community.slug,
+            folder_id=folder.id)
         response = self.client.post(url, data=data)
         self.assert_status(response, 302)
 
         doc = folder.children[0]
         assert doc.title == title
-        url = url_for("documents.document_view",
-                      community_id=self.community.slug,
-                      doc_id=doc.id)
+        url = url_for(
+            "documents.document_view",
+            community_id=self.community.slug,
+            doc_id=doc.id)
         response = self.get(url)
         self.assert_200(response)
 
-        url = url_for("documents.document_download",
-                      community_id=self.community.slug,
-                      doc_id=doc.id)
+        url = url_for(
+            "documents.document_download",
+            community_id=self.community.slug,
+            doc_id=doc.id)
         response = self.get(url)
         self.assert_200(response)
         assert response.headers['Content-Type'] == content_type
@@ -235,10 +235,11 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         assert response.data == content
 
         if test_preview:
-            url = url_for("documents.document_preview_image",
-                          community_id=self.community.slug,
-                          doc_id=doc.id,
-                          size=500)
+            url = url_for(
+                "documents.document_preview_image",
+                community_id=self.community.slug,
+                doc_id=doc.id,
+                size=500)
             response = self.get(url)
             if assert_preview_available:
                 self.assert_200(response)
@@ -248,15 +249,17 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 self.assert_302(response)
                 assert response.headers['Cache-Control'] == 'no-cache'
 
-        url = url_for("documents.document_delete",
-                      community_id=self.community.slug,
-                      doc_id=doc.id)
+        url = url_for(
+            "documents.document_delete",
+            community_id=self.community.slug,
+            doc_id=doc.id)
         response = self.client.post(url)
         self.assert_302(response)
 
-        url = url_for("documents.document_view",
-                      community_id=self.community.slug,
-                      doc_id=doc.id)
+        url = url_for(
+            "documents.document_view",
+            community_id=self.community.slug,
+            doc_id=doc.id)
         response = self.get(url)
         self.assert_404(response)
 
@@ -278,9 +281,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
     def test_binary_upload(self):
         NAME = u"random.bin"
         with self.client_login(self.user.email, password='azerty'):
-            self._test_upload(NAME,
-                              "application/octet-stream",
-                              assert_preview_available=False)
+            self._test_upload(
+                NAME,
+                "application/octet-stream",
+                assert_preview_available=False)
 
     def test_explore_archive(self):
         from abilian.sbe.apps.documents.views.folders import explore_archive
@@ -309,9 +313,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         files.append((self.open_file('content.zip'), u'content.zip',
                       'application/zip'))
         data = {'file': files, 'action': 'upload', 'uncompress_files': True}
-        url = url_for("documents.folder_post",
-                      community_id=self.community.slug,
-                      folder_id=folder.id)
+        url = url_for(
+            "documents.folder_post",
+            community_id=self.community.slug,
+            folder_id=folder.id)
         with self.client_login(self.user.email, password='azerty'):
             response = self.client.post(url, data=data)
 
@@ -330,18 +335,20 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 'action': 'upload',
             }
             folder = self.community.folder
-            url = url_for("documents.folder_post",
-                          community_id=self.community.slug,
-                          folder_id=folder.id)
+            url = url_for(
+                "documents.folder_post",
+                community_id=self.community.slug,
+                folder_id=folder.id)
             response = self.client.post(url, data=data)
             self.assert_302(response)
 
             doc = folder.children[0]
             data = {'action': 'download',
                     'object-selected': ["cmis:document:%d" % doc.id]}
-            url = url_for("documents.folder_post",
-                          community_id=self.community.slug,
-                          folder_id=folder.id)
+            url = url_for(
+                "documents.folder_post",
+                community_id=self.community.slug,
+                folder_id=folder.id)
             response = self.client.post(url, data=data)
             self.assert_200(response)
             assert response.content_type == 'application/zip'
@@ -353,9 +360,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         with self.client_login(self.user.email, password='azerty'):
             data = {'action': 'new', 'title': u'my folder'}
             folder = self.community.folder
-            url = url_for("documents.folder_post",
-                          community_id=self.community.slug,
-                          folder_id=folder.id)
+            url = url_for(
+                "documents.folder_post",
+                community_id=self.community.slug,
+                folder_id=folder.id)
             response = self.client.post(url, data=data)
             self.assert_302(response)
 
@@ -367,17 +375,19 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 'file': (self.open_file(title), title, content_type),
                 'action': 'upload',
             }
-            url = url_for("documents.folder_post",
-                          community_id=self.community.slug,
-                          folder_id=my_folder.id)
+            url = url_for(
+                "documents.folder_post",
+                community_id=self.community.slug,
+                folder_id=my_folder.id)
             response = self.client.post(url, data=data)
             self.assert_302(response)
 
             data = {'action': 'download',
                     'object-selected': ["cmis:folder:%d" % my_folder.id]}
-            url = url_for("documents.folder_post",
-                          community_id=self.community.slug,
-                          folder_id=folder.id)
+            url = url_for(
+                "documents.folder_post",
+                community_id=self.community.slug,
+                folder_id=folder.id)
             response = self.client.post(url, data=data)
             self.assert_200(response)
             assert response.content_type == 'application/zip'
@@ -400,25 +410,28 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                     'file': (StringIO('file content'), filename, content_type),
                     'action': 'upload',
                 }
-                url = url_for("documents.folder_post",
-                              community_id=self.community.slug,
-                              folder_id=folder.id)
+                url = url_for(
+                    "documents.folder_post",
+                    community_id=self.community.slug,
+                    folder_id=folder.id)
                 self.client.post(url, data=data)
 
             ascii_doc = folder.children[0]
             unicode_doc = folder.children[1]
 
             def get_send_url(doc_id):
-                return url_for('documents.document_send',
-                               community_id=self.community.slug,
-                               doc_id=doc_id)
+                return url_for(
+                    'documents.document_send',
+                    community_id=self.community.slug,
+                    doc_id=doc_id)
 
             # mail ascii filename
             with mail.record_messages() as outbox:
                 url = get_send_url(ascii_doc.id)
-                rv = self.client.post(url,
-                                      data={'recipient': 'dest@example.com',
-                                            'message': u'Voilà un fichier'})
+                rv = self.client.post(
+                    url,
+                    data={'recipient': 'dest@example.com',
+                          'message': u'Voilà un fichier'})
                 self.assertEqual(rv.status_code, 302,
                                  "expected 302, got:" + rv.status)
                 assert len(outbox) == 1
@@ -433,9 +446,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             # mail unicode filename
             with mail.record_messages() as outbox:
                 url = get_send_url(unicode_doc.id)
-                rv = self.client.post(url,
-                                      data={'recipient': 'dest@example.com',
-                                            'message': u'Voilà un fichier'})
+                rv = self.client.post(
+                    url,
+                    data={'recipient': 'dest@example.com',
+                          'message': u'Voilà un fichier'})
                 assert rv.status_code == 302
                 assert len(outbox) == 1
                 msg = outbox[0]

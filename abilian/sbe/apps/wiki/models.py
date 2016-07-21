@@ -6,16 +6,16 @@ from __future__ import absolute_import
 from datetime import datetime
 
 from flask import g
-from sqlalchemy import (Column, DateTime, ForeignKey, Integer, Unicode,
-                        UnicodeText, UniqueConstraint)
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, Unicode, \
+    UnicodeText, UniqueConstraint
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 
 from abilian.core.entities import SEARCHABLE, Entity, db
 from abilian.core.models.subjects import User
-from abilian.sbe.apps.communities.models import (Community, CommunityIdColumn,
-                                                 community_content)
+from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
+    community_content
 from abilian.sbe.apps.documents.models import BaseContent
 
 from . import markup
@@ -35,13 +35,15 @@ class WikiPage(Entity):
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref("wiki", cascade="all, delete-orphan"))
+        backref=backref(
+            "wiki", cascade="all, delete-orphan"))
 
     #: The body, using some markup language (Markdown for now)
-    body_src = Column(UnicodeText,
-                      default=u"",
-                      nullable=False,
-                      info=SEARCHABLE | dict(index_to=('text',)))
+    body_src = Column(
+        UnicodeText,
+        default=u"",
+        nullable=False,
+        info=SEARCHABLE | dict(index_to=('text',)))
 
     __table_args__ = (UniqueConstraint('title', 'community_id'),)
 
@@ -137,9 +139,11 @@ class WikiPageAttachment(BaseContent):
     sbe_type = 'wikipage:attachment'
 
     _wikipage_id = Column(Integer, ForeignKey(WikiPage.id), nullable=True)
-    wikipage = relationship(WikiPage,
-                            primaryjoin=(_wikipage_id == WikiPage.id),
-                            backref=backref('attachments',
-                                            lazy='select',
-                                            order_by='WikiPageAttachment.name',
-                                            cascade='all, delete-orphan'))
+    wikipage = relationship(
+        WikiPage,
+        primaryjoin=(_wikipage_id == WikiPage.id),
+        backref=backref(
+            'attachments',
+            lazy='select',
+            order_by='WikiPageAttachment.name',
+            cascade='all, delete-orphan'))

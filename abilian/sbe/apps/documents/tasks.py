@@ -87,10 +87,11 @@ def preview_document(document_id):
             converter.to_image(document.content_digest, document.content,
                                document.content_type, 0, document.preview_size)
         except ConversionError as e:
-            logger.info('Preview failed: %s',
-                        str(e),
-                        exc_info=True,
-                        extra={'stack': True})
+            logger.info(
+                'Preview failed: %s',
+                str(e),
+                exc_info=True,
+                extra={'stack': True})
 
 
 @shared_task

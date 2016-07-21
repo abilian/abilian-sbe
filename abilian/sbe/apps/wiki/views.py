@@ -8,8 +8,8 @@ from os.path import dirname, join
 from urllib import quote
 
 import sqlalchemy as sa
-from flask import (current_app, flash, g, make_response, redirect,
-                   render_template, request)
+from flask import current_app, flash, g, make_response, redirect, \
+    render_template, request
 from markdown import markdown
 from markupsafe import Markup
 from sqlalchemy.orm.exc import NoResultFound
@@ -26,16 +26,14 @@ from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
-from abilian.web.views import (ObjectCreate, ObjectEdit, ObjectView,
-                               default_view)
+from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
+    default_view
 
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
-wiki = Blueprint("wiki",
-                 __name__,
-                 url_prefix="/wiki",
-                 template_folder="templates")
+wiki = Blueprint(
+    "wiki", __name__, url_prefix="/wiki", template_folder="templates")
 route = wiki.route
 
 
@@ -48,18 +46,18 @@ def init_wiki_values(endpoint, values):
 
     title = request.args.get('title', u'').strip()
     if title and title != 'Home':
-        g.breadcrumb.append(BreadcrumbItem(label=title,
-                                           url=Endpoint(
-                                               'wiki.page',
-                                               community_id=g.community.slug,
-                                               title=title)))
+        g.breadcrumb.append(
+            BreadcrumbItem(
+                label=title,
+                url=Endpoint(
+                    'wiki.page', community_id=g.community.slug, title=title)))
 
 
 @route('/')
 def index():
-    return redirect(url_for(".page",
-                            title='Home',
-                            community_id=g.community.slug))
+    return redirect(
+        url_for(
+            ".page", title='Home', community_id=g.community.slug))
 
 
 def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
@@ -108,9 +106,11 @@ class BasePageView(object):
                 else:
                     flash(_(u"This page doesn't exit. You must create it first."),
                            "warning")
-                    self.redirect(url_for(".page_new",
-                                          title=title,
-                                          community_id=g.community.slug))
+                    self.redirect(
+                        url_for(
+                            ".page_new",
+                            title=title,
+                            community_id=g.community.slug))
             actions.context['object'] = self.obj
         return args, kwargs
 
@@ -118,19 +118,18 @@ class BasePageView(object):
         return url_for(".index", community_id=g.community.slug)
 
     def view_url(self):
-        return url_for(self.view_endpoint,
-                       community_id=g.community.slug,
-                       title=self.obj.title)
+        return url_for(
+            self.view_endpoint,
+            community_id=g.community.slug,
+            title=self.obj.title)
 
 
 class PageView(BasePageView, ObjectView):
     template = 'wiki/page.html'
     view_endpoint = '.page'
     decorators = [
-        default_view(wiki,
-                     WikiPage,
-                     id_attr=None,
-                     kw_func=wiki_page_default_view_kw)
+        default_view(
+            wiki, WikiPage, id_attr=None, kw_func=wiki_page_default_view_kw)
     ]
 
     def init_object(self, args, kwargs):
@@ -140,9 +139,11 @@ class PageView(BasePageView, ObjectView):
             if title == u'Home':
                 self.obj = create_home_page()
             else:
-                return redirect(url_for(".page_edit",
-                                        title=title,
-                                        community_id=g.community.slug))
+                return redirect(
+                    url_for(
+                        ".page_edit",
+                        title=title,
+                        community_id=g.community.slug))
 
         actions.context['object'] = self.obj
         return args, kwargs
@@ -234,11 +235,13 @@ class PageEdit(BasePageView, ObjectEdit):
                         self.last_revision.body_src.splitlines(True),
                         current.body_src.splitlines(True)) if not l[0] == u'?'
                 ]
-                field.errors.append(Markup(render_template(
-                    'wiki/edit_conflict_error.html',
-                    current=current,
-                    current_diff=current_diff,
-                    edited_diff=edited_diff)))
+                field.errors.append(
+                    Markup(
+                        render_template(
+                            'wiki/edit_conflict_error.html',
+                            current=current,
+                            current_diff=current_diff,
+                            edited_diff=edited_diff)))
 
         return None
 
@@ -272,9 +275,9 @@ def page_source():
     try:
         page = get_page_by_title(title)
     except NoResultFound:
-        return redirect(url_for(".page_edit",
-                                title=title,
-                                community_id=g.community.slug))
+        return redirect(
+            url_for(
+                ".page_edit", title=title, community_id=g.community.slug))
 
     actions.context['object'] = page
     return render_template('wiki/source.html', page=page)
@@ -286,9 +289,9 @@ def page_changes():
     try:
         page = get_page_by_title(title)
     except NoResultFound:
-        return redirect(url_for(".page_edit",
-                                title=title,
-                                community_id=g.community.slug))
+        return redirect(
+            url_for(
+                ".page_edit", title=title, community_id=g.community.slug))
     revisions = page.revisions
     revisions = sorted(revisions, key=lambda x: -x.number)
     actions.context['object'] = page
@@ -301,9 +304,9 @@ def page_compare():
     try:
         page = get_page_by_title(title)
     except NoResultFound:
-        return redirect(url_for(".page_edit",
-                                title=title,
-                                community_id=g.community.slug))
+        return redirect(
+            url_for(
+                ".page_edit", title=title, community_id=g.community.slug))
     revisions = page.revisions
     revisions = sorted(revisions, key=lambda x: x.number)
     revs_to_compare = []
@@ -312,9 +315,9 @@ def page_compare():
             revs_to_compare.append(int(arg[3:]))
     if len(revs_to_compare) != 2:
         flash(_(u"You must check exactly 2 revisions."), "error")
-        return redirect(url_for(".page_changes",
-                                title=title,
-                                community_id=g.community.slug))
+        return redirect(
+            url_for(
+                ".page_changes", title=title, community_id=g.community.slug))
 
     revs_to_compare.sort()
     from_rev = revisions[revs_to_compare[0]]
@@ -330,11 +333,12 @@ def page_compare():
     diff = [line for line in diff if not line.startswith("?")]
 
     actions.context['object'] = page
-    return render_template('wiki/compare.html',
-                           page=page,
-                           diff=diff,
-                           rev1=from_rev,
-                           rev2=to_rev,)
+    return render_template(
+        'wiki/compare.html',
+        page=page,
+        diff=diff,
+        rev1=from_rev,
+        rev2=to_rev,)
 
 
 @route('/delete/', methods=["POST"])
@@ -350,11 +354,8 @@ def page_delete():
 
     app = current_app._get_current_object()
     community = g.community._model
-    activity.send(app,
-                  actor=g.user,
-                  verb="delete",
-                  object=page,
-                  target=community)
+    activity.send(
+        app, actor=g.user, verb="delete", object=page, target=community)
 
     db.session.commit()
     flash(_(u"Page %(title)s deleted.", title=title))

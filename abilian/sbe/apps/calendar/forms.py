@@ -59,9 +59,8 @@ for attr in ALLOWED_TAGS:
 
 
 class EventForm(Form):
-    title = StringField(label=_l("Title"),
-                        filters=(strip,),
-                        validators=[required()])
+    title = StringField(
+        label=_l("Title"), filters=(strip,), validators=[required()])
 
     start = DateTimeField(_l("Start"), validators=[required()])
     end = DateTimeField(_l("End"), validators=[required()])
@@ -77,11 +76,12 @@ class EventForm(Form):
         validators=[required()])
 
     def validate_description(self, field):
-        field.data = bleach.clean(field.data,
-                                  tags=ALLOWED_TAGS,
-                                  attributes=ALLOWED_ATTRIBUTES,
-                                  styles=ALLOWED_STYLES,
-                                  strip=True)
+        field.data = bleach.clean(
+            field.data,
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES,
+            styles=ALLOWED_STYLES,
+            strip=True)
 
     def validate_end(self, field):
         if self.start.data > self.end.data:

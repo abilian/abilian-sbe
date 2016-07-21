@@ -15,8 +15,8 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 
 from abilian.core.entities import SEARCHABLE, Entity
-from abilian.sbe.apps.communities.models import (Community, CommunityIdColumn,
-                                                 community_content)
+from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
+    community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 from abilian.services.indexing.adapter import SAAdapter
 
@@ -46,14 +46,12 @@ class Thread(Entity):
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref('threads', cascade="all, delete-orphan"))
+        backref=backref(
+            'threads', cascade="all, delete-orphan"))
 
     #: The thread title (aka subject)
-    _title = Column('title',
-                    Unicode(255),
-                    nullable=False,
-                    default=u"",
-                    info=SEARCHABLE)
+    _title = Column(
+        'title', Unicode(255), nullable=False, default=u"", info=SEARCHABLE)
 
     # title is defined has an hybrid property to allow name <-> title sync (2 way)
     @hybrid_property
@@ -68,11 +66,12 @@ class Thread(Entity):
         if self.name != title:
             self.name = title
 
-    posts = relationship('Post',
-                         primaryjoin='Thread.id == Post.thread_id',
-                         order_by='Post.created_at',
-                         cascade="all, delete-orphan",
-                         back_populates='thread',)
+    posts = relationship(
+        'Post',
+        primaryjoin='Thread.id == Post.thread_id',
+        order_by='Post.created_at',
+        cascade="all, delete-orphan",
+        back_populates='thread',)
 
     @property
     def closed(self):
@@ -117,9 +116,8 @@ class Post(Entity):
 
     #: The thread this post belongs to
     thread_id = Column(ForeignKey(Thread.id), nullable=False)
-    thread = relationship(Thread,
-                          foreign_keys=thread_id,
-                          back_populates='posts')
+    thread = relationship(
+        Thread, foreign_keys=thread_id, back_populates='posts')
 
     #: The post this post is a reply to, if any (currently not used)
     parent_post_id = Column(ForeignKey("forum_post.id"), nullable=True)
@@ -154,8 +152,8 @@ class ThreadIndexAdapter(SAAdapter):
 
     def get_document(self, obj):
         kw = super(ThreadIndexAdapter, self).get_document(obj)
-        kw['text'] = u' '.join(chain((kw['text'],), [p.body_html
-                                                     for p in obj.posts]))
+        kw['text'] = u' '.join(
+            chain((kw['text'],), [p.body_html for p in obj.posts]))
         return kw
 
 
@@ -205,9 +203,11 @@ class PostAttachment(BaseContent, CmisObject):
     sbe_type = 'forum_post:attachment'
 
     _post_id = Column(Integer, ForeignKey(Post.id), nullable=True)
-    post = relationship(Post,
-                        primaryjoin=(_post_id == Post.id),
-                        backref=backref('attachments',
-                                        lazy='select',
-                                        order_by='PostAttachment.name',
-                                        cascade='all, delete-orphan'))
+    post = relationship(
+        Post,
+        primaryjoin=(_post_id == Post.id),
+        backref=backref(
+            'attachments',
+            lazy='select',
+            order_by='PostAttachment.name',
+            cascade='all, delete-orphan'))

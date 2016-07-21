@@ -21,10 +21,8 @@ from abilian.web.action import actions
 from .presenters import ActivityEntryPresenter
 from .util import get_recent_entries
 
-wall = Blueprint("wall",
-                 __name__,
-                 url_prefix="/wall",
-                 template_folder="templates")
+wall = Blueprint(
+    "wall", __name__, url_prefix="/wall", template_folder="templates")
 route = wall.route
 
 

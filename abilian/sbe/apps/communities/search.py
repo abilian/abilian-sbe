@@ -17,11 +17,8 @@ logger = logging.getLogger(__name__)
 _COMMUNITY_CONTENT_FIELDNAME = 'is_community_content'
 _COMMUNITY_CONTENT_FIELD = wf.BOOLEAN()
 
-_COMMUNITY_ID_FIELD = wf.NUMERIC(numtype=int,
-                                 bits=64,
-                                 signed=False,
-                                 stored=True,
-                                 unique=False)
+_COMMUNITY_ID_FIELD = wf.NUMERIC(
+    numtype=int, bits=64, signed=False, stored=True, unique=False)
 _COMMUNITY_SLUG_FIELD = wf.ID(stored=True)
 
 _FIELDS = [

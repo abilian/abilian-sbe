@@ -27,8 +27,8 @@ def get_recent_entries(num=20, user=None, community=None):
     query = AE.query.options(sa.orm.joinedload(AE.object))
 
     if community:
-        query = query.filter(sa.or_(AE.target == g.community, AE.object ==
-                                    g.community))
+        query = query.filter(
+            sa.or_(AE.target == g.community, AE.object == g.community))
     if user:
         query = query.filter(AE.actor == user)
 
@@ -47,8 +47,10 @@ def get_recent_entries(num=20, user=None, community=None):
         if not community_ids:
             return []
 
-        query = query.filter(sa.or_(
-            AE.target_id.in_(community_ids), AE.object_id.in_(community_ids)))
+        query = query.filter(
+            sa.or_(
+                AE.target_id.in_(community_ids), AE.object_id.in_(
+                    community_ids)))
 
     query = query.order_by(AE.happened_at.desc()).limit(1000)
     # get twice entries as needed, but ceil to 100
@@ -68,11 +70,8 @@ def get_recent_entries(num=20, user=None, community=None):
             deleted = True
             continue
 
-        if (isinstance(entry.object, (Folder, Document)) and
-                not has_permission(current_user,
-                                   READ,
-                                   obj=entry.object,
-                                   inherit=True)):
+        if (isinstance(entry.object, (Folder, Document)) and not has_permission(
+                current_user, READ, obj=entry.object, inherit=True)):
             continue
 
         entries.append(entry)

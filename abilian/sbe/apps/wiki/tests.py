@@ -9,8 +9,8 @@ from markdown import Markdown
 from mock import MagicMock, patch
 
 from abilian.core.models.subjects import User
-from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
-                                                     CommunityIndexingTestCase)
+from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
+    CommunityIndexingTestCase
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
 
 from . import views
@@ -128,13 +128,14 @@ class TestIndexing(CommunityIndexingTestCase):
 class TestsViews(WikiBaseTestCase):
 
     def test_home(self):
-        response = self.client.get(url_for("wiki.index",
-                                           community_id=self.community.slug))
+        response = self.client.get(
+            url_for(
+                "wiki.index", community_id=self.community.slug))
         self.assertStatus(response, 302)
 
-        response = self.client.get(url_for("wiki.page",
-                                           title='Home',
-                                           community_id=self.community.slug))
+        response = self.client.get(
+            url_for(
+                "wiki.page", title='Home', community_id=self.community.slug))
         assert response.status_code == 200
 
     def test_create_page_initial_form(self):
@@ -160,17 +161,15 @@ class TestsViews(WikiBaseTestCase):
         response = self.client.post(url, data=data)
         assert response.status_code == 302
 
-        url = url_for("wiki.page",
-                      community_id=self.community.slug,
-                      title=title)
+        url = url_for(
+            "wiki.page", community_id=self.community.slug, title=title)
         response = self.client.get(url)
         assert response.status_code == 200
         self.assertIn(body, response.data)
 
         # edit
-        url = url_for("wiki.page_edit",
-                      community_id=self.community.slug,
-                      title=title)
+        url = url_for(
+            "wiki.page_edit", community_id=self.community.slug, title=title)
         response = self.client.get(url)
         assert response.status_code == 200
 
@@ -180,15 +179,13 @@ class TestsViews(WikiBaseTestCase):
         m = re.search('value="(.*?)"', line)
         page_id = int(m.group(1))
 
-        url = url_for("wiki.page_changes",
-                      community_id=self.community.slug,
-                      title=title)
+        url = url_for(
+            "wiki.page_changes", community_id=self.community.slug, title=title)
         response = self.client.get(url)
         assert response.status_code == 200
 
-        url = url_for("wiki.page_source",
-                      community_id=self.community.slug,
-                      title=title)
+        url = url_for(
+            "wiki.page_source", community_id=self.community.slug, title=title)
         response = self.client.get(url)
         assert response.status_code == 200
 
@@ -198,10 +195,11 @@ class TestsViews(WikiBaseTestCase):
         response = self.client.post(url, data=data)
         assert response.status_code == 302
 
-        url = url_for("wiki.page_compare",
-                      rev0="on",
-                      rev1="on",
-                      community_id=self.community.slug,
-                      title=title)
+        url = url_for(
+            "wiki.page_compare",
+            rev0="on",
+            rev1="on",
+            community_id=self.community.slug,
+            title=title)
         response = self.client.get(url)
         assert response.status_code == 200

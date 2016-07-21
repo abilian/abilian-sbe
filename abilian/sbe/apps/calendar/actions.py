@@ -24,9 +24,8 @@ class EventAction(CalendarAction):
 
     def url(self, context=None):
         event = context.get('object')
-        return url_for("." + self.name,
-                       community_id=g.community.slug,
-                       event_id=event.id)
+        return url_for(
+            "." + self.name, community_id=g.community.slug, event_id=event.id)
 
 
 def is_admin(context):
@@ -35,22 +34,15 @@ def is_admin(context):
 
 
 _actions = [
-    CalendarAction('calendar:global',
-                   'new_event',
-                   _l('Create a new event'),
-                   icon='plus'),
-    CalendarAction('calendar:global',
-                   'index',
-                   _l('Upcoming events'),
-                   icon='list'),
-    EventAction('calendar:event',
-                'event',
-                _l('View event'),
-                icon=FAIcon('eye')),
-    EventAction('calendar:event',
-                'event_edit',
-                _l('Edit event'),
-                icon=FAIcon('pencil')),
+    CalendarAction(
+        'calendar:global', 'new_event', _l('Create a new event'), icon='plus'),
+    CalendarAction(
+        'calendar:global', 'index', _l('Upcoming events'), icon='list'),
+    EventAction(
+        'calendar:event', 'event', _l('View event'), icon=FAIcon('eye')),
+    EventAction(
+        'calendar:event', 'event_edit', _l('Edit event'),
+        icon=FAIcon('pencil')),
 ]
 
 

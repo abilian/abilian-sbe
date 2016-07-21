@@ -124,8 +124,8 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
         if failed == failed_ids:
             # 5 minutes * (2** retry count)
             countdown = 300 * 2**batch_send_post_to_users.request.retries
-            batch_send_post_to_users.retry([post_id, list(failed)],
-                                           countdown=countdown)
+            batch_send_post_to_users.retry(
+                [post_id, list(failed)], countdown=countdown)
         else:
             batch_send_post_to_users.apply_async([post_id, list(failed)])
 
@@ -219,12 +219,10 @@ def send_post_to_user(community, post, member):
     SERVER_NAME = config.get('SERVER_NAME', u'example.com')
     list_id = u'"{} forum" <forum.{}.{}>'.format(community.name, community.slug,
                                                  SERVER_NAME)
-    forum_url = url_for('forum.index',
-                        community_id=community.slug,
-                        _external=True)
-    forum_archive = url_for('forum.archives',
-                            community_id=community.slug,
-                            _external=True)
+    forum_url = url_for(
+        'forum.index', community_id=community.slug, _external=True)
+    forum_archive = url_for(
+        'forum.archives', community_id=community.slug, _external=True)
 
     extra_headers = {
         'List-Id': list_id,
@@ -238,16 +236,18 @@ def send_post_to_user(community, post, member):
         name = sender.rsplit('@', 1)[0]
         domain = sender.rsplit('@', 1)[1]
         replyto = build_reply_email_address(name, post, member, domain)
-        msg = Message(subject,
-                      sender=sender,
-                      recipients=[recipient],
-                      reply_to=replyto,
-                      extra_headers=extra_headers)
+        msg = Message(
+            subject,
+            sender=sender,
+            recipients=[recipient],
+            reply_to=replyto,
+            extra_headers=extra_headers)
     else:
-        msg = Message(subject,
-                      sender=sender,
-                      recipients=[recipient],
-                      extra_headers=extra_headers)
+        msg = Message(
+            subject,
+            sender=sender,
+            recipients=[recipient],
+            extra_headers=extra_headers)
 
     msg.body = render_template_i18n(
         "forum/mail/new_message.txt",
@@ -268,8 +268,9 @@ def send_post_to_user(community, post, member):
     try:
         mail.send(msg)
     except:
-        logger.error("Send mail to user failed",
-                     exc_info=True)  # log to sentry if enabled
+        logger.error(
+            "Send mail to user failed",
+            exc_info=True)  # log to sentry if enabled
 
 
 def extract_content(payload, marker):
@@ -280,11 +281,12 @@ def extract_content(payload, marker):
 
 
 def validate_html(payload):
-    return bleach.clean(payload,
-                        tags=ALLOWED_TAGS,
-                        attributes=ALLOWED_ATTRIBUTES,
-                        styles=ALLOWED_STYLES,
-                        strip=True).strip()
+    return bleach.clean(
+        payload,
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRIBUTES,
+        styles=ALLOWED_STYLES,
+        strip=True).strip()
 
 
 def add_paragraph(newpost):
@@ -423,11 +425,8 @@ def process_email(message):
         obj_meta = post.meta.setdefault('abilian.sbe.forum', {})
         obj_meta['origin'] = u'email'
         obj_meta['send_by_email'] = True
-        activity.send(app,
-                      actor=g.user,
-                      verb='post',
-                      object=post,
-                      target=community)
+        activity.send(
+            app, actor=g.user, verb='post', object=post, target=community)
 
         for desc in attachments:
             attachment = PostAttachment(name=desc['filename'])

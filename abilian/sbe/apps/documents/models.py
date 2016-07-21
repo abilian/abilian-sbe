@@ -34,8 +34,8 @@ from abilian.core.models.blob import Blob
 from abilian.core.models.subjects import Group, User
 from abilian.services.conversion import converter
 from abilian.services.indexing import indexable_role
-from abilian.services.security import (Admin, Anonymous, InheritSecurity,
-                                       security)
+from abilian.services.security import Admin, Anonymous, InheritSecurity, \
+    security
 
 from . import tasks
 from .lock import Lock
@@ -83,11 +83,11 @@ class CmisObject(Entity, InheritSecurity):
     del index_to
 
     _title = Column('title', UnicodeText, nullable=False, default=u"")
-    description = Column(UnicodeText,
-                         nullable=False,
-                         default=u"",
-                         info=SEARCHABLE |
-                         dict(index_to=('description', 'text')))
+    description = Column(
+        UnicodeText,
+        nullable=False,
+        default=u"",
+        info=SEARCHABLE | dict(index_to=('description', 'text')))
 
     _parent_id = Column(Integer, ForeignKey('cmisobject.id'), nullable=True)
 
@@ -186,9 +186,10 @@ class PathAndSecurityIndexable(object):
     """
     Mixin for folder and documents indexation.
     """
-    __indexation_args__ = dict(index_to=(
-        ('_indexable_parent_ids', ('parent_ids',)),
-        ('_indexable_roles_and_users', ('allowed_roles_and_users',)),),)
+    __indexation_args__ = dict(
+        index_to=(('_indexable_parent_ids', ('parent_ids',)),
+                  ('_indexable_roles_and_users',
+                   ('allowed_roles_and_users',)),),)
 
     def _iter_to_root(self, skip_self=False):
         obj = self if not skip_self else self.parent
@@ -231,8 +232,9 @@ class PathAndSecurityIndexable(object):
             remaining = parent_allowed - obj_allowed
             # find users who can access 'obj' because of their group memberships
             # 1. extends groups in obj_allowed with their actual member list
-            extended_allowed = set(itertools.chain(*(p.members if isinstance(
-                p, Group) else (p,) for p in obj_allowed)))
+            extended_allowed = set(
+                itertools.chain(*(p.members if isinstance(p, Group) else (p,)
+                                  for p in obj_allowed)))
 
             # 2. remaining_users are users explicitly listed in parents but not on
             # obj. Are they in a group?
@@ -240,8 +242,9 @@ class PathAndSecurityIndexable(object):
             allowed |= (remaining_users & extended_allowed)
 
             # remaining groups: find if some users are eligible
-            remaining_groups_members = set(itertools.chain(*(
-                p.members for p in remaining if isinstance(p, Group))))
+            remaining_groups_members = set(
+                itertools.chain(*(p.members for p in remaining
+                                  if isinstance(p, Group))))
             allowed |= remaining_groups_members - extended_allowed
 
         # admin role is always granted access
@@ -270,10 +273,11 @@ class Folder(CmisObject, PathAndSecurityIndexable):
         "Folder",
         primaryjoin=(
             lambda: foreign(CmisObject._parent_id) == remote(Folder.id)),
-        backref=backref('subfolders',
-                        lazy="joined",
-                        order_by='Folder.title',
-                        cascade='all, delete-orphan'))
+        backref=backref(
+            'subfolders',
+            lazy="joined",
+            order_by='Folder.title',
+            cascade='all, delete-orphan'))
 
     @property
     def icon(self):
@@ -334,17 +338,13 @@ class Folder(CmisObject, PathAndSecurityIndexable):
     #
     @property
     def filtered_children(self):
-        return security.filter_with_permission(g.user,
-                                               "read",
-                                               self.children,
-                                               inherit=True)
+        return security.filter_with_permission(
+            g.user, "read", self.children, inherit=True)
 
     @property
     def filtered_subfolders(self):
-        return security.filter_with_permission(g.user,
-                                               "read",
-                                               self.subfolders,
-                                               inherit=True)
+        return security.filter_with_permission(
+            g.user, "read", self.subfolders, inherit=True)
 
     def get_local_roles_assignments(self):
         local_roles_assignments = security.get_role_assignements(self)
@@ -391,8 +391,8 @@ class Folder(CmisObject, PathAndSecurityIndexable):
                                                 principal.admins):
                         yield user
 
-        members = set(_iter_users(itertools.chain(local_roles,
-                                                  inherited_roles)))
+        members = set(
+            _iter_users(itertools.chain(local_roles, inherited_roles)))
         members = sorted(members, key=lambda u: (u.last_name, u.first_name))
         return members
 
@@ -403,9 +403,8 @@ class BaseContent(CmisObject):
     __tablename__ = None  # type: str  # type: str
 
     _content_id = Column(Integer, db.ForeignKey(Blob.id))
-    content_blob = relationship(Blob,
-                                cascade='all, delete',
-                                foreign_keys=[_content_id])
+    content_blob = relationship(
+        Blob, cascade='all, delete', foreign_keys=[_content_id])
 
     #: md5 digest (BTW: not sure they should be part of the public API).
     content_digest = Column(Text)
@@ -416,16 +415,17 @@ class BaseContent(CmisObject):
         default=0,
         nullable=False,
         server_default=sa.text('0'),
-        info=dict(searchable=True,
-                  index_to=(('content_length', wf.NUMERIC(stored=True)),)))
+        info=dict(
+            searchable=True,
+            index_to=(('content_length', wf.NUMERIC(stored=True)),)))
 
     #: MIME type of the content stream.
     # TODO: normalize mime type?
-    content_type = Column(Text,
-                          default="application/octet-stream",
-                          info=dict(searchable=True,
-                                    index_to=(
-                                        ('content_type', wf.ID(stored=True)),)))
+    content_type = Column(
+        Text,
+        default="application/octet-stream",
+        info=dict(
+            searchable=True, index_to=(('content_type', wf.ID(stored=True)),)))
 
     @property
     def content(self):
@@ -461,8 +461,8 @@ class BaseContent(CmisObject):
                 'application/binary', 'multipart/octet-stream'):
             # absent or generic content type: try to find something more useful to be
             # able to do preview/indexing/...
-            guessed_content_type = mimetypes.guess_type(self.title,
-                                                        strict=False)[0]
+            guessed_content_type = mimetypes.guess_type(
+                self.title, strict=False)[0]
             if (guessed_content_type and guessed_content_type !=
                     'application/vnd.ms-office.activeX'):
                 # mimetypes got an update: "random.bin" would be guessed as
@@ -514,10 +514,11 @@ class Document(BaseContent, PathAndSecurityIndexable):
     parent = relationship(
         "Folder",
         primaryjoin=(foreign(CmisObject._parent_id) == remote(Folder.id)),
-        backref=backref('documents',
-                        lazy="joined",
-                        order_by='Document.title',
-                        cascade='all, delete-orphan'))
+        backref=backref(
+            'documents',
+            lazy="joined",
+            order_by='Document.title',
+            cascade='all, delete-orphan'))
 
     PREVIEW_SIZE = 700
 
@@ -538,21 +539,20 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self.content_digest
 
     _text_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
-    text_blob = relationship(Blob,
-                             cascade='all, delete',
-                             foreign_keys=[_text_id])
+    text_blob = relationship(
+        Blob, cascade='all, delete', foreign_keys=[_text_id])
 
     _pdf_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
     pdf_blob = relationship(Blob, cascade='all, delete', foreign_keys=[_pdf_id])
 
     _preview_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
-    preview_blob = relationship(Blob,
-                                cascade='all, delete',
-                                foreign_keys=[_preview_id])
+    preview_blob = relationship(
+        Blob, cascade='all, delete', foreign_keys=[_preview_id])
 
-    language = Column(Text,
-                      info=dict(searchable=True,
-                                index_to=[('language', wf.ID(stored=True))]))
+    language = Column(
+        Text,
+        info=dict(
+            searchable=True, index_to=[('language', wf.ID(stored=True))]))
     size = Column(Integer)
     page_num = Column(Integer, default=1)
 

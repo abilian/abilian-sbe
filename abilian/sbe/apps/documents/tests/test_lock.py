@@ -19,9 +19,8 @@ def test_lock():
     l = Lock(user_id=3, user=u'Joe Smith', date=date)
 
     d = l.as_dict()
-    assert d == dict(user_id=3,
-                     user=u'Joe Smith',
-                     date=u'2015-10-22T14:58:42+00:00')
+    assert d == dict(
+        user_id=3, user=u'Joe Smith', date=u'2015-10-22T14:58:42+00:00')
     l = Lock.from_dict(d)
     assert l.user_id == 3
     assert l.user == u'Joe Smith'
@@ -34,10 +33,11 @@ class LockTestCase(BaseTestCase):
 
     def test_lock(self):
         session = self.app.db.session()
-        user = User(email=u'test@example.com',
-                    first_name=u'Joe',
-                    last_name=u'Smith',
-                    can_login=True)
+        user = User(
+            email=u'test@example.com',
+            first_name=u'Joe',
+            last_name=u'Smith',
+            can_login=True)
         other = User(email=u'other@exemple.com')
         session.add(user)
         session.add(other)
@@ -45,9 +45,8 @@ class LockTestCase(BaseTestCase):
 
         # set 30s lifetime
         self.app.config['SBE_LOCK_LIFETIME'] = 30
-        dt_patcher = mock.patch.object(lock,
-                                       'utcnow',
-                                       mock.Mock(wraps=lock.utcnow))
+        dt_patcher = mock.patch.object(
+            lock, 'utcnow', mock.Mock(wraps=lock.utcnow))
         with dt_patcher as mocked:
             created_at = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)
             mocked.return_value = created_at

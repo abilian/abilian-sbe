@@ -15,10 +15,8 @@ from ..actions import register_actions
 
 __all__ = ['blueprint']
 
-blueprint = Blueprint("documents",
-                      __name__,
-                      url_prefix="/docs",
-                      template_folder="../templates")
+blueprint = Blueprint(
+    "documents", __name__, url_prefix="/docs", template_folder="../templates")
 route = blueprint.route
 blueprint.record_once(register_actions)
 
@@ -27,7 +25,8 @@ blueprint.record_once(register_actions)
 def init_document_values(endpoint, values):
     g.current_tab = 'documents'
 
-    g.breadcrumb.append(BreadcrumbItem(label=_l(u'Documents'),
-                                       url=Endpoint(
-                                           'documents.index',
-                                           community_id=g.community.slug)))
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            label=_l(u'Documents'),
+            url=Endpoint(
+                'documents.index', community_id=g.community.slug)))

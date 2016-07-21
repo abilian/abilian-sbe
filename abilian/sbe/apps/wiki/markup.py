@@ -19,9 +19,8 @@ class UrlBuilder(object):
 
     def build(self, label, base, end):
         label = label.strip()
-        return url_for(".page",
-                       community_id=self.page.community.slug,
-                       title=label)
+        return url_for(
+            ".page", community_id=self.page.community.slug, title=label)
 
 
 def convert(page, text):

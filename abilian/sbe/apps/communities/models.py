@@ -11,8 +11,8 @@ from os.path import dirname, join
 import sqlalchemy as sa
 from blinker import ANY
 from flask import current_app
-from sqlalchemy import (Boolean, Column, DateTime, ForeignKey, Integer, String,
-                        Unicode, UniqueConstraint, and_)
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, \
+    String, Unicode, UniqueConstraint, and_
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import backref, relation, relationship
 from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE
@@ -47,14 +47,14 @@ class Membership(db.Model):
     id = Column(Integer, primary_key=True)
 
     user_id = Column(ForeignKey('user.id'), index=True, nullable=False)
-    user = relationship(User,
-                        lazy='joined',
-                        backref=backref('communautes_membership',
-                                        lazy='select'))
+    user = relationship(
+        User,
+        lazy='joined',
+        backref=backref(
+            'communautes_membership', lazy='select'))
 
     community_id = Column(
-        ForeignKey('community.id'),
-        index=True, nullable=False)
+        ForeignKey('community.id'), index=True, nullable=False)
     community = relationship('Community', lazy='joined')
 
     role = Column(RoleType())  # should be either 'member' or 'manager'
@@ -114,20 +114,18 @@ class Community(Entity):
 
     # : A public description.
     description = Column(
-        Unicode(500), default=u"",
-        nullable=False,
-        info=SEARCHABLE)
+        Unicode(500), default=u"", nullable=False, info=SEARCHABLE)
 
     #: An image or logo for this community.
     image_id = Column(ForeignKey(Blob.id), index=True)
     image = relationship(Blob, lazy='joined')
 
     #: The root folder for this community.
-    folder_id = Column(Integer,
-                       ForeignKey(Folder.id,
-                                  use_alter=True,
-                                  name='fk_community_root_folder'),
-                       unique=True)
+    folder_id = Column(
+        Integer,
+        ForeignKey(
+            Folder.id, use_alter=True, name='fk_community_root_folder'),
+        unique=True)
     folder = relation(Folder,
                       single_parent=True,  # required for delete-orphan
                       primaryjoin=(folder_id == Folder.id),
@@ -143,30 +141,24 @@ class Community(Entity):
     memberships = relationship(Membership, cascade="all, delete-orphan")
 
     #: direct access to :class:`User` members
-    members = relationship(User,
-                           secondary=Membership.__table__,
-                           viewonly=True,
-                           backref=backref('communities',
-                                           lazy='select',
-                                           viewonly=True))
+    members = relationship(
+        User,
+        secondary=Membership.__table__,
+        viewonly=True,
+        backref=backref(
+            'communities', lazy='select', viewonly=True))
 
     #: Number of members in this community.
-    membership_count = Column(Integer,
-                              default=0,
-                              nullable=False,
-                              info=NOT_AUDITABLE)
+    membership_count = Column(
+        Integer, default=0, nullable=False, info=NOT_AUDITABLE)
 
     #: Number of documents in this community.
-    document_count = Column(Integer,
-                            default=0,
-                            nullable=False,
-                            info=NOT_AUDITABLE)
+    document_count = Column(
+        Integer, default=0, nullable=False, info=NOT_AUDITABLE)
 
     #: Last time something happened in this community
-    last_active_at = Column(DateTime,
-                            default=datetime.utcnow,
-                            nullable=False,
-                            info=NOT_AUDITABLE)
+    last_active_at = Column(
+        DateTime, default=datetime.utcnow, nullable=False, info=NOT_AUDITABLE)
 
     # Various features for this community:
 

@@ -47,9 +47,10 @@ def _group_choices():
 
 class CommunityForm(Form):
     name = StringField(label=_l(u"Name"), validators=[required()])
-    description = TextAreaField(label=_l(u"Description"),
-                                validators=[required(), length(max=500)],
-                                widget=TextArea(resizeable="vertical"))
+    description = TextAreaField(
+        label=_l(u"Description"),
+        validators=[required(), length(max=500)],
+        widget=TextArea(resizeable="vertical"))
 
     linked_group = Select2Field(
         label=_l(u'Linked to group'),
@@ -57,21 +58,23 @@ class CommunityForm(Form):
             u'Manages a group of users through this community members.'),
         choices=_group_choices)
 
-    image = FileField(label=_l('Image'),
-                      widget=ImageInput(width=65, height=65),
-                      validators=[optional()])
+    image = FileField(
+        label=_l('Image'),
+        widget=ImageInput(
+            width=65, height=65),
+        validators=[optional()])
 
     type = Select2Field(label=_(u"Type"), validators=[required()],
                         filters=(strip,),
                         choices=[(_l(u'informative'), 'informative'),
                                  (_l(u'participative'), 'participative')])
 
-    has_documents = BooleanField(label=_l(u"Has documents"),
-                                 widget=BooleanWidget(on_off_mode=True))
-    has_wiki = BooleanField(label=_l(u"Has a wiki"),
-                            widget=BooleanWidget(on_off_mode=True))
-    has_forum = BooleanField(label=_l(u"Has a forum"),
-                             widget=BooleanWidget(on_off_mode=True))
+    has_documents = BooleanField(
+        label=_l(u"Has documents"), widget=BooleanWidget(on_off_mode=True))
+    has_wiki = BooleanField(
+        label=_l(u"Has a wiki"), widget=BooleanWidget(on_off_mode=True))
+    has_forum = BooleanField(
+        label=_l(u"Has a forum"), widget=BooleanWidget(on_off_mode=True))
 
     def validate_name(self, field):
         name = field.data = field.data.strip()

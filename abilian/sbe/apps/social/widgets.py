@@ -16,7 +16,9 @@ class UserPhotoInputWidget(object):
             options = kwargs.pop('widget_options')
             user_id = options.get('user_id')
 
-        return Markup(render_template('social/widget_user_photo.html',
-                                      field=field,
-                                      attrs=kwargs,
-                                      user_id=user_id))
+        return Markup(
+            render_template(
+                'social/widget_user_photo.html',
+                field=field,
+                attrs=kwargs,
+                user_id=user_id))

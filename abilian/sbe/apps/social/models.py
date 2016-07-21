@@ -39,9 +39,8 @@ class Message(Entity):
     group_id = Column(Integer, ForeignKey(Group.id))
 
     #: The group this message has been posted to.
-    group = relationship('Group',
-                         primaryjoin=(group_id == Group.id),
-                         lazy='joined')
+    group = relationship(
+        'Group', primaryjoin=(group_id == Group.id), lazy='joined')
 
     query = db.session.query_property(MessageQuery)
 

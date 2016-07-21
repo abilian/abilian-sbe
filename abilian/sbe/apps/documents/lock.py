@@ -39,9 +39,8 @@ class Lock(object):
     def as_dict(self):
         """Return a dict suitable for serialization to JSON.
         """
-        return dict(user_id=self.user_id,
-                    user=self.user,
-                    date=self.date.isoformat())
+        return dict(
+            user_id=self.user_id, user=self.user, date=self.date.isoformat())
 
     @staticmethod
     def from_dict(d):

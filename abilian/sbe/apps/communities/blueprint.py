@@ -65,8 +65,9 @@ def pull_community(endpoint, values):
     """url_value_preprocessor function.
     """
     g.nav['active'] = 'section:communities'
-    g.breadcrumb.append(BreadcrumbItem(label=_l(u'Communities'),
-                                       url=Endpoint('communities.index')))
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            label=_l(u'Communities'), url=Endpoint('communities.index')))
 
     try:
         slug = values.pop('community_id')

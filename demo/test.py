@@ -1,8 +1,8 @@
 #!./bin/python
 
 import subprocess
-import urllib
 import time
+import urllib
 
 # Some random number
 BIND = '0.0.0.0'

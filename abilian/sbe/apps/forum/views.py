@@ -9,8 +9,8 @@ from itertools import groupby
 from urllib import quote
 
 import sqlalchemy as sa
-from flask import (current_app, flash, g, make_response, render_template,
-                   request)
+from flask import current_app, flash, g, make_response, render_template, \
+    request
 from flask_babel import format_date
 from flask_login import current_user
 from six import text_type
@@ -33,10 +33,8 @@ from .tasks import send_post_by_email
 # TODO: move to config
 MAX_THREADS = 30
 
-forum = Blueprint("forum",
-                  __name__,
-                  url_prefix="/forum",
-                  template_folder="templates")
+forum = Blueprint(
+    "forum", __name__, url_prefix="/forum", template_folder="templates")
 route = forum.route
 
 
@@ -54,9 +52,11 @@ def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
 def init_forum_values(endpoint, values):
     g.current_tab = 'forum'
 
-    g.breadcrumb.append(BreadcrumbItem(
-        label=_l(u'Conversations'),
-        url=Endpoint('forum.index', community_id=g.community.slug)))
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            label=_l(u'Conversations'),
+            url=Endpoint(
+                'forum.index', community_id=g.community.slug)))
 
 
 @route('/')
@@ -66,9 +66,8 @@ def index():
         .order_by(Thread.created_at.desc())
     has_more = query.count() > MAX_THREADS
     threads = query.limit(MAX_THREADS).all()
-    return render_template("forum/index.html",
-                           threads=threads,
-                           has_more=has_more)
+    return render_template(
+        "forum/index.html", threads=threads, has_more=has_more)
 
 
 def group_monthly(entities_list):
@@ -94,8 +93,8 @@ def archives():
         .order_by(Thread.created_at.desc()).all()
 
     grouped_threads = group_monthly(all_threads)
-    return render_template('forum/archives.html',
-                           grouped_threads=grouped_threads)
+    return render_template(
+        'forum/archives.html', grouped_threads=grouped_threads)
 
 
 @route('/attachments/')
@@ -115,8 +114,8 @@ def attachments():
     posts_with_attachments.reverse()
 
     grouped_posts = group_monthly(posts_with_attachments)
-    return render_template('forum/attachments.html',
-                           grouped_posts=grouped_posts)
+    return render_template(
+        'forum/attachments.html', grouped_posts=grouped_posts)
 
 
 class BaseThreadView(object):
@@ -165,15 +164,12 @@ default_view(forum, Thread, 'thread_id', kw_func=default_view_kw)(thread_view)
 
 route('/<int:thread_id>/')(thread_view)
 route('/<int:thread_id>/attachments')(ThreadView.as_view(
-    'thread_attachments',
-    template='forum/thread_attachments.html'))
+    'thread_attachments', template='forum/thread_attachments.html'))
 
 
 class ThreadCreate(BaseThreadView, views.ObjectCreate):
-    POST_BUTTON = ButtonAction('form',
-                               'create',
-                               btn_class='primary',
-                               title=_l(u'Post this message'))
+    POST_BUTTON = ButtonAction(
+        'form', 'create', btn_class='primary', title=_l(u'Post this message'))
 
     title = _("New conversation")
 
@@ -243,8 +239,8 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
         return [self.POST_BUTTON, views.object.CANCEL_BUTTON]
 
 
-route('/new_thread/')(ThreadCreate.as_view('new_thread',
-                                           view_endpoint='.thread'))
+route('/new_thread/')(ThreadCreate.as_view(
+    'new_thread', view_endpoint='.thread'))
 
 
 class ThreadPostCreate(ThreadCreate):
@@ -268,8 +264,8 @@ class ThreadPostCreate(ThreadCreate):
         self.obj = self.post
 
 
-route('/<int:thread_id>/')(ThreadPostCreate.as_view('thread_post',
-                                                    view_endpoint='.thread'))
+route('/<int:thread_id>/')(ThreadPostCreate.as_view(
+    'thread_post', view_endpoint='.thread'))
 
 
 class ThreadDelete(BaseThreadView, views.ObjectDelete):
@@ -355,10 +351,12 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         self.obj.body_html = self.message_body
         obj_meta = self.obj.meta.setdefault('abilian.sbe.forum', {})
         history = obj_meta.setdefault('history', [])
-        history.append(dict(user_id=current_user.id,
-                            user=text_type(current_user),
-                            date=utc_dt(datetime.utcnow()).isoformat(),
-                            reason=self.form.reason.data,))
+        history.append(
+            dict(
+                user_id=current_user.id,
+                user=text_type(current_user),
+                date=utc_dt(datetime.utcnow()).isoformat(),
+                reason=self.form.reason.data,))
         self.obj.meta['abilian.sbe.forum'] = obj_meta  # trigger change for SA
 
         attachments_to_remove = []
@@ -411,10 +409,8 @@ def attachment_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
 
 
 @route('/<int:thread_id>/posts/<int:post_id>/attachment/<int:attachment_id>')
-@default_view(forum,
-              PostAttachment,
-              'attachment_id',
-              kw_func=attachment_kw_view_func)
+@default_view(
+    forum, PostAttachment, 'attachment_id', kw_func=attachment_kw_view_func)
 def attachment_download(thread_id, post_id, attachment_id):
     thread = Thread.query.get(thread_id)
     post = Post.query.get(post_id)

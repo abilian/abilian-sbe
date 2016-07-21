@@ -42,39 +42,46 @@ class CommunityTabAction(Action):
 
 _actions = (
     # Navigation
-    NavItem('section',
-            'communities',
-            title=_l(u'Communities'),
-            url=lambda context: url_for_orig('communities.index'),
-            condition=lambda ctx: current_user.is_authenticated),
+    NavItem(
+        'section',
+        'communities',
+        title=_l(u'Communities'),
+        url=lambda context: url_for_orig('communities.index'),
+        condition=lambda ctx: current_user.is_authenticated),
     # Tabs
     CommunityTabAction('communities:tabs', 'wall', _l(u'Activities')),
-    CommunityTabAction('communities:tabs',
-                       'documents',
-                       _l(u'Documents'),
-                       condition=lambda ctx: g.community.has_documents),
-    CommunityTabAction('communities:tabs',
-                       'wiki',
-                       _l(u'Wiki'),
-                       condition=lambda ctx: g.community.has_wiki),
-    CommunityTabAction('communities:tabs',
-                       'forum',
-                       _l(u'Conversations'),
-                       condition=lambda ctx: g.community.has_forum),
-    CommunityTabAction('communities:tabs',
-                       'calendar',
-                       _l(u'Calendar'),
-                       condition=lambda ctx: g.community.has_calendar),
-    CommunityTabAction('communities:tabs',
-                       'members',
-                       _l(u'Members'),
-                       endpoint="communities.members"),
-    CommunityTabAction('communities:tabs',
-                       'settings',
-                       _l(u'Settings'),
-                       icon='cog',
-                       condition=lambda ctx: current_user.has_role("admin"),
-                       endpoint="communities.settings"))
+    CommunityTabAction(
+        'communities:tabs',
+        'documents',
+        _l(u'Documents'),
+        condition=lambda ctx: g.community.has_documents),
+    CommunityTabAction(
+        'communities:tabs',
+        'wiki',
+        _l(u'Wiki'),
+        condition=lambda ctx: g.community.has_wiki),
+    CommunityTabAction(
+        'communities:tabs',
+        'forum',
+        _l(u'Conversations'),
+        condition=lambda ctx: g.community.has_forum),
+    CommunityTabAction(
+        'communities:tabs',
+        'calendar',
+        _l(u'Calendar'),
+        condition=lambda ctx: g.community.has_calendar),
+    CommunityTabAction(
+        'communities:tabs',
+        'members',
+        _l(u'Members'),
+        endpoint="communities.members"),
+    CommunityTabAction(
+        'communities:tabs',
+        'settings',
+        _l(u'Settings'),
+        icon='cog',
+        condition=lambda ctx: current_user.has_role("admin"),
+        endpoint="communities.settings"))
 
 
 def register_actions(state):

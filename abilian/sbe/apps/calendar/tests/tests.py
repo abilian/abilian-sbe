@@ -9,8 +9,8 @@ from unittest import TestCase
 from flask import url_for
 from pytest import skip
 
-from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
-                                                     CommunityIndexingTestCase)
+from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
+    CommunityIndexingTestCase
 
 from ..models import Event
 
@@ -60,8 +60,9 @@ class NoLoginViewTest(CommunityBaseTestCase):
 
     @skip
     def test(self):
-        response = self.client.get(url_for("calendar.index",
-                                           community_id=self.community.slug))
+        response = self.client.get(
+            url_for(
+                "calendar.index", community_id=self.community.slug))
         self.assert200(response)
 
 # class ViewTestCase(CommunityBaseTestCase):

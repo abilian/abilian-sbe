@@ -8,8 +8,8 @@ import pkgutil
 from cgi import escape
 
 import sqlalchemy as sa
-from flask import (Response, current_app, flash, g, jsonify, redirect,
-                   render_template, request)
+from flask import Response, current_app, flash, g, jsonify, redirect, \
+    render_template, request
 from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError
 
@@ -116,9 +116,8 @@ def users_dt_json():
 
         cell0 = (
             u'<a href="{url}"><img src="{src}" width="{size}" height="{size}">'
-            '</a>'.format(url=user_url,
-                          src=mugshot,
-                          size=MUGSHOT_SIZE))
+            '</a>'.format(
+                url=user_url, src=mugshot, size=MUGSHOT_SIZE))
         cell1 = (u'<div class="info"><a href="{user_url}">{name}</a> '
                  u'</div>'.format(**locals()))
         cell2 = age(user.created_at)

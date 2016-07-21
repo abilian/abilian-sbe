@@ -14,14 +14,14 @@ from mock import Mock, patch
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
-from abilian.sbe.apps.communities.tests.base import (CommunityBaseTestCase,
-                                                     CommunityIndexingTestCase)
+from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
+    CommunityIndexingTestCase
 from abilian.sbe.testing import BaseTestCase
 
 from ..commands import inject_email
 from ..models import Post, Thread, ThreadClosedError
-from ..tasks import (build_reply_email_address, extract_email_destination,
-                     process)
+from ..tasks import build_reply_email_address, extract_email_destination, \
+    process
 
 
 class Test(TestCase):
@@ -148,8 +148,9 @@ class NoLoginViewTest(CommunityBaseTestCase):
     """
 
     def test(self):
-        response = self.client.get(url_for("forum.index",
-                                           community_id=self.community.slug))
+        response = self.client.get(
+            url_for(
+                "forum.index", community_id=self.community.slug))
         self.assert200(response)
 
 
@@ -181,9 +182,8 @@ class ViewTestCase(CommunityBaseTestCase):
         self.app.config['MAIL_ADDRESS_TAG_CHAR'] = u'+'
 
         # create a new user, add him/her to the current community as a MANAGER
-        self.user = User(email=u'user_1@example.com',
-                         password='azerty',
-                         can_login=True)
+        self.user = User(
+            email=u'user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.community.set_membership(self.user, MANAGER)
         self.session.commit()
@@ -204,10 +204,11 @@ class ViewTestCase(CommunityBaseTestCase):
             threadid = response.location.rsplit('/', 2)[1]
 
             # retrieve the new thread, make sur it has the message
-            url = url_for("forum.thread",
-                          thread_id=threadid,
-                          community_id=self.community.slug,
-                          title=title)
+            url = url_for(
+                "forum.thread",
+                thread_id=threadid,
+                community_id=self.community.slug,
+                title=title)
             response = self.client.get(url)
             self.assertStatus(response, 200)
             self.assertIn(content, response.data.decode("utf-8"))
@@ -224,10 +225,11 @@ class ViewTestCase(CommunityBaseTestCase):
             self.assertStatus(response, 302)
 
             # retrieve the new thread, make sur it has the message
-            url = url_for("forum.thread",
-                          thread_id=threadid,
-                          community_id=self.community.slug,
-                          title=title)
+            url = url_for(
+                "forum.thread",
+                thread_id=threadid,
+                community_id=self.community.slug,
+                title=title)
             response = self.client.get(url)
             self.assertStatus(response, 200)
             self.assertIn(content, response.data.decode("utf-8"))
@@ -243,9 +245,8 @@ class ViewTestCase(CommunityBaseTestCase):
     """
         assert self.community.type == 'informative'
         # create a new user, add him/her to the current community
-        self.user = User(email=u'user_1@example.com',
-                         password='azerty',
-                         can_login=True)
+        self.user = User(
+            email=u'user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.community.set_membership(self.user, MEMBER)
         self.session.commit()

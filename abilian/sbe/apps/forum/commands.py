@@ -18,11 +18,12 @@ logger = logging.getLogger(__name__)
 manager = Manager(description='SBE forum commands', help='SBE forum commands')
 
 
-@manager.option('-f',
-                '--filename',
-                help='email filename; defaults to standard input',
-                default=u'-',
-                required=False,)
+@manager.option(
+    '-f',
+    '--filename',
+    help='email filename; defaults to standard input',
+    default=u'-',
+    required=False,)
 def inject_email(filename=u'-'):
     """Read one email from stdin, parse it, forward it in a celery task to be persisted."""
 
@@ -51,12 +52,13 @@ def inject_email(filename=u'-'):
         if not message.defects:
             process_email.delay(message)
         else:
-            logger.error('email has defects, message content:\n'
-                         '------ START -------\n'
-                         '%s'
-                         '\n------ END -------\n',
-                         message,
-                         extra={'stack': True,})
+            logger.error(
+                'email has defects, message content:\n'
+                '------ START -------\n'
+                '%s'
+                '\n------ END -------\n',
+                message,
+                extra={'stack': True,})
     else:
         logger.error('no email was parsed from stdin', extra={'stack': True,})
 

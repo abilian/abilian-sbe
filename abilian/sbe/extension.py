@@ -46,9 +46,8 @@ class AbilianSBE(object):
         app.extensions['babel'].add_translations('abilian.sbe')
 
         # sbe static assets
-        app.add_static_url('abilian/sbe',
-                           STATIC_DIR,
-                           endpoint='abilian_sbe_static')
+        app.add_static_url(
+            'abilian/sbe', STATIC_DIR, endpoint='abilian_sbe_static')
         app.extensions['webassets'].append_path(
             STATIC_DIR, app.static_url_path + '/abilian/sbe')
 

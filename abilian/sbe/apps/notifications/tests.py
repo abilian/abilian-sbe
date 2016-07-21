@@ -8,8 +8,8 @@ from flask import render_template
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import WRITER
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase
-from abilian.sbe.apps.notifications.tasks.social import (
-    CommunityDigest, generate_unsubscribe_token)
+from abilian.sbe.apps.notifications.tasks.social import CommunityDigest, \
+    generate_unsubscribe_token
 from abilian.sbe.testing import BaseTestCase
 from abilian.web import url_for
 
@@ -27,9 +27,8 @@ class TestNotificationViews(BaseTestCase):
 
     def setUp(self):
         super(TestNotificationViews, self).setUp()
-        self.user = User(email=u'user_1@example.com',
-                         password='azerty',
-                         can_login=True)
+        self.user = User(
+            email=u'user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.session.commit()
 
@@ -55,9 +54,8 @@ class NotificationTestCase(CommunityBaseTestCase):
 
     def setUp(self):
         super(NotificationTestCase, self).setUp()
-        self.user = User(email=u'user_1@example.com',
-                         password='azerty',
-                         can_login=True)
+        self.user = User(
+            email=u'user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.community.set_membership(self.user, WRITER)
         self.session.commit()
@@ -67,9 +65,11 @@ class NotificationTestCase(CommunityBaseTestCase):
         # rendered content
         digests = [CommunityDigest(self.community)]
         token = generate_unsubscribe_token(self.user)
-        render_template("notifications/daily-social-digest.txt",
-                        digests=digests,
-                        token=token)
-        render_template("notifications/daily-social-digest.html",
-                        digests=digests,
-                        token=token)
+        render_template(
+            "notifications/daily-social-digest.txt",
+            digests=digests,
+            token=token)
+        render_template(
+            "notifications/daily-social-digest.html",
+            digests=digests,
+            token=token)

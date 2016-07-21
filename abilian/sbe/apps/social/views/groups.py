@@ -1,8 +1,8 @@
 # coding=utf-8
 from os.path import dirname, join
 
-from flask import (current_app, flash, g, jsonify, make_response, redirect,
-                   render_template, request, url_for)
+from flask import current_app, flash, g, jsonify, make_response, redirect, \
+    render_template, request, url_for
 from flask_babel import gettext as _
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError, NotFound
@@ -17,8 +17,8 @@ from abilian.web.views import default_view
 from .social import social
 from .util import Env
 
-DEFAULT_GROUP_MUGSHOT = open(join(
-    dirname(__file__), "../../../static/images/frog.jpg")).read()
+DEFAULT_GROUP_MUGSHOT = open(
+    join(dirname(__file__), "../../../static/images/frog.jpg")).read()
 
 
 @social.route("/groups/")

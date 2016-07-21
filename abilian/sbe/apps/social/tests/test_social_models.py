@@ -17,10 +17,11 @@ def check_editable(object):
 class TestUsers(TestCase):
 
     def test_user(self):
-        user = User(first_name=u"John",
-                    last_name=u"Test User",
-                    email=u"test@example.com",
-                    password="toto")
+        user = User(
+            first_name=u"John",
+            last_name=u"Test User",
+            email=u"test@example.com",
+            password="toto")
         check_editable(user)
 
         assert u"John Test User" == user.name
@@ -30,16 +31,18 @@ class TestUsers(TestCase):
     def test_user_follow(self):
         # id is provided by DB (which is not used in this test), and is required for
         # having in (user1 != user2) == True
-        user1 = User(id=1,
-                     first_name=u"John",
-                     last_name=u"Test User 1",
-                     email=u"test1@example.com",
-                     password="toto")
-        user2 = User(id=2,
-                     first_name=u"Joe",
-                     last_name=u"Test User 2",
-                     email=u"test2@example.com",
-                     password="toto")
+        user1 = User(
+            id=1,
+            first_name=u"John",
+            last_name=u"Test User 1",
+            email=u"test1@example.com",
+            password="toto")
+        user2 = User(
+            id=2,
+            first_name=u"Joe",
+            last_name=u"Test User 2",
+            email=u"test2@example.com",
+            password="toto")
 
         assert len(user1.followers) == 0
         assert len(user1.followees) == 0
@@ -65,10 +68,11 @@ class TestUsers(TestCase):
         assert user2 not in user1.followers
 
     def test_group(self):
-        user = User(first_name=u"John",
-                    last_name=u"Test User",
-                    email=u"test@example.com",
-                    password="toto")
+        user = User(
+            first_name=u"John",
+            last_name=u"Test User",
+            email=u"test@example.com",
+            password="toto")
         group = Group(name=u"Group 1")
 
         user.join(group)
@@ -93,10 +97,11 @@ class TestContent(TestCase):
         check_editable(pm)
 
     def test_status_update(self):
-        user = User(first_name=u"John",
-                    last_name=u"Test User",
-                    email=u"test@example.com",
-                    password="toto")
+        user = User(
+            first_name=u"John",
+            last_name=u"Test User",
+            email=u"test@example.com",
+            password="toto")
         #self.assertEquals(len(user.messages), 0)
 
         message = Message()

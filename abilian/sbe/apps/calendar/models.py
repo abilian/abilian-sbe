@@ -8,8 +8,8 @@ from sqlalchemy.event import listens_for
 from sqlalchemy.orm import backref, relationship
 
 from abilian.core.entities import SEARCHABLE, Entity
-from abilian.sbe.apps.communities.models import (Community, CommunityIdColumn,
-                                                 community_content)
+from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
+    community_content
 
 
 @community_content
@@ -21,7 +21,8 @@ class Event(Entity):
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref('events', cascade="all, delete-orphan"))
+        backref=backref(
+            'events', cascade="all, delete-orphan"))
 
     title = Column(Unicode, nullable=False, default="", info=SEARCHABLE)
 

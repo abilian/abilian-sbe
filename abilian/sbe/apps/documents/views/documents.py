@@ -7,8 +7,8 @@ from datetime import datetime
 from urllib import quote
 
 import sqlalchemy as sa
-from flask import (current_app, flash, g, make_response, redirect,
-                   render_template, request)
+from flask import current_app, flash, g, make_response, redirect, \
+    render_template, request
 from flask_login import current_user
 from flask_mail import Message
 from werkzeug.exceptions import BadRequest, NotFound
@@ -28,8 +28,8 @@ from abilian.web.views import default_view
 from ..models import Document
 from ..repository import repository
 from ..tasks import convert_document_content, preview_document
-from .util import (breadcrumbs_for, check_manage_access, check_read_access,
-                   check_write_access, edit_object, get_document, match)
+from .util import breadcrumbs_for, check_manage_access, check_read_access, \
+    check_write_access, edit_object, get_document, match
 from .views import blueprint
 
 route = blueprint.route
@@ -58,12 +58,13 @@ def document_view(doc_id):
     has_preview = doc.has_preview()
     audit_entries = audit_service.entries_for(doc)
 
-    ctx = dict(doc=doc,
-               audit_entries=audit_entries,
-               breadcrumbs=bc,
-               folder=doc.parent,
-               has_preview=has_preview,
-               csrf_token=csrf.field())
+    ctx = dict(
+        doc=doc,
+        audit_entries=audit_entries,
+        breadcrumbs=bc,
+        folder=doc.parent,
+        has_preview=has_preview,
+        csrf_token=csrf.field())
     return render_template("documents/document.html", **ctx)
 
 
@@ -176,8 +177,9 @@ def checkin_checkout(doc_id):
 
 
 def preview_missing_image():
-    response = redirect(url_for('abilian_sbe_static',
-                                filename='images/preview_missing.png'))
+    response = redirect(
+        url_for(
+            'abilian_sbe_static', filename='images/preview_missing.png'))
     response.headers['Cache-Control'] = 'no-cache'
     return response
 
@@ -260,11 +262,12 @@ def document_send(doc_id):
     msg = Message(subject)
     msg.sender = g.user.email
     msg.recipients = [recipient]
-    msg.body = render_template_i18n('documents/mail_file_sent.txt',
-                                    sender_name=sender_name,
-                                    message=user_msg,
-                                    document_url=url_for(doc),
-                                    filename=doc.title)
+    msg.body = render_template_i18n(
+        'documents/mail_file_sent.txt',
+        sender_name=sender_name,
+        message=user_msg,
+        document_url=url_for(doc),
+        filename=doc.title)
 
     filename = doc.title
     msg.attach(filename, doc.content_type, doc.content)
@@ -282,14 +285,18 @@ def document_preview(doc_id):
         return "Waiting for antivirus to finish"
 
     if doc.content_type == "application/pdf":
-        return redirect(url_for(".document_view_pdf",
-                                community_id=g.community.slug,
-                                doc_id=doc.id))
+        return redirect(
+            url_for(
+                ".document_view_pdf",
+                community_id=g.community.slug,
+                doc_id=doc.id))
 
     else:
-        return redirect(url_for(".document_download",
-                                community_id=g.community.slug,
-                                doc_id=doc.id))
+        return redirect(
+            url_for(
+                ".document_download",
+                community_id=g.community.slug,
+                doc_id=doc.id))
 
 
 @route("/doc/<int:doc_id>/view_pdf")
@@ -298,10 +305,10 @@ def document_view_pdf(doc_id):
     if not doc.antivirus_ok:
         return "Waiting for antivirus to finish"
 
-    return render_template("documents/view_pdf.html",
-                           pdf_url=url_for(".document_download",
-                                           community_id=g.community.slug,
-                                           doc_id=doc.id))
+    return render_template(
+        "documents/view_pdf.html",
+        pdf_url=url_for(
+            ".document_download", community_id=g.community.slug, doc_id=doc.id))
 
 #
 # Tagging (currently not used!)

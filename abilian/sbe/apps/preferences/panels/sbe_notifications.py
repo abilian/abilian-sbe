@@ -66,6 +66,7 @@ class SbeNotificationsPanel(PreferencePanel):
             flash(_(u"Preferences saved."), "info")
             return redirect(url_for(".sbe_notifications"))
         else:
-            return render_template("preferences/sbe_notifications.html",
-                                   form=form,
-                                   csrf_token=csrf.field())
+            return render_template(
+                "preferences/sbe_notifications.html",
+                form=form,
+                csrf_token=csrf.field())

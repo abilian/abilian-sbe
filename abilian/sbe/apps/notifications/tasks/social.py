@@ -28,8 +28,9 @@ from .. import TOKEN_SERIALIZER_NAME
 DIGEST_TASK_NAME = __name__ + '.send_daily_social_digest_task'
 DEFAULT_DIGEST_SCHEDULE = {
     'task': DIGEST_TASK_NAME,
-    'schedule': crontab(hour=10,
-                        minute=0,)
+    'schedule': crontab(
+        hour=10,
+        minute=0,)
 }
 
 
@@ -59,8 +60,8 @@ def send_daily_social_digest():
         try:
             send_daily_social_digest_to(user)
         except:
-            current_app.logger.error('Error sending daily social digest',
-                                     exc_info=True)
+            current_app.logger.error(
+                'Error sending daily social digest', exc_info=True)
 
 
 def send_daily_social_digest_to(user):
@@ -128,17 +129,19 @@ def make_message(user):
         return None
 
     token = generate_unsubscribe_token(user)
-    unsubscribe_url = url_for('notifications.unsubscribe_sbe',
-                              token=token,
-                              _external=True,
-                              _scheme=config['PREFERRED_URL_SCHEME'])
+    unsubscribe_url = url_for(
+        'notifications.unsubscribe_sbe',
+        token=token,
+        _external=True,
+        _scheme=config['PREFERRED_URL_SCHEME'])
     extra_headers = dict(base_extra_headers)
     extra_headers['List-Unsubscribe'] = u'<{}>'.format(unsubscribe_url)
 
-    msg = Message(subject,
-                  sender=sender,
-                  recipients=[recipient],
-                  extra_headers=extra_headers)
+    msg = Message(
+        subject,
+        sender=sender,
+        recipients=[recipient],
+        extra_headers=extra_headers)
     ctx = {'digests': digests,
            'token': token,
            'unsubscribe_url': unsubscribe_url}

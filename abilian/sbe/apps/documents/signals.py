@@ -4,8 +4,8 @@
 from __future__ import absolute_import
 
 from abilian.sbe.apps.communities.models import VALID_ROLES
-from abilian.sbe.apps.communities.signals import (membership_removed,
-                                                  membership_set)
+from abilian.sbe.apps.communities.signals import membership_removed, \
+    membership_set
 from abilian.services.security import Manager, Reader, Writer, security
 
 from .search import reindex_tree
@@ -22,8 +22,9 @@ def new_community_member(community, membership, is_new, **kwargs):
     if role == Manager:
         local_role = Manager
 
-    current_roles = set(security.get_roles(
-        user, community.folder, no_group_roles=True))
+    current_roles = set(
+        security.get_roles(
+            user, community.folder, no_group_roles=True))
     current_roles &= VALID_ROLES  # ensure we don't remove roles not managed
     # by us
 

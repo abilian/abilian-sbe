@@ -15,8 +15,8 @@ from time import gmtime, strftime
 import openpyxl
 import pytz
 import sqlalchemy as sa
-from flask import (current_app, flash, g, jsonify, redirect, render_template,
-                   request, session, url_for)
+from flask import current_app, flash, g, jsonify, redirect, render_template, \
+    request, session, url_for
 from flask_login import current_user, login_required
 from openpyxl.writer.write_only import WriteOnlyCell
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
@@ -54,10 +54,11 @@ def seconds_since_epoch(dt):
     return int((utc_dt(dt) - EPOCH).total_seconds())
 
 
-communities = Blueprint("communities",
-                        __name__,
-                        set_community_id_prefix=False,
-                        template_folder='templates')
+communities = Blueprint(
+    "communities",
+    __name__,
+    set_community_id_prefix=False,
+    template_folder='templates')
 route = communities.route
 add_url = communities.add_url_rule
 communities.record_once(register_actions)
@@ -154,10 +155,8 @@ def index():
 
 
 @route("/<string:community_id>/")
-@views.default_view(communities,
-                    Community,
-                    'community_id',
-                    kw_func=default_view_kw)
+@views.default_view(
+    communities, Community, 'community_id', kw_func=default_view_kw)
 def community():
     return redirect(url_for("wall.index", community_id=g.community.slug))
 
@@ -245,11 +244,12 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
         self.obj.group = self.linked_group
 
 
-add_url("/<string:community_id>/settings",
-        view_func=CommunityEdit.as_view(
-            'settings',
-            view_endpoint='.community',
-            message_success=_l(u"Community settings saved successfully.")))
+add_url(
+    "/<string:community_id>/settings",
+    view_func=CommunityEdit.as_view(
+        'settings',
+        view_endpoint='.community',
+        message_success=_l(u"Community settings saved successfully.")))
 
 
 class CommunityCreate(views.ObjectCreate, CommunityEdit):
@@ -267,25 +267,25 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
 
 add_url(
     '/new',
-    view_func=CommunityCreate.as_view('new', view_endpoint='.community'))
+    view_func=CommunityCreate.as_view(
+        'new', view_endpoint='.community'))
 
 
 class CommunityDelete(BaseCommunityView, views.ObjectDelete):
     get_form_kwargs = views.ObjectDelete.get_form_kwargs
 
 
-add_url("/<string:community_id>/destroy",
-        methods=['POST'],
-        view_func=CommunityDelete.as_view(
-            'delete', message_success=_l(u"Community destroyed.")))
+add_url(
+    "/<string:community_id>/destroy",
+    methods=['POST'],
+    view_func=CommunityDelete.as_view(
+        'delete', message_success=_l(u"Community destroyed.")))
 
 # Community Image
 _DEFAULT_IMAGE = Path(__file__).parent / u'data' / u'community.png'
 _DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open('rb').read()).hexdigest()
 route('/_default_image')(image_views.StaticImageView.as_view(
-    'community_default_image',
-    set_expire=True,
-    image=_DEFAULT_IMAGE))
+    'community_default_image', set_expire=True, image=_DEFAULT_IMAGE))
 
 
 class CommunityImageView(image_views.BlobView):
@@ -345,10 +345,11 @@ def members():
     )
     memberships = _members_query().all()
 
-    return render_template("community/members.html",
-                           seconds_since_epoch=seconds_since_epoch,
-                           memberships=memberships,
-                           csrf_token=csrf.field())
+    return render_template(
+        "community/members.html",
+        seconds_since_epoch=seconds_since_epoch,
+        memberships=memberships,
+        csrf_token=csrf.field())
 
 
 @route("/<string:community_id>/members", methods=["POST"])
@@ -405,9 +406,8 @@ MEMBERS_EXPORT_HEADERS = [
 MEMBERS_EXPORT_ATTRS = ['User', 'User.email', 'last_activity_date', 'role']
 
 HEADER_FONT = openpyxl.styles.Font(bold=True)
-HEADER_ALIGN = openpyxl.styles.Alignment(horizontal='center',
-                                         vertical='top',
-                                         wrapText=True)
+HEADER_ALIGN = openpyxl.styles.Alignment(
+    horizontal='center', vertical='top', wrapText=True)
 XLSX_MIME = u'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 
@@ -507,7 +507,8 @@ def doc(doc_id):
     target_community = Community.query \
         .filter(Community.folder_id == folder.id) \
         .one()
-    location = url_for("documents.document_view",
-                       community_id=target_community.slug,
-                       doc_id=doc.id)
+    location = url_for(
+        "documents.document_view",
+        community_id=target_community.slug,
+        doc_id=doc.id)
     return redirect(location)
