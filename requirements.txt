@@ -11,7 +11,7 @@ anyjson==0.3.3            # via kombu
 Babel==2.3.4              # via flask-babel
 billiard==3.3.0.23        # via celery
 bleach==1.4.3             # via abilian-core
-Blinker==1.4              # via flask-debugtoolbar, flask-mail, flask-principal
+blinker==1.4              # via flask-debugtoolbar, flask-mail, flask-principal
 celery==3.1.23            # via abilian-core
 chardet==2.3.0
 clamd==1.0.2              # via abilian-core
@@ -42,7 +42,7 @@ Jinja2==2.8               # via flask, flask-babel
 jsmin==2.2.1              # via abilian-core
 kombu==3.0.35             # via celery
 langid==1.1.6
-lxml==3.6.0               # via abilian-core
+lxml==3.6.1               # via abilian-core
 Mako==1.0.4               # via alembic
 markdown==2.6.6
 MarkupSafe==0.23          # via abilian-core, jinja2, mako
