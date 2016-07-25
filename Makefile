@@ -85,7 +85,7 @@ lint: lint-js lint-python
 
 lint-js:
 	@echo "--> Linting JavaScript files"
-	@jshint ./abilian/sbe/apps/
+	eslint ./abilian/sbe/apps/
 
 lint-python:
 	@echo "--> Linting Python files"
