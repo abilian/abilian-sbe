@@ -139,11 +139,11 @@ def setup_sbe_app():
     script_file = bin_dir / 'abilian_sbe'
     if script_file.exists():
         logger.info('%s already exists. Skipping creation.',
-                    repr(unicode(script_file)))
+                    repr(text_type(script_file)))
     else:
         with script_file.open('w') as out:
-            logger.info('Create script: "%s".', repr(unicode(script_file)))
-            content = _SBE_DEMO_SCRIPT.format(BIN_DIR=unicode(bin_dir))
+            logger.info('Create script: "%s".', repr(text_type(script_file)))
+            content = _SBE_DEMO_SCRIPT.format(BIN_DIR=text_type(bin_dir))
             out.write(content)
         script_file.chmod(0o755)  # 0755: -rwxr-xr-x
 

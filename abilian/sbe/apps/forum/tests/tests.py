@@ -13,6 +13,8 @@ from flask import url_for
 from mock import Mock, patch
 
 from abilian.core.models.subjects import User
+from six import text_type
+
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
     CommunityIndexingTestCase
@@ -236,13 +238,13 @@ class ViewTestCase(CommunityBaseTestCase):
 
             # check the email was sent with the new threadpost
             assert len(outbox) == 1
-            assert unicode(outbox[
-                0].subject) == u'[My Community] Brand new thread'
+            expected = u'[My Community] Brand new thread'
+            assert text_type(outbox[0].subject) == expected
 
     def test_create_thread_informative(self):
         """
-    Test with 'informative' community. No mail sent, unless user is MANAGER
-    """
+        Test with 'informative' community. No mail sent, unless user is MANAGER
+        """
         assert self.community.type == 'informative'
         # create a new user, add him/her to the current community
         self.user = User(

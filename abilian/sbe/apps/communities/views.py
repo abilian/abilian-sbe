@@ -19,6 +19,7 @@ from flask import current_app, flash, g, jsonify, redirect, render_template, \
     request, session, url_for
 from flask_login import current_user, login_required
 from openpyxl.writer.write_only import WriteOnlyCell
+from six import text_type
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from whoosh.searching import Hit
 
@@ -433,7 +434,7 @@ def members_excel_export():
 
     cols_width = []
     for col, label in enumerate(MEMBERS_EXPORT_HEADERS, 1):
-        value = unicode(label)
+        value = text_type(label)
         cell = WriteOnlyCell(ws, value=value)
         cell.font = HEADER_FONT
         cell.alignment = HEADER_ALIGN
@@ -453,13 +454,13 @@ def members_excel_export():
                 pass
 
             if isinstance(value, (BaseModel, Role)):
-                value = unicode(value)
+                value = text_type(value)
 
             cell = WriteOnlyCell(ws, value=value)
             cells.append(value)
 
             # estimate width
-            value = unicode(cell.value)
+            value = text_type(cell.value)
             width = max(len(l) for l in value.split(u'\n')) + 1
             cols_width[col] = max(width, cols_width[col])
 

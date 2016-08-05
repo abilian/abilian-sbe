@@ -2,6 +2,7 @@ import re
 
 from flask import current_app, flash, g, request
 from flask_babel import gettext as _
+from six import text_type
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
 from abilian.core.signals import activity
@@ -79,10 +80,10 @@ def get_new_filename(folder, name):
 def create_document(folder, fs):
     check_write_access(folder)
 
-    if isinstance(fs.filename, unicode):
+    if isinstance(fs.filename, text_type):
         name = fs.filename
     else:
-        name = unicode(fs.filename, errors='ignore')
+        name = text_type(fs.filename, errors='ignore')
 
     if not name:
         flash(_(u"Document name can't be empty."), "error")

@@ -209,7 +209,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
             name = meta.get('filename', handle)
             mimetype = meta.get('mimetype')
 
-            if not isinstance(name, unicode):
+            if not isinstance(name, text_type):
                 name = text_type(name, encoding='utf-8', errors='ignore')
 
             if not name:
@@ -273,14 +273,15 @@ class ThreadDelete(BaseThreadView, views.ObjectDelete):
     _message_success = _(u'Thread "{title}" deleted.')
 
     def message_success(self):
-        return unicode(self._message_success).format(title=self.obj.title)
+        return text_type(self._message_success).format(title=self.obj.title)
 
 
 route('/<int:thread_id>/delete')(ThreadDelete.as_view('thread_delete'))
 
 
 class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
-    """Close / Re-open a thread."""
+    """Close / Re-open a thread.
+    """
     methods = ['POST']
     _VALID_ACTIONS = {u'close', u'reopen'}
     CLOSED_MSG = _l(u'The thread is now closed for edition and new '
@@ -303,7 +304,7 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
         sa.orm.object_session(self.obj).commit()
 
         msg = self.CLOSED_MSG if is_closed else self.REOPENED_MSG
-        flash(unicode(msg))
+        flash(text_type(msg))
         return self.redirect(url_for(self.obj))
 
 
@@ -383,7 +384,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
             name = meta.get('filename', handle)
             mimetype = meta.get('mimetype')
 
-            if not isinstance(name, unicode):
+            if not isinstance(name, text_type):
                 name = text_type(name, encoding='utf-8', errors='ignore')
 
             if not name:

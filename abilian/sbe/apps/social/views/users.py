@@ -10,6 +10,7 @@ from cgi import escape
 import sqlalchemy as sa
 from flask import Response, current_app, flash, g, jsonify, redirect, \
     render_template, request
+from six import text_type
 from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError
 
@@ -273,7 +274,7 @@ def users_json():
             user, role = user
 
         if role is not None:
-            role = unicode(role)
+            role = text_type(role)
 
         item = {'id': user.id,
                 'text': u'{} ({})'.format(user.name, user.email),

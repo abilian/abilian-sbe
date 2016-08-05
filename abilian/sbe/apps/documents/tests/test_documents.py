@@ -170,7 +170,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             g.community = CommunityPresenter(self.community)
             name = u'document'
             fs = FileStorage(
-                BytesIO('content'), filename=name, content_type='text/plain')
+                BytesIO(b'content'), filename=name, content_type='text/plain')
             doc = view_util.create_document(self.folder, fs)
             self.session.flush()
             assert doc.parent == self.folder
@@ -178,7 +178,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
             # test upload with same name: should be renamed
             fs = FileStorage(
-                BytesIO('content'), filename=name, content_type='text/plain')
+                BytesIO(b'content'), filename=name, content_type='text/plain')
             doc2 = view_util.create_document(self.folder, fs)
             self.session.flush()
             assert doc2.parent == self.folder

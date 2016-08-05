@@ -547,7 +547,7 @@ def explore_archive(fd, filename=None, uncompress=False):
     if filename is None:
         filename = fd.filename
 
-    if not isinstance(filename, unicode):
+    if not isinstance(filename, text_type):
         filename = text_type(fd.filename, errors='ignore')
 
     if not uncompress:

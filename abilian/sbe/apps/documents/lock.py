@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import dateutil.parser
 from flask import current_app
 from flask_login import current_user
-from six import raise_from
+from six import raise_from, text_type
 
 from abilian.core.util import utcnow
 
@@ -34,7 +34,7 @@ class Lock(object):
 
     @staticmethod
     def new():
-        return Lock(current_user.id, unicode(current_user), utcnow())
+        return Lock(current_user.id, text_type(current_user), utcnow())
 
     def as_dict(self):
         """Return a dict suitable for serialization to JSON.

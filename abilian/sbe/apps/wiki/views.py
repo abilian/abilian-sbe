@@ -5,6 +5,8 @@ from __future__ import absolute_import
 
 import difflib
 from os.path import dirname, join
+
+from six import text_type
 from six.moves.urllib.parse import quote
 
 import sqlalchemy as sa
@@ -399,8 +401,8 @@ def attachment_upload():
 
     for f in files:
         name = f.filename
-        if not isinstance(name, unicode):
-            name = unicode(f.filename, encoding='utf-8', errors='ignore')
+        if not isinstance(name, text_type):
+            name = text_type(f.filename, encoding='utf-8', errors='ignore')
 
         # FIXME: do something instead of just skipping the attachement
         if not name:

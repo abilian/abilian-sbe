@@ -4,6 +4,7 @@ from unittest import TestCase
 
 from abilian.core.entities import all_entity_classes
 from abilian.core.models.subjects import Group, User
+from six import text_type
 
 from ..models import Message, PrivateMessage
 
@@ -25,7 +26,7 @@ class TestUsers(TestCase):
         check_editable(user)
 
         assert u"John Test User" == user.name
-        assert u"John Test User" == unicode(user)
+        assert u"John Test User" == text_type(user)
         #self.assertEquals(len(user.messages), 0)
 
     def test_user_follow(self):

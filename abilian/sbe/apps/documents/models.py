@@ -27,6 +27,7 @@ from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, Text, UnicodeText
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
+from six import text_type
 
 from abilian.core.entities import Entity, db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
@@ -203,7 +204,7 @@ class PathAndSecurityIndexable(object):
         Return a string made of ids separated by a slash: "/1/3/4/5", "5" being
         self.parent.id.
         """
-        ids = [unicode(obj.id) for obj in self._iter_to_root(skip_self=True)]
+        ids = [text_type(obj.id) for obj in self._iter_to_root(skip_self=True)]
         return u'/' + u'/'.join(reversed(ids))
 
     @property
@@ -648,7 +649,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @text.setter
     def text(self, value):
-        assert isinstance(value, unicode)
+        assert isinstance(value, text_type)
         self.text_blob = Blob()
         self.text_blob.value = value.encode("utf8")
 
@@ -664,7 +665,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     @extra_metadata.setter
     def extra_metadata(self, extra_metadata):
         self._extra_metadata = extra_metadata
-        self.extra_metadata_json = unicode(json.dumps(extra_metadata))
+        self.extra_metadata_json = text_type(json.dumps(extra_metadata))
 
     # TODO: or use SQLAlchemy alias?
     @property

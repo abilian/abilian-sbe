@@ -11,6 +11,7 @@ import whoosh.query as wq
 from flask import current_app, g, render_template
 from flask_babel import format_date
 from sqlalchemy.orm import joinedload
+from six import text_type
 
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.documents.models import Document, icon_for
@@ -93,7 +94,7 @@ def get_attachments_from_forum(community):
     for post in posts_with_attachments:
         for att in post.attachments:
             url = current_app.default_view.url_for(att)
-            attachment = Attachment(url, att.name, unicode(att.owner),
+            attachment = Attachment(url, att.name, text_type(att.owner),
                                     att.created_at, att.content_length,
                                     att.content_type)
             attachments.append(attachment)

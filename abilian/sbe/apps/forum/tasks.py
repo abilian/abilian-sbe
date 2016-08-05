@@ -20,6 +20,7 @@ from flask import current_app, g
 from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
+from six import text_type
 
 from abilian.core.celery import periodic_task
 from abilian.core.extensions import db, mail
@@ -326,7 +327,7 @@ def decode_payload(part):
     """
 
     payload = part.get_payload(decode=True)
-    if not (isinstance(payload, unicode)):
+    if not (isinstance(payload, text_type)):
         # What about other encodings? -> using chardet
         if part.get_content_charset() is None:
             found = chardet.detect(payload)
@@ -406,7 +407,7 @@ def process_email(message):
     # Translate marker with locale from email address
     rq_headers = [('Accept-Language', locale)]
     with app.test_request_context('/process_email', headers=rq_headers):
-        marker = unicode(MAIL_REPLY_MARKER)
+        marker = text_type(MAIL_REPLY_MARKER)
 
     # Extract text and attachments from message
     try:
