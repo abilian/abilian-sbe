@@ -2,9 +2,10 @@
 
 from unittest import TestCase
 
+from six import text_type
+
 from abilian.core.entities import all_entity_classes
 from abilian.core.models.subjects import Group, User
-from six import text_type
 
 from ..models import Message, PrivateMessage
 

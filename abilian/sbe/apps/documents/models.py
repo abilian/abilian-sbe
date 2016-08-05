@@ -19,6 +19,7 @@ import sqlalchemy as sa
 import whoosh.fields as wf
 from flask import current_app, g, json, url_for
 from flask_login import current_user
+from six import text_type
 from sqlalchemy.event import listen, listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, foreign, relationship, remote
@@ -27,7 +28,6 @@ from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, Text, UnicodeText
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
-from six import text_type
 
 from abilian.core.entities import Entity, db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE

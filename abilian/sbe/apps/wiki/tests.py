@@ -3,12 +3,11 @@ from __future__ import absolute_import
 
 import re
 
-from six import text_type
-from six.moves.urllib.parse import quote_plus
-
 from flask import g, url_for
 from markdown import Markdown
 from mock import MagicMock, patch
+from six import text_type
+from six.moves.urllib.parse import quote_plus
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \

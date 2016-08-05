@@ -11,10 +11,9 @@ from unittest import TestCase
 import pytest
 from flask import url_for
 from mock import Mock, patch
-
-from abilian.core.models.subjects import User
 from six import text_type
 
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
     CommunityIndexingTestCase

@@ -3,11 +3,11 @@
 """
 from __future__ import absolute_import
 
-from io import StringIO
 import hashlib
 import logging
 from datetime import datetime
 from functools import wraps
+from io import StringIO
 from operator import attrgetter
 from pathlib import Path
 from time import gmtime, strftime

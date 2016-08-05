@@ -9,11 +9,10 @@ import logging
 import os
 import re
 import tempfile
-from io import StringIO
 from datetime import datetime
 from functools import partial
+from io import StringIO
 from typing import Any, List
-from six.moves.urllib.parse import quote
 from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
@@ -21,6 +20,7 @@ import whoosh.query as wq
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
     redirect, render_template, render_template_string, request, send_file
 from flask._compat import text_type
+from six.moves.urllib.parse import quote
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf

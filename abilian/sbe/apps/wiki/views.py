@@ -6,14 +6,13 @@ from __future__ import absolute_import
 import difflib
 from os.path import dirname, join
 
-from six import text_type
-from six.moves.urllib.parse import quote
-
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, redirect, \
     render_template, request
 from markdown import markdown
 from markupsafe import Markup
+from six import text_type
+from six.moves.urllib.parse import quote
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound
 from whoosh.searching import Hit

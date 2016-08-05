@@ -4,8 +4,7 @@
 from __future__ import absolute_import
 
 import unittest
-from io import BytesIO
-from io import StringIO
+from io import BytesIO, StringIO
 from itertools import count
 from os.path import dirname, join
 from zipfile import ZipFile

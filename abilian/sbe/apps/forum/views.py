@@ -6,7 +6,6 @@ from __future__ import absolute_import, print_function
 
 from datetime import date, datetime
 from itertools import groupby
-from six.moves.urllib.parse import quote
 
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, render_template, \
@@ -14,6 +13,7 @@ from flask import current_app, flash, g, make_response, render_template, \
 from flask_babel import format_date
 from flask_login import current_user
 from six import text_type
+from six.moves.urllib.parse import quote
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
 

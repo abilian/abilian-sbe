@@ -10,8 +10,8 @@ import whoosh
 import whoosh.query as wq
 from flask import current_app, g, render_template
 from flask_babel import format_date
-from sqlalchemy.orm import joinedload
 from six import text_type
+from sqlalchemy.orm import joinedload
 
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.documents.models import Document, icon_for
