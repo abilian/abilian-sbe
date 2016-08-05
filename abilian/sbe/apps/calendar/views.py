@@ -82,7 +82,7 @@ class EventView(BaseEventView, views.ObjectView):
         return kw
 
 
-event_view = EventView.as_view(b'event')
+event_view = EventView.as_view('event')
 views.default_view(
     blueprint, Event, 'event_id', kw_func=default_view_kw)(event_view)
 route('/<int:event_id>/')(event_view)
@@ -107,7 +107,7 @@ class EventCreateView(BaseEventView, views.ObjectCreate):
 
 
 event_create_view = EventCreateView.as_view(
-    b'new_event', view_endpoint='.event')
+    'new_event', view_endpoint='.event')
 route('/new_event/')(event_create_view)
 
 
@@ -118,5 +118,5 @@ class EventEditView(BaseEventView, views.ObjectEdit):
     title = _l("Edit event")
 
 
-event_edit_view = EventEditView.as_view(b'event_edit', view_endpoint='.event')
+event_edit_view = EventEditView.as_view('event_edit', view_endpoint='.event')
 route('/<int:event_id>/edit')(event_edit_view)

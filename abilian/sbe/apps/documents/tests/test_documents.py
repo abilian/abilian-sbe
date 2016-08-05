@@ -310,7 +310,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         self.session.flush()
         folder = self.community.folder
         files = []
-        files.append((BytesIO('A document'), u'existing-doc', 'text/plain'))
+        files.append((BytesIO(b'A document'), u'existing-doc', 'text/plain'))
         files.append((self.open_file('content.zip'), u'content.zip',
                       'application/zip'))
         data = {'file': files, 'action': 'upload', 'uncompress_files': True}
@@ -408,7 +408,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             for filename in (u'ascii title.txt', u'utf-8 est arrivé!.txt'):
                 content_type = "text/plain"
                 data = {
-                    'file': (BytesIO('file content'), filename, content_type),
+                    'file': (BytesIO(b'file content'), filename, content_type),
                     'action': 'upload',
                 }
                 url = url_for(
