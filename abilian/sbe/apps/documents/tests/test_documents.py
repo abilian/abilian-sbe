@@ -4,7 +4,8 @@
 from __future__ import absolute_import
 
 import unittest
-from cStringIO import StringIO
+from io import BytesIO
+from io import StringIO
 from itertools import count
 from os.path import dirname, join
 from zipfile import ZipFile
@@ -169,7 +170,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             g.community = CommunityPresenter(self.community)
             name = u'document'
             fs = FileStorage(
-                StringIO(u'content'), filename=name, content_type='text/plain')
+                BytesIO('content'), filename=name, content_type='text/plain')
             doc = view_util.create_document(self.folder, fs)
             self.session.flush()
             assert doc.parent == self.folder
@@ -177,12 +178,13 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
             # test upload with same name: should be renamed
             fs = FileStorage(
-                StringIO(u'content'), filename=name, content_type='text/plain')
+                BytesIO('content'), filename=name, content_type='text/plain')
             doc2 = view_util.create_document(self.folder, fs)
             self.session.flush()
             assert doc2.parent == self.folder
             assert len(self.folder.children) == 2
             assert doc2.name == name + u'-1'
+
             messages = get_flashed_messages()
             assert len(messages) == 1
 
@@ -309,7 +311,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         self.session.flush()
         folder = self.community.folder
         files = []
-        files.append((StringIO('A document'), u'existing-doc', 'text/plain'))
+        files.append((BytesIO('A document'), u'existing-doc', 'text/plain'))
         files.append((self.open_file('content.zip'), u'content.zip',
                       'application/zip'))
         data = {'file': files, 'action': 'upload', 'uncompress_files': True}
@@ -353,7 +355,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             self.assert_200(response)
             assert response.content_type == 'application/zip'
 
-            zipfile = ZipFile(StringIO(response.data))
+            zipfile = ZipFile(BytesIO(response.data))
             assert zipfile.namelist() == [title]
 
     def test_recursive_zip(self):
@@ -392,7 +394,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             self.assert_200(response)
             assert response.content_type == 'application/zip'
 
-            zipfile = ZipFile(StringIO(response.data))
+            zipfile = ZipFile(BytesIO(response.data))
             assert zipfile.namelist() == ['my folder/' + title]
 
     def test_document_send_by_mail(self):
@@ -407,7 +409,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             for filename in (u'ascii title.txt', u'utf-8 est arrivé!.txt'):
                 content_type = "text/plain"
                 data = {
-                    'file': (StringIO('file content'), filename, content_type),
+                    'file': (BytesIO('file content'), filename, content_type),
                     'action': 'upload',
                 }
                 url = url_for(

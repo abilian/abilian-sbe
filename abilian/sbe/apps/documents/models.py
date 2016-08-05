@@ -433,7 +433,7 @@ class BaseContent(CmisObject):
 
     @content.setter
     def content(self, value):
-        assert isinstance(value, str)
+        assert isinstance(value, bytes)
         self.content_blob = Blob()
         self.content_blob.value = value
         self.content_length = len(value)

@@ -9,11 +9,11 @@ import logging
 import os
 import re
 import tempfile
-from cStringIO import StringIO
+from io import StringIO
 from datetime import datetime
 from functools import partial
 from typing import Any, List
-from urllib import quote
+from six.moves.urllib.parse import quote
 from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa

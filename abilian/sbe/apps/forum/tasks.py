@@ -141,10 +141,10 @@ def build_local_part(name, uid):
     tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
     key = current_app.config['SECRET_KEY']
     serializer = Serializer(key)
-    signature = serializer.dumps(uid.decode('utf-8'))
+    signature = serializer.dumps(uid)
     digest = hashlib.md5(signature).digest()
     digest = base64.b32encode(digest).split('=', 1)[0]  # remove base32 padding
-    digest = unicode(digest)
+    # digest = unicode(digest)
     local_part = name + tag + uid + u'-' + digest
 
     if len(local_part) > 64:

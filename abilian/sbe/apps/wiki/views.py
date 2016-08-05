@@ -5,7 +5,7 @@ from __future__ import absolute_import
 
 import difflib
 from os.path import dirname, join
-from urllib import quote
+from six.moves.urllib.parse import quote
 
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, redirect, \
@@ -489,7 +489,7 @@ def get_page_by_title(title):
 
 def create_home_page():
     filename = join(dirname(__file__), 'data', 'default_page.txt')
-    default_src = open(filename).read().decode('utf-8')
+    default_src = open(filename, 'rt').read()
     page = WikiPage(title=u"Home", body_src=default_src)
     page.community_id = g.community.id
     db.session.add(page)

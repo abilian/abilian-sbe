@@ -2,7 +2,7 @@
 
 import subprocess
 import time
-import urllib
+from six.moves.urllib.parse import urlopen
 
 # Some random number
 BIND = '0.0.0.0'
@@ -17,7 +17,7 @@ p = subprocess.Popen(["./bin/gunicorn", 'wsgi:app', '-b', '{}:{}'.format(BIND,
 try:
     # Just in case
     time.sleep(5)
-    page = urllib.urlopen(HOME).read()
+    page = urlopen(HOME).read()
     assert "Welcome to Abilian" in page
 finally:
     p.terminate()

@@ -208,7 +208,7 @@ class Community(Entity):
 
         if not self.image:
             fn = join(dirname(__file__), "data", "community.png")
-            self.image = Blob(open(fn).read())
+            self.image = Blob(open(fn, 'rb').read())
 
     @property
     def has_calendar(self):

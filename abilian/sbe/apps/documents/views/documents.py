@@ -4,7 +4,7 @@
 from __future__ import absolute_import
 
 from datetime import datetime
-from urllib import quote
+from six.moves.urllib.parse import quote
 
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, redirect, \

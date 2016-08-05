@@ -16,6 +16,7 @@ from pathlib import Path
 import jinja2
 from flask import current_app
 from flask_script import Command, Manager
+from six import text_type
 from werkzeug.serving import BaseWSGIServer
 
 from abilian.app import Application as BaseApplication
@@ -132,7 +133,7 @@ def setup_sbe_app():
 
     if not bin_dir.exists() and bin_dir.is_dir():
         logger.error('%s doesn\'t exists or is not a directory. Aborting',
-                     repr(unicode(bin_dir)))
+                     repr(text_type(bin_dir)))
         return 1
 
     script_file = bin_dir / 'abilian_sbe'

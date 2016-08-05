@@ -2,7 +2,7 @@
 from __future__ import absolute_import
 
 import re
-from urllib import quote_plus
+from six.moves.urllib.parse import quote_plus
 
 from flask import g, url_for
 from markdown import Markdown

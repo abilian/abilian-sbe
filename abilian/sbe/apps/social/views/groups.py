@@ -1,4 +1,6 @@
 # coding=utf-8
+from __future__ import unicode_literals
+
 from os.path import dirname, join
 
 from flask import current_app, flash, g, jsonify, make_response, redirect, \
@@ -18,7 +20,7 @@ from .social import social
 from .util import Env
 
 DEFAULT_GROUP_MUGSHOT = open(
-    join(dirname(__file__), "../../../static/images/frog.jpg")).read()
+    join(dirname(__file__), "../../../static/images/frog.jpg"), 'rb').read()
 
 
 @social.route("/groups/")

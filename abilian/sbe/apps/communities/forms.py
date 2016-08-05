@@ -4,13 +4,13 @@
 from __future__ import absolute_import
 
 import imghdr
-from string import strip
 
 import PIL
 import sqlalchemy as sa
 from flask import request
 from flask_babel import gettext as _
 from flask_babel import lazy_gettext as _l
+from six import text_type
 from wtforms.fields import BooleanField, StringField, TextAreaField
 from wtforms.validators import ValidationError, optional, required
 
@@ -21,6 +21,10 @@ from abilian.web.forms.validators import length
 from abilian.web.forms.widgets import BooleanWidget, ImageInput, TextArea
 
 from .models import Community
+
+
+def strip(s):
+    return s.strip()
 
 
 def _group_choices():
@@ -40,7 +44,7 @@ def _group_choices():
         label = u'{} ({:d} membres)'.format(g.name, g.members_count)
         if g.community:
             label += u' — Communauté: {}'.format(g.community)
-        choices.append((unicode(g.id), label))
+        choices.append((text_type(g.id), label))
 
     return choices
 

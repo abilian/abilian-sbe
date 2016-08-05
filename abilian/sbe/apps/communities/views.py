@@ -3,7 +3,7 @@
 """
 from __future__ import absolute_import
 
-import cStringIO as StringIO
+from io import StringIO
 import hashlib
 import logging
 from datetime import datetime
@@ -474,7 +474,7 @@ def members_excel_export():
         width = min(max(width, MIN_WIDTH), MAX_WIDTH)
         ws.column_dimensions[letter].width = width
 
-    fd = StringIO.StringIO()
+    fd = StringIO()
     wb.save(fd)
     fd.seek(0)
 
