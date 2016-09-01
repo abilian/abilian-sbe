@@ -7,7 +7,7 @@ from datetime import datetime
 from unittest import TestCase
 
 from flask import url_for
-from pytest import skip
+from pytest import mark
 
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
     CommunityIndexingTestCase
@@ -25,7 +25,7 @@ class Test(TestCase):
 
 class IndexingTestCase(CommunityIndexingTestCase):
 
-    @skip
+    @mark.skip
     def test_event_indexed(self):
         start = datetime.now()
         event1 = Event(name="Test event", community=self.community, start=start)
@@ -58,7 +58,7 @@ class NoLoginViewTest(CommunityBaseTestCase):
     Test correct url response, without login or security involved
     """
 
-    @skip
+    @mark.skip
     def test(self):
         response = self.client.get(
             url_for(

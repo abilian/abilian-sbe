@@ -66,8 +66,10 @@ test:
 	py.test --tb=short $(PKG) tests
 
 test-with-coverage:
-	py.test --tb=short --durations 10 --cov $(PKG) --cov-config etc/coverage.rc \
-	  --cov-report term-missing $(SRC) tests
+	py.test --tb=short --durations 10 \
+		--cov $(PKG) \
+		--cov-config etc/coverage.rc \
+		--cov-report term-missing $(SRC) tests
 
 test-long:
 	RUN_SLOW_TESTS=True py.test -x $(SRC) tests
