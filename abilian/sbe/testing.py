@@ -3,14 +3,14 @@ from abilian import testing
 from .app import Application
 
 
-class TestConfig(testing.TestConfig):
+class ConfigForTests(testing.TestConfig):
     CELERY_ALWAYS_EAGER = True  # run tasks locally, no async
     CELERY_EAGER_PROPAGATES_EXCEPTIONS = True
 
 
 class BaseTestCase(testing.BaseTestCase):
     application_class = Application
-    config_class = TestConfig
+    config_class = ConfigForTests
 
     def get_setup_config(self):
         """Called before creating application class.
