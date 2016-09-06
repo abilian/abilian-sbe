@@ -130,9 +130,11 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
         else:
             batch_send_post_to_users.apply_async([post_id, list(failed)])
 
-    return {'post_id': post_id,
-            'successfully_sent': successfully_sent,
-            'failed': list(failed),}
+    return {
+        'post_id': post_id,
+        'successfully_sent': successfully_sent,
+        'failed': list(failed),
+    }
 
 
 def build_local_part(name, uid):

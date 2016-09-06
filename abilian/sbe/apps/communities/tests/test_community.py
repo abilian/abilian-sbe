@@ -237,11 +237,13 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             response = self.client.get(url)
             self.assert_200(response)
 
-            data = {'__action': u'edit',
-                    'name': u'edited community',
-                    'description': u'my community',
-                    'linked_group': u'',
-                    'type': 'participative',}
+            data = {
+                '__action': u'edit',
+                'name': u'edited community',
+                'description': u'my community',
+                'linked_group': u'',
+                'type': 'participative',
+            }
             response = self.client.post(url, data=data)
             assert response.status_code == 302
             self.assertEqual(

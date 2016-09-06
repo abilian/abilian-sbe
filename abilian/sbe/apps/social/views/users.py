@@ -276,11 +276,13 @@ def users_json():
         if role is not None:
             role = text_type(role)
 
-        item = {'id': user.id,
-                'text': u'{} ({})'.format(user.name, user.email),
-                'name': user.name,
-                'email': user.email,
-                'role': role,}
+        item = {
+            'id': user.id,
+            'text': u'{} ({})'.format(user.name, user.email),
+            'name': user.name,
+            'email': user.email,
+            'role': role,
+        }
         results.append(item)
 
     return jsonify({'results': results})
