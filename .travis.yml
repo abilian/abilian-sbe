@@ -33,7 +33,7 @@ before_install:
 
 # Install Python dependencies
 install:
-  - pip install -U 'pip>=8'
+  - pip install -U 'pip>=8' setuptools
   - pip install -e '.[dev]'
   # Debug info
   - pip --version
