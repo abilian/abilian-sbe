@@ -7,7 +7,7 @@ import hashlib
 import logging
 from datetime import datetime
 from functools import wraps
-from io import StringIO
+from io import BytesIO
 from operator import attrgetter
 from pathlib import Path
 from time import gmtime, strftime
@@ -475,7 +475,7 @@ def members_excel_export():
         width = min(max(width, MIN_WIDTH), MAX_WIDTH)
         ws.column_dimensions[letter].width = width
 
-    fd = StringIO()
+    fd = BytesIO()
     wb.save(fd)
     fd.seek(0)
 
