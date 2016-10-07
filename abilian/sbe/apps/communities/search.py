@@ -62,8 +62,9 @@ def filter_user_communities():
         communities = [wq.Term('community_id', i[0]) for i in ids]
 
         if communities:
-            communities = wq.And([wq.Term(_COMMUNITY_CONTENT_FIELDNAME, True),
-                                  wq.Or(communities)])
+            communities = wq.And([
+                wq.Term(_COMMUNITY_CONTENT_FIELDNAME, True), wq.Or(communities)
+            ])
             filter_q = wq.Or([filter_q, communities])
 
     return filter_q

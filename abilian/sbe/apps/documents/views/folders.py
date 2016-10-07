@@ -12,7 +12,6 @@ import tempfile
 from datetime import datetime
 from functools import partial
 from io import StringIO
-from typing import Any, List
 from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
@@ -22,6 +21,7 @@ from flask import Markup, current_app, flash, g, jsonify, make_response, \
 from flask._compat import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
+from typing import Any, List
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
 
@@ -147,8 +147,9 @@ def permissions(folder_id):
     users_and_local_roles = [(user, role, repository.has_access(user, folder))
                              for user, role in local_roles_assignments
                              if isinstance(user, User)]
-    groups_and_local_roles = [t for t in local_roles_assignments
-                              if isinstance(t[0], Group)]
+    groups_and_local_roles = [
+        t for t in local_roles_assignments if isinstance(t[0], Group)
+    ]
 
     users_and_inherited_roles = groups_and_inherited_roles = ()
 
@@ -158,8 +159,9 @@ def permissions(folder_id):
             (user, role, False) for user, role in inherited_roles_assignments
             if isinstance(user, User)
         ]
-        groups_and_inherited_roles = [t for t in inherited_roles_assignments
-                                      if isinstance(t[0], Group)]
+        groups_and_inherited_roles = [
+            t for t in inherited_roles_assignments if isinstance(t[0], Group)
+        ]
 
     query = Group.query
     query = query.order_by(func.lower(Group.name))
@@ -529,8 +531,10 @@ def folder_edit(folder):
 ARCHIVE_IGNORE_FILES_GLOBS = {'__MACOSX/*', '.DS_Store'}
 # translates patterns to match with any parent directory ((*/)?pattern should
 # match)
-ARCHIVE_IGNORE_FILES = {re.compile('(?:.*\\/)?' + fnmatch.translate(pattern))
-                        for pattern in ARCHIVE_IGNORE_FILES_GLOBS}
+ARCHIVE_IGNORE_FILES = {
+    re.compile('(?:.*\\/)?' + fnmatch.translate(pattern))
+    for pattern in ARCHIVE_IGNORE_FILES_GLOBS
+}
 
 # skip directory names. Directory will be created only if they contains files
 ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate('*/')))
@@ -886,7 +890,8 @@ def descendants_view(folder_id):
 
     for children in by_path.values():
         children.sort(
-            key=lambda hit: (hit['object_type'] != Folder.entity_type, hit['name'].lower()))
+            key=lambda hit: (hit['object_type'] != Folder.entity_type, hit['name'].lower())
+        )
 
     descendants = []
 

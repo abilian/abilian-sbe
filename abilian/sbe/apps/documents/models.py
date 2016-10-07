@@ -78,8 +78,9 @@ class CmisObject(Entity, InheritSecurity):
     __indexation_args__ = {}
     __indexation_args__.update(Entity.__indexation_args__)
     index_to = Entity.__indexation_args__.setdefault('index_to', ())
-    index_to += (('community.id', ('community_id',)),
-                 ('community.slug', ('community_slug',)),)
+    index_to += (
+        ('community.id', ('community_id',)),
+        ('community.slug', ('community_slug',)),)
     __indexation_args__['index_to'] = index_to
     del index_to
 
@@ -133,9 +134,10 @@ class CmisObject(Entity, InheritSecurity):
         new_obj = self.__class__(title=title, name=title, parent=parent)
         state = vars(self)
         for k, v in state.items():
-            if not k.startswith("_") and k not in ['uid', 'id', 'parent',
-                                                   'title', 'name', 'path',
-                                                   'subfolders', 'documents']:
+            if not k.startswith("_") and k not in [
+                    'uid', 'id', 'parent', 'title', 'name', 'path',
+                    'subfolders', 'documents'
+            ]:
                 setattr(new_obj, k, v)
         if self.parent:
             assert self in self.parent.children
@@ -188,9 +190,9 @@ class PathAndSecurityIndexable(object):
     Mixin for folder and documents indexation.
     """
     __indexation_args__ = dict(
-        index_to=(('_indexable_parent_ids', ('parent_ids',)),
-                  ('_indexable_roles_and_users',
-                   ('allowed_roles_and_users',)),),)
+        index_to=(
+            ('_indexable_parent_ids', ('parent_ids',)),
+            ('_indexable_roles_and_users', ('allowed_roles_and_users',)),),)
 
     def _iter_to_root(self, skip_self=False):
         obj = self if not skip_self else self.parent

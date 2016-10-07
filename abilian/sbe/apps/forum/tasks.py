@@ -64,8 +64,9 @@ def send_post_by_email(post_id):
                     community.name)
 
         CHUNK_SIZE = 20
-        members_id = [member.id for member in community.members
-                      if member.can_login]
+        members_id = [
+            member.id for member in community.members if member.can_login
+        ]
         chunk = []
         for idx, member_id in enumerate(members_id):
             chunk.append(member_id)
@@ -360,9 +361,11 @@ def process(message, marker):
             content[part.get_content_subtype()] = payload
 
         if content_disp is not None:
-            attachments.append({'filename': part.get_filename(),
-                                'content_type': part.get_content_type(),
-                                'data': part.get_payload(decode=True)})
+            attachments.append({
+                'filename': part.get_filename(),
+                'content_type': part.get_content_type(),
+                'data': part.get_payload(decode=True)
+            })
 
     if 'html' in content and marker in content['html']:
         newpost = extract_content(content['html'], marker[:9])

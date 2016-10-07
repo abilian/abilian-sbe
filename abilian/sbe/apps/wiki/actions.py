@@ -31,56 +31,50 @@ class WikiAction(Action):
     Endpoint = CommunityEndpoint
 
 
-_actions = (WikiPageAction(
-    'wiki:page', 'view', _l(u'View'), endpoint='.page', icon='eye-open'),
-            WikiPageAction(
-                'wiki:page',
-                'edit',
-                _l(u'Edit'),
-                endpoint='.page_edit',
-                icon='pencil'),
-            WikiPageModalAction(
-                'wiki:page',
-                'upload_attachment',
-                _l(u'Upload an attachment'),
-                url='#upload-files',
-                icon='plus'),
-            WikiPageAction(
-                'wiki:page',
-                'source',
-                _l(u'Source'),
-                endpoint='.page_source',
-                icon=FAIcon('code')),
-            WikiPageAction(
-                'wiki:page',
-                'changes',
-                _l(u'Changes'),
-                endpoint='.page_changes',
-                icon='time'),
-            WikiPageModalAction(
-                'wiki:page',
-                'delete',
-                _l(u'Delete'),
-                url='#modal-delete',
-                icon='trash'),
-            WikiAction(
-                'wiki:global',
-                'new',
-                _l(u'New page'),
-                endpoint='.page_new',
-                icon='plus'),
-            WikiAction(
-                'wiki:global',
-                'pages',
-                _l(u'All pages'),
-                endpoint='.wiki_pages',
-                icon='list'),
-            WikiAction(
-                'wiki:global',
-                'help',
-                _l(u'Syntax help'),
-                endpoint='.wiki_help',
-                icon='info-sign'),)
+_actions = (
+    WikiPageAction(
+        'wiki:page', 'view', _l(u'View'), endpoint='.page', icon='eye-open'),
+    WikiPageAction(
+        'wiki:page', 'edit', _l(u'Edit'), endpoint='.page_edit', icon='pencil'),
+    WikiPageModalAction(
+        'wiki:page',
+        'upload_attachment',
+        _l(u'Upload an attachment'),
+        url='#upload-files',
+        icon='plus'),
+    WikiPageAction(
+        'wiki:page',
+        'source',
+        _l(u'Source'),
+        endpoint='.page_source',
+        icon=FAIcon('code')),
+    WikiPageAction(
+        'wiki:page',
+        'changes',
+        _l(u'Changes'),
+        endpoint='.page_changes',
+        icon='time'),
+    WikiPageModalAction(
+        'wiki:page', 'delete', _l(u'Delete'), url='#modal-delete',
+        icon='trash'),
+    WikiAction(
+        'wiki:global',
+        'new',
+        _l(u'New page'),
+        endpoint='.page_new',
+        icon='plus'),
+    WikiAction(
+        'wiki:global',
+        'pages',
+        _l(u'All pages'),
+        endpoint='.wiki_pages',
+        icon='list'),
+    WikiAction(
+        'wiki:global',
+        'help',
+        _l(u'Syntax help'),
+        endpoint='.wiki_help',
+        icon='info-sign'),)
 
 
 def register_actions(state):

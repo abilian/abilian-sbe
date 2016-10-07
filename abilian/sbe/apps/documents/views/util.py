@@ -130,10 +130,14 @@ def get_selected_objects(folder):
     """
     selected_ids = request.form.getlist("object-selected")
 
-    doc_ids = [int(x.split(":")[-1]) for x in selected_ids
-               if x.startswith("cmis:document")]
-    folder_ids = [int(x.split(":")[-1]) for x in selected_ids
-                  if x.startswith("cmis:folder")]
+    doc_ids = [
+        int(x.split(":")[-1]) for x in selected_ids
+        if x.startswith("cmis:document")
+    ]
+    folder_ids = [
+        int(x.split(":")[-1]) for x in selected_ids
+        if x.startswith("cmis:folder")
+    ]
 
     docs = map(get_document, doc_ids)
     folders = map(get_folder, folder_ids)

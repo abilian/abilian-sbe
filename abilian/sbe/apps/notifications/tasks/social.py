@@ -142,9 +142,11 @@ def make_message(user):
         sender=sender,
         recipients=[recipient],
         extra_headers=extra_headers)
-    ctx = {'digests': digests,
-           'token': token,
-           'unsubscribe_url': unsubscribe_url}
+    ctx = {
+        'digests': digests,
+        'token': token,
+        'unsubscribe_url': unsubscribe_url
+    }
     msg.body = render_template_i18n("notifications/daily-social-digest.txt",
                                     **ctx)
     msg.html = render_template_i18n("notifications/daily-social-digest.html",
@@ -208,8 +210,10 @@ class CommunityDigest(object):
                 if obj.thread.id not in self.seen_entities:
                     # save actor and oldest/first modified Post in thread
                     # oldest post because Activities are ordered_by Asc(A.happened_at)
-                    self.updated_conversations[obj.thread] = {'actors': [actor],
-                                                              'post': obj}
+                    self.updated_conversations[obj.thread] = {
+                        'actors': [actor],
+                        'post': obj
+                    }
                     # Mark this post's Thread as seen to avoid duplicates
                     self.seen_entities.add(obj.thread.id)
                 elif obj.thread not in self.new_conversations:

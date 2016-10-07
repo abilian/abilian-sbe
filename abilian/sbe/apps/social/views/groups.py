@@ -30,8 +30,10 @@ def groups():
     if tab == 'all_groups':
         e.groups = Group.query.order_by(Group.name).all()
         if not security.has_role(g.user, "admin"):
-            e.groups = [group for group in e.groups
-                        if group.public or g.user in group.members]
+            e.groups = [
+                group for group in e.groups
+                if group.public or g.user in group.members
+            ]
     else:
         e.groups = g.user.groups
         e.groups.sort(key=lambda x: x.name)
@@ -77,10 +79,11 @@ def group_post(group_id):
     action = request.form.get('action')
     return_url = request.form.get('return_url')
 
-    membership_actions = frozenset(('add',
-                                    'remove',
-                                    'add-admin',
-                                    'remove-admin',))
+    membership_actions = frozenset((
+        'add',
+        'remove',
+        'add-admin',
+        'remove-admin',))
 
     if action not in ('join', 'leave'):
         assert is_admin(group)

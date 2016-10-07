@@ -1,6 +1,8 @@
-DAV_PROPS = ['creationdate', 'displayname', 'getcontentlanguage',
-             'getcontentlength', 'getcontenttype', 'getetag', 'getlastmodified',
-             'lockdiscovery', 'resourcetype', 'source', 'supportedlock']
+DAV_PROPS = [
+    'creationdate', 'displayname', 'getcontentlanguage', 'getcontentlength',
+    'getcontenttype', 'getetag', 'getlastmodified', 'lockdiscovery',
+    'resourcetype', 'source', 'supportedlock'
+]
 
 # DAV level 1
 #OPTIONS = 'GET, HEAD, COPY, MOVE, POST, PUT, PROPFIND, PROPPATCH, OPTIONS, '\

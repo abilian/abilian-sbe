@@ -379,9 +379,8 @@ def attachment_download():
     response = make_response(attachment.content)
     response.headers['content-length'] = attachment.content_length
     response.headers['content-type'] = attachment.content_type
-    content_disposition = (
-        'attachment;filename="{}"'.format(quote(attachment.name.encode('utf8')))
-    )
+    content_disposition = ('attachment;filename="{}"'.format(
+        quote(attachment.name.encode('utf8'))))
     response.headers['content-disposition'] = content_disposition
     return response
 

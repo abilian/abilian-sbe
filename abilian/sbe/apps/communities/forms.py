@@ -31,7 +31,8 @@ def _group_choices():
     m_prop = Group.members.property
     membership = m_prop.secondary
     query = Group.query.session.query(
-        Group.id, Group.name, Community.name.label('community'),
+        Group.id, Group.name,
+        Community.name.label('community'),
         sa.sql.func.count(membership.c.user_id).label('members_count'))
     query = query.outerjoin(m_prop.secondary, m_prop.primaryjoin) \
         .outerjoin(Community, Community.group.property.primaryjoin) \

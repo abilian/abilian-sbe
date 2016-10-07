@@ -12,8 +12,8 @@ HOME = "http://{}:{}/".format(BIND, PORT)
 
 subprocess.call(['./bin/pip', 'install', 'gunicorn'])
 
-p = subprocess.Popen(["./bin/gunicorn", 'wsgi:app', '-b', '{}:{}'.format(BIND,
-                                                                         PORT)])
+p = subprocess.Popen(
+    ["./bin/gunicorn", 'wsgi:app', '-b', '{}:{}'.format(BIND, PORT)])
 
 try:
     # Just in case

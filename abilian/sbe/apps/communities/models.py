@@ -126,11 +126,13 @@ class Community(Entity):
         ForeignKey(
             Folder.id, use_alter=True, name='fk_community_root_folder'),
         unique=True)
-    folder = relation(Folder,
-                      single_parent=True,  # required for delete-orphan
-                      primaryjoin=(folder_id == Folder.id),
-                      cascade='all, delete-orphan',
-                      backref=backref('_community', lazy='select', uselist=False))
+    folder = relation(
+        Folder,
+        single_parent=True,  # required for delete-orphan
+        primaryjoin=(folder_id == Folder.id),
+        cascade='all, delete-orphan',
+        backref=backref(
+            '_community', lazy='select', uselist=False))
 
     #: The group this community is linked to, if any. Memberships are then
     #: reflected
@@ -200,8 +202,8 @@ class Community(Entity):
                 # during creation, we may have to provide a temporary name for
                 # subfolder, we don't want empty names on folders since they must be
                 # unique among siblings
-                name = u'{}_{}-{}'.format(self.__class__.__name__, str(self.id),
-                                          time.asctime())
+                name = u'{}_{}-{}'.format(self.__class__.__name__,
+                                          str(self.id), time.asctime())
             self.folder = repository.root_folder.create_subfolder(name)
             #if not self.group:
             #  self.group = Group(name=self.name)

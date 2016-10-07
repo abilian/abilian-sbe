@@ -29,8 +29,9 @@ class Message(Entity):
     __tablename__ = 'message'
     __indexable__ = False
     __editable__ = ['content']
-    __exportable__ = __editable__ + ['id', 'created_at', 'updated_at',
-                                     'creator_id', 'owner_id']
+    __exportable__ = __editable__ + [
+        'id', 'created_at', 'updated_at', 'creator_id', 'owner_id'
+    ]
 
     #: The content for this message.
     content = Column(UnicodeText(), info=SEARCHABLE | dict(index_to=('text',)))
@@ -64,8 +65,9 @@ class PrivateMessage(Entity):
     __tablename__ = 'private_message'
     __indexable__ = False
     __editable__ = ['content', 'recipient_id']
-    __exportable__ = __editable__ + ['id', 'created_at', 'updated_at',
-                                     'creator_id', 'owner_id']
+    __exportable__ = __editable__ + [
+        'id', 'created_at', 'updated_at', 'creator_id', 'owner_id'
+    ]
 
     content = Column(UnicodeText, info=SEARCHABLE | dict(index_to=('text',)))
     recipient_id = Column(Integer, ForeignKey(User.id), nullable=False)
@@ -76,8 +78,9 @@ class Like(Entity):
     __tablename__ = 'like'
     __indexable__ = False
     __editable__ = ['content', 'message_id']
-    __exportable__ = __editable__ + ['id', 'created_at', 'updated_at',
-                                     'creator_id', 'owner_id']
+    __exportable__ = __editable__ + [
+        'id', 'created_at', 'updated_at', 'creator_id', 'owner_id'
+    ]
 
     content = Column(UnicodeText, info=SEARCHABLE | dict(index_to=('text',)))
     message_id = Column(Integer, ForeignKey(Message.id), nullable=False)

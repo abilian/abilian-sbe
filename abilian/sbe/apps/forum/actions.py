@@ -58,51 +58,52 @@ _close_template_action = u'''
 </form>
 '''
 
-_actions = (ForumAction(
-    'forum:global', 'new_thread', _l(u'Start a new conversation'), icon='plus'),
-            ForumAction(
-                'forum:global',
-                'index',
-                _l(u'Recent conversations'),
-                icon='list'),
-            ForumAction(
-                'forum:global', 'archives', _l(u'Archives'), icon='calendar'),
-            ForumAction(
-                'forum:global',
-                'attachments',
-                _l(u'Attachments'),
-                icon='file',
-                condition=is_in_thread),
-            ForumModalAction(
-                'forum:thread',
-                'delete',
-                _l(u'Delete'),
-                condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
-                url='#modal-delete',
-                icon='trash'),
-            #
-            ThreadAction(
-                'forum:thread',
-                'close',
-                _l('Close thread'),
-                url='close',
-                template_string=_close_template_action,
-                condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
-                icon=FAIcon('lock')),
-            ThreadAction(
-                'forum:thread',
-                'reopen',
-                _l('Re-open thread'),
-                url='close',
-                template_string=_close_template_action,
-                condition=lambda ctx: is_admin(ctx) and is_closed(ctx),
-                icon=FAIcon('unlock')),
-            ThreadAction(
-                'forum:thread',
-                'attachments',
-                _l(u'Attachments'),
-                url='attachments',
-                icon='file'),)
+_actions = (
+    ForumAction(
+        'forum:global',
+        'new_thread',
+        _l(u'Start a new conversation'),
+        icon='plus'),
+    ForumAction(
+        'forum:global', 'index', _l(u'Recent conversations'), icon='list'),
+    ForumAction(
+        'forum:global', 'archives', _l(u'Archives'), icon='calendar'),
+    ForumAction(
+        'forum:global',
+        'attachments',
+        _l(u'Attachments'),
+        icon='file',
+        condition=is_in_thread),
+    ForumModalAction(
+        'forum:thread',
+        'delete',
+        _l(u'Delete'),
+        condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
+        url='#modal-delete',
+        icon='trash'),
+    #
+    ThreadAction(
+        'forum:thread',
+        'close',
+        _l('Close thread'),
+        url='close',
+        template_string=_close_template_action,
+        condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
+        icon=FAIcon('lock')),
+    ThreadAction(
+        'forum:thread',
+        'reopen',
+        _l('Re-open thread'),
+        url='close',
+        template_string=_close_template_action,
+        condition=lambda ctx: is_admin(ctx) and is_closed(ctx),
+        icon=FAIcon('unlock')),
+    ThreadAction(
+        'forum:thread',
+        'attachments',
+        _l(u'Attachments'),
+        url='attachments',
+        icon='file'),)
 
 
 def register_actions(state):

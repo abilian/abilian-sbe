@@ -12,10 +12,12 @@ class Feed(object):
         self.collection = collection
 
     def to_xml(self, **options):
-        ctx = {'ROOT': ROOT,
-               'object': self.object,
-               'collection': self.collection,
-               'to_xml': to_xml}
+        ctx = {
+            'ROOT': ROOT,
+            'object': self.object,
+            'collection': self.collection,
+            'to_xml': to_xml
+        }
         return render_template("cmis/feed.xml", **ctx)
 
 
@@ -25,11 +27,13 @@ class Entry(object):
         self.obj = obj
 
     def to_xml(self, **options):
-        ctx = {'ROOT': ROOT,
-               'folder': self.obj,
-               'document': self.obj,
-               'options': options,
-               'to_xml': to_xml}
+        ctx = {
+            'ROOT': ROOT,
+            'folder': self.obj,
+            'document': self.obj,
+            'options': options,
+            'to_xml': to_xml
+        }
 
         if self.obj.sbe_type == 'cmis:folder':
             result = render_template("cmis/folder.xml", **ctx)

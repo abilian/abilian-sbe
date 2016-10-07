@@ -7,6 +7,8 @@ class CommunityPresenter(BasePresenter):
 
     @property
     def breadcrumbs(self):
-        return [dict(
-            label=_l("Communities"), path="/communities/"),
-                dict(label=self._model.name)]
+        return [
+            dict(
+                label=_l("Communities"), path="/communities/"),
+            dict(label=self._model.name)
+        ]

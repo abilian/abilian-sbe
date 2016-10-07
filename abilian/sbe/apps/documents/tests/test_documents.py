@@ -193,9 +193,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 url_for(
                     'documents.index', community_id=self.community.slug))
             self.assert_status(response, 302)
-            self.assertEqual(response.headers['Location'],
-                             u'http://localhost/communities/{}/docs/folder/{}'
-                             u''.format(self.community.slug, self.folder.id),)
+            self.assertEqual(
+                response.headers['Location'],
+                u'http://localhost/communities/{}/docs/folder/{}'
+                u''.format(self.community.slug, self.folder.id),)
 
     def _test_upload(self,
                      title,
@@ -296,8 +297,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
         fd = self.open_file('content.zip')
         archive_content = explore_archive(fd, u'content.zip', uncompress=True)
-        result = {u'/'.join(path) + u'/' + f.filename
-                  for path, f in archive_content}
+        result = {
+            u'/'.join(path) + u'/' + f.filename
+            for path, f in archive_content
+        }
         assert result == {
             u'existing-doc/file.txt',
             u'existing-doc/subfolder_in_renamed/doc.txt', u'folder 1/doc.txt',
@@ -344,8 +347,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             self.assert_302(response)
 
             doc = folder.children[0]
-            data = {'action': 'download',
-                    'object-selected': ["cmis:document:%d" % doc.id]}
+            data = {
+                'action': 'download',
+                'object-selected': ["cmis:document:%d" % doc.id]
+            }
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
@@ -383,8 +388,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             response = self.client.post(url, data=data)
             self.assert_302(response)
 
-            data = {'action': 'download',
-                    'object-selected': ["cmis:folder:%d" % my_folder.id]}
+            data = {
+                'action': 'download',
+                'object-selected': ["cmis:folder:%d" % my_folder.id]
+            }
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
@@ -431,8 +438,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 url = get_send_url(ascii_doc.id)
                 rv = self.client.post(
                     url,
-                    data={'recipient': 'dest@example.com',
-                          'message': u'Voilà un fichier'})
+                    data={
+                        'recipient': 'dest@example.com',
+                        'message': u'Voilà un fichier'
+                    })
                 self.assertEqual(rv.status_code, 302,
                                  "expected 302, got:" + rv.status)
                 assert len(outbox) == 1
@@ -449,8 +458,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 url = get_send_url(unicode_doc.id)
                 rv = self.client.post(
                     url,
-                    data={'recipient': 'dest@example.com',
-                          'message': u'Voilà un fichier'})
+                    data={
+                        'recipient': 'dest@example.com',
+                        'message': u'Voilà un fichier'
+                    })
                 assert rv.status_code == 302
                 assert len(outbox) == 1
                 msg = outbox[0]

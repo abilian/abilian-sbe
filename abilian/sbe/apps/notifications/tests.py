@@ -34,8 +34,8 @@ class TestNotificationViews(BaseTestCase):
 
     def test_unsubscribe(self):
         preferences = self.app.services['preferences']
-        preferences.set_preferences(self.user, **{'sbe:notifications:daily':
-                                                  True})
+        preferences.set_preferences(self.user,
+                                    **{'sbe:notifications:daily': True})
         token = generate_unsubscribe_token(self.user)
         url = url_for('notifications.unsubscribe_sbe', token=token)
 

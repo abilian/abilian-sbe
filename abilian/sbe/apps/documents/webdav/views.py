@@ -93,11 +93,13 @@ def create_root_folder():
 @route('/', methods=['OPTIONS'], defaults={'path': '/'})
 @route('/<path:path>', methods=['OPTIONS'])
 def options(path):
-    headers = {'Content-Type': 'text/plain',
-               'Content-Length': '0',
-               'DAV': '1,2',
-               'MS-Author-Via': 'DAV',
-               'Allow': OPTIONS}
+    headers = {
+        'Content-Type': 'text/plain',
+        'Content-Length': '0',
+        'DAV': '1,2',
+        'MS-Author-Via': 'DAV',
+        'Allow': OPTIONS
+    }
     print("Returning", headers)
     return "", HTTP_OK, headers
 
@@ -110,8 +112,10 @@ def get(path):
     obj = get_object(path)
 
     file_name = obj.file_name.encode('utf8')
-    headers = {'Content-Type': obj.content_type,
-               'Content-Disposition': 'attachment;filename=%s' % file_name}
+    headers = {
+        'Content-Type': obj.content_type,
+        'Content-Disposition': 'attachment;filename=%s' % file_name
+    }
     return obj.content, HTTP_OK, headers
 
 
