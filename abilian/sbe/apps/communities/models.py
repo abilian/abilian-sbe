@@ -173,9 +173,6 @@ class Community(Entity):
     #: True if this community has a forum
     has_forum = Column(Boolean, nullable=False, default=True)
 
-    # FIXME
-    has_calendar = False
-
     #: One of 'participative' or 'informative
     type = Column(String(20), nullable=False, default="informative")
 

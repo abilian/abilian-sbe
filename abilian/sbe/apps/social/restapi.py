@@ -22,7 +22,7 @@ restapi = Blueprint('restapi', __name__, url_prefix="/api")
 
 
 def make_json_response(obj, response_code=200):
-    if type(obj) == list:
+    if isinstance(obj, list):
         obj = [x.to_dict() if hasattr(x, 'to_dict') else x for x in obj]
 
     if hasattr(obj, 'to_json'):
