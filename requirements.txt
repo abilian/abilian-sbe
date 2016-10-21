@@ -53,10 +53,10 @@ openpyxl==2.4.0
 pandas==0.19.0            # via abilian-core
 passlib==1.6.5            # via flask-security
 pathlib==1.0.1            # via abilian-core
-Pillow==3.4.1             # via abilian-core
+Pillow==3.4.2             # via abilian-core
 progressbar-latest==2.4   # via abilian-core
 psycopg2==2.6.2           # via abilian-core
-pycparser==2.14           # via cffi
+pycparser==2.16           # via cffi
 pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.5.3    # via abilian-core, pandas
 python-editor==1.0.1      # via alembic

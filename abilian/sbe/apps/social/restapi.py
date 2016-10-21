@@ -34,6 +34,7 @@ def make_json_response(obj, response_code=200):
     response.mimetype = 'application/json'
     return response
 
+
 #
 # Users
 #
@@ -97,6 +98,7 @@ def delete_user(user_id):
     db.session.commit()
     return make_response("", 204)
 
+
 #
 # Social graph: following
 #
@@ -140,6 +142,7 @@ def unfollow(user_id, contact_user_id):
     db.session.commit()
     return make_json_response("", 204)
 
+
 #
 # Social graph: groups
 #
@@ -168,6 +171,7 @@ def get_group_members(group_id):
     group = Group.query.get(group_id)
     return make_json_response(group.members)
 
+
 # [GET] /api/group_memberships	Listing Group Memberships
 
 
@@ -180,6 +184,7 @@ def create_group():
     db.session.add(group)
     db.session.commit()
     return make_json_response(group, 201)
+
 
 # [PUT] /api/groups/GROUP_ID	Updating Existing Group
 
@@ -239,6 +244,7 @@ def delete_message(message_id):
     db.session.commit()
     return make_response("", 204)
 
+
 #
 # Likes
 #
@@ -273,6 +279,7 @@ def unlike_message(message_id, like_id):
 @login_required
 def unlike_comment(comment_id, like_id):
     pass
+
 
 #
 # Search

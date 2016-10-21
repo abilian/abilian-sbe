@@ -80,6 +80,7 @@ class Application(BaseApplication):
         repository.init_app(self)
         converter.init_app(self)
 
+
 # SBE demo app bootstrap stuff
 _SBE_DEMO_SCRIPT = '''\
 #!{BIN_DIR}/python

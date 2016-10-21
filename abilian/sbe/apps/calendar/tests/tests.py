@@ -65,6 +65,7 @@ class NoLoginViewTest(CommunityBaseTestCase):
                 "calendar.index", community_id=self.community.slug))
         self.assert200(response)
 
+
 # class ViewTestCase(CommunityBaseTestCase):
 #     no_login = False
 #     SERVICES = ('security',)

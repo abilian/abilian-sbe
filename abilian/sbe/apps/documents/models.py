@@ -746,6 +746,7 @@ def icon_for(content_type):
 
     return icon_url('bin.png')
 
+
 # Async conversion
 _async_data = threading.local()
 

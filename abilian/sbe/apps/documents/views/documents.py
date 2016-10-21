@@ -310,6 +310,7 @@ def document_view_pdf(doc_id):
         pdf_url=url_for(
             ".document_download", community_id=g.community.slug, doc_id=doc.id))
 
+
 #
 # Tagging (currently not used!)
 #

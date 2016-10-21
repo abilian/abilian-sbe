@@ -328,6 +328,7 @@ def CommunityIdColumn():
         nullable=False,
         info=SEARCHABLE | dict(index_to=(('community_id', ('community_id',)),)))
 
+
 # Handlers to keep community/group members in sync
 #
 _PROCESSED_ATTR = '__sbe_community_group_sync_processed__'
