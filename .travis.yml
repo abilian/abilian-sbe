@@ -33,8 +33,9 @@ before_install:
 
 # Install Python dependencies
 install:
-  - pip install -U 'pip>=8' setuptools
+  - pip install -U 'pip>=9' setuptools
   - pip install -e '.[dev]'
+  - pip check
   # Debug info
   - pip --version
   - python -c "import sqlite3; print 'SQLITE3:', sqlite3.sqlite_version"
