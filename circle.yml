@@ -10,15 +10,14 @@ dependencies:
   pre:
     - sudo apt-get install poppler-utils
   override:
-    - pip install pip==8.1.1
+    - pip install -U pip>=9
     - pip install -U tox
     - npm install -g less
 
-    # Just to warm up the cache
+    # Just to fill up the cache
     - pip install -r requirements.txt -r etc/dev-requirements.txt
 
-    # Untill sqlite 3.9 is available on the server
-    - wget 'http://jenkins.abilian.com/_fixtures/libsqlite-3.9.1-precise-bin.tar.gz'
-    - tar xpvzf libsqlite-3.9.1-precise-bin.tar.gz -C ~
+test:
+  - pip check
+  - tox -e py27-postgres
 
- 
