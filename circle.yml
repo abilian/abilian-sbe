@@ -7,8 +7,9 @@ machine:
 dependencies:
   cache_directories:
      - "~/.cache/"
-  override:
+  pre:
     - apt-get install poppler-utils
+  override:
     - pip install pip==8.1.1
     - pip install -U tox
     - npm install -g less
