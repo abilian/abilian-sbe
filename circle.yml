@@ -20,5 +20,6 @@ dependencies:
 test:
   override:
     - pip check
+    - mkdir -p $CIRCLE_TEST_REPORTS/pytest
     - tox -e py27-postgres
 

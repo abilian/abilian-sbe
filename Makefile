@@ -155,3 +155,6 @@ release:
 	cd /tmp/abilian-sbe ; python setup.py sdist
 	cd /tmp/abilian-sbe ; python setup.py sdist upload
 
+update-deps:
+	pip-compile -U
+	pip-compile
