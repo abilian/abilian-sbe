@@ -3,9 +3,10 @@
 """
 from __future__ import absolute_import
 
+from typing import Any, Dict
+
 from flask import url_for as url_for_orig
 from flask import g
-from typing import Any, Dict
 
 from abilian.i18n import _l
 from abilian.services.security import MANAGE, WRITE, security
