@@ -12,7 +12,6 @@ import tempfile
 from datetime import datetime
 from functools import partial
 from io import StringIO
-from typing import Any, List
 from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
@@ -22,6 +21,7 @@ from flask import Markup, current_app, flash, g, jsonify, make_response, \
 from flask._compat import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
+from typing import Any, List
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
 
