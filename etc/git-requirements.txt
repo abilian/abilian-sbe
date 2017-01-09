@@ -1,3 +1,1 @@
 -e git+git://github.com/abilian/abilian-core.git@master#egg=Abilian-Core
--e git+git://github.com/pallets/flask.git@master#egg=Flask
-
