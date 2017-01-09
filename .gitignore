@@ -48,6 +48,7 @@ placeholders
 *.mo
 etc/db_version
 etc/db_version.old
+junit-*.xml
 
 # Demo
 demo/.Python
