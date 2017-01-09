@@ -94,6 +94,9 @@ lint-python:
 	@make flake8
 	@make mypy
     
+lint-py3k:
+	pylint --py3k abilian tests
+
 flake8:
 	flake8 --max-complexity=8 --config=setup.cfg abilian
 

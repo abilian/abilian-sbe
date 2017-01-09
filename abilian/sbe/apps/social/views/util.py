@@ -1,4 +1,6 @@
-#noinspection PyMissingConstructor
+from __future__ import absolute_import, print_function
+
+
 class Env(dict):
     """
     A dictionnary whose objects can be accessed by '.' notation, saving a few

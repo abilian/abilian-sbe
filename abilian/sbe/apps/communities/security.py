@@ -2,6 +2,8 @@
 Decorators and helpers to check access to communities.
 """
 
+from __future__ import absolute_import, print_function
+
 from functools import wraps
 
 from flask import current_app, g

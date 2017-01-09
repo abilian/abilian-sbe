@@ -2,6 +2,8 @@
 Not used!
 """
 
+from __future__ import absolute_import, print_function
+
 from flask import flash, g, redirect, render_template, request, url_for
 from flask_babel import gettext as _
 from flask_mail import Message as Email

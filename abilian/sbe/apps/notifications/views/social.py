@@ -2,7 +2,7 @@
 """
 First cut at a notification system.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 from flask import current_app as app
 from flask import request

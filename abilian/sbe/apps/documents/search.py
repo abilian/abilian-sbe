@@ -2,7 +2,7 @@
 """
 Indexing related utilities for Folder, Documents
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import sqlalchemy as sa
 from flask import current_app

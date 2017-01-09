@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from __future__ import absolute_import, print_function
+
 from flask_babel import lazy_gettext as _l
 from wtforms import StringField, TextAreaField
 from wtforms_alchemy import model_form_factory

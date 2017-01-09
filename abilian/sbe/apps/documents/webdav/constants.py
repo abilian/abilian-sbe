@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function
+
 DAV_PROPS = [
     'creationdate', 'displayname', 'getcontentlanguage', 'getcontentlength',
     'getcontenttype', 'getetag', 'getlastmodified', 'lockdiscovery',

@@ -2,6 +2,8 @@
 The blueprint for this app.
 """
 
+from __future__ import absolute_import, print_function
+
 from flask import Blueprint, redirect, render_template, url_for
 
 from abilian.core.extensions import db

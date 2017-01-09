@@ -5,7 +5,7 @@ Models for the Forum.
 Note: a few features are planned but not implemented yet, and are commented
 out.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 from itertools import chain
 

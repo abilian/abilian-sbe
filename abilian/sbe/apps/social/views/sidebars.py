@@ -5,6 +5,8 @@ TODO: make it smarter (direct access from 'g' using lazy objects?) and
 cacheable.
 """
 
+from __future__ import absolute_import, print_function
+
 from datetime import datetime, timedelta
 
 from flask import g

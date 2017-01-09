@@ -4,7 +4,7 @@ Entity objects for the Document Management applications.
 
 TODO: move to an independent service / app.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import hashlib
 import itertools

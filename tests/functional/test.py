@@ -8,6 +8,8 @@ Also, we're using pytest-splinter
 (https://github.com/pytest-dev/pytest-splinter) to inject the browser as
 a pytest fixture.
 """
+from __future__ import absolute_import, print_function
+
 import multiprocessing
 import shutil
 import socket

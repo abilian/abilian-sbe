@@ -3,6 +3,8 @@
 This panel manages user setting for email reminders related to the SBE
 (social netowking) app.
 """
+from __future__ import absolute_import, print_function
+
 from flask import current_app as app
 from flask import flash, redirect, render_template, request, url_for
 from werkzeug.exceptions import InternalServerError

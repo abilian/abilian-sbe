@@ -1,5 +1,7 @@
 # coding=utf-8
 
+from __future__ import absolute_import, print_function
+
 from flask import current_app, g, url_for
 from flask_login import current_user
 

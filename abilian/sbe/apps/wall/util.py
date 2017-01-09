@@ -4,6 +4,8 @@ Some functions to retrieve activity entries.
 """
 # TODO: move to the activity service ?
 
+from __future__ import absolute_import, print_function
+
 import sqlalchemy as sa
 from flask import current_app, g
 from flask_login import current_user

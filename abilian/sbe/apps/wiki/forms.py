@@ -2,7 +2,7 @@
 """
 Forms for the Wiki module.
 """
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 from flask import g
 from wtforms import HiddenField, StringField, TextAreaField

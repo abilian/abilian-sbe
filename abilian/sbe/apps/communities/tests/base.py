@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function
+
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import READER, Community
 from abilian.sbe.testing import BaseTestCase

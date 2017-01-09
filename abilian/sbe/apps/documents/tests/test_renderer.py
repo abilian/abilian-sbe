@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function
+
 from abilian.sbe.testing import BaseTestCase
 
 from ..cmis.renderer import Feed, to_xml

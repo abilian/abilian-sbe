@@ -1,3 +1,5 @@
+from __future__ import absolute_import, print_function
+
 import re
 
 from flask import current_app, flash, g, request
