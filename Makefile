@@ -159,5 +159,7 @@ release:
 	cd /tmp/abilian-sbe ; python setup.py sdist upload
 
 update-deps:
-	pip-compile -U
-	pip-compile
+	pip-compile -U > /dev/null
+	pip-compile > /dev/null
+	git --no-pager diff requirements.txt
+
