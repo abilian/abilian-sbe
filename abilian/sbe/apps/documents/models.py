@@ -477,22 +477,7 @@ class BaseContent(CmisObject):
 
     @property
     def icon(self):
-        icon = icon_for(self.content_type)
-
-        if not icon.endswith("/bin.png"):
-            return icon
-
-        # Try harder, just in case. XXX: Could be probably removed later when we are
-        # sure that all our bases are covered.
-        if "." not in self.title:
-            return icon_url('bin.png')
-
-        suffix = self.title.split(".")[-1]
-        icon = u'{}.png'.format(suffix)
-        if icon_exists(icon):
-            return icon_url(icon)
-        else:
-            return icon_url('bin.png')
+        return icon_for(self.content_type)
 
 
 class Document(BaseContent, PathAndSecurityIndexable):
