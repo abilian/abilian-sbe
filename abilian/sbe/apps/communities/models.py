@@ -262,8 +262,8 @@ class Community(Entity):
             .filter(and_(M.user_id == user.id, M.community_id == self.id)) \
             .first()
         if not membership:
-            raise KeyError("User {} is not a member of community {}".format(
-                user, self))
+            raise KeyError(
+                "User {} is not a member of community {}".format(user, self))
 
         db.session.delete(membership)
         self.membership_count -= 1

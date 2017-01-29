@@ -397,8 +397,8 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
             session.add(attachment)
 
 
-route('/<int:thread_id>/<int:object_id>/edit')(ThreadPostEdit.as_view(
-    'post_edit'))
+route('/<int:thread_id>/<int:object_id>/edit')(
+    ThreadPostEdit.as_view('post_edit'))
 
 
 def attachment_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
