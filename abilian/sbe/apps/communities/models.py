@@ -50,8 +50,7 @@ class Membership(db.Model):
     user = relationship(
         User,
         lazy='joined',
-        backref=backref(
-            'communautes_membership', lazy='select'))
+        backref=backref('communautes_membership', lazy='select'))
 
     community_id = Column(
         ForeignKey('community.id'), index=True, nullable=False)
@@ -123,16 +122,14 @@ class Community(Entity):
     #: The root folder for this community.
     folder_id = Column(
         Integer,
-        ForeignKey(
-            Folder.id, use_alter=True, name='fk_community_root_folder'),
+        ForeignKey(Folder.id, use_alter=True, name='fk_community_root_folder'),
         unique=True)
     folder = relation(
         Folder,
         single_parent=True,  # required for delete-orphan
         primaryjoin=(folder_id == Folder.id),
         cascade='all, delete-orphan',
-        backref=backref(
-            '_community', lazy='select', uselist=False))
+        backref=backref('_community', lazy='select', uselist=False))
 
     #: The group this community is linked to, if any. Memberships are then
     #: reflected
@@ -147,8 +144,7 @@ class Community(Entity):
         User,
         secondary=Membership.__table__,
         viewonly=True,
-        backref=backref(
-            'communities', lazy='select', viewonly=True))
+        backref=backref('communities', lazy='select', viewonly=True))
 
     #: Number of members in this community.
     membership_count = Column(

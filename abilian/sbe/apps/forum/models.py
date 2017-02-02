@@ -46,8 +46,7 @@ class Thread(Entity):
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref(
-            'threads', cascade="all, delete-orphan"))
+        backref=backref('threads', cascade="all, delete-orphan"))
 
     #: The thread title (aka subject)
     _title = Column(

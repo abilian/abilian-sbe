@@ -539,8 +539,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     language = Column(
         Text,
-        info=dict(
-            searchable=True, index_to=[('language', wf.ID(stored=True))]))
+        info=dict(searchable=True, index_to=[('language', wf.ID(stored=True))]))
     size = Column(Integer)
     page_num = Column(Integer, default=1)
 

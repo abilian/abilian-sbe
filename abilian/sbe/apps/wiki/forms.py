@@ -37,8 +37,7 @@ class WikiPageForm(Form):
         label=_l("Body"),
         filters=(strip, clean_up),
         validators=[required()],
-        widget=TextArea(
-            rows=10, resizeable='vertical'),)
+        widget=TextArea(rows=10, resizeable='vertical'),)
 
     message = StringField(label=_l("Commit message"))
     page_id = HiddenField(filters=(int_or_none,), validators=[flaghidden()])

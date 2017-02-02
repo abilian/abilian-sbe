@@ -191,8 +191,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
     def test_home(self):
         with self.client_login(self.user.email, password='azerty'):
             response = self.get(
-                url_for(
-                    'documents.index', community_id=self.community.slug))
+                url_for('documents.index', community_id=self.community.slug))
             self.assert_status(response, 302)
             self.assertEqual(
                 response.headers['Location'],

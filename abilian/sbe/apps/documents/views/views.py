@@ -28,5 +28,4 @@ def init_document_values(endpoint, values):
     g.breadcrumb.append(
         BreadcrumbItem(
             label=_l(u'Documents'),
-            url=Endpoint(
-                'documents.index', community_id=g.community.slug)))
+            url=Endpoint('documents.index', community_id=g.community.slug)))

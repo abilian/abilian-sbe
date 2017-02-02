@@ -23,8 +23,7 @@ def new_community_member(community, membership, is_new, **kwargs):
         local_role = Manager
 
     current_roles = set(
-        security.get_roles(
-            user, community.folder, no_group_roles=True))
+        security.get_roles(user, community.folder, no_group_roles=True))
     current_roles &= VALID_ROLES  # ensure we don't remove roles not managed
     # by us
 

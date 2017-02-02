@@ -83,8 +83,7 @@ def folder_json(folder_id):
     bc = result['breadcrumbs'] = []
     subfolders = sorted(
         (f for f in folder.subfolders
-         if has_permission(
-             g.user, READ, f, inherit=True)),
+         if has_permission(g.user, READ, f, inherit=True)),
         key=lambda f: f.title)
 
     parent = folder
@@ -299,8 +298,8 @@ def permissions_update(folder_id):
             transaction = db.session.begin_nested()
             security.ungrant_role(user, role, folder)
 
-            if (user == g.user and role == 'manager' and not has_permission(
-                    g.user, 'manage', folder, inherit=True)):
+            if (user == g.user and role == 'manager' and
+                    not has_permission(g.user, 'manage', folder, inherit=True)):
 
                 transaction.rollback()
                 flash(_('Cannot remove "manager" local role for yourself: you '
@@ -320,8 +319,8 @@ def permissions_update(folder_id):
             transaction = db.session.begin_nested()
             security.ungrant_role(group, role, folder)
 
-            if (role == 'manager' and not has_permission(
-                    g.user, 'manage', folder, inherit=True)):
+            if (role == 'manager' and
+                    not has_permission(g.user, 'manage', folder, inherit=True)):
                 transaction.rollback()
                 flash(_('Cannot remove "manager" local role for group "{group}": you'
                         ' don\'t have "manager" role by security inheritance or by '
@@ -627,8 +626,7 @@ def upload_new(folder):
     flash(
         _n("One new document successfully uploaded",
            "%(num)d new document successfully uploaded",
-           num=created_count),
-        "success")
+           num=created_count), "success")
 
     session.commit()
     return redirect(url_for(folder))

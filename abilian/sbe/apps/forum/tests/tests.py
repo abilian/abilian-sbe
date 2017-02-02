@@ -150,8 +150,7 @@ class NoLoginViewTest(CommunityBaseTestCase):
 
     def test(self):
         response = self.client.get(
-            url_for(
-                "forum.index", community_id=self.community.slug))
+            url_for("forum.index", community_id=self.community.slug))
         self.assert200(response)
 
 

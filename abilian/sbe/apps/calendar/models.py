@@ -21,8 +21,7 @@ class Event(Entity):
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref(
-            'events', cascade="all, delete-orphan"))
+        backref=backref('events', cascade="all, delete-orphan"))
 
     title = Column(Unicode, nullable=False, default="", info=SEARCHABLE)
 

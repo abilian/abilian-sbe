@@ -307,19 +307,21 @@ def clean_html(newpost):
     """Clean leftover empty blockquotes.
     """
 
-    clean = re.sub(r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)",
-                   '',
-                   newpost,
-                   flags=re.MULTILINE | re.DOTALL)
+    clean = re.sub(
+        r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)",
+        '',
+        newpost,
+        flags=re.MULTILINE | re.DOTALL)
 
     # this cleans auto generated reponse text (<br>timedate <a email /a><br>)
     # we reverse the string because re.sub replaces
     #  LEFTMOST NON-OVERLAPPING OCCURRENCES, and we only want the last match
     # in the string
-    clean = re.sub(r"(>rb<.*?>a.*?=ferh\sa<.*?>rb<)",
-                   '',
-                   clean[::-1],
-                   flags=re.MULTILINE | re.DOTALL)
+    clean = re.sub(
+        r"(>rb<.*?>a.*?=ferh\sa<.*?>rb<)",
+        '',
+        clean[::-1],
+        flags=re.MULTILINE | re.DOTALL)
     clean = clean[::-1]
 
     return clean

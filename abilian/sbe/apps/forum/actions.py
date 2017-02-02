@@ -68,8 +68,7 @@ _actions = (
         icon='plus'),
     ForumAction(
         'forum:global', 'index', _l(u'Recent conversations'), icon='list'),
-    ForumAction(
-        'forum:global', 'archives', _l(u'Archives'), icon='calendar'),
+    ForumAction('forum:global', 'archives', _l(u'Archives'), icon='calendar'),
     ForumAction(
         'forum:global',
         'attachments',

@@ -268,8 +268,7 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
 
 add_url(
     '/new',
-    view_func=CommunityCreate.as_view(
-        'new', view_endpoint='.community'))
+    view_func=CommunityCreate.as_view('new', view_endpoint='.community'))
 
 
 class CommunityDelete(BaseCommunityView, views.ObjectDelete):

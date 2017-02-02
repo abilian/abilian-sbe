@@ -57,8 +57,7 @@ def init_wiki_values(endpoint, values):
 @route('/')
 def index():
     return redirect(
-        url_for(
-            ".page", title='Home', community_id=g.community.slug))
+        url_for(".page", title='Home', community_id=g.community.slug))
 
 
 def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
@@ -277,8 +276,7 @@ def page_source():
         page = get_page_by_title(title)
     except NoResultFound:
         return redirect(
-            url_for(
-                ".page_edit", title=title, community_id=g.community.slug))
+            url_for(".page_edit", title=title, community_id=g.community.slug))
 
     actions.context['object'] = page
     return render_template('wiki/source.html', page=page)
@@ -291,8 +289,7 @@ def page_changes():
         page = get_page_by_title(title)
     except NoResultFound:
         return redirect(
-            url_for(
-                ".page_edit", title=title, community_id=g.community.slug))
+            url_for(".page_edit", title=title, community_id=g.community.slug))
     revisions = page.revisions
     revisions = sorted(revisions, key=lambda x: -x.number)
     actions.context['object'] = page
@@ -306,8 +303,7 @@ def page_compare():
         page = get_page_by_title(title)
     except NoResultFound:
         return redirect(
-            url_for(
-                ".page_edit", title=title, community_id=g.community.slug))
+            url_for(".page_edit", title=title, community_id=g.community.slug))
     revisions = page.revisions
     revisions = sorted(revisions, key=lambda x: x.number)
     revs_to_compare = []
@@ -418,8 +414,7 @@ def attachment_upload():
             _n(u"One new document successfully uploaded",
                u"%(num)d new document successfully uploaded",
                count=saved_count,
-               num=len(files)),
-            "success")
+               num=len(files)), "success")
     else:
         flash(_(u'No file uploaded.'))
 

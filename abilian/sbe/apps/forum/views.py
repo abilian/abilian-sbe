@@ -55,8 +55,7 @@ def init_forum_values(endpoint, values):
     g.breadcrumb.append(
         BreadcrumbItem(
             label=_l(u'Conversations'),
-            url=Endpoint(
-                'forum.index', community_id=g.community.slug)))
+            url=Endpoint('forum.index', community_id=g.community.slug)))
 
 
 @route('/')
@@ -239,8 +238,8 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
         return [self.POST_BUTTON, views.object.CANCEL_BUTTON]
 
 
-route('/new_thread/')(ThreadCreate.as_view(
-    'new_thread', view_endpoint='.thread'))
+route('/new_thread/')(
+    ThreadCreate.as_view('new_thread', view_endpoint='.thread'))
 
 
 class ThreadPostCreate(ThreadCreate):
@@ -264,8 +263,8 @@ class ThreadPostCreate(ThreadCreate):
         self.obj = self.post
 
 
-route('/<int:thread_id>/')(ThreadPostCreate.as_view(
-    'thread_post', view_endpoint='.thread'))
+route('/<int:thread_id>/')(
+    ThreadPostCreate.as_view('thread_post', view_endpoint='.thread'))
 
 
 class ThreadDelete(BaseThreadView, views.ObjectDelete):
