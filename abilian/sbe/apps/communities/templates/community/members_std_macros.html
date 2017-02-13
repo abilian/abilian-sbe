@@ -62,6 +62,7 @@
   </td>
   <td class="hide">{{ seconds_since_epoch(last_activity_date) }}</td>
   <td>{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</td>
+  <!-- bug jinja : do not use [not is_manager] -->
   {%- if is_manager == False %}
     <td>{{ _(role) }}</td>
   {%- else %}
