@@ -10,14 +10,15 @@
     {%- if is_manager %}
       {{ add_member() }}
     {%- endif %}
-
-    <h2>{{ _("Current members") }}</h2>
+    
+    
+    <h2 style="margin-top : 10px;">{{ _("Current members") }}</h2>
 
     <p class="clearfix">
-      (<i class="glyphicon glyphicon-lock"></i>: {{ _('account disabled') }})
+      
       {%- if is_manager  %}
         <a class="btn btn-info pull-right" href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
-          <i class="fa fa-justify"></i> {{ _('Download list') }}
+          <i class="glyphicon glyphicon-download-alt"></i> {{ _('Download list') }}
         </a>
       {%- endif %}
     </p>
