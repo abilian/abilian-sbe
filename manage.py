@@ -12,6 +12,9 @@ from flask_script import Manager
 from abilian.core.commands import setup_abilian_commands
 from abilian.sbe.app import Application
 
+import warnings
+warnings.filterwarnings("ignore")
+
 
 def create_app():
   return Application(name='myapp')

@@ -253,6 +253,7 @@ def users_json():
             .outerjoin(Membership,
                        and_(Membership.user.expression,
                             Membership.community_id == with_membership)) \
+            .filter(User.can_login == True) \
             .add_columns(Membership.role)
 
     exclude_community = request.args.get('exclude_community')
