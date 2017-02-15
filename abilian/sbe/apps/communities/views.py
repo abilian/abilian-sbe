@@ -326,7 +326,7 @@ def _members_query():
         .outerjoin(ActivityEntry,
                    sa.sql.and_(ActivityEntry.actor_id == User.id,
                                ActivityEntry.target_id == Membership.community_id)) \
-        .filter(Membership.community == g.community) \
+        .filter(Membership.community == g.community, User.can_login == True) \
         .add_columns(Membership.id,
                      Membership.role,
                      last_activity_date) \
