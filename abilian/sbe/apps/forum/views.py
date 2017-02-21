@@ -3,9 +3,11 @@
 Forum views
 """
 from __future__ import absolute_import, print_function
-from itertools import groupby
-from datetime import date, datetime
+
 import time
+from datetime import date, datetime
+from itertools import groupby
+
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, render_template, \
     request
@@ -252,7 +254,9 @@ class ThreadPostCreate(ThreadCreate):
         args, kwargs = super(ThreadPostCreate, self).init_object(args, kwargs)
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
-        Thread.query.filter(Thread.id == thread_id).update({Thread.last_post_at:datetime.utcnow()})
+        Thread.query.filter(Thread.id == thread_id).update({
+            Thread.last_post_at: datetime.utcnow()
+        })
         return args, kwargs
 
     def after_populate_obj(self):
