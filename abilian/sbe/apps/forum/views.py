@@ -3,10 +3,9 @@
 Forum views
 """
 from __future__ import absolute_import, print_function
-
-from datetime import date, datetime
 from itertools import groupby
-
+from datetime import date, datetime
+import time
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, render_template, \
     request
@@ -62,7 +61,7 @@ def init_forum_values(endpoint, values):
 def index():
     query = Thread.query \
         .filter(Thread.community_id == g.community.id) \
-        .order_by(Thread.created_at.desc())
+        .order_by(Thread.last_post_at.desc())
     has_more = query.count() > MAX_THREADS
     threads = query.limit(MAX_THREADS).all()
     return render_template(
@@ -195,7 +194,6 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
         obj_meta = self.post.meta.setdefault('abilian.sbe.forum', {})
         obj_meta['origin'] = u'web'
         obj_meta['send_by_email'] = self.send_by_email
-
         session = sa.orm.object_session(self.thread)
         uploads = current_app.extensions['uploads']
 
@@ -254,6 +252,7 @@ class ThreadPostCreate(ThreadCreate):
         args, kwargs = super(ThreadPostCreate, self).init_object(args, kwargs)
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
+        Thread.query.filter(Thread.id == thread_id).update({Thread.last_post_at:datetime.utcnow()})
         return args, kwargs
 
     def after_populate_obj(self):
@@ -291,7 +290,6 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
     def prepare_args(self, args, kwargs):
         args, kwargs = super(ThreadCloseView, self).prepare_args(args, kwargs)
         action = kwargs['action'] = request.form.get('action')
-
         if action not in self._VALID_ACTIONS:
             raise BadRequest(u'Unknown action: {!r}'.format(action))
 
