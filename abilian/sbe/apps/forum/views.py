@@ -5,8 +5,7 @@ Forum views
 from __future__ import absolute_import, print_function
 
 from datetime import date, datetime
-from itertools import groupby
-
+import time
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, render_template, \
     request
@@ -60,9 +59,22 @@ def init_forum_values(endpoint, values):
 
 @route('/')
 def index():
+
+    #just one time (to reset last_post_at attribute)
+    #Thread.query.update({Thread.last_post_at : None })
+
+
+    """def get_last_post_time(Th_id):
+        return Post.query.filter(Post.thread_id == Th_id )[-1].created_at
+
+    #just one time (auto-add of last_post_at)
+    Thread.query\
+        .filter(Thread.last_post_at == None)\
+        .update({Thread.last_post_at : get_last_post_time(Thread.id) })"""
+
     query = Thread.query \
         .filter(Thread.community_id == g.community.id) \
-        .order_by(Thread.created_at.desc())
+        .order_by(Thread.last_post_at.desc())
     has_more = query.count() > MAX_THREADS
     threads = query.limit(MAX_THREADS).all()
     return render_template(
@@ -196,6 +208,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
         obj_meta['origin'] = u'web'
         obj_meta['send_by_email'] = self.send_by_email
 
+
         session = sa.orm.object_session(self.thread)
         uploads = current_app.extensions['uploads']
 
@@ -254,6 +267,7 @@ class ThreadPostCreate(ThreadCreate):
         args, kwargs = super(ThreadPostCreate, self).init_object(args, kwargs)
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
+        Thread.query.filter(Thread.id == thread_id).update({Thread.last_post_at : datetime.utcnow()})
         return args, kwargs
 
     def after_populate_obj(self):

@@ -6,7 +6,7 @@
 {% block content %}
   {% call m_box_content(_("Recent conversations")) %}
     {% if threads %}
-      <ul class="threads">
+      <ul class="threads" >
         {% for thread in threads %}
           {{ m_thread(thread) }}
         {% endfor %}
@@ -32,30 +32,32 @@
     {%- endcall %}
 
     <div class="entry">
-      <h4><a href="{{ thread_href }}">{{ thread.title }}</a></h4>
-
-      <div class="details">
+      <h4><a href="{{ thread_href }}"> {{ thread.title }}</a></h4>
+     
+      <div class="details" >
         {{ _("by %(creator)s", creator=m_user_link(thread.creator)) }}
-        –
-        <span class="datetime">
+         |
+        <span class="datetime" >
           {{ thread.created_at | age(date_threshold='day') }}
         </span>
         {%- if thread.closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
       </div>
 
-      <div class="comments">
-        <a href="{{ thread_href }}">
+      <div class="comments" >
+        <a href="{{ thread_href }}" >
           <span class="glyphicon glyphicon-comment"></span>
           {{ thread_length-1 }} commentaires
         </a>
 
-        {%- if thread_length > 1 %}
+        {%- if thread_length > 1 %}<br>
           {% set last_post_creator = thread.posts[-1].creator %}
           <span class="hidden-xs">
-          {{ _("Last comment by %(creator)s", creator=m_user_link(last_post_creator)) }}
+          {{ _("Last comment by %(creator)s", creator=m_user_link(last_post_creator)) }} | <span class="divider">{{thread.posts[-1].created_at.strftime('%Y-%m-%d') }}
         </span>
         {%- endif %}
       </div>
-    </div>
+    <br></div>
   </li>
+
+
 {% endmacro %}

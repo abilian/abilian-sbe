@@ -9,7 +9,7 @@ from __future__ import absolute_import, print_function
 
 from itertools import chain
 
-from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
+from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText,desc
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
@@ -19,6 +19,9 @@ from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 from abilian.services.indexing.adapter import SAAdapter
+from datetime import datetime
+from sqlalchemy.types import DateTime
+from sqlalchemy.sql import select,func,cast
 
 
 class ThreadClosedError(RuntimeError):
@@ -51,6 +54,9 @@ class Thread(Entity):
     #: The thread title (aka subject)
     _title = Column(
         'title', Unicode(255), nullable=False, default=u"", info=SEARCHABLE)
+
+
+    last_post_at = Column(DateTime, default=datetime.utcnow,nullable=True)
 
     # title is defined has an hybrid property to allow name <-> title sync (2 way)
     @hybrid_property
