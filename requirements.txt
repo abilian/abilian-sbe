@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.7.25
+abilian-core==0.7.26
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -24,7 +24,7 @@ decorator==4.0.11         # via validators
 et-xmlfile==1.0.1         # via openpyxl
 flask-assets==0.12        # via abilian-core
 flask-babel==0.11.1       # via abilian-core
-flask-debugtoolbar==0.10.0  # via abilian-core
+flask-debugtoolbar==0.10.1  # via abilian-core
 flask-login==0.3.2        # via abilian-core, flask-security
 flask-mail==0.9.1         # via abilian-core, flask-security
 flask-migrate==2.0.3      # via abilian-core
@@ -44,7 +44,7 @@ jinja2==2.9.5             # via flask, flask-babel
 jsmin==2.2.1              # via abilian-core
 kombu==3.0.37             # via celery
 langid==1.1.6
-lxml==3.7.2               # via abilian-core
+lxml==3.7.3               # via abilian-core
 mako==1.0.6               # via alembic
 markdown==2.6.8
 markupsafe==0.23          # via abilian-core, jinja2, mako
