@@ -1,12 +1,13 @@
 // Forum home page (thread list)
 ul.threads {
+  padding-bottom: 6px;
   margin: 0;
 
   .list-unstyled();
 
   li {
-    padding: 5px 0;
-    margin: 10px auto;
+    padding: 3px 0;
+    margin: 15px auto;
     font-size: 12px;
 
     @avatar-size: 45px;
@@ -14,26 +15,44 @@ ul.threads {
 
     .entry {
       position: relative;
+      top:7px;
       min-height: @avatar-full-height;
       display: block;
       padding: 5px 5px @line-height-computed;
-      margin-left: 65px;
+      margin-left: 52px;
       text-align: left;
-      border-left: 2px solid #FF7F66;
-      background: #fafafa;
+      box-shadow: 0 6px 6px -8px silver;
       .border-right-radius(@border-radius-small);
+
+      
 
       > h4 {
         margin-top: 0;
       }
 
       .details {
+        left: 4px;
+        top: 23.5px;
         .datetime {
+          position: relative;
+          top: 1px;
           color: @gray;
         }
       }
       .comments {
+        top: 10.6%;
         text-align: right;
+
+        > a {
+        position: relative;
+        left: -210px;top:-6px;
+        }
+
+      .divider{
+      position: relative;
+      top: 1px;
+      }
+      
       }
 
       @media (min-width: @screen-sm-min) {
@@ -56,6 +75,8 @@ ul.threads {
 
     .avatar {
       float: left;
+      position : relative;
+      top : 9px;
       > img {
         .square(@avatar-size);
         margin-top: (@avatar-full-height - @avatar-size);
