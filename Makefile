@@ -98,7 +98,7 @@ lint-py3k:
 	pylint --py3k abilian tests
 
 flake8:
-	flake8 --max-complexity=8 --config=setup.cfg abilian
+	flake8 abilian tests
 
 mypy:
 	mypy --py2 --silent-imports abilian
