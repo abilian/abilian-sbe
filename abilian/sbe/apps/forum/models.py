@@ -20,8 +20,10 @@ from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 from abilian.services.indexing.adapter import SAAdapter
 from datetime import datetime
-from sqlalchemy.types import DateTime
+from sqlalchemy.types import DateTime,Boolean
 from sqlalchemy.sql import select,func,cast
+from abilian.core.models.subjects import User
+from flask_login import current_user
 
 
 class ThreadClosedError(RuntimeError):
@@ -61,6 +63,11 @@ class Thread(Entity):
     @hybrid_property
     def title(self):
         return self._title
+
+    @hybrid_property
+    def get_viewed_posts(self):
+        return Post.query.filter(Post.thread_id == self.id ).count() - \
+        Post_view.query.filter(Post_view.thread_id == self.id,Post_view.user_id== current_user.id ).count()
 
     @title.setter
     def title(self, title):
@@ -145,7 +152,17 @@ class Post(Entity):
     def history(self):
         return self.meta.get('abilian.sbe.forum', {}).get('history', [])
 
+class Post_view(Entity):
 
+    __tablename__ = 'forum_log'
+    __indexable__ = False  # content is indexed at thread level
+
+    #: The thread this post belongs to
+    thread_id = Column(ForeignKey(Thread.id), nullable=False)
+    post_id = Column(ForeignKey(Post.id), nullable=False)
+    user_id = Column(ForeignKey(User.id), nullable=False)
+    viewed_at = Column(DateTime, default=datetime.utcnow,nullable=True)
+    
 class ThreadIndexAdapter(SAAdapter):
     """Index a thread and its posts.
     """

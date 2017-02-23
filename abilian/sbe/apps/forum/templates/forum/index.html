@@ -44,14 +44,14 @@
       </div>
 
       <div class="comments" >
-        <a href="{{ thread_href }}" >
+        <p><a href="{{ thread_href }}" >
           <span class="glyphicon glyphicon-comment"></span>
-          {{ thread_length-1 }} commentaires
-        </a>
-
-        {%- if thread_length > 1 %}<br>
+          {{ thread_length-1 }} commentaires 
+        </a> {% if thread.get_viewed_posts !=0 %} | <span class="hilight-view" style=""><i class="fa fa-caret-right"></i> {{thread.get_viewed_posts }} non lus</span>{% endif %}</p>
+          <br>
+        {%- if thread_length > 1 %}
           {% set last_post_creator = thread.posts[-1].creator %}
-          <span class="hidden-xs">
+          <span class="hidden-xs" style="float:left;">
           {{ _("Last comment by %(creator)s", creator=m_user_link(last_post_creator)) }} | <span class="divider">{{thread.posts[-1].created_at.strftime('%Y-%m-%d') }}
         </span>
         {%- endif %}

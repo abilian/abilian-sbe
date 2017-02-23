@@ -7,6 +7,7 @@ from itertools import groupby
 from datetime import date, datetime
 import time
 import sqlalchemy as sa
+from abilian.core.extensions import db
 from flask import current_app, flash, g, make_response, render_template, \
     request
 from flask_babel import format_date
@@ -26,7 +27,7 @@ from abilian.web.views import default_view
 from ..communities.blueprint import Blueprint
 from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
-from .models import Post, PostAttachment, Thread
+from .models import Post, PostAttachment, Thread, Post_view
 from .tasks import send_post_by_email
 
 # TODO: move to config
@@ -153,6 +154,11 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw = super(ThreadView, self).template_kwargs
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
+        all_relative_posts =  Post.query.filter(Post.thread_id == self.obj.id)
+        for current_post in all_relative_posts:
+            if not Post_view.query.filter_by(thread_id=self.obj.id,post_id=current_post.id,user_id=current_user.id).first():
+                db.session.add(Post_view(thread_id=self.obj.id,post_id=current_post.id,user_id=current_user.id,viewed_at=datetime.utcnow()))
+                db.session.commit()
         return kw
 
 
