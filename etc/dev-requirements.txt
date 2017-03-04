@@ -33,6 +33,7 @@ Flask-LinkTester
 
 # Static code analysis
 flake8
+pep8-naming
 
 # deps management
 pip-tools
