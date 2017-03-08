@@ -8,84 +8,84 @@
 
 {%- block content %}
   {% call m_box_content() %}
-    {#  TODO #}
-    <p>
-      <a href="{{ url_for('.index', community_id=g.community.slug) }}">
-        <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
-    </p>
+  {#  TODO #}
+  <p>
+    <a href="{{ url_for('.index', community_id=g.community.slug) }}">
+      <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
+  </p>
 
-    <article class="thread">
-      {%- set post = thread.posts[0] %}
-      <h2>{{ thread.title }}</h2>
+  <article class="thread">
+    {%- set post = thread.posts[0] %}
+    <h2>{{ thread.title }}</h2>
 
-      <div>
-        {{ _("Posted by %(creator)s", creator=m_user_link(thread.creator)) }}
-        –
-        {{ thread.created_at | age(date_threshold='day') }}
-        {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
-        {{ m_post_edit_link(post) }}
+    <div>
+      {{ _("Posted by %(creator)s", creator=m_user_link(thread.creator)) }}
+      –
+      {{ thread.created_at | age(date_threshold='day') }}
+      {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
+      {{ m_post_edit_link(post) }}
+    </div>
+
+    <div class="media post">
+      <div class="media-left">
+        {% call m_user_link(thread.creator) %}
+          {{ m_user_photo(thread.creator, size=55) }}
+        {% endcall %}
       </div>
 
-      <div class="media post">
-        <div class="media-left">
-          {% call m_user_link(thread.creator) %}
-            {{ m_user_photo(thread.creator, size=55) }}
-          {% endcall %}
-        </div>
-
-        <div class="media-body">
-          {{ m_post_content(thread.posts[0]) }}
-        </div>
+      <div class="media-body">
+        {{ m_post_content(thread.posts[0]) }}
       </div>
+    </div>
 
-      {%- if thread.posts|length > 1 %}
-        <hr class="clearfix" style="margin-top: 5px;">
-      {%- endif %}
+    {%- if thread.posts|length > 1 %}
+    <hr class="clearfix" style="margin-top: 5px;">
+    {%- endif %}
 
-      <ul class="posts">
-        {%- for post in thread.posts[1:] %}
-          <li>
-            {{ m_post(post) }}
-          </li>
-        {%- endfor %}
-      </ul>
+    <ul class="posts">
+    {%- for post in thread.posts[1:] %}
+      <li>
+        {{ m_post(post) }}
+      </li>
+    {%- endfor %}
+    </ul>
 
-      {%- if not is_closed %}
-        <hr/>
+   {%- if not is_closed %}
+    <hr />
 
-        <div class="media">
-          <div class="media-left">
-            {% call m_user_link(current_user) %}
-              {{ m_user_photo(current_user, size=55) }}
-            {% endcall %}
+    <div class="media">
+      <div class="media-left">
+        {% call m_user_link(current_user) %}
+          {{ m_user_photo(current_user, size=55) }}
+        {% endcall %}
+      </div>
+      
+
+      <div class="media-body">
+        <h3 style="margin-top: 0;">{{ _("Post a comment") }}</h3>
+        <form action="." method="POST" enctype="multipart/form-data">
+          {{ form.csrf_token }}
+
+          {{ m_field(form.message, class_="resizeable-vertical", rows=10) }}
+          {{ m_field(form.attachments) }}
+
+          {%- if g.community.type == 'participative' or is_manager %}
+            {{ m_field(form.send_by_email) }}
+          {%- endif %}
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary" name="__action" value="create">
+              {{ _("Post this comment") }}
+            </button>
+            <button type="submit" class="btn cancel" name="__action" value="cancel">
+              {{ _("Cancel") }}
+            </button>
           </div>
-
-
-          <div class="media-body">
-            <h3 style="margin-top: 0;">{{ _("Post a comment") }}</h3>
-            <form action="." method="POST" enctype="multipart/form-data">
-              {{ form.csrf_token }}
-
-              {{ m_field(form.message, class_="resizeable-vertical", rows=10) }}
-              {{ m_field(form.attachments) }}
-
-              {%- if g.community.type == 'participative' or is_manager %}
-                {{ m_field(form.send_by_email) }}
-              {%- endif %}
-
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary" name="__action" value="create">
-                  {{ _("Post this comment") }}
-                </button>
-                <button type="submit" class="btn cancel" name="__action" value="cancel">
-                  {{ _("Cancel") }}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      {%- endif %}
-    </article>
+        </form>
+      </div>
+    </div>
+    {%- endif %}
+  </article>
   {% endcall %}
 {%- endblock %}
 
@@ -110,7 +110,7 @@
         {%- for attachment in post.attachments %}
           <li>
             <span class="attachment-item">
-              <img src="{{ attachment.icon }}"/>
+              <img src="{{ attachment.icon }}" />
               <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
               ({{ attachment.content_length | filesize }})
             </span>
@@ -177,13 +177,13 @@
 
 {%- block modals %}
   <div class="modal fade" id="modal-delete" role="dialog"
-       data-keyboard="true">
+      data-keyboard="true">
 
     <div class="modal-dialog">
       <div class="modal-content">
         <form
-            action="{{ url_for('.thread_delete', thread_id=thread.id, community_id=g.community.slug) }}"
-            method="POST" style="margin-bottom: 0;">
+          action="{{ url_for('.thread_delete', thread_id=thread.id, community_id=g.community.slug) }}"
+          method="POST" style="margin-bottom: 0;">
 
           {{ csrf.field() }}
 
@@ -198,8 +198,7 @@
 
           <div class="modal-footer">
             <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
-            <button type="submit" name="__action" value="delete"
-                    class="btn btn-danger">{{ _("Really Delete") }}</button>
+            <button type="submit" name="__action" value="delete" class="btn btn-danger">{{ _("Really Delete") }}</button>
           </div>
         </form>
       </div>

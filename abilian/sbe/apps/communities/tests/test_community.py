@@ -303,8 +303,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
 
             # test delete
             data = {
-                'action': 'delete',
-                'user': self.user_c2.id,
+                'action':'delete',
+                'user':self.user_c2.id,
                 'membership':
                 [m.id for m in community.memberships
                  if m.user == self.user_c2][0],

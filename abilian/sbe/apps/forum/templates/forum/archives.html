@@ -2,8 +2,18 @@
 
 {% from "macros/box.html" import m_box_menu, m_box_content %}
 
-{% block content %}
-  {% call m_box_content(_("Archives")) %}
+{% block forumcontent %}
+   {% call m_box_content(_("Archives")) %}
+
+      {%- block forumsidebar %}
+    <div class="forum_menu" role="group" >
+      {%- set global_actions = actions.for_category('forum:global') %}
+      {%- for action in global_actions %}
+         {{forum_menu(action)}}
+      {%- endfor %}
+    </div>
+  {%- endblock %}
+
     {% for month, threads in grouped_threads %}
       <h2>{{ month }}</h2>
 
@@ -32,3 +42,7 @@
     {%- endif %}
   </li>
 {% endmacro %}
+
+{% macro forum_menu(action) %}
+  <button type="button" style="border: none;padding: 10px;" {% if action.is_current()%}class="forum_btn_active"{%endif%}>{{ action.render() }}</button>
+    {% endmacro %}

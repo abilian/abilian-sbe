@@ -7,17 +7,20 @@ out.
 """
 from __future__ import absolute_import, print_function
 
+from collections import Counter
 from datetime import datetime
 from itertools import chain
 
+from flask_login import current_user
 from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.sql import cast, func, select
-from sqlalchemy.types import DateTime
+from sqlalchemy.types import Boolean, DateTime
 
 from abilian.core.entities import SEARCHABLE, Entity
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
@@ -61,6 +64,24 @@ class Thread(Entity):
     @hybrid_property
     def title(self):
         return self._title
+
+    @property
+    def get_viewed_posts(self):
+        all_posts = Post.query.filter(Post.thread_id == self.id)
+        return (all_posts.count() - 1) - \
+         (PostView.query.filter(PostView.thread_id == self.id, PostView.user_id == current_user.id).count())
+
+    @property
+    def viewed_times(self):
+        return ThreadView.query.filter(ThreadView.thread_id == self.id).count()
+
+    def get_frequent_posters(self, limit):
+        all_posts = Post.query.filter(Post.thread_id == self.id).all()[1:]
+        d = Counter([e.creator for e in all_posts])
+        return [
+            user for (user, nb_posts) in sorted(d.items(), key=lambda x: x[1])
+            if user != self.creator
+        ][::-1][:limit]
 
     @title.setter
     def title(self, title):
@@ -144,6 +165,29 @@ class Post(Entity):
     @property
     def history(self):
         return self.meta.get('abilian.sbe.forum', {}).get('history', [])
+
+
+class ThreadView(Entity):
+
+    __tablename__ = 'forum_thread_view'
+    __indexable__ = False  # content is indexed at thread level
+
+    #: The thread this post belongs to
+    thread_id = Column(ForeignKey(Thread.id), nullable=False)
+    user_id = Column(ForeignKey(User.id), nullable=False)
+    viewed_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+
+
+class PostView(Entity):
+
+    __tablename__ = 'forum_log'
+    __indexable__ = False  # content is indexed at thread level
+
+    #: The thread this post belongs to
+    thread_id = Column(ForeignKey(Thread.id), nullable=False)
+    post_id = Column(ForeignKey(Post.id), nullable=False)
+    user_id = Column(ForeignKey(User.id), nullable=False)
+    viewed_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
 
 class ThreadIndexAdapter(SAAdapter):

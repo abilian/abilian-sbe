@@ -28,6 +28,9 @@ ul.threads {
 
       > h4 {
         margin-top: 0;
+        >a{
+        color:cadetblue;
+        }
       }
 
       .details {
@@ -43,16 +46,27 @@ ul.threads {
         top: 10.6%;
         text-align: right;
 
-        > a {
+        >p{
+        float:left;
+        .hilight-view {
         position: relative;
-        left: -210px;top:-6px;
+        color: coral;
+        top: 1px;
+        font-weight: bold;
+        }
+        }
+
+        >p > a {
+
+        position: relative;
+        
         }
 
       .divider{
       position: relative;
       top: 1px;
       }
-      
+
       }
 
       @media (min-width: @screen-sm-min) {
@@ -150,4 +164,46 @@ ul.threads {
     }
   }
 }
+
+ul.threads li .entry .comments {
+position: absolute;
+bottom: 0;
+right: 0;
+padding: 8px;
+padding-bottom: 5px;
+margin-right: -14.5px;
+background: linear-gradient(to right, white, ghostwhite);
+margin-bottom: 16px;
+margin-top: 16px;
+top: -19px;
+border-radius: 4px;
+}
+
+ul.threads {
+padding-bottom: -5px;
+margin: 0;
+padding-left: 0;
+list-style: none;
+position: relative;
+top: 40px;
+}
+
+
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+color: #555555;
+background-color: #fcfcfc;
+border: 1px solid #ddd;
+border-bottom-color: transparent;
+cursor: default;
+border-radius: 2px;
+}
+
+
+.hilight-view {
+        position: relative;
+        top: 1px;
+        color: coral;
+        font-weight: bold;
+        }
+
 

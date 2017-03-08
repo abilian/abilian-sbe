@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import current_app, g, url_for
+from flask import current_app, g, request, url_for
 from flask_login import current_user
 
 from abilian.i18n import _l
@@ -11,6 +11,9 @@ from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 
 class ForumAction(Action):
+
+    def is_current(self):
+        return request.path == self.url()
 
     def url(self, context=None):
         if self._url or self.endpoint:
@@ -62,10 +65,7 @@ _close_template_action = u'''
 
 _actions = (
     ForumAction(
-        'forum:global',
-        'new_thread',
-        _l(u'Start a new conversation'),
-        icon='plus'),
+        'forum:global', 'new_thread', _l(u'New conversation'), icon='plus'),
     ForumAction(
         'forum:global', 'index', _l(u'Recent conversations'), icon='list'),
     ForumAction('forum:global', 'archives', _l(u'Archives'), icon='calendar'),

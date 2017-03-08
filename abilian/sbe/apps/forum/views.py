@@ -18,6 +18,7 @@ from six.moves.urllib.parse import quote
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
 
+from abilian.core.extensions import db
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.web import url_for, views
@@ -28,7 +29,8 @@ from abilian.web.views import default_view
 from ..communities.blueprint import Blueprint
 from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
-from .models import Post, PostAttachment, Thread
+from .models import ThreadView as MThreadView
+from .models import Post, PostAttachment, PostView, Thread
 from .tasks import send_post_by_email
 
 # TODO: move to config
@@ -155,6 +157,26 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw = super(ThreadView, self).template_kwargs
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
+        all_relative_posts = Post.query.filter(
+            Post.thread_id == self.obj.id)[1:]
+        db.session.add(
+            MThreadView(
+                thread_id=self.obj.id,
+                user_id=current_user.id,
+                viewed_at=datetime.utcnow()))
+        db.session.commit()
+        for current_post in all_relative_posts:
+            if not PostView.query.filter_by(
+                    thread_id=self.obj.id,
+                    post_id=current_post.id,
+                    user_id=current_user.id).first():
+                db.session.add(
+                    PostView(
+                        thread_id=self.obj.id,
+                        post_id=current_post.id,
+                        user_id=current_user.id,
+                        viewed_at=datetime.utcnow()))
+                db.session.commit()
         return kw
 
 
@@ -168,6 +190,8 @@ route('/<int:thread_id>/attachments')(ThreadView.as_view(
 
 
 class ThreadCreate(BaseThreadView, views.ObjectCreate):
+    base_template = 'community/_forumbase.html'
+    template = 'forum/thread_create.html'
     POST_BUTTON = ButtonAction(
         'form', 'create', btn_class='primary', title=_l(u'Post this message'))
 
@@ -254,9 +278,10 @@ class ThreadPostCreate(ThreadCreate):
         args, kwargs = super(ThreadPostCreate, self).init_object(args, kwargs)
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
-        Thread.query.filter(Thread.id == thread_id).update({
-            Thread.last_post_at: datetime.utcnow()
-        })
+        Thread.query.filter(Thread.id == thread_id).update(
+            {
+                Thread.last_post_at: datetime.utcnow()
+            })
         return args, kwargs
 
     def after_populate_obj(self):

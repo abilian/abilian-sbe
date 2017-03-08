@@ -42,7 +42,9 @@ logger = get_task_logger(__name__)
 def init_app(app):
     global check_maildir
     if app.config['INCOMING_MAIL_USE_MAILDIR']:
-        make_task = periodic_task(run_every=crontab(minute='*',),)
+        make_task = periodic_task(
+            run_every=crontab(
+                minute='*',),)
         check_maildir = make_task(check_maildir)
 
 

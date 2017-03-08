@@ -1,10 +1,13 @@
 {#- base template for communities (as container for social apps) #}
 {% extends "base.html" %}
+{% from "macros/box.html" import m_box_forum %}
 
 {% block header %}
   <h1 class="community-header">
-    <img src="{{ community_image_url(g.community, s=55) }}"/>
-    {{ g.community.name }}
+    <img src="{{ community_image_url(g.community, s=40) }}"/>
+    <span style="color:black;">
+    {{ g.community.name }}{%if threads%}</span> -
+    <span class="nb_conversation">{{threads|length}} Conversation(s)</span>{%endif%}
   </h1>
   {%- set tabs = actions.for_category('communities:tabs') %}
 
@@ -15,7 +18,6 @@
   </ul>
 {% endblock %}
 
-
 {% block main %}
   <div class="row">
     <div class="col-md-9">
@@ -23,6 +25,9 @@
       {%- endblock %}
     </div>
 
+    {%- block forumcontent %}
+    {%- endblock %}
+  
     <div class="col-md-3" id="sidebar">
       {%- block sidebar %}
       {%- endblock %}

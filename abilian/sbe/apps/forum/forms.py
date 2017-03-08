@@ -46,7 +46,9 @@ ALLOWED_ATTRIBUTES = {
     'img': ['src', 'alt', 'title'],
 }
 
-ALLOWED_STYLES = ['text-align',]
+ALLOWED_STYLES = [
+    'text-align',
+]
 
 WIDGET_ALLOWED = {}
 for attr in ALLOWED_TAGS:
