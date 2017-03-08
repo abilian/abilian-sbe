@@ -28,6 +28,7 @@ update-env:
 	pip install -U -r etc/git-requirements.txt
 	pip install -U -r etc/dev-requirements.txt
 	pip install -e .
+	yarn
 	@echo ""
 
 #remove template cache
