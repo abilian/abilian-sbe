@@ -89,17 +89,21 @@ vagrant-tests:
 #
 # Linting & formatting
 #
-lint: lint-js lint-python
+lint: lint-js lint-python lint-less
 
 lint-js:
 	@echo "--> Linting JavaScript files"
-	eslint ./abilian/sbe/apps/
+	npm run eslint
+
+lint-less:
+	@echo "--> Linting Less files"
+	-npm run stylelint
 
 lint-python:
 	@echo "--> Linting Python files"
 	@make flake8
 	@make mypy
-    
+
 lint-py3k:
 	pylint --py3k abilian tests
 
@@ -107,7 +111,7 @@ flake8:
 	flake8 abilian tests
 
 mypy:
-	mypy --py2 --silent-imports abilian
+	-mypy --py2 --ignore-missing-imports --follow-imports=skip abilian
 
 format:
 	isort -rc abilian demo tests
