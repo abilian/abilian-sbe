@@ -79,7 +79,9 @@ class Thread(Entity):
         all_posts = Post.query.filter(Post.thread_id == self.id).all()[1:]
         posters_counter = Counter([e.creator for e in all_posts])
         sorted_posters = posters_counter.most_common(limit)
-        frequent_posters = [user for (user,nb_posts) in sorted_posters if user != self.creator]
+        frequent_posters = [
+            user for (user, nb_posts) in sorted_posters if user != self.creator
+        ]
         return frequent_posters
 
     @title.setter

@@ -157,12 +157,25 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw = super(ThreadView, self).template_kwargs
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
-        all_relative_posts = Post.query.filter(Post.thread_id == self.obj.id)[1:]
-        db.session.add(MThreadView(thread_id=self.obj.id,user_id=current_user.id,viewed_at=datetime.utcnow()))
+        all_relative_posts = Post.query.filter(
+            Post.thread_id == self.obj.id)[1:]
+        db.session.add(
+            MThreadView(
+                thread_id=self.obj.id,
+                user_id=current_user.id,
+                viewed_at=datetime.utcnow()))
         db.session.commit()
         for current_post in all_relative_posts:
-            if not PostView.query.filter_by(thread_id=self.obj.id,post_id=current_post.id,user_id=current_user.id).first():
-                db.session.add(PostView(thread_id=self.obj.id,post_id=current_post.id,user_id=current_user.id,viewed_at=datetime.utcnow()))
+            if not PostView.query.filter_by(
+                    thread_id=self.obj.id,
+                    post_id=current_post.id,
+                    user_id=current_user.id).first():
+                db.session.add(
+                    PostView(
+                        thread_id=self.obj.id,
+                        post_id=current_post.id,
+                        user_id=current_user.id,
+                        viewed_at=datetime.utcnow()))
                 db.session.commit()
         return kw
 
@@ -265,7 +278,9 @@ class ThreadPostCreate(ThreadCreate):
         args, kwargs = super(ThreadPostCreate, self).init_object(args, kwargs)
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
-        Thread.query.filter(Thread.id == thread_id).update({Thread.last_post_at: datetime.utcnow()})
+        Thread.query.filter(Thread.id == thread_id).update({
+            Thread.last_post_at: datetime.utcnow()
+        })
         return args, kwargs
 
     def after_populate_obj(self):
