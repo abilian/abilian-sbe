@@ -5,9 +5,10 @@
 {% block header %}
   <h1 class="community-header">
     <img src="{{ community_image_url(g.community, s=40) }}"/>
-    <span style="color:black;">
-    {{ g.community.name }}{%if threads%}</span> -
-    <span class="nb-conversation">{{threads|length}} Conversation(s)</span>{%endif%}
+    <span style="color:black;">{{ g.community.name }}</span>
+    {% if threads %} -
+      <span class="nb-conversation">{{ threads|length }} Conversation(s)</span>
+    {% endif %}
   </h1>
   {%- set tabs = actions.for_category('communities:tabs') %}
 
@@ -27,7 +28,7 @@
 
     {%- block forumcontent %}
     {%- endblock %}
-  
+
     <div class="col-md-3" id="sidebar">
       {%- block sidebar %}
       {%- endblock %}

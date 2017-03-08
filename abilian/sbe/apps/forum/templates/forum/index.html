@@ -1,91 +1,96 @@
-{% extends "forum/_base.html" %} 
-{%- from "macros/user.html" import m_user_link, m_user_photo %} 
-{% from "macros/box.html" import m_box_menu, m_box_content %} 
-              
-{% block forumcontent %} 
-    {% call m_box_content(_("Recent conversations")) %}
+{% extends "forum/_base.html" %}
+{%- from "macros/user.html" import m_user_link, m_user_photo %}
+{% from "macros/box.html" import m_box_menu, m_box_content %}
 
-<div class="forum-menu-container">
-    <div class="forum_menu" role="group">
+{% block forumcontent %}
+  {% call m_box_content(_("Recent conversations")) %}
+
+    <div class="forum-menu-container">
+      <div class="forum_menu" role="group">
         {%- set global_actions = actions.for_category('forum:global') %}
-            {%- for action in global_actions %} 
-                  {{forum_menu(action)}} 
-            {%- endfor %}
+        {%- for action in global_actions %}
+          {{ forum_menu(action) }}
+        {%- endfor %}
+      </div>
     </div>
-</div>
 
 
-{% if threads %}
-<table class="thread-table" border="0">
-    <tr>
-        <th colspan="2" style="">Topic</th>
-        <th>Users</th>
-        <th>
+    {% if threads %}
+      <table class="thread-table" border="0">
+        <tr>
+          <th colspan="2" style="">Topic</th>
+          <th>Users</th>
+          <th>
             <center>Replies</center>
-        </th>
-        <th>
+          </th>
+          <th>
             <center>Views</center>
-        </th>
-        <th>
+          </th>
+          <th>
             <center>Activity</center>
-        </th>
-    </tr>
-    {% for thread in threads %} 
-        {{ m_thread(thread) }} 
-    {% endfor %}
-</table>
-   <br>
-   <br> {% else %}
-           <p>{{ _("No message has been posted to this community yet.") }}</p>
-        {% endif %} 
-        {% if has_more or True %}
-                 <hr>
-                 <p><a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
-        {% endif %} 
-    {% endcall %} 
-{% endblock %} 
+          </th>
+        </tr>
+        {% for thread in threads %}
+          {{ m_thread(thread) }}
+        {% endfor %}
+      </table>
+      <br>
+      <br> {% else %}
+      <p>{{ _("No message has been posted to this community yet.") }}</p>
+    {% endif %}
+    {% if has_more or True %}
+      <hr>
+      <p><a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
+    {% endif %}
+  {% endcall %}
+{% endblock %}
 
 
 
-{% macro m_thread(thread) %} 
-{%- set thread_href = url_for(thread) %} 
-{%- set thread_length = thread.posts|length %}
-<tr>
+{% macro m_thread(thread) %}
+  {%- set thread_href = url_for(thread) %}
+  {%- set thread_length = thread.posts|length %}
+  <tr>
     <td class="thread-user">
-        {% call m_user_link(thread.creator) %} 
-             {{ m_user_photo(thread.creator, size=40) }} 
-        {%- endcall %}
+      {% call m_user_link(thread.creator) %}
+        {{ m_user_photo(thread.creator, size=40) }}
+      {%- endcall %}
     </td>
     <td style="width: 31%;">
-        <div class="entry">
-        <h4><a href="{{ thread_href }}" title="{{ thread.created_at | age(date_threshold='day') }}" class="thread-title"> {{ thread.title }}</a></h4> {%- if thread.closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
-        </div>
+      <div class="entry">
+        <h4><a href="{{ thread_href }}" title="{{ thread.created_at | age(date_threshold='day') }}"
+               class="thread-title"> {{ thread.title }}</a></h4> {%- if thread.closed %}
+        <i class="fa fa-lock fa-big"></i>{%- endif %}
+      </div>
     </td>
     <td class="frequent-posters">
-        {%for p in thread.get_frequent_posters(5) %} {% call m_user_link(p) %} {{ m_user_photo(p, size=30) }} {%- endcall %} {%endfor%}
+      {% for p in thread.get_frequent_posters(5) %} {% call m_user_link(p) %} {{ m_user_photo(p, size=30) }}
+      {%- endcall %} {% endfor %}
     </td>
     <td>
-        <center>
-            <div class="comments" style="position: relative;">
-                <a class="replies" href="{{ thread_href }}">
-          {{ thread_length-1 }}</a>{% if thread.get_viewed_posts !=0 %} <span style="color:gray;"></span> <span class="hilight-view" title="not viewed"> (+{{thread.get_viewed_posts }})</span>{% endif %}</center>
+      <center>
+        <div class="comments" style="position: relative;">
+          <a class="replies" href="{{ thread_href }}">
+            {{ thread_length-1 }}</a>{% if thread.get_viewed_posts !=0 %} <span style="color:gray;"></span>
+          <span class="hilight-view" title="not viewed"> (+{{ thread.get_viewed_posts }})</span>{% endif %}</center>
     </td>
     <td>
-        <center><span class="viewed-times"> {{thread.viewed_times}}</span></p></center>
+      <center><span class="viewed-times"> {{ thread.viewed_times }}</span></p></center>
     </td>
     <td>
-        <center>
-            {%- if thread_length > 1 %} {% set last_post_creator = thread.posts[-1].creator %}
-            <span class="hidden-xs" style="">
-         <span class="divider" style="color:silver;">{{thread.posts[-1].created_at | age(date_threshold='day') }}
+      <center>
+        {%- if thread_length > 1 %} {% set last_post_creator = thread.posts[-1].creator %}
+          <span class="hidden-xs" style="">
+          <span class="divider" style="color:silver;">{{ thread.posts[-1].created_at | age(date_threshold='day') }}
         </span> {%- endif %}
-            </div>
-            </div>
-            </span>
+        </div>
+        </div>
+        </span>
     </td>
-</tr>
-{% endmacro %} 
+  </tr>
+{% endmacro %}
 
 {% macro forum_menu(action) %}
-       <button type="button" style="border: none;padding: 10px;" {% if action.is_current()%}class="forum-btn-active" {%endif%}>{{ action.render() }}</button>
+  <button type="button" style="border: none;padding: 10px;"
+          {% if action.is_current() %}class="forum-btn-active" {% endif %}>{{ action.render() }}</button>
 {% endmacro %}
