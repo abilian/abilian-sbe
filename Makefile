@@ -30,6 +30,12 @@ update-env:
 	pip install -e .
 	@echo ""
 
+#remove template cache
+delete-cache:
+	@echo "--> Removing template cache"
+	rm -rf ./instance/webassets/compiled/*
+	rm -rf ./instance/webassets/cache/*
+
 #
 # testing
 #
@@ -98,7 +104,7 @@ lint-py3k:
 	pylint --py3k abilian tests
 
 flake8:
-	flake8 abilian tests
+	flake8 --max-complexity=8 --config=setup.cfg abilian
 
 mypy:
 	mypy --py2 --silent-imports abilian

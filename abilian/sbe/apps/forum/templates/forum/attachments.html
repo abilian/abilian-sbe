@@ -8,12 +8,15 @@
   {% call m_box_content(_("Recent conversations attachments")) %}
 
   {%- block forumsidebar %}
+
+  <div class="forum-menu-container">
      <div class="forum_menu" role="group" >
       {%- set global_actions = actions.for_category('forum:global') %}
       {%- for action in global_actions %}
            {{forum_menu(action)}}
       {%- endfor %}
     </div>
+  </div>
  
   {%- endblock %}
 
@@ -33,5 +36,5 @@
 {% endblock %}
 
 {% macro forum_menu(action) %}
-  <button type="button" style="border: none;padding: 10px;" {% if action.is_current()%}class="forum_btn_active"{%endif%}>{{ action.render() }}</button>
+  <button type="button" style="border: none;padding: 10px;" {% if action.is_current()%}class="forum-btn-active"{%endif%}>{{ action.render() }}</button>
     {% endmacro %}

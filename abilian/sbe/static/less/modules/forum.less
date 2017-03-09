@@ -24,8 +24,6 @@ ul.threads {
       box-shadow: 0 6px 6px -8px silver;
       .border-right-radius(@border-radius-small);
 
-      
-
       > h4 {
         margin-top: 0;
         >a{
@@ -148,7 +146,7 @@ ul.threads {
     font-size: inherit;
   }
 
-  .history {
+.history {
     font-size: 90%;
     font-style: italic;
     color: @gray-light;
@@ -165,45 +163,33 @@ ul.threads {
   }
 }
 
-ul.threads li .entry .comments {
-position: absolute;
-bottom: 0;
-right: 0;
-padding: 8px;
-padding-bottom: 5px;
-margin-right: -14.5px;
-background: linear-gradient(to right, white, ghostwhite);
-margin-bottom: 16px;
-margin-top: 16px;
-top: -19px;
-border-radius: 4px;
-}
-
-ul.threads {
-padding-bottom: -5px;
-margin: 0;
-padding-left: 0;
-list-style: none;
-position: relative;
-top: 40px;
-}
-
-
-.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
-color: #555555;
-background-color: #fcfcfc;
-border: 1px solid #ddd;
-border-bottom-color: transparent;
-cursor: default;
-border-radius: 2px;
-}
-
-
+// hilight not viewed number
 .hilight-view {
         position: relative;
         top: 1px;
-        color: coral;
+        color: lightcoral;
         font-weight: bold;
         }
 
+.thread-title{
+  text-decoration: none;
+  color: #858585;
+}
+
+.thread-title:hover{
+  text-decoration: none;
+  color: #858585;
+}
+
+.frequent-posters{
+  position: relative;
+  left: -9px;
+}
+
+//first column in thread table
+.thread-user{
+  width:4%;
+  position:relative;
+  left: -6px;
+}
 
