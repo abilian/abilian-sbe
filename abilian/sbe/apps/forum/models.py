@@ -77,10 +77,10 @@ class Thread(Entity):
 
     def get_frequent_posters(self, limit):
         all_posts = Post.query.filter(Post.thread_id == self.id).all()[1:]
-        count_posters = Counter([e.creator for e in all_posts])
-        sorted_posters = sorted(count_posters.items(), key=lambda x: x[1])
-        frequent_posters = [user for (user, nb_posts) in sorted_posters if user != self.creator]
-        return frequent_posters[::-1][:limit]
+        posters_counter = Counter([e.creator for e in all_posts])
+        sorted_posters = posters_counter.most_common(limit)
+        frequent_posters = [user for (user,nb_posts) in sorted_posters if user != self.creator]
+        return frequent_posters
 
     @title.setter
     def title(self, title):
