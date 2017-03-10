@@ -67,9 +67,9 @@ class Thread(Entity):
 
     @property
     def get_viewed_posts(self):
-        all_posts = Post.query.filter(Post.thread_id == self.id)
-        return (all_posts.count() - 1) - \
-         (PostView.query.filter(PostView.thread_id == self.id, PostView.user_id == current_user.id).count())
+        thread_last_view = ThreadView.query.filter(ThreadView.thread_id == self.id, ThreadView.user_id == current_user.id)[-1].viewed_at
+        new_posts = Post.query.filter(Post.thread_id == self.id, Post.created_at > thread_last_view)
+        return new_posts.count()
 
     @property
     def viewed_times(self):
@@ -175,18 +175,6 @@ class ThreadView(Entity):
 
     #: The thread this post belongs to
     thread_id = Column(ForeignKey(Thread.id), nullable=False)
-    user_id = Column(ForeignKey(User.id), nullable=False)
-    viewed_at = Column(DateTime, default=datetime.utcnow, nullable=True)
-
-
-class PostView(Entity):
-
-    __tablename__ = 'forum_log'
-    __indexable__ = False  # content is indexed at thread level
-
-    #: The thread this post belongs to
-    thread_id = Column(ForeignKey(Thread.id), nullable=False)
-    post_id = Column(ForeignKey(Post.id), nullable=False)
     user_id = Column(ForeignKey(User.id), nullable=False)
     viewed_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 

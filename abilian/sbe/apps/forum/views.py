@@ -30,7 +30,7 @@ from ..communities.blueprint import Blueprint
 from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import ThreadView as MThreadView
-from .models import Post, PostAttachment, PostView, Thread
+from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
 
 # TODO: move to config
@@ -157,26 +157,12 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw = super(ThreadView, self).template_kwargs
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
-        all_relative_posts = Post.query.filter(
-            Post.thread_id == self.obj.id)[1:]
         db.session.add(
             MThreadView(
                 thread_id=self.obj.id,
                 user_id=current_user.id,
                 viewed_at=datetime.utcnow()))
         db.session.commit()
-        for current_post in all_relative_posts:
-            if not PostView.query.filter_by(
-                    thread_id=self.obj.id,
-                    post_id=current_post.id,
-                    user_id=current_user.id).first():
-                db.session.add(
-                    PostView(
-                        thread_id=self.obj.id,
-                        post_id=current_post.id,
-                        user_id=current_user.id,
-                        viewed_at=datetime.utcnow()))
-                db.session.commit()
         return kw
 
 
