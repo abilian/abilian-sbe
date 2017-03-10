@@ -1,6 +1,7 @@
 {% extends "forum/_base.html" %}
 
 {% from "macros/box.html" import m_box_menu, m_box_content %}
+{%from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
   {% call m_box_content(_("Archives")) %}
@@ -43,9 +44,4 @@
 
     {%- endif %}
   </li>
-{% endmacro %}
-
-{% macro forum_menu(action) %}
-  <button type="button" style="border: none;padding: 10px;"
-          {% if action.is_current() %}class="forum-btn-active"{% endif %}>{{ action.render() }}</button>
 {% endmacro %}

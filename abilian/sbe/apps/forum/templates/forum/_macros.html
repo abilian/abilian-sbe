@@ -36,3 +36,9 @@
     </div>
   {%- endif %}
 {%- endmacro %}
+
+{% macro forum_menu(action) %}
+  <button type="button" style="border: none;padding: 10px;"
+          {% if action.is_current() %}class="forum-btn-active" {% endif %}>{{ action.render() }}</button>
+{% endmacro %}
+
