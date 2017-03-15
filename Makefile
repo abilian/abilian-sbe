@@ -9,11 +9,16 @@ INSTANCE_FOLDER=$(shell 												\
 
 default: test
 
+install:
+	pip install -r requirements.txt
 
 #
 # Environment
 #
 develop: setup-git update-env
+
+develop-abilian: develop
+	pip install -e ../abilian-core
 
 setup-git:
 	@echo "--> Configuring git and installing hooks"
@@ -93,7 +98,7 @@ lint-python:
 	@echo "--> Linting Python files"
 	@make flake8
 	@make mypy
-    
+
 lint-py3k:
 	pylint --py3k abilian tests
 
@@ -162,4 +167,3 @@ update-deps:
 	pip-compile -U > /dev/null
 	pip-compile > /dev/null
 	git --no-pager diff requirements.txt
-
