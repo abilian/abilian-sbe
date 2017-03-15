@@ -9,11 +9,11 @@ from celery import shared_task
 from celery.schedules import crontab
 from flask import current_app
 from flask_mail import Message
-from flask_security.utils import md5
 from sqlalchemy import and_, or_
 from validate_email import validate_email
 
 from abilian.core.models.subjects import User
+from abilian.core.util import md5
 from abilian.i18n import render_template_i18n
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import repository
