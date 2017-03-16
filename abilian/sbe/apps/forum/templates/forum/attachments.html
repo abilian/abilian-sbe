@@ -11,7 +11,7 @@
     {%- block forumsidebar %}
 
       <div class="forum-menu-container">
-        <div class="forum_menu" role="group">
+        <div class="forum-menu" role="group">
           {%- set global_actions = actions.for_category('forum:global') %}
           {%- for action in global_actions %}
             {{ forum_menu(action) }}
