@@ -25,6 +25,7 @@ from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 from abilian.services.indexing.adapter import SAAdapter
+from abilian.services.activitytracker.service import ActivityTracker
 
 
 class ThreadClosedError(RuntimeError):
@@ -65,18 +66,21 @@ class Thread(Entity):
     def title(self):
         return self._title
 
-    @property
-    def get_viewed_posts(self):
-        thread_last_view = ThreadView.query.filter(ThreadView.thread_id == self.id, ThreadView.user_id == current_user.id)[-1].viewed_at
-        new_posts = Post.query.filter(Post.thread_id == self.id, Post.created_at > thread_last_view)
-        return new_posts.count()
+    def get_viewed_posts(self,user_id):
+        activitytracker = ActivityTracker()
+        thread_traking = activitytracker.get_tracked_object(self.id,user_id)
+        if not thread_traking:
+            nb_new_posts = len(self.posts) - 1
+        else:
+            nb_new_posts = len(filter(lambda p: p.created_at > thread_traking.viewed_at,self.posts))
+        return nb_new_posts
 
     @property
     def viewed_times(self):
         return ThreadView.query.filter(ThreadView.thread_id == self.id).count()
 
     def get_frequent_posters(self, limit):
-        all_posts = Post.query.filter(Post.thread_id == self.id).all()[1:]
+        all_posts = self.posts[1:]
         posters_counter = Counter([e.creator for e in all_posts])
         sorted_posters = posters_counter.most_common(limit)
         frequent_posters = [

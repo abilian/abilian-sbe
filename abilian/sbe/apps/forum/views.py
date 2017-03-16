@@ -32,6 +32,7 @@ from .forms import PostEditForm, PostForm, ThreadForm
 from .models import ThreadView as MThreadView
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
+from abilian.services.activitytracker.service import ActivityTracker
 
 # TODO: move to config
 MAX_THREADS = 30
@@ -163,6 +164,8 @@ class ThreadView(BaseThreadView, views.ObjectView):
                 user_id=current_user.id,
                 viewed_at=datetime.utcnow()))
         db.session.commit()
+        tr = ActivityTracker()
+        tr.track_object(self.obj.id,current_user.id)
         return kw
 
 

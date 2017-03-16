@@ -72,8 +72,8 @@
       <center>
         <div class="comments" style="position: relative;">
           <a class="replies" href="{{ thread_href }}">
-            {{ thread_length-1 }}</a>{% if thread.get_viewed_posts !=0 %} <span style="color:gray;"></span>
-          <span class="hilight-view" title="not viewed"> (+{{ thread.get_viewed_posts }})</span>{% endif %}</center>
+            {{ thread_length-1 }}</a>{% if thread.get_viewed_posts((g.user.id)) !=0 %} <span style="color:gray;"></span>
+          <span class="hilight-view" title="not viewed"> (+{{ thread.get_viewed_posts(g.user.id) }})</span>{% endif %}</center>
     </td>
     <td>
       <center><span class="viewed-times"> {{ thread.viewed_times }}</span></p></center>
