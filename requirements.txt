@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-git+https://github.com/abilian/abilian-core.git@9938b02e59796de19e01744ffaafef5db149658f#egg=abilian-core
+git+https://github.com/abilian/abilian-core.git@0ec9746dc37f2738b10cf45a23c2e40d5307ec2b#egg=abilian-core
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
