@@ -33,6 +33,7 @@ from .models import ThreadView as MThreadView
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
 from abilian.services.activitytracker.service import ActivityTracker
+from blinker import signal
 
 # TODO: move to config
 MAX_THREADS = 30
@@ -152,6 +153,9 @@ class ThreadView(BaseThreadView, views.ObjectView):
     methods = ['GET', 'HEAD']
     Form = PostForm
     template = 'forum/thread.html'
+    tr = ActivityTracker()
+    entity_was_viewed = signal('entity_was_viewed')
+    entity_was_viewed.connect(tr.signal_callback)
 
     @property
     def template_kwargs(self):
@@ -164,8 +168,8 @@ class ThreadView(BaseThreadView, views.ObjectView):
                 user_id=current_user.id,
                 viewed_at=datetime.utcnow()))
         db.session.commit()
-        tr = ActivityTracker()
-        tr.track_object(self.obj.id,current_user.id)
+        self.tr.track_object(self.obj.id,current_user.id)
+        self.entity_was_viewed.send(current_app.name,object_id=self.obj.id, user_id=current_user.id)
         return kw
 
 
