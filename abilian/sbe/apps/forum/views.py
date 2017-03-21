@@ -13,6 +13,7 @@ from flask import current_app, flash, g, make_response, render_template, \
     request
 from flask_babel import format_date
 from flask_login import current_user
+from abilian.core import signals
 from six import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy.orm import joinedload
@@ -33,10 +34,11 @@ from .models import ThreadView as MThreadView
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
 from abilian.services.activitytracker.service import ActivityTracker
-from blinker import signal
+from abilian.core.signals import entity_was_viewed
 
 # TODO: move to config
 MAX_THREADS = 30
+TRACKER_SERVICE = ActivityTracker()
 
 forum = Blueprint(
     "forum", __name__, url_prefix="/forum", template_folder="templates")
@@ -153,9 +155,7 @@ class ThreadView(BaseThreadView, views.ObjectView):
     methods = ['GET', 'HEAD']
     Form = PostForm
     template = 'forum/thread.html'
-    tr = ActivityTracker()
-    entity_was_viewed = signal('entity_was_viewed')
-    entity_was_viewed.connect(tr.signal_callback)
+    entity_was_viewed.connect(TRACKER_SERVICE.object_tracked)
 
     @property
     def template_kwargs(self):
@@ -168,8 +168,8 @@ class ThreadView(BaseThreadView, views.ObjectView):
                 user_id=current_user.id,
                 viewed_at=datetime.utcnow()))
         db.session.commit()
-        self.tr.track_object(self.obj.id,current_user.id)
-        self.entity_was_viewed.send(current_app.name,object_id=self.obj.id, user_id=current_user.id)
+        TRACKER_SERVICE.track_object(self.obj.id,current_user.id)
+        entity_was_viewed.send(current_app.name,object_id=self.obj.id, user_id=current_user.id)
         return kw
 
 
