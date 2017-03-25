@@ -1,0 +1,13 @@
+{%- from "macros/user.html" import m_user_link, m_user_photo %}
+
+
+{% macro show_viewers(viewers) %}
+ {% if viewers %}
+         <div class="manager-thread-viewers">
+         <i class="fa fa-bullseye" aria-hidden="true"></i> read by : {% for viewer in viewers %}
+         {{ _("%(viewer)s", viewer=m_user_link(viewer)) }}, 
+         {%endfor%}
+         </div>
+      {% endif %}
+{% endmacro %}
+

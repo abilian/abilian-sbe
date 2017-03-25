@@ -3,6 +3,7 @@
 {% from "macros/box.html" import m_box_menu, m_box_content %}
 {%from "forum/_macros.html" import forum_menu %}
 
+
 {% block forumcontent %}
   {% call m_box_content(_("Recent conversations")) %}
 
@@ -23,6 +24,9 @@
           <th>Users</th>
           <th>
             <center>Replies</center>
+          </th>
+          <th>
+            <center>Viewers</center>
           </th>
           <th>
             <center>Views</center>
@@ -60,7 +64,7 @@
     <td style="width: 31%;">
       <div class="entry">
         <h4><a href="{{ thread_href }}" title="{{ thread.created_at | age(date_threshold='day') }}"
-               class="thread-title"> {{ thread.title }}</a></h4> {%- if thread.closed %}
+               class="thread-title"> {{ thread.title }} </a></h4> {%- if thread.closed %}
         <i class="fa fa-lock fa-big"></i>{%- endif %}
       </div>
     </td>
@@ -74,6 +78,9 @@
           <a class="thread-replies" href="{{ thread_href }}">
             {{ thread_length-1 }}</a>{% if thread.get_viewed_posts((g.user.id)) !=0 %} <span style="color:gray;"></span>
           <span class="thread-hilightview" title="not viewed"> (+{{ thread.get_viewed_posts(g.user.id) }})</span>{% endif %}</center>
+    </td>
+    <td>
+      <center><span class="thread-viewers"><i class="fa fa-user" aria-hidden="true"></i> {{ thread.viewers }}</span></p></center>
     </td>
     <td>
       <center><span class="thread-viewed-times"> {{ thread.viewed_times }}</span></p></center>

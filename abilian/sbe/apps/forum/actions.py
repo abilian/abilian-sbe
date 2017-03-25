@@ -75,6 +75,12 @@ _actions = (
         _l(u'Attachments'),
         icon='file',
         condition=is_in_thread),
+    ForumAction('forum:thread',
+        'thread_viewers',
+        _l(u'Readers list'),
+        icon='user',
+        condition=lambda ctx: is_admin(ctx),
+        url="viewers"),
     ForumModalAction(
         'forum:thread',
         'delete',

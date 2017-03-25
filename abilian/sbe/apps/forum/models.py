@@ -25,7 +25,7 @@ from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 from abilian.services.indexing.adapter import SAAdapter
-from abilian.services.activitytracker.service import ActivityTracker
+from abilian.services.activitytracker import activitytracker
 
 
 class ThreadClosedError(RuntimeError):
@@ -67,13 +67,16 @@ class Thread(Entity):
         return self._title
 
     def get_viewed_posts(self,user_id):
-        activitytracker = ActivityTracker()
         thread_traking = activitytracker.get_tracked_object(self.id,user_id)
         if not thread_traking:
             nb_new_posts = len(self.posts) - 1
         else:
             nb_new_posts = len(filter(lambda p: p.created_at > thread_traking.viewed_at,self.posts))
         return nb_new_posts
+
+    @property
+    def viewers(self):
+        return len(activitytracker.get_viewers(self.id))
 
     @property
     def viewed_times(self):

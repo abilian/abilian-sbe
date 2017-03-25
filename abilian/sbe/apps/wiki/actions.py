@@ -1,11 +1,13 @@
 # coding=utf-8
 from __future__ import absolute_import, print_function
 
-from flask import url_for
+from flask import url_for, current_app
 from flask_babel import lazy_gettext as _l
 
 from abilian.sbe.apps.communities.actions import CommunityEndpoint
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
+from abilian.services.security import Admin
+from flask_login import current_user
 
 
 class WikiPageAction(Action):
@@ -25,6 +27,11 @@ class WikiPageAction(Action):
             return url_for(self.endpoint.name, **kw)
 
 
+def is_admin(context):
+        svc = current_app.services['security']
+        return svc.has_role(current_user, Admin, object=context.get('object'))
+
+
 class WikiPageModalAction(ModalActionMixin, WikiPageAction):
     pass
 
@@ -34,6 +41,12 @@ class WikiAction(Action):
 
 
 _actions = (
+    WikiPageAction('wiki:page',
+        'view',
+        _l(u'Readers list'),
+        icon='user',
+        condition=lambda ctx: is_admin(ctx),
+        url="viewers"),
     WikiPageAction(
         'wiki:page', 'view', _l(u'View'), endpoint='.page', icon='eye-open'),
     WikiPageAction(

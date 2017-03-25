@@ -28,17 +28,16 @@ from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import default_view
 
 from ..communities.blueprint import Blueprint
+from ..communities.common import object_viewers
 from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import ThreadView as MThreadView
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
-from abilian.services.activitytracker.service import ActivityTracker
-from abilian.core.signals import entity_was_viewed
+from abilian.services.activitytracker import activitytracker
 
 # TODO: move to config
 MAX_THREADS = 30
-TRACKER_SERVICE = ActivityTracker()
 
 forum = Blueprint(
     "forum", __name__, url_prefix="/forum", template_folder="templates")
@@ -155,21 +154,20 @@ class ThreadView(BaseThreadView, views.ObjectView):
     methods = ['GET', 'HEAD']
     Form = PostForm
     template = 'forum/thread.html'
-    entity_was_viewed.connect(TRACKER_SERVICE.object_tracked)
 
     @property
     def template_kwargs(self):
         kw = super(ThreadView, self).template_kwargs
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
+        kw['viewers'] = object_viewers(self.obj.id)
         db.session.add(
             MThreadView(
                 thread_id=self.obj.id,
                 user_id=current_user.id,
                 viewed_at=datetime.utcnow()))
         db.session.commit()
-        TRACKER_SERVICE.track_object(self.obj.id,current_user.id)
-        entity_was_viewed.send(current_app.name,object_id=self.obj.id, user_id=current_user.id)
+        activitytracker.track_object(self.obj.id,current_user.id)
         return kw
 
 
@@ -283,8 +281,15 @@ class ThreadPostCreate(ThreadCreate):
         self.obj = self.post
 
 
+class ThreadViewers(ThreadView):
+
+    template = 'forum/thread_viewers.html'
+
+
 route('/<int:thread_id>/')(
     ThreadPostCreate.as_view('thread_post', view_endpoint='.thread'))
+
+route('/<int:thread_id>/viewers')(ThreadViewers.as_view('thread_viewers'))
 
 
 class ThreadDelete(BaseThreadView, views.ObjectDelete):
