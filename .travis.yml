@@ -34,6 +34,7 @@ before_install:
 # Install Python dependencies
 install:
   - pip install -U 'pip>=9' setuptools
+  - pip install -r requirements.txt -r etc/dev-requirements.txt
   - pip install -e '.[dev]'
   - pip check
   # Debug info
