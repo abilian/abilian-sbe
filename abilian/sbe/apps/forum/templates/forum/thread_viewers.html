@@ -45,7 +45,7 @@
       {% for viewer in viewers %}
          <p> {% call m_user_link(viewer) %}
             {{ m_user_photo(viewer, size=30) }}
-          {% endcall %} {{ _("%(viewer)s", viewer=m_user_link(viewer)) }}</p> 
+          {% endcall %} {{ _("%(viewer)s", viewer=m_user_link(viewer)) }}  <span style="color:silver;">- {{viewer.viewed_at | age(date_threshold='day')}}</span></p> 
          {%endfor%}
 
       {%- if thread.posts|length > 1 %}
