@@ -71,16 +71,15 @@ class Thread(Entity):
         if not thread_traking:
             nb_new_posts = len(self.posts) - 1
         else:
-            nb_new_posts = len(filter(lambda p: p.created_at > thread_traking.viewed_at,self.posts))
+            nb_new_posts = len(filter(lambda p: p.created_at > thread_traking[-1].viewed_at,self.posts))
         return nb_new_posts
 
-    @property
-    def viewers(self):
-        return len(activitytracker.get_viewers(self.id))
+    def get_nb_viewers(self, user_id):
+        return len(filter(lambda user: user.user_id != user_id, activitytracker.get_viewers(self.id)))
 
     @property
     def viewed_times(self):
-        return ThreadView.query.filter(ThreadView.thread_id == self.id).count()
+        return len(activitytracker.get_object_tracks(self.id))
 
     def get_frequent_posters(self, limit):
         all_posts = self.posts[1:]
@@ -173,17 +172,6 @@ class Post(Entity):
     @property
     def history(self):
         return self.meta.get('abilian.sbe.forum', {}).get('history', [])
-
-
-class ThreadView(Entity):
-
-    __tablename__ = 'forum_thread_view'
-    __indexable__ = False  # content is indexed at thread level
-
-    #: The thread this post belongs to
-    thread_id = Column(ForeignKey(Thread.id), nullable=False)
-    user_id = Column(ForeignKey(User.id), nullable=False)
-    viewed_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
 
 class ThreadIndexAdapter(SAAdapter):

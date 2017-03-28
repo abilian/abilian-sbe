@@ -6,7 +6,7 @@ from flask import current_app, g, request, url_for
 from flask_login import current_user
 
 from abilian.i18n import _l
-from abilian.services.security import Admin
+from abilian.services.security import Admin, Manager
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 
@@ -32,6 +32,11 @@ class ThreadAction(ForumAction):
 def is_admin(context):
     svc = current_app.services['security']
     return svc.has_role(current_user, Admin, object=context.get('object'))
+
+
+def is_manager(context):
+    svc = current_app.services['security']
+    return svc.has_role(current_user, Manager, object=context.get('object'))
 
 
 def is_in_thread(context):
@@ -79,7 +84,7 @@ _actions = (
         'thread_viewers',
         _l(u'Readers list'),
         icon='user',
-        condition=lambda ctx: is_admin(ctx),
+        condition=lambda ctx: is_manager(ctx),
         url="viewers"),
     ForumModalAction(
         'forum:thread',

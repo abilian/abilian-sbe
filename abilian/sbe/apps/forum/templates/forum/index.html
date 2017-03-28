@@ -80,7 +80,7 @@
           <span class="thread-hilightview" title="not viewed"> (+{{ thread.get_viewed_posts(g.user.id) }})</span>{% endif %}</center>
     </td>
     <td>
-      <center><span class="thread-viewers"><i class="fa fa-user" aria-hidden="true"></i> {{ thread.viewers }}</span></p></center>
+      <center><span class="thread-viewers"><i class="fa fa-user" aria-hidden="true"></i> {{ thread.get_nb_viewers(thread.creator.id) }}</span></p></center>
     </td>
     <td>
       <center><span class="thread-viewed-times"> {{ thread.viewed_times }}</span></p></center>

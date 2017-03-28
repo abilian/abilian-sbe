@@ -6,7 +6,7 @@ from flask_babel import lazy_gettext as _l
 
 from abilian.sbe.apps.communities.actions import CommunityEndpoint
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
-from abilian.services.security import Admin
+from abilian.services.security import Admin, Manager
 from flask_login import current_user
 
 
@@ -32,6 +32,11 @@ def is_admin(context):
         return svc.has_role(current_user, Admin, object=context.get('object'))
 
 
+def is_manager(context):
+    svc = current_app.services['security']
+    return svc.has_role(current_user, Manager, object=context.get('object'))
+
+
 class WikiPageModalAction(ModalActionMixin, WikiPageAction):
     pass
 
@@ -45,7 +50,7 @@ _actions = (
         'view',
         _l(u'Readers list'),
         icon='user',
-        condition=lambda ctx: is_admin(ctx),
+        condition=lambda ctx: is_manager(ctx),
         url="viewers"),
     WikiPageAction(
         'wiki:page', 'view', _l(u'View'), endpoint='.page', icon='eye-open'),
