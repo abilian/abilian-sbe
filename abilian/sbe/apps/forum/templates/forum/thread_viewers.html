@@ -3,7 +3,7 @@
 {%- from "macros/user.html" import m_user_link, m_user_photo %}
 {%- from "macros/box.html" import m_box_content, m_box_menu -%}
 {%- from "macros/form.html" import m_field -%}
-{%- from "community/macros.html" import show_viewers -%}
+{%- from "community/macros.html" import show_all_viewers -%}
 
 {%- set is_manager = g.community.has_permission(current_user, 'manage') -%}
 
@@ -42,11 +42,7 @@
       </div>
       <hr>
       <p>Read by :</p>
-      {% for viewer in viewers %}
-         <p> {% call m_user_link(viewer) %}
-            {{ m_user_photo(viewer, size=30) }}
-          {% endcall %} {{ _("%(viewer)s", viewer=m_user_link(viewer)) }}  <span style="color:silver;">- {{viewer.viewed_at | age(date_threshold='day')}}</span></p> 
-         {%endfor%}
+      {{show_all_viewers(viewers)}}
 
       {%- if thread.posts|length > 1 %}
         <hr class="clearfix" style="margin-top: 5px;">
