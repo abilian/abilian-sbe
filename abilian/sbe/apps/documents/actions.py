@@ -4,18 +4,26 @@
 from __future__ import absolute_import, print_function
 
 from flask import url_for as url_for_orig
+from flask import current_app
 from flask import g
 from typing import Any, Dict
 
 from abilian.i18n import _l
 from abilian.services.security import MANAGE, WRITE, security
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
+from abilian.services.security import Manager
+from flask_login import current_user
 
 from .repository import repository
 
 
 def url_for(endpoint, **kw):
     return url_for_orig(endpoint, community_id=g.community.slug, **kw)
+
+
+def is_manager(context):
+    svc = current_app.services['security']
+    return svc.has_role(current_user, Manager, object=context.get('object'))
 
 
 class CmisContentAction(Action):
@@ -211,6 +219,13 @@ _actions = (
             and ctx['object'].content_type in ('text/html',
                                                'text/plain',
                                                'application/pdf'))),
+    #viewers
+    DocumentModalAction('documents:content',
+        'edit',
+        _l(u'Viewers list'),
+        icon='user',
+        condition=lambda ctx: is_manager(ctx),
+        url="viewers"),
     # edit
     DocumentModalAction(
         'documents:content', 'edit', _l(u'Edit properties'),

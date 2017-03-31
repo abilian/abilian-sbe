@@ -47,7 +47,7 @@ class WikiAction(Action):
 
 _actions = (
     WikiPageAction('wiki:page',
-        'viewers',
+        'page_viewers',
         _l(u'Readers list'),
         icon='user',
         condition=lambda ctx: is_manager(ctx),
