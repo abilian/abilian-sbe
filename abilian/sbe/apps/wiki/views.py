@@ -9,6 +9,7 @@ from os.path import dirname, join
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, redirect, \
     render_template, request
+from flask_login import current_user
 from markdown import markdown
 from markupsafe import Markup
 from six import text_type
@@ -17,6 +18,7 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound
 from whoosh.searching import Hit
 
+from ..communities.common import object_viewers
 from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.i18n import _, _l, _n
@@ -32,6 +34,7 @@ from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
 
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
+from abilian.services.activitytracker import activitytracker
 
 wiki = Blueprint(
     "wiki", __name__, url_prefix="/wiki", template_folder="templates")
@@ -93,6 +96,7 @@ class BasePageView(object):
     """
         kw = super(BasePageView, self).template_kwargs
         kw['page'] = self.obj
+        kw['viewers'] = object_viewers(self.obj)
         return kw
 
     def init_object(self, args, kwargs):
@@ -146,10 +150,19 @@ class PageView(BasePageView, ObjectView):
                         community_id=g.community.slug))
 
         actions.context['object'] = self.obj
+        activitytracker.track_object(self.obj.id,current_user.id)
         return args, kwargs
 
 
 route('/page/')(PageView.as_view('page'))
+
+
+class PageViewers(PageView):
+
+    template = 'wiki/page_readers.html'
+
+
+route('/viewers')(PageViewers.as_view('page_viewers'))
 
 
 class PageEdit(BasePageView, ObjectEdit):

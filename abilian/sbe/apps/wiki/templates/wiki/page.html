@@ -1,9 +1,12 @@
 {% extends "wiki/_base.html" %}
 
 {% from "macros/box.html" import m_box_menu, m_box_content %}
+{%- from "community/macros.html" import viewers_snapshot -%}
 
 {% block content %}
   {% call m_box_content() %}
+ {{viewers_snapshot(viewers)}}
+ <br>
     <div class="wiki-page">
       <h1>{{ page.title }}</h1>
 

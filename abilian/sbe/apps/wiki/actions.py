@@ -47,11 +47,11 @@ class WikiAction(Action):
 
 _actions = (
     WikiPageAction('wiki:page',
-        'view',
+        'viewers',
         _l(u'Readers list'),
         icon='user',
         condition=lambda ctx: is_manager(ctx),
-        url="viewers"),
+        endpoint='.page_viewers'),
     WikiPageAction(
         'wiki:page', 'view', _l(u'View'), endpoint='.page', icon='eye-open'),
     WikiPageAction(
