@@ -17,4 +17,4 @@ def object_viewers(obj):
             for view in tracked_views:
                 if view.user_id in set(community_members_id):
                     viewers.append({'user':view.user,'viewed_at':view.viewed_at})
-    return viewers
+            return viewers
