@@ -27,10 +27,12 @@ from abilian.web.views import default_view
 
 from ..models import Document
 from ..repository import repository
+from ...communities.common import object_viewers
 from ..tasks import convert_document_content, preview_document
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
     check_write_access, edit_object, get_document, match
 from .views import blueprint
+from abilian.services.activitytracker import activitytracker
 
 route = blueprint.route
 
@@ -57,6 +59,7 @@ def document_view(doc_id):
 
     has_preview = doc.has_preview()
     audit_entries = audit_service.entries_for(doc)
+    activitytracker.track_object(doc.id,current_user.id)
 
     ctx = dict(
         doc=doc,
@@ -64,7 +67,8 @@ def document_view(doc_id):
         breadcrumbs=bc,
         folder=doc.parent,
         has_preview=has_preview,
-        csrf_token=csrf.field())
+        csrf_token=csrf.field(),
+        viewers=object_viewers(doc))
     return render_template("documents/document.html", **ctx)
 
 
@@ -86,6 +90,36 @@ def document_edit(doc_id):
         flash(_(u"You didn't change any property."), "success")
 
     return redirect(url_for(doc))
+
+
+@route("/doc/<int:doc_id>/viewers", methods=['GET'])
+def document_viewers(doc_id):
+    doc = get_document(doc_id)
+    check_read_access(doc)
+    doc.ensure_antivirus_scheduled()
+    #db.session.commit()
+
+    bc = breadcrumbs_for(doc)
+    actions.context['object'] = doc
+
+    """if doc.content_type.startswith("image/"):
+        add_to_recent_items(doc, "image")
+    else:
+        add_to_recent_items(doc, "document")"""
+
+    has_preview = doc.has_preview()
+    audit_entries = audit_service.entries_for(doc)
+
+    ctx = dict(
+        doc=doc,
+        audit_entries=audit_entries,
+        breadcrumbs=bc,
+        folder=doc.parent,
+        has_preview=has_preview,
+        csrf_token=csrf.field(),
+        viewers=object_viewers(doc))
+
+    return render_template("documents/document_viewers.html", **ctx)
 
 
 @route("/doc/<int:doc_id>/delete", methods=['POST'])

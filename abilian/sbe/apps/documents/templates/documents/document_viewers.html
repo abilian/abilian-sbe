@@ -1,4 +1,4 @@
-{% extends "community/_base.html" %}
+{% extends "documents/document.html" %}
 
 {% from "macros/box.html" import m_box_content, m_box_menu with context %}
 {% from "macros/audit.html" import m_audit_log %}
@@ -6,6 +6,7 @@
 
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
 {%- from "community/macros.html" import viewers_snapshot -%}
+{%- from "community/macros.html" import show_all_viewers -%}
 
 {% macro user_markup(user) %}
   <a href="{{ url_for("social.user", user_id=user.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
@@ -40,15 +41,6 @@
 
 
     <div>
-      {%- if doc.antivirus_ok %}
-        <a class="btn btn-success btn-lg pull-right"
-           href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
-          <i class="glyphicon glyphicon-download"></i>
-          {{ _('Download') }} (
-          <small>{{ doc.content_length|filesize }}</small>
-          )
-        </a>
-      {%- endif %}
 
       <h2><i class="fa fa-file-o fa-lg"></i>
         {{ m_breadcrumbs2(breadcrumbs) }}
@@ -73,7 +65,9 @@
             {%- endif %}
           {%- endif %}
         </small>
-        {{viewers_snapshot(viewers,"viewed by :")}}
+        <hr>
+      <p>Viewed by :</p>
+      {{show_all_viewers(viewers)}}
       </div>
     </div>
 
@@ -82,37 +76,7 @@
       <p>&nbsp;</p>
     {%- endif %}
 
-    <h3 class="main">{{ _('Preview') }}</h3>
-
-    <div class="preview-container" data-page-num="{{ doc.page_num }}">
-      <img src="{{ url_for(".document_preview_image",
-          community_id=g.community.slug, doc_id=doc.id,
-          size=doc.preview_size) }}" alt="" class="preview" data-page="0"/>
-
-      {%- if has_preview %}
-        <a class="preview-nav-button preview-prev" title="{{ _('Previous') }}">
-          <i class="fa fa-chevron-circle-left fa-5x"></i>
-          <span class="sr-only">{{ _('Previous') }}</span>
-        </a>
-        <a class="preview-nav-button preview-next" title="{{ _('Next') }}">
-          <i class="fa fa-chevron-circle-right fa-5x"></i>
-          <span class="sr-only">{{ _('Next') }}</span>
-        </a>
-
-        {%- deferJS %}
-          <script>
-            require(
-                ['Abilian', 'SBEDocumentViewerSetup'],
-                function (Abilian, viewerSetup) {
-                  Abilian.fn.onAppInit(viewerSetup);
-                });
-          </script>
-        {%- enddeferJS %}
-
-      {%- else %}
-        {{ _("Document preview not yet available") }}
-      {%- endif %}
-    </div>
+    
 
     {%- if doc.extra_metadata %}
       <h3 class="main collapsed" data-toggle="collapse"
@@ -123,23 +87,8 @@
       </div>
     {%- endif %}
 
-    {{ m_audit_log(audit_entries) }}
-
   {% endcall %}
 
-{% endblock %}
-
-{% block sidebar %}
-  {%- set content_actions = actions.for_category('documents:content') %}
-  {%- if content_actions %}
-    {% call m_box_menu() %}
-      <ul class="nav nav-list">
-        {%- for action in content_actions %}
-          <li>{{ action.render() }}</li>
-        {%- endfor %}
-      </ul>
-    {% endcall %}
-  {%- endif %}
 {% endblock %}
 
 {% block modals %}

@@ -221,11 +221,11 @@ _actions = (
                                                'application/pdf'))),
     #viewers
     DocumentModalAction('documents:content',
-        'edit',
+        'document_viewers',
         _l(u'Viewers list'),
         icon='user',
         condition=lambda ctx: is_manager(ctx),
-        url="viewers"),
+        url=lambda ctx: url_for(".document_viewers", doc_id=ctx['object'].id)),
     # edit
     DocumentModalAction(
         'documents:content', 'edit', _l(u'Edit properties'),
