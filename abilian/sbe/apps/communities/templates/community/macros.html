@@ -5,12 +5,14 @@
  {% if viewers %}
          {% set nb_viewers = viewers|length %}
          <div class="manager-thread-viewers">
-         <i class="fa fa-bullseye" aria-hidden="true"></i> {{label}} {% for viewer in viewers %}
+         <i class="fa fa-bookmark" aria-hidden="true" style="color:yellowgreen;"></i> {{label}} {% for viewer in viewers %}
          {% if loop.index <= limit %}
          {{ _("%(viewer)s", viewer=m_user_link(viewer.user)) }} {% if loop.index < nb_viewers %},{% endif %}
          {% else %}
          {% if limit < nb_viewers %}
+         {% if loop.last %}
           <span> ...</span>
+          {%endif%}
          {% endif %}
          {% endif %}
          {%endfor%}

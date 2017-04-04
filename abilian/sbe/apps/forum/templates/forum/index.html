@@ -45,7 +45,7 @@
     {% endif %}
     {% if has_more or True %}
       <hr>
-      <p><a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
+      <p><i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i> <a class="thread-all" href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
     {% endif %}
   {% endcall %}
 {% endblock %}
