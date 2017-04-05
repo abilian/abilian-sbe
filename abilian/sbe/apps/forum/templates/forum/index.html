@@ -44,8 +44,8 @@
       <p>{{ _("No message has been posted to this community yet.") }}</p>
     {% endif %}
     {% if has_more or True %}
-      <hr>
-      <p><i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i> <a class="thread-all" href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
+      <br>
+      <p class="thread-all" ><i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i> <a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
     {% endif %}
   {% endcall %}
 {% endblock %}
