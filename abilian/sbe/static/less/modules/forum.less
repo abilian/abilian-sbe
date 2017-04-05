@@ -119,6 +119,9 @@ ul.threads {
 
   .posts {
     .list-unstyled();
+    >li{
+    margin-bottom : -11px;
+    }
   }
 }
 
@@ -131,14 +134,28 @@ ul.threads {
   }
 
   .media-body {
-    border-left: 2px solid ghostwhite;
+    border-left: 2px solid yellowgreen;
+    background: ghostwhite;
     padding-top: 0.5em;
     padding-left: 0.5em;
+    border-radius: 2px 4px 4px 0px;
+    text-align: justify;
+    padding-right: 9px;
 
     .attachments img {
       vertical-align: middle;
     }
   }
+
+  .media-body:before {
+  content: ' ';
+position: absolute;
+width: 0;
+height: 0;
+top: 207px;
+border: 6px solid;
+border-color: ghostwhite transparent transparent ghostwhite;
+}
 
   blockquote {
     font-size: inherit;
@@ -392,6 +409,7 @@ padding-left: 8px;
 position: relative;
 top: 4px;
 left: -7px;
+width: 101%;
 }
 
 .thread-all{
@@ -419,7 +437,5 @@ color: gray;
 position: relative;
 left: 2.5px;
 }
-
-
 
 
