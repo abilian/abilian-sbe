@@ -21,7 +21,9 @@
 {% endmacro %}
 
 
-{% macro show_all_viewers(viewers) %}
+{% macro show_all_viewers(viewers, label="Read by :") %}
+{% set nb_viewers=viewers|length %}
+<p class="viewed">{{label}} <font color="silver"> {{nb_viewers}} member{%if nb_viewers > 1%}s{%endif%} </font></p>
 {% if viewers %}
 {% for viewer in viewers %}
          <p> {% call m_user_link(viewer.user) %}

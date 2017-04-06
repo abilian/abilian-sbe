@@ -32,16 +32,17 @@
       <div class="media post">
         <div class="media-left">
           {% call m_user_link(thread.creator) %}
-            {{ m_user_photo(thread.creator, size=55) }}
+            {{ m_user_photo(thread.creator, size=40) }}
           {% endcall %}
         </div>
 
         <div class="media-body">
           {{ m_post_content(thread.posts[0]) }}
         </div>
+        <div class="media-post-tail"></div>
       </div>
       <hr>
-      <p class="viewed">Read by :</p>
+      
       {{show_all_viewers(viewers)}}
 
       {%- if thread.posts|length > 1 %}
