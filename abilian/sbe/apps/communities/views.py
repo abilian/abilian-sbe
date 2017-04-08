@@ -352,6 +352,22 @@ def members():
         csrf_token=csrf.field())
 
 
+@route("/<string:community_id>/members/wizard/step1")
+@tab('members')
+def add_member_emails_wizard():
+    g.breadcrumb.append(BreadcrumbItem(
+        label=_(u'Members'),
+        url=Endpoint('communities.members', community_id=g.community.slug))
+    )
+    memberships = _members_query().all()
+
+    return render_template(
+        "community/members_wizard_step1.html",
+        seconds_since_epoch=seconds_since_epoch,
+        memberships=memberships,
+        csrf_token=csrf.field())
+
+
 @route("/<string:community_id>/members", methods=["POST"])
 @csrf.protect
 @require_manage

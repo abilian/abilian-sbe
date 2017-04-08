@@ -32,3 +32,13 @@
          {%endfor%}
 {% endif %}
 {% endmacro%}
+
+
+
+{% macro wizard_steps(steps,active_n) %}
+<ul id="progress">
+    {% for step in steps %}
+    <li {% if loop.index <= active_n %}class="active"{% endif %}>{% if loop.index <= active_n %}<i class="fa fa-check" aria-hidden="true" style="position: relative;left: -7px;"></i>{%endif%}  {{step}}</li>
+    {% endfor %}
+</ul>
+{% endmacro%}

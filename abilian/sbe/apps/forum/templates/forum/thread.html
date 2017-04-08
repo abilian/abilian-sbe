@@ -11,7 +11,7 @@
   {% call m_box_content() %}
     {#  TODO #}
     <p>
-      <a href="{{ url_for('.index', community_id=g.community.slug) }}">
+      <a style="color:silver;" href="{{ url_for('.index', community_id=g.community.slug) }}">
         <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
     </p>
 
@@ -55,12 +55,12 @@
       </ul>
 
       {%- if not is_closed %}
+       <br>
         <hr/>
-
         <div class="media">
           <div class="media-left">
             {% call m_user_link(current_user) %}
-              {{ m_user_photo(current_user, size=55) }}
+              {{ m_user_photo(current_user, size=40) }}
             {% endcall %}
           </div>
 
