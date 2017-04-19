@@ -178,3 +178,8 @@ update-deps:
 	pip-compile -U > /dev/null
 	pip-compile > /dev/null
 	git --no-pager diff requirements.txt
+
+sync-deps:
+	pip install -r requirements.txt
+	pip install -r etc/dev-requirements.txt
+	pip install -e .
