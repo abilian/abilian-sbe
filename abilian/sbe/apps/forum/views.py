@@ -13,15 +13,16 @@ from flask import current_app, flash, g, make_response, render_template, \
     request
 from flask_babel import format_date
 from flask_login import current_user
-from abilian.core import signals
 from six import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
 
+from abilian.core import signals
 from abilian.core.extensions import db
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
+from abilian.services.activitytracker import activitytracker
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction, Endpoint
 from abilian.web.nav import BreadcrumbItem
@@ -33,7 +34,6 @@ from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
-from abilian.services.activitytracker import activitytracker
 
 # TODO: move to config
 MAX_THREADS = 30
@@ -160,7 +160,7 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
         kw['viewers'] = object_viewers(self.obj)
-        activitytracker.track_object(self.obj.id,current_user.id)
+        activitytracker.track_object(self.obj.id, current_user.id)
         return kw
 
 

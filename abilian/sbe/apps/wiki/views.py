@@ -18,13 +18,13 @@ from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound
 from whoosh.searching import Hit
 
-from ..communities.common import object_viewers
 from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.i18n import _, _l, _n
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import \
     default_view_kw as community_dv_kw
+from abilian.services.activitytracker import activitytracker
 from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
 from abilian.web.nav import BreadcrumbItem
@@ -32,9 +32,9 @@ from abilian.web.util import url_for
 from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
     default_view
 
+from ..communities.common import object_viewers
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
-from abilian.services.activitytracker import activitytracker
 
 wiki = Blueprint(
     "wiki", __name__, url_prefix="/wiki", template_folder="templates")
@@ -150,7 +150,7 @@ class PageView(BasePageView, ObjectView):
                         community_id=g.community.slug))
 
         actions.context['object'] = self.obj
-        activitytracker.track_object(self.obj.id,current_user.id)
+        activitytracker.track_object(self.obj.id, current_user.id)
         return args, kwargs
 
 

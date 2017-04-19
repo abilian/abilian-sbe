@@ -18,6 +18,7 @@ from abilian.core.signals import activity
 from abilian.i18n import _, render_template_i18n
 from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.services import audit_service
+from abilian.services.activitytracker import activitytracker
 from abilian.services.conversion import converter
 from abilian.services.image import FIT, resize
 from abilian.web import csrf, url_for
@@ -25,14 +26,13 @@ from abilian.web.action import actions
 from abilian.web.frontend import add_to_recent_items
 from abilian.web.views import default_view
 
+from ...communities.common import object_viewers
 from ..models import Document
 from ..repository import repository
-from ...communities.common import object_viewers
 from ..tasks import convert_document_content, preview_document
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
     check_write_access, edit_object, get_document, match
 from .views import blueprint
-from abilian.services.activitytracker import activitytracker
 
 route = blueprint.route
 
@@ -59,7 +59,7 @@ def document_view(doc_id):
 
     has_preview = doc.has_preview()
     audit_entries = audit_service.entries_for(doc)
-    activitytracker.track_object(doc.id,current_user.id)
+    activitytracker.track_object(doc.id, current_user.id)
 
     ctx = dict(
         doc=doc,
@@ -101,7 +101,6 @@ def document_viewers(doc_id):
 
     bc = breadcrumbs_for(doc)
     actions.context['object'] = doc
-
     """if doc.content_type.startswith("image/"):
         add_to_recent_items(doc, "image")
     else:

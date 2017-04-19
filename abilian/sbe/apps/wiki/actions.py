@@ -1,13 +1,13 @@
 # coding=utf-8
 from __future__ import absolute_import, print_function
 
-from flask import url_for, current_app
+from flask import current_app, url_for
 from flask_babel import lazy_gettext as _l
+from flask_login import current_user
 
 from abilian.sbe.apps.communities.actions import CommunityEndpoint
-from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 from abilian.services.security import Admin, Manager
-from flask_login import current_user
+from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 
 class WikiPageAction(Action):
@@ -28,8 +28,8 @@ class WikiPageAction(Action):
 
 
 def is_admin(context):
-        svc = current_app.services['security']
-        return svc.has_role(current_user, Admin, object=context.get('object'))
+    svc = current_app.services['security']
+    return svc.has_role(current_user, Admin, object=context.get('object'))
 
 
 def is_manager(context):
@@ -46,7 +46,8 @@ class WikiAction(Action):
 
 
 _actions = (
-    WikiPageAction('wiki:page',
+    WikiPageAction(
+        'wiki:page',
         'page_viewers',
         _l(u'Readers list'),
         icon='user',

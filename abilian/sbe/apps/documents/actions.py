@@ -4,15 +4,13 @@
 from __future__ import absolute_import, print_function
 
 from flask import url_for as url_for_orig
-from flask import current_app
-from flask import g
+from flask import current_app, g
+from flask_login import current_user
 from typing import Any, Dict
 
 from abilian.i18n import _l
-from abilian.services.security import MANAGE, WRITE, security
+from abilian.services.security import MANAGE, WRITE, Manager, security
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
-from abilian.services.security import Manager
-from flask_login import current_user
 
 from .repository import repository
 
