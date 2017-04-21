@@ -403,7 +403,7 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 class BaseContent(CmisObject):
     """A base class for cmisobject with an attached file.
     """
-    __tablename__ = None  # type: str  # type: str
+    __tablename__ = None  # type: str
 
     _content_id = Column(Integer, db.ForeignKey(Blob.id))
     content_blob = relationship(

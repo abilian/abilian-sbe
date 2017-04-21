@@ -106,12 +106,15 @@ flake8:
 	flake8 abilian tests
 
 mypy:
-	mypy --py2 --silent-imports abilian
+	-mypy abilian
 
 format:
 	isort -rc abilian demo tests
 	-yapf --style google -r -i abilian demo tests
 	isort -rc abilian demo tests
+
+format-js:
+	prettier --tab-width 4 --write ./abilian/sbe/static/js/**.js
 
 #
 # running
