@@ -117,11 +117,8 @@ flake8:
 	flake8 abilian tests
 
 mypy:
-<<<<<<< HEAD
 	-mypy --py2 --ignore-missing-imports --follow-imports=skip abilian
-=======
 	-mypy abilian
->>>>>>> dd60669af5aaca45d91f9accba6419030411b84f
 
 format:
 	isort -rc abilian demo tests
