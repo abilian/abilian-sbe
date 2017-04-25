@@ -338,6 +338,7 @@ def _members_query():
 
     return memberships
 
+
 def _wizard_check_query(emails):
     """Helper used in members views."""
     community_members_email = [member.email for member in g.community.members if member.email in emails]
@@ -364,6 +365,7 @@ def members():
         seconds_since_epoch=seconds_since_epoch,
         memberships=memberships,
         csrf_token=csrf.field())
+
 
 @route("/<string:community_id>/members/wizard/step1")
 @tab('members')
@@ -498,7 +500,6 @@ def wizard_saving():
             return redirect(url_for(".members", community_id=community.slug))
 
     return "wizard saving"
-
 
 
 @route("/<string:community_id>/members", methods=["POST"])
