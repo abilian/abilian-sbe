@@ -10,7 +10,6 @@
     <th class="hide">First Name</th>
     <th>{{ _('Name') }}</th>
     <th class="hide" >{# last activity seconds since epoch #}</th>
-    <th width="20%" style="position: relative;left: -52px;">{{ _('Last activity in this community') }}</th>
     <th width="10%"><center>{{ _('Role') }}</center></th>
     {% if is_manager %}
       <th>{{ _('Action') }}</th>
@@ -61,8 +60,7 @@
       </div>
     </div>
   </td>
-  <td class="hide">{{ seconds_since_epoch(last_activity_date) }}</td>
-  <td>{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</td>
+  
   <!-- bug jinja : do not use [not is_manager] -->
   {%- if is_manager == False %}
     <td>{{ _(role) }}</td>
@@ -73,7 +71,7 @@
         {{ csrf_token }}
         <input type="hidden" name="user" value="{{ user.id }}"/>
         <input type="hidden" name="action" value="set-user-role"/>
-        <select onchange="this.form.submit();" id="role-select" name="role" class="form-control" style="width: auto;">
+        <select onchange="role_change(this)" id="{{user.email}}" name="role" class="form-control role-change" style="width: auto;">
           <option value="member" default="default" {%- if role == 'member' %}
                   selected="selected"{%- endif %}>{{ _("Member") }}</option>
           <option value="manager" {%- if role == 'manager' %}selected="selected"{%- endif %}>{{ _("Manager") }}</option>
@@ -81,16 +79,42 @@
       </form>
     </td>
     <td>
-      <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
-            method="POST" style="display: inline;">
-        {{ csrf_token }}
         <input type="hidden" name="membership" value="{{ m_id }}">
         <input type="hidden" name="user" value="{{ user.id }}">
-        <button type="submit" name="action" value="delete"
-                class="btn btn-danger" data-original-title="" title=""><i
-            class="fa fa-times"></i></button>
-      </form>
+        <button id="{{user.email}}"  onclick="delete_current(this)" class="btn btn-danger"><i class="fa fa-times"></i></button>
     </td>
   {% endif %}
+
+  <script>
+  function delete_current(e){
+    $(e).closest('tr').fadeOut('slow', function(){
+         $(e).closest('tr').remove();
+         var wizard_emails = $("#wizard-emails").val();
+         var tmp_emails = jQuery.parseJSON(wizard_emails);
+         delete tmp_emails[e.id];
+         $("#wizard-emails").val(JSON.stringify(tmp_emails));
+
+         console.log($("#wizard-emails").val());
+
+
+          $("#account-nb").html($(".table-condensed tr").length-1)
+          if ($(".table-condensed tr").length == 1){
+                      $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+                        $("#wizard-msg").fadeIn();
+                        $(".existing-account").fadeOut();
+
+                                                   }
+                                });
+    
+      }
+
+      function role_change(e){
+        var wizard_emails = $("#wizard-emails").val();
+        var tmp_emails = jQuery.parseJSON(wizard_emails);
+         tmp_emails[e.id] = $('.role-change').val();
+         $("#wizard-emails").val(JSON.stringify(tmp_emails));
+         console.log($("#wizard-emails").val());
+      }
+  </script>
 
 {% endmacro %}

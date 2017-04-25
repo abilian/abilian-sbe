@@ -33,7 +33,14 @@ update-env:
 	pip install -U -r etc/git-requirements.txt
 	pip install -U -r etc/dev-requirements.txt
 	pip install -e .
+	yarn
 	@echo ""
+
+#remove template cache
+delete-cache:
+	@echo "--> Removing template cache"
+	rm -rf ./instance/webassets/compiled/*
+	rm -rf ./instance/webassets/cache/*
 
 #
 # testing
@@ -88,11 +95,15 @@ vagrant-tests:
 #
 # Linting & formatting
 #
-lint: lint-js lint-python
+lint: lint-js lint-python lint-less
 
 lint-js:
 	@echo "--> Linting JavaScript files"
-	eslint ./abilian/sbe/apps/
+	npm run eslint
+
+lint-less:
+	@echo "--> Linting Less files"
+	-npm run stylelint
 
 lint-python:
 	@echo "--> Linting Python files"
@@ -106,7 +117,11 @@ flake8:
 	flake8 abilian tests
 
 mypy:
+<<<<<<< HEAD
+	-mypy --py2 --ignore-missing-imports --follow-imports=skip abilian
+=======
 	-mypy abilian
+>>>>>>> dd60669af5aaca45d91f9accba6419030411b84f
 
 format:
 	isort -rc abilian demo tests

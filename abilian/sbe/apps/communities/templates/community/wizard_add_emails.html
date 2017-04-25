@@ -1,0 +1,125 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+{% import "community/members_macros.html" as macros with context %}
+{%- from "community/macros.html" import wizard_steps -%}
+
+{% block membersContent %}
+  {% call m_box_content(_("Members Wizard")) %}
+    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
+
+    {%- set steps =["Add Members","Already Members and New Members","Create Members"] %}
+    {{ wizard_steps(steps,1) }}
+<br>
+
+<p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 9px;margin-bottom: 16px;"></p>
+
+ <div class="container">
+            <div class="row">
+        <article class="col-sm-12 col-md-12 col-lg-12 sortable-grid ui-sortable">
+            <div id="wid-id-0">
+                    <!-- widget content -->
+                    <div class="widget-body">
+
+                        <div class="row">
+                            <form id="wizard-1" novalidate="novalidate">
+                                <div id="bootstrap-wizard-1" class="col-sm-12">
+
+                                    <!-- ETAPE 1 -->
+                                    <div class="tab-content col-sm-10">
+                                        <div class="tab-pane active" id="tab1">
+                                            <br>
+                                           
+                                    <div class="bloc col-sm-8 col-sm-offset-3">
+
+                                        <label class="col-sm-offset-1"><i class="fa fa-bookmark" style="color:yellowgreen;" aria-hidden="true"></i> Insert your emails collection</label> <span class="email-count" style="color: silver;font-size: 11pt;"></span>
+                                        
+                                        <div class="input-group col-sm-offset-1 col-lg-10 input">
+                                        <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                                        <input placeholder="Emails Collection" class="form-control" id="collection" type="text" value="" data-role="tagsinput">
+                                        </div>  
+
+                                               <!-- AJOUTER LES MEMBRES PAR FICHIER CSV -->
+                                        <br><br>
+                                        <label class="col-sm-offset-1 importer">Import members from CSV file</label>
+                                        <br>
+                                        <a href="csv/template_import_member.csv" download="csv/template_import_member.csv" class="col-sm-offset-1"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download CSV file model</a>
+                                        
+                                      
+                                        <input style="display:none;"  type="file" class="file-add form-control col-sm-2">                                      
+                                        
+                                        <div class="row">
+                                          <div class="col-lg-10">
+                                          </div><!-- /.col-lg-6 -->
+                                          <div class="col-sm-offset-1 col-lg-10">
+                                            <div class="input-group">
+                                              <input type="text" class="form-control input" placeholder="Choisir le fichier">
+                                              <span class="input-group-btn">
+                                                <button class="btn btn-default input" type="button" onclick="fileadd()">Parcourir</button>
+                                              </span>
+                                            </div><br>
+                                              <hr>
+
+                                              <a class="users-wizard-next btn default input" style="float:right;color: gray;background: ghostwhite;position: relative;
+top: -2px;" disabled><i class="fa fa-check-circle"></i> Next</a>
+                                          </div>
+                                        </div>
+                                     
+                                    </div>
+                                            
+                                            <script>
+                                                function fileadd(){
+                                                    $( ".file-add" ).trigger( "click" );
+                                                }
+                                                </script>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                    </div>
+                    <!-- end widget content -->
+
+                </div>
+                <!-- end widget div -->
+
+            </div>
+            <!-- end widget -->
+
+    </div>
+
+
+<div class="col-lg-6 col-md-offset-3" style="">
+
+<form method="POST" class="form-inline" action=" {{url_for('.check_members_wizard',community_id=g.community.slug) }}">
+{{ csrf_token }}
+<input id="wizard-emails" type="hidden" name="wizard-emails" value="">
+<br><br>
+</form>
+
+</div>
+
+
+
+
+ {%- deferJS %}
+<script>
+
+$(".users-wizard-next").hover(function(){
+$('#wizard-emails').val($("#collection").val());
+});
+$(".users-wizard-next").click(function(){
+$('.form-inline').submit();	
+});
+
+</script>
+{%- enddeferJS %}    
+    
+    
+    <div class="clearfix"></div>
+  {% endcall %}
+{% endblock %}
+

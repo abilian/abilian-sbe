@@ -11,7 +11,7 @@ from io import BytesIO
 from operator import attrgetter
 from pathlib import Path
 from time import gmtime, strftime
-
+import json
 import openpyxl
 import pytz
 import sqlalchemy as sa
@@ -22,8 +22,9 @@ from openpyxl.writer.write_only import WriteOnlyCell
 from six import text_type
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from whoosh.searching import Hit
+from flask_mail import Message
 
-from abilian.core.extensions import db
+from abilian.core.extensions import db, mail
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
 from abilian.core.util import utc_dt
@@ -31,10 +32,12 @@ from abilian.i18n import _, _l
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
+from abilian.services.auth.views import send_reset_password_instructions
 from abilian.web import csrf, views
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import images as image_views
+from abilian.core.commands.base import createuser
 
 from .actions import register_actions
 from .blueprint import Blueprint
@@ -335,6 +338,17 @@ def _members_query():
 
     return memberships
 
+def _wizard_check_query(emails):
+    """Helper used in members views."""
+    community_members_email = [member.email for member in g.community.members if member.email in emails]
+    new_emails = filter(lambda email: email not in community_members_email,emails)
+
+    existing_community_members = filter(lambda user: user.email in community_members_email, g.community.members)
+    existing_account = filter(lambda user: user.email in new_emails, User.query.all())
+    final_email_list = {str(email):"member" for email in emails if email not in community_members_email}
+
+    return existing_account, existing_community_members, final_email_list
+
 
 @route("/<string:community_id>/members")
 @tab('members')
@@ -350,6 +364,141 @@ def members():
         seconds_since_epoch=seconds_since_epoch,
         memberships=memberships,
         csrf_token=csrf.field())
+
+@route("/<string:community_id>/members/wizard/step1")
+@tab('members')
+def add_member_emails_wizard():
+    g.breadcrumb.append(BreadcrumbItem(
+        label=_(u'Members'),
+        url=Endpoint('communities.members', community_id=g.community.slug))
+    )
+    memberships = _members_query().all()
+
+    return render_template(
+        "community/wizard_add_emails.html",
+        seconds_since_epoch=seconds_since_epoch,
+        memberships=memberships,
+        csrf_token=csrf.field())
+
+
+@route("/<string:community_id>/members/wizard/step2", methods=['GET','POST'])
+@csrf.protect
+@tab('members')
+def check_members_wizard():
+    g.breadcrumb.append(BreadcrumbItem(
+        label=_(u'Members'),
+        url=Endpoint('communities.members', community_id=g.community.slug))
+    )
+
+    wizard_emails = request.form.get("wizard-emails").split(",")
+    existing_users,existing_members,final_email_list = _wizard_check_query(wizard_emails)
+    final_email_list_json = json.dumps(final_email_list)
+
+    wizard_emails = final_email_list_json
+
+    return render_template(
+        "community/wizard_check_members.html",
+        seconds_since_epoch=seconds_since_epoch,
+        existing_users=existing_users,
+        wizard_emails=wizard_emails,
+        existing_members=existing_members,
+        nb_new_members=len(wizard_emails),
+        final_email_list=final_email_list_json,
+        csrf_token=csrf.field())
+
+
+@route("/<string:community_id>/members/wizard/step3", methods=['GET','POST'])
+@csrf.protect
+@tab('members')
+def new_accounts_wizard():
+    g.breadcrumb.append(BreadcrumbItem(
+        label=_(u'Members'),
+        url=Endpoint('communities.members', community_id=g.community.slug))
+    )
+
+    wizard_emails = request.form.get("wizard-emails")
+    emails = json.loads(wizard_emails)
+    print(emails)
+
+    existing_users,existing_members,final_email_list = _wizard_check_query(wizard_emails)
+    existing_users_emails = [user.email for user in existing_users]
+
+    wizard_existing_account = {email:role for email,role in emails.iteritems() if email in existing_users_emails}
+    new_accounts = {email:role for email,role in emails.iteritems() if email not in existing_users_emails}
+
+    final_email_list_json = final_email_list
+    wizard_emails = final_email_list_json
+
+    return render_template(
+        "community/wizard_new_accounts.html",
+        seconds_since_epoch=seconds_since_epoch,
+        existing_users=existing_users,
+        existing_account=json.dumps(wizard_existing_account),
+        new_accounts=new_accounts,
+        nb_new_members=len(wizard_emails),
+        final_email_list=','.join(final_email_list),
+        csrf_token=csrf.field())
+
+
+@route("/<string:community_id>/members/wizard/complete", methods=['POST'])
+@csrf.protect
+def wizard_saving():
+
+    existing_accounts = request.form.get("existing_account")
+    existing_accounts = json.loads(existing_accounts)
+    community = g.community._model
+
+    #check if there is existing accounts & save
+    if len(existing_accounts):
+        for email,role in existing_accounts.iteritems():
+            user = User.query.filter(User.email == email).first()
+            community.set_membership(user, role)
+
+        app = current_app._get_current_object()
+        activity.send(app, actor=user, verb="join", object=community)
+        #---------------------------------------------
+        db.session.commit()
+        ######################
+        print(existing_accounts)
+
+    #check if there is new accounts and save
+    new_accounts = request.form.get("new_accounts")
+    new_accounts = json.loads(new_accounts)
+    all_new_emails = [str(account["email"]) for account in new_accounts]
+    print(all_new_emails)
+    if len(new_accounts):
+        for account in new_accounts:
+            email = account["email"]
+            first_name = account["first_name"]
+            last_name = account["last_name"]
+            role = account["role"]
+
+            #creating new accounts
+            user = User(
+                email=email,
+                last_name=last_name,
+                first_name=first_name,
+                can_login=True)
+            db.session.add(user)
+
+            #adding to community
+            community.set_membership(user, role)
+            app = current_app._get_current_object()
+            activity.send(app, actor=user, verb="join", object=community)
+            #---------------------------------------------
+            db.session.commit()
+
+            #sending email
+            msg = Message('Hello again', sender=current_app.config['MAIL_DEFAULT_SENDER'], recipients=all_new_emails)
+            msg.body = 'verification'
+            msg.html = render_template('/community/password_reset_wizard.html')
+            mail.send(msg)
+
+            flash(_(u"Members added Successfully"), 'success')
+            return redirect(url_for(".members", community_id=community.slug))
+
+    return "wizard saving"
+
 
 
 @route("/<string:community_id>/members", methods=["POST"])

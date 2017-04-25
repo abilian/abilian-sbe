@@ -1,0 +1,188 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+{% import "community/members_macros.html" as macros with context %}
+{%- from "community/macros.html" import wizard_steps -%}
+{% from "macros/user.html" import m_user_link, m_user_photo %}
+
+{% block membersContent %}
+  {% call m_box_content(_("Members Wizard")) %}
+    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
+
+    {%- set steps =["Add Members","Already Members and New Members","Create Members"] %}
+    {{ wizard_steps(steps,3) }}
+    <br>
+
+<p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 9px;margin-bottom: 16px;"></p>
+
+<div class="alert alert-warning wizard-warning" style="display:none;" role="alert"><span class="glyphicon glyphicon-check" aria-hidden="true"></span> You need to coplete all the fields</div>
+<h3 style="position: relative;left: 8px;margin-top: 30px;"><i class="fa fa-bookmark" style="color:yellowgreen;" aria-hidden="true"></i> Add New Accounts <span class="existing-account" style="color: silver;font-size: 12pt;"> </h3>
+
+{% if existing_members %}
+
+<div class="already-members" style="">
+<font color="silver" style="position: relative;
+left: 7px;top: 6px;color: cadetblue;"><i class="fa fa-bell-o" aria-hidden="true"></i> Already member:</font><br><br>
+{% for member in existing_members%}
+<p>{% call m_user_link(member, css="media-object") %}
+          {{ m_user_photo(member, size="32") }}{{member}} ({{member.email}})
+    {%- endcall %}</p>
+{% endfor %}
+</div>
+
+<br>
+{% endif %}
+
+<font color="gray" style="position: relative;
+left: 8px;"><i class="fa fa-cogs" aria-hidden="true"></i> New members account :</font><br><br>
+   {% set table_id = uuid() %}
+    <table border="0" class="table table-condensed table-striped" id="{{ table_id }}">
+      <tr>
+      <th>Email</th>
+      <th>First Name <font color="coral">*</font></th>
+      <th>Last Name <font color="coral">*</font></th>
+      <th><center>Role</center></th>
+      <th></th>
+      </tr>
+
+      {% set nb_new_accounts = (new_accounts|length) %}
+      {% if new_accounts %}
+      {% for account,role in new_accounts.iteritems() %}
+      <tr>
+      <td style="color: gray;
+font-weight: bold;
+position: relative;
+top: 6px;left:3px;"><i class="fa fa-user" aria-hidden="true"></i><input id="email{{loop.index-1}}" value="{{account}}" type="hidden" name="account"/> {{account}}</td>
+      <td><input placeholder="First Name" id="first_name{{loop.index-1}}" name="first_name" class="form-control wizard-required" type="text" /></td>
+      <td><input name="last_name" id="last_name{{loop.index-1}}" placeholder="Last Name" class="form-control wizard-required" type="text" /></td>
+      <td>
+        <select onchange="" id="role{{loop.index-1}}" name="role" class="form-control role-change" style="">
+          <option value="member" default="default" {%- if role == 'member' %}
+                  selected="selected"{%- endif %}>{{ _("Member") }}</option>
+          <option value="manager" {%- if role == 'manager' %}selected="selected"{%- endif %}>{{ _("Manager") }}</option>
+        </select>
+      </td>
+      <td><center><button id="{{account}}"  onclick="remove_user(this)" class="btn btn-danger"><i class="fa fa-times"></i></button></center></td>
+      </tr>
+      {% endfor %}
+      {% endif %}
+      </tbody>
+    </table>
+
+    <form method="POST" id="wizard-form" class="form-inline" action=" {{url_for('.wizard_saving',community_id=g.community.slug) }}">
+{{ csrf_token }}
+<input id="existing_account" type="hidden" name="existing_account" value="{{existing_account}}">
+<input id="new_accounts" type="hidden" name="new_accounts" value='{{new_accounts|tojson}}'>
+</form>
+<button class="users-wizard-next btn default" onclick="wizard_check()" style="float: right;color: white;background: yellowgreen;" ><i class="fa fa-floppy-o" aria-hidden="true"></i>
+ Save</button>
+
+
+    <script type="application/json">
+        {{ macros.table_config() }}
+    </script>
+
+    
+    <script>
+   function wizard_check(){
+    var nb_missed = 0 ;
+    $( ".wizard-required" ).each(function( index ) { 
+      if ($(this).val().trim() == ""){
+      $(".wizard-warning").fadeIn();
+      $(this).css("border","2px solid coral");
+      nb_missed += 1;
+    }else{
+      $(this).css("border","0px");
+         }  
+     });
+   
+   //validation 
+         if (nb_missed == 0){
+        
+         //adding new users to the list
+      var existing_account = $("#existing_account").val();
+      existing_account = jQuery.parseJSON(existing_account);
+      ////
+      var new_accounts = $("#new_accounts").val();
+      new_accounts = jQuery.parseJSON(new_accounts);
+      ////
+      var new_accounts_list = [];
+      for(var n=0; n<={{nb_new_accounts}};n++){
+        console.log("-->"+n);
+         
+         if($("#first_name"+n).length!=0){
+
+         var tmp_account = {};
+         console.log(n+'------------------------------');
+
+         tmp_account["email"] = $("#email"+n).val();
+
+         tmp_account["first_name"] = $("#first_name"+n).val();
+         console.log($("#first_name"+n).val());
+
+         tmp_account["last_name"] = $("#last_name"+n).val();
+         console.log($("#last_name"+n).val());
+
+         tmp_account["role"] = $("#role"+n).val();
+         console.log($("#role"+n).val());
+         ///adding
+         console.log(tmp_account);
+         new_accounts_list.push(tmp_account);
+         console.log("--------------------------------------");
+        
+       }
+
+      }
+      
+      $("#new_accounts").val(JSON.stringify(new_accounts_list));
+      console.log(JSON.stringify(new_accounts_list));
+      
+    //submitting
+    $("#wizard-form").submit();
+      }  
+   }
+
+   function remove_user(e){
+      $(e).closest('tr').fadeOut('slow', function(){
+         $(e).closest('tr').remove();
+
+         var wizard_emails = $("#new_accounts").val();
+         var tmp_emails = jQuery.parseJSON(wizard_emails);
+         delete tmp_emails[e.id];
+         $("#new_accounts").val(JSON.stringify(tmp_emails));
+
+
+         if($(".table-condensed tr").length == 1){
+         $(".table-condensed").closest('tr').remove();
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+          $("#wizard-msg").fadeIn();
+        }
+       });
+
+   }
+
+   if ($(".table-condensed tr").length == 1){
+   	      $(".table-condensed").closest('tr').remove();
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+          $("#wizard-msg").fadeIn();
+   } 
+    </script>
+    
+    <div class="clearfix"></div>
+  {% endcall %}
+{% endblock %}
+
+{% block sidebar %}
+  {%- set actions = actions.for_category('members:menu') %}
+  {%- if actions %}
+    {% call m_box_menu() %}
+      <ul class="nav nav-list">
+        {%- for action in actions %}
+          <li>{{ action.render() }}</li>
+        {%- endfor %}
+      </ul>
+    {% endcall %}
+  {%- endif %}
+{% endblock %}
+  
+

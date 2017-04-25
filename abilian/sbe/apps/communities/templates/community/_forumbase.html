@@ -3,12 +3,12 @@
 {% from "macros/box.html" import m_box_forum %}
 
 {% block header %}
+
   <h1 class="community-header">
     <img src="{{ community_image_url(g.community, s=40) }}"/>
-    <span style="color:black;">{{ g.community.name }}</span>
-    {% if threads %} -
-      <span class="forum-nb-conversation">{{ threads|length }} Conversation(s)</span>
-    {% endif %}
+    <span style="color:black;">
+    {{ g.community.name }}{%if threads%}</span> -
+    <span class="nb-conversation">{{threads|length}} Conversation(s)</span>{%endif%}
   </h1>
   {%- set tabs = actions.for_category('communities:tabs') %}
 
@@ -21,24 +21,25 @@
 
 {% block main %}
   <div class="row">
-    <div class="col-md-9">
+
+    <div class="col-md-13">
       {%- block content %}
+
       {%- endblock %}
     </div>
     
-    {%- block membersContent %}
-    {%- endblock %}
-
     {%- block forumcontent %}
     {%- endblock %}
 
-    <div class="col-md-3" id="sidebar">
-      {%- block sidebar %}
-      {%- endblock %}
-    </div>
-  </div>
+    {%- block forumsidebar %}
 
+      {%- endblock %}
+  </div>
   {%- block modals %}
   {% endblock %}
 
 {% endblock %}
+{% macro forum_menu(action) %}
+  <button type="button" style="border: none;padding: 10px;{% if action.is_current() %}border-bottom:2px solid gray; {%endif%}">{{ action.render() }}</button>
+    {% endmacro %}
+

@@ -1,0 +1,95 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+{% import "community/members_macros.html" as macros with context %}
+{%- from "community/macros.html" import wizard_steps -%}
+{% from "macros/user.html" import m_user_link, m_user_photo %}
+
+{% block membersContent %}
+  {% call m_box_content(_("Members Wizard")) %}
+    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
+
+    {%- set steps =["Add Members","Already Members and New Members","Create Members"] %}
+    {{ wizard_steps(steps,2) }}
+    <br>
+
+<p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 9px;margin-bottom: 16px;"></p>
+
+<h3 style="position: relative;left: 8px;margin-top: 30px;"><i class="fa fa-bookmark" style="color:yellowgreen;" aria-hidden="true"></i> Check Existing Accounts <span class="existing-account" style="color: silver;font-size: 12pt;"> ( <span id="account-nb">{{existing_users|length}}</span> from the insered emails )</span></h3>
+
+{% if existing_members %}
+
+<div class="already-members" style="">
+<font color="silver" style="position: relative;
+left: 7px;top: 6px;color: cadetblue;"><i class="fa fa-bell-o" aria-hidden="true"></i> Already member:</font><br><br>
+{% for member in existing_members%}
+<p>{% call m_user_link(member, css="media-object") %}
+          {{ m_user_photo(member, size="32") }}{{member}} ({{member.email}})
+    {%- endcall %}</p>
+{% endfor %}
+</div>
+
+<br>
+{% endif %}
+
+<font color="gray" style="position: relative;
+left: 8px;"><i class="fa fa-cogs" aria-hidden="true"></i> Already have an account:</font><br>
+   {% set table_id = uuid() %}
+    <table class="table table-condensed table-striped" id="{{ table_id }}">
+      <thead>
+        {{ macros.wizard_thead() }}
+      </thead>
+
+      <tbody>
+      {% for user in existing_users %}
+        <tr>
+          {{ macros.wizard_member_row(user) }}
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <form method="POST" class="form-inline wizard-form" action=" {{url_for('.new_accounts_wizard',community_id=g.community.slug) }}">
+{{ csrf_token }}
+<input id="wizard-emails" type="hidden" name="wizard-emails" value="{{wizard_emails}}">
+</form>
+<button onclick="wizard_next()" class="users-wizard-next btn default" style="float: right;color: white;background: yellowgreen;" ><i class="fa fa-check-circle" aria-hidden="true"></i>
+ Next</button>
+
+    <script type="application/json">
+        {{ macros.table_config() }}
+    </script>
+
+    
+    <script>
+   if ($(".table-condensed tr").length == 1){
+   	      $(".table-condensed").closest('tr').remove();
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+          $("#wizard-msg").fadeIn();
+   } 
+
+   function wizard_next(){
+   	 $(".wizard-form").submit();
+   }
+
+
+    </script>
+   
+    <div class="clearfix"></div>
+  {% endcall %}
+{% endblock %}
+
+{% block sidebar %}
+  {%- set actions = actions.for_category('members:menu') %}
+  {%- if actions %}
+    {% call m_box_menu() %}
+      <ul class="nav nav-list">
+        {%- for action in actions %}
+          <li>{{ action.render() }}</li>
+        {%- endfor %}
+      </ul>
+    {% endcall %}
+  {%- endif %}
+{% endblock %}
+  
+
