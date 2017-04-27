@@ -18,9 +18,9 @@ from abilian.core.signals import activity
 from abilian.i18n import _, render_template_i18n
 from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.services import audit_service
-from abilian.services.viewtracker import viewtracker
 from abilian.services.conversion import converter
 from abilian.services.image import FIT, resize
+from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf, url_for
 from abilian.web.action import actions
 from abilian.web.frontend import add_to_recent_items
