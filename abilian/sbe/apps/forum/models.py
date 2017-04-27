@@ -11,20 +11,17 @@ from collections import Counter
 from datetime import datetime
 from itertools import chain
 
-from flask_login import current_user
 from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
-from sqlalchemy.sql import cast, func, select
-from sqlalchemy.types import Boolean, DateTime
+from sqlalchemy.types import DateTime
 
 from abilian.core.entities import SEARCHABLE, Entity
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
-from abilian.services.activitytracker import activitytracker
+from abilian.services.viewtracker import viewtracker
 from abilian.services.indexing.adapter import SAAdapter
 
 
@@ -66,29 +63,23 @@ class Thread(Entity):
     def title(self):
         return self._title
 
-    def get_viewed_posts(self, user_id):
-        thread_traking = activitytracker.get_tracked_object(self.id, user_id)
-        if not thread_traking:
-            nb_new_posts = len(self.posts) - 1
-        else:
-            nb_new_posts = len(
-                filter(
-                    lambda p: p.created_at > thread_traking.track_logs[-1].viewed_at,
-                    self.posts))
-        return nb_new_posts
+    def get_viewed_posts(self, user):
+        views = viewtracker.get_views(entity=self, user=user)
+        if not views:
+            return len(self.posts) - 1
 
-    def get_nb_viewers(self, user_id):
-        return len(
-            filter(lambda user: user.user_id != user_id,
-                   activitytracker.get_viewers(self.id)))
+        cutoff = views[0].hits[-1].viewed_at
+        return len([post for post in self.posts if post.created_at > cutoff])
+
+    def get_nb_viewers(self, user):
+        views = viewtracker.get_views(entity=self)
+        # XXX: why not just len(views)?
+        return len([view for view in views if view.user != user])
 
     @property
     def viewed_times(self):
-        view_objects = activitytracker.get_viewers(self.id)
-        nb_access = 0
-        for obj in view_objects:
-            nb_access += obj.track_logs.count()
-        return nb_access
+        views = viewtracker.get_views(entity=self)
+        return sum(view.hits.count() for view in views)
 
     def get_frequent_posters(self, limit):
         all_posts = self.posts[1:]

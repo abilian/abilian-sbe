@@ -24,7 +24,7 @@ from abilian.i18n import _, _l, _n
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import \
     default_view_kw as community_dv_kw
-from abilian.services.activitytracker import activitytracker
+from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
 from abilian.web.nav import BreadcrumbItem
@@ -150,7 +150,7 @@ class PageView(BasePageView, ObjectView):
                         community_id=g.community.slug))
 
         actions.context['object'] = self.obj
-        activitytracker.track_object(self.obj.id, current_user.id)
+        viewtracker.record_hit(entity=self.obj, user=current_user)
         return args, kwargs
 
 

@@ -18,7 +18,7 @@ from abilian.core.signals import activity
 from abilian.i18n import _, render_template_i18n
 from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.services import audit_service
-from abilian.services.activitytracker import activitytracker
+from abilian.services.viewtracker import viewtracker
 from abilian.services.conversion import converter
 from abilian.services.image import FIT, resize
 from abilian.web import csrf, url_for
@@ -59,7 +59,7 @@ def document_view(doc_id):
 
     has_preview = doc.has_preview()
     audit_entries = audit_service.entries_for(doc)
-    activitytracker.track_object(doc.id, current_user.id)
+    viewtracker.record_hit(entity=doc, user=current_user)
 
     ctx = dict(
         doc=doc,

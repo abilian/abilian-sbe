@@ -4,7 +4,6 @@ Forum views
 """
 from __future__ import absolute_import, print_function
 
-import time
 from datetime import date, datetime
 from itertools import groupby
 
@@ -18,11 +17,9 @@ from six.moves.urllib.parse import quote
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
 
-from abilian.core import signals
-from abilian.core.extensions import db
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
-from abilian.services.activitytracker import activitytracker
+from abilian.services.viewtracker import viewtracker
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction, Endpoint
 from abilian.web.nav import BreadcrumbItem
@@ -160,7 +157,7 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
         kw['viewers'] = object_viewers(self.obj)
-        activitytracker.track_object(self.obj.id, current_user.id)
+        viewtracker.record_hit(entity=self.obj, user=current_user)
         return kw
 
 

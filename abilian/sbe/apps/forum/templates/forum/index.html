@@ -1,7 +1,7 @@
 {% extends "forum/_base.html" %}
 {%- from "macros/user.html" import m_user_link, m_user_photo %}
 {% from "macros/box.html" import m_box_menu, m_box_content %}
-{%from "forum/_macros.html" import forum_menu %}
+{% from "forum/_macros.html" import forum_menu %}
 
 
 {% block forumcontent %}
@@ -15,7 +15,6 @@
         {%- endfor %}
       </div>
     </div>
-
 
     {% if threads %}
       <table class="thread-table" border="0">
@@ -45,7 +44,8 @@
     {% endif %}
     {% if has_more or True %}
       <br>
-      <p class="thread-all" ><i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i> <a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
+      <p class="thread-all"><i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i> <a
+          href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
     {% endif %}
   {% endcall %}
 {% endblock %}
@@ -76,11 +76,14 @@
       <center>
         <div class="comments" style="position: relative;">
           <a class="thread-replies" href="{{ thread_href }}">
-            {{ thread_length-1 }}</a>{% if thread.get_viewed_posts((g.user.id)) !=0 %} <span style="color:gray;"></span>
-          <span class="thread-hilightview" title="not viewed"> (+{{ thread.get_viewed_posts(g.user.id) }})</span>{% endif %}</center>
+            {{ thread_length-1 }}</a>{% if thread.get_viewed_posts((g.user)) !=0 %} <span style="color:gray;"></span>
+          <span class="thread-hilightview"
+                title="not viewed"> (+{{ thread.get_viewed_posts(g.user.id) }})</span>{% endif %}</center>
     </td>
     <td>
-      <center><span class="thread-viewers"><i class="fa fa-user" aria-hidden="true"></i> {{ thread.get_nb_viewers(thread.creator.id) }}</span></p></center>
+      <center><span class="thread-viewers"><i class="fa fa-user"
+                                              aria-hidden="true"></i> {{ thread.get_nb_viewers(thread.creator.id) }}</span></p>
+      </center>
     </td>
     <td>
       <center><span class="thread-viewed-times"> {{ thread.viewed_times }}</span></p></center>
@@ -89,8 +92,9 @@
       <center>
         {%- if thread_length > 1 %} {% set last_post_creator = thread.posts[-1].creator %}
           <span class="hidden-xs" style="">
-          <span class="divider" style="color:silver;">{{ thread.posts[-1].created_at | age(date_threshold='day') }}
-        </span> {%- endif %}
+          <span class="divider"
+                style="color:silver;">{{ thread.posts[-1].created_at | age(date_threshold='day') }}</span>
+        {%- endif %}
         </div>
         </div>
         </span>

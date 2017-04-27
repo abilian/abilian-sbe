@@ -3,20 +3,21 @@
 Forum views
 """
 
-from flask import current_app, g
+from flask import g
 from flask_login import current_user
 
-from abilian.services.activitytracker import activitytracker
+from abilian.services.viewtracker import viewtracker
 
 
-def object_viewers(obj):
+def object_viewers(entity):
     if current_user.has_role('manager'):
-        tracked_views = activitytracker.get_viewers(obj.id)
+        views = viewtracker.get_views(entity=entity)
         community_members_id = [
-            user.id for user in g.community.members if user.id != obj.creator.id
+            user.id for user in g.community.members
+            if user.id != entity.creator.id
         ]
         viewers = []
-        for view in tracked_views:
+        for view in views:
             if view.user_id in set(community_members_id):
                 viewers.append({
                     'user': view.user,
