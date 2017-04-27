@@ -1,26 +1,22 @@
-(function (factory) {
-    'use strict';
-    define('SBEDocumentViewerSetup',
-        ['Abilian', 'jquery'],
-        factory);
-}
-(function (Abilian, $) {
-    'use strict';
-
+(function(factory) {
+    "use strict";
+    define("SBEDocumentViewerSetup", ["Abilian", "jquery"], factory);
+})(function(Abilian, $) {
+    "use strict";
     function setupDocumentViewer() {
-        var container = $('.preview-container'),
-            img = container.find('img.preview'),
-            imgSrc = img.attr('src'),
-            previewPrev = container.find('.preview-prev'),
-            previewNext = container.find('.preview-next'),
-            pageNum = container.data('pageNum');
+        var container = $(".preview-container"),
+            img = container.find("img.preview"),
+            imgSrc = img.attr("src"),
+            previewPrev = container.find(".preview-prev"),
+            previewNext = container.find(".preview-next"),
+            pageNum = container.data("pageNum");
 
         function showNav() {
-            $(document).bind('keydown', keyDown);
+            $(document).bind("keydown", keyDown);
         }
 
         function hideNav() {
-            $(document).unbind('keydown', keyDown);
+            $(document).unbind("keydown", keyDown);
         }
 
         if (pageNum > 1) {
@@ -32,22 +28,22 @@
 
         // TODO: what if we want to go past the last page?
         function loadNext() {
-            var page = img.data('page') + 1;
+            var page = img.data("page") + 1;
             if (page >= pageNum) {
                 page = page - 1;
             }
-            img.attr('src', imgSrc + '&page=' + page);
-            img.data('page', page);
+            img.attr("src", imgSrc + "&page=" + page);
+            img.data("page", page);
             return true;
         }
 
         function loadPrev() {
-            var page = img.data('page') - 1;
+            var page = img.data("page") - 1;
             if (page < 0) {
                 page = 0;
             }
-            img.attr('src', imgSrc + '&page=' + page);
-            img.data('page', page);
+            img.attr("src", imgSrc + "&page=" + page);
+            img.data("page", page);
             return true;
         }
 
@@ -69,4 +65,4 @@
     }
 
     return setupDocumentViewer;
-}));
+});
