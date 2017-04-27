@@ -23,6 +23,8 @@ from six import text_type
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from whoosh.searching import Hit
 from flask_mail import Message
+from werkzeug.utils import secure_filename
+import requests
 
 from abilian.core.extensions import db, mail
 from abilian.core.models.subjects import Group, User
@@ -346,7 +348,40 @@ def _wizard_check_query(emails):
 
     existing_community_members = filter(lambda user: user.email in community_members_email, g.community.members)
     existing_account = filter(lambda user: user.email in new_emails, User.query.all())
-    final_email_list = {str(email):"member" for email in emails if email not in community_members_email}
+
+    #email list of existing accounts
+    existing_account_email = [user.email for user in existing_account]
+    #emails without account
+    emails_without_account = set(new_emails) - set(existing_account_email)
+    print(">emails_without_account",list(emails_without_account))
+
+    #generating json list
+    accounts_list = []
+
+    #adding existing account to list
+    for user in existing_account:
+        if user.email not in community_members_email:
+            account = {}
+            account["email"] = user.email
+            account["first_name"] = user.first_name
+            account["last_name"] = user.last_name
+            account["role"] = "member"
+            account["status"] = "existing"
+            accounts_list.append(account)
+
+    #adding emails without account to the list
+    for email in emails_without_account:
+        if email not in community_members_email:
+            account = {}
+            account["email"] = email
+            account["first_name"] = ""
+            account["last_name"] = ""
+            account["role"] = "member"
+            account["status"] = "new"
+            accounts_list.append(account)
+
+    final_email_list = accounts_list
+    print(final_email_list)
 
     return existing_account, existing_community_members, final_email_list
 
@@ -383,6 +418,24 @@ def add_member_emails_wizard():
         csrf_token=csrf.field())
 
 
+def wizard_read_csv(csv):
+    if request.method == 'POST':
+        #filename = secure_filename(csv.filename)
+        contents = csv.readlines()
+        new_accounts = []
+        for line in contents:
+            account = {}
+            data = line.split(";")
+            account["email"] = data[0].strip()
+            account["first_name"] = data[1].strip()
+            account["last_name"] = data[2].strip()
+            account["role"] = data[3].strip()
+            #add to the list
+            new_accounts.append(account)
+
+        return new_accounts
+
+
 @route("/<string:community_id>/members/wizard/step2", methods=['GET','POST'])
 @csrf.protect
 @tab('members')
@@ -392,11 +445,18 @@ def check_members_wizard():
         url=Endpoint('communities.members', community_id=g.community.slug))
     )
 
-    wizard_emails = request.form.get("wizard-emails").split(",")
-    existing_users,existing_members,final_email_list = _wizard_check_query(wizard_emails)
-    final_email_list_json = json.dumps(final_email_list)
+    #cam form input tags
+    if request.form.get("wizard-emails"):
+        #sending emails list
+        wizard_emails = request.form.get("wizard-emails").split(",")
+        print(wizard_emails)
+        existing_users,existing_members,final_email_list = _wizard_check_query(wizard_emails)
+        final_email_list_json = json.dumps(final_email_list)
+        wizard_emails = final_email_list_json
 
-    wizard_emails = final_email_list_json
+    #else:
+        #accounts_data = wizard_read_csv(request.files['csv_file'])
+        #csv operation
 
     return render_template(
         "community/wizard_check_members.html",
@@ -419,26 +479,31 @@ def new_accounts_wizard():
     )
 
     wizard_emails = request.form.get("wizard-emails")
-    emails = json.loads(wizard_emails)
-    print(emails)
+    wizard_accounts = json.loads(wizard_emails)
 
-    existing_users,existing_members,final_email_list = _wizard_check_query(wizard_emails)
-    existing_users_emails = [user.email for user in existing_users]
+    #filter existing accounts
+    wizard_existing_account = {}
+    #new_accounts contains a list of object of new accounts
+    new_accounts = []
 
-    wizard_existing_account = {email:role for email,role in emails.iteritems() if email in existing_users_emails}
-    new_accounts = {email:role for email,role in emails.iteritems() if email not in existing_users_emails}
+    for user in wizard_accounts:
+        #return a dictionary of email and role of existing accounts
+        if user["status"] == "existing":
+            wizard_existing_account[user["email"]] = user["role"]
 
-    final_email_list_json = final_email_list
-    wizard_emails = final_email_list_json
+        elif user["status"] == "new":
+            new_accounts.append(user)
+
+    #preparing the json string
+    existing_account = json.dumps(wizard_existing_account)
+    new_accounts = new_accounts
 
     return render_template(
         "community/wizard_new_accounts.html",
         seconds_since_epoch=seconds_since_epoch,
-        existing_users=existing_users,
-        existing_account=json.dumps(wizard_existing_account),
+        existing_account=existing_account,
         new_accounts=new_accounts,
         nb_new_members=len(wizard_emails),
-        final_email_list=','.join(final_email_list),
         csrf_token=csrf.field())
 
 
@@ -446,6 +511,7 @@ def new_accounts_wizard():
 @csrf.protect
 def wizard_saving():
 
+    #add existing accounts to community
     existing_accounts = request.form.get("existing_account")
     existing_accounts = json.loads(existing_accounts)
     community = g.community._model
@@ -491,13 +557,10 @@ def wizard_saving():
             db.session.commit()
 
             #sending email
-            msg = Message('Hello again', sender=current_app.config['MAIL_DEFAULT_SENDER'], recipients=all_new_emails)
-            msg.body = 'verification'
-            msg.html = render_template('/community/password_reset_wizard.html')
-            mail.send(msg)
+            send_reset_password_instructions(user)
 
-            flash(_(u"Members added Successfully"), 'success')
-            return redirect(url_for(".members", community_id=community.slug))
+        flash(_(u"Members added Successfully"), 'success')
+        return redirect(url_for(".members", community_id=community.slug))
 
     return "wizard saving"
 

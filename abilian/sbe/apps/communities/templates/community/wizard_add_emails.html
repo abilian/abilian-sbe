@@ -8,9 +8,9 @@
   {% call m_box_content(_("Members Wizard")) %}
     {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
 
-    {%- set steps =["Add Members","Already Members and New Members","Create Members"] %}
+    {%- set steps =["Add Members","Existing and new members","Create Accounts"] %}
     {{ wizard_steps(steps,1) }}
-<br>
+<br><br><br>
 
 <p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 9px;margin-bottom: 16px;"></p>
 
@@ -29,7 +29,10 @@
                                     <div class="tab-content col-sm-10">
                                         <div class="tab-pane active" id="tab1">
                                             <br>
-                                           
+                                            <div style="position: relative;left: -12px;"><h3 class="titre col-sm-offset-4"> Add new members </h3>
+                                            <h4 class="sous_titre col-sm-offset-4"> Insert or import new members into your community</h4></div>
+
+                                           <br>
                                     <div class="bloc col-sm-8 col-sm-offset-3">
 
                                         <label class="col-sm-offset-1"><i class="fa fa-bookmark" style="color:yellowgreen;" aria-hidden="true"></i> Insert your emails collection</label> <span class="email-count" style="color: silver;font-size: 11pt;"></span>
@@ -45,9 +48,8 @@
                                         <br>
                                         <a href="csv/template_import_member.csv" download="csv/template_import_member.csv" class="col-sm-offset-1"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download CSV file model</a>
                                         
-                                      
-                                        <input style="display:none;"  type="file" class="file-add form-control col-sm-2">                                      
-                                        
+
+
                                         <div class="row">
                                           <div class="col-lg-10">
                                           </div><!-- /.col-lg-6 -->
@@ -93,6 +95,12 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> Next</a>
 
 
 <div class="col-lg-6 col-md-offset-3" style="">
+<form id="csv_form" method="post" action="{{url_for('.check_members_wizard',community_id=g.community.slug) }}" enctype="multipart/form-data" >
+                                        {{ csrf_token }}
+                                        <input style="display:none;"  type="file" class="file-add form-control col-sm-2" name="csv_file">                                      
+                                        </form>
+
+
 
 <form method="POST" class="form-inline" action=" {{url_for('.check_members_wizard',community_id=g.community.slug) }}">
 {{ csrf_token }}

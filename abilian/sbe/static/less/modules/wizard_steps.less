@@ -35,7 +35,7 @@
   height: 0;
   border-top: 35px solid transparent;
   border-bottom: 33px solid transparent;
-  border-left: 17px solid #ddd;
+  border-left: 17px solid ghostwhite;
   z-index: 2;
 }
 }
@@ -52,7 +52,7 @@
   height: 0;
   border-top: 20px solid transparent;
   border-bottom: 20px solid transparent;
-  border-left: 17px solid #ddd;
+  border-left: 17px solid ghostwhite;
   z-index: 2;
 }
 }
@@ -75,14 +75,14 @@
   font-size: 14px;
   text-align: center;
   vertical-align: middle;
-  color: #777;
+  color: #ddd;
   cursor: default;
   margin: 0 1px 0 0;
   padding: 10px 0px 10px 0px;
   width: 33%;
   float: left;
   position: relative;
-  background-color: #ddd;
+  background-color: ghostwhite;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -137,7 +137,8 @@
 
 .arrow-steps .step.current {
   color: #fff;
-  background-color: #5599e5;
+  background-color: yellowgreen;
+  font-weight:bold;
 }
 
 .arrow-steps .step.current a {
@@ -146,7 +147,7 @@
 }
 
 .arrow-steps .step.current:after {
-  border-left: 17px solid #5599e5;
+  border-left: 17px solid yellowgreen;
 }
 
 .arrow-steps .step.done {
@@ -161,4 +162,11 @@
 
 .arrow-steps .step.done:after {
   border-left: 17px solid #2f69aa;
+}
+
+.step-number{
+color: white;
+width: 10px;
+height: 10px;
+position: relative !important;
 }

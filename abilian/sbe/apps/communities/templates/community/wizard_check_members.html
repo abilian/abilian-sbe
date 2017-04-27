@@ -9,52 +9,101 @@
   {% call m_box_content(_("Members Wizard")) %}
     {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
 
-    {%- set steps =["Add Members","Already Members and New Members","Create Members"] %}
+    {%- set steps =["Add Members","Existing and new members","Create Accounts"] %}
     {{ wizard_steps(steps,2) }}
     <br>
 
-<p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 9px;margin-bottom: 16px;"></p>
+  <div class="row">
+                <form class="form-horizontal" id="wizard-1">
+                    <div id="bootstrap-wizard-1" class="col-sm-12">
+                        <div class="form-bootstrapWizard col-sm-offset-2">
 
-<h3 style="position: relative;left: 8px;margin-top: 30px;"><i class="fa fa-bookmark" style="color:yellowgreen;" aria-hidden="true"></i> Check Existing Accounts <span class="existing-account" style="color: silver;font-size: 12pt;"> ( <span id="account-nb">{{existing_users|length}}</span> from the insered emails )</span></h3>
+                            <div class="clearfix"></div>
+                        </div>
 
-{% if existing_members %}
+                        <!-- STEP 2 -->
+                        <div style="margin-right: 8%;margin-left: 8%;">
+                        <div class="tab-content col-sm-12">   
+                            <div class="tab-pane active" id="tab1">
+                                <br>
+                                <h3 class="titre ">Existing and new members</h3>
+                                <h4 class="sous_titre "> Check if the user is already a member of the community and if he currently has an account on the platform
+                                </h4>
+                                <br>
+                                <!-- DEJA MEMBRE DE LA COMMUNAUTE -->
+                                 {% if existing_members %}
+                                <div style="border: 1px solid silver;padding-top: 19px;padding-left: 20px;width: 96.7%;">
+                                    <label class="">Already a member of the community</label>
+                                    <h6 class=" sous_titre_step2">
+                                        The users below are already members of the community :
+                                    </h6>
+                                <br>
 
-<div class="already-members" style="">
-<font color="silver" style="position: relative;
-left: 7px;top: 6px;color: cadetblue;"><i class="fa fa-bell-o" aria-hidden="true"></i> Already member:</font><br><br>
-{% for member in existing_members%}
-<p>{% call m_user_link(member, css="media-object") %}
-          {{ m_user_photo(member, size="32") }}{{member}} ({{member.email}})
-    {%- endcall %}</p>
-{% endfor %}
-</div>
+                                <div style="position: relative;top: -13px;">
+                               
+                                   {% for member in existing_members%}
+                                       <p>{% call m_user_link(member, css="media-object") %}
+                                          {{ m_user_photo(member, size="32") }}{{member}} ({{member.email}})
+                                          {%- endcall %}
+                                      </p>
+                                   {% endfor %}
+                      
+                                
+                                </div>
+                                </div>
+                                {% endif %}
+                                <br>
+                                <!-- NOUVEAUX MEMBRES -->
 
-<br>
-{% endif %}
+                                 <div class="form-group bloc col-lg-12 col-sm-offset-1">
 
-<font color="gray" style="position: relative;
-left: 8px;"><i class="fa fa-cogs" aria-hidden="true"></i> Already have an account:</font><br>
+                                    <label class="">New member(s) of the community <span class="existing-account" style="color: silver;font-size: 11pt;font-weight: normal;"> ( <span id="account-nb">{{existing_users|length}}</span> from the insered emails )</span></label>
+                                    <h6 class=" sous_titre_step2">
+                                        The users below already have an account on the platform, and is going to be added to the community
+                                    </h6>
+                                    
+                                    
+                                         <table class="table table-condensed table-striped col-lg-8" id="{{ table_id }}">
+                                         <thead>
+                                              {{ macros.wizard_thead() }}
+                                         </thead>
+
+                                          <tbody>
+                                         {% for user in existing_users %}
+                                           <tr>
+                                         {{ macros.wizard_member_row(user) }}
+                                           </tr>
+                                         {% endfor %}
+                                         </tbody>
+                                        </table>
+                                  
+                                 <a onclick="wizard_next()" class="users-wizard-next btn default" style="float: right;color: white;background: yellowgreen;margin-bottom: 13px;" >
+                                  <i class="fa fa-check-circle"></i> Next</a>
+                                </div>
+                                
+                               
+                            </div>
+                            
+
+
+
+                        </div>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+
+
    {% set table_id = uuid() %}
-    <table class="table table-condensed table-striped" id="{{ table_id }}">
-      <thead>
-        {{ macros.wizard_thead() }}
-      </thead>
-
-      <tbody>
-      {% for user in existing_users %}
-        <tr>
-          {{ macros.wizard_member_row(user) }}
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+   
 
     <form method="POST" class="form-inline wizard-form" action=" {{url_for('.new_accounts_wizard',community_id=g.community.slug) }}">
 {{ csrf_token }}
 <input id="wizard-emails" type="hidden" name="wizard-emails" value="{{wizard_emails}}">
 </form>
-<button onclick="wizard_next()" class="users-wizard-next btn default" style="float: right;color: white;background: yellowgreen;" ><i class="fa fa-check-circle" aria-hidden="true"></i>
- Next</button>
+
 
     <script type="application/json">
         {{ macros.table_config() }}
