@@ -65,7 +65,7 @@
       {% if new_accounts %}
       {% for user in new_accounts %}
       <tr>
-      <td style="color: gray;font-weight: bold;position: relative;top: 6px;left:3px;"><input id="email{{loop.index-1}}" value="{{account}}" type="hidden" name="account"/> {{user.email}}</td>
+      <td style="color: gray;font-weight: bold;position: relative;top: 6px;left:3px;"><input id="email{{loop.index-1}}" value="{{user.email}}" type="hidden" name="account"/> {{user.email}}</td>
       <td><input placeholder="First Name" id="first_name{{loop.index-1}}" name="first_name" class="form-control wizard-required" type="text" value="{{user.first_name}}" /></td>
       <td><input name="last_name" id="last_name{{loop.index-1}}" placeholder="Last Name" class="form-control wizard-required" type="text" value="{{user.last_name}}" /></td>
       <td>
@@ -75,7 +75,7 @@
           <option value="manager" {%- if role == 'manager' %}selected="selected"{%- endif %}>{{ _("Manager") }}</option>
         </select>
       </td>
-      <td><center><a style="position: relative;left: 5px;" id="{{account}}"  onclick="remove_user(this)" class="btn btn-danger"><i class="fa fa-times"></i></a></center></td>
+      <td><center><a style="position: relative;left: 5px;" id="{{user.email}}"  onclick="remove_user(this)" class="btn btn-danger"><i class="fa fa-times"></i></a></center></td>
       </tr>
       {% endfor %}
       {% endif %}
@@ -176,18 +176,29 @@
    }
 
    function remove_user(e){
+     
       $(e).closest('tr').fadeOut('slow', function(){
          $(e).closest('tr').remove();
 
          var wizard_emails = $("#new_accounts").val();
          var tmp_emails = jQuery.parseJSON(wizard_emails);
-         delete tmp_emails[e.id];
+         jQuery.each(tmp_emails, function(i, val) {
+             if(val.email == e.id) 
+               {
+                 delete tmp_emails[i];
+               }
+                 });
+         //clean the list
+         tmp_emails = jQuery.grep(tmp_emails, function(n, i){
+             return (n !== "" && n != null);
+            });
          $("#new_accounts").val(JSON.stringify(tmp_emails));
-
+         
+          console.log($("#new_accounts").val());
 
          if($(".table-condensed tr").length == 1){
          $(".table-condensed").closest('tr').remove();
-          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='4' style='display:none;padding: 10px;color: gray;width: 18cm;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no new accounts</td></tr>");
           $("#wizard-msg").fadeIn();
         }
        });
