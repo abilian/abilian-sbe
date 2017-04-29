@@ -76,17 +76,24 @@
       <center>
         <div class="comments" style="position: relative;">
           <a class="thread-replies" href="{{ thread_href }}">
-            {{ thread_length-1 }}</a>{% if thread.get_viewed_posts((g.user)) !=0 %} <span style="color:gray;"></span>
-          <span class="thread-hilightview"
-                title="not viewed"> (+{{ thread.get_viewed_posts(g.user.id) }})</span>{% endif %}</center>
-    </td>
-    <td>
-      <center><span class="thread-viewers"><i class="fa fa-user"
-                                              aria-hidden="true"></i> {{ thread.get_nb_viewers(thread.creator.id) }}</span></p>
+            {{ thread_length-1 }}</a>
+          {% if thread.get_viewed_posts((g.user)) !=0 %}
+            <span style="color:gray;"></span>
+            <span class="thread-hilightview"
+                  title="not viewed"> (+{{ thread.get_viewed_posts(g.user) }})</span>
+          {% endif %}
       </center>
     </td>
     <td>
-      <center><span class="thread-viewed-times"> {{ thread.viewed_times }}</span></p></center>
+      <center><span class="thread-viewers"><i class="fa fa-user"
+                                              aria-hidden="true"></i>
+        {{ thread.get_nb_viewers(thread.creator.id) }}</span>
+      </center>
+    </td>
+    <td>
+      <center>
+        <span class="thread-viewed-times"> {{ thread.viewed_times }}</span>
+      </center>
     </td>
     <td>
       <center>
@@ -95,9 +102,8 @@
           <span class="divider"
                 style="color:silver;">{{ thread.posts[-1].created_at | age(date_threshold='day') }}</span>
         {%- endif %}
-        </div>
-        </div>
         </span>
+      </center>
     </td>
   </tr>
 {% endmacro %}
