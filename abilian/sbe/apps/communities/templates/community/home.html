@@ -12,9 +12,9 @@
       <form action=".">
         <select name="sort" class="form-control" onchange="this.form.submit()">
           <option value="alpha"
-              {% if not sort_order=='activity' %}selected{% endif %}>{{ _("Sort alphabetically") }}</option>
+                  {% if not sort_order=='activity' %}selected{% endif %}>{{ _("Sort alphabetically") }}</option>
           <option value="activity"
-              {% if sort_order=='activity' %}selected{% endif %}>{{ _("Sort by activity") }}</option>
+                  {% if sort_order=='activity' %}selected{% endif %}>{{ _("Sort by activity") }}</option>
         </select>
       </form>
     </div>
@@ -58,7 +58,7 @@
     {% call m_box_menu() %}
       <div style="padding: 15px;">
         <a class="btn btn-default" style="white-space: normal;"
-            href="{{ url_for(".new") }}">{{ _("Create new community") }}</a>
+           href="{{ url_for(".new") }}">{{ _("Create new community") }}</a>
       </div>
     {% endcall %}
   {% endif %}

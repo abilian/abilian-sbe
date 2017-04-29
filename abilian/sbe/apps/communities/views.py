@@ -218,9 +218,9 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
 
     def breadcrumb(self):
         return BreadcrumbItem(label=_(u'Settings'),
-                                  icon='cog',
-                                  url=Endpoint('communities.settings',
-                                                   community_id=g.community.slug))
+                              icon='cog',
+                              url=Endpoint('communities.settings',
+                                           community_id=g.community.slug))
 
     def before_populate_obj(self):
         form = self.form

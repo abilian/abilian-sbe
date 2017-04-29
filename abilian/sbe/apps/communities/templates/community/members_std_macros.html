@@ -9,9 +9,11 @@
     <th class="hide" style="">Last Name</th>
     <th class="hide">First Name</th>
     <th>{{ _('Name') }}</th>
-    <th class="hide" >{# last activity seconds since epoch #}</th>
+    <th class="hide">{# last activity seconds since epoch #}</th>
     <th width="20%" style="position: relative;left: -52px;">{{ _('Last activity in this community') }}</th>
-    <th width="10%"><center>{{ _('Role') }}</center></th>
+    <th width="10%">
+      <center>{{ _('Role') }}</center>
+    </th>
     {% if is_manager %}
       <th>{{ _('Action') }}</th>
     {% endif %}

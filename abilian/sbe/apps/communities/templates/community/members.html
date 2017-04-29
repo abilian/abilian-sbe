@@ -7,27 +7,27 @@
   {% call m_box_content(_("Members")) %}
     {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
 
-     {%- if is_manager  %}
-     <div style="
+    {%- if is_manager %}
+      <div style="
     position: relative;top: -9px;">
-      <div class="btn-group" role="group" aria-label="..." style="float:right;position: relative;
+        <div class="btn-group" role="group" aria-label="..." style="float:right;position: relative;
 top: 39px;">
-          <a class="btn btn-info pull-right" href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
-          <i class="glyphicon glyphicon-download-alt"></i> {{ _('Download list') }}
-        </a>
-  </div>
+          <a class="btn btn-info pull-right"
+             href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
+            <i class="glyphicon glyphicon-download-alt"></i> {{ _('Download list') }}
+          </a>
+        </div>
 
-   {{ add_member() }}
-</div>
-
-      {%- endif %}
+        {{ add_member() }}
+      </div>
+    {%- endif %}
 
     <p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 17px;margin-bottom: 32px;"></p>
 
     {% set table_id = uuid() %}
     <table class="table table-condensed table-striped" id="{{ table_id }}">
       <thead>
-        {{ macros.thead() }}
+      {{ macros.thead() }}
       </thead>
 
       <tbody>
@@ -39,29 +39,29 @@ top: 39px;">
       </tbody>
     </table>
     <script type="application/json">
-        {{ macros.table_config() }}
+
     </script>
 
     {%- deferJS %}
-    <script>
-     'use strict';
-     require(
-         ['Abilian', 'jquery', 'jquery.dataTables'],
-         function(Abilian, $, jqDT) {
+      <script>
+        'use strict';
+        require(
+            ['Abilian', 'jquery', 'jquery.dataTables'],
+            function (Abilian, $, jqDT) {
 
-             function initMembersTable() {
-                 var id = "#{{ table_id }}",
-                     table = $(id),
-                     configNode = table.get(0).nextElementSibling,
-                     config = JSON.parse(configNode.textContent);
+              function initMembersTable() {
+                var id = "#{{ table_id }}",
+                    table = $(id),
+                    configNode = table.get(0).nextElementSibling,
+                    config = JSON.parse(configNode.textContent);
 
-                 $(id).dataTable(config);
-             }
+                $(id).dataTable(config);
+              }
 
-             Abilian.fn.onAppInit(initMembersTable);
-         }
-     );
-    </script>
+              Abilian.fn.onAppInit(initMembersTable);
+            }
+        );
+      </script>
     {%- enddeferJS %}
     <div class="clearfix"></div>
   {% endcall %}
@@ -93,7 +93,7 @@ margin-bottom: 16px;">{{ _("Add a member") }}</h2>
 
       <div class="form-group">
         <label for="user-select">{{ _('User') }}</label>
-        <input class="form-control" type="text" id="user-select" name="user" />
+        <input class="form-control" type="text" id="user-select" name="user"/>
       </div>
 
       <div class="form-group">
@@ -105,54 +105,54 @@ margin-bottom: 16px;">{{ _("Add a member") }}</h2>
       </div>
 
       <button class="btn btn-primary" type="submit" name="action"
-          value="add-user-role">{{ _("Add") }}</button>
+              value="add-user-role">{{ _("Add") }}</button>
     </form>
   </div>
 
   {%- deferJS %}
-  <script>
-require(
-    ['Abilian', 'jquery'],
-    function(Abilian, $) {
+    <script>
+      require(
+          ['Abilian', 'jquery'],
+          function (Abilian, $) {
 
-     Abilian.fn.onAppInit(
-         function() {
-       $("#user-select")
-            .attr("style", "min-width: 220px")
-            .select2({
-         minimumInputLength: 2,
-         ajax: {
-           url:         "{{ url_for("social.users_json") }}",
-           dataType:    'json',
-           quietMillis: 100,
-           data:        function(term, page) {
-             return { q: term, with_membership: {{ g.community.id | tojson }} };
-           },
-           results:     function(data, page) {
-             return {results: data.results, more: false};
-           }
-         },
-         allowClear:    true,
-         formatResult: function(state, container, query, escapeMarkup) {
-           var markup = [], text;
-           window.Select2.util.markMatch(state.name, query.term, markup, escapeMarkup);
-           text = '<b>' + markup.join("") + '</b>';
-           if (state.role) {
-             text+= ' <small class="label label-default pull-right">' + escapeMarkup(state.role) + '</small> ';
-           }
+            Abilian.fn.onAppInit(
+                function () {
+                  $("#user-select")
+                  .attr("style", "min-width: 220px")
+                  .select2({
+                    minimumInputLength: 2,
+                    ajax: {
+                      url: "{{ url_for("social.users_json") }}",
+                      dataType: 'json',
+                      quietMillis: 100,
+                      data: function (term, page) {
+                        return {q: term, with_membership: {{ g.community.id | tojson }}};
+                      },
+                      results: function (data, page) {
+                        return {results: data.results, more: false};
+                      }
+                    },
+                    allowClear: true,
+                    formatResult: function (state, container, query, escapeMarkup) {
+                      var markup = [], text;
+                      window.Select2.util.markMatch(state.name, query.term, markup, escapeMarkup);
+                      text = '<b>' + markup.join("") + '</b>';
+                      if (state.role) {
+                        text += ' <small class="label label-default pull-right">' + escapeMarkup(state.role) + '</small> ';
+                      }
 
-           if (state.email) {
-             text += ' <br /><i>' + escapeMarkup(state.email) + '</i> ';
-           }
-           return text;
-         }
-       });
+                      if (state.email) {
+                        text += ' <br /><i>' + escapeMarkup(state.email) + '</i> ';
+                      }
+                      return text;
+                    }
+                  });
 
-       $("#s2id_user-select a span").text("");
-       $("input#user-select").attr("value", "");
-         });
-    });
-  </script>
+                  $("#s2id_user-select a span").text("");
+                  $("input#user-select").attr("value", "");
+                });
+          });
+    </script>
   {%- enddeferJS %}
 {% endmacro %}
 

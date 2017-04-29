@@ -2,33 +2,42 @@
 
 
 {% macro viewers_snapshot(viewers, label="read by :", limit=4) %}
- {% if viewers %}
-         {% set nb_viewers = viewers|length %}
-         <div class="manager-thread-viewers">
-         <i class="fa fa-bookmark" aria-hidden="true" style="color:yellowgreen;"></i> {{label}} {% for viewer in viewers %}
-         {% if loop.index <= limit %}
-         {{ _("%(viewer)s", viewer=m_user_link(viewer.user)) }} {% if loop.index < nb_viewers %},{% endif %}
-         {% else %}
-         {% if limit < nb_viewers %}
-         {% if loop.last %}
-          <span> ...</span>
-          {%endif%}
-         {% endif %}
-         {% endif %}
-         {%endfor%}
-         </div>
-      {% endif %}
+  {% if viewers %}
+    {% set nb_viewers = viewers|length %}
+    <div class="manager-thread-viewers">
+      <i class="fa fa-bookmark" aria-hidden="true" style="color:yellowgreen;"></i> {{ label }}
+      {% for viewer in viewers %}
+        {% if loop.index <= limit %}
+          {{ _("%(viewer)s", viewer=m_user_link(viewer.user)) }} {% if loop.index < nb_viewers %},{% endif %}
+        {% else %}
+          {% if limit < nb_viewers %}
+            {% if loop.last %}
+              <span> ...</span>
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
 {% endmacro %}
 
 
 {% macro show_all_viewers(viewers, label="Read by :") %}
-{% set nb_viewers=viewers|length %}
-<p class="viewed">{{label}} <font color="silver"> {{nb_viewers}} member{%if nb_viewers > 1%}s{%endif%} </font></p>
-{% if viewers %}
-{% for viewer in viewers %}
-         <p> {% call m_user_link(viewer.user) %}
-            {{ m_user_photo(viewer.user, size=30) }}
-          {% endcall %} {{ _("%(viewer)s", viewer=m_user_link(viewer.user)) }}  <span style="color:silver;">- {{ viewer.viewed_at | age(date_threshold='day')}}</span></p> 
-         {%endfor%}
-{% endif %}
-{% endmacro%}
+  {% set nb_viewers=viewers|length %}
+  <p class="viewed">
+    {{ label }}
+    <font color="silver"> {{ nb_viewers }} member{% if nb_viewers > 1 %}s{% endif %} </font>
+  </p>
+  {% if viewers %}
+    {% for viewer in viewers %}
+      <p>
+        {% call m_user_link(viewer.user) %}
+          {{ m_user_photo(viewer.user, size=30) }}
+        {% endcall %}
+        {{ _("%(viewer)s", viewer=m_user_link(viewer.user)) }}
+        <span
+            style="color:silver;">- {{ viewer.viewed_at | age(date_threshold='day') }}</span>
+      </p>
+    {% endfor %}
+  {% endif %}
+{% endmacro %}
