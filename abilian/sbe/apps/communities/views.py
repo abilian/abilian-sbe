@@ -30,7 +30,7 @@ from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
-from abilian.services.security import Role, MANAGE
+from abilian.services.security import MANAGE, Role
 from abilian.web import csrf, views
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem

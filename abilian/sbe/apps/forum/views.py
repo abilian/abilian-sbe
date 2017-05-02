@@ -8,7 +8,6 @@ from datetime import date, datetime
 from itertools import groupby
 
 import sqlalchemy as sa
-from abilian.services.security import MANAGE
 from flask import current_app, flash, g, make_response, render_template, \
     request
 from flask_babel import format_date
@@ -20,6 +19,7 @@ from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
+from abilian.services.security import MANAGE
 from abilian.services.viewtracker import viewtracker
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction, Endpoint

@@ -9,9 +9,9 @@ from flask_login import current_user
 from typing import Any, Dict
 
 from abilian.i18n import _l
-from abilian.services.security import MANAGE, WRITE, Manager, Admin, security
-from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 from abilian.sbe.apps.communities.security import is_manager
+from abilian.services.security import MANAGE, WRITE, Admin, Manager, security
+from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 from .repository import repository
 

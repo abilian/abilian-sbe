@@ -3,12 +3,11 @@
 Forum views
 """
 
-from flask import g
+from flask import current_app, g
 from flask_login import current_user
 
-from flask import current_app
-from abilian.services.viewtracker import viewtracker
 from abilian.sbe.apps.communities.security import is_manager
+from abilian.services.viewtracker import viewtracker
 
 
 def object_viewers(entity):

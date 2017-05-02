@@ -5,10 +5,12 @@ Decorators and helpers to check access to communities.
 from __future__ import absolute_import, print_function
 
 from functools import wraps
-from abilian.services.security import MANAGE
+
 from flask import current_app, g
 from flask_login import current_user
 from werkzeug.exceptions import Forbidden
+
+from abilian.services.security import MANAGE
 
 
 def require_admin(func):

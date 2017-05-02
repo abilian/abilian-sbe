@@ -5,7 +5,7 @@ from __future__ import absolute_import, print_function
 
 import sqlalchemy as sa
 
-from abilian.services.security import READ, security, Permission
+from abilian.services.security import READ, Permission, security
 
 from .models import CmisObject, Document, Folder
 
