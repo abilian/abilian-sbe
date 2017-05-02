@@ -8,6 +8,7 @@ from datetime import date, datetime
 from itertools import groupby
 
 import sqlalchemy as sa
+from abilian.services.security import MANAGE
 from flask import current_app, flash, g, make_response, render_template, \
     request
 from flask_babel import format_date
@@ -127,7 +128,7 @@ class BaseThreadView(object):
 
     def can_send_by_mail(self):
         return (g.community.type == 'participative' or
-                g.community.has_permission(current_user, 'manage'))
+                g.community.has_permission(current_user, MANAGE))
 
     def prepare_args(self, args, kwargs):
         args, kwargs = super(BaseThreadView, self).prepare_args(args, kwargs)
