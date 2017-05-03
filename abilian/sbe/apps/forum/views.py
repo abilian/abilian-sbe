@@ -32,6 +32,7 @@ from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
+from abilian.sbe.apps.communities.security import is_manager
 
 # TODO: move to config
 MAX_THREADS = 30
@@ -128,7 +129,7 @@ class BaseThreadView(object):
 
     def can_send_by_mail(self):
         return (g.community.type == 'participative' or
-                g.community.has_permission(current_user, MANAGE))
+                is_manager(user=current_user))
 
     def prepare_args(self, args, kwargs):
         args, kwargs = super(BaseThreadView, self).prepare_args(args, kwargs)
@@ -157,7 +158,7 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw = super(ThreadView, self).template_kwargs
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
-        kw['is_manager'] = g.community.has_permission(current_user, MANAGE)
+        kw['is_manager'] = is_manager(user=current_user)
         kw['viewers'] = object_viewers(self.obj)
         viewtracker.record_hit(entity=self.obj, user=current_user)
         return kw

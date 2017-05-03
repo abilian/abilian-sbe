@@ -218,7 +218,7 @@ _actions = (
         'document_viewers',
         _l(u'Viewers list'),
         icon='user',
-        condition=lambda ctx: is_manager(ctx),
+        condition=lambda ctx: is_manager(context=ctx),
         url=lambda ctx: url_for(".document_viewers", doc_id=ctx['object'].id)),
     # edit
     DocumentModalAction(

@@ -30,7 +30,7 @@ from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
-from abilian.services.security import MANAGE, Role
+from abilian.services.security import Role
 from abilian.web import csrf, views
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
@@ -41,6 +41,7 @@ from .blueprint import Blueprint
 from .forms import CommunityForm
 from .models import Community, Membership
 from .security import require_admin, require_manage
+from abilian.sbe.apps.communities.security import is_manager
 
 __all__ = ['communities']
 
@@ -348,7 +349,7 @@ def members():
     return render_template(
         "community/members.html",
         seconds_since_epoch=seconds_since_epoch,
-        is_manager=g.community.has_permission(current_user, MANAGE),
+        is_manager=is_manager(user=current_user),
         memberships=memberships,
         csrf_token=csrf.field())
 

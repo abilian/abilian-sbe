@@ -81,7 +81,7 @@ _actions = (
         'thread_viewers',
         _l(u'Readers list'),
         icon='user',
-        condition=lambda ctx: is_manager(ctx),
+        condition=lambda ctx: is_manager(context=ctx),
         url="viewers"),
     ForumModalAction(
         'forum:thread',

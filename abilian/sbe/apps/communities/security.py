@@ -77,19 +77,24 @@ def has_access(community=None, user=None):
     return False
 
 
-def is_manager(context=None):
+def is_manager(context=None, user=None):
     svc = current_app.services['security']
+
+    if not user:
+        user = current_user
+    if user.is_anonymous:
+        return False
 
     if context:
         community = context.get('object').community
     else:
-        community = getattr(g, 'community', None)
+        community = g.community
 
-    if community.has_permission(current_user, MANAGE) and\
-            (current_user in community.members or current_user == community.creator):
+    if community.has_permission(user, MANAGE) or\
+            user == community.creator:
         return True
 
-    if svc.has_role(current_user, 'admin'):
+    if svc.has_role(user, 'admin'):
         return True
 
     return False

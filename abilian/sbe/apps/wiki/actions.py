@@ -47,7 +47,7 @@ _actions = (
         'page_viewers',
         _l(u'Readers list'),
         icon='user',
-        condition=lambda ctx: is_manager(ctx),
+        condition=lambda ctx: is_manager(context=ctx),
         endpoint='.page_viewers'),
     WikiPageAction(
         'wiki:page', 'view', _l(u'View'), endpoint='.page', icon='eye-open'),
