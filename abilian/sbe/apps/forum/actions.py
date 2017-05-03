@@ -35,8 +35,14 @@ def is_admin(context):
 
 
 def is_manager(context):
-    svc = current_app.services['security']
-    return svc.has_role(current_user, Manager, object=context.get('object'))
+    if context.get('object').community.has_permission(current_user, Manager):
+        if current_user in context.get('object').community.members or current_user == context.get('object').community.creator:
+            return True
+
+    if context.get('object').community.has_permission(current_user, Admin):
+        return True
+
+    return False
 
 
 def is_in_thread(context):
