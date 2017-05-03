@@ -11,23 +11,13 @@ from typing import Any, Dict
 from abilian.i18n import _l
 from abilian.services.security import MANAGE, WRITE, Manager, Admin, security
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
+from abilian.sbe.apps.communities.security import is_manager
 
 from .repository import repository
 
 
 def url_for(endpoint, **kw):
     return url_for_orig(endpoint, community_id=g.community.slug, **kw)
-
-
-def is_manager(context):
-    if context.get('object').community.has_permission(current_user, Manager):
-        if current_user in context.get('object').community.members or current_user == context.get('object').community.creator:
-            return True
-
-    if context.get('object').community.has_permission(current_user, Admin):
-        return True
-
-    return False
 
 
 class CmisContentAction(Action):

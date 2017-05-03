@@ -301,8 +301,8 @@ class Community(Entity):
         return self.get_role(user) is not None
 
     def has_permission(self, user, permission):
-        # TODO: permission shouldn't be allowed to be a string
-        assert isinstance(permission, (Permission, str))
+
+        assert isinstance(permission, Permission)
         if user.has_role(Admin):
             return True
         role = self.get_role(user)

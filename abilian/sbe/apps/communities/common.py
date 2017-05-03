@@ -5,24 +5,14 @@ Forum views
 
 from flask import g
 from flask_login import current_user
-from abilian.services.security import Manager, Admin
 
+from flask import current_app
 from abilian.services.viewtracker import viewtracker
-
-
-def is_manager(user,community):
-    if community.has_permission(user, Manager):
-        if user in community.members or user == community.creator:
-            return True
-
-    if community.has_permission(user, Admin):
-        return True
-
-    return False
+from abilian.sbe.apps.communities.security import is_manager
 
 
 def object_viewers(entity):
-    if is_manager(current_user,g.community):
+    if is_manager():
         views = viewtracker.get_views(entity=entity)
         community_members_id = [
             user.id for user in g.community.members

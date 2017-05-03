@@ -157,6 +157,7 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw = super(ThreadView, self).template_kwargs
         kw['thread'] = self.obj
         kw['is_closed'] = self.obj.closed
+        kw['is_manager'] = g.community.has_permission(current_user, MANAGE)
         kw['viewers'] = object_viewers(self.obj)
         viewtracker.record_hit(entity=self.obj, user=current_user)
         return kw

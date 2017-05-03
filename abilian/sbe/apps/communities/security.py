@@ -5,7 +5,7 @@ Decorators and helpers to check access to communities.
 from __future__ import absolute_import, print_function
 
 from functools import wraps
-
+from abilian.services.security import MANAGE
 from flask import current_app, g
 from flask_login import current_user
 from werkzeug.exceptions import Forbidden
@@ -29,7 +29,7 @@ def require_manage(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
         community = getattr(g, 'community')
-        if community and community.has_permission(current_user, 'manage'):
+        if community and community.has_permission(current_user, MANAGE):
             return func(*args, **kwargs)
         security = current_app.services['security']
         is_admin = security.has_role(current_user, 'admin')
@@ -71,5 +71,23 @@ def has_access(community=None, user=None):
 
     if community is not None:
         return community.get_role(user) is not None
+
+    return False
+
+
+def is_manager(context=None):
+    svc = current_app.services['security']
+
+    if context:
+        community = context.get('object').community
+    else:
+        community = getattr(g, 'community', None)
+
+    if community.has_permission(current_user, MANAGE) and\
+            (current_user in community.members or current_user == community.creator):
+        return True
+
+    if svc.has_role(current_user, 'admin'):
+        return True
 
     return False

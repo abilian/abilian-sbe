@@ -8,6 +8,7 @@ from flask_login import current_user
 from abilian.i18n import _l
 from abilian.services.security import Admin, Manager
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
+from abilian.sbe.apps.communities.security import is_manager
 
 
 class ForumAction(Action):
@@ -32,17 +33,6 @@ class ThreadAction(ForumAction):
 def is_admin(context):
     svc = current_app.services['security']
     return svc.has_role(current_user, Admin, object=context.get('object'))
-
-
-def is_manager(context):
-    if context.get('object').community.has_permission(current_user, Manager):
-        if current_user in context.get('object').community.members or current_user == context.get('object').community.creator:
-            return True
-
-    if context.get('object').community.has_permission(current_user, Admin):
-        return True
-
-    return False
 
 
 def is_in_thread(context):
