@@ -5,7 +5,6 @@
 
 {% block membersContent %}
   {% call m_box_content(_("Members")) %}
-    {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
 
     {%- if is_manager %}
       <div style="
