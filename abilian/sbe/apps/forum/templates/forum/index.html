@@ -19,19 +19,23 @@
     {% if threads %}
       <table class="thread-table" border="0">
         <tr>
-          <th colspan="2" style="">Topic</th>
-          <th>Users</th>
-          <th>
-            <center>Replies</center>
+          <th colspan="2">
+            Topic
           </th>
           <th>
-            <center>Viewers</center>
+            Users
           </th>
           <th>
-            <center>Views</center>
+            Replies
           </th>
           <th>
-            <center>Activity</center>
+            Viewers
+          </th>
+          <th>
+            Views
+          </th>
+          <th>
+            Activity
           </th>
         </tr>
         {% for thread in threads %}
@@ -61,9 +65,9 @@
         {{ m_user_photo(thread.creator, size=40) }}
       {%- endcall %}
     </td>
-    <td style="width: 31%;">
+    <td style="width: 41%;">
       <div class="entry">
-        <h4><a href="{{ thread_href }}" title="{{ thread.created_at | age(date_threshold='day') }}"
+        <h4 class="thread-list-title"><a href="{{ thread_href }}" title="{{ thread.created_at | age(date_threshold='day') }}"
                class="thread-title"> {{ thread.title }} </a></h4>
         {%- if thread.closed %}
           <i class="fa fa-lock fa-big"></i>
@@ -101,7 +105,7 @@
         <span class="thread-viewed-times"> {{ thread.viewed_times }}</span>
       </center>
     </td>
-    <td>
+    <td style="width: 17%;">
       <center>
         {%- if thread_length > 1 %}
           {% set last_post_creator = thread.posts[-1].creator %}

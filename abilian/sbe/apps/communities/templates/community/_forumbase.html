@@ -38,6 +38,6 @@
 
 {% macro forum_menu(action) %}
   <button type="button"
-          style="border: none;padding: 10px;{% if action.is_current() %}border-bottom:2px solid gray; {% endif %}">{{ action.render() }}</button>
+          class="{% if action.is_current() %}forum-action-active{% else %}forum-action{% endif %}">{{ action.render() }}</button>
 {% endmacro %}
 
