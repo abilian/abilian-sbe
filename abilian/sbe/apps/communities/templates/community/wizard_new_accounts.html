@@ -9,7 +9,7 @@
   {% call m_box_content(_("Members Wizard")) %}
     {%- set is_manager = g.community.has_permission(current_user, 'manage') %}
 
-    {%- set steps =["Add Members","Existing and new members","Create Accounts"] %}
+    {%- set steps =[_("Add Members"),_("Existing and new members"),_("Create Accounts")] %}
     {{ wizard_steps(steps,3) }}
     <br>
 
