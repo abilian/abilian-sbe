@@ -55,7 +55,7 @@
                                           </div><!-- /.col-lg-6 -->
                                           <div class="col-sm-offset-1 col-lg-10">
                                             <div class="input-group">
-                                              <input type="text" class="form-control input" placeholder="Choisir le fichier">
+                                              <input type="text" class="form-control input" placeholder="Choisir le fichier" id="csv-file-name" disabled>
                                               <span class="input-group-btn">
                                                 <button class="btn btn-default input" type="button" onclick="fileadd()">Parcourir</button>
                                               </span>
@@ -96,11 +96,9 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> Next</a>
 
 <div class="col-lg-6 col-md-offset-3" style="">
 <form id="csv_form" method="post" action="{{url_for('.check_members_wizard',community_id=g.community.slug) }}" enctype="multipart/form-data" >
-                                        {{ csrf_token }}
-                                        <input style="display:none;"  type="file" class="file-add form-control col-sm-2" name="csv_file">                                      
-                                        </form>
-
-
+{{ csrf_token }}
+<input style="display:none;"  type="file" id="csv_file" class="file-add form-control col-sm-2" name="csv_file"> 
+ </form>
 
 <form method="POST" class="form-inline" action=" {{url_for('.check_members_wizard',community_id=g.community.slug) }}">
 {{ csrf_token }}
@@ -121,6 +119,13 @@ $('#wizard-emails').val($("#collection").val());
 });
 $(".users-wizard-next").click(function(){
 $('.form-inline').submit();	
+});
+
+$( "#csv_file" ).change(function() {
+  var file_local = $("#csv_file").val().split("\\");
+  $("#csv-file-name").val(file_local[file_local.length-1]);
+  $('.users-wizard-next').css({"background": "yellowgreen","color": "white"});
+  $('.users-wizard-next').attr("disabled", false);
 });
 
 </script>
