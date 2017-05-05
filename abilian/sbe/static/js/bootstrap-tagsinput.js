@@ -135,6 +135,10 @@
         $('.email-count').html(self.itemsArray.length+" <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>");
         $('.users-wizard-next').css({"background": "yellowgreen","color": "white"});
         $('.users-wizard-next').attr("disabled", false);
+        $('#wizard-form-choice').val("emails-tag");
+        //remove csv input value
+        $("#csv_file").val("");
+        $("#csv-file-name").val("");
       }else{
         $('.email-count').html("");
       }

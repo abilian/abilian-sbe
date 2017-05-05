@@ -93,6 +93,7 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> Next</a>
 
     </div>
 
+<input id="wizard-form-choice" type="hidden" value="emails-tag">
 
 <div class="col-lg-6 col-md-offset-3" style="">
 <form id="csv_form" method="post" action="{{url_for('.check_members_wizard',community_id=g.community.slug) }}" enctype="multipart/form-data" >
@@ -114,18 +115,31 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> Next</a>
  {%- deferJS %}
 <script>
 
-$(".users-wizard-next").hover(function(){
-$('#wizard-emails').val($("#collection").val());
-});
 $(".users-wizard-next").click(function(){
-$('.form-inline').submit();	
+    var form_selection = $("#wizard-form-choice").val();
+
+    if (form_selection == "emails-tag"){
+         //get emails tag before submit
+         $('#wizard-emails').val($("#collection").val());
+         $('.form-inline').submit();  
+    }
+    
+    if (form_selection == "csv-file"){
+         $("#csv_form").submit();
+    }
+
 });
 
 $( "#csv_file" ).change(function() {
-  var file_local = $("#csv_file").val().split("\\");
-  $("#csv-file-name").val(file_local[file_local.length-1]);
-  $('.users-wizard-next').css({"background": "yellowgreen","color": "white"});
-  $('.users-wizard-next').attr("disabled", false);
+     var file_local = $("#csv_file").val().split("\\");
+     $("#csv-file-name").val(file_local[file_local.length-1]);
+     $('.users-wizard-next').css({"background": "yellowgreen","color": "white"});
+     $('.users-wizard-next').attr("disabled", false);
+     //disable emails tag
+     $("#collection").tagsinput('removeAll');
+     $(".email-count").html("");
+     //change choice
+     $("#wizard-form-choice").val("csv-file");
 });
 
 </script>
