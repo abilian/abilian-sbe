@@ -139,6 +139,7 @@
         //remove csv input value
         $("#csv_file").val("");
         $("#csv-file-name").val("");
+        $("#csv-file-name").attr("placeholder","Choisir le fichier");
       }else{
         $('.email-count').html("");
       }

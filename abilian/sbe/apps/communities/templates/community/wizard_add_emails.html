@@ -46,7 +46,7 @@
                                         <br><br>
                                         <label class="col-sm-offset-1 importer">Import members from CSV file</label>
                                         <br>
-                                        <a href="csv/template_import_member.csv" download="csv/template_import_member.csv" class="col-sm-offset-1"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download CSV file model</a>
+                                        <a href="{{ url_for('abilian_sbe_static', filename='csv/csv_example.csv') }}" download="csv_example.csv" class="col-sm-offset-1"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download CSV file model</a>
                                         
 
 
@@ -137,6 +137,7 @@ $( "#csv_file" ).change(function() {
      $('.users-wizard-next').attr("disabled", false);
      //disable emails tag
      $("#collection").tagsinput('removeAll');
+     $(".content_tags").attr("placeholder","Emails Collection");
      $(".email-count").html("");
      //change choice
      $("#wizard-form-choice").val("csv-file");
