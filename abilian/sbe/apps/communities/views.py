@@ -353,14 +353,19 @@ def _wizard_check_query(emails,is_csv=False):
     """Helper used in members views."""
     community_members_email = [member.email for member in g.community.members if member.email in emails]
     new_emails = filter(lambda email: email not in community_members_email,emails)
+    new_emails = [email.strip() for email in new_emails]
 
     #get already community members
     existing_community_members = filter(lambda user: user.email in community_members_email, g.community.members)
     #get already has an account
-    existing_account = filter(lambda user: user.email in new_emails, User.query.all())
+    existing_account = User.query.filter(User.email.in_(new_emails)).all()
 
     #email list of existing accounts
     existing_account_email = [user.email for user in existing_account]
+
+    #dict of existing accounts role for community
+    if is_csv:
+        existing_account_community_role = {user["email"]:user["role"] for user in csv_data}
 
     #emails without account
     emails_without_account = set(new_emails) - set(existing_account_email)
@@ -380,7 +385,7 @@ def _wizard_check_query(emails,is_csv=False):
             account["email"] = user.email
             account["first_name"] = user.first_name
             account["last_name"] = user.last_name
-            account["role"] = "member"
+            account["role"] = existing_account_community_role[user.email] if is_csv else "member"
             account["status"] = "existing"
             accounts_list.append(account)
 
@@ -407,7 +412,9 @@ def _wizard_check_query(emails,is_csv=False):
                 accounts_list.append(account)
 
     final_email_list = accounts_list
-    print(final_email_list)
+
+    if is_csv:
+        existing_account = {"account_objects":existing_account,"csv_data":existing_account_community_role}
 
     return existing_account, existing_community_members, final_email_list
 
@@ -471,27 +478,33 @@ def check_members_wizard():
         url=Endpoint('communities.members', community_id=g.community.slug))
     )
 
+    is_csv = False
     #cam form input tags
     if request.form.get("wizard-emails"):
         #sending emails list
         wizard_emails = request.form.get("wizard-emails").split(",")
-        print(wizard_emails)
-        existing_users,existing_members,final_email_list = _wizard_check_query(wizard_emails)
+        existing_accounts_object,existing_members,final_email_list = _wizard_check_query(wizard_emails)
         final_email_list_json = json.dumps(final_email_list)
         wizard_emails = final_email_list_json
 
     else:
+        is_csv = True
         accounts_data = wizard_read_csv(request.files['csv_file'])
         print(accounts_data)
         #csv operation
-        existing_users,existing_members,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
+        existing_accounts,existing_members,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
+        #getting objects
+        existing_accounts_object = existing_accounts["account_objects"]
+        existing_accounts_csv = existing_accounts["csv_data"]
         final_email_list_json = json.dumps(final_email_list)
         wizard_emails = final_email_list_json
 
     return render_template(
         "community/wizard_check_members.html",
+        is_csv=is_csv,
         seconds_since_epoch=seconds_since_epoch,
-        existing_users=existing_users,
+        existing_accounts_object=existing_accounts_object,
+        role_csv=existing_accounts_csv if is_csv else "",
         wizard_emails=wizard_emails,
         existing_members=existing_members,
         nb_new_members=len(wizard_emails),
