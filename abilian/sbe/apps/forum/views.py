@@ -80,7 +80,7 @@ def get_viewed_posts(entities):
             cutoff = related_hits[-1].viewed_at
             nb_viewed_posts[view.entity] = len(filter(lambda post: post.created_at > cutoff, view.entity.posts))
 
-    never_viewed = set(entities) - set([view.entity for view in views])
+    never_viewed = set(entities) - {view.entity for view in views}
     for entity in never_viewed:
         nb_viewed_posts[entity] = len(entity.posts) - 1
 
