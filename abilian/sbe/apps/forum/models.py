@@ -63,24 +63,6 @@ class Thread(Entity):
     def title(self):
         return self._title
 
-    def get_viewed_posts(self, user):
-        views = viewtracker.get_views(entity=self, user=user)
-        if not views:
-            return len(self.posts) - 1
-
-        cutoff = views[0].hits[-1].viewed_at
-        return len([post for post in self.posts if post.created_at > cutoff])
-
-    def get_nb_viewers(self, user):
-        views = viewtracker.get_views(entity=self)
-        # XXX: why not just len(views)?
-        return len([view for view in views if view.user != user])
-
-    @property
-    def viewed_times(self):
-        views = viewtracker.get_views(entity=self)
-        return sum(view.hits.count() for view in views)
-
     def get_frequent_posters(self, limit):
         all_posts = self.posts[1:]
         posters_counter = Counter([e.creator for e in all_posts])
