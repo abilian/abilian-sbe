@@ -371,7 +371,7 @@ def _wizard_check_query(emails,is_csv=False):
             accounts_list.append(account)
 
     if is_csv:
-        emails_without_account = [account for account in csv_data if account["email"] in emails_without_account]
+        emails_without_account = [csv_account for csv_account in csv_data if csv_account["email"] in emails_without_account]
 
         for csv_account in emails_without_account:
                 account = {}
