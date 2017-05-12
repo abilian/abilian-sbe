@@ -72,9 +72,9 @@
         <input type="hidden" name="user" value="{{ user.id }}"/>
         <input type="hidden" name="action" value="set-user-role"/>
         <select onchange="role_change(this)" id="{{user.email}}" name="role" class="form-control role-change" style="width: auto;border-radius: 0px;">
-          <option value="member" default="default" {%if is_csv %}{%- if role_csv[user.email] == 'member' %}
+          <option value="member" default="default" {%if csv_roles %}{%- if csv_roles[user.email] == 'member' %}
                   selected="selected"{%- endif %}{% endif %}>{{ _("Member") }}</option>
-          <option value="manager" {%if is_csv %}{%- if role_csv[user.email] == 'manager' %}selected="selected"{%- endif %}{%- endif %}>{{ _("Manager") }}</option>
+          <option value="manager" {%if csv_roles %}{%- if csv_roles[user.email] == 'manager' %}selected="selected"{%- endif %}{%- endif %}>{{ _("Manager") }}</option>
         </select>
       </form>
     </td>

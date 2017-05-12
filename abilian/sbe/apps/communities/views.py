@@ -391,12 +391,10 @@ def _wizard_check_query(emails,is_csv=False):
                 account["status"] = "new"
                 accounts_list.append(account)
 
-    final_email_list = accounts_list
-
     if is_csv:
-        existing_accounts_objects = {"account_objects":existing_accounts_objects,"csv_data":existing_account_csv_roles}
+        existing_accounts_objects = {"account_objects":existing_accounts_objects,"csv_roles":existing_account_csv_roles}
 
-    return existing_accounts_objects, existing_members_objects, final_email_list
+    return existing_accounts_objects, existing_members_objects, accounts_list
 
 
 @route("/<string:community_id>/members")
@@ -468,16 +466,14 @@ def check_members_wizard():
         existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
 
         existing_accounts_object = existing_accounts["account_objects"]
-        # TODO: change this
-        existing_accounts_csv = existing_accounts["csv_data"]
+        existing_accounts_csv_roles = existing_accounts["csv_roles"]
 
         final_email_list_json = json.dumps(final_email_list)
 
     return render_template(
         "community/wizard_check_members.html",
-        is_csv=is_csv,
         existing_accounts_object=existing_accounts_object,
-        role_csv=existing_accounts_csv if is_csv else "",
+        csv_roles=existing_accounts_csv_roles if is_csv else False,
         wizard_emails=final_email_list_json,
         existing_members_objects=existing_members_objects,
         csrf_token=csrf.field())
@@ -495,13 +491,10 @@ def new_accounts_wizard():
     wizard_emails = request.form.get("wizard-emails")
     wizard_accounts = json.loads(wizard_emails)
 
-    #filter existing accounts
     wizard_existing_account = {}
-    #new_accounts contains a list of object of new accounts
     new_accounts = []
 
     for user in wizard_accounts:
-        #return a dictionary of email and role of existing accounts
         if user["status"] == "existing":
             wizard_existing_account[user["email"]] = user["role"]
 
@@ -551,7 +544,6 @@ def wizard_saving():
             last_name = account["last_name"]
             role = account["role"]
 
-            #creating new accounts
             user = User(
                 email=email,
                 last_name=last_name,
@@ -559,14 +551,11 @@ def wizard_saving():
                 can_login=True)
             db.session.add(user)
 
-            #adding to community
             community.set_membership(user, role)
             app = current_app._get_current_object()
             activity.send(app, actor=user, verb="join", object=community)
-            #---------------------------------------------
             db.session.commit()
 
-            #sending email
             send_reset_password_instructions(user)
 
         flash(_(u"Members added Successfully"), 'success')
