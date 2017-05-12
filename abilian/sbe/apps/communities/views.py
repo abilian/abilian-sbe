@@ -508,16 +508,12 @@ def new_accounts_wizard():
         elif user["status"] == "new":
             new_accounts.append(user)
 
-    #preparing the json string
     existing_account = json.dumps(wizard_existing_account)
-    new_accounts = new_accounts
 
     return render_template(
         "community/wizard_new_accounts.html",
-        seconds_since_epoch=seconds_since_epoch,
         existing_account=existing_account,
         new_accounts=new_accounts,
-        nb_new_members=len(wizard_emails),
         csrf_token=csrf.field())
 
 
