@@ -345,6 +345,7 @@ def _wizard_check_query(emails,is_csv=False):
 
     if is_csv:
         csv_data = emails
+        existing_account_csv_roles = {user["email"]:user["role"] for user in csv_data}
         emails = [user["email"] for user in emails]
 
     emails = [email.strip() for email in emails]
@@ -359,21 +360,19 @@ def _wizard_check_query(emails,is_csv=False):
 
     emails_without_account = set(not_member_emails) - set(existing_account_emails)
 
-    if is_csv:
-        existing_account_community_role = {user["email"]:user["role"] for user in csv_data}
-        emails_without_account = [account for account in csv_data if account["email"] in emails_without_account]
-
     accounts_list = []
     for user in existing_accounts_objects:
             account = {}
             account["email"] = user.email
             account["first_name"] = user.first_name
             account["last_name"] = user.last_name
-            account["role"] = existing_account_community_role[user.email] if is_csv else "member"
+            account["role"] = existing_account_csv_roles[user.email] if is_csv else "member"
             account["status"] = "existing"
             accounts_list.append(account)
 
     if is_csv:
+        emails_without_account = [account for account in csv_data if account["email"] in emails_without_account]
+
         for csv_account in emails_without_account:
                 account = {}
                 account["email"] = csv_account["email"]
@@ -395,7 +394,7 @@ def _wizard_check_query(emails,is_csv=False):
     final_email_list = accounts_list
 
     if is_csv:
-        existing_accounts_objects = {"account_objects":existing_accounts_objects,"csv_data":existing_account_community_role}
+        existing_accounts_objects = {"account_objects":existing_accounts_objects,"csv_data":existing_account_csv_roles}
 
     return existing_accounts_objects, existing_members_objects, final_email_list
 
@@ -469,6 +468,7 @@ def check_members_wizard():
         existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
 
         existing_accounts_object = existing_accounts["account_objects"]
+        # TODO: change this
         existing_accounts_csv = existing_accounts["csv_data"]
 
         final_email_list_json = json.dumps(final_email_list)
@@ -534,9 +534,9 @@ def wizard_saving():
 
         app = current_app._get_current_object()
         activity.send(app, actor=user, verb="join", object=community)
-        #---------------------------------------------
+
         db.session.commit()
-        ######################
+
         print(existing_accounts)
 
     #check if there is new accounts and save
