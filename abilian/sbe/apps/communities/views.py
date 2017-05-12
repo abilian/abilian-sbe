@@ -343,44 +343,29 @@ def _members_query():
 
 def _wizard_check_query(emails,is_csv=False):
 
-    #check if it is from csv
     if is_csv:
-        #getting data
         csv_data = emails
         emails = [user["email"] for user in emails]
-    #---------------------------------------------
 
-    """Helper used in members views."""
-    community_members_email = [member.email for member in g.community.members if member.email in emails]
-    new_emails = filter(lambda email: email not in community_members_email,emails)
-    new_emails = [email.strip() for email in new_emails]
+    emails = [email.strip() for email in emails]
 
-    #get already community members
-    existing_community_members = filter(lambda user: user.email in community_members_email, g.community.members)
-    #get already has an account
-    existing_account = User.query.filter(User.email.in_(new_emails)).all()
+    already_member_emails = [member.email for member in g.community.members if member.email in emails]
+    not_member_emails = set(emails) - set(already_member_emails)
 
-    #email list of existing accounts
-    existing_account_email = [user.email for user in existing_account]
+    existing_members_objects = filter(lambda user: user.email in already_member_emails, g.community.members)
 
-    #dict of existing accounts role for community
+    existing_accounts_objects = User.query.filter(User.email.in_(not_member_emails)).all()
+    existing_account_emails = [user.email for user in existing_accounts_objects]
+
+    emails_without_account = set(not_member_emails) - set(existing_account_emails)
+
     if is_csv:
         existing_account_community_role = {user["email"]:user["role"] for user in csv_data}
-
-    #emails without account
-    emails_without_account = set(new_emails) - set(existing_account_email)
-
-    #configure if it is from csv
-    #---------------------------
-    if is_csv:
         emails_without_account = [account for account in csv_data if account["email"] in emails_without_account]
 
-    #generating json list
     accounts_list = []
-
-    #adding existing account to list
-    for user in existing_account:
-        if user.email not in community_members_email:
+    for user in existing_accounts_objects:
+        if user.email not in already_member_emails:
             account = {}
             account["email"] = user.email
             account["first_name"] = user.first_name
@@ -391,7 +376,7 @@ def _wizard_check_query(emails,is_csv=False):
 
     if is_csv:
         for csv_account in emails_without_account:
-            if csv_account["email"] not in community_members_email:
+            if csv_account["email"] not in already_member_emails:
                 account = {}
                 account["email"] = csv_account["email"]
                 account["first_name"] = csv_account["first_name"]
@@ -400,9 +385,8 @@ def _wizard_check_query(emails,is_csv=False):
                 account["status"] = "new"
                 accounts_list.append(account)
     else:
-        #adding emails without account to the list
         for email in emails_without_account:
-            if email not in community_members_email:
+            if email not in already_member_emails:
                 account = {}
                 account["email"] = email
                 account["first_name"] = ""
@@ -414,9 +398,9 @@ def _wizard_check_query(emails,is_csv=False):
     final_email_list = accounts_list
 
     if is_csv:
-        existing_account = {"account_objects":existing_account,"csv_data":existing_account_community_role}
+        existing_accounts_objects = {"account_objects":existing_accounts_objects,"csv_data":existing_account_community_role}
 
-    return existing_account, existing_community_members, final_email_list
+    return existing_accounts_objects, existing_members_objects, final_email_list
 
 
 @route("/<string:community_id>/members")
