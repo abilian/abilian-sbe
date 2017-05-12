@@ -31,7 +31,7 @@
                                 </h4>
                                 <br>
                                 <!-- DEJA MEMBRE DE LA COMMUNAUTE -->
-                                 {% if existing_members %}
+                                 {% if existing_members_objects %}
                                 <div style="border: 1px solid silver;padding-top: 19px;padding-left: 20px;width: 96.7%;">
                                     <label class="">Already a member of the community</label>
                                     <h6 class=" sous_titre_step2">
@@ -41,7 +41,7 @@
 
                                 <div style="position: relative;top: -13px;">
                                
-                                   {% for member in existing_members%}
+                                   {% for member in existing_members_objects%}
                                        <p>{% call m_user_link(member, css="media-object") %}
                                           {{ m_user_photo(member, size="32") }}{{member}} ({{member.email}})
                                           {%- endcall %}

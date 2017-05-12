@@ -467,21 +467,19 @@ def check_members_wizard():
         is_csv = True
         accounts_data = wizard_read_csv(request.files['csv_file'])
         existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
+
         existing_accounts_object = existing_accounts["account_objects"]
         existing_accounts_csv = existing_accounts["csv_data"]
+
         final_email_list_json = json.dumps(final_email_list)
-        wizard_emails = final_email_list_json
 
     return render_template(
         "community/wizard_check_members.html",
         is_csv=is_csv,
-        seconds_since_epoch=seconds_since_epoch,
         existing_accounts_object=existing_accounts_object,
         role_csv=existing_accounts_csv if is_csv else "",
-        wizard_emails=wizard_emails,
-        existing_members=existing_members_objects,
-        nb_new_members=len(wizard_emails),
-        final_email_list=final_email_list_json,
+        wizard_emails=final_email_list_json,
+        existing_members_objects=existing_members_objects,
         csrf_token=csrf.field())
 
 
