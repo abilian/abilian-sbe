@@ -365,7 +365,6 @@ def _wizard_check_query(emails,is_csv=False):
 
     accounts_list = []
     for user in existing_accounts_objects:
-        if user.email not in already_member_emails:
             account = {}
             account["email"] = user.email
             account["first_name"] = user.first_name
@@ -376,7 +375,6 @@ def _wizard_check_query(emails,is_csv=False):
 
     if is_csv:
         for csv_account in emails_without_account:
-            if csv_account["email"] not in already_member_emails:
                 account = {}
                 account["email"] = csv_account["email"]
                 account["first_name"] = csv_account["first_name"]
@@ -386,7 +384,6 @@ def _wizard_check_query(emails,is_csv=False):
                 accounts_list.append(account)
     else:
         for email in emails_without_account:
-            if email not in already_member_emails:
                 account = {}
                 account["email"] = email
                 account["first_name"] = ""
@@ -437,7 +434,6 @@ def add_member_emails_wizard():
 
 def wizard_read_csv(csv):
     if request.method == 'POST':
-        #filename = secure_filename(csv.filename)
         contents = csv.readlines()
         new_accounts = []
         for line in contents:
@@ -447,9 +443,7 @@ def wizard_read_csv(csv):
             account["first_name"] = data[1].strip()
             account["last_name"] = data[2].strip()
             account["role"] = data[3].strip()
-            #add to the list
             new_accounts.append(account)
-
         return new_accounts
 
 
@@ -463,21 +457,16 @@ def check_members_wizard():
     )
 
     is_csv = False
-    #cam form input tags
     if request.form.get("wizard-emails"):
-        #sending emails list
         wizard_emails = request.form.get("wizard-emails").split(",")
-        existing_accounts_object,existing_members,final_email_list = _wizard_check_query(wizard_emails)
+        existing_accounts_object,existing_members_objects,final_email_list = _wizard_check_query(wizard_emails)
         final_email_list_json = json.dumps(final_email_list)
         wizard_emails = final_email_list_json
 
     else:
         is_csv = True
         accounts_data = wizard_read_csv(request.files['csv_file'])
-        print(accounts_data)
-        #csv operation
-        existing_accounts,existing_members,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
-        #getting objects
+        existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
         existing_accounts_object = existing_accounts["account_objects"]
         existing_accounts_csv = existing_accounts["csv_data"]
         final_email_list_json = json.dumps(final_email_list)
@@ -490,7 +479,7 @@ def check_members_wizard():
         existing_accounts_object=existing_accounts_object,
         role_csv=existing_accounts_csv if is_csv else "",
         wizard_emails=wizard_emails,
-        existing_members=existing_members,
+        existing_members=existing_members_objects,
         nb_new_members=len(wizard_emails),
         final_email_list=final_email_list_json,
         csrf_token=csrf.field())
