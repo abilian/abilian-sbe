@@ -28,6 +28,7 @@ from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
+from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
@@ -41,7 +42,6 @@ from .blueprint import Blueprint
 from .forms import CommunityForm
 from .models import Community, Membership
 from .security import require_admin, require_manage
-from abilian.sbe.apps.communities.security import is_manager
 
 __all__ = ['communities']
 

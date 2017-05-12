@@ -4,6 +4,7 @@ Forum views
 """
 from __future__ import absolute_import, print_function
 
+from collections import Counter
 from datetime import date, datetime
 from itertools import groupby
 
@@ -16,10 +17,10 @@ from six import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
-from collections import Counter
 
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
+from abilian.sbe.apps.communities.security import is_manager
 from abilian.services.security import MANAGE
 from abilian.services.viewtracker import viewtracker
 from abilian.web import url_for, views
@@ -33,7 +34,6 @@ from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
-from abilian.sbe.apps.communities.security import is_manager
 
 # TODO: move to config
 MAX_THREADS = 30
@@ -66,7 +66,11 @@ def init_forum_values(endpoint, values):
 def get_nb_viewers(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
-        threads = [thread.entity for thread in views if thread.user in g.community.members and thread.user != thread.entity.creator]
+        threads = [
+            thread.entity for thread in views
+            if thread.user in g.community.members and thread.user !=
+            thread.entity.creator
+        ]
 
         return Counter(threads)
 
@@ -80,7 +84,9 @@ def get_viewed_posts(entities):
             related_hits = filter(lambda hit: hit.view_id == view.id, all_hits)
             if view.entity in entities:
                 cutoff = related_hits[-1].viewed_at
-                nb_viewed_posts[view.entity] = len(filter(lambda post: post.created_at > cutoff, view.entity.posts))
+                nb_viewed_posts[view.entity] = len(
+                    filter(lambda post: post.created_at > cutoff,
+                           view.entity.posts))
 
         never_viewed = set(entities) - {view.entity for view in views}
         for entity in never_viewed:
@@ -120,7 +126,12 @@ def index():
     nb_viewed_times = get_viewed_times(threads)
 
     return render_template(
-        "forum/index.html", threads=threads, has_more=has_more, nb_viewers=nb_viewers, nb_viewed_posts=nb_viewed_posts, nb_viewed_times=nb_viewed_times)
+        "forum/index.html",
+        threads=threads,
+        has_more=has_more,
+        nb_viewers=nb_viewers,
+        nb_viewed_posts=nb_viewed_posts,
+        nb_viewed_times=nb_viewed_times)
 
 
 def group_monthly(entities_list):
