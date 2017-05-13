@@ -535,7 +535,6 @@ def wizard_saving():
     #check if there is new accounts and save
     new_accounts = request.form.get("new_accounts")
     new_accounts = json.loads(new_accounts)
-    all_new_emails = [str(account["email"]) for account in new_accounts]
     if len(new_accounts):
         for account in new_accounts:
             email = account["email"]
