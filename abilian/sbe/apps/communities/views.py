@@ -45,6 +45,7 @@ from .actions import register_actions
 from .blueprint import Blueprint
 from .forms import CommunityForm
 from .models import Community, Membership
+from collections import Counter
 from .security import require_admin, require_manage
 
 __all__ = ['communities']
@@ -403,11 +404,14 @@ def members():
         url=Endpoint('communities.members', community_id=g.community.slug))
     )
     memberships = _members_query().all()
+    community_threads_users = [thread.creator for thread in g.community.threads]
+    threads_count = Counter(community_threads_users)
 
     return render_template(
         "community/members.html",
         seconds_since_epoch=seconds_since_epoch,
         memberships=memberships,
+        threads_count=threads_count,
         csrf_token=csrf.field())
 
 
