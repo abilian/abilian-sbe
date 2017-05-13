@@ -372,6 +372,7 @@ def _wizard_check_query(emails,is_csv=False):
 
     if is_csv:
         emails_without_account = [csv_account for csv_account in csv_data if csv_account["email"] in emails_without_account]
+        existing_accounts_objects = {"account_objects":existing_accounts_objects,"csv_roles":existing_account_csv_roles}
 
         for csv_account in emails_without_account:
                 account = {}
@@ -390,9 +391,6 @@ def _wizard_check_query(emails,is_csv=False):
                 account["role"] = "member"
                 account["status"] = "new"
                 accounts_list.append(account)
-
-    if is_csv:
-        existing_accounts_objects = {"account_objects":existing_accounts_objects,"csv_roles":existing_account_csv_roles}
 
     return existing_accounts_objects, existing_members_objects, accounts_list
 
@@ -530,13 +528,10 @@ def wizard_saving():
 
         db.session.commit()
 
-        print(existing_accounts)
-
     #check if there is new accounts and save
     new_accounts = request.form.get("new_accounts")
     new_accounts = json.loads(new_accounts)
     all_new_emails = [str(account["email"]) for account in new_accounts]
-    print(all_new_emails)
     if len(new_accounts):
         for account in new_accounts:
             email = account["email"]
