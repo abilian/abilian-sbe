@@ -64,6 +64,7 @@ def init_forum_values(endpoint, values):
 
 
 def get_nb_viewers(entities):
+    if entities:
         views = viewtracker.get_views(entities=entities)
         threads = [thread.entity for thread in views if thread.user in g.community.members and thread.user != thread.entity.creator]
 
@@ -71,37 +72,39 @@ def get_nb_viewers(entities):
 
 
 def get_viewed_posts(entities):
-    views = viewtracker.get_views(entities=entities, user=current_user)
-    all_hits = viewtracker.get_hits(views=views)
-    nb_viewed_posts = {}
-    for view in views:
-        related_hits = filter(lambda hit: hit.view_id == view.id, all_hits)
-        if view.entity in entities:
-            cutoff = related_hits[-1].viewed_at
-            nb_viewed_posts[view.entity] = len(filter(lambda post: post.created_at > cutoff, view.entity.posts))
+    if entities:
+        views = viewtracker.get_views(entities=entities, user=current_user)
+        all_hits = viewtracker.get_hits(views=views)
+        nb_viewed_posts = {}
+        for view in views:
+            related_hits = filter(lambda hit: hit.view_id == view.id, all_hits)
+            if view.entity in entities:
+                cutoff = related_hits[-1].viewed_at
+                nb_viewed_posts[view.entity] = len(filter(lambda post: post.created_at > cutoff, view.entity.posts))
 
-    never_viewed = set(entities) - {view.entity for view in views}
-    for entity in never_viewed:
-        nb_viewed_posts[entity] = len(entity.posts) - 1
+        never_viewed = set(entities) - {view.entity for view in views}
+        for entity in never_viewed:
+            nb_viewed_posts[entity] = len(entity.posts) - 1
 
-    return nb_viewed_posts
+        return nb_viewed_posts
 
 
 def get_viewed_times(entities):
-    views = viewtracker.get_views(entities=entities)
+    if entities:
+        views = viewtracker.get_views(entities=entities)
 
-    all_hits = viewtracker.get_hits(views=views)
-    views_id = [view.view_id for view in all_hits]
+        all_hits = viewtracker.get_hits(views=views)
+        views_id = [view.view_id for view in all_hits]
 
-    viewed_times = Counter(views_id)
-    entity_viewed_times = {}
-    for view in views:
-        if view.entity not in entity_viewed_times:
-            entity_viewed_times[view.entity] = viewed_times[view.id]
-        else:
-            entity_viewed_times[view.entity] += viewed_times[view.id]
+        viewed_times = Counter(views_id)
+        entity_viewed_times = {}
+        for view in views:
+            if view.entity not in entity_viewed_times:
+                entity_viewed_times[view.entity] = viewed_times[view.id]
+            else:
+                entity_viewed_times[view.entity] += viewed_times[view.id]
 
-    return entity_viewed_times
+        return entity_viewed_times
 
 
 @route('/')
