@@ -102,7 +102,7 @@
     </td>
     <td>
       <center>
-        <span class="thread-viewed-times"> {{ nb_viewed_times[thread] }}</span>
+        <span class="thread-viewed-times"> {% if nb_viewed_times[thread] %}{{ nb_viewed_times[thread] }}{% else %}0{% endif %}</span>
       </center>
     </td>
     <td style="width: 17%;">

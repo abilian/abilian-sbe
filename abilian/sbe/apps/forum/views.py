@@ -98,7 +98,7 @@ def get_viewed_posts(entities):
 def get_viewed_times(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
-
+        views = filter(lambda view: view.user != view.entity.creator, views)
         all_hits = viewtracker.get_hits(views=views)
         views_id = [view.view_id for view in all_hits]
 
