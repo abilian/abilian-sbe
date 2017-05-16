@@ -107,12 +107,9 @@
     </td>
     <td style="width: 17%;">
       <center>
-        {%- if thread_length > 1 %}
-          {% set last_post_creator = thread.posts[-1].creator %}
           <span class="hidden-xs">
           <span class="divider"
-                style="color:silver;">{{ thread.posts[-1].created_at | age(date_threshold='day') }}</span>
-        {%- endif %}
+                style="color:silver;"> {{ thread.last_post_at | age(date_threshold='day') }}</span>
         </span>
       </center>
     </td>
