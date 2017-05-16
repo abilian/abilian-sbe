@@ -10,7 +10,8 @@
   {% call m_box_content() %}
     {#  TODO #}
     <p>
-      <a href="{{ url_for('.index', community_id=g.community.slug) }}">
+      {%- set thread_href = url_for(thread) %}
+      <a href="{{ thread_href }}">
         <i class="fa fa-arrow-left"></i> {{ _("Back to the topic") }}</a>
     </p>
 
