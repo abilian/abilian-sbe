@@ -88,7 +88,7 @@
           {% if nb_viewed_posts[thread] %}
             <span style="color:gray;"></span>
             <span class="thread-hilightview"
-                  title="not viewed"> (+{{ nb_viewed_posts[thread] }})</span>
+                  title="not viewed"><span class="badge thread-unread-posts">+{{ nb_viewed_posts[thread] }}</span></span>
           {% endif %}
       </center>
     </td>
