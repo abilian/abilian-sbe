@@ -121,7 +121,9 @@ def activity_time_format(time):
 def get_viewed_times(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
-        views = filter(lambda view: view.user != view.entity.creator and view.user in g.community.members, views)
+        views = filter(
+            lambda view: view.user != view.entity.creator and view.user in g.community.members,
+            views)
         all_hits = viewtracker.get_hits(views=views)
         views_id = [view.view_id for view in all_hits]
 
