@@ -79,7 +79,7 @@
         </li>
     </ul>
     <button onclick="show_panel_info()" class="viewers-panel-button">
-             <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+             <span id="panel-direction" class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
     </button>
 </div>
 <div class="viewers-panel-content">
@@ -95,8 +95,19 @@
 {{show_all_viewers(viewers)}}
 </div>
 <script>
+var opened = false;
 function show_panel_info(){
-  $( ".viewers-panel-content" ).fadeToggle();
+  if(opened==false){
+      $(".viewers-panel-posters").fadeOut();
+      $("#panel-direction").attr("class","glyphicon glyphicon-chevron-up");
+      $( ".viewers-panel-content" ).fadeIn();
+      opened=true;
+  }else{
+      $(".viewers-panel-posters").fadeIn();
+      $("#panel-direction").attr("class","glyphicon glyphicon-chevron-down");
+      $( ".viewers-panel-content" ).fadeOut();
+      opened=false;
+  }
 }
 </script>
 
