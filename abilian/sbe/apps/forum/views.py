@@ -110,6 +110,8 @@ def activity_time_format(time):
                     return "{}h".format(hours)
                 else:
                     return "{}m".format(minutes % 60)
+            elif days == 0:
+                return "{}h".format(hours)
             else:
                 return "{}d".format(days)
         else:
