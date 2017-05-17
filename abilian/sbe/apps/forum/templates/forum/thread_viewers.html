@@ -43,27 +43,63 @@
       </div>
       <hr>
 
-<div>
+<div class="viewers-panel-container">
     <ul class="viewers-panel-info">
-        <li>created <br>{% call m_user_link(thread.creator) %}
+        <li><span>created</span><br>
+            {% call m_user_link(thread.creator) %}
             {{ m_user_photo(thread.creator, size=22) }}
-          {% endcall %} {{ activity_time_format(thread.created_at) }}</li>
+            {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(thread.created_at) }}</span>
+        </li>
         {% set last_reply = thread.posts[-1] %}
-        <li>last reply <br>{% call m_user_link(last_reply.creator) %}
+        <li>
+            <span>last reply</span><br>{% call m_user_link(last_reply.creator) %}
             {{ m_user_photo(last_reply.creator, size=22) }}
-          {% endcall %} {{ activity_time_format(last_reply.created_at) }}</li>
-        <li>{{ thread.posts|length-1 }}<br>replies</li>
-        <li>{{ views[thread] }}<br>views</li>
-        <li>{{participants|length}}<br>users</li>
+            {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(last_reply.created_at) }}</span>
+        </li>
+        <li>
+            <span class="viewers-panel-count">{{ thread.posts|length-1 }}</span><br><span>replies</span>
+        </li>
+        <li>{% if views[thread] %}
+            <span class="viewers-panel-count">{{ views[thread] }}</span>
+            {% else %}
+            <span class="viewers-panel-count">0</span>
+            {% endif %}<br><span>views</span>
+        </li>
+        <li>
+            <span class="viewers-panel-count">{{participants|length}}</span><br><span>users</span>
+        </li>
+        <li class="viewers-panel-posters">
+        {% for user in thread.get_frequent_posters(4) %}
+            {% call m_user_link(user) %}
+            {{ m_user_photo(user, size=32) }}
+            {% endcall %}
+        {%endfor%}
+        </li>
+        <li>
+        </li>
     </ul>
+    <button onclick="show_panel_info()" class="viewers-panel-button">
+             <span class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+    </button>
 </div>
-      {{show_all_viewers(viewers)}}
+<div class="viewers-panel-content">
+<p>Frequent Posters</p>
+<span>
+   {% for user in thread.get_frequent_posters(6) %}
+        {% call m_user_link(user) %}
+        {{ m_user_photo(user, size=32) }}
+        {% endcall %}
+    {%endfor%}
+</span>
+<hr>
+{{show_all_viewers(viewers)}}
+</div>
+<script>
+function show_panel_info(){
+  $( ".viewers-panel-content" ).fadeToggle();
+}
+</script>
 
-      {%- if thread.posts|length > 1 %}
-        <hr class="clearfix" style="margin-top: 5px;">
-      {%- endif %}
-
-      
     </article>
   {% endcall %}
 {%- endblock %}
