@@ -113,9 +113,9 @@ def activity_time_format(time):
             else:
                 return "{}d".format(days)
         else:
-            return "{} {}".format(month_abbreviation,time.day)
+            return "{} {}".format(month_abbreviation, time.day)
     else:
-        return "{} {}".format(month_abbreviation,str(time.year))
+        return "{} {}".format(month_abbreviation, str(time.year))
 
 
 def get_viewed_times(entities):
