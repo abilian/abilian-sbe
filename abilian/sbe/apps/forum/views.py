@@ -95,6 +95,29 @@ def get_viewed_posts(entities):
         return nb_viewed_posts
 
 
+def activity_time_format(time):
+    current_date = datetime.utcnow()
+    time_diffrence = current_date - time
+    month_abbreviation = time.strftime('%B')[:3]
+    days, hours, minutes, seconds = time_diffrence.days, time_diffrence.seconds // 3600, time_diffrence.seconds // 60, time_diffrence.seconds
+
+    if time.year == current_date.year:
+        if time.month == current_date.month:
+            if time.day == current_date.day:
+                if minutes < 1:
+                    return "{}s".format(seconds)
+                elif minutes > 60:
+                    return "{}h".format(hours)
+                else:
+                    return "{}m".format(minutes % 60)
+            else:
+                return "{}d".format(days)
+        else:
+            return "{} {}".format(month_abbreviation, time.day)
+    else:
+        return "{} {}".format(month_abbreviation, str(time.year))
+
+
 def get_viewed_times(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
@@ -133,7 +156,8 @@ def index():
         has_more=has_more,
         nb_viewers=nb_viewers,
         nb_viewed_posts=nb_viewed_posts,
-        nb_viewed_times=nb_viewed_times)
+        nb_viewed_times=nb_viewed_times,
+        activity_time_format=activity_time_format)
 
 
 def group_monthly(entities_list):
