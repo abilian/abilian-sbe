@@ -224,6 +224,8 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw['is_closed'] = self.obj.closed
         kw['is_manager'] = is_manager(user=current_user)
         kw['viewers'] = object_viewers(self.obj)
+        kw['views'] = get_viewed_times([self.obj])
+        kw['participants'] = {post.creator for post in self.obj.posts}
         kw['activity_time_format'] = activity_time_format
         viewtracker.record_hit(entity=self.obj, user=current_user)
         return kw
