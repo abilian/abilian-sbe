@@ -42,7 +42,21 @@
         <div class="media-post-tail"></div>
       </div>
       <hr>
-      
+
+<div>
+    <ul class="viewers-panel-info">
+        <li>created <br>{% call m_user_link(thread.creator) %}
+            {{ m_user_photo(thread.creator, size=22) }}
+          {% endcall %} {{ activity_time_format(thread.created_at) }}</li>
+        {% set last_reply = thread.posts[-1] %}
+        <li>last reply <br>{% call m_user_link(last_reply.creator) %}
+            {{ m_user_photo(last_reply.creator, size=22) }}
+          {% endcall %} {{ activity_time_format(last_reply.created_at) }}</li>
+        <li>{{ thread.posts|length-1 }}<br>replies</li>
+        <li>{{ views[thread] }}<br>views</li>
+        <li>{{participants|length}}<br>users</li>
+    </ul>
+</div>
       {{show_all_viewers(viewers)}}
 
       {%- if thread.posts|length > 1 %}
