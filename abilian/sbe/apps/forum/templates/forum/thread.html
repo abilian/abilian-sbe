@@ -78,12 +78,14 @@
         <li>
         </li>
     </ul>
+    {% set frequent_posters = thread.get_frequent_posters(6) %}
+    {% if is_manager or frequent_posters %}
     <button onclick="show_panel_info()" class="viewers-panel-button">
              <span id="panel-direction" class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
     </button>
+    {% endif %}
 </div>
-<div class="viewers-panel-content">
-{% set frequent_posters = thread.get_frequent_posters(6) %}
+<div class="viewers-panel-content" style="{%if is_manager %}padding-bottom: 9px;{% endif %}">
 {% if frequent_posters %}
 <p>Frequent Posters</p>
 <span>
@@ -94,8 +96,8 @@
     {%endfor%}
 </span>
 {% endif %}
+{% if frequent_posters and is_manager %}<hr>{% endif %}
 {% if is_manager %}
-<hr>
 {{show_all_viewers(viewers)}}
 {% endif %}
 </div>
