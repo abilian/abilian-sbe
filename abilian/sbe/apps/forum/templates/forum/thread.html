@@ -43,7 +43,7 @@
           <br>
            <div class="viewers-panel-container">
     <ul class="viewers-panel-info">
-        <li><span>created</span><br>
+        <li><span>{{_('created')}}</span><br>
             {% call m_user_link(thread.creator) %}
             {{ m_user_photo(thread.creator, size=22) }}
             {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(thread.created_at) }}</span>
@@ -51,22 +51,22 @@
         {% set replies = thread.posts %}
         {% if replies|length > 1 %}
         <li>
-            <span>last reply</span><br>{% call m_user_link(replies[-1].creator) %}
+            <span>{{_('last reply')}}</span><br>{% call m_user_link(replies[-1].creator) %}
             {{ m_user_photo(replies[-1].creator, size=22) }}
             {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(replies[-1].created_at) }}</span>
         </li>
         {% endif %}
         <li>
-            <center><span class="viewers-panel-count">{{ thread.posts|length-1 }}</span><br><span>replies</span></center>
+            <center><span class="viewers-panel-count">{{ thread.posts|length-1 }}</span><br><span>{{_('replies')}}</span></center>
         </li>
         <li>{% if views[thread] %}
             <span class="viewers-panel-count">{{ views[thread] }}</span>
             {% else %}
             <span class="viewers-panel-count">0</span>
-            {% endif %}<br><span>views</span>
+            {% endif %}<br><span>{{_('views')}}</span>
         </li>
         <li>
-            <span class="viewers-panel-count">{{participants|length}}</span><br><span>users</span>
+            <span class="viewers-panel-count">{{participants|length}}</span><br><span>{{_('users')}}</span>
         </li>
         <li class="viewers-panel-posters">
         {% for user in thread.get_frequent_posters(4) %}
@@ -87,7 +87,7 @@
 </div>
 <div class="viewers-panel-content" style="{%if is_manager %}padding-bottom: 9px;{% endif %}">
 {% if frequent_posters %}
-<p>Frequent Posters</p>
+<p>{{_('Frequent Posters')}}</p>
 <span>
    {% for user in frequent_posters %}
         {% call m_user_link(user) %}
