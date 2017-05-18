@@ -9,6 +9,7 @@ from datetime import datetime
 
 from abilian.sbe.apps.communities.security import is_manager
 from abilian.services.viewtracker import viewtracker
+from abilian.i18n import _l
 
 
 def object_viewers(entity):
@@ -46,7 +47,7 @@ def activity_time_format(time):
             elif days == 0:
                 return "{}h".format(hours)
             else:
-                return "{}d".format(days)
+                return "{}{}".format(days,_l(u"d"))
         else:
             return "{} {}".format(month_abbreviation, time.day)
     else:
