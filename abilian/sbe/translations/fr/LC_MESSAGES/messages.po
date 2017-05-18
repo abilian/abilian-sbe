@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-18 11:37-0700\n"
+"POT-Creation-Date: 2017-05-18 12:00-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -1054,6 +1054,30 @@ msgstr "Revenir à la liste des conversations"
 msgid "Posted by %(creator)s"
 msgstr "Posté par %(creator)s"
 
+#: abilian/sbe/apps/forum/templates/forum/thread.html:46
+msgid "created"
+msgstr "créé à"
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:54
+msgid "last reply"
+msgstr "dernière réponse"
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:60
+msgid "replies"
+msgstr "réponses"
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:66
+msgid "views"
+msgstr "vues"
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:69
+msgid "participants"
+msgstr "participants"
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:90
+msgid "Frequent Posters"
+msgstr "Participants fréquents"
+
 #: abilian/sbe/apps/forum/templates/forum/thread.html:148
 msgid "Post a comment"
 msgstr "Ajouter un commentaire"
@@ -1509,5 +1533,8 @@ msgstr "(source)"
 #~ msgstr "Participants"
 
 #~ msgid "Users"
+#~ msgstr "Utilisateur"
+
+#~ msgid "users"
 #~ msgstr "Utilisateur"
 

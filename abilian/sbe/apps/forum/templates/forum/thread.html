@@ -66,7 +66,7 @@
             {% endif %}<br><span>{{_('views')}}</span>
         </li>
         <li>
-            <span class="viewers-panel-count">{{participants|length}}</span><br><span>{{_('users')}}</span>
+            <span class="viewers-panel-count">{{participants|length}}</span><br><span>{{_('participants')}}</span>
         </li>
         <li class="viewers-panel-posters">
         {% for user in thread.get_frequent_posters(4) %}

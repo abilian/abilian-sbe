@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.3.1.dev36+g579eebf.d20170518\n"
+"Project-Id-Version: abilian-sbe 0.3.1.dev38+gce214fe.d20170518\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-18 11:37-0700\n"
+"POT-Creation-Date: 2017-05-18 12:00-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1023,6 +1023,30 @@ msgstr ""
 #: abilian/sbe/apps/forum/templates/forum/thread.html:23
 #, python-format
 msgid "Posted by %(creator)s"
+msgstr ""
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:46
+msgid "created"
+msgstr ""
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:54
+msgid "last reply"
+msgstr ""
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:60
+msgid "replies"
+msgstr ""
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:66
+msgid "views"
+msgstr ""
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:69
+msgid "participants"
+msgstr ""
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:90
+msgid "Frequent Posters"
 msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:148
