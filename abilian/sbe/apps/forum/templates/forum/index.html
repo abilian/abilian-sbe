@@ -112,7 +112,7 @@
           <span class="hidden-xs">
           <span class="divider"
           {% set activity_time = activity_time_format(thread.last_post_at) %}
-                style="color:silver;">{% if activity_time[-1]=='d' %}{{activity_time[:-1]}}{{_('d')}}{% else %}{{activity_time}}{% endif %}</span>
+                style="color:silver;">{{activity_time}}</span>
         </span>
       </center>
     </td>
