@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.3.1.dev39+gcf24f61.d20170518\n"
+"Project-Id-Version: abilian-sbe 0.3.1.dev41+g2d5926a.d20170518\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-18 12:06-0700\n"
+"POT-Creation-Date: 2017-05-18 12:45-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -139,6 +139,10 @@ msgstr ""
 #: abilian/sbe/apps/communities/actions.py:83
 #: abilian/sbe/apps/communities/views.py:221
 msgid "Settings"
+msgstr ""
+
+#: abilian/sbe/apps/communities/common.py:50
+msgid "d"
 msgstr ""
 
 #: abilian/sbe/apps/communities/forms.py:54
@@ -1009,10 +1013,6 @@ msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/index.html:52
 msgid "All conversations"
-msgstr ""
-
-#: abilian/sbe/apps/forum/templates/forum/index.html:115
-msgid "d"
 msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:15
