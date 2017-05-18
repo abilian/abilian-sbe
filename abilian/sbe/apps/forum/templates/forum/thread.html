@@ -93,9 +93,11 @@
         {% endcall %}
     {%endfor%}
 </span>
-<hr>
 {% endif %}
+{% if is_manager %}
+<hr>
 {{show_all_viewers(viewers)}}
+{% endif %}
 </div>
 <script>
 var opened = false;
