@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-18 12:00-0700\n"
+"POT-Creation-Date: 2017-05-18 12:06-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -1056,7 +1056,7 @@ msgstr "Posté par %(creator)s"
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:46
 msgid "created"
-msgstr "créé à"
+msgstr "créé"
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:54
 msgid "last reply"
