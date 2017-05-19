@@ -29,7 +29,7 @@ from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import default_view
 
 from ..communities.blueprint import Blueprint
-from ..communities.common import object_viewers
+from ..communities.common import activity_time_format, object_viewers
 from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
@@ -93,29 +93,6 @@ def get_viewed_posts(entities):
             nb_viewed_posts[entity] = len(entity.posts) - 1
 
         return nb_viewed_posts
-
-
-def activity_time_format(time):
-    current_date = datetime.utcnow()
-    time_diffrence = current_date - time
-    month_abbreviation = time.strftime('%B')[:3]
-    days, hours, minutes, seconds = time_diffrence.days, time_diffrence.seconds // 3600, time_diffrence.seconds // 60, time_diffrence.seconds
-
-    if time.year == current_date.year:
-        if time.month == current_date.month:
-            if time.day == current_date.day:
-                if minutes < 1:
-                    return "{}s".format(seconds)
-                elif minutes > 60:
-                    return "{}h".format(hours)
-                else:
-                    return "{}m".format(minutes % 60)
-            else:
-                return "{}d".format(days)
-        else:
-            return "{} {}".format(month_abbreviation, time.day)
-    else:
-        return "{} {}".format(month_abbreviation, str(time.year))
 
 
 def get_viewed_times(entities):
@@ -247,6 +224,9 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw['is_closed'] = self.obj.closed
         kw['is_manager'] = is_manager(user=current_user)
         kw['viewers'] = object_viewers(self.obj)
+        kw['views'] = get_viewed_times([self.obj])
+        kw['participants'] = {post.creator for post in self.obj.posts}
+        kw['activity_time_format'] = activity_time_format
         viewtracker.record_hit(entity=self.obj, user=current_user)
         return kw
 

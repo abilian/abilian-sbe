@@ -1,6 +1,6 @@
 {% extends base_template %}
 {% from "macros/box.html" import m_box_content with context %}
-{%from "forum/_macros.html" import forum_menu %}
+{% from "forum/_macros.html" import forum_menu %}
 
 
 {%- macro m_field(field, horizontal=False, label_width=2, field_width=8) %}
@@ -14,7 +14,7 @@
 
   {%- set css_class = kwargs.pop('class_', '') %}
   {%- set standard_field = field.type not in ('CSRFTokenField',) %}
-  {%-  if standard_field and field.type not in ('BooleanField',) %}
+  {%- if standard_field and field.type not in ('BooleanField',) %}
     {%- set css_class =  'form-control ' + css_class %}
   {%- endif %}
 
@@ -25,9 +25,11 @@
   {%- if is_hidden %}
     {{ field(**kwargs) }}
   {%- else %}
-    <div class="form-group{% if field.errors and not field.form %} has-error{% endif %}{% if field.flags.required %} required{% endif %}">
+    <div
+        class="form-group{% if field.errors and not field.form %} has-error{% endif %}{% if field.flags.required %} required{% endif %}">
       {%- if with_label and not is_hidden %}
-        <label class="control-label {%- if horizontal %} col-sm-{{ label_width }} {%- endif %}" for="{{ field.id }}">{{ field.label.text }}</label>
+        <label class="control-label {%- if horizontal %} col-sm-{{ label_width }} {%- endif %}"
+               for="{{ field.id }}">{{ field.label.text }}</label>
       {%- endif %}
 
       {%- if horizontal and standard_field %}
@@ -52,13 +54,13 @@
       {%- endif %}
 
       {%- if field.errors and not field.form %}
-        {%- if 'FieldList' in field.type  %}
+        {%- if 'FieldList' in field.type %}
           <span class="help-inline text-danger">
           {% for error in field.errors %}
             {% if 'dict' in error.__class__.__name__ %}
-              {% if not loop.first %}<br />{% endif %}
+              {% if not loop.first %}<br/>{% endif %}
               {% for key, val in error.iteritems() %}
-                {{ field._field_nameTolabel[key] }}&nbsp;:&nbsp;{{val|join(', ')}}
+                {{ field._field_nameTolabel[key] }}&nbsp;:&nbsp;{{ val|join(', ') }}
               {% endfor %}
             {% else %}
               {{ error |safe }}
@@ -84,7 +86,9 @@
 {%- macro m_form(form, fields=(), action="", method="POST", enctype="multipart/form-data",
                  horizontal=False, id=None, role="form",
                  label_width=2, field_width=6) %}
-  <form action="{{ action }}" method="{{ method }}" enctype="{{ enctype }}" {%- if horizontal %}class="form-horizontal" {%- endif %} {%- if id %} id="{{ id }}" {%- endif %} role="{{ role }}"  novalidate>
+  <form action="{{ action }}" method="{{ method }}" enctype="{{ enctype }}"
+        {%- if horizontal %}class="form-horizontal" {%- endif %} {%- if id %} id="{{ id }}" {%- endif %}
+        role="{{ role }}" novalidate>
 
     {%- for field in (fields or form) %}
       {{ m_field(field, horizontal=horizontal, label_width=label_width, field_width=field_width) }}
@@ -92,9 +96,9 @@
 
     <div class="form-group form-actions">
       <div class="{%- if horizontal %}col-sm-{{ field_width }} col-sm-push-{{ label_width }}{%- endif %}">
-      {%- for button in g.view.buttons %}
-        {{ button.render() }}
-      {%- endfor %}
+        {%- for button in g.view.buttons %}
+          {{ button.render() }}
+        {%- endfor %}
       </div>
     </div>
 
@@ -106,9 +110,9 @@
   {%- endblock %}
 
   {%- call m_box_content(view.title) %}
-   {%- block sidebar %}
+    {%- block sidebar %}
 
-      {%- endblock %}
+    {%- endblock %}
 
 
 
