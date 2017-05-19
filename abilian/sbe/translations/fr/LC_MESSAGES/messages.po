@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-18 15:01-0700\n"
+"POT-Creation-Date: 2017-05-19 11:13-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -143,7 +143,19 @@ msgstr "Membres"
 msgid "Settings"
 msgstr "Paramètres"
 
-#: abilian/sbe/apps/communities/common.py:52
+#: abilian/sbe/apps/communities/common.py:41
+msgid "s"
+msgstr "s"
+
+#: abilian/sbe/apps/communities/common.py:43
+msgid "m"
+msgstr "m"
+
+#: abilian/sbe/apps/communities/common.py:44
+msgid "h"
+msgstr "h"
+
+#: abilian/sbe/apps/communities/common.py:47
 msgid "d"
 msgstr "j"
 
