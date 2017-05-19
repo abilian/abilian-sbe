@@ -29,7 +29,7 @@ from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import default_view
 
 from ..communities.blueprint import Blueprint
-from ..communities.common import object_viewers, activity_time_format
+from ..communities.common import activity_time_format, object_viewers
 from ..communities.views import default_view_kw
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread

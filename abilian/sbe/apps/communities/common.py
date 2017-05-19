@@ -3,14 +3,15 @@
 Forum views
 """
 
-from flask import current_app, g
-from flask_login import current_user
 from datetime import datetime
 
+from flask import current_app, g
+from flask_babel import format_date
+from flask_login import current_user
+
+from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import is_manager
 from abilian.services.viewtracker import viewtracker
-from abilian.i18n import _l
-from flask_babel import format_date
 
 
 def object_viewers(entity):
@@ -31,6 +32,9 @@ def object_viewers(entity):
 
 
 def activity_time_format(time):
+    if not time:
+        return ""
+
     current_date = datetime.utcnow()
     time_diffrence = current_date - time
     month_abbreviation = format_date(time, "MMM")

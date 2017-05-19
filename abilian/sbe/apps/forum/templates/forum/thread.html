@@ -3,6 +3,7 @@
 {%- from "macros/user.html" import m_user_link, m_user_photo %}
 {%- from "macros/box.html" import m_box_content, m_box_menu -%}
 {%- from "macros/form.html" import m_field -%}
+
 {%- from "community/macros.html" import viewers_snapshot -%}
 {%- from "community/macros.html" import show_all_viewers -%}
 
@@ -17,7 +18,12 @@
 
     <article class="thread">
       {%- set post = thread.posts[0] %}
-      <h2 class="thread-current-title">{{ thread.title }} <i class="fa fa-angle-right" aria-hidden="true"></i> <font class="thread-current-replies" color="silver">{{(thread.posts|length)-1}} replies</font></h2>
+      <h2 class="thread-current-title">{{ thread.title }} <i class="fa fa-angle-right" aria-hidden="true"></i> <font class="thread-current-replies" color="silver">{{(thread.posts|length)-1}} {{_("replies")}}</font></h2>
+
+      <h2 class="thread-current-title">{{ thread.title }} <i class="fa fa-angle-right" aria-hidden="true"></i>
+        <font class="thread-current-replies" color="silver">{{ (thread.posts|length)-1}} replies</font>
+      </h2>
+
 
       <div>
         {{ _("Posted by %(creator)s", creator=m_user_link(thread.creator)) }}
@@ -26,8 +32,8 @@
         {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
         {{ m_post_edit_link(post) }}
       </div>
-      
-       {{viewers_snapshot(viewers)}}
+
+      {{ viewers_snapshot(viewers) }}
 
       <div class="media post thread-content" style="margin-bottom: -38px;">
         <div class="media-left">
@@ -39,88 +45,95 @@
         <div class="media-body">
           {{ m_post_content(thread.posts[0]) }}
         </div>
-        <div class="media-post-tail"></div>
-          <br>
-           <div class="viewers-panel-container">
-        <ul class="viewers-panel-info">
-        <li><span>{{_('created')}}</span><br>
-            {% call m_user_link(thread.creator) %}
-            {{ m_user_photo(thread.creator, size=22) }}
-            {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(thread.created_at) }}</span>
-        </li>
-        {% set replies = thread.posts %}
-        {% if replies|length > 1 %}
-        <li>
-            <span>{{_('last reply')}}</span><br>{% call m_user_link(replies[-1].creator) %}
-            {{ m_user_photo(replies[-1].creator, size=22) }}
-            {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(replies[-1].created_at) }}</span>
-        </li>
-        {% endif %}
-        <li>
-            <center><span class="viewers-panel-count">{{ thread.posts|length-1 }}</span><br><span>{{_('replies')}}</span></center>
-        </li>
-        <li>{% if views[thread] %}
-            <span class="viewers-panel-count">{{ views[thread] }}</span>
-            {% else %}
-            <span class="viewers-panel-count">0</span>
-            {% endif %}<br><span>{{_('views')}}</span>
-        </li>
-        <li>
-            <span class="viewers-panel-count">{{participants|length}}</span><br><span>{{_('participants')}}</span>
-        </li>
-        <li class="viewers-panel-posters">
-        {% for user in thread.get_frequent_posters(4) %}
-            {% call m_user_link(user) %}
-            {{ m_user_photo(user, size=32) }}
-            {% endcall %}
-        {%endfor%}
-        </li>
-        <li>
-        </li>
-    </ul>
-    {% set frequent_posters = thread.get_frequent_posters(6) %}
-    {% if is_manager or frequent_posters %}
-    <button onclick="show_panel_info()" class="viewers-panel-button">
-             <span id="panel-direction" class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
-    </button>
-    {% endif %}
-</div>
-<div class="viewers-panel-content" style="{%if is_manager %}padding-bottom: 9px;{% endif %}">
-{% if frequent_posters %}
-<p>{{_('Frequent Posters')}}</p>
-<span>
-   {% for user in frequent_posters %}
-        {% call m_user_link(user) %}
-        {{ m_user_photo(user, size=32) }}
-        {% endcall %}
-    {%endfor%}
-</span>
-{% endif %}
-{% if frequent_posters and is_manager %}<hr>{% endif %}
-{% if is_manager %}
-{{show_all_viewers(viewers)}}
-{% endif %}
-</div>
-<script>
-    var opened = false;
 
-    function show_panel_info() {
-        if (opened == false) {
-            $(".viewers-panel-posters").fadeOut();
-            $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-up");
-            $(".viewers-panel-content").fadeIn();
-            $(".thread-content").css("margin-bottom", "15px");
-            opened = true;
-        }
-        else {
-            $(".viewers-panel-posters").fadeIn();
-            $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-down");
-            $(".viewers-panel-content").fadeOut();
-            $(".thread-content").css("margin-bottom", "-38px");
-            opened = false;
-        }
-    }
-</script>
+        <div class="media-post-tail"></div>
+
+        <br>
+        <div class="viewers-panel-container">
+          <ul class="viewers-panel-info">
+            <li><span>{{ _('created') }}</span><br>
+              {% call m_user_link(thread.creator) %}
+                {{ m_user_photo(thread.creator, size=22) }}
+              {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(thread.created_at) }}</span>
+            </li>
+            {% set replies = thread.posts %}
+            {% if replies|length > 1 %}
+              <li>
+                <span>{{ _('last reply') }}</span><br>{% call m_user_link(replies[-1].creator) %}
+                {{ m_user_photo(replies[-1].creator, size=22) }}
+              {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(replies[-1].created_at) }}</span>
+              </li>
+            {% endif %}
+            <li>
+              <center><span
+                  class="viewers-panel-count">{{ thread.posts|length-1 }}</span><br><span>{{ _('replies') }}</span>
+              </center>
+            </li>
+            <li>{% if views[thread] %}
+              <span class="viewers-panel-count">{{ views[thread] }}</span>
+            {% else %}
+              <span class="viewers-panel-count">0</span>
+            {% endif %}<br><span>{{ _('views') }}</span>
+            </li>
+            <li>
+              <span class="viewers-panel-count">{{ participants|length }}</span><br><span>{{ _('participants') }}</span>
+            </li>
+            <li class="viewers-panel-posters">
+              {% for user in thread.get_frequent_posters(4) %}
+                {% call m_user_link(user) %}
+                  {{ m_user_photo(user, size=32) }}
+                {% endcall %}
+              {% endfor %}
+            </li>
+            <li>
+            </li>
+          </ul>
+          {% set frequent_posters = thread.get_frequent_posters(6) %}
+          {% if is_manager or frequent_posters %}
+            <button onclick="show_panel_info()" class="viewers-panel-button">
+              <span id="panel-direction" class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+            </button>
+          {% endif %}
+        </div>
+
+        <div class="viewers-panel-content" style="{% if is_manager %}padding-bottom: 9px;{% endif %}">
+          {% if frequent_posters %}
+            <p>{{ _('Frequent Posters') }}</p>
+            <span>
+               {% for user in frequent_posters %}
+                 {% call m_user_link(user) %}
+                   {{ m_user_photo(user, size=32) }}
+                 {% endcall %}
+               {% endfor %}
+            </span>
+          {% endif %}
+          {% if frequent_posters and is_manager %}
+            <hr>
+          {% endif %}
+          {% if is_manager %}
+            {{ show_all_viewers(viewers) }}
+          {% endif %}
+        </div>
+
+        <script>
+          var opened = false;
+
+          function show_panel_info() {
+            if (opened == false) {
+              $(".viewers-panel-posters").fadeOut();
+              $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-up");
+              $(".viewers-panel-content").fadeIn();
+              $(".thread-content").css("margin-bottom", "15px");
+              opened = true;
+            } else {
+              $(".viewers-panel-posters").fadeIn();
+              $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-down");
+              $(".viewers-panel-content").fadeOut();
+              $(".thread-content").css("margin-bottom", "-38px");
+              opened = false;
+            }
+          }
+        </script>
       </div>
 
       {%- if thread.posts|length > 1 %}
@@ -136,7 +149,7 @@
       </ul>
 
       {%- if not is_closed %}
-       <br>
+        <br>
         <hr/>
         <div class="media">
           <div class="media-left">
@@ -144,7 +157,6 @@
               {{ m_user_photo(current_user, size=40) }}
             {% endcall %}
           </div>
-
 
           <div class="media-body">
             <h3 style="margin-top: 0;">{{ _("Post a comment") }}</h3>

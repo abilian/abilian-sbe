@@ -20,22 +20,22 @@
       <table class="thread-table" border="0">
         <tr>
           <th>
-          {{ _("Topic") }}
+            {{ _("Topic") }}
           </th>
           <th>
-          {{ _("Participants") }}
+            {{ _("Participants") }}
           </th>
           <th>
-          {{ _("Replies") }}
+            {{ _("Replies") }}
           </th>
           <th>
-          {{ _("Viewers") }}
+            {{ _("Viewers") }}
           </th>
           <th>
-          {{ _("Views") }}
+            {{ _("Views") }}
           </th>
           <th>
-          {{ _("Activity") }}
+            {{ _("Activity") }}
           </th>
         </tr>
         {% for thread in threads %}
@@ -62,21 +62,22 @@
   <tr>
     <td>
       <div class="entry">
-        <h4 class="thread-list-title"><a href="{{ thread_href }}" title="{{ thread.created_at | age(date_threshold='day') }}"
-               class="thread-title"> {{ thread.title }} </a></h4>
+        <h4 class="thread-list-title"><a href="{{ thread_href }}"
+                                         title="{{ thread.created_at | age(date_threshold='day') }}"
+                                         class="thread-title"> {{ thread.title }} </a></h4>
         {%- if thread.closed %}
           <i class="fa fa-lock fa-big"></i>
         {%- endif %}
       </div>
     </td>
     <td class="thread-frequent-posters">
-     {% call m_user_link(thread.creator) %}
+      {% call m_user_link(thread.creator) %}
         {{ m_user_photo(thread.creator, size=40) }}
       {%- endcall %}
 
       {% for p in thread.get_frequent_posters(5) %}
         {% call m_user_link(p) %}
-        <span class="thread-participants-logo">
+          <span class="thread-participants-logo">
           {{ m_user_photo(p, size=30) }}
         </span>
         {%- endcall %}
@@ -89,9 +90,10 @@
           {% if nb_viewed_posts[thread] %}
             <span style="color:gray;"></span>
             <span class="thread-hilightview"
-                  title="not viewed"><span class="badge thread-unread-posts">+{{ nb_viewed_posts[thread] }}</span></span>
+                  title="not viewed"><span
+                class="badge thread-unread-posts">+{{ nb_viewed_posts[thread] }}</span></span>
           {% endif %}
-          </div>
+        </div>
       </center>
     </td>
     <td style="width:10%;">
@@ -104,15 +106,16 @@
     </td>
     <td style="width:0%;">
       <center>
-        <span class="thread-viewed-times"> {% if nb_viewed_times[thread] %}{{ nb_viewed_times[thread] }}{% else %}0{% endif %}</span>
+        <span class="thread-viewed-times"> {% if nb_viewed_times[thread] %}{{ nb_viewed_times[thread] }}{% else %}
+          0{% endif %}</span>
       </center>
     </td>
     <td>
       <center>
           <span class="hidden-xs">
           <span class="divider"
-          {% set activity_time = activity_time_format(thread.last_post_at) %}
-                style="color:silver;">{{activity_time}}</span>
+              {% set activity_time = activity_time_format(thread.last_post_at) %}
+                style="color:silver;">{{ activity_time }}</span>
         </span>
       </center>
     </td>
