@@ -1,14 +1,18 @@
 {%- from "macros/user.html" import m_user_link, m_user_photo %}
 
-
-{% macro viewers_snapshot(viewers, label=_("Read by"), limit=4) %}
+{% macro viewers_snapshot(viewers, label=None, limit=4) %}
+  {% if not label %}
+    {% set label = _("Read by") %}
+  {% endif %}
   {% if viewers %}
     {% set nb_viewers = viewers|length %}
+
     <div class="manager-thread-viewers">
       <i class="fa fa-bookmark" aria-hidden="true" style="color:yellowgreen;"></i> {{ label }} :
       {% for viewer in viewers %}
         {% if loop.index <= limit %}
-          {{ _("%(viewer)s", viewer=m_user_link(viewer.user)) }} {% if loop.index < nb_viewers %},{% endif %}
+          {{ m_user_link(viewer.user) }}
+          {%- if loop.index < nb_viewers %},{% endif %}
         {% else %}
           {% if limit < nb_viewers %}
             {% if loop.last %}
@@ -22,19 +26,24 @@
 {% endmacro %}
 
 
-{% macro show_all_viewers(viewers, label=_("Read by")) %}
+{% macro show_all_viewers(viewers, label=None) %}
+  {% if not label %}
+    {% set label = _("Read by") %}
+  {% endif %}
   {% set nb_viewers=viewers|length %}
   <p class="viewed">
     {{ label }}
-    <font color="silver"> {{ nb_viewers }} {{_("member")}}{% if nb_viewers > 1 %}s{% endif %} </font>
+    <span style="color: silver;"> {{ nb_viewers }} {{ _("member") }}
+      {%- if nb_viewers > 1 %}s{% endif %} </span>
   </p>
+
   {% if viewers %}
     {% for viewer in viewers %}
       <p>
         {% call m_user_link(viewer.user) %}
           {{ m_user_photo(viewer.user, size=30) }}
         {% endcall %}
-        {{ _("%(viewer)s", viewer=m_user_link(viewer.user)) }}
+        {{ m_user_link(viewer.user) }}
         <span
             style="color:silver;">- {{ viewer.viewed_at | age(date_threshold='day') }}</span>
       </p>

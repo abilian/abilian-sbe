@@ -32,6 +32,9 @@ def object_viewers(entity):
 
 
 def activity_time_format(time):
+    if not time:
+        return ""
+
     current_date = datetime.utcnow()
     time_diffrence = current_date - time
     month_abbreviation = format_date(time, "MMM")
