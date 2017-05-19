@@ -42,7 +42,7 @@
         <div class="media-post-tail"></div>
           <br>
            <div class="viewers-panel-container">
-    <ul class="viewers-panel-info">
+        <ul class="viewers-panel-info">
         <li><span>{{_('created')}}</span><br>
             {% call m_user_link(thread.creator) %}
             {{ m_user_photo(thread.creator, size=22) }}
@@ -102,22 +102,24 @@
 {% endif %}
 </div>
 <script>
-var opened = false;
-function show_panel_info(){
-  if(opened==false){
-      $(".viewers-panel-posters").fadeOut();
-      $("#panel-direction").attr("class","glyphicon glyphicon-chevron-up");
-      $( ".viewers-panel-content" ).fadeIn();
-      $(".thread-content").css("margin-bottom","15px");
-      opened=true;
-  }else{
-      $(".viewers-panel-posters").fadeIn();
-      $("#panel-direction").attr("class","glyphicon glyphicon-chevron-down");
-      $( ".viewers-panel-content" ).fadeOut();
-      $(".thread-content").css("margin-bottom","-38px");
-      opened=false;
-  }
-}
+    var opened = false;
+
+    function show_panel_info() {
+        if (opened == false) {
+            $(".viewers-panel-posters").fadeOut();
+            $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-up");
+            $(".viewers-panel-content").fadeIn();
+            $(".thread-content").css("margin-bottom", "15px");
+            opened = true;
+        }
+        else {
+            $(".viewers-panel-posters").fadeIn();
+            $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-down");
+            $(".viewers-panel-content").fadeOut();
+            $(".thread-content").css("margin-bottom", "-38px");
+            opened = false;
+        }
+    }
 </script>
       </div>
 
