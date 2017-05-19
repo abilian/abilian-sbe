@@ -38,13 +38,13 @@ def activity_time_format(time):
 
     if days == 0:
         if minutes < 1:
-            return u"{}s".format(seconds)
+            return u"{}{}".format(seconds, _l(u"s"))
         if minutes < 60:
-            return u"{}m".format(minutes % 60)
-        return u"{}h".format(hours)
+            return u"{}{}".format(minutes % 60, _l(u"m"))
+        return u"{}{}".format(hours, _l(u"h"))
 
     if days < 30:
-        return u"{}{}".format(days,_l(u"d"))
+        return u"{}{}".format(days, _l(u"d"))
 
     if time.year == current_date.year:
         return u"{} {}".format(month_abbreviation, time.day)
