@@ -5,9 +5,8 @@ Forum views
 
 from datetime import datetime
 
-from flask import current_app, g
+from flask import g
 from flask_babel import format_date
-from flask_login import current_user
 
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import is_manager
@@ -31,26 +30,30 @@ def object_viewers(entity):
         return viewers
 
 
-def activity_time_format(time):
+def activity_time_format(time, now=None):
     if not time:
         return ""
 
-    current_date = datetime.utcnow()
-    time_diffrence = current_date - time
+    if not now:
+        now = datetime.utcnow()
+    time_delta = now - time
     month_abbreviation = format_date(time, "MMM")
-    days, hours, minutes, seconds = time_diffrence.days, time_diffrence.seconds // 3600, time_diffrence.seconds // 60, time_diffrence.seconds
+    days, hours, minutes, seconds = time_delta.days, time_delta.seconds // 3600, \
+        time_delta.seconds // 60, time_delta.seconds
+
+    if days == 0 and hours == 0 and minutes == 0:
+        return u"{}{}".format(seconds, _l(u"s"))
+
+    if days == 0 and hours == 0:
+        return u"{}{}".format(minutes, _l(u"m"))
 
     if days == 0:
-        if minutes < 1:
-            return u"{}{}".format(seconds, _l(u"s"))
-        if minutes < 60:
-            return u"{}{}".format(minutes % 60, _l(u"m"))
         return u"{}{}".format(hours, _l(u"h"))
 
     if days < 30:
         return u"{}{}".format(days, _l(u"d"))
 
-    if time.year == current_date.year:
+    if time.year == now.year:
         return u"{} {}".format(month_abbreviation, time.day)
 
     return u"{} {}".format(month_abbreviation, str(time.year))
