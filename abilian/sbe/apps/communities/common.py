@@ -36,20 +36,17 @@ def activity_time_format(time):
     month_abbreviation = format_date(time, "MMM")
     days, hours, minutes, seconds = time_diffrence.days, time_diffrence.seconds // 3600, time_diffrence.seconds // 60, time_diffrence.seconds
 
+    if days == 0:
+        if minutes < 1:
+            return u"{}s".format(seconds)
+        if minutes < 60:
+            return u"{}m".format(minutes % 60)
+        return u"{}h".format(hours)
+
+    if days < 30:
+        return u"{}{}".format(days,_l(u"d"))
+
     if time.year == current_date.year:
-        if time.month == current_date.month:
-            if time.day == current_date.day:
-                if minutes < 1:
-                    return u"{}s".format(seconds)
-                elif minutes > 60:
-                    return u"{}h".format(hours)
-                else:
-                    return u"{}m".format(minutes % 60)
-            elif days == 0:
-                return u"{}h".format(hours)
-            else:
-                return u"{}{}".format(days,_l(u"d"))
-        else:
-            return u"{} {}".format(month_abbreviation, time.day)
-    else:
-        return u"{} {}".format(month_abbreviation, str(time.year))
+        return u"{} {}".format(month_abbreviation, time.day)
+
+    return u"{} {}".format(month_abbreviation, str(time.year))
