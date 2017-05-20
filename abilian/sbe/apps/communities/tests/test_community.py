@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import mock
 import sqlalchemy as sa
@@ -21,14 +21,14 @@ from .base import CommunityIndexingTestCase as BaseIndexingTestCase
 class CommunityUnitTestCase(BaseTestCase):
 
     def test_instanciation(self):
-        community = Community(name=u"My Community")
+        community = Community(name="My Community")
         assert isinstance(community.folder, Folder)
-        #assert isinstance(community.group, Group)
+        # assert isinstance(community.group, Group)
 
     def test_default_view_kw(self):
         # test exceptions are handled if passed an object with 'community' attribute
         # and no community_id in kwargs. and ValueError is properly raised
-        dummy = type('Dummy', (object,), {'community': None})()
+        dummy = type(b'Dummy', (object,), {b'community': None})()
         with self.assertRaises(ValueError) as cm:
             views.default_view_kw({}, dummy, 'dummy', 1)
 
@@ -39,7 +39,7 @@ class CommunityDbTestCase(BaseTestCase):
 
     def setUp(self):
         super(CommunityDbTestCase, self).setUp()
-        self.community = Community(name=u"My Community")
+        self.community = Community(name="My Community")
         self.db.session.add(self.community)
         self.db.session.commit()
 
@@ -58,13 +58,13 @@ class CommunityDbTestCase(BaseTestCase):
         self.db.session.commit()
 
     def test_rename(self):
-        NEW_NAME = u"My new name"
+        NEW_NAME = "My new name"
         self.community.rename(NEW_NAME)
         assert self.community.name == NEW_NAME
         assert self.community.folder.name == NEW_NAME
 
     def test_auto_slug(self):
-        assert self.community.slug == u'my-community'
+        assert self.community.slug == 'my-community'
 
     def test_membership(self):
         user = User.query.first()
@@ -161,12 +161,12 @@ class CommunityDbTestCase(BaseTestCase):
             if not table.exists(conn):
                 table.create(conn)
 
-        cc = CommunityContent(name=u'my content', community=self.community)
+        cc = CommunityContent(name='my content', community=self.community)
         self.session.add(cc)
         self.session.flush()
         assert hasattr(cc, 'community_slug')
         assert cc.community_slug == 'my-community'
-        assert cc.slug == u'my-content'
+        assert cc.slug == 'my-content'
 
         index_to = dict(CommunityContent.__indexation_args__['index_to'])
         assert 'community_slug' in index_to
@@ -178,17 +178,17 @@ class CommunityIndexingTestCase(BaseIndexingTestCase):
         svc = self.svc
         obj_types = (Community.entity_type,)
         with self.login(self.user_no_community):
-            res = svc.search(u'community', object_types=obj_types)
+            res = svc.search('community', object_types=obj_types)
             assert len(res) == 0
 
         with self.login(self.user):
-            res = svc.search(u'community', object_types=obj_types)
+            res = svc.search('community', object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
             assert hit['object_key'] == self.community.object_key
 
         with self.login(self.user_c2):
-            res = svc.search(u'community', object_types=obj_types)
+            res = svc.search('community', object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
             assert hit['object_key'] == self.c2.object_key
@@ -196,14 +196,13 @@ class CommunityIndexingTestCase(BaseIndexingTestCase):
     def test_default_view_kw_with_hit(self):
         with self.login(self.user):
             hit = self.svc.search(
-                u'community', object_types=(Community.entity_type,))[0]
+                'community', object_types=(Community.entity_type,))[0]
             kw = views.default_view_kw({}, hit, hit['object_type'], hit['id'])
 
         assert kw == {'community_id': self.community.slug}
 
 
 class CommunityWebTestCase(BaseIndexingTestCase):
-
     # FIXME later
     SQLALCHEMY_WARNINGS_AS_ERROR = False
 
@@ -238,20 +237,19 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             self.assert_200(response)
 
             data = {
-                '__action': u'edit',
-                'name': u'edited community',
-                'description': u'my community',
-                'linked_group': u'',
+                '__action': 'edit',
+                'name': 'edited community',
+                'description': 'my community',
+                'linked_group': '',
                 'type': 'participative',
             }
             response = self.client.post(url, data=data)
             assert response.status_code == 302
-            self.assertEqual(
-                response.headers['Location'],
-                u'http://localhost/communities/{}/'.format(self.community.slug))
+            assert response.headers['Location'] == \
+                   'http://localhost/communities/{}/'.format(self.community.slug)
 
             community = Community.query.get(self.community.id)
-            assert community.name == u'edited community'
+            assert community.name == 'edited community'
 
     def test_new(self):
         with self.client_login(self.user.email, 'azerty'):
@@ -282,7 +280,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             }
             response = self.client.post(url, data=data)
             assert response.status_code == 302
-            response.headers['Location'] == 'http://localhost' + url
+            assert response.headers['Location'] == 'http://localhost' + url
 
             membership = [
                 m for m in self.community.memberships if m.user == self.user_c2
@@ -294,6 +292,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             response = self.client.post(url, data=data)
             assert response.status_code == 302
             assert response.headers['Location'] == 'http://localhost' + url
+
             self.session.expire(membership)
             assert membership.role == 'manager'
 
@@ -311,8 +310,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             }
             response = self.client.post(url, data=data)
             assert response.status_code == 302
-            self.assertEqual(response.headers['Location'],
-                             u'http://localhost/communities/{}/members'.format(
-                                 self.community.slug))
+            assert response.headers['Location'] == \
+                   'http://localhost/communities/{}/members'.format(
+                       self.community.slug)
 
             assert self.user_c2 not in community.members
