@@ -10,6 +10,8 @@ from flask import current_app, g
 from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 
+from abilian.services.security import MANAGE
+
 
 def require_admin(func):
 
@@ -29,7 +31,7 @@ def require_manage(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
         community = getattr(g, 'community')
-        if community and community.has_permission(current_user, 'manage'):
+        if community and community.has_permission(current_user, MANAGE):
             return func(*args, **kwargs)
         security = current_app.services['security']
         is_admin = security.has_role(current_user, 'admin')
@@ -71,5 +73,28 @@ def has_access(community=None, user=None):
 
     if community is not None:
         return community.get_role(user) is not None
+
+    return False
+
+
+def is_manager(context=None, user=None):
+    svc = current_app.services['security']
+
+    if not user:
+        user = current_user
+    if user.is_anonymous:
+        return False
+
+    if context:
+        community = context.get('object').community
+    else:
+        community = g.community
+
+    if community.has_permission(user, MANAGE) or\
+            user == community.creator:
+        return True
+
+    if svc.has_role(user, 'admin'):
+        return True
 
     return False

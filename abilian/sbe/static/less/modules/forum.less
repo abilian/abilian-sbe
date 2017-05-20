@@ -15,7 +15,7 @@ ul.threads {
 
     .entry {
       position: relative;
-      top:7px;
+      top: 7px;
       min-height: @avatar-full-height;
       display: block;
       padding: 5px 5px @line-height-computed;
@@ -24,10 +24,11 @@ ul.threads {
       box-shadow: 0 6px 6px -8px silver;
       .border-right-radius(@border-radius-small);
 
-      
-
       > h4 {
         margin-top: 0;
+        > a {
+          color: cadetblue;
+        }
       }
 
       .details {
@@ -39,20 +40,29 @@ ul.threads {
           color: @gray;
         }
       }
+
       .comments {
         top: 10.6%;
         text-align: right;
 
-        > a {
-        position: relative;
-        left: -210px;top:-6px;
+        > p {
+          float: left;
+          .hilight-view {
+            position: relative;
+            color: coral;
+            top: 1px;
+            font-weight: bold;
+          }
         }
 
-      .divider{
-      position: relative;
-      top: 1px;
-      }
-      
+        > p > a {
+          position: relative;
+        }
+
+        .divider {
+          position: relative;
+          top: 1px;
+        }
       }
 
       @media (min-width: @screen-sm-min) {
@@ -75,8 +85,8 @@ ul.threads {
 
     .avatar {
       float: left;
-      position : relative;
-      top : 9px;
+      position: relative;
+      top: 9px;
       > img {
         .square(@avatar-size);
         margin-top: (@avatar-full-height - @avatar-size);
@@ -108,7 +118,10 @@ ul.threads {
 .thread {
 
   .posts {
-    .list-unstyled();    
+    .list-unstyled();
+    > li {
+      margin-bottom: -11px;
+    }
   }
 }
 
@@ -118,18 +131,35 @@ ul.threads {
   .date {
     .small();
     color: grey;
-  };
+  }
 
   .media-body {
-    border-left: 2px solid #FF7F66;
+    border-left: 2px solid yellowgreen;
+    background: ghostwhite;
     padding-top: 0.5em;
     padding-left: 0.5em;
+    border-radius: 2px 4px 4px 0;
+    text-align: justify;
+    padding-right: 9px;
+    box-shadow: 0 4px 2px -4px silver;
 
     .attachments img {
       vertical-align: middle;
-      }
+    }
   }
-  
+
+  .media-post-tail {
+    content: ' ';
+    position: relative;
+    width: 0;
+    height: 0;
+    border: 6px solid;
+    border-color: ghostwhite transparent transparent ghostwhite;
+    top: 0;
+    left: 63px;
+    z-index: 1;
+  }
+
   blockquote {
     font-size: inherit;
   }
@@ -146,8 +176,370 @@ ul.threads {
       max-width: 50%;
       margin-left: auto;
       color: @gray-dark;
-
     }
   }
 }
 
+// hilight not viewed number
+.thread-hilightview {
+  position: relative;
+  top: -0.4pt;
+  color: lightcoral;
+  font-weight: bold;
+}
+
+.thread-title {
+  text-decoration: none;
+  color: #858585;
+}
+
+.thread-participants-logo {
+  margin-right: -13px;
+  > .avatar {
+    border: 2px solid white;
+  }
+}
+
+.thread-list-title {
+  text-align: justify;
+  margin-right: 23px;
+  line-height: 21px;
+  font-size: 12pt;
+}
+
+.thread-title:hover {
+  text-decoration: none;
+  color: #858585;
+}
+
+//thread frequent posters
+.thread-frequent-posters {
+  position: relative;
+  left: -9px;
+}
+
+//first column in thread table
+.thread-user {
+  width: 4%;
+  position: relative;
+  left: -6px;
+}
+
+.community-header {
+  margin: 0;
+  margin-bottom: 19px;
+  position: relative;
+  left: 0;
+  font-size: 15pt;
+  color: silver;
+  top: -3px;
+}
+
+.forum-menu-container {
+  background: ghostwhite;
+  position: relative;
+  padding-right: 5px;
+  top: -15px;
+  width: auto;
+  padding-bottom: 52px;
+  border-radius: 0 0 3px 3px;
+  margin-bottom: 15px;
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+// The forum's menu
+.forum-menu, .forum-menu-admin {
+  position: relative;
+  float: right;
+  right: 1px;
+  top: 5.5px;
+  margin-bottom: -3px;
+
+  > button {
+    background: white;
+    border-radius: 3px;
+  }
+
+  > button:first-child {
+    background-color: yellowgreen;
+    border-radius: 3px;
+
+    > a {
+      color: white;
+    }
+
+    > a:first-child {
+      color: white;
+      font-weight: bold;
+    }
+
+  }
+
+  > a:hover {
+    color: gray;
+  }
+
+  > button > a {
+    text-decoration: none;
+    color: silver;
+  }
+
+  > button > a:hover {
+    color: gray;
+  }
+}
+
+.forum-menu-admin {
+  right: -488px;
+}
+
+.thread-viewers {
+  position: relative;
+  color: gray;
+}
+
+// the table of threads
+.thread-table {
+  width: 100%;
+
+  > tbody > tr {
+    border-bottom: 1px solid #e9e9e9;
+
+    > th:nth-child(n+3) {
+      text-align: center;
+    }
+  }
+
+  > tbody > tr:first-child {
+    color: #919191;
+    border-bottom: 4px solid ghostwhite;
+  }
+
+  > tbody > tr > td {
+    padding: 7px;
+  }
+
+  > tbody > tr > td > center > a {
+    text-decoration: none;
+  }
+
+  > tbody > tr > th {
+    font-weight: normal;
+
+    padding-bottom: 12px;
+  }
+
+  > tbody > tr:last-child {
+    border-bottom: 1px solid white;
+  }
+}
+
+// forum menu active button
+.forum-btn-active {
+  > a {
+    color: dimgray !important;
+  }
+}
+
+.forum-divider {
+  border-bottom: 1px dashed #eeeeee;
+  position: relative;
+  top: 17px;
+  margin-bottom: 32px;
+}
+
+.forum-thread-divider {
+  margin-top: 5px;
+  border: 1px dashed ghostwhite;
+}
+
+.forum-action {
+  border: none;
+  padding: 10px;
+}
+
+.forum-action-active {
+  border: none;
+  padding: 10px;
+  border-bottom: 2px solid gray;
+}
+
+//Thread replies
+.thread-replies {
+  text-decoration: none;
+  color: gray;
+  font-weight: bold;
+  position: relative;
+}
+
+//Thread viewed times
+.thread-viewed-times {
+  position: relative;
+  color: gray;
+}
+
+.thread-unread-posts {
+  background: yellowgreen;
+  font-size: 13px;
+}
+
+//forum number of conversations
+.forum-nb-conversation {
+  color: silver;
+  font-size: 12pt;
+}
+
+.manager-thread-viewers {
+  background: linear-gradient(to right, white, ghostwhite);
+  border-radius: 2px;
+  color: gray;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  padding-left: 8px;
+  position: relative;
+  top: 4px;
+  left: -7px;
+  width: 101%;
+}
+
+.thread-all {
+  position: relative;
+  left: 8px;
+
+  > a {
+    position: relative;
+    left: 4px;
+    color: gray;
+  }
+}
+
+.thread-current-title {
+  color: gray;
+  font-family: sans-serif;
+  font-size: 22pt;
+  padding-bottom: 8px;
+  border-bottom: 3px solid ghostwhite;
+}
+
+.thread-current-replies {
+  font-size: 14pt;
+  font-weight: normal;
+  position: relative;
+  top: -3.1px;
+}
+
+.viewed {
+  color: gray;
+  position: relative;
+  left: 2.5px;
+}
+
+.panel-body-pos {
+  position: relative;
+  top: -20px;
+}
+
+.members-download-btn {
+  float: right;
+  position: relative;
+  top: 39px;
+}
+
+.members-title {
+  position: relative;
+  font-weight: normal;
+  color: silver;
+  font-family: sans-serif;
+  top: 7px;
+  margin-bottom: 21px;
+}
+
+.members-last-activity {
+  position: relative;
+  top: 7.5px;
+}
+
+.viewers-panel-container {
+  border: 1px solid #e9e9e9;
+  margin-left: 48px;
+}
+
+.viewers-panel-info {
+  list-style: none;
+  display: inline-flex;
+  background: ghostwhite;
+  width: 100%;
+  padding-top: 5px;
+  padding-bottom: 6px;
+  margin-bottom: 0;
+  > li {
+    padding-right: 15px;
+    position: relative;
+    left: -26px;
+    > center > span {
+      color: gray;
+    }
+    > span {
+      color: gray;
+      line-height: 21px;
+      text-align: center;
+    }
+    > a > img {
+      position: relative;
+      top: -2px;
+    }
+    .viewers-panel-label {
+      color: #4e4e4e;
+    }
+  }
+  > li:nth-child(n+3) {
+    text-align: center;
+  }
+  > .viewers-panel-posters {
+    position: relative;
+    top: 7px;
+  }
+}
+
+.viewers-panel-count {
+  font-weight: bold;
+  color: #4e4e4e !important;
+}
+
+.viewers-panel-button {
+  position: relative;
+  border: none;
+  background: ghostwhite;
+  padding: 17px;
+  float: right;
+  top: -54px;
+  border-left: 1px solid #e9e9e9;
+  padding-left: 25px;
+  padding-right: 25px;
+  color: silver;
+}
+
+.viewers-panel-button:hover {
+  background: #e9e9e9;
+  color: #4e4e4e;
+}
+
+.viewers-panel-content {
+  border: 1px solid #e9e9e9;
+  background: ghostwhite;
+  padding-top: 17px;
+  padding-left: 11px;
+  margin-left: 48px;
+  padding-bottom: 19px;
+  margin-bottom: 2px;
+  display: none;
+  > p {
+    color: #4e4e4e;
+  }
+  > hr {
+    margin-left: -11px;
+    margin-top: 17px;
+    margin-bottom: 17px;
+  }
+}

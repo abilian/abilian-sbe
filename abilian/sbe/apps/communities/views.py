@@ -31,6 +31,7 @@ from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
+from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
@@ -224,9 +225,9 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
 
     def breadcrumb(self):
         return BreadcrumbItem(label=_(u'Settings'),
-                                  icon='cog',
-                                  url=Endpoint('communities.settings',
-                                                   community_id=g.community.slug))
+                              icon='cog',
+                              url=Endpoint('communities.settings',
+                                           community_id=g.community.slug))
 
     def before_populate_obj(self):
         form = self.form
@@ -410,6 +411,7 @@ def members():
     return render_template(
         "community/members.html",
         seconds_since_epoch=seconds_since_epoch,
+        is_manager=is_manager(user=current_user),
         memberships=memberships,
         threads_count=threads_count,
         csrf_token=csrf.field())

@@ -7,6 +7,7 @@ out.
 """
 from __future__ import absolute_import, print_function
 
+from collections import Counter
 from datetime import datetime
 from itertools import chain
 
@@ -14,7 +15,6 @@ from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
-from sqlalchemy.sql import cast, func, select
 from sqlalchemy.types import DateTime
 
 from abilian.core.entities import SEARCHABLE, Entity
@@ -22,6 +22,7 @@ from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 from abilian.services.indexing.adapter import SAAdapter
+from abilian.services.viewtracker import viewtracker
 
 
 class ThreadClosedError(RuntimeError):
@@ -61,6 +62,15 @@ class Thread(Entity):
     @hybrid_property
     def title(self):
         return self._title
+
+    def get_frequent_posters(self, limit):
+        all_posts = self.posts[1:]
+        posters_counter = Counter([e.creator for e in all_posts])
+        sorted_posters = posters_counter.most_common(limit)
+        frequent_posters = [
+            user for (user, nb_posts) in sorted_posters if user != self.creator
+        ]
+        return frequent_posters
 
     @title.setter
     def title(self, title):

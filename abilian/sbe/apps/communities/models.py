@@ -29,7 +29,8 @@ from abilian.services.indexing import indexable_role
 from abilian.services.security import Manager as MANAGER
 from abilian.services.security import Reader as READER
 from abilian.services.security import Writer as WRITER
-from abilian.services.security import Admin, Role, RoleType, security
+from abilian.services.security import Admin, Permission, Role, RoleType, \
+    security
 
 from . import signals
 
@@ -301,6 +302,8 @@ class Community(Entity):
         return self.get_role(user) is not None
 
     def has_permission(self, user, permission):
+
+        assert isinstance(permission, Permission)
         if user.has_role(Admin):
             return True
         role = self.get_role(user)

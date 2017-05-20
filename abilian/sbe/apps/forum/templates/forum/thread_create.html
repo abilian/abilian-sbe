@@ -1,0 +1,124 @@
+{% extends base_template %}
+{% from "macros/box.html" import m_box_content with context %}
+{% from "forum/_macros.html" import forum_menu %}
+
+
+{%- macro m_field(field, horizontal=False, label_width=2, field_width=8) %}
+  {%- set is_hidden = field.is_hidden or field.type in ('CSRFTokenField', 'HiddenField') %}
+  {%- set with_label = kwargs.pop('with_label', not is_hidden) %}
+  {%- set placeholder = '' %}
+
+  {%- if not with_label %}
+    {%- set placeholder = field.label.text %}
+  {%- endif %}
+
+  {%- set css_class = kwargs.pop('class_', '') %}
+  {%- set standard_field = field.type not in ('CSRFTokenField',) %}
+  {%- if standard_field and field.type not in ('BooleanField',) %}
+    {%- set css_class =  'form-control ' + css_class %}
+  {%- endif %}
+
+  {%- if field.flags.required %}
+    {%- set css_class = css_class + ' required' %}
+  {%- endif %}
+
+  {%- if is_hidden %}
+    {{ field(**kwargs) }}
+  {%- else %}
+    <div
+        class="form-group{% if field.errors and not field.form %} has-error{% endif %}{% if field.flags.required %} required{% endif %}">
+      {%- if with_label and not is_hidden %}
+        <label class="control-label {%- if horizontal %} col-sm-{{ label_width }} {%- endif %}"
+               for="{{ field.id }}">{{ field.label.text }}</label>
+      {%- endif %}
+
+      {%- if horizontal and standard_field %}
+        <div class="col-sm-{{ field_width }}">
+      {%- endif %}
+
+      {%- if field.type == 'CSRFTokenField' %}
+        {{ field(**kwargs) }}
+
+      {%- elif field.type == 'BooleanField' %}
+        <label class="checkbox-inline">
+          {# the 'nbsp' after the field is here because without any text bootstrap
+           misalign the checkbox :-( #}
+          {{ field(class_=css_class, **kwargs) }} {#- comment to prevent trailing whitespace cleanup by editors.. #}
+        </label>
+
+      {%- else %}
+        {%- if field.type == 'FileField' %}
+          {%- set css_class = css_class + ' input-file' %}
+        {%- endif %}
+        {{ field(class_=css_class, placeholder=placeholder, **kwargs)|safe }}
+      {%- endif %}
+
+      {%- if field.errors and not field.form %}
+        {%- if 'FieldList' in field.type %}
+          <span class="help-inline text-danger">
+          {% for error in field.errors %}
+            {% if 'dict' in error.__class__.__name__ %}
+              {% if not loop.first %}<br/>{% endif %}
+              {% for key, val in error.iteritems() %}
+                {{ field._field_nameTolabel[key] }}&nbsp;:&nbsp;{{ val|join(', ') }}
+              {% endfor %}
+            {% else %}
+              {{ error |safe }}
+            {% endif %}
+          {% endfor %}
+          </span>
+        {%- else %}
+          <span class="help-inline text-danger">{{ field.errors|join('<br />'|safe) }}</span>
+        {%- endif %}
+      {%- endif %}
+
+      {%- if field.description %}
+        <span class="help-block">{{ field.description|safe }}</span>
+      {%- endif %}
+
+      {%- if standard_field and horizontal %}
+        </div> {# when horizontal: close input div; else closes div.col-xs-12 before label #}
+      {%- endif %}
+    </div> {# form-group #}
+  {%- endif %}
+{%- endmacro %}
+
+{%- macro m_form(form, fields=(), action="", method="POST", enctype="multipart/form-data",
+                 horizontal=False, id=None, role="form",
+                 label_width=2, field_width=6) %}
+  <form action="{{ action }}" method="{{ method }}" enctype="{{ enctype }}"
+        {%- if horizontal %}class="form-horizontal" {%- endif %} {%- if id %} id="{{ id }}" {%- endif %}
+        role="{{ role }}" novalidate>
+
+    {%- for field in (fields or form) %}
+      {{ m_field(field, horizontal=horizontal, label_width=label_width, field_width=field_width) }}
+    {%- endfor %}
+
+    <div class="form-group form-actions">
+      <div class="{%- if horizontal %}col-sm-{{ field_width }} col-sm-push-{{ label_width }}{%- endif %}">
+        {%- for button in g.view.buttons %}
+          {{ button.render() }}
+        {%- endfor %}
+      </div>
+    </div>
+
+  </form>
+{%- endmacro %}
+
+{% block content %}
+  {%- block before_form %}
+  {%- endblock %}
+
+  {%- call m_box_content(view.title) %}
+    {%- block sidebar %}
+
+    {%- endblock %}
+
+
+
+    {{ m_form(form, horizontal=True, action=request.path, id="edit-form") }}
+  {%- endcall %}
+
+  {%- block after_form %}
+  {%- endblock %}
+{% endblock %}

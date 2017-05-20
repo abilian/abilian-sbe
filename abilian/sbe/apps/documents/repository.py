@@ -5,7 +5,7 @@ from __future__ import absolute_import, print_function
 
 import sqlalchemy as sa
 
-from abilian.services.security import READ, security
+from abilian.services.security import READ, Permission, security
 
 from .models import CmisObject, Document, Folder
 
@@ -158,6 +158,7 @@ class Repository(object):
     # Security / access rights
     #
     def has_permission(self, user, permission, obj):
+        assert isinstance(permission, Permission)
         return security.has_permission(user, permission, obj, inherit=True)
 
     def has_access(self, user, obj):

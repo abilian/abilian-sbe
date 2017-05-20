@@ -4,11 +4,13 @@
 from __future__ import absolute_import, print_function
 
 from flask import url_for as url_for_orig
-from flask import g
+from flask import current_app, g
+from flask_login import current_user
 from typing import Any, Dict
 
 from abilian.i18n import _l
-from abilian.services.security import MANAGE, WRITE, security
+from abilian.sbe.apps.communities.security import is_manager
+from abilian.services.security import MANAGE, WRITE, Admin, Manager, security
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 from .repository import repository
@@ -211,6 +213,13 @@ _actions = (
             and ctx['object'].content_type in ('text/html',
                                                'text/plain',
                                                'application/pdf'))),
+    #viewers
+    DocumentModalAction('documents:content',
+        'document_viewers',
+        _l(u'Viewers list'),
+        icon='user',
+        condition=lambda ctx: is_manager(context=ctx),
+        url=lambda ctx: url_for(".document_viewers", doc_id=ctx['object'].id)),
     # edit
     DocumentModalAction(
         'documents:content', 'edit', _l(u'Edit properties'),

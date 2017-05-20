@@ -1,0 +1,20 @@
+{% extends "wiki/_base.html" %}
+
+{% from "macros/box.html" import m_box_menu, m_box_content %}
+{%- from "community/macros.html" import show_all_viewers -%}
+
+{% block content %}
+  {% call m_box_content() %}
+    <div class="wiki-page">
+      <h1>{{ page.title }}</h1>
+
+      <div class="wiki-page-info">
+        <span class="last-modified">
+          {{ _("Last modified by") }} {{ page.last_modified_by }}
+          {{ _("on") }} {{ page.updated_at | datetimeformat }}</span>
+      </div>
+      <br>
+      {{show_all_viewers(viewers)}}
+    </div>
+  {% endcall %}
+{% endblock %}

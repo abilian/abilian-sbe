@@ -1,35 +1,35 @@
 {% extends "community/_base.html" %}
 
-{%-  from "macros/user.html" import m_user_link, m_user_photo %}
+{%- from "macros/user.html" import m_user_link, m_user_photo %}
 {%- from "macros/box.html" import m_box_content, m_box_menu -%}
 {%- from "forum/_macros.html" import m_postattachments -%}
-{%- set is_manager = g.community.has_permission(current_user, 'manage') %}
+
 
 {%- block content %}
-    {#  TODO #}
-    <p>
-      <a href="{{ url_for('.index', community_id=g.community.slug) }}">
-        <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
-    </p>
+  {#  TODO #}
+  <p>
+    <a href="{{ url_for('.index', community_id=g.community.slug) }}">
+      <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
+  </p>
 
-    <div class="thread-header">
-      <div class="author">
-        {% call m_user_link(thread.creator, css="pull-left") %}
-          {{ m_user_photo(thread.creator, size=55) }}
-        {% endcall %}
-        <div>{{ m_user_link(thread.creator) }}</div>
-        <div>{{ thread.created_at | age(date_threshold='day') }}</div>
-      </div>
-      <h2>{{ thread.title }}</h2>
+  <div class="thread-header">
+    <div class="author">
+      {% call m_user_link(thread.creator, css="pull-left") %}
+        {{ m_user_photo(thread.creator, size=55) }}
+      {% endcall %}
+      <div>{{ m_user_link(thread.creator) }}</div>
+      <div>{{ thread.created_at | age(date_threshold='day') }}</div>
     </div>
+    <h2>{{ thread.title }}</h2>
+  </div>
 
-    {%- if thread.posts|length > 1 %}
-      <div class="comments">
-        {%- for post in thread.posts %}
-          {{ m_postattachments(post) }}
-        {%- endfor %}
-      </div>
-    {%- endif %}
+  {%- if thread.posts|length > 1 %}
+    <div class="comments">
+      {%- for post in thread.posts %}
+        {{ m_postattachments(post) }}
+      {%- endfor %}
+    </div>
+  {%- endif %}
 
 {%- endblock %}
 
@@ -57,13 +57,13 @@
 
 {%- block modals %}
   <div class="modal fade" id="modal-delete" role="dialog"
-      data-keyboard="true">
+       data-keyboard="true">
 
     <div class="modal-dialog">
       <div class="modal-content">
         <form
-          action="{{ url_for('.thread_delete', thread_id=thread.id, community_id=g.community.slug) }}"
-          method="POST" style="margin-bottom: 0;">
+            action="{{ url_for('.thread_delete', thread_id=thread.id, community_id=g.community.slug) }}"
+            method="POST" style="margin-bottom: 0;">
 
           {{ csrf.field() }}
 

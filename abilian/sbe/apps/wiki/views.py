@@ -9,6 +9,7 @@ from os.path import dirname, join
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, redirect, \
     render_template, request
+from flask_login import current_user
 from markdown import markdown
 from markupsafe import Markup
 from six import text_type
@@ -23,6 +24,7 @@ from abilian.i18n import _, _l, _n
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.views import \
     default_view_kw as community_dv_kw
+from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
 from abilian.web.nav import BreadcrumbItem
@@ -30,6 +32,7 @@ from abilian.web.util import url_for
 from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
     default_view
 
+from ..communities.common import object_viewers
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
@@ -93,6 +96,7 @@ class BasePageView(object):
     """
         kw = super(BasePageView, self).template_kwargs
         kw['page'] = self.obj
+        kw['viewers'] = object_viewers(self.obj)
         return kw
 
     def init_object(self, args, kwargs):
@@ -146,10 +150,19 @@ class PageView(BasePageView, ObjectView):
                         community_id=g.community.slug))
 
         actions.context['object'] = self.obj
+        viewtracker.record_hit(entity=self.obj, user=current_user)
         return args, kwargs
 
 
 route('/page/')(PageView.as_view('page'))
+
+
+class PageViewers(PageView):
+
+    template = 'wiki/page_readers.html'
+
+
+route('/viewers')(PageViewers.as_view('page_viewers'))
 
 
 class PageEdit(BasePageView, ObjectEdit):

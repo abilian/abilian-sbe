@@ -5,6 +5,7 @@
 {% from "macros/table.html" import m_table %}
 
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
+{%- from "community/macros.html" import viewers_snapshot -%}
 
 {% macro user_markup(user) %}
   <a href="{{ url_for("social.user", user_id=user.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
@@ -72,6 +73,7 @@
             {%- endif %}
           {%- endif %}
         </small>
+        {{viewers_snapshot(viewers,_("viewed by"))}}
       </div>
     </div>
 

@@ -2,12 +2,28 @@
 
 {% from "macros/box.html" import m_box_menu, m_box_content %}
 {% from "forum/_macros.html" import m_postattachments %}
+{%from "forum/_macros.html" import forum_menu %}
 
+{% block forumcontent %}
 
-{% block content %}
   {% call m_box_content(_("Recent conversations attachments")) %}
+
+    {%- block forumsidebar %}
+
+      <div class="forum-menu-container">
+        <div class="forum-menu" role="group">
+          {%- set global_actions = actions.for_category('forum:global') %}
+          {%- for action in global_actions %}
+            {{ forum_menu(action) }}
+          {%- endfor %}
+        </div>
+      </div>
+
+    {%- endblock %}
+
     {% for month, posts in grouped_posts %}
       <h2>{{ month }}</h2>
+
 
       <ul class="attachments-archives">
         {% for post in posts %}
@@ -19,3 +35,4 @@
     {% endfor %}
   {% endcall %}
 {% endblock %}
+

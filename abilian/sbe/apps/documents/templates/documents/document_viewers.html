@@ -1,0 +1,79 @@
+{% extends "documents/document.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu with context %}
+{% from "macros/audit.html" import m_audit_log %}
+{% from "macros/table.html" import m_table %}
+
+{% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
+{%- from "community/macros.html" import viewers_snapshot -%}
+{%- from "community/macros.html" import show_all_viewers -%}
+
+{% macro user_markup(user) %}
+  <a href="{{ url_for("social.user", user_id=user.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
+    {{ user }}
+  </a>
+{% endmacro %}
+
+{% block content %}
+  {% call m_box_content(title=_("Document view")) %}
+
+    {%- if doc.antivirus_required %}
+      <div style="margin: 5px 0;">
+        <i class="fa fa-file-o fa-lg"></i>
+        {{ m_breadcrumbs2(breadcrumbs) }}
+      </div>
+
+      <hr/>
+
+      <p class="small alert alert-warning">
+      <span class="fa-stack">
+        <i class="fa fa-search fa-stack-2x"></i>
+        <i class="fa fa-bug fa-stack-1x text-danger"></i>
+      </span>
+        {% trans %}Waiting for virus check...{% endtrans %}
+      </p>
+    {%- elif not doc.antivirus_ok %}
+      <p class="alert alert-danger">
+        <i class="fa fa-exclamation-triangle"></i>
+        {%- trans %}Virus found. Access disabled.{%- endtrans %}
+      </p>
+    {%- endif %}
+
+
+    <div>
+
+      <h2><i class="fa fa-file-o fa-lg"></i>
+        {{ m_breadcrumbs2(breadcrumbs) }}
+      </h2>
+
+      <div>
+        <small>
+          {{ _('Created: %(date)s (%(age)s) by %(creator)s',
+               date=(doc.created_at | datetimeformat('short')),
+              age=doc.created_at | age(add_direction=False),
+              creator=user_markup(doc.creator)) }}
+          {%- if doc.updated_at != doc.created_at %}
+            <br/>
+            {{ _('Last modification: %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
+            {%- set lock = doc.lock %}
+            {%- if lock %}
+              <div class="lock">
+                <i class="fa fa-lock"></i>
+                {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
+                  user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
+              </div>
+            {%- endif %}
+          {%- endif %}
+        </small>
+        <hr>
+      {{show_all_viewers(viewers,_("viewed by"))}}
+      </div>
+    </div>
+
+    {%- if doc.description %}
+      <p>{{ doc.description }}</p>
+      <p>&nbsp;</p>
+    {%- endif %}
+  {% endcall %}
+{% endblock %}
+

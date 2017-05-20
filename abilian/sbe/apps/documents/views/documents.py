@@ -20,11 +20,13 @@ from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.services import audit_service
 from abilian.services.conversion import converter
 from abilian.services.image import FIT, resize
+from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf, url_for
 from abilian.web.action import actions
 from abilian.web.frontend import add_to_recent_items
 from abilian.web.views import default_view
 
+from ...communities.common import object_viewers
 from ..models import Document
 from ..repository import repository
 from ..tasks import convert_document_content, preview_document
@@ -57,6 +59,7 @@ def document_view(doc_id):
 
     has_preview = doc.has_preview()
     audit_entries = audit_service.entries_for(doc)
+    viewtracker.record_hit(entity=doc, user=current_user)
 
     ctx = dict(
         doc=doc,
@@ -64,7 +67,8 @@ def document_view(doc_id):
         breadcrumbs=bc,
         folder=doc.parent,
         has_preview=has_preview,
-        csrf_token=csrf.field())
+        csrf_token=csrf.field(),
+        viewers=object_viewers(doc))
     return render_template("documents/document.html", **ctx)
 
 
@@ -86,6 +90,35 @@ def document_edit(doc_id):
         flash(_(u"You didn't change any property."), "success")
 
     return redirect(url_for(doc))
+
+
+@route("/doc/<int:doc_id>/viewers", methods=['GET'])
+def document_viewers(doc_id):
+    doc = get_document(doc_id)
+    check_read_access(doc)
+    doc.ensure_antivirus_scheduled()
+    #db.session.commit()
+
+    bc = breadcrumbs_for(doc)
+    actions.context['object'] = doc
+    """if doc.content_type.startswith("image/"):
+        add_to_recent_items(doc, "image")
+    else:
+        add_to_recent_items(doc, "document")"""
+
+    has_preview = doc.has_preview()
+    audit_entries = audit_service.entries_for(doc)
+
+    ctx = dict(
+        doc=doc,
+        audit_entries=audit_entries,
+        breadcrumbs=bc,
+        folder=doc.parent,
+        has_preview=has_preview,
+        csrf_token=csrf.field(),
+        viewers=object_viewers(doc))
+
+    return render_template("documents/document_viewers.html", **ctx)
 
 
 @route("/doc/<int:doc_id>/delete", methods=['POST'])
