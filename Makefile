@@ -117,7 +117,6 @@ flake8:
 	flake8 abilian tests
 
 mypy:
-	-mypy --py2 --ignore-missing-imports --follow-imports=skip abilian
 	-mypy abilian
 
 format:
