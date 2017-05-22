@@ -86,8 +86,6 @@
   {% endif %}
 
   <script>
-  console.log($("#wizard-emails").val());
-
   function delete_current(e){
     $(e).closest('tr').fadeOut('slow', function(){
          $(e).closest('tr').remove();
@@ -99,15 +97,12 @@
                  delete tmp_emails[i];
                }
                  });
-         //clean the list
+
          tmp_emails = jQuery.grep(tmp_emails, function(n, i){
              return (n !== "" && n != null);
             });
 
          $("#wizard-emails").val(JSON.stringify(tmp_emails));
-
-         console.log($("#wizard-emails").val());
-
 
           $("#account-nb").html($(".table-condensed tr").length-1)
           if ($(".table-condensed tr").length == 1){
@@ -126,14 +121,12 @@
         jQuery.each(tmp_emails, function(i, val) {
              if(val.email == e.id) 
                {
-                 console.log(e.id);
                  tmp_emails[i].role = $(e).val();
                }
                  });
 
          
          $("#wizard-emails").val(JSON.stringify(tmp_emails));
-         console.log($("#wizard-emails").val());
       }
   </script>
 

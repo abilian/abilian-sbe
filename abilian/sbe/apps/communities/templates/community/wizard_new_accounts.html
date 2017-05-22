@@ -129,49 +129,31 @@
       $(this).css("border","0px");
          }  
      });
-   
-   //validation 
-         if (nb_missed == 0){
-        
-         //adding new users to the list
+
+    if (nb_missed == 0){
       var existing_account = $("#existing_account").val();
       existing_account = jQuery.parseJSON(existing_account);
-      ////
+
       var new_accounts = $("#new_accounts").val();
       new_accounts = jQuery.parseJSON(new_accounts);
-      ////
+
       var new_accounts_list = [];
       for(var n=0; n<={{nb_new_accounts}};n++){
-        console.log("-->"+n);
          
          if($("#first_name"+n).length!=0){
 
          var tmp_account = {};
-         console.log(n+'------------------------------');
-
          tmp_account["email"] = $("#email"+n).val();
-
          tmp_account["first_name"] = $("#first_name"+n).val();
-         console.log($("#first_name"+n).val());
-
          tmp_account["last_name"] = $("#last_name"+n).val();
-         console.log($("#last_name"+n).val());
-
          tmp_account["role"] = $("#role"+n).val();
-         console.log($("#role"+n).val());
-         ///adding
-         console.log(tmp_account);
          new_accounts_list.push(tmp_account);
-         console.log("--------------------------------------");
-        
        }
 
       }
       
       $("#new_accounts").val(JSON.stringify(new_accounts_list));
-      console.log(JSON.stringify(new_accounts_list));
-      
-    //submitting
+
     $("#wizard-form").submit();
       }  
    }
@@ -189,13 +171,11 @@
                  delete tmp_emails[i];
                }
                  });
-         //clean the list
+
          tmp_emails = jQuery.grep(tmp_emails, function(n, i){
              return (n !== "" && n != null);
             });
          $("#new_accounts").val(JSON.stringify(tmp_emails));
-         
-          console.log($("#new_accounts").val());
 
          if($(".table-condensed tr").length == 1){
          $(".table-condensed").closest('tr').remove();
@@ -205,7 +185,6 @@
        });
 
    }
-
    if ($(".table-condensed tr").length == 1){
    	      $(".table-condensed").closest('tr').remove();
           $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");

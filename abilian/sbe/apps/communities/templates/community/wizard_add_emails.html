@@ -118,7 +118,6 @@ $(".users-wizard-next").click(function(){
     var form_selection = $("#wizard-form-choice").val();
 
     if (form_selection == "emails-tag"){
-         //get emails tag before submit
          $('#wizard-emails').val($("#collection").val());
          $('.form-inline').submit();  
     }
@@ -134,11 +133,10 @@ $( "#csv_file" ).change(function() {
      $("#csv-file-name").val(file_local[file_local.length-1]);
      $('.users-wizard-next').css({"background": "yellowgreen","color": "white"});
      $('.users-wizard-next').attr("disabled", false);
-     //disable emails tag
+
      $("#collection").tagsinput('removeAll');
      $(".content_tags").attr("placeholder","Emails Collection");
      $(".email-count").html("");
-     //change choice
      $("#wizard-form-choice").val("csv-file");
 });
 
