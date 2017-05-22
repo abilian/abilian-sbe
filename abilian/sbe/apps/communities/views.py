@@ -452,78 +452,81 @@ def wizard_read_csv(csv):
 @csrf.protect
 @tab('members')
 def check_members_wizard():
-    g.breadcrumb.append(BreadcrumbItem(
-        label=_(u'Members'),
-        url=Endpoint('communities.members', community_id=g.community.slug))
-    )
+    if request.method == "POST":
+        g.breadcrumb.append(BreadcrumbItem(
+            label=_(u'Members'),
+            url=Endpoint('communities.members', community_id=g.community.slug))
+        )
 
-    is_csv = False
-    if request.form.get("wizard-emails"):
-        wizard_emails = request.form.get("wizard-emails").split(",")
-        existing_accounts_object,existing_members_objects,final_email_list = _wizard_check_query(wizard_emails)
-        final_email_list_json = json.dumps(final_email_list)
-        wizard_emails = final_email_list_json
+        is_csv = False
+        if request.form.get("wizard-emails"):
+            wizard_emails = request.form.get("wizard-emails").split(",")
+            existing_accounts_object,existing_members_objects,final_email_list = _wizard_check_query(wizard_emails)
+            final_email_list_json = json.dumps(final_email_list)
+            wizard_emails = final_email_list_json
 
-    else:
-        is_csv = True
-        accounts_data = wizard_read_csv(request.files['csv_file'])
-        existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
+        else:
+            is_csv = True
+            accounts_data = wizard_read_csv(request.files['csv_file'])
+            existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
 
-        existing_accounts_object = existing_accounts["account_objects"]
-        existing_accounts_csv_roles = existing_accounts["csv_roles"]
+            existing_accounts_object = existing_accounts["account_objects"]
+            existing_accounts_csv_roles = existing_accounts["csv_roles"]
 
-        final_email_list_json = json.dumps(final_email_list)
+            final_email_list_json = json.dumps(final_email_list)
 
-    return render_template(
-        "community/wizard_check_members.html",
-        existing_accounts_object=existing_accounts_object,
-        csv_roles=existing_accounts_csv_roles if is_csv else False,
-        wizard_emails=final_email_list_json,
-        existing_members_objects=existing_members_objects,
-        csrf_token=csrf.field())
+        return render_template(
+            "community/wizard_check_members.html",
+            existing_accounts_object=existing_accounts_object,
+            csv_roles=existing_accounts_csv_roles if is_csv else False,
+            wizard_emails=final_email_list_json,
+            existing_members_objects=existing_members_objects,
+            csrf_token=csrf.field())
+
+    return redirect(url_for(".members", community_id=community.slug))
 
 
 @route("/<string:community_id>/members/wizard/step3", methods=['GET','POST'])
 @csrf.protect
 @tab('members')
 def new_accounts_wizard():
-    g.breadcrumb.append(BreadcrumbItem(
-        label=_(u'Members'),
-        url=Endpoint('communities.members', community_id=g.community.slug))
-    )
+    if request.method == "POST":
+        g.breadcrumb.append(BreadcrumbItem(
+            label=_(u'Members'),
+            url=Endpoint('communities.members', community_id=g.community.slug))
+        )
 
-    wizard_emails = request.form.get("wizard-emails")
-    wizard_accounts = json.loads(wizard_emails)
+        wizard_emails = request.form.get("wizard-emails")
+        wizard_accounts = json.loads(wizard_emails)
 
-    wizard_existing_account = {}
-    new_accounts = []
+        wizard_existing_account = {}
+        new_accounts = []
 
-    for user in wizard_accounts:
-        if user["status"] == "existing":
-            wizard_existing_account[user["email"]] = user["role"]
+        for user in wizard_accounts:
+            if user["status"] == "existing":
+                wizard_existing_account[user["email"]] = user["role"]
 
-        elif user["status"] == "new":
-            new_accounts.append(user)
+            elif user["status"] == "new":
+                new_accounts.append(user)
 
-    existing_account = json.dumps(wizard_existing_account)
+        existing_account = json.dumps(wizard_existing_account)
 
-    return render_template(
-        "community/wizard_new_accounts.html",
-        existing_account=existing_account,
-        new_accounts=new_accounts,
-        csrf_token=csrf.field())
+        return render_template(
+            "community/wizard_new_accounts.html",
+            existing_account=existing_account,
+            new_accounts=new_accounts,
+            csrf_token=csrf.field())
+
+    return redirect(url_for(".members", community_id=community.slug))
 
 
 @route("/<string:community_id>/members/wizard/complete", methods=['POST'])
 @csrf.protect
 def wizard_saving():
-
-    #add existing accounts to community
     existing_accounts = request.form.get("existing_account")
     existing_accounts = json.loads(existing_accounts)
     community = g.community._model
 
-    #check if there is existing accounts & save
     if len(existing_accounts):
         for email,role in existing_accounts.iteritems():
             user = User.query.filter(User.email == email).first()
@@ -534,7 +537,6 @@ def wizard_saving():
 
         db.session.commit()
 
-    #check if there is new accounts and save
     new_accounts = request.form.get("new_accounts")
     new_accounts = json.loads(new_accounts)
     if len(new_accounts):
