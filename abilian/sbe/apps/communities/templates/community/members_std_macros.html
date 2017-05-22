@@ -8,10 +8,10 @@
   <tr style="color:silver;">
     <th class="hide" style="">Last Name</th>
     <th class="hide">First Name</th>
-    <th>{{ _('Name') }}</th>
+    <th style="text-align: left !important;">{{ _('Name') }}</th>
     <th>{{ _('Posts') }}</th>
-    <th class="hide" >{# last activity seconds since epoch #}</th>
-    <th width="20%" style="position: relative;left: -52px;">{{ _('Last activity in this community') }}</th>
+    <th class="hide">{# last activity seconds since epoch #}</th>
+    <th width="20%">{{ _('Last activity in this community') }}</th>
     <th width="10%"><center>{{ _('Role') }}</center></th>
     {% if is_manager %}
       <th>{{ _('Action') }}</th>
@@ -61,9 +61,9 @@
       </div>
     </div>
   </td>
-  <td style="width: 18%;position: relative;left: 14px;">{{threads_count[user]}}</td>
+<td class="members-data" style="width: 18%;"><span class="badge">{{threads_count[user]}}</span></td>
   <td class="hide">{{ seconds_since_epoch(last_activity_date) }}</td>
-  <td class="members-last-activity">{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</td>
+  <td class="members-data">{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</td>
   <!-- bug jinja : do not use [not is_manager] -->
   {%- if is_manager == False %}
     <td>{{ _(role) }}</td>
@@ -87,7 +87,7 @@
         {{ csrf_token }}
         <input type="hidden" name="membership" value="{{ m_id }}">
         <input type="hidden" name="user" value="{{ user.id }}">
-        <button type="submit" name="action" value="delete"
+        <button style="position: relative;left: 4.5px;" type="submit" name="action" value="delete"
                 class="btn btn-danger" data-original-title="" title=""><i
             class="fa fa-times"></i></button>
       </form>
