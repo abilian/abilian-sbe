@@ -26,7 +26,7 @@ from flask_mail import Message
 from werkzeug.utils import secure_filename
 import requests
 
-from abilian.core.extensions import db, mail
+from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
 from abilian.core.util import utc_dt
