@@ -641,7 +641,7 @@ def download_multiple(folder):
     def zip_folder(zipfile, folder, path=''):
         for doc in folder.documents:
             doc_path = rel_path(path, doc)
-            zipfile.writestr(doc_path, doc.content)
+            zipfile.writestr(doc_path, doc.content or b"")
 
         for subfolder in folder.filtered_subfolders:
             zip_folder(zipfile, subfolder, rel_path(path, subfolder))
@@ -655,7 +655,7 @@ def download_multiple(folder):
     zip_fn = temp_factory(prefix='tmp-' + current_app.name + '-', suffix='.zip')
     with ZipFile(zip_fn, "w") as zipfile:
         for doc in docs:
-            zipfile.writestr(doc.title, doc.content)
+            zipfile.writestr(doc.title, doc.content or b"")
         for subfolder in folders:
             zip_folder(zipfile, subfolder, subfolder.title)
 
