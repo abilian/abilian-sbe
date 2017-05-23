@@ -24,16 +24,16 @@
                         <div class="tab-content col-sm-12">   
                             <div class="tab-pane active" id="tab1">
                                 <br>
-                                <h3 class="titre ">Existing and new members</h3>
-                                <h4 class="sous_titre "> Check if the user is already a member of the community and if he currently has an account on the platform
+                                <h3 class="titre ">{{_("Existing and new members")}}</h3>
+                                <h4 class="sous_titre "> {{_("Check if the user is already a member of the community and if he currently has an account on the platform")}}
                                 </h4>
                                 <br>
                                 <!-- DEJA MEMBRE DE LA COMMUNAUTE -->
                                  {% if existing_members_objects %}
                                 <div style="border: 1px solid silver;padding-top: 19px;padding-left: 20px;width: 96.7%;">
-                                    <label class="">Already a member of the community</label>
+                                    <label class="">{{_("Already a member of the community")}}</label>
                                     <h6 class=" sous_titre_step2">
-                                        The users below are already members of the community :
+                                        {{_("The users below are already members of the community :")}}
                                     </h6>
                                 <br>
 
@@ -55,9 +55,9 @@
 
                                  <div class="form-group bloc col-lg-12 col-sm-offset-1">
 
-                                    <label class="">New member(s) of the community <span class="existing-account" style="color: silver;font-size: 11pt;font-weight: normal;"> ( <span id="account-nb">{{existing_users|length}}</span> from the insered emails )</span></label>
+                                    <label class="">{{_("New member(s) of the community")}} <span class="existing-account" style="color: silver;font-size: 11pt;font-weight: normal;"> ( <span id="account-nb">{{existing_users|length}}</span> {{_("from the insered emails")}} )</span></label>
                                     <h6 class=" sous_titre_step2">
-                                        The users below already have an account on the platform, and is going to be added to the community
+                                        {{_("The users below already have an account on the platform, and is going to be added to the community")}}
                                     </h6>
                                     
                                     
@@ -111,7 +111,7 @@
     <script>
    if ($(".table-condensed tr").length == 1){
    	      $(".table-condensed").closest('tr').remove();
-          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
           $("#wizard-msg").fadeIn();
    } 
 

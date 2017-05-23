@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-23 12:08-0700\n"
+"POT-Creation-Date: 2017-05-23 12:30-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -295,6 +295,7 @@ msgid "Add Members"
 msgstr "Ajouter les membres"
 
 #: abilian/sbe/apps/communities/templates/community/_base.html:4
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:27
 msgid "Existing and new members"
 msgstr "Membres existants et nouveaux"
 
@@ -440,6 +441,42 @@ msgstr "Télécharger le modèle de fichier CSV"
 #: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:58
 msgid "Browse"
 msgstr "Parcourir"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:28
+msgid ""
+"Check if the user is already a member of the community and if he "
+"currently has an account on the platform"
+msgstr ""
+"Vérifier si l'utilisateur est déjà membre de la communauté et s'il "
+"possède actuellement un compte sur la plateforme"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:34
+msgid "Already a member of the community"
+msgstr "Déjà membre de la communauté"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:36
+msgid "The users below are already members of the community :"
+msgstr "Les utilisateurs ci-dessous sont déjà membres de la communauté :"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:58
+msgid "New member(s) of the community"
+msgstr "Nouveau(x) membre(s) de la communauté"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:58
+msgid "from the insered emails"
+msgstr "à partir des e-mails insérés"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:60
+msgid ""
+"The users below already have an account on the platform, and is going to "
+"be added to the community"
+msgstr ""
+"Les uilisateurs ci-dessous possèdent déjà un compte sur la plateforme, et"
+" is vont être ajoutés à la communauté"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:114
+msgid "There is no existing accounts"
+msgstr "Il n'y a pas de comptes existants"
 
 #: abilian/sbe/apps/documents/actions.py:148
 #: abilian/sbe/apps/documents/templates/documents/document.html:47
