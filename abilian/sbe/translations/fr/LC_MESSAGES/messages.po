@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-23 14:45-0700\n"
+"POT-Creation-Date: 2017-05-23 15:33-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -135,7 +135,7 @@ msgstr "Agenda"
 #: abilian/sbe/apps/communities/views.py:404
 #: abilian/sbe/apps/communities/views.py:424
 #: abilian/sbe/apps/communities/views.py:455
-#: abilian/sbe/apps/communities/views.py:491
+#: abilian/sbe/apps/communities/views.py:493
 #: abilian/sbe/apps/social/templates/social/groups.html:39
 msgid "Members"
 msgstr "Membres"
@@ -164,7 +164,7 @@ msgstr "j"
 #: abilian/sbe/apps/communities/forms.py:54
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:11
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:11
-#: abilian/sbe/apps/communities/views.py:612
+#: abilian/sbe/apps/communities/views.py:614
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:17
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:15
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:17
@@ -253,39 +253,40 @@ msgstr "Communauté %(name)s créé avec succès"
 msgid "Community destroyed."
 msgstr "Communauté supprimée"
 
-#: abilian/sbe/apps/communities/views.py:529
-msgid "Threre are no new members"
-msgstr ""
+#: abilian/sbe/apps/communities/views.py:473
+#: abilian/sbe/apps/communities/views.py:531
+msgid "No new members were found"
+msgstr "Aucun nouveau membre n'a été trouvé"
 
-#: abilian/sbe/apps/communities/views.py:563
+#: abilian/sbe/apps/communities/views.py:565
 #, fuzzy
 msgid "Members added Successfully"
 msgstr "Les paramètres de la communautés ont été enregistrés"
 
-#: abilian/sbe/apps/communities/views.py:576
+#: abilian/sbe/apps/communities/views.py:578
 msgid "You must provide a user."
 msgstr "Vous devez spécifier un utilisateur."
 
-#: abilian/sbe/apps/communities/views.py:613
+#: abilian/sbe/apps/communities/views.py:615
 msgid "email"
 msgstr "email"
 
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:14
-#: abilian/sbe/apps/communities/views.py:614
+#: abilian/sbe/apps/communities/views.py:616
 msgid "Last activity in this community"
 msgstr "Dernière activité dans cette communauté"
 
 #: abilian/sbe/apps/communities/templates/community/members.html:96
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:15
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:13
-#: abilian/sbe/apps/communities/views.py:615
+#: abilian/sbe/apps/communities/views.py:617
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:33
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:17
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:91
 msgid "Role"
 msgstr "Rôle"
 
-#: abilian/sbe/apps/communities/views.py:637
+#: abilian/sbe/apps/communities/views.py:639
 #, python-format
 msgid "%(community)s members"
 msgstr "membres de %(community)s "
@@ -1679,4 +1680,7 @@ msgstr "(source)"
 
 #~ msgid "from the insered emails"
 #~ msgstr "à partir des e-mails insérés"
+
+#~ msgid "Threre are no new members"
+#~ msgstr ""
 

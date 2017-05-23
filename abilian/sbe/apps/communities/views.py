@@ -528,7 +528,7 @@ def wizard_saving():
     new_accounts = json.loads(new_accounts)
 
     if not (existing_accounts or new_accounts):
-        flash(_(u"Threre are no new members"), 'warning')
+        flash(_(u"No new members were found"), 'warning')
         return redirect(url_for(".members", community_id=g.community.slug))
 
     if existing_accounts:
