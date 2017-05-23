@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-23 15:33-0700\n"
+"POT-Creation-Date: 2017-05-23 16:04-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -363,6 +363,10 @@ msgstr "Lu par"
 msgid "member"
 msgstr "membre"
 
+#: abilian/sbe/apps/communities/templates/community/members.html:13
+msgid "Add members"
+msgstr "Ajouter des membres"
+
 #: abilian/sbe/apps/communities/templates/community/members.html:15
 msgid "Download list"
 msgstr "Télécharger la liste"
@@ -439,9 +443,17 @@ msgstr "Importer les membres à partir d'un fichier CSV"
 msgid "Download CSV file model"
 msgstr "Télécharger le modèle de fichier CSV"
 
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:56
+msgid "Choose a File"
+msgstr "Choisir le fichier"
+
 #: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:58
 msgid "Browse"
 msgstr "Parcourir"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:137
+msgid "Emails Collection"
+msgstr "Collection Emails"
 
 #: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:28
 msgid ""

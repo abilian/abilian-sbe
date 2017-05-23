@@ -37,7 +37,7 @@
                                         
                                         <div class="input-group col-sm-offset-1 col-lg-10 input">
                                         <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                                        <input placeholder="Emails Collection" class="form-control" id="collection" type="text" value="" data-role="tagsinput">
+                                        <input placeholder="{{_('Emails Collection')}}" class="form-control" id="collection" type="text" value="" data-role="tagsinput">
                                         </div>  
 
                                                <!-- AJOUTER LES MEMBRES PAR FICHIER CSV -->
@@ -53,7 +53,7 @@
                                           </div><!-- /.col-lg-6 -->
                                           <div class="col-sm-offset-1 col-lg-10">
                                             <div class="input-group">
-                                              <input type="text" class="form-control input" placeholder="Choisir le fichier" id="csv-file-name" disabled>
+                                              <input type="text" class="form-control input" placeholder="{{_('Choose a File')}}" id="csv-file-name" disabled>
                                               <span class="input-group-btn">
                                                 <button class="btn btn-default input" type="button" onclick="fileadd()">{{_("Browse")}}</button>
                                               </span>
@@ -134,7 +134,7 @@ $( "#csv_file" ).change(function() {
      $('.users-wizard-next').attr("disabled", false);
 
      $("#collection").tagsinput('removeAll');
-     $(".content_tags").attr("placeholder","Emails Collection");
+     $(".content_tags").attr("placeholder","{{_('Emails Collection')}}");
      $(".email-count").html("");
      $("#wizard-form-choice").val("csv-file");
 });
