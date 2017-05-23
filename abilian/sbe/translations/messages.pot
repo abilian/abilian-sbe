@@ -7,16 +7,16 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.3.3.dev35+ga159fd9.d20170519\n"
+"Project-Id-Version: abilian-sbe 0.1.dev708+gc3efc05.d20170523\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-19 12:25+0200\n"
+"POT-Creation-Date: 2017-05-23 11:32-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.4.0\n"
+"Generated-By: Babel 2.3.4\n"
 
 #: abilian/sbe/apps/calendar/actions.py:38
 msgid "Create a new event"
@@ -131,13 +131,16 @@ msgstr ""
 
 #: abilian/sbe/apps/communities/actions.py:78
 #: abilian/sbe/apps/communities/templates/community/members.html:7
-#: abilian/sbe/apps/communities/views.py:344
+#: abilian/sbe/apps/communities/views.py:404
+#: abilian/sbe/apps/communities/views.py:424
+#: abilian/sbe/apps/communities/views.py:455
+#: abilian/sbe/apps/communities/views.py:491
 #: abilian/sbe/apps/social/templates/social/groups.html:39
 msgid "Members"
 msgstr ""
 
 #: abilian/sbe/apps/communities/actions.py:83
-#: abilian/sbe/apps/communities/views.py:221
+#: abilian/sbe/apps/communities/views.py:227
 msgid "Settings"
 msgstr ""
 
@@ -145,21 +148,22 @@ msgstr ""
 msgid "s"
 msgstr ""
 
-#: abilian/sbe/apps/communities/common.py:47
+#: abilian/sbe/apps/communities/common.py:48
 msgid "m"
 msgstr ""
 
-#: abilian/sbe/apps/communities/common.py:48
+#: abilian/sbe/apps/communities/common.py:51
 msgid "h"
 msgstr ""
 
-#: abilian/sbe/apps/communities/common.py:51
+#: abilian/sbe/apps/communities/common.py:54
 msgid "d"
 msgstr ""
 
 #: abilian/sbe/apps/communities/forms.py:54
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:11
-#: abilian/sbe/apps/communities/views.py:402
+#: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:11
+#: abilian/sbe/apps/communities/views.py:612
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:17
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:15
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:17
@@ -222,55 +226,64 @@ msgstr ""
 msgid "role_member"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:217
+#: abilian/sbe/apps/communities/views.py:223
 msgid "Edit community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:254
+#: abilian/sbe/apps/communities/views.py:260
 msgid "Community settings saved successfully."
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:258
+#: abilian/sbe/apps/communities/views.py:264
 msgid "Create community"
 msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/home.html:61
-#: abilian/sbe/apps/communities/views.py:264
+#: abilian/sbe/apps/communities/views.py:270
 msgid "Create new community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:267
+#: abilian/sbe/apps/communities/views.py:273
 #, python-format
 msgid "Community %(name)s created successfully"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:283
+#: abilian/sbe/apps/communities/views.py:289
 msgid "Community destroyed."
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:366
+#: abilian/sbe/apps/communities/views.py:529
+msgid "Threre are no new members"
+msgstr ""
+
+#: abilian/sbe/apps/communities/views.py:563
+msgid "Members added Successfully"
+msgstr ""
+
+#: abilian/sbe/apps/communities/views.py:576
 msgid "You must provide a user."
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:403
+#: abilian/sbe/apps/communities/views.py:613
 msgid "email"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:13
-#: abilian/sbe/apps/communities/views.py:404
+#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:14
+#: abilian/sbe/apps/communities/views.py:614
 msgid "Last activity in this community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members.html:94
+#: abilian/sbe/apps/communities/templates/community/members.html:96
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:15
-#: abilian/sbe/apps/communities/views.py:405
+#: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:13
+#: abilian/sbe/apps/communities/views.py:615
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:33
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:17
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:91
 msgid "Role"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views.py:427
+#: abilian/sbe/apps/communities/views.py:637
 #, python-format
 msgid "%(community)s members"
 msgstr ""
@@ -334,43 +347,77 @@ msgstr ""
 msgid "member"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members.html:14
+#: abilian/sbe/apps/communities/templates/community/members.html:15
 msgid "Download list"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members.html:82
+#: abilian/sbe/apps/communities/templates/community/members.html:84
 msgid "Add a member"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members.html:89
+#: abilian/sbe/apps/communities/templates/community/members.html:91
 msgid "User"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members.html:96
+#: abilian/sbe/apps/communities/templates/community/members.html:98
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:79
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:75
+#: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:76
 msgid "Member"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members.html:97
+#: abilian/sbe/apps/communities/templates/community/members.html:99
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:80
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:76
+#: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:77
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:40
 msgid "Manager"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members.html:102
+#: abilian/sbe/apps/communities/templates/community/members.html:104
 msgid "Add"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:18
+#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:12
+msgid "Posts"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:17
+#: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:15
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:19
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:93
 msgid "Action"
 msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:56
+#: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:54
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:28
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:36
 msgid "account disabled"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:8
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:9
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:9
+msgid "Members Wizard"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
+msgid "Add Members"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
+msgid "Existing and new members"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
+msgid "Create Accounts"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:148
