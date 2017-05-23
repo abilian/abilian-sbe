@@ -185,7 +185,7 @@
    }
    if ($(".table-condensed tr").length == 1){
    	      $(".table-condensed").closest('tr').remove();
-          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='4' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
           $("#wizard-msg").fadeIn();
    } 
     </script>

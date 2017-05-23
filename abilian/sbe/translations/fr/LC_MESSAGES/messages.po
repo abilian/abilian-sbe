@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-23 12:50-0700\n"
+"POT-Creation-Date: 2017-05-23 14:45-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -461,10 +461,6 @@ msgstr "Les utilisateurs ci-dessous sont déjà membres de la communauté :"
 #: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:58
 msgid "New member(s) of the community"
 msgstr "Nouveau(x) membre(s) de la communauté"
-
-#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:58
-msgid "from the insered emails"
-msgstr "à partir des e-mails insérés"
 
 #: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:60
 msgid ""
@@ -1680,4 +1676,7 @@ msgstr "(source)"
 
 #~ msgid "New User Accounts"
 #~ msgstr ""
+
+#~ msgid "from the insered emails"
+#~ msgstr "à partir des e-mails insérés"
 
