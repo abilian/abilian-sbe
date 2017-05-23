@@ -424,12 +424,10 @@ def add_member_emails_wizard():
         label=_(u'Members'),
         url=Endpoint('communities.members', community_id=g.community.slug))
     )
-    memberships = _members_query().all()
 
     return render_template(
         "community/wizard_add_emails.html",
         seconds_since_epoch=seconds_since_epoch,
-        memberships=memberships,
         csrf_token=csrf.field())
 
 
@@ -463,8 +461,6 @@ def check_members_wizard():
             wizard_emails = request.form.get("wizard-emails").split(",")
             existing_accounts_object,existing_members_objects,final_email_list = _wizard_check_query(wizard_emails)
             final_email_list_json = json.dumps(final_email_list)
-            wizard_emails = final_email_list_json
-
         else:
             is_csv = True
             accounts_data = wizard_read_csv(request.files['csv_file'])
@@ -523,11 +519,17 @@ def new_accounts_wizard():
 @route("/<string:community_id>/members/wizard/complete", methods=['POST'])
 @csrf.protect
 def wizard_saving():
+    community = g.community._model
     existing_accounts = request.form.get("existing_account")
     existing_accounts = json.loads(existing_accounts)
-    community = g.community._model
+    new_accounts = request.form.get("new_accounts")
+    new_accounts = json.loads(new_accounts)
 
-    if len(existing_accounts):
+    if not (existing_accounts or new_accounts):
+        flash(_(u"Threre are no new members"), 'warning')
+        return redirect(url_for(".members", community_id=g.community.slug))
+
+    if existing_accounts:
         for email,role in existing_accounts.iteritems():
             user = User.query.filter(User.email == email).first()
             community.set_membership(user, role)
@@ -537,9 +539,7 @@ def wizard_saving():
 
         db.session.commit()
 
-    new_accounts = request.form.get("new_accounts")
-    new_accounts = json.loads(new_accounts)
-    if len(new_accounts):
+    if new_accounts:
         for account in new_accounts:
             email = account["email"]
             first_name = account["first_name"]
@@ -560,10 +560,8 @@ def wizard_saving():
 
             send_reset_password_instructions(user)
 
-        flash(_(u"Members added Successfully"), 'success')
-        return redirect(url_for(".members", community_id=community.slug))
-
-    return "wizard saving"
+    flash(_(u"Members added Successfully"), 'success')
+    return redirect(url_for(".members", community_id=community.slug))
 
 
 @route("/<string:community_id>/members", methods=["POST"])
