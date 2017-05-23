@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-23 11:32-0700\n"
+"POT-Creation-Date: 2017-05-23 12:08-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -290,6 +290,18 @@ msgstr "Rôle"
 msgid "%(community)s members"
 msgstr "membres de %(community)s "
 
+#: abilian/sbe/apps/communities/templates/community/_base.html:4
+msgid "Add Members"
+msgstr "Ajouter les membres"
+
+#: abilian/sbe/apps/communities/templates/community/_base.html:4
+msgid "Existing and new members"
+msgstr "Membres existants et nouveaux"
+
+#: abilian/sbe/apps/communities/templates/community/_base.html:4
+msgid "Create Accounts"
+msgstr "Créer les comptes"
+
 #: abilian/sbe/apps/communities/templates/community/edit.html:7
 msgid "Delete community"
 msgstr "Supprimer la communauté"
@@ -363,14 +375,14 @@ msgstr "Utilisateur"
 
 #: abilian/sbe/apps/communities/templates/community/members.html:98
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:79
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:75
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:73
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:76
 msgid "Member"
 msgstr "Membre"
 
 #: abilian/sbe/apps/communities/templates/community/members.html:99
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:80
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:76
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:74
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:77
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:40
 msgid "Manager"
@@ -405,23 +417,29 @@ msgstr "compte désactivé"
 msgid "Members Wizard"
 msgstr "membre"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
-#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
-msgid "Add Members"
-msgstr "Ajouter les membres"
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:30
+msgid "Add new members"
+msgstr "Ajouter de nouveaux membres"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
-#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
-msgid "Existing and new members"
-msgstr "Membres existants et nouveaux"
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:31
+msgid "Insert or import new members into your community"
+msgstr "Insérer ou importer de nouveaux membres dans votre communauté"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
-#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
-msgid "Create Accounts"
-msgstr "Créer les comptes"
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:36
+msgid "Insert your emails collection"
+msgstr "Ajouter les membres à partir de leurs emails"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:45
+msgid "Import members from CSV file"
+msgstr "Importer les membres à partir d'un fichier CSV"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:47
+msgid "Download CSV file model"
+msgstr "Télécharger le modèle de fichier CSV"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:58
+msgid "Browse"
+msgstr "Parcourir"
 
 #: abilian/sbe/apps/documents/actions.py:148
 #: abilian/sbe/apps/documents/templates/documents/document.html:47
@@ -710,7 +728,7 @@ msgstr "Précédent"
 #: abilian/sbe/apps/documents/templates/documents/document.html:97
 #: abilian/sbe/apps/documents/templates/documents/document.html:99
 msgid "Next"
-msgstr "Suivant"
+msgstr "Suivant "
 
 #: abilian/sbe/apps/documents/templates/documents/document.html:113
 msgid "Document preview not yet available"

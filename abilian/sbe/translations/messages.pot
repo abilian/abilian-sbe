@@ -7,9 +7,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: abilian-sbe 0.1.dev708+gc3efc05.d20170523\n"
+"Project-Id-Version: abilian-sbe 0.1.dev710+g5f72156.d20170523\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-23 11:32-0700\n"
+"POT-Creation-Date: 2017-05-23 12:08-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -288,6 +288,18 @@ msgstr ""
 msgid "%(community)s members"
 msgstr ""
 
+#: abilian/sbe/apps/communities/templates/community/_base.html:4
+msgid "Add Members"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/_base.html:4
+msgid "Existing and new members"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/_base.html:4
+msgid "Create Accounts"
+msgstr ""
+
 #: abilian/sbe/apps/communities/templates/community/edit.html:7
 msgid "Delete community"
 msgstr ""
@@ -361,14 +373,14 @@ msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/members.html:98
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:79
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:75
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:73
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:76
 msgid "Member"
 msgstr ""
 
 #: abilian/sbe/apps/communities/templates/community/members.html:99
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:80
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:76
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:74
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:77
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:40
 msgid "Manager"
@@ -402,22 +414,28 @@ msgstr ""
 msgid "Members Wizard"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
-#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
-msgid "Add Members"
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:30
+msgid "Add new members"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
-#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
-msgid "Existing and new members"
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:31
+msgid "Insert or import new members into your community"
 msgstr ""
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:10
-#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:12
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:12
-msgid "Create Accounts"
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:36
+msgid "Insert your emails collection"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:45
+msgid "Import members from CSV file"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:47
+msgid "Download CSV file model"
+msgstr ""
+
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:58
+msgid "Browse"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:148

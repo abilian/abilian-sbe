@@ -27,13 +27,13 @@
                                     <div class="tab-content col-sm-10">
                                         <div class="tab-pane active" id="tab1">
                                             <br>
-                                            <div style="position: relative;left: -12px;"><h3 class="titre col-sm-offset-4"> Add new members </h3>
-                                            <h4 class="sous_titre col-sm-offset-4"> Insert or import new members into your community</h4></div>
+                                            <div style="position: relative;left: -12px;"><h3 class="titre col-sm-offset-4"> {{_("Add new members") }}</h3>
+                                            <h4 class="sous_titre col-sm-offset-4"> {{_("Insert or import new members into your community")}}</h4></div>
 
                                            <br>
                                     <div class="bloc col-sm-8 col-sm-offset-3">
 
-                                        <label class="col-sm-offset-1"><i class="fa fa-bookmark" style="color:yellowgreen;" aria-hidden="true"></i> Insert your emails collection</label> <span class="email-count" style="color: silver;font-size: 11pt;"></span>
+                                        <label class="col-sm-offset-1"><i class="fa fa-bookmark" style="color:yellowgreen;" aria-hidden="true"></i> {{_("Insert your emails collection")}}</label> <span class="email-count" style="color: silver;font-size: 11pt;"></span>
                                         
                                         <div class="input-group col-sm-offset-1 col-lg-10 input">
                                         <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
@@ -42,9 +42,9 @@
 
                                                <!-- AJOUTER LES MEMBRES PAR FICHIER CSV -->
                                         <br><br>
-                                        <label class="col-sm-offset-1 importer">Import members from CSV file</label>
+                                        <label class="col-sm-offset-1 importer">{{_("Import members from CSV file")}}</label>
                                         <br>
-                                        <a href="{{ url_for('abilian_sbe_static', filename='csv/csv_example.csv') }}" download="csv_example.csv" class="col-sm-offset-1"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> Download CSV file model</a>
+                                        <a href="{{ url_for('abilian_sbe_static', filename='csv/csv_example.csv') }}" download="csv_example.csv" class="col-sm-offset-1"><span class="glyphicon glyphicon-save" aria-hidden="true"></span> {{_("Download CSV file model")}}</a>
                                         
 
 
@@ -55,7 +55,7 @@
                                             <div class="input-group">
                                               <input type="text" class="form-control input" placeholder="Choisir le fichier" id="csv-file-name" disabled>
                                               <span class="input-group-btn">
-                                                <button class="btn btn-default input" type="button" onclick="fileadd()">Parcourir</button>
+                                                <button class="btn btn-default input" type="button" onclick="fileadd()">{{_("Browse")}}</button>
                                               </span>
                                             </div><br>
                                               <hr>
