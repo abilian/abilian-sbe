@@ -28,8 +28,8 @@
                                     
                                     <div class="tab-pane active" id="tab1">
                                         <br>
-                                        <h3 class="titre "> New User Accounts </h3>
-                                        <h4 class="sous_titre "> The members below are not registered on the platform. Please create an account so that they can join the community.
+                                        <h3 class="titre "> {{_("New Users Accounts")}} </h3>
+                                        <h4 class="sous_titre "> {{_("The members below are not registered on the platform. Please create their accounts so that they can join the community.")}}
                              </h4>
 
                                         <!-- AJOUTER LES MEMBRES PAR MAIL -->
@@ -38,15 +38,15 @@
                                     <div class="form-group bloc col-lg-12">
                                     <br> 
 
-                                    <label class="">Profile</label>
+                                    <label class="">{{_("Profile")}}</label>
                                     <h6 class=" sous_titre_step2">
-                                        Complete the information below to create a new user. It will receive a mail instruction to connect.
+                                        {{_("Complete the information below to create a new user. It will receive a mail instruction to connect.")}}
                                     </h6>
                                     <br>
 
                                     <div class="input-group col-lg-12">
                                         <!-- new account table -->
-                      <div class="alert alert-warning wizard-warning" style="display:none;" role="alert"><span class="glyphicon glyphicon-check" aria-hidden="true"></span> You need to coplete all the fields</div>
+                      <div class="alert alert-warning wizard-warning" style="display:none;" role="alert"><span class="glyphicon glyphicon-check" aria-hidden="true"></span> {{_("You need to coplete all the fields")}}</div>
 
 
    {% set table_id = uuid() %}
@@ -82,7 +82,7 @@
     </table>
 
     <a class="users-wizard-next btn default" onclick="wizard_check()" style="float: right;color: white;background: yellowgreen;margin-bottom: 13px;" ><i class="fa fa-floppy-o" aria-hidden="true"></i>
- Save</a>
+ {{_("Save")}}</a>
 
 
                                     </div>  
@@ -177,7 +177,7 @@
 
          if($(".table-condensed tr").length == 1){
          $(".table-condensed").closest('tr').remove();
-          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='4' style='display:none;padding: 10px;color: gray;width: 18cm;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no new accounts</td></tr>");
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='4' style='display:none;padding: 10px;color: gray;width: 18cm;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no new accounts')}}</td></tr>");
           $("#wizard-msg").fadeIn();
         }
        });
@@ -185,7 +185,7 @@
    }
    if ($(".table-condensed tr").length == 1){
    	      $(".table-condensed").closest('tr').remove();
-          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
           $("#wizard-msg").fadeIn();
    } 
     </script>

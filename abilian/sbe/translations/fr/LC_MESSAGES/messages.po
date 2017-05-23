@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-23 12:30-0700\n"
+"POT-Creation-Date: 2017-05-23 12:50-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -475,7 +475,48 @@ msgstr ""
 " is vont être ajoutés à la communauté"
 
 #: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:114
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:188
 msgid "There is no existing accounts"
+msgstr "Il n'y a pas de comptes existants"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:31
+msgid "New Users Accounts"
+msgstr "Nouveaux comptes utilisateur"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:32
+msgid ""
+"The members below are not registered on the platform. Please create their"
+" accounts so that they can join the community."
+msgstr ""
+"Les membres ci-dessous ne sont pas inscrit sur la plateforme. Veuillez "
+"leur créer un compte pour qu'ils puissent rejoindre la communauté."
+
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:41
+#: abilian/sbe/apps/social/templates/social/user.html:8
+#: abilian/sbe/apps/social/views/users.py:40
+msgid "Profile"
+msgstr "Profil"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:43
+msgid ""
+"Complete the information below to create a new user. It will receive a "
+"mail instruction to connect."
+msgstr ""
+"Compléter les informations ci-dessous pour créer un nouvel utilisateur. "
+"Il recevra un mail d'instruction pour se connecter."
+
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:49
+msgid "You need to coplete all the fields"
+msgstr "Vous devez compléter tous les champs"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:85
+#: abilian/sbe/apps/preferences/templates/preferences/sbe_notifications.html:16
+msgid "Save"
+msgstr "Enregistrer"
+
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:180
+#, fuzzy
+msgid "There is no new accounts"
 msgstr "Il n'y a pas de comptes existants"
 
 #: abilian/sbe/apps/documents/actions.py:148
@@ -1230,10 +1271,6 @@ msgstr "Préférences enregistrées."
 msgid "Community email digests"
 msgstr "Email de résumé des communautés"
 
-#: abilian/sbe/apps/preferences/templates/preferences/sbe_notifications.html:16
-msgid "Save"
-msgstr "Enregistrer"
-
 #: abilian/sbe/apps/social/forms.py:38
 msgid "Name is required."
 msgstr "Le nom est requis."
@@ -1329,11 +1366,6 @@ msgstr "Invitation"
 #: abilian/sbe/apps/social/templates/social/macros.html:85
 msgid "Audit log"
 msgstr "Audit log"
-
-#: abilian/sbe/apps/social/templates/social/user.html:8
-#: abilian/sbe/apps/social/views/users.py:40
-msgid "Profile"
-msgstr "Profil"
 
 #: abilian/sbe/apps/social/templates/social/user.html:33
 msgid "Location:"
@@ -1645,4 +1677,7 @@ msgstr "(source)"
 
 #~ msgid "%(viewer)s"
 #~ msgstr "%(viewer)s"
+
+#~ msgid "New User Accounts"
+#~ msgstr ""
 
