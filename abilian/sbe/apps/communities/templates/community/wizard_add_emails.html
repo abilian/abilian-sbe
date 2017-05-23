@@ -7,7 +7,6 @@
 {% block memberscontent %}
   {% call m_box_content(_("Members Wizard")) %}
 
-    {%- set steps =[_("Add Members"),_("Existing and new members"),_("Create Accounts")] %}
     {{ wizard_steps(steps,1) }}
 <br><br><br>
 
