@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-05-23 16:04-0700\n"
+"POT-Creation-Date: 2017-05-23 17:39-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -435,6 +435,11 @@ msgstr "Insérer ou importer de nouveaux membres dans votre communauté"
 msgid "Insert your emails collection"
 msgstr "Ajouter les membres à partir de leurs emails"
 
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:40
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:137
+msgid "Emails Collection"
+msgstr "Collection Emails"
+
 #: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:45
 msgid "Import members from CSV file"
 msgstr "Importer les membres à partir d'un fichier CSV"
@@ -451,9 +456,10 @@ msgstr "Choisir le fichier"
 msgid "Browse"
 msgstr "Parcourir"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:137
-msgid "Emails Collection"
-msgstr "Collection Emails"
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:64
+#: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:79
+msgid "Next step"
+msgstr "étape suivante"
 
 #: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:28
 msgid ""
@@ -815,7 +821,7 @@ msgstr "Précédent"
 #: abilian/sbe/apps/documents/templates/documents/document.html:97
 #: abilian/sbe/apps/documents/templates/documents/document.html:99
 msgid "Next"
-msgstr "Suivant "
+msgstr "Suivant"
 
 #: abilian/sbe/apps/documents/templates/documents/document.html:113
 msgid "Document preview not yet available"
