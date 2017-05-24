@@ -438,11 +438,12 @@ def wizard_read_csv(csv):
         for line in contents:
             account = {}
             data = line.split(";")
-            account["email"] = data[0].strip()
-            account["first_name"] = data[1].strip()
-            account["last_name"] = data[2].strip()
-            account["role"] = data[3].strip()
-            new_accounts.append(account)
+            if len(data) == 4:
+                account["email"] = data[0].strip()
+                account["first_name"] = data[1].strip()
+                account["last_name"] = data[2].strip()
+                account["role"] = data[3].strip()
+                new_accounts.append(account)
         return new_accounts
 
 
@@ -464,6 +465,10 @@ def check_members_wizard():
         else:
             is_csv = True
             accounts_data = wizard_read_csv(request.files['csv_file'])
+            if not accounts_data:
+                flash(_(u"No new members were found"), 'warning')
+                return redirect(url_for(".add_member_emails_wizard", community_id=g.community.slug))
+
             existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
             existing_accounts_object = existing_accounts["account_objects"]
             existing_accounts_csv_roles = existing_accounts["csv_roles"]
