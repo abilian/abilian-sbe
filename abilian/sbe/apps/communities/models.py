@@ -26,7 +26,7 @@ from abilian.i18n import _l
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.repository import repository
 from abilian.services.indexing import indexable_role
-from abilian.services.security import Manager as MANAGER
+from abilian.services.security import Manager as MANAGER, READ, WRITE
 from abilian.services.security import Reader as READER
 from abilian.services.security import Writer as WRITER
 from abilian.services.security import Admin, Permission, Role, RoleType, \
@@ -302,14 +302,16 @@ class Community(Entity):
         return self.get_role(user) is not None
 
     def has_permission(self, user, permission):
+        if not isinstance(permission, Permission):
+            assert isinstance(permission, str)
+            permission = Permission(permission)
 
-        assert isinstance(permission, Permission)
         if user.has_role(Admin):
             return True
         role = self.get_role(user)
         if role == MANAGER:
             return True
-        if role == MEMBER and permission in ('read', 'write'):
+        if role == MEMBER and permission in (READ, WRITE):
             return True
         return False
 

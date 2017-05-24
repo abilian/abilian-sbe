@@ -21,9 +21,6 @@ from whoosh.searching import Hit
 from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.i18n import _, _l, _n
-from abilian.sbe.apps.communities.blueprint import Blueprint
-from abilian.sbe.apps.communities.views import \
-    default_view_kw as community_dv_kw
 from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
@@ -32,6 +29,9 @@ from abilian.web.util import url_for
 from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
     default_view
 
+from ..communities.blueprint import Blueprint
+from ..communities.views import \
+    default_view_kw as community_dv_kw
 from ..communities.common import object_viewers
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
@@ -91,9 +91,9 @@ class BasePageView(object):
     @property
     def template_kwargs(self):
         """
-    Template render arguments. You can override `base_template` for
-    instance. Only `view` and `form` cannot be overriden.
-    """
+        Template render arguments. You can override `base_template` for
+        instance. Only `view` and `form` cannot be overriden.
+        """
         kw = super(BasePageView, self).template_kwargs
         kw['page'] = self.obj
         kw['viewers'] = object_viewers(self.obj)
