@@ -9,8 +9,8 @@
     <th class="hide" style="">Last Name</th>
     <th class="hide">First Name</th>
     <th>{{ _('Name') }}</th>
-    <th class="hide" >{# last activity seconds since epoch #}</th>
-    <th width="10%"><center>{{ _('Role') }}</center></th>
+    <th class="hide">{# last activity seconds since epoch #}</th>
+    <th width="10%" class="text-center">{{ _('Role') }}</th>
     {% if is_manager %}
       <th>{{ _('Action') }}</th>
     {% endif %}
@@ -60,7 +60,7 @@
       </div>
     </div>
   </td>
-  
+
   <!-- bug jinja : do not use [not is_manager] -->
   {%- if is_manager == False %}
     <td style="padding-top: 11px;padding-left: 10px;">{{ _(role) }}</td>
@@ -71,63 +71,61 @@
         {{ csrf_token }}
         <input type="hidden" name="user" value="{{ user.id }}"/>
         <input type="hidden" name="action" value="set-user-role"/>
-        <select onchange="role_change(this)" id="{{user.email}}" name="role" class="form-control role-change" style="width: auto;border-radius: 0px;">
-          <option value="member" default="default" {%if csv_roles %}{%- if csv_roles[user.email] == 'member' %}
+        <select onchange="role_change(this)" id="{{ user.email }}" name="role" class="form-control role-change"
+                style="width: auto;border-radius: 0px;">
+          <option value="member" default="default" {% if csv_roles %}{%- if csv_roles[user.email] == 'member' %}
                   selected="selected"{%- endif %}{% endif %}>{{ _("Member") }}</option>
-          <option value="manager" {%if csv_roles %}{%- if csv_roles[user.email] == 'manager' %}selected="selected"{%- endif %}{%- endif %}>{{ _("Manager") }}</option>
+          <option value="manager" {% if csv_roles %}{%- if csv_roles[user.email] == 'manager' %}selected="selected"
+          {%- endif %}{%- endif %}>{{ _("Manager") }}</option>
         </select>
       </form>
     </td>
     <td style="padding-top: 11px;padding-left: 10px;padding-right: 10px;">
-        <input type="hidden" name="membership" value="{{ m_id }}">
-        <input type="hidden" name="user" value="{{ user.id }}">
-        <a id="{{user.email}}"  onclick="delete_current(this)" class="btn btn-danger"><i class="fa fa-times"></i></a>
+      <input type="hidden" name="membership" value="{{ m_id }}">
+      <input type="hidden" name="user" value="{{ user.id }}">
+      <a id="{{ user.email }}" onclick="delete_current(this)" class="btn btn-danger"><i class="fa fa-times"></i></a>
     </td>
   {% endif %}
 
   <script>
-  function delete_current(e){
-    $(e).closest('tr').fadeOut('slow', function(){
-         $(e).closest('tr').remove();
-         var wizard_emails = $("#wizard-emails").val();
-         var tmp_emails = jQuery.parseJSON(wizard_emails);
-         jQuery.each(tmp_emails, function(i, val) {
-             if(val.email == e.id) 
-               {
-                 delete tmp_emails[i];
-               }
-                 });
-
-         tmp_emails = jQuery.grep(tmp_emails, function(n, i){
-             return (n !== "" && n != null);
-            });
-
-         $("#wizard-emails").val(JSON.stringify(tmp_emails));
-
-          $("#account-nb").html($(".table-condensed tr").length-1)
-          if ($(".table-condensed tr").length == 1){
-                      $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
-                        $("#wizard-msg").fadeIn();
-                        $(".existing-account").fadeOut();
-
-                                                   }
-                                });
-    
-      }
-
-      function role_change(e){
+    function delete_current(e) {
+      $(e).closest('tr').fadeOut('slow', function () {
+        $(e).closest('tr').remove();
         var wizard_emails = $("#wizard-emails").val();
         var tmp_emails = jQuery.parseJSON(wizard_emails);
-        jQuery.each(tmp_emails, function(i, val) {
-             if(val.email == e.id) 
-               {
-                 tmp_emails[i].role = $(e).val();
-               }
-                 });
+        jQuery.each(tmp_emails, function (i, val) {
+          if (val.email === e.id) {
+            delete tmp_emails[i];
+          }
+        });
 
-         
-         $("#wizard-emails").val(JSON.stringify(tmp_emails));
-      }
+        tmp_emails = jQuery.grep(tmp_emails, function (n, i) {
+          return (n !== "" && n !== null);
+        });
+
+        $("#wizard-emails").val(JSON.stringify(tmp_emails));
+
+        $("#account-nb").html($(".table-condensed tr").length - 1);
+        if ($(".table-condensed tr").length === 1) {
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+          $("#wizard-msg").fadeIn();
+          $(".existing-account").fadeOut();
+
+        }
+      });
+    }
+
+    function role_change(e) {
+      var wizard_emails = $("#wizard-emails").val();
+      var tmp_emails = jQuery.parseJSON(wizard_emails);
+      jQuery.each(tmp_emails, function (i, val) {
+        if (val.email === e.id) {
+          tmp_emails[i].role = $(e).val();
+        }
+      });
+
+      $("#wizard-emails").val(JSON.stringify(tmp_emails));
+    }
   </script>
 
 {% endmacro %}

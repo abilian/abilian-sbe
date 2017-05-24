@@ -52,11 +52,17 @@
 {% endmacro %}
 
 {% macro wizard_steps(steps,active_n) %}
- <div class="row">
-                <!-- Responsive Arrow Progress Bar -->
-                        <div class="arrow-steps clearfix col-sm-12 progress_bar">
-                    {% for step in steps %}
-                          <div class="step {% if loop.index <= active_n %}current{% endif %}"> <span> <a href="#" >{% if loop.index <= active_n %}<span class="step-number">{{loop.index}}. </span>{%endif%} {{step}}</a></span> </div>
-                    {% endfor %}      
-                    </div>
-{% endmacro%}
+  <div class="row">
+  <!-- Responsive Arrow Progress Bar -->
+  <div class="arrow-steps clearfix col-sm-12 progress_bar">
+    {% for step in steps %}
+      <div class="step {% if loop.index <= active_n %}current{% endif %}"><span>
+        <a href="#">
+          {%- if loop.index <= active_n %}
+            <span class="step-number">{{ loop.index }}. </span>
+          {% endif %}
+          {{ step }}</a></span>
+      </div>
+    {% endfor %}
+  </div>
+{% endmacro %}
