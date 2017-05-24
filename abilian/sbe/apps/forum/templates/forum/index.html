@@ -43,7 +43,8 @@
         {% endfor %}
       </table>
       <br>
-      <br> {% else %}
+      <br>
+    {% else %}
       <p>{{ _("No message has been posted to this community yet.") }}</p>
     {% endif %}
     {% if has_more or True %}
