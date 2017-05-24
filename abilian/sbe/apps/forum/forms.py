@@ -10,7 +10,7 @@ from abilian.i18n import _l
 from abilian.web.forms import Form, RichTextWidget
 from abilian.web.forms.fields import FileField
 from abilian.web.forms.filters import strip
-from abilian.web.forms.validators import optional, required
+from abilian.web.forms.validators import optional, required, Length
 
 ALLOWED_TAGS = [
     'a',
@@ -58,7 +58,7 @@ for attr in ALLOWED_TAGS:
 # instantiate this one before PostForm fields, so that it is listed first
 # when Threadform is displayed
 _TITLE_FIELD = StringField(
-    label=_l("Title"), filters=(strip,), validators=[required()])
+    label=_l("Title"), filters=(strip,), validators=[required(), Length(max=150)])
 
 
 class BasePostForm(Form):
