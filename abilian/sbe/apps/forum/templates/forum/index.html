@@ -19,10 +19,10 @@
     {% if threads %}
       <table class="thread-table" border="0">
         <tr>
-          <th>
+          <th style="width: 50%;">
             {{ _("Topic") }}
           </th>
-          <th>
+          <th style="width: 20%;">
             {{ _("Participants") }}
           </th>
           <th>
@@ -34,7 +34,7 @@
           <th>
             {{ _("Views") }}
           </th>
-          <th>
+          <th style="width: 8%;">
             {{ _("Activity") }}
           </th>
         </tr>
@@ -48,12 +48,13 @@
     {% endif %}
     {% if has_more or True %}
       <br>
-      <p class="thread-all"><i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i> <a
-          href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a></p>
+      <p class="thread-all">
+        <i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i>
+        <a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a>
+      </p>
     {% endif %}
   {% endcall %}
 {% endblock %}
-
 
 
 {% macro m_thread(thread) %}
@@ -62,9 +63,11 @@
   <tr>
     <td>
       <div class="entry">
-        <h4 class="thread-list-title"><a href="{{ thread_href }}"
-                                         title="{{ thread.created_at | age(date_threshold='day') }}"
-                                         class="thread-title"> {{ thread.title }} </a></h4>
+        <h4 class="thread-list-title">
+          <a href="{{ thread_href }}"
+             title="{{ thread.created_at | age(date_threshold='day') }}"
+             class="thread-title">{{ thread.title }}</a>
+        </h4>
         {%- if thread.closed %}
           <i class="fa fa-lock fa-big"></i>
         {%- endif %}
@@ -79,45 +82,35 @@
         {% call m_user_link(p) %}
           <span class="thread-participants-logo">
           {{ m_user_photo(p, size=30) }}
-        </span>
+          </span>
         {%- endcall %}
       {% endfor %}
     </td>
     <td>
-      <center>
-        <div class="comments" style="position: relative;">
-          <a class="thread-replies" href="{{ thread_href }}">{{ thread_length-1 }}</a>
-          {% if nb_viewed_posts[thread] %}
-            <span style="color:gray;"></span>
-            <span class="thread-hilightview"
-                  title="not viewed"><span
-                class="badge thread-unread-posts">+{{ nb_viewed_posts[thread] }}</span></span>
-          {% endif %}
-        </div>
-      </center>
+      <div class="text-center">
+        <a class="thread-replies" href="{{ thread_href }}">{{ thread_length-1 }}</a>
+        {% if nb_viewed_posts[thread] %}
+          <span
+              class="thread-unread-posts">+{{ nb_viewed_posts[thread] }}</span>
+        {% endif %}
+      </div>
     </td>
-    <td style="width:10%;">
-      <center>
-        <span class="thread-viewers">
-          <i class="fa fa-user" aria-hidden="true"></i>
-          {{ nb_viewers[thread] }}
-        </span>
-      </center>
+    <td style="width:7%;">
+      <div class="text-center">
+        <i class="fa fa-user" aria-hidden="true"></i>
+        {{ nb_viewers[thread] }}
+      </div>
     </td>
-    <td style="width:0%;">
-      <center>
-        <span class="thread-viewed-times"> {% if nb_viewed_times[thread] %}{{ nb_viewed_times[thread] }}{% else %}
-          0{% endif %}</span>
-      </center>
+    <td style="width:7%;">
+      <div class="text-center thread-viewed-times">
+        {% if nb_viewed_times[thread] %}{{ nb_viewed_times[thread] }}
+        {% else %}0{% endif %}
+      </div>
     </td>
     <td>
-      <center>
-          <span class="hidden-xs">
-          <span class="divider"
-              {% set activity_time = activity_time_format(thread.last_post_at) %}
-                style="color:silver;">{{ activity_time }}</span>
-        </span>
-      </center>
+      <div class="hidden-xs text-center">
+        {{ activity_time_format(thread.last_post_at) }}
+      </div>
     </td>
   </tr>
 {% endmacro %}
