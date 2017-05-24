@@ -18,7 +18,12 @@
 
     <article class="thread">
       {%- set post = thread.posts[0] %}
-      <h2 class="thread-current-title">{{ thread.title }} <i class="fa fa-angle-right" aria-hidden="true"></i> <span class="thread-current-replies" color="silver">{{(thread.posts|length)-1}} {{_("replies")}}</span></h2>
+      <h2 class="thread-current-title">
+        {{ thread.title }}
+        <i class="fa fa-angle-right" aria-hidden="true"></i>
+        <span
+            class="thread-current-replies" color="silver">{{ (thread.posts|length)-1}} {{ _("replies") }}</span>
+      </h2>
       <div>
         {{ _("Posted by %(creator)s", creator=m_user_link(thread.creator)) }}
         –
@@ -45,10 +50,12 @@
         <br>
         <div class="viewers-panel-container">
           <ul class="viewers-panel-info">
-            <li><span>{{ _('created') }}</span><br>
+            <li><span>{{ _('created') }}</span>
+              <br>
               {% call m_user_link(thread.creator) %}
                 {{ m_user_photo(thread.creator, size=22) }}
-              {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(thread.created_at) }}</span>
+              {% endcall %}
+              <span class="viewers-panel-label">{{ activity_time_format(thread.created_at) }}</span>
             </li>
             {% set replies = thread.posts %}
             {% if replies|length > 1 %}

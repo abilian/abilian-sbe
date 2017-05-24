@@ -273,7 +273,6 @@ ul.threads {
       color: white;
       font-weight: bold;
     }
-
   }
 
   > a:hover {
@@ -365,7 +364,7 @@ ul.threads {
   border-bottom: 2px solid gray;
 }
 
-.thread-title-counter{
+.thread-title-counter {
   float: right;
   background: ghostwhite;
   color: silver;
@@ -563,52 +562,46 @@ ul.threads {
 }
 
 @media only screen and (max-width: 993px) {
-    .container{
-        width: 95%;
-    }
+  .container {
+    width: 95%;
+  }
 }
 
 @media only screen and (max-width: 776px) {
-    .thread-table{
-        >tbody >tr {
-            >th:nth-child(4){
-                display: none;
-                    }
-            >td:nth-child(4){
-               display: none;
-            }
-            >th:nth-child(5){
-                display: none;
-                    }
-            >td:nth-child(5){
-               display: none;
-            }
-        }
+  .thread-table {
+    > tbody > tr {
+      > th:nth-child(4), td:nth-child(4) {
+        display: none;
+      }
+      > th:nth-child(5), td:nth-child(5) {
+        display: none;
+      }
     }
+  }
 }
 
 @media only screen and (max-width: 855px) {
-   .thread-participants-logo {
-  margin-right: -13px;
-  > .avatar {
-    display: none;
-  }
-}
-    .thread-table{
-        >tbody >tr {
-            >th:nth-child(1){
-                width: 85% !important;
-                    }
-            >th:nth-child(2){
-                width: 0% !important;
-            }
-            >td:nth-child(2){
-            >a >img{
-            position: relative;
-            left: 25%;
-                }
-            }
-        }
+  .thread-participants-logo {
+    margin-right: -13px;
+    > .avatar {
+      display: none;
     }
+  }
 
+  .thread-table {
+    > tbody > tr {
+      > th:nth-child(1) {
+        width: 85% !important;
+      }
+      > th:nth-child(2) {
+        width: 0 !important;
+      }
+      > td:nth-child(2) {
+        > a > img {
+          position: relative;
+          left: 25%;
+        }
+      }
+    }
+  }
 }
