@@ -4,28 +4,31 @@
 from __future__ import absolute_import, print_function
 
 import hashlib
+import json
 import logging
+from collections import Counter
 from datetime import datetime
 from functools import wraps
 from io import BytesIO
 from operator import attrgetter
 from pathlib import Path
 from time import gmtime, strftime
-import json
+
 import openpyxl
 import pytz
+import requests
 import sqlalchemy as sa
 from flask import current_app, flash, g, jsonify, redirect, render_template, \
     request, session, url_for
 from flask_login import current_user, login_required
+from flask_mail import Message
 from openpyxl.writer.write_only import WriteOnlyCell
 from six import text_type
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
-from whoosh.searching import Hit
-from flask_mail import Message
 from werkzeug.utils import secure_filename
-import requests
+from whoosh.searching import Hit
 
+from abilian.core.commands.base import createuser
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
@@ -34,19 +37,17 @@ from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
-from abilian.services.security import Role
 from abilian.services.auth.views import send_reset_password_instructions
+from abilian.services.security import Role
 from abilian.web import csrf, views
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import images as image_views
-from abilian.core.commands.base import createuser
 
 from .actions import register_actions
 from .blueprint import Blueprint
 from .forms import CommunityForm
 from .models import Community, Membership
-from collections import Counter
 from .security import require_admin, require_manage
 
 __all__ = ['communities']
@@ -343,56 +344,71 @@ def _members_query():
     return memberships
 
 
-def _wizard_check_query(emails,is_csv=False):
+def _wizard_check_query(emails, is_csv=False):
 
     if is_csv:
         csv_data = emails
-        existing_account_csv_roles = {user["email"]:user["role"] for user in csv_data}
+        existing_account_csv_roles = {
+            user["email"]: user["role"]
+            for user in csv_data
+        }
         emails = [user["email"] for user in emails]
 
     emails = [email.strip() for email in emails]
 
-    already_member_emails = [member.email for member in g.community.members if member.email in emails]
+    already_member_emails = [
+        member.email for member in g.community.members if member.email in emails
+    ]
     not_member_emails = set(emails) - set(already_member_emails)
 
-    existing_members_objects = filter(lambda user: user.email in already_member_emails, g.community.members)
+    existing_members_objects = filter(
+        lambda user: user.email in already_member_emails, g.community.members)
 
-    existing_accounts_objects = User.query.filter(User.email.in_(not_member_emails)).all()
+    existing_accounts_objects = User.query.filter(
+        User.email.in_(not_member_emails)).all()
     existing_account_emails = [user.email for user in existing_accounts_objects]
 
-    emails_without_account = set(not_member_emails) - set(existing_account_emails)
+    emails_without_account = set(not_member_emails) - set(
+        existing_account_emails)
 
     accounts_list = []
     for user in existing_accounts_objects:
-            account = {}
-            account["email"] = user.email
-            account["first_name"] = user.first_name
-            account["last_name"] = user.last_name
-            account["role"] = existing_account_csv_roles[user.email] if is_csv else "member"
-            account["status"] = "existing"
-            accounts_list.append(account)
+        account = {}
+        account["email"] = user.email
+        account["first_name"] = user.first_name
+        account["last_name"] = user.last_name
+        account["role"] = existing_account_csv_roles[
+            user.email] if is_csv else "member"
+        account["status"] = "existing"
+        accounts_list.append(account)
 
     if is_csv:
-        emails_without_account = [csv_account for csv_account in csv_data if csv_account["email"] in emails_without_account]
-        existing_accounts_objects = {"account_objects":existing_accounts_objects,"csv_roles":existing_account_csv_roles}
+        emails_without_account = [
+            csv_account for csv_account in csv_data
+            if csv_account["email"] in emails_without_account
+        ]
+        existing_accounts_objects = {
+            "account_objects": existing_accounts_objects,
+            "csv_roles": existing_account_csv_roles
+        }
 
         for csv_account in emails_without_account:
-                account = {}
-                account["email"] = csv_account["email"]
-                account["first_name"] = csv_account["first_name"]
-                account["last_name"] = csv_account["last_name"]
-                account["role"] = csv_account["role"]
-                account["status"] = "new"
-                accounts_list.append(account)
+            account = {}
+            account["email"] = csv_account["email"]
+            account["first_name"] = csv_account["first_name"]
+            account["last_name"] = csv_account["last_name"]
+            account["role"] = csv_account["role"]
+            account["status"] = "new"
+            accounts_list.append(account)
     else:
         for email in emails_without_account:
-                account = {}
-                account["email"] = email
-                account["first_name"] = ""
-                account["last_name"] = ""
-                account["role"] = "member"
-                account["status"] = "new"
-                accounts_list.append(account)
+            account = {}
+            account["email"] = email
+            account["first_name"] = ""
+            account["last_name"] = ""
+            account["role"] = "member"
+            account["status"] = "new"
+            accounts_list.append(account)
 
     return existing_accounts_objects, existing_members_objects, accounts_list
 
@@ -449,7 +465,7 @@ def wizard_read_csv(csv):
     return False
 
 
-@route("/<string:community_id>/members/wizard/step2", methods=['GET','POST'])
+@route("/<string:community_id>/members/wizard/step2", methods=['GET', 'POST'])
 @csrf.protect
 @tab('members')
 def check_members_wizard():
@@ -462,23 +478,30 @@ def check_members_wizard():
         is_csv = False
         if request.form.get("wizard-emails"):
             wizard_emails = request.form.get("wizard-emails").split(",")
-            existing_accounts_object,existing_members_objects,final_email_list = _wizard_check_query(wizard_emails)
+            existing_accounts_object, existing_members_objects, final_email_list = _wizard_check_query(
+                wizard_emails)
             final_email_list_json = json.dumps(final_email_list)
         else:
             is_csv = True
             accounts_data = wizard_read_csv(request.files['csv_file'])
             if not accounts_data:
                 flash(_(u"Csv file is not valid"), 'warning')
-                return redirect(url_for(".add_member_emails_wizard", community_id=g.community.slug))
+                return redirect(
+                    url_for(
+                        ".add_member_emails_wizard",
+                        community_id=g.community.slug))
 
-            existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
+            existing_accounts, existing_members_objects, final_email_list = _wizard_check_query(
+                accounts_data, is_csv=True)
             existing_accounts_object = existing_accounts["account_objects"]
             existing_accounts_csv_roles = existing_accounts["csv_roles"]
             final_email_list_json = json.dumps(final_email_list)
 
         if not final_email_list:
             flash(_(u"No new members were found"), 'warning')
-            return redirect(url_for(".add_member_emails_wizard", community_id=g.community.slug))
+            return redirect(
+                url_for(
+                    ".add_member_emails_wizard", community_id=g.community.slug))
 
         return render_template(
             "community/wizard_check_members.html",
@@ -491,7 +514,7 @@ def check_members_wizard():
     return redirect(url_for(".members", community_id=community.slug))
 
 
-@route("/<string:community_id>/members/wizard/step3", methods=['GET','POST'])
+@route("/<string:community_id>/members/wizard/step3", methods=['GET', 'POST'])
 @csrf.protect
 @tab('members')
 def new_accounts_wizard():
@@ -539,7 +562,7 @@ def wizard_saving():
         return redirect(url_for(".members", community_id=g.community.slug))
 
     if existing_accounts:
-        for email,role in existing_accounts.iteritems():
+        for email, role in existing_accounts.iteritems():
             user = User.query.filter(User.email == email).first()
             community.set_membership(user, role)
 

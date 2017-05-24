@@ -30,9 +30,8 @@ from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
     default_view
 
 from ..communities.blueprint import Blueprint
-from ..communities.views import \
-    default_view_kw as community_dv_kw
 from ..communities.common import object_viewers
+from ..communities.views import default_view_kw as community_dv_kw
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
