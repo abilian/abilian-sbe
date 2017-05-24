@@ -121,4 +121,15 @@
 
   {%- block after_form %}
   {%- endblock %}
+<script>
+$( "#title" ).after("<span class='thread-title-counter'></span>")
+$("#title").bind("keyup change",function(){
+   var title_length = $("#title").val().length;
+   $(".thread-title-counter").html(title_length+"/150");
+   if(title_length>150){
+   $(".thread-title-counter").html("150/150");
+   $("#title").val($("#title").val().substr(0,150));
+   }
+});
+</script>
 {% endblock %}
