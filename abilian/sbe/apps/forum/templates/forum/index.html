@@ -17,15 +17,15 @@
     </div>
 
     {% if threads %}
-      <table class="thread-table" border="0">
+      <table border="0" class="thread-table" border="0">
         <tr>
           <th style="width: 50%;">
             {{ _("Topic") }}
           </th>
-          <th style="width: 20%;">
+          <th style="width: 22%;">
             {{ _("Participants") }}
           </th>
-          <th>
+          <th style="width: 8.9%;">
             {{ _("Replies") }}
           </th>
           <th>
@@ -108,7 +108,7 @@
       </div>
     </td>
     <td>
-      <div class="hidden-xs text-center">
+      <div class="text-center">
         {{ activity_time_format(thread.last_post_at) }}
       </div>
     </td>
