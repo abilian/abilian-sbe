@@ -12,7 +12,7 @@
       {{ m_user_photo(post.creator, size=15) }}
       <small>{{ post.creator }}</small>
     {% endcall %}
-  </a>
+    </a>
   </div>
 {%- endmacro %}
 
@@ -26,7 +26,7 @@
           <li>
             <span class="attachment-item">
               <img src="{{ attachment.icon }}" style="vertical-align: middle;"
-                  alt=""/>
+                   alt=""/>
               <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
               ({{ attachment.content_length|filesize }})
             </span>
