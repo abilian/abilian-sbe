@@ -273,7 +273,6 @@ ul.threads {
       color: white;
       font-weight: bold;
     }
-
   }
 
   > a:hover {
@@ -363,6 +362,19 @@ ul.threads {
   border: none;
   padding: 10px;
   border-bottom: 2px solid gray;
+}
+
+.thread-title-counter {
+  float: right;
+  background: ghostwhite;
+  color: silver;
+  padding: 2px;
+  border-radius: 3px;
+  font-size: 8pt;
+  font-weight: bold;
+  margin-top: 2px;
+  margin-bottom: -7px;
+  border: 1px solid #ddd;
 }
 
 //Thread replies
@@ -526,5 +538,50 @@ ul.threads {
     margin-left: -11px;
     margin-top: 17px;
     margin-bottom: 17px;
+  }
+}
+
+@media only screen and (max-width: 993px) {
+  .container {
+    width: 95%;
+  }
+}
+
+@media only screen and (max-width: 776px) {
+  .thread-table {
+    > tbody > tr {
+      > th:nth-child(4), td:nth-child(4) {
+        display: none;
+      }
+      > th:nth-child(5), td:nth-child(5) {
+        display: none;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 855px) {
+  .thread-participants-logo {
+    margin-right: -13px;
+    > .avatar {
+      display: none;
+    }
+  }
+
+  .thread-table {
+    > tbody > tr {
+      > th:nth-child(1) {
+        width: 85% !important;
+      }
+      > th:nth-child(2) {
+        width: 0 !important;
+      }
+      > td:nth-child(2) {
+        > a > img {
+          position: relative;
+          left: 25%;
+        }
+      }
+    }
   }
 }

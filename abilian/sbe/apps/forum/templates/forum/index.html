@@ -17,15 +17,15 @@
     </div>
 
     {% if threads %}
-      <table class="thread-table" border="0">
+      <table border="0" class="thread-table">
         <tr>
           <th style="width: 50%;">
             {{ _("Topic") }}
           </th>
-          <th style="width: 20%;">
+          <th style="width: 22%;">
             {{ _("Participants") }}
           </th>
-          <th>
+          <th style="width: 8.9%;">
             {{ _("Replies") }}
           </th>
           <th>
@@ -43,7 +43,8 @@
         {% endfor %}
       </table>
       <br>
-      <br> {% else %}
+      <br>
+    {% else %}
       <p>{{ _("No message has been posted to this community yet.") }}</p>
     {% endif %}
     {% if has_more or True %}
@@ -103,12 +104,11 @@
     </td>
     <td style="width:7%;">
       <div class="text-center thread-viewed-times">
-        {% if nb_viewed_times[thread] %}{{ nb_viewed_times[thread] }}
-        {% else %}0{% endif %}
+        {{ nb_viewed_times[thread] or 0 }}
       </div>
     </td>
     <td>
-      <div class="hidden-xs text-center">
+      <div class="text-center">
         {{ activity_time_format(thread.last_post_at) }}
       </div>
     </td>

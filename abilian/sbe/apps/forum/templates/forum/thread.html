@@ -18,10 +18,12 @@
 
     <article class="thread">
       {%- set post = thread.posts[0] %}
-      <h2 class="thread-current-title">{{ thread.title }} <i class="fa fa-angle-right" aria-hidden="true"></i>
-        <font class="thread-current-replies" color="silver">{{ (thread.posts|length)-1}} replies</font>
+      <h2 class="thread-current-title">
+        {{ thread.title }}
+        <i class="fa fa-angle-right" aria-hidden="true"></i>
+        <span
+            class="thread-current-replies" color="silver">{{ (thread.posts|length)-1}} {{ _("replies") }}</span>
       </h2>
-
       <div>
         {{ _("Posted by %(creator)s", creator=m_user_link(thread.creator)) }}
         –
@@ -48,32 +50,43 @@
         <br>
         <div class="viewers-panel-container">
           <ul class="viewers-panel-info">
-            <li><span>{{ _('created') }}</span><br>
+            <li><span>{{ _('created') }}</span>
+              <br>
               {% call m_user_link(thread.creator) %}
                 {{ m_user_photo(thread.creator, size=22) }}
-              {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(thread.created_at) }}</span>
+              {% endcall %}
+              <span class="viewers-panel-label">{{ activity_time_format(thread.created_at) }}</span>
             </li>
             {% set replies = thread.posts %}
             {% if replies|length > 1 %}
               <li>
-                <span>{{ _('last reply') }}</span><br>{% call m_user_link(replies[-1].creator) %}
-                {{ m_user_photo(replies[-1].creator, size=22) }}
-              {% endcall %} <span class="viewers-panel-label">{{ activity_time_format(replies[-1].created_at) }}</span>
+                <span>{{ _('last reply') }}</span>
+                <br>
+                {% call m_user_link(replies[-1].creator) %}
+                  {{ m_user_photo(replies[-1].creator, size=22) }}
+                {% endcall %}
+                <span
+                    class="viewers-panel-label">{{ activity_time_format(replies[-1].created_at) }}</span>
               </li>
             {% endif %}
             <li>
-              <center><span
-                  class="viewers-panel-count">{{ thread.posts|length-1 }}</span><br><span>{{ _('replies') }}</span>
-              </center>
-            </li>
-            <li>{% if views[thread] %}
-              <span class="viewers-panel-count">{{ views[thread] }}</span>
-            {% else %}
-              <span class="viewers-panel-count">0</span>
-            {% endif %}<br><span>{{ _('views') }}</span>
+              <span
+                  class="text-center viewers-panel-count">{{ thread.posts|length-1 }}</span>
+              <br>
+              <span>{{ _('replies') }}</span>
             </li>
             <li>
-              <span class="viewers-panel-count">{{ participants|length }}</span><br><span>{{ _('participants') }}</span>
+              {% if views[thread] %}
+                <span class="viewers-panel-count">{{ views[thread] }}</span>
+              {% else %}
+                <span class="viewers-panel-count">0</span>
+              {% endif %}
+              <br><span>{{ _('views') }}</span>
+            </li>
+            <li>
+              <span class="viewers-panel-count">{{ participants|length }}</span>
+              <br>
+              <span>{{ _('participants') }}</span>
             </li>
             <li class="viewers-panel-posters">
               {% for user in thread.get_frequent_posters(4) %}
@@ -82,9 +95,8 @@
                 {% endcall %}
               {% endfor %}
             </li>
-            <li>
-            </li>
           </ul>
+
           {% set frequent_posters = thread.get_frequent_posters(6) %}
           {% if is_manager or frequent_posters %}
             <button onclick="show_panel_info()" class="viewers-panel-button">
@@ -116,7 +128,7 @@
           var opened = false;
 
           function show_panel_info() {
-            if (opened == false) {
+            if (!opened) {
               $(".viewers-panel-posters").fadeOut();
               $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-up");
               $(".viewers-panel-content").fadeIn();
@@ -157,6 +169,7 @@
 
           <div class="media-body">
             <h3 style="margin-top: 0;">{{ _("Post a comment") }}</h3>
+
             <form action="." method="POST" enctype="multipart/form-data">
               {{ form.csrf_token }}
 
