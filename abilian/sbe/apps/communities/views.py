@@ -432,7 +432,8 @@ def add_member_emails_wizard():
 
 
 def wizard_read_csv(csv):
-    if request.method == 'POST':
+    file_extension = secure_filename(csv.filename).split(".")[-1]
+    if file_extension == "csv":
         contents = csv.readlines()
         new_accounts = []
         for line in contents:
@@ -445,6 +446,7 @@ def wizard_read_csv(csv):
                 account["role"] = data[3].strip()
                 new_accounts.append(account)
         return new_accounts
+    return False
 
 
 @route("/<string:community_id>/members/wizard/step2", methods=['GET','POST'])
@@ -466,7 +468,7 @@ def check_members_wizard():
             is_csv = True
             accounts_data = wizard_read_csv(request.files['csv_file'])
             if not accounts_data:
-                flash(_(u"No new members were found"), 'warning')
+                flash(_(u"Csv file is not valid"), 'warning')
                 return redirect(url_for(".add_member_emails_wizard", community_id=g.community.slug))
 
             existing_accounts,existing_members_objects,final_email_list = _wizard_check_query(accounts_data,is_csv=True)
