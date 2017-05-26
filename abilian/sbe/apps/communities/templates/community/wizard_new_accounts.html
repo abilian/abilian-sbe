@@ -13,14 +13,9 @@
 
     <div class="row">
       <form class="form-horizontal" id="wizard-1">
-        <div id="bootstrap-wizard-1" class="col-sm-12">
           <div class="form-bootstrapWizard col-sm-offset-2">
-
-
             <div class="clearfix"></div>
           </div>
-
-          <!-- ETAPE 1 -->
           <div style="margin-right: 8%;margin-left: 8%;">
             <div class="tab-content col-sm-12">
 
@@ -31,37 +26,29 @@
                 <h4 class="sous_titre ">
                   {{ _("The members below are not registered on the platform. Please create their accounts so that they can join the community.") }}
                 </h4>
-
-                <!-- AJOUTER LES MEMBRES PAR MAIL -->
-
                 <div class="form-group bloc col-lg-12">
                   <br>
-
                   <label class="">{{ _("Profile") }}</label>
                   <h6 class=" sous_titre_step2">
                     {{ _("Complete the information below to create a new user. It will receive a mail instruction to connect.") }}
                   </h6>
                   <br>
-
                   <div class="input-group col-lg-12">
-                    <!-- new account table -->
                     <div class="alert alert-warning wizard-warning" style="display:none;" role="alert">
                       <span
                           class="glyphicon glyphicon-check"
                           aria-hidden="true"></span>
                       {{ _("You need to coplete all the fields") }}
                     </div>
-
                     {% set table_id = uuid() %}
-                    <table border="0" class="table table-condensed table-striped" id="{{ table_id }}">
+                    <table class="table table-condensed table-striped" id="{{ table_id }}">
                       <tr>
                         <th>Email</th>
-                        <th>First Name <font color="coral">*</font></th>
-                        <th>Last Name <font color="coral">*</font></th>
+                        <th>First Name <span class="content-required">*</span></th>
+                        <th>Last Name <span class="content-required">*</span></th>
                         <th>Role</th>
                         <th></th>
                       </tr>
-
                       {% set nb_new_accounts = (new_accounts|length) %}
                       {% if new_accounts %}
                         {% for user in new_accounts %}
@@ -89,37 +76,25 @@
                               </select>
                             </td>
                             <td>
-                              <center><a style="position: relative;left: 5px;" id="{{ user.email }}"
+                              <a style="position: relative;left: 10px;" id="{{ user.email }}"
                                          onclick="remove_user(this)" class="btn btn-danger"><i class="fa fa-times"></i></a>
-                              </center>
                             </td>
                           </tr>
                         {% endfor %}
                       {% endif %}
-                      </tbody>
                     </table>
 
                     <a class="users-wizard-next btn default" onclick="wizard_check()"
                        style="float: right;color: white;background: yellowgreen;margin-bottom: 13px;"><i
                         class="fa fa-floppy-o" aria-hidden="true"></i>
                       {{ _("Save") }}</a>
-
-
                   </div>
-
                 </div>
-
-
               </div>
-
-
             </div>
           </div>
-        </div>
       </form>
     </div>
-
-
 
     <form method="POST" id="wizard-form" class="form-inline"
           action=" {{ url_for('.wizard_saving',community_id=g.community.slug) }}">
@@ -127,12 +102,6 @@
       <input id="existing_account" type="hidden" name="existing_account" value="{{ existing_account }}">
       <input id="new_accounts" type="hidden" name="new_accounts" value='{{ new_accounts|tojson }}'>
     </form>
-
-
-    <script type="application/json">
-
-    </script>
-
 
     <script>
       function wizard_check() {

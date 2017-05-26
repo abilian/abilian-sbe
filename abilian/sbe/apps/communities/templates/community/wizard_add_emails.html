@@ -27,7 +27,6 @@
                                 <i class="glyphicon glyphicon-user"></i>
                             </span>
                         <input placeholder="{{ _('Emails Collection') }}" class="form-control" id="collection" type="text" value="" data-role="tagsinput"> </div>
-                    <!-- AJOUTER LES MEMBRES PAR FICHIER CSV -->
                     <br>
                     <br>
                     <label class="col-sm-offset-1 importer">{{ _("Import members from CSV file") }}</label>
@@ -64,7 +63,8 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
         {{ csrf_token }}
         <input id="wizard-emails" type="hidden" name="wizard-emails" value="">
         <br>
-        <br> </form>
+        <br>
+    </form>
 </div>
 {%- deferJS %}
 <script>
