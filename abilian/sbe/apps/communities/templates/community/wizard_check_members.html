@@ -13,16 +13,8 @@
 
     <div class="row">
       <form class="form-horizontal" id="wizard-1">
-        <div id="bootstrap-wizard-1" class="col-sm-12">
-          <div class="form-bootstrapWizard col-sm-offset-2">
-
-            <div class="clearfix"></div>
-          </div>
-
-          <!-- STEP 2 -->
           <div style="margin-right: 8%;margin-left: 8%;">
             <div class="tab-content col-sm-12">
-              <div class="tab-pane active" id="tab1">
                 <br>
                 <h3 class="titre ">{{ _("Existing and new members") }}</h3>
                 <h4 class="sous_titre ">
@@ -82,12 +74,8 @@
 
                   </label>
                 </div>
-
-
-              </div>
             </div>
           </div>
-        </div>
       </form>
 
     </div>
@@ -99,12 +87,6 @@
       {{ csrf_token }}
       <input id="wizard-emails" type="hidden" name="wizard-emails" value="{{ wizard_emails }}">
     </form>
-
-
-    <script type="application/json">
-
-    </script>
-
 
     <script>
       if ($(".table-condensed tr").length == 1) {
@@ -120,17 +102,4 @@
 
     <div class="clearfix"></div>
   {% endcall %}
-{% endblock %}
-
-{% block sidebar %}
-  {%- set actions = actions.for_category('members:menu') %}
-  {%- if actions %}
-    {% call m_box_menu() %}
-      <ul class="nav nav-list">
-        {%- for action in actions %}
-          <li>{{ action.render() }}</li>
-        {%- endfor %}
-      </ul>
-    {% endcall %}
-  {%- endif %}
 {% endblock %}
