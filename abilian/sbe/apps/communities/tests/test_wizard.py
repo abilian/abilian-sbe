@@ -24,14 +24,14 @@ def app():
 
 class WizardTest(CommunityIndexingTestCase):
 
-    def wizard_test_empty_list(self):
+    def test_wizard_empty_list(self):
         wizard_emails = []
         existing_accounts_objects, existing_members_objects, accounts_list = _wizard_check_query(wizard_emails)
         assert existing_accounts_objects == []
         assert existing_members_objects == []
         assert accounts_list == []
 
-    def wizard_test_check_emails(self):
+    def test_wizard_check_emails(self):
         wizard_emails = ["user_1@example.com", "no_community@example.com"]
         existing_accounts_objects, existing_members_objects, accounts_list = _wizard_check_query(wizard_emails)
         assert existing_accounts_objects == [self.user_no_community]
