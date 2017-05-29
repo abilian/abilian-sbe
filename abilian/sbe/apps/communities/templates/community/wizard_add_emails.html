@@ -68,7 +68,68 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
 </div>
 {%- deferJS %}
 <script>
-    $(".users-wizard-next").click(function () {
+    function validEmail(v) {
+        var r = new RegExp(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
+        return (v.match(r) == null) ? false : true;
+    }
+
+    if($("#collection").val()!=""){
+        location.reload();
+    }
+    $('#collection').tagsinput({
+        delimiter: ' '
+    });
+
+    $('#collection').on('beforeItemAdd', function(event) {
+        var is_valid = validEmail(event.item);
+        if (!is_valid) {
+            event.cancel = true;
+        }
+    });
+
+    $('#collection').on('itemAdded', function(event) {
+        var nb_items = $("#collection").tagsinput('items').length;
+        if (nb_items != 0) {
+            $('.email-count').html(nb_items + " <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>");
+            $('.users-wizard-next').css({
+                "background": "yellowgreen",
+                "color": "white"
+            });
+            $('.users-wizard-next').attr("disabled", false);
+            $('#wizard-form-choice').val("emails-tag");
+            $("#csv_file").val("");
+            $("#csv-file-name").val("");
+            $(".bootstrap-tagsinput input:first").attr("placeholder", "");
+            $("#csv-file-name").attr("placeholder", "Choisir le fichier");
+        } else {
+            $('.email-count').html("");
+        }
+    });
+
+    $('#collection').on('itemRemoved', function(event) {
+        var nb_items = $("#collection").tagsinput('items').length;
+        if (nb_items != 0) {
+            $('.email-count').html(nb_items + " <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>");
+        } else {
+            $(".bootstrap-tagsinput input:first").attr("placeholder", "{{_('Emails Collection')}}");
+            $('.email-count').html("");
+            $('.users-wizard-next').css({
+                "background": "ghostwhite",
+                "color": "gray"
+            });
+            $('.users-wizard-next').attr("disabled", true);
+        }
+    });
+
+    $('.bootstrap-tagsinput').on('paste', function(e) {
+        var pasteData = e.originalEvent.clipboardData.getData('text');
+        $("#collection").tagsinput("add", pasteData);
+        setTimeout(function() {
+            $(".bootstrap-tagsinput input:first").val("");
+        }, 5);
+    });
+
+    $(".users-wizard-next").click(function() {
         var form_selection = $("#wizard-form-choice").val();
         if (form_selection === "emails-tag") {
             $('#wizard-emails').val($("#collection").val());
@@ -78,12 +139,12 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
             $("#csv_form").submit();
         }
     });
-    $("#csv_file").change(function () {
+    $("#csv_file").change(function() {
         var file_local = $("#csv_file").val().split("\\");
         $("#csv-file-name").val(file_local[file_local.length - 1]);
         $('.users-wizard-next').css({
-            "background": "yellowgreen"
-            , "color": "white"
+            "background": "yellowgreen",
+            "color": "white"
         }).attr("disabled", false);
         $("#collection").tagsinput('removeAll');
         $(".content_tags").attr("placeholder", "{{_('Emails Collection')}}");
