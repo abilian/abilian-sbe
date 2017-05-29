@@ -19,8 +19,8 @@
     maxTags: undefined,
     maxChars: undefined,
     confirmKeys: [13, 44],
-    delimiter: ' ',
-    delimiterRegex: ' ',
+    delimiter: ',',
+    delimiterRegex: null,
     cancelConfirmKeysOnEmpty: true,
     onTagExists: function(item, $tag) {
       $tag.hide().fadeIn();
@@ -45,7 +45,7 @@
     this.inputSize = Math.max(1, this.placeholderText.length);
 
     this.$container = $('<div class="bootstrap-tagsinput"></div>');
-    this.$input = $('<input class="content_tags" type="text" placeholder="' + this.placeholderText + '"/>').appendTo(this.$container);
+    this.$input = $('<input type="text" placeholder="' + this.placeholderText + '"/>').appendTo(this.$container);
 
     this.$element.before(this.$container);
 
@@ -88,11 +88,8 @@
 
       if (typeof item === "string" && this.$element[0].tagName === 'INPUT') {
         var delimiter = (self.options.delimiterRegex) ? self.options.delimiterRegex : self.options.delimiter;
-        //var items = item.split(delimiter);
-        var items = item.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
-        $(".content_tags").removeAttr('placeholder'); 
-        if (items == null){ return; }
-        if (items.length > 1 ) {
+        var items = item.split(delimiter);
+        if (items.length > 1) {
           for (var i = 0; i < items.length; i++) {
             this.add(items[i], true);
           }
@@ -131,19 +128,6 @@
 
       // register item in internal array and map
       self.itemsArray.push(item);
-      if(self.itemsArray.length!=0){
-        $('.email-count').html(self.itemsArray.length+" <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>");
-        $('.users-wizard-next').css({"background": "yellowgreen","color": "white"});
-        $('.users-wizard-next').attr("disabled", false);
-        $('#wizard-form-choice').val("emails-tag");
-        //remove csv input value
-        $("#csv_file").val("");
-        $("#csv-file-name").val("");
-        $("#csv-file-name").attr("placeholder","Choisir le fichier");
-      }else{
-        $('.email-count').html("");
-      }
-      
 
       // add a tag element
 
@@ -176,6 +160,7 @@
      */
     remove: function(item, dontPushVal, options) {
       var self = this;
+
       if (self.objectItems) {
         if (typeof item === "object")
           item = $.grep(self.itemsArray, function(other) { return self.options.itemValue(other) ==  self.options.itemValue(item); } );
@@ -183,7 +168,6 @@
           item = $.grep(self.itemsArray, function(other) { return self.options.itemValue(other) ==  item; } );
 
         item = item[item.length-1];
-
       }
 
       if (item) {
@@ -206,15 +190,6 @@
         self.$container.removeClass('bootstrap-tagsinput-max');
 
       self.$element.trigger($.Event('itemRemoved',  { item: item, options: options }));
-       if(self.itemsArray.length!=0){
-        $('.email-count').html(self.itemsArray.length+" <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>");
-      }else{
-        $('.email-count').html("");
-        $('.users-wizard-next').css({"background": "ghostwhite","color": "gray"});
-        $('.users-wizard-next').attr("disabled", true);
-      }
-      
-
     },
 
     /**
@@ -665,17 +640,7 @@
    * Initialize tagsinput behaviour on inputs and selects which have
    * data-role=tagsinput
    */
-
-
   $(function() {
     $("input[data-role=tagsinput], select[multiple][data-role=tagsinput]").tagsinput();
-    $('.bootstrap-tagsinput').on('paste', function(e) {
-    var pasteData = e.originalEvent.clipboardData.getData('text');
-    $("#collection").tagsinput("add",pasteData);
-    setTimeout(function() {
-        $(".content_tags").val("");
-        }, 5);
-});
-
   });
 })(window.jQuery);
