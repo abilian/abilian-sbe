@@ -111,7 +111,10 @@ def wizard_read_csv(csv):
 
 @route("/<string:community_id>/members/wizard/step1")
 @tab('members')
-def add_member_emails_wizard():
+def wizard_data_insertion():
+    """
+    Insertion of new members data into the community via emails or csv file
+    """
     g.breadcrumb.append(BreadcrumbItem(
         label=_(u'Members'),
         url=Endpoint('communities.members', community_id=g.community.slug))
@@ -125,7 +128,10 @@ def add_member_emails_wizard():
 @route("/<string:community_id>/members/wizard/step2", methods=['GET', 'POST'])
 @csrf.protect
 @tab('members')
-def check_members_wizard():
+def wizard_check_data():
+    """
+    Filter and detect existing members, existing accounts and new emails
+    """
     if request.method == "POST":
         g.breadcrumb.append(BreadcrumbItem(
             label=_(u'Members'),
@@ -174,7 +180,10 @@ def check_members_wizard():
 @route("/<string:community_id>/members/wizard/step3", methods=['GET', 'POST'])
 @csrf.protect
 @tab('members')
-def new_accounts_wizard():
+def wizard_new_accounts():
+    """
+    Complete new emails information
+    """
     if request.method == "POST":
         g.breadcrumb.append(BreadcrumbItem(
             label=_(u'Members'),
@@ -208,6 +217,10 @@ def new_accounts_wizard():
 @route("/<string:community_id>/members/wizard/complete", methods=['POST'])
 @csrf.protect
 def wizard_saving():
+    """
+    Automatically add existing accounts to the current community.
+    Create accounts for new emails, add them to the community and send them a password reset email
+    """
     community = g.community._model
     existing_accounts = request.form.get("existing_account")
     existing_accounts = json.loads(existing_accounts)
