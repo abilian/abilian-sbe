@@ -56,10 +56,10 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
 </div>
 <input id="wizard-form-choice" type="hidden" value="emails-tag">
 <div class="col-lg-6 col-md-offset-3">
-    <form id="csv_form" method="post" action="{{ url_for('.check_members_wizard',community_id=g.community.slug) }}" enctype="multipart/form-data">
+    <form id="csv_form" method="post" action="{{ url_for('.wizard_check_data',community_id=g.community.slug) }}" enctype="multipart/form-data">
         {{ csrf_token }}
         <input style="display:none;" type="file" id="csv_file" class="file-add form-control col-sm-2" name="csv_file"> </form>
-    <form method="POST" class="form-inline" action=" {{ url_for('.check_members_wizard',community_id=g.community.slug) }}">
+    <form method="POST" class="form-inline" action=" {{ url_for('.wizard_check_data',community_id=g.community.slug) }}">
         {{ csrf_token }}
         <input id="wizard-emails" type="hidden" name="wizard-emails" value="">
         <br>

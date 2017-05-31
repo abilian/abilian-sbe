@@ -73,7 +73,7 @@
     {% set table_id = uuid() %}
 
     <form method="POST" class="form-inline wizard-form"
-          action=" {{ url_for('.new_accounts_wizard',community_id=g.community.slug) }}">
+          action=" {{ url_for('.wizard_new_accounts',community_id=g.community.slug) }}">
       {{ csrf_token }}
       <input id="wizard-emails" type="hidden" name="wizard-emails" value="{{ wizard_emails }}">
     </form>
