@@ -5,6 +5,7 @@ from __future__ import absolute_import, print_function
 
 import json
 from io import BytesIO
+from validate_email import validate_email
 
 from flask import current_app, flash, g, jsonify, redirect, render_template, \
     request, session, url_for
@@ -91,22 +92,36 @@ def wizard_extract_data(emails, is_csv=False):
     return existing_accounts_objects, existing_members_objects, accounts_list
 
 
-def wizard_read_csv(csv):
+def wizard_read_csv(csv=None):
     file_extension = secure_filename(csv.filename).split(".")[-1]
-    if file_extension == "csv":
-        contents = csv.readlines()
-        new_accounts = []
-        for line in contents:
-            account = {}
-            data = line.split(";")
-            if len(data) == 4:
-                account["email"] = data[0].strip()
-                account["first_name"] = data[1].strip()
-                account["last_name"] = data[2].strip()
-                account["role"] = data[3].strip()
-                new_accounts.append(account)
-        return new_accounts
-    return False
+
+    if file_extension != "csv":
+        return False
+
+    contents = csv.readlines()
+    new_accounts = []
+
+    for line in contents:
+        account = {}
+        data = line.split(";")
+        if len(data) != 4:
+            continue
+        email, first_name, last_name, role = (data[0].strip(),
+                                              data[1].strip(),
+                                              data[2].strip(),
+                                              data[3].strip())
+        if not validate_email(email):
+            continue
+        if role.lower() not in ["manager","member"]:
+            continue
+
+        account["email"] = email
+        account["first_name"] = first_name
+        account["last_name"] = last_name
+        account["role"] = role
+        new_accounts.append(account)
+
+    return new_accounts
 
 
 @route("/<string:community_id>/members/wizard/step1")
@@ -151,7 +166,7 @@ def wizard_check_data():
                 flash(_(u"Csv file is not valid"), 'warning')
                 return redirect(
                     url_for(
-                        ".add_member_emails_wizard",
+                        ".wizard_data_insertion",
                         community_id=g.community.slug))
 
             existing_accounts, existing_members_objects, final_email_list = wizard_extract_data(
@@ -164,7 +179,7 @@ def wizard_check_data():
             flash(_(u"No new members were found"), 'warning')
             return redirect(
                 url_for(
-                    ".add_member_emails_wizard", community_id=g.community.slug))
+                    ".wizard_data_insertion", community_id=g.community.slug))
 
         return render_template(
             "community/wizard_check_members.html",
