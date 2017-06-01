@@ -157,13 +157,13 @@
           });
 
           tmp_emails = jQuery.grep(tmp_emails, function (n, i) {
-            return (n !== "" && n !== null);
+            return (n !== "" && n != null);
           });
           $("#new_accounts").val(JSON.stringify(tmp_emails));
 
           if ($(".table-condensed tr").length === 1) {
             $(".table-condensed").closest('tr').remove();
-            $(".table-condensed").append("<tr><td id='wizard-msg' colspan='4' style='display:none;padding: 10px;color: gray;width: 18cm;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no new accounts')}}</td></tr>");
+            $(".table-condensed").append("<tr><td id='wizard-msg' colspan='5' style='display:none;padding: 10px;color: gray;width: 18cm;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no new accounts')}}</td></tr>");
             $("#wizard-msg").fadeIn();
           }
         });
@@ -171,7 +171,7 @@
       }
       if ($(".table-condensed tr").length === 1) {
         $(".table-condensed").closest('tr').remove();
-        $(".table-condensed").append("<tr><td id='wizard-msg' colspan='4' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
+        $(".table-condensed").append("<tr><td id='wizard-msg' colspan='5' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
         $("#wizard-msg").fadeIn();
       }
     </script>
