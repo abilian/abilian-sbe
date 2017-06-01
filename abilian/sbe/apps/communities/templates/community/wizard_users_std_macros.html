@@ -97,10 +97,10 @@
           if (val.email === e.id) {
             delete tmp_emails[i];
           }
-        });
 
+        });
         tmp_emails = jQuery.grep(tmp_emails, function (n, i) {
-          return (n !== "" && n !== null);
+          return (n !== "" && n != null);
         });
 
         $("#wizard-emails").val(JSON.stringify(tmp_emails));
@@ -109,8 +109,6 @@
         if ($(".table-condensed tr").length === 1) {
           $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
           $("#wizard-msg").fadeIn();
-          $(".existing-account").fadeOut();
-
         }
       });
     }
