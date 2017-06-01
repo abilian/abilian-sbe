@@ -166,7 +166,7 @@ def wizard_check_data():
         is_csv = True
         accounts_data = wizard_read_csv(request.files['csv_file'])
         if not accounts_data:
-            flash(_(u"Csv file is not valid"), 'warning')
+            flash(_(u"To add new members, please try to follow the CSV file model."), 'warning')
             return redirect(
                 url_for(
                     ".wizard_data_insertion",
