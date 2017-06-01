@@ -73,24 +73,26 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
         return (v.match(r) == null) ? false : true;
     }
 
-    if($("#collection").val()!=""){
+    if ($("#collection").val() != "") {
         location.reload();
     }
     $('#collection').tagsinput({
         delimiter: ' '
     });
 
-    $('#collection').on('beforeItemAdd', function(event) {
+    $('#collection').on('beforeItemAdd', function (event) {
         var is_valid = validEmail(event.item);
         if (!is_valid) {
             event.cancel = true;
         }
     });
 
-    $('#collection').on('itemAdded', function(event) {
+    $('#collection').on('itemAdded', function (event) {
         var nb_items = $("#collection").tagsinput('items').length;
         if (nb_items != 0) {
-            $('.email-count').html(nb_items + " <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>");
+            $('.email-count').html(nb_items +
+                " <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>"
+            );
             $('.users-wizard-next').css({
                 "background": "yellowgreen",
                 "color": "white"
@@ -106,10 +108,12 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
         }
     });
 
-    $('#collection').on('itemRemoved', function(event) {
+    $('#collection').on('itemRemoved', function (event) {
         var nb_items = $("#collection").tagsinput('items').length;
         if (nb_items != 0) {
-            $('.email-count').html(nb_items + " <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>");
+            $('.email-count').html(nb_items +
+                " <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>"
+            );
         } else {
             $(".bootstrap-tagsinput input:first").attr("placeholder", "{{_('Emails Collection')}}");
             $('.email-count').html("");
@@ -121,15 +125,15 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
         }
     });
 
-    $('.bootstrap-tagsinput').on('paste', function(e) {
+    $('.bootstrap-tagsinput').on('paste', function (e) {
         var pasteData = e.originalEvent.clipboardData.getData('text');
         $("#collection").tagsinput("add", pasteData);
-        setTimeout(function() {
+        setTimeout(function () {
             $(".bootstrap-tagsinput input:first").val("");
         }, 5);
     });
 
-    $(".users-wizard-next").click(function() {
+    $(".users-wizard-next").click(function () {
         var form_selection = $("#wizard-form-choice").val();
         if (form_selection === "emails-tag") {
             $('#wizard-emails').val($("#collection").val());
@@ -139,7 +143,7 @@ top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
             $("#csv_form").submit();
         }
     });
-    $("#csv_file").change(function() {
+    $("#csv_file").change(function () {
         var file_local = $("#csv_file").val().split("\\");
         $("#csv-file-name").val(file_local[file_local.length - 1]);
         $('.users-wizard-next').css({
