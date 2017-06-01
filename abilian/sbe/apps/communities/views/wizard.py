@@ -113,7 +113,7 @@ def wizard_read_csv(csv=None):
                                               data[3].strip())
         if not validate_email(email):
             continue
-        if role.lower() not in ["manager","member"]:
+        if role.lower() not in ["manager", "member"]:
             continue
 
         account["email"] = email
@@ -148,49 +148,49 @@ def wizard_check_data():
     """
     Filter and detect existing members, existing accounts and new emails
     """
-    if request.method == "POST":
-        g.breadcrumb.append(BreadcrumbItem(
-            label=_(u'Members'),
-            url=Endpoint('communities.members', community_id=g.community.slug))
-        )
+    if request.method == "GET":
+        return redirect(url_for(".members", community_id=g.community.slug))
 
-        is_csv = False
-        if request.form.get("wizard-emails"):
-            wizard_emails = request.form.get("wizard-emails").split(",")
-            existing_accounts_object, existing_members_objects, final_email_list = wizard_extract_data(
-                wizard_emails)
-            final_email_list_json = json.dumps(final_email_list)
-        else:
-            is_csv = True
-            accounts_data = wizard_read_csv(request.files['csv_file'])
-            if not accounts_data:
-                flash(_(u"Csv file is not valid"), 'warning')
-                return redirect(
-                    url_for(
-                        ".wizard_data_insertion",
-                        community_id=g.community.slug))
+    g.breadcrumb.append(BreadcrumbItem(
+        label=_(u'Members'),
+        url=Endpoint('communities.members', community_id=g.community.slug))
+    )
 
-            existing_accounts, existing_members_objects, final_email_list = wizard_extract_data(
-                accounts_data, is_csv=True)
-            existing_accounts_object = existing_accounts["account_objects"]
-            existing_accounts_csv_roles = existing_accounts["csv_roles"]
-            final_email_list_json = json.dumps(final_email_list)
-
-        if not final_email_list:
-            flash(_(u"No new members were found"), 'warning')
+    is_csv = False
+    if request.form.get("wizard-emails"):
+        wizard_emails = request.form.get("wizard-emails").split(",")
+        existing_accounts_object, existing_members_objects, final_email_list = wizard_extract_data(
+            wizard_emails)
+        final_email_list_json = json.dumps(final_email_list)
+    else:
+        is_csv = True
+        accounts_data = wizard_read_csv(request.files['csv_file'])
+        if not accounts_data:
+            flash(_(u"Csv file is not valid"), 'warning')
             return redirect(
                 url_for(
-                    ".wizard_data_insertion", community_id=g.community.slug))
+                    ".wizard_data_insertion",
+                    community_id=g.community.slug))
 
-        return render_template(
-            "community/wizard_check_members.html",
-            existing_accounts_object=existing_accounts_object,
-            csv_roles=existing_accounts_csv_roles if is_csv else False,
-            wizard_emails=final_email_list_json,
-            existing_members_objects=existing_members_objects,
-            csrf_token=csrf.field())
+        existing_accounts, existing_members_objects, final_email_list = wizard_extract_data(
+            accounts_data, is_csv=True)
+        existing_accounts_object = existing_accounts["account_objects"]
+        existing_accounts_csv_roles = existing_accounts["csv_roles"]
+        final_email_list_json = json.dumps(final_email_list)
 
-    return redirect(url_for(".members", community_id=g.community.slug))
+    if not final_email_list:
+        flash(_(u"No new members were found"), 'warning')
+        return redirect(
+            url_for(
+                ".wizard_data_insertion", community_id=g.community.slug))
+
+    return render_template(
+        "community/wizard_check_members.html",
+        existing_accounts_object=existing_accounts_object,
+        csv_roles=existing_accounts_csv_roles if is_csv else False,
+        wizard_emails=final_email_list_json,
+        existing_members_objects=existing_members_objects,
+        csrf_token=csrf.field())
 
 
 @route("/<string:community_id>/members/wizard/step3", methods=['GET', 'POST'])
@@ -200,34 +200,34 @@ def wizard_new_accounts():
     """
     Complete new emails information
     """
-    if request.method == "POST":
-        g.breadcrumb.append(BreadcrumbItem(
-            label=_(u'Members'),
-            url=Endpoint('communities.members', community_id=g.community.slug))
-        )
+    if request.method == "GET":
+        return redirect(url_for(".members", community_id=g.community.slug))
 
-        wizard_emails = request.form.get("wizard-emails")
-        wizard_accounts = json.loads(wizard_emails)
+    g.breadcrumb.append(BreadcrumbItem(
+        label=_(u'Members'),
+        url=Endpoint('communities.members', community_id=g.community.slug))
+    )
 
-        wizard_existing_account = {}
-        new_accounts = []
+    wizard_emails = request.form.get("wizard-emails")
+    wizard_accounts = json.loads(wizard_emails)
 
-        for user in wizard_accounts:
-            if user["status"] == "existing":
-                wizard_existing_account[user["email"]] = user["role"]
+    wizard_existing_account = {}
+    new_accounts = []
 
-            elif user["status"] == "new":
-                new_accounts.append(user)
+    for user in wizard_accounts:
+        if user["status"] == "existing":
+            wizard_existing_account[user["email"]] = user["role"]
 
-        existing_account = json.dumps(wizard_existing_account)
+        elif user["status"] == "new":
+            new_accounts.append(user)
 
-        return render_template(
-            "community/wizard_new_accounts.html",
-            existing_account=existing_account,
-            new_accounts=new_accounts,
-            csrf_token=csrf.field())
+    existing_account = json.dumps(wizard_existing_account)
 
-    return redirect(url_for(".members", community_id=g.community.slug))
+    return render_template(
+        "community/wizard_new_accounts.html",
+        existing_account=existing_account,
+        new_accounts=new_accounts,
+        csrf_token=csrf.field())
 
 
 @route("/<string:community_id>/members/wizard/complete", methods=['POST'])
