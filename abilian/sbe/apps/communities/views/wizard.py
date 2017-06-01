@@ -107,10 +107,12 @@ def wizard_read_csv(csv=None):
         data = line.split(";")
         if len(data) != 4:
             continue
-        email, first_name, last_name, role = (data[0].strip(),
-                                              data[1].strip(),
-                                              data[2].strip(),
-                                              data[3].strip())
+
+        email = data[0].strip()
+        first_name = data[1].strip()
+        last_name = data[2].strip()
+        role = data[3].strip()
+
         if not validate_email(email):
             continue
         if role.lower() not in ["manager", "member"]:
@@ -166,7 +168,7 @@ def wizard_check_data():
         is_csv = True
         accounts_data = wizard_read_csv(request.files['csv_file'])
         if not accounts_data:
-            flash(_(u"To add new members, please try to follow the CSV file model."), 'warning')
+            flash(_(u"To add new members, please follow the CSV file model."), 'warning')
             return redirect(
                 url_for(
                     ".wizard_data_insertion",

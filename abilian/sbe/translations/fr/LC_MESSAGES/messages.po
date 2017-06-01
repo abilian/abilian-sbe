@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-06-01 12:20+0200\n"
+"POT-Creation-Date: 2017-06-01 13:55+0200\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -133,9 +133,9 @@ msgstr "Agenda"
 #: abilian/sbe/apps/communities/actions.py:78
 #: abilian/sbe/apps/communities/templates/community/members.html:7
 #: abilian/sbe/apps/communities/views/views.py:351
-#: abilian/sbe/apps/communities/views/wizard.py:135
-#: abilian/sbe/apps/communities/views/wizard.py:155
-#: abilian/sbe/apps/communities/views/wizard.py:207
+#: abilian/sbe/apps/communities/views/wizard.py:137
+#: abilian/sbe/apps/communities/views/wizard.py:157
+#: abilian/sbe/apps/communities/views/wizard.py:209
 #: abilian/sbe/apps/social/templates/social/groups.html:39
 msgid "Members"
 msgstr "Membres"
@@ -525,18 +525,18 @@ msgstr "email"
 msgid "%(community)s members"
 msgstr "membres de %(community)s "
 
-#: abilian/sbe/apps/communities/views/wizard.py:169
-msgid "To add new members, please try to follow the CSV file model."
+#: abilian/sbe/apps/communities/views/wizard.py:171
+msgid "To add new members, please follow the CSV file model."
 msgstr ""
-"Pour ajouter de nouveaux membres, essayez de suivre le modèle de fichier "
-"CSV."
+"Pour ajouter des nouveaux membres, essayez de suivre le modèle de fichier"
+" CSV."
 
-#: abilian/sbe/apps/communities/views/wizard.py:182
-#: abilian/sbe/apps/communities/views/wizard.py:247
+#: abilian/sbe/apps/communities/views/wizard.py:184
+#: abilian/sbe/apps/communities/views/wizard.py:249
 msgid "No new members were found"
 msgstr "Aucun nouveau membre n'a été trouvé"
 
-#: abilian/sbe/apps/communities/views/wizard.py:281
+#: abilian/sbe/apps/communities/views/wizard.py:283
 #, fuzzy
 msgid "Members added Successfully"
 msgstr "Les paramètres de la communautés ont été enregistrés"
