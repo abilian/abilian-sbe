@@ -7,8 +7,8 @@ import json
 from io import BytesIO
 from validate_email import validate_email
 
-from flask import current_app, flash, g, jsonify, redirect, render_template, \
-    request, session, url_for
+from flask import current_app, flash, g, redirect, render_template, \
+    request, url_for
 
 from werkzeug.utils import secure_filename
 from abilian.core.extensions import db
@@ -24,7 +24,7 @@ from .views import route, tab
 
 
 def wizard_extract_data(emails, is_csv=False):
-
+    """Filter data and extract existing accounts, existing members and new emails"""
     if is_csv:
         csv_data = emails
         existing_account_csv_roles = {
@@ -93,6 +93,7 @@ def wizard_extract_data(emails, is_csv=False):
 
 
 def wizard_read_csv(csv=None):
+    """read new members data from csv file"""
     file_extension = secure_filename(csv.filename).split(".")[-1]
 
     if file_extension != "csv":
