@@ -5,12 +5,12 @@ from __future__ import absolute_import, print_function
 
 import json
 from io import BytesIO
+
+from flask import current_app, flash, g, redirect, render_template, request, \
+    url_for
 from validate_email import validate_email
-
-from flask import current_app, flash, g, redirect, render_template, \
-    request, url_for
-
 from werkzeug.utils import secure_filename
+
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 from abilian.core.signals import activity
@@ -139,8 +139,7 @@ def wizard_data_insertion():
     )
 
     return render_template(
-        "community/wizard_add_emails.html",
-        csrf_token=csrf.field())
+        "community/wizard_add_emails.html", csrf_token=csrf.field())
 
 
 @route("/<string:community_id>/members/wizard/step2", methods=['GET', 'POST'])
@@ -171,8 +170,7 @@ def wizard_check_data():
             flash(_(u"To add new members, please follow the CSV file model."), 'warning')
             return redirect(
                 url_for(
-                    ".wizard_data_insertion",
-                    community_id=g.community.slug))
+                    ".wizard_data_insertion", community_id=g.community.slug))
 
         existing_accounts, existing_members_objects, final_email_list = wizard_extract_data(
             accounts_data, is_csv=True)
@@ -183,8 +181,7 @@ def wizard_check_data():
     if not final_email_list:
         flash(_(u"No new members were found"), 'warning')
         return redirect(
-            url_for(
-                ".wizard_data_insertion", community_id=g.community.slug))
+            url_for(".wizard_data_insertion", community_id=g.community.slug))
 
     return render_template(
         "community/wizard_check_members.html",

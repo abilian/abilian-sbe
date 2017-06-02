@@ -1,27 +1,20 @@
 # Note: this test suite is using pytest instead of the unittest-based scaffolding
 # provided by SBE. Hopefully one day all of SBE will follow.
-from os.path import exists
 from tempfile import NamedTemporaryFile
+
+import pytest
+from flask import g
 
 from abilian.core.extensions import db as _db
 from abilian.core.models.subjects import User
 from abilian.sbe.app import create_app
 from abilian.sbe.apps.communities.models import READER, Community
-from abilian.sbe.apps.communities.views.wizard import (wizard_extract_data,
-                                                       wizard_read_csv)
-from flask import g, url_for
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, event
-from sqlalchemy.orm import Session
-
-import pytest
-
-from .base import CommunityIndexingTestCase
+from abilian.sbe.apps.communities.views.wizard import wizard_extract_data, \
+    wizard_read_csv
 
 
 @pytest.fixture(scope='session')
 def app(request):
-
     app = create_app()
     app.config["TESTING"] = True
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
@@ -29,7 +22,6 @@ def app(request):
     app.config["SERVICES"] = ()
 
     # Establish an application context .
-
     with app.app_context() as ctx:
         app.services["audit"].stop()
         ctx.push()
@@ -43,14 +35,10 @@ def app(request):
 
 @pytest.fixture(scope='session')
 def db(app, request):
-
-    """def teardown():
-        _db.drop_all()"""
-
     _db.app = app
     _db.create_all()
 
-    #request.addfinalizer(teardown)
+    # request.addfinalizer(teardown)
     return _db
 
 
@@ -81,59 +69,65 @@ def test_wizard_extract_data(session):
     user2 = User(email=u'user_2@example.com', password='azerty', can_login=True)
     user3 = User(email=u'user_3@example.com', password='azerty', can_login=True)
 
-    new_emails = [u"user_1@example.com",
-                  u"user_2@example.com",
-                  u"user_3@example.com",
-                  u"user_4@example.com",
-                  u"user_5@example.com"]
+    new_emails = [
+        u"user_1@example.com", u"user_2@example.com", u"user_3@example.com",
+        u"user_4@example.com", u"user_5@example.com"
+    ]
 
-    #creating community
+    # creating community
     session.add(community)
 
-    #creating users
+    # creating users
     session.add(user1)
     session.add(user2)
     session.add(user3)
     session.flush()
 
-    #add user1 to the community
+    # add user1 to the community
     community.set_membership(user1, READER)
 
     g.community = community
     session.commit()
 
-    #check wizard function
-    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(new_emails)
-    assert existing_accounts_objects == [user2,user3]
+    # check wizard function
+    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
+        new_emails)
+    assert existing_accounts_objects == [user2, user3]
     assert existing_members_objects == [user1]
-    assert accounts_list == [{'status': 'existing',
-                              'first_name': None,
-                              'last_name': None,
-                              'role': 'member',
-                              'email': u'user_2@example.com'},
-                             {'status': 'existing',
-                              'first_name': None,
-                              'last_name': None,
-                              'role': 'member',
-                              'email': u'user_3@example.com'},
-                             {'status': 'new',
-                              'first_name': '',
-                              'last_name': '',
-                              'role': 'member',
-                              'email': u'user_5@example.com'},
-                             {'status': 'new',
-                              'first_name': '',
-                              'last_name': '',
-                              'role': 'member',
-                              'email': u'user_4@example.com'}]
+    assert accounts_list == [{
+        'status': 'existing',
+        'first_name': None,
+        'last_name': None,
+        'role': 'member',
+        'email': u'user_2@example.com'
+    }, {
+        'status': 'existing',
+        'first_name': None,
+        'last_name': None,
+        'role': 'member',
+        'email': u'user_3@example.com'
+    }, {
+        'status': 'new',
+        'first_name': '',
+        'last_name': '',
+        'role': 'member',
+        'email': u'user_5@example.com'
+    }, {
+        'status': 'new',
+        'first_name': '',
+        'last_name': '',
+        'role': 'member',
+        'email': u'user_4@example.com'
+    }]
 
 
-def test_wizard_read_csv(session):
-    #create a tmp csv file
+def test_wizard_read_csv():
+    # create a tmp csv file
     csv = NamedTemporaryFile(suffix=".csv", prefix="tmp_", delete=False)
     csv.write("user1@example.com;userone;userone;manager\n")
     csv.write("user1@example.com;usertwo;usertwo;member\n")
-    #writing a wrong line
+
+    # writing a wrong line
     csv.write("user1@example.com;userthree;userthree\n")
     csv.write("example.com;example;userfour;member\n")
 
@@ -141,11 +135,14 @@ def test_wizard_read_csv(session):
     csv.filename = csv.name.split("/")[-1]
     wizard_read = wizard_read_csv(csv)
 
-    assert wizard_read == [{'first_name': 'userone',
-                            'last_name': 'userone',
-                            'role': 'manager',
-                            'email': 'ser1@example.com'},
-                           {'first_name': 'usertwo',
-                            'last_name': 'usertwo',
-                            'role': 'member',
-                            'email': 'user1@example.com'}]
+    assert wizard_read == [{
+        'first_name': 'userone',
+        'last_name': 'userone',
+        'role': 'manager',
+        'email': 'ser1@example.com'
+    }, {
+        'first_name': 'usertwo',
+        'last_name': 'usertwo',
+        'role': 'member',
+        'email': 'user1@example.com'
+    }]
