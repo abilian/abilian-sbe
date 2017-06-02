@@ -203,7 +203,7 @@ class Community(Entity):
             #  self.group = Group(name=self.name)
 
         if not self.image:
-            fn = join(dirname(__file__), "data", "community.png")
+            fn = join(dirname(__file__), "views/data", "community.png")
             self.image = Blob(open(fn, 'rb').read())
 
     @property
