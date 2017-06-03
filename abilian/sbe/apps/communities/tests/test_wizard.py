@@ -2,123 +2,12 @@
 # provided by SBE. Hopefully one day all of SBE will follow.
 from tempfile import NamedTemporaryFile
 
-import pytest
 from flask import g
 
-from abilian.core.extensions import db as _db
 from abilian.core.models.subjects import User
-from abilian.sbe.app import create_app
 from abilian.sbe.apps.communities.models import READER, Community
 from abilian.sbe.apps.communities.views.wizard import wizard_extract_data, \
     wizard_read_csv
-
-
-@pytest.fixture(scope='session')
-def app(request):
-    app = create_app()
-    app.config["TESTING"] = True
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
-
-    app.config["SERVICES"] = ()
-
-    # Establish an application context .
-    with app.app_context() as ctx:
-        app.services["audit"].stop()
-        ctx.push()
-
-    def teardown():
-        ctx.pop()
-
-    request.addfinalizer(teardown)
-    return app
-
-
-@pytest.fixture(scope='session')
-def db(app, request):
-    _db.app = app
-    _db.create_all()
-
-    # request.addfinalizer(teardown)
-    return _db
-
-
-@pytest.fixture(scope='function')
-def session(db, request):
-    """Creates a new database session for a test."""
-    connection = db.engine.connect()
-    transaction = connection.begin()
-
-    options = dict(bind=connection, binds={})
-    session = db.create_scoped_session(options=options)
-
-    db.session = session
-
-    def teardown():
-        transaction.rollback()
-        connection.close()
-        session.remove()
-
-    request.addfinalizer(teardown)
-    return session
-
-
-def test_wizard_extract_data(session):
-    community = Community(name=u'Hp')
-
-    user1 = User(email=u'user_1@example.com', password='azerty', can_login=True)
-    user2 = User(email=u'user_2@example.com', password='azerty', can_login=True)
-    user3 = User(email=u'user_3@example.com', password='azerty', can_login=True)
-
-    new_emails = [
-        u"user_1@example.com", u"user_2@example.com", u"user_3@example.com",
-        u"user_4@example.com", u"user_5@example.com"
-    ]
-
-    # creating community
-    session.add(community)
-
-    # creating users
-    session.add(user1)
-    session.add(user2)
-    session.add(user3)
-    session.flush()
-
-    # add user1 to the community
-    community.set_membership(user1, READER)
-
-    g.community = community
-    session.commit()
-
-    # check wizard function
-    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
-        new_emails)
-    assert existing_accounts_objects == [user2, user3]
-    assert existing_members_objects == [user1]
-    assert accounts_list == [{
-        'status': 'existing',
-        'first_name': None,
-        'last_name': None,
-        'role': 'member',
-        'email': u'user_2@example.com'
-    }, {
-        'status': 'existing',
-        'first_name': None,
-        'last_name': None,
-        'role': 'member',
-        'email': u'user_3@example.com'
-    }, {
-        'status': 'new',
-        'first_name': '',
-        'last_name': '',
-        'role': 'member',
-        'email': u'user_5@example.com'
-    }, {
-        'status': 'new',
-        'first_name': '',
-        'last_name': '',
-        'role': 'member',
-        'email': u'user_4@example.com'
-    }]
 
 
 def test_wizard_read_csv():
@@ -146,3 +35,63 @@ def test_wizard_read_csv():
         'role': 'member',
         'email': 'user1@example.com'
     }]
+
+
+def test_wizard_extract_data(db_session):
+    session = db_session
+
+    community = Community(name=u'Hp')
+    g.community = community
+
+    user1 = User(email=u'user_1@example.com', password='azerty', can_login=True)
+    user2 = User(email=u'user_2@example.com', password='azerty', can_login=True)
+    user3 = User(email=u'user_3@example.com', password='azerty', can_login=True)
+
+    new_emails = [
+        u"user_1@example.com", u"user_2@example.com", u"user_3@example.com",
+        u"user_4@example.com", u"user_5@example.com"
+    ]
+
+    # creating community
+    session.add(community)
+
+    # creating users
+    session.add(user1)
+    session.add(user2)
+    session.add(user3)
+    session.flush()
+
+    # add user1 to the community
+    community.set_membership(user1, READER)
+    session.flush()
+
+    # check wizard function
+    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
+        new_emails)
+    assert set(existing_accounts_objects) == {user2, user3}
+    assert existing_members_objects == [user1]
+    assert sorted(accounts_list) == sorted([{
+        'status': 'existing',
+        'first_name': None,
+        'last_name': None,
+        'role': 'member',
+        'email': u'user_2@example.com'
+    }, {
+        'status': 'existing',
+        'first_name': None,
+        'last_name': None,
+        'role': 'member',
+        'email': u'user_3@example.com'
+    }, {
+        'status': 'new',
+        'first_name': '',
+        'last_name': '',
+        'role': 'member',
+        'email': u'user_5@example.com'
+    }, {
+        'status': 'new',
+        'first_name': '',
+        'last_name': '',
+        'role': 'member',
+        'email': u'user_4@example.com'
+    }])
