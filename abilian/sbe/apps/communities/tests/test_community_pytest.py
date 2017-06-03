@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-tests from test_community are currently refactored using pytest in this module
+Tests from test_community are currently refactored using pytest in this module.
 """
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
@@ -19,17 +19,17 @@ from ..models import MEMBER, Community, CommunityIdColumn, community_content
 
 
 @fixture
-def community(db_session):
+def community(db):
     community = Community(name="My Community")
-    db_session.add(community)
-    db_session.commit()
+    db.session.add(community)
+    db.session.commit()
     return community
 
 
 #
 # Actual tests
 #
-def test_instanciation(db_session):
+def test_instanciation(db):
     community = Community(name="My Community")
     assert isinstance(community.folder, Folder)
     # assert isinstance(community.group, Group)
@@ -50,17 +50,17 @@ def test_default_url(app, community):
         community) == 'http://localhost/communities/my-community/'
 
 
-def test_can_recreate_with_same_name(community, db_session):
+def test_can_recreate_with_same_name(community, db):
     name = community.name
 
-    db_session.delete(community)
-    db_session.commit()
+    db.session.delete(community)
+    db.session.commit()
     community = Community(name=name)
-    db_session.add(community)
+    db.session.add(community)
 
     # if community.folder was not deleted, this will raise IntegrityError. Test
     # passes if no exceptions is raised
-    db_session.commit()
+    db.session.commit()
 
 
 def test_rename(community):
@@ -74,7 +74,7 @@ def test_auto_slug(community):
     assert community.slug == 'my-community'
 
 
-def test_membership(community, db_session):
+def test_membership(community, db):
     user = User(email="user@example.com")
 
     l = community.memberships
@@ -89,15 +89,15 @@ def test_membership(community, db_session):
     signals.membership_removed.connect(when_removed)
 
     # invalid role
-    # with self.assertRaises(ValueError):
-    #     self.community.set_membership(user, 'dummy role name')
+    with pytest.raises(ValueError):
+        community.set_membership(user, 'dummy role name')
 
     assert not when_set.called
     assert not when_removed.called
 
     # simple member
     community.set_membership(user, "member")
-    db_session.commit()
+    db.session.commit()
 
     l = community.memberships
     assert len(l) == 1
@@ -116,7 +116,7 @@ def test_membership(community, db_session):
 
     # change user role
     community.set_membership(user, "manager")
-    db_session.commit()
+    db.session.commit()
 
     l = community.memberships
     assert len(l) == 1
@@ -132,7 +132,7 @@ def test_membership(community, db_session):
     # remove user
     membership = l[0]
     community.remove_membership(user)
-    db_session.commit()
+    db.session.commit()
 
     l = community.memberships
     assert l == []
@@ -141,11 +141,11 @@ def test_membership(community, db_session):
     when_removed.assert_called_once_with(community, membership=membership)
 
 
-def test_folder_roles(community, db_session, app):
+def test_folder_roles(community, db, app):
     user = User(email="user@example.com")
     folder = community.folder
     community.set_membership(user, "member")
-    db_session.commit()
+    db.session.commit()
     security = app.services['security']
 
     assert security.get_roles(user, folder) == ["reader"]

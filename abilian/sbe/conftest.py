@@ -1,5 +1,11 @@
 # coding=utf-8
 """
+Configuration anf injectable fixtures for Pytest.
+
+Supposed to replace the too-complex current UnitTest-based testing
+framework.
+
+DI and function over complex inheritance hierarchies FTW!
 """
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
@@ -18,41 +24,22 @@ class TestConfig:
 
 @fixture(scope='session')
 def app():
+    """We usually only create an app once per session."""
     _app = create_app(config=TestConfig)
     return _app
 
 
-# XXX: not sure we really need both 'db' and 'db_session' ???
-@yield_fixture(scope="session")
+@yield_fixture(scope="function")
 def db(app):
-    """
-    Creates clean database schema and drops it on teardown.
-
-    Note, that this is a session scoped fixture, it will be executed only once
-    and shared among all tests. Use `db` fixture to get clean database before
-    each test.
-    """
     from abilian.core.extensions import db
 
-    with app.app_context():
-        db.create_all()
-        yield db
-
-        db.session.remove()
-        cleanup_db(db)
-        # Is this needed ?
-        # db.session.bind.dispose()
-
-
-@yield_fixture(scope="function")
-def db_session(db, app):
     with app.app_context():
         stop_all_services(app)
         ensure_services_started(['repository', 'session_repository'])
 
         cleanup_db(db)
         db.create_all()
-        yield db.session
+        yield db
 
         db.session.remove()
         cleanup_db(db)
@@ -60,7 +47,8 @@ def db_session(db, app):
 
 
 @fixture(scope='function')
-def client(app, db_session):
+def client(app, db):
+    """Web client, used for testing, bound to a DB session."""
     return app.test_client()
 
 

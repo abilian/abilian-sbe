@@ -1,5 +1,7 @@
 # Note: this test suite is using pytest instead of the unittest-based scaffolding
 # provided by SBE. Hopefully one day all of SBE will follow.
+from __future__ import unicode_literals
+
 from tempfile import NamedTemporaryFile
 
 from flask import g
@@ -37,19 +39,18 @@ def test_wizard_read_csv():
     }]
 
 
-def test_wizard_extract_data(db_session):
-    session = db_session
-
-    community = Community(name=u'Hp')
+def test_wizard_extract_data(db):
+    session = db.session
+    community = Community(name='Hp')
     g.community = community
 
-    user1 = User(email=u'user_1@example.com', password='azerty', can_login=True)
-    user2 = User(email=u'user_2@example.com', password='azerty', can_login=True)
-    user3 = User(email=u'user_3@example.com', password='azerty', can_login=True)
+    user1 = User(email='user_1@example.com')
+    user2 = User(email='user_2@example.com')
+    user3 = User(email='user_3@example.com')
 
     new_emails = [
-        u"user_1@example.com", u"user_2@example.com", u"user_3@example.com",
-        u"user_4@example.com", u"user_5@example.com"
+        "user_1@example.com", "user_2@example.com", "user_3@example.com",
+        "user_4@example.com", "user_5@example.com"
     ]
 
     # creating community
@@ -75,23 +76,23 @@ def test_wizard_extract_data(db_session):
         'first_name': None,
         'last_name': None,
         'role': 'member',
-        'email': u'user_2@example.com'
+        'email': 'user_2@example.com'
     }, {
         'status': 'existing',
         'first_name': None,
         'last_name': None,
         'role': 'member',
-        'email': u'user_3@example.com'
+        'email': 'user_3@example.com'
     }, {
         'status': 'new',
         'first_name': '',
         'last_name': '',
         'role': 'member',
-        'email': u'user_5@example.com'
+        'email': 'user_5@example.com'
     }, {
         'status': 'new',
         'first_name': '',
         'last_name': '',
         'role': 'member',
-        'email': u'user_4@example.com'
+        'email': 'user_4@example.com'
     }])
