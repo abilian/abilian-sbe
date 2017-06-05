@@ -5,18 +5,14 @@ Tests from test_community are currently refactored using pytest in this module.
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-import random
-import string
-
 import pytest
 import sqlalchemy as sa
+from abilian.core.entities import Entity
+from abilian.core.models.subjects import User
 from mock import mock
 from pytest import fixture
 
-from abilian.core.entities import Entity
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents.models import Folder
-
 from .. import signals, views
 from ..models import MEMBER, Community, CommunityIdColumn, community_content
 
@@ -38,7 +34,7 @@ def test_instanciation(db):
     # assert isinstance(community.group, Group)
 
 
-def test_default_view_kw(app):
+def test_default_view_kw():
     # test exceptions are handled if passed an object with 'community' attribute
     # and no community_id in kwargs. and ValueError is properly raised
     dummy = type(b'Dummy', (object,), {b'community': None})()
@@ -58,6 +54,7 @@ def test_can_recreate_with_same_name(community, db):
 
     db.session.delete(community)
     db.session.commit()
+
     community = Community(name=name)
     db.session.add(community)
 
@@ -181,149 +178,3 @@ def test_community_content_decorator(community, db):
 
     index_to = dict(CommunityContent.__indexation_args__['index_to'])
     assert 'community_slug' in index_to
-
-# class CommunityIndexingTestCase(BaseIndexingTestCase):
-#
-# def test_community_indexed(app):
-#     search_service = app.services['indexing']
-#
-#     obj_types = (Community.entity_type,)
-#     with self.login(self.user_no_community):
-#         res = search_service.search('community', object_types=obj_types)
-#         assert len(res) == 0
-#
-#     with self.login(self.user):
-#         res = search_service.search('community', object_types=obj_types)
-#         assert len(res) == 1
-#         hit = res[0]
-#         assert hit['object_key'] == self.community.object_key
-#
-#     with self.login(self.user_c2):
-#         res = search_service.search('community', object_types=obj_types)
-#         assert len(res) == 1
-#         hit = res[0]
-#         assert hit['object_key'] == self.c2.object_key
-
-#
-#     def test_default_view_kw_with_hit(self):
-#         with self.login(self.user):
-#             hit = self.svc.search(
-#                 'community', object_types=(Community.entity_type,))[0]
-#             kw = views.default_view_kw({}, hit, hit['object_type'], hit['id'])
-#
-#         assert kw == {'community_id': self.community.slug}
-#
-#
-# class CommunityWebTestCase(BaseIndexingTestCase):
-#     # FIXME later
-#     SQLALCHEMY_WARNINGS_AS_ERROR = False
-#
-#     def test_index(self):
-#         with self.client_login(self.user.email, 'azerty'):
-#             response = self.client.get(url_for("communities.index"))
-#         self.assert_200(response)
-#
-#     def test_community_home(self):
-#         url = self.app.default_view.url_for(self.community)
-#         user = self.user.email
-#         user_c2 = self.user_c2.email
-#         with self.client_login(user_c2, 'azerty'):
-#             response = self.client.get(url)
-#             assert response.status_code == 403
-#
-#         with self.client_login(user, 'azerty'):
-#             response = self.client.get(url)
-#             assert response.status_code == 302
-#             expected_url = url_for(
-#                 "wall.index", community_id=self.community.slug, _external=True)
-#             assert response.headers['Location'] == expected_url
-#
-#     def test_community_settings(self):
-#         url = url_for('communities.settings', community_id=self.community.slug)
-#         with self.client_login(self.user.email, 'azerty'):
-#             response = self.client.get(url)
-#             assert response.status_code == 403
-#
-#             self.app.services['security'].grant_role(self.user, Admin)
-#             response = self.client.get(url)
-#             self.assert_200(response)
-#
-#             data = {
-#                 '__action': 'edit',
-#                 'name': 'edited community',
-#                 'description': 'my community',
-#                 'linked_group': '',
-#                 'type': 'participative',
-#             }
-#             response = self.client.post(url, data=data)
-#             assert response.status_code == 302
-#             assert response.headers['Location'] == \
-#                    'http://localhost/communities/{}/'.format(self.community.slug)
-#
-#             community = Community.query.get(self.community.id)
-#             assert community.name == 'edited community'
-#
-#     def test_new(self):
-#         with self.client_login(self.user.email, 'azerty'):
-#             response = self.client.get(url_for("communities.new"))
-#             assert response.status_code == 403
-#
-#             self.app.services['security'].grant_role(self.user, Admin)
-#             response = self.client.get(url_for("communities.new"))
-#             assert response.status_code == 200
-#
-#     def test_members(self):
-#         with self.client_login(self.user.email, 'azerty'):
-#             url = url_for(
-#                 "communities.members", community_id=self.community.slug)
-#             response = self.client.get(url)
-#             self.assert_200(response)
-#
-#             # test add user
-#             data = {'action': 'add-user-role', 'user': self.user_c2.id}
-#             response = self.client.post(url, data=data)
-#             assert response.status_code == 403
-#
-#             self.app.services['security'].grant_role(self.user, Admin)
-#             data = {
-#                 'action': 'add-user-role',
-#                 'user': self.user_c2.id,
-#                 'role': 'member',
-#             }
-#             response = self.client.post(url, data=data)
-#             assert response.status_code == 302
-#             assert response.headers['Location'] == 'http://localhost' + url
-#
-#             membership = [
-#                 m for m in self.community.memberships if m.user == self.user_c2
-#             ][0]
-#             assert membership.role == 'member'
-#
-#             data['action'] = 'set-user-role'
-#             data['role'] = 'manager'
-#             response = self.client.post(url, data=data)
-#             assert response.status_code == 302
-#             assert response.headers['Location'] == 'http://localhost' + url
-#
-#             self.session.expire(membership)
-#             assert membership.role == 'manager'
-#
-#             # Community.query.session is not self.db.session, but web app session.
-#             community = Community.query.get(self.community.id)
-#             assert self.user_c2 in community.members
-#
-#             # test delete
-#             data = {
-#                 'action': 'delete',
-#                 'user': self.user_c2.id,
-#                 'membership':
-#                 [m.id for m in community.memberships
-#                  if m.user == self.user_c2][0],
-#             }
-#             response = self.client.post(url, data=data)
-#             assert response.status_code == 302
-#             assert response.headers['Location'] == \
-#                    'http://localhost/communities/{}/members'.format(
-#                        self.community.slug)
-#
-#             assert self.user_c2 not in community.members
