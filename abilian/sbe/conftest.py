@@ -1,6 +1,6 @@
 # coding=utf-8
 """
-Configuration anf injectable fixtures for Pytest.
+Configuration and injectable fixtures for Pytest.
 
 Supposed to replace the too-complex current UnitTest-based testing
 framework.
@@ -29,7 +29,7 @@ def app():
     return _app
 
 
-@yield_fixture(scope="function")
+@yield_fixture
 def db(app):
     """Return a fresh db for each test."""
     from abilian.core.extensions import db
@@ -47,7 +47,7 @@ def db(app):
         stop_all_services(app)
 
 
-@fixture(scope='function')
+@fixture
 def client(app, db):
     """Return a Web client, used for testing, bound to a DB session."""
     return app.test_client()
