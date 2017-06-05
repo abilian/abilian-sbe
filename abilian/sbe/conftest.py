@@ -5,7 +5,7 @@ Configuration anf injectable fixtures for Pytest.
 Supposed to replace the too-complex current UnitTest-based testing
 framework.
 
-DI and function over complex inheritance hierarchies FTW!
+DI and functions over complex inheritance hierarchies FTW!
 """
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
@@ -31,6 +31,7 @@ def app():
 
 @yield_fixture(scope="function")
 def db(app):
+    """Return a fresh db for each test."""
     from abilian.core.extensions import db
 
     with app.app_context():
@@ -48,7 +49,7 @@ def db(app):
 
 @fixture(scope='function')
 def client(app, db):
-    """Web client, used for testing, bound to a DB session."""
+    """Return a Web client, used for testing, bound to a DB session."""
     return app.test_client()
 
 
@@ -56,6 +57,8 @@ def client(app, db):
 # Cleanup utilities
 #
 def cleanup_db(db):
+    """Drop all the tables, in a way that doesn't raise integrity errors."""
+
     # Need to run this sequence twice for some reason
     for i in range(0, 2):
         for table in reversed(db.metadata.sorted_tables):

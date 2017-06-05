@@ -5,6 +5,9 @@ Tests from test_community are currently refactored using pytest in this module.
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
+import random
+import string
+
 import pytest
 import sqlalchemy as sa
 from mock import mock
@@ -156,28 +159,28 @@ def test_folder_roles(community, db, app):
     assert security.get_roles(user, folder) == ["reader"]
 
 
-# def test_community_content_decorator(community, db_session):
-#
-#     @community_content
-#     class CommunityContent(Entity):
-#         community_id = CommunityIdColumn()
-#         community = sa.orm.relation(Community, foreign_keys=[community_id])
-#
-#     sa.orm.configure_mappers()
-#     conn = db_session.connection()
-#     for table in sa.inspect(CommunityContent).tables:
-#         if not table.exists(conn):
-#             table.create(conn)
-#
-#     cc = CommunityContent(name='my content', community=community)
-#     db_session.add(cc)
-#     db_session.flush()
-#     assert hasattr(cc, 'community_slug')
-#     assert cc.community_slug == 'my-community'
-#     assert cc.slug == 'my-content'
-#
-#     index_to = dict(CommunityContent.__indexation_args__['index_to'])
-#     assert 'community_slug' in index_to
+def test_community_content_decorator(community, db):
+
+    @community_content
+    class CommunityContent(Entity):
+        community_id = CommunityIdColumn()
+        community = sa.orm.relation(Community, foreign_keys=[community_id])
+
+    sa.orm.configure_mappers()
+    conn = db.session.connection()
+    for table in sa.inspect(CommunityContent).tables:
+        if not table.exists(conn):
+            table.create(conn)
+
+    cc = CommunityContent(name='my content', community=community)
+    db.session.add(cc)
+    db.session.flush()
+    assert hasattr(cc, 'community_slug')
+    assert cc.community_slug == 'my-community'
+    assert cc.slug == 'my-content'
+
+    index_to = dict(CommunityContent.__indexation_args__['index_to'])
+    assert 'community_slug' in index_to
 
 # class CommunityIndexingTestCase(BaseIndexingTestCase):
 #
