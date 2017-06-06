@@ -91,12 +91,12 @@ def wizard_extract_data(emails, is_csv=False):
     return existing_accounts_objects, existing_members_objects, accounts_list
 
 
-def wizard_read_csv(csv=None):
+def wizard_read_csv(csv):
     """read new members data from csv file"""
     file_extension = secure_filename(csv.filename).split(".")[-1]
 
     if file_extension != "csv":
-        return False
+        return []
 
     contents = csv.readlines()
     new_accounts = []
