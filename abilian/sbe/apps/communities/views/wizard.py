@@ -4,6 +4,7 @@
 from __future__ import absolute_import, print_function
 
 import json
+import csv
 
 from flask import current_app, flash, g, redirect, render_template, request, \
     url_for
@@ -91,26 +92,25 @@ def wizard_extract_data(emails, is_csv=False):
     return existing_accounts_objects, existing_members_objects, accounts_list
 
 
-def wizard_read_csv(csv):
+def wizard_read_csv(csv_file):
     """read new members data from csv file"""
-    file_extension = secure_filename(csv.filename).split(".")[-1]
+    file_extension = secure_filename(csv_file.filename).split(".")[-1]
 
     if file_extension != "csv":
         return []
 
-    contents = csv.readlines()
+    contents = csv.reader(csv_file,delimiter=";")
     new_accounts = []
 
-    for line in contents:
+    for row in contents:
         account = {}
-        data = line.split(";")
-        if len(data) != 4:
+        if len(row) != 4:
             continue
 
-        email = data[0].strip()
-        first_name = data[1].strip()
-        last_name = data[2].strip()
-        role = data[3].strip()
+        email = row[0].strip()
+        first_name = row[1].strip()
+        last_name = row[2].strip()
+        role = row[3].strip()
 
         if not validate_email(email):
             continue
