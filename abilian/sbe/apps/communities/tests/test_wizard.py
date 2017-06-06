@@ -12,30 +12,42 @@ from abilian.sbe.apps.communities.views.wizard import wizard_extract_data, \
     wizard_read_csv
 
 
-def test_wizard_read_csv():
+def simulate_csv_file():
     # create a tmp csv file
     csv = NamedTemporaryFile(suffix=".csv", prefix="tmp_", delete=False)
-    csv.write("user1@example.com;userone;userone;manager\n")
-    csv.write("user1@example.com;usertwo;usertwo;member\n")
+    csv.write("user_1@example.com;userone;userone;manager\n")
+    csv.write("user_2@example.com;usertwo;usertwo;member\n")
+    csv.write("user_7@example.com;userseven;userseven;member\n")
 
     # writing a wrong line
     csv.write("user1@example.com;userthree;userthree\n")
     csv.write("example.com;example;userfour;member\n")
 
-    csv.seek(1)
+    csv.seek(0)
     csv.filename = csv.name.split("/")[-1]
+
+    return csv
+
+
+def test_wizard_read_csv():
+    csv = simulate_csv_file()
     wizard_read = wizard_read_csv(csv)
 
     assert wizard_read == [{
         'first_name': 'userone',
         'last_name': 'userone',
         'role': 'manager',
-        'email': 'ser1@example.com'
+        'email': 'user_1@example.com'
     }, {
         'first_name': 'usertwo',
         'last_name': 'usertwo',
         'role': 'member',
-        'email': 'user1@example.com'
+        'email': 'user_2@example.com'
+    }, {
+        'first_name': 'userseven',
+        'last_name': 'userseven',
+        'role': 'member',
+        'email': 'user_7@example.com'
     }]
 
 
@@ -66,7 +78,7 @@ def test_wizard_extract_data(db):
     community.set_membership(user1, READER)
     session.flush()
 
-    # check wizard function
+    # check wizard function in case of email list
     existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
         new_emails)
     assert set(existing_accounts_objects) == {user2, user3}
@@ -95,4 +107,28 @@ def test_wizard_extract_data(db):
         'last_name': '',
         'role': 'member',
         'email': 'user_4@example.com'
+    }])
+
+    # check wizard function in case of csv file
+    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
+        wizard_read_csv(simulate_csv_file()), is_csv=True)
+
+    assert existing_accounts_objects == {"csv_roles":
+                                         {"user_1@example.com": "manager",
+                                          "user_2@example.com": "member",
+                                          "user_7@example.com": "member",},
+                                         "account_objects": [user2]}
+    assert existing_members_objects == [user1]
+    assert sorted(accounts_list) == sorted([{
+        'status': 'existing',
+        'first_name': None,
+        'last_name': None,
+        'role': 'member',
+        'email': 'user_2@example.com'
+    }, {
+        'status': 'new',
+        'first_name': 'userseven',
+        'last_name': 'userseven',
+        'role': 'member',
+        'email': 'user_7@example.com'
     }])
