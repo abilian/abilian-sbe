@@ -99,7 +99,7 @@ def wizard_read_csv(csv_file):
     if file_extension != "csv":
         return []
 
-    contents = csv.reader(csv_file,delimiter=";")
+    contents = csv.reader(csv_file, delimiter=";")
     new_accounts = []
 
     for row in contents:
