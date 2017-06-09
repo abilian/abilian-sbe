@@ -92,7 +92,7 @@
              title="{{ thread.created_at | age(date_threshold='day') }}"
              class="thread-title">{{ thread.title }}</a>
         </h4>
-        {{thread.posts[0].body_html|safe|truncate(150, False, '...', 0) }}
+          <p>{{thread.posts[0].body_html|safe|striptags|truncate(155, False, '...', 0) }}</p>
       </div>
     </td>
     <td class="thread-frequent-posters">
