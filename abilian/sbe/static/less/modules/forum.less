@@ -180,6 +180,10 @@ ul.threads {
   }
 }
 
+.content-required{
+    color: coral;
+}
+
 // hilight not viewed number
 .thread-hilightview {
   position: relative;
@@ -236,7 +240,7 @@ ul.threads {
 }
 
 .forum-menu-container {
-  background: ghostwhite;
+  background: white;
   position: relative;
   padding-right: 5px;
   top: -15px;
@@ -245,25 +249,25 @@ ul.threads {
   border-radius: 0 0 3px 3px;
   margin-bottom: 15px;
   margin-right: -15px;
-  margin-left: -15px;
 }
 
 // The forum's menu
 .forum-menu, .forum-menu-admin {
   position: relative;
-  float: right;
+  float: left;
   right: 1px;
   top: 5.5px;
   margin-bottom: -3px;
 
   > button {
     background: white;
-    border-radius: 3px;
   }
 
-  > button:first-child {
+    button:nth-child(7) {
     background-color: yellowgreen;
-    border-radius: 3px;
+    float: right;
+    position: relative;
+    right: 6px;
 
     > a {
       color: white;
@@ -305,8 +309,22 @@ ul.threads {
   > tbody > tr {
     border-bottom: 1px solid #e9e9e9;
 
+  > th:nth-child(1) {
+        width: 50%;
+      }
+  > th:nth-child(2) {
+        width: 22%;
+    }
+
     > th:nth-child(n+3) {
       text-align: center;
+    }
+
+    >td >div.entry{
+      >p{
+        color: silver;
+        line-height: 2px;
+      }
     }
   }
 
@@ -335,9 +353,11 @@ ul.threads {
 }
 
 // forum menu active button
-.forum-btn-active {
+button.forum-btn-active {
+  background: #12A2EA;
   > a {
-    color: dimgray !important;
+    color: white;
+
   }
 }
 
@@ -457,26 +477,6 @@ ul.threads {
   top: -20px;
 }
 
-.members-download-btn {
-  float: right;
-  position: relative;
-  top: 39px;
-}
-
-.members-title {
-  position: relative;
-  font-weight: normal;
-  color: silver;
-  font-family: sans-serif;
-  top: 7px;
-  margin-bottom: 21px;
-}
-
-.members-last-activity {
-  position: relative;
-  top: 7.5px;
-}
-
 .viewers-panel-container {
   border: 1px solid #e9e9e9;
   margin-left: 48px;
@@ -501,6 +501,11 @@ ul.threads {
       color: gray;
       line-height: 21px;
       text-align: center;
+
+    }
+    >span.viewers-panel-count {
+        font-weight: bold;
+        color: #4e4e4e;
     }
     > a > img {
       position: relative;
@@ -517,11 +522,6 @@ ul.threads {
     position: relative;
     top: 7px;
   }
-}
-
-.viewers-panel-count {
-  font-weight: bold;
-  color: #4e4e4e !important;
 }
 
 .viewers-panel-button {
@@ -591,10 +591,10 @@ ul.threads {
   .thread-table {
     > tbody > tr {
       > th:nth-child(1) {
-        width: 85% !important;
+        width: 85%;
       }
       > th:nth-child(2) {
-        width: 0 !important;
+        width: 0%;
       }
       > td:nth-child(2) {
         > a > img {

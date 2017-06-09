@@ -8,8 +8,28 @@
   {% call m_box_content(_("Recent conversations")) %}
 
     <div class="forum-menu-container">
-      <div class="forum-menu" role="group">
-        {%- set global_actions = actions.for_category('forum:global') %}
+      <div class="forum-menu" role="group" style="width:100%;">
+      <span style="color:gray;">{{_("Showing :")}}</span>
+
+<div class="dropdown" style="display: inline;">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+       {{_("Recent")}}
+      <span class="caret"></span>
+      </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">test</a></li>
+  </ul>
+</div>
+<div class="dropdown" style="display: inline;">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+       {{_("Top")}}
+      <span class="caret"></span>
+      </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
+    <li><a href="#">test</a></li>
+  </ul>
+</div>
+       {%- set global_actions = actions.for_category('forum:global') %}
         {%- for action in global_actions %}
           {{ forum_menu(action) }}
         {%- endfor %}
@@ -19,10 +39,10 @@
     {% if threads %}
       <table border="0" class="thread-table">
         <tr>
-          <th style="width: 50%;">
+          <th>
             {{ _("Topic") }}
           </th>
-          <th style="width: 22%;">
+          <th>
             {{ _("Participants") }}
           </th>
           <th style="width: 8.9%;">
@@ -65,13 +85,14 @@
     <td>
       <div class="entry">
         <h4 class="thread-list-title">
+          {%- if thread.closed %}
+          <i class="fa fa-lock fa-big"></i>
+          {%- endif %}
           <a href="{{ thread_href }}"
              title="{{ thread.created_at | age(date_threshold='day') }}"
              class="thread-title">{{ thread.title }}</a>
         </h4>
-        {%- if thread.closed %}
-          <i class="fa fa-lock fa-big"></i>
-        {%- endif %}
+        {{thread.posts[0].body_html|safe|truncate(150, False, '...', 0) }}
       </div>
     </td>
     <td class="thread-frequent-posters">
