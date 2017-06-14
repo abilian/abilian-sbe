@@ -37,7 +37,22 @@
   {%- endif %}
 {%- endmacro %}
 
-{% macro forum_menu(action) %}
-  <button type="button" style="border: none;padding: 10px;"
-          {% if action.is_current() %}class="forum-btn-active" {% endif %}>{{ action.render() }}</button>
+{% macro forum_menu(global_actions) %}
+{%- for action in global_actions %}
+      {% if loop.index == 2%}
+    <div class="dropdown" style="display: inline;">
+        <button style="color:#95989A;" class="btn btn-default dropdown-toggle forum-action-dropdown" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> {{ action.render() }} <span class="glyphicon glyphicon-chevron-down" style="position: relative;top: 3px;"></span> </button>
+        <ul class="dropdown-menu forum-action-dropdownmenu" aria-labelledby="dropdownMenu2">
+            <li><a href="#">Year</a></li>
+            <li><a href="#">Quarter</a></li>
+            <li><a href="#">Month</a></li>
+            <li><a href="#">Week</a></li>
+            <li><a href="#">Today</a></li>
+        </ul>
+    </div>
+    {%else%}
+        <button type="button" style="border: none;padding: 10px;"
+      {% if action.is_current() %}class="forum-btn-active" {% endif %}{%if loop.last%}class="forum-action-conversation"{%endif%}>{{ action.render() }}</button>
+      {%endif%}
+  {%- endfor %}
 {% endmacro %}
