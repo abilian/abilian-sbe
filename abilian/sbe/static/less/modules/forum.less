@@ -199,6 +199,13 @@ ul.threads {
   font-size: 11.5pt;
 }
 
+.forum-action-dropdownmenu{
+    position: absolute;
+    top: 25px;
+    border-radius: 0px;
+    box-shadow: none;
+}
+
 .thread-participants-logo {
   margin-right: -13px;
   > .avatar {
@@ -251,6 +258,23 @@ ul.threads {
   border-radius: 0 0 3px 3px;
   margin-bottom: 15px;
   margin-right: -15px;
+  margin-top: 20px;
+}
+
+.forum-action-conversation{
+    background-color: yellowgreen !important;
+    float: right;
+    position: relative;
+    right: 6px;
+
+    > a {
+      color: white;
+    }
+
+    > a:first-child {
+      color: white;
+      font-weight: bold;
+    }
 }
 
 // The forum's menu
@@ -265,7 +289,7 @@ ul.threads {
     background: white;
   }
 
-    button:nth-child(7) {
+    button:nth-child(6) {
     background-color: yellowgreen;
     float: right;
     position: relative;
@@ -287,7 +311,7 @@ ul.threads {
 
   > button > a {
     text-decoration: none;
-    color: silver;
+    color: #95989A;
   }
 
   > button > a:hover {
@@ -312,7 +336,7 @@ ul.threads {
     border-bottom: 1px solid #e9e9e9;
 
   > th:nth-child(1) {
-        width: 50%;
+        width: 55%;
       }
   > th:nth-child(2) {
         width: 22%;
@@ -329,8 +353,7 @@ ul.threads {
         position: relative;
         top : -9px;
         margin-bottom: -9px;
-        text-align: justify;
-        margin-right: 32px;
+        margin-right: 29px;
       }
     }
   }
@@ -362,8 +385,18 @@ ul.threads {
 // forum menu active button
 button.forum-btn-active {
   background: #12A2EA;
+  padding-left: 20px !important;
+  padding-right: 23px !important;
   > a {
     color: white;
+    font-weight: bold;
+      >i{
+          float: right;
+          left: 9.5px;
+          top: 3.5px;
+          color: gray;
+          font-weight: normal;
+      }
 
   }
 }
@@ -392,6 +425,10 @@ button.forum-btn-active {
   top: -0.5px;
   color: silver;
   border: 0px;
+    >a{
+       color: #95989A;
+       text-decoration: none;
+    }
 }
 
 .forum-action-active {
