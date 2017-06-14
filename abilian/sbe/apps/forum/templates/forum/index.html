@@ -5,34 +5,11 @@
 
 
 {% block forumcontent %}
-  {% call m_box_content(_("Recent conversations")) %}
-
     <div class="forum-menu-container">
       <div class="forum-menu" role="group" style="width:100%;">
       <span style="color:gray;">{{_("Showing :")}}</span>
-
-<div class="dropdown" style="display: inline;">
-  <button class="btn btn-default dropdown-toggle forum-action-dropdown" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-       {{_("Recent")}}
-      <span class="glyphicon glyphicon-chevron-down" style="position: relative;top: 3px;"></span>
-      </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-    <li><a href="#">test</a></li>
-  </ul>
-</div>
-<div class="dropdown" style="display: inline;">
-  <button class="btn btn-default dropdown-toggle forum-action-dropdown" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-       {{_("Top")}}
-      <span class="glyphicon glyphicon-chevron-down" style="position: relative;top: 3px;"></span>
-      </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu2">
-    <li><a href="#">test</a></li>
-  </ul>
-</div>
        {%- set global_actions = actions.for_category('forum:global') %}
-        {%- for action in global_actions %}
-          {{ forum_menu(action) }}
-        {%- endfor %}
+       {{forum_menu(global_actions)}}
       </div>
     </div>
 
@@ -74,7 +51,6 @@
         <a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a>
       </p>
     {% endif %}
-  {% endcall %}
 {% endblock %}
 
 
