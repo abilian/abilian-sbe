@@ -5,17 +5,13 @@
 {% from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
-
-  {% call m_box_content(_("Recent conversations attachments")) %}
-
     {%- block forumsidebar %}
 
       <div class="forum-menu-container">
-        <div class="forum-menu" role="group">
-          {%- set global_actions = actions.for_category('forum:global') %}
-          {%- for action in global_actions %}
-            {{ forum_menu(action) }}
-          {%- endfor %}
+        <div class="forum-menu" role="group" style="width:100%;">
+       <span style="color:gray;">{{_("Showing :")}}</span>
+       {%- set global_actions = actions.for_category('forum:global') %}
+       {{forum_menu(global_actions)}}
         </div>
       </div>
 
@@ -33,6 +29,5 @@
     {% else %}
       <p>{{ _("No attachment has been posted to this community yet") }}</p>
     {% endfor %}
-  {% endcall %}
 {% endblock %}
 

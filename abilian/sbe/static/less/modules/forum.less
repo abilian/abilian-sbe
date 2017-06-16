@@ -180,6 +180,10 @@ ul.threads {
   }
 }
 
+.content-required {
+  color: coral;
+}
+
 // hilight not viewed number
 .thread-hilightview {
   position: relative;
@@ -190,7 +194,16 @@ ul.threads {
 
 .thread-title {
   text-decoration: none;
-  color: #858585;
+  color: gray;
+  font-weight: bold;
+  font-size: 11.5pt;
+}
+
+.forum-action-dropdownmenu {
+  position: absolute;
+  top: 25px;
+  border-radius: 0px;
+  box-shadow: none;
 }
 
 .thread-participants-logo {
@@ -236,7 +249,7 @@ ul.threads {
 }
 
 .forum-menu-container {
-  background: ghostwhite;
+  background: white;
   position: relative;
   padding-right: 5px;
   top: -15px;
@@ -245,25 +258,42 @@ ul.threads {
   border-radius: 0 0 3px 3px;
   margin-bottom: 15px;
   margin-right: -15px;
-  margin-left: -15px;
+  margin-top: 20px;
+}
+
+.forum-action-conversation {
+  background-color: yellowgreen !important;
+  float: right;
+  position: relative;
+  right: 6px;
+
+  > a {
+    color: white;
+  }
+
+  > a:first-child {
+    color: white;
+    font-weight: bold;
+  }
 }
 
 // The forum's menu
 .forum-menu, .forum-menu-admin {
   position: relative;
-  float: right;
+  float: left;
   right: 1px;
   top: 5.5px;
   margin-bottom: -3px;
 
   > button {
     background: white;
-    border-radius: 3px;
   }
 
-  > button:first-child {
+  button:nth-child(6) {
     background-color: yellowgreen;
-    border-radius: 3px;
+    float: right;
+    position: relative;
+    right: 6px;
 
     > a {
       color: white;
@@ -281,7 +311,7 @@ ul.threads {
 
   > button > a {
     text-decoration: none;
-    color: silver;
+    color: #95989A;
   }
 
   > button > a:hover {
@@ -305,8 +335,26 @@ ul.threads {
   > tbody > tr {
     border-bottom: 1px solid #e9e9e9;
 
+    > th:nth-child(1) {
+      width: 55%;
+    }
+    > th:nth-child(2) {
+      width: 22%;
+    }
+
     > th:nth-child(n+3) {
       text-align: center;
+    }
+
+    > td > div.entry {
+      margin-top: -9px;
+      > p {
+        color: silver;
+        position: relative;
+        top: -9px;
+        margin-bottom: -9px;
+        margin-right: 29px;
+      }
     }
   }
 
@@ -335,10 +383,24 @@ ul.threads {
 }
 
 // forum menu active button
-.forum-btn-active {
+button.forum-btn-active {
+  background: #12A2EA;
   > a {
-    color: dimgray !important;
+    color: white;
+    font-weight: bold;
+    > i {
+      float: right;
+      left: 9.5px;
+      top: 3.5px;
+      color: gray;
+      font-weight: normal;
+    }
+
   }
+}
+
+button.forum-btn-active:hover {
+  background-color: #12A2EA;
 }
 
 .forum-divider {
@@ -356,6 +418,19 @@ ul.threads {
 .forum-action {
   border: none;
   padding: 10px;
+}
+
+.forum-action-dropdown {
+  border-radius: 0;
+  padding: 9px;
+  position: relative;
+  top: -0.5px;
+  color: silver;
+  border: 0;
+  > a {
+    color: #95989A;
+    text-decoration: none;
+  }
 }
 
 .forum-action-active {
@@ -457,26 +532,6 @@ ul.threads {
   top: -20px;
 }
 
-.members-download-btn {
-  float: right;
-  position: relative;
-  top: 39px;
-}
-
-.members-title {
-  position: relative;
-  font-weight: normal;
-  color: silver;
-  font-family: sans-serif;
-  top: 7px;
-  margin-bottom: 21px;
-}
-
-.members-last-activity {
-  position: relative;
-  top: 7.5px;
-}
-
 .viewers-panel-container {
   border: 1px solid #e9e9e9;
   margin-left: 48px;
@@ -501,6 +556,11 @@ ul.threads {
       color: gray;
       line-height: 21px;
       text-align: center;
+
+    }
+    > span.viewers-panel-count {
+      font-weight: bold;
+      color: #4e4e4e;
     }
     > a > img {
       position: relative;
@@ -517,11 +577,6 @@ ul.threads {
     position: relative;
     top: 7px;
   }
-}
-
-.viewers-panel-count {
-  font-weight: bold;
-  color: #4e4e4e !important;
 }
 
 .viewers-panel-button {
@@ -591,10 +646,10 @@ ul.threads {
   .thread-table {
     > tbody > tr {
       > th:nth-child(1) {
-        width: 85% !important;
+        width: 85%;
       }
       > th:nth-child(2) {
-        width: 0 !important;
+        width: 0;
       }
       > td:nth-child(2) {
         > a > img {
