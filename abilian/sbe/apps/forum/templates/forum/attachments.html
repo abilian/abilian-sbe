@@ -5,9 +5,6 @@
 {%from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
-
-  {% call m_box_content(_("Recent conversations attachments")) %}
-
     {%- block forumsidebar %}
 
       <div class="forum-menu-container">
@@ -32,6 +29,5 @@
     {% else %}
       <p>{{ _("No attachment has been posted to this community yet") }}</p>
     {% endfor %}
-  {% endcall %}
 {% endblock %}
 
