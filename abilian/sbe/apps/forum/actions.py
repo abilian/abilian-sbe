@@ -16,8 +16,8 @@ class ForumAction(Action):
     def is_current(self):
         return request.path == self.url()
 
-    def is_filtred(self):
-        filter_keys = ["today","month","year","week"]
+    def is_filtered(self):
+        filter_keys = ["today", "month", "year", "week"]
         current_url = request.path.split("/")
         filter = current_url[-1].strip()
 

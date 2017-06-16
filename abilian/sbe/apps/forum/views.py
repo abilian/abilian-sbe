@@ -123,15 +123,16 @@ def index(filter=None):
         .order_by(Thread.last_post_at.desc())
 
     threads = query.all()
-    filter_keys = ["today","month","year","week"]
+    filter_keys = ["today", "month", "year", "week"]
     has_more = False
 
     nb_viewed_times = get_viewed_times(threads)
     for thread in threads:
-            thread.nb_views = nb_viewed_times.get(thread, 0)
+        thread.nb_views = nb_viewed_times.get(thread, 0)
 
     if filter == 'today':
-        threads = [thread for thread in threads if thread.created_at.strftime("%d-%m-%y") == datetime.utcnow().strftime("%d-%m-%y")]
+        threads = [thread for thread in threads
+                   if thread.created_at.strftime("%d-%m-%y") == datetime.utcnow().strftime("%d-%m-%y")]
 
     if filter == 'month':
         month_duration = datetime.utcnow() - timedelta(days=30)
