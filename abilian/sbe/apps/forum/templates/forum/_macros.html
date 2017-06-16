@@ -41,13 +41,12 @@
 {%- for action in global_actions %}
       {% if loop.index == 2%}
     <div class="dropdown" style="display: inline;">
-        <button style="color:#95989A;" class="btn btn-default dropdown-toggle forum-action-dropdown" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> {{ action.render() }} <span class="glyphicon glyphicon-chevron-down" style="position: relative;top: 3px;"></span> </button>
+        <button style="color:#95989A;" class="{% if action.is_filtred() %}forum-btn-active {% endif %}btn btn-default dropdown-toggle forum-action-dropdown" type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"> {{ action.render() }} <span class="glyphicon glyphicon-chevron-down" style="position: relative;top: 3px;"></span> </button>
         <ul class="dropdown-menu forum-action-dropdownmenu" aria-labelledby="dropdownMenu2">
-            <li><a href="#">Year</a></li>
-            <li><a href="#">Quarter</a></li>
-            <li><a href="#">Month</a></li>
-            <li><a href="#">Week</a></li>
-            <li><a href="#">Today</a></li>
+            <li><a href='{{ url_for(".index", filter="year", community_id=g.community.slug) }}'>Year</a></li>
+            <li><a href='{{ url_for(".index", filter="month", community_id=g.community.slug) }}'>Month</a></li>
+            <li><a href='{{ url_for(".index", filter="week", community_id=g.community.slug) }}'>Week</a></li>
+            <li><a href='{{ url_for(".index", filter="today", community_id=g.community.slug) }}'>Today</a></li>
         </ul>
     </div>
     {%else%}
