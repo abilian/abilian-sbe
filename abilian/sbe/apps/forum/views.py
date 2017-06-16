@@ -5,12 +5,12 @@ Forum views
 from __future__ import absolute_import, print_function
 
 from collections import Counter
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from itertools import groupby
 
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, render_template, \
-    request
+    request, redirect
 from flask_babel import format_date
 from flask_login import current_user
 from six import text_type
@@ -116,12 +116,41 @@ def get_viewed_times(entities):
 
 
 @route('/')
-def index():
+@route('/<string:filter>')
+def index(filter=None):
     query = Thread.query \
         .filter(Thread.community_id == g.community.id) \
         .order_by(Thread.last_post_at.desc())
-    has_more = query.count() > MAX_THREADS
-    threads = query.limit(MAX_THREADS).all()
+
+    threads = query.all()
+    filter_keys = ["today","month","year","week"]
+    has_more = False
+
+    nb_viewed_times = get_viewed_times(threads)
+    for thread in threads:
+        if thread in nb_viewed_times:
+            thread.nb_views = nb_viewed_times[thread]
+        else:
+            thread.nb_views = 0
+
+    if filter == 'today':
+        threads = [thread for thread in threads if thread.created_at.strftime("%d-%m-%y") == datetime.utcnow().strftime("%d-%m-%y")]
+
+    if filter == 'month':
+        threads = [thread for thread in threads if thread.created_at.strftime("%m-%y") == datetime.utcnow().strftime("%m-%y")]
+
+    if filter == 'year':
+        threads = [thread for thread in threads if thread.created_at.year == datetime.utcnow().year]
+
+    if filter == 'week':
+        week_duration = datetime.utcnow() - timedelta(days=7)
+        threads = [thread for thread in threads if thread.created_at > week_duration]
+
+    if filter != None and filter in filter_keys:
+        threads = sorted(threads,key=lambda th:th.nb_views)[::-1]
+    else:
+        has_more = query.count() > MAX_THREADS
+        threads = query.limit(MAX_THREADS).all()
 
     nb_viewers = get_nb_viewers(threads)
     nb_viewed_posts = get_viewed_posts(threads)
