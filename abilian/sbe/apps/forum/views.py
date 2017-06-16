@@ -156,7 +156,7 @@ def index(filter=None):
         ]
 
     if filter != None and filter in filter_keys:
-        threads = sorted(threads, key=lambda th: th.nb_views)[::-1]
+        threads = sorted(threads, key=lambda thread: -thread.nb_views)
     else:
         has_more = query.count() > MAX_THREADS
         threads = query.limit(MAX_THREADS).all()
