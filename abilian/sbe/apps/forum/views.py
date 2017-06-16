@@ -128,19 +128,18 @@ def index(filter=None):
 
     nb_viewed_times = get_viewed_times(threads)
     for thread in threads:
-        if thread in nb_viewed_times:
-            thread.nb_views = nb_viewed_times[thread]
-        else:
-            thread.nb_views = 0
+            thread.nb_views = nb_viewed_times.get(thread, 0)
 
     if filter == 'today':
         threads = [thread for thread in threads if thread.created_at.strftime("%d-%m-%y") == datetime.utcnow().strftime("%d-%m-%y")]
 
     if filter == 'month':
-        threads = [thread for thread in threads if thread.created_at.strftime("%m-%y") == datetime.utcnow().strftime("%m-%y")]
+        month_duration = datetime.utcnow() - timedelta(days=30)
+        threads = [thread for thread in threads if thread.created_at > month_duration]
 
     if filter == 'year':
-        threads = [thread for thread in threads if thread.created_at.year == datetime.utcnow().year]
+        year_duration = datetime.utcnow() - timedelta(days=256)
+        threads = [thread for thread in threads if thread.created_at > year_duration]
 
     if filter == 'week':
         week_duration = datetime.utcnow() - timedelta(days=7)
@@ -154,7 +153,6 @@ def index(filter=None):
 
     nb_viewers = get_nb_viewers(threads)
     nb_viewed_posts = get_viewed_posts(threads)
-    nb_viewed_times = get_viewed_times(threads)
 
     return render_template(
         "forum/index.html",
