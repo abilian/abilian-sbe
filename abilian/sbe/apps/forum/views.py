@@ -9,8 +9,8 @@ from datetime import date, datetime, timedelta
 from itertools import groupby
 
 import sqlalchemy as sa
-from flask import current_app, flash, g, make_response, render_template, \
-    request, redirect
+from flask import current_app, flash, g, make_response, redirect, \
+    render_template, request
 from flask_babel import format_date
 from flask_login import current_user
 from six import text_type
@@ -131,23 +131,32 @@ def index(filter=None):
         thread.nb_views = nb_viewed_times.get(thread, 0)
 
     if filter == 'today':
-        threads = [thread for thread in threads
-                   if thread.created_at.strftime("%d-%m-%y") == datetime.utcnow().strftime("%d-%m-%y")]
+        threads = [
+            thread for thread in threads
+            if thread.created_at.strftime("%d-%m-%y") == datetime.utcnow()
+            .strftime("%d-%m-%y")
+        ]
 
     if filter == 'month':
         month_duration = datetime.utcnow() - timedelta(days=30)
-        threads = [thread for thread in threads if thread.created_at > month_duration]
+        threads = [
+            thread for thread in threads if thread.created_at > month_duration
+        ]
 
     if filter == 'year':
         year_duration = datetime.utcnow() - timedelta(days=256)
-        threads = [thread for thread in threads if thread.created_at > year_duration]
+        threads = [
+            thread for thread in threads if thread.created_at > year_duration
+        ]
 
     if filter == 'week':
         week_duration = datetime.utcnow() - timedelta(days=7)
-        threads = [thread for thread in threads if thread.created_at > week_duration]
+        threads = [
+            thread for thread in threads if thread.created_at > week_duration
+        ]
 
     if filter != None and filter in filter_keys:
-        threads = sorted(threads,key=lambda th:th.nb_views)[::-1]
+        threads = sorted(threads, key=lambda th: th.nb_views)[::-1]
     else:
         has_more = query.count() > MAX_THREADS
         threads = query.limit(MAX_THREADS).all()

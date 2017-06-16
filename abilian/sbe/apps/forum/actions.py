@@ -78,8 +78,7 @@ _close_template_action = u'''
 '''
 
 _actions = (
-    ForumAction(
-        'forum:global', 'index', _l(u'Recent conversations')),
+    ForumAction('forum:global', 'index', _l(u'Recent conversations')),
     ForumAction(
         'forum:global', 'index/<string:filter>', _l(u'Top'), url='#filter'),
     ForumAction('forum:global', 'archives', _l(u'Archives')),

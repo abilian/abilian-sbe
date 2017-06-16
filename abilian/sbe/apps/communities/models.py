@@ -26,11 +26,11 @@ from abilian.i18n import _l
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.repository import repository
 from abilian.services.indexing import indexable_role
-from abilian.services.security import Manager as MANAGER, READ, WRITE
+from abilian.services.security import Manager as MANAGER
 from abilian.services.security import Reader as READER
 from abilian.services.security import Writer as WRITER
-from abilian.services.security import Admin, Permission, Role, RoleType, \
-    security
+from abilian.services.security import READ, WRITE, Admin, Permission, Role, \
+    RoleType, security
 
 from . import signals
 
