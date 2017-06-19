@@ -18,14 +18,27 @@
     {%- endblock %}
 
     {% for month, posts in grouped_posts %}
+      <br>
       <h2>{{ month }}</h2>
-
-
-      <ul class="attachments-archives">
-        {% for post in posts %}
+    <table border="0" class="attachment-table">
+      <tr>
+        <th style="width:33%;">
+          {{ _("Topic") }}
+        </th>
+        <th style="width: 8.9%;text-align:center;">
+          {{ _("Owner") }}
+        </th>
+        <th style="float:left;position: relative;left: 5px;">
+          {{ _("Document") }}
+        </th>
+        <th style="position: relative;left: 34px;">
+          {{ _("Size") }}
+        </th>
+      </tr>
+     {% for post in posts %}
           {{ m_postattachments(post) }}
-        {% endfor %}
-      </ul>
+     {% endfor %}
+    </table>
     {% else %}
       <p>{{ _("No attachment has been posted to this community yet") }}</p>
     {% endfor %}

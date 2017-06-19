@@ -3,36 +3,27 @@
 {%- macro m_postinfos(post) %}
   {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
   {%- set thread_href = url_for(".thread", thread_id=post.thread_id, community_id=g.community.slug) %}
-  <div class="post-infos">
-    <span class="date"><small>{{ post.created_at | age(date_threshold='day') }}</small></span>,
-    <a href="{{ url_for(post) }}">
+    <td><a style="color: gray;font-weight: bold;font-size: 12pt;" href="{{ url_for(post) }}">
       <small>{{ post.thread.title }}</small>
-    </a>,
-    {% call m_user_link(post.creator) %}
-      {{ m_user_photo(post.creator, size=15) }}
-      <small>{{ post.creator }}</small>
-    {% endcall %}
-  </div>
+        </a></td>
+    <td style="text-align:center;">{% call m_user_link(post.creator) %}
+      {{ m_user_photo(post.creator, size=35) }}
+        {% endcall %}</td>
+
 {%- endmacro %}
 
 {%- macro m_postattachments(post) %}
   {%- if post.attachments %}
-    <hr style="margin-top: 0; margin-bottom: 0;">
-    <div id="attachments">
-      <ul>
+<tr>
         {{ m_postinfos(post) }}
-        {%- for attachment in post.attachments %}
-          <li>
-            <span class="attachment-item">
-              <img src="{{ attachment.icon }}" style="vertical-align: middle;"
-                   alt=""/>
-              <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
-              ({{ attachment.content_length|filesize }})
-            </span>
-          </li>
-        {%- endfor %}
-      </ul>
-    </div>
+        <td colspan="2">
+          {%- for attachment in post.attachments %}
+          <span style="line-height: 2;"> <img src="{{ attachment.icon }}" style="vertical-align: middle;" alt=""/>
+                  <a href="{{ url_for(attachment) }}">{{ attachment.name |truncate(70, False, '...', 0)  }}</a>
+              <span style="float: right;position: relative;right: 40px;">{{ attachment.content_length|filesize }}</span> </span><br>
+            {%- endfor %}
+        </td>
+</tr>
   {%- endif %}
 {%- endmacro %}
 
