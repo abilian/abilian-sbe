@@ -452,6 +452,60 @@ button.forum-btn-active:hover {
   border: 1px solid #ddd;
 }
 
+.attachment-table {
+  width: 100%;
+
+  > tbody > tr {
+    border-bottom: 1px solid #e9e9e9;
+
+    > th:nth-child(1) {
+      width: 55%;
+    }
+    > th:nth-child(2) {
+      width: 22%;
+    }
+
+    > th:nth-child(n+3) {
+      text-align: center;
+    }
+
+    > td > div.entry {
+      margin-top: -9px;
+      > p {
+        color: silver;
+        position: relative;
+        top: -9px;
+        margin-bottom: -9px;
+        margin-right: 29px;
+      }
+    }
+  }
+
+  > tbody > tr:first-child {
+    color: #919191;
+    border-bottom: 4px solid ghostwhite;
+  }
+
+  > tbody > tr > td {
+    padding: 7px;
+  }
+
+  > tbody > tr > td > center > a {
+    text-decoration: none;
+  }
+
+  > tbody > tr > th {
+    font-weight: normal;
+
+    padding-bottom: 12px;
+  }
+
+  > tbody > tr:last-child {
+    border-bottom: 1px solid white;
+  }
+}
+
+
 //Thread replies
 .thread-replies {
   text-decoration: none;
