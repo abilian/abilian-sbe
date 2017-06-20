@@ -134,8 +134,6 @@ ul.threads {
   }
 
   .media-body {
-    border-left: 2px solid yellowgreen;
-    background: ghostwhite;
     padding-top: 0.5em;
     padding-left: 0.5em;
     border-radius: 2px 4px 4px 0;
@@ -452,6 +450,13 @@ button.forum-btn-active:hover {
   border: 1px solid #ddd;
 }
 
+.attachment-item{
+  line-height: 30px;
+  position: relative;
+  top: -8px;
+  left: -7px;
+}
+
 .attachment-table {
   width: 100%;
 
@@ -461,12 +466,25 @@ button.forum-btn-active:hover {
     > th:nth-child(1) {
       width: 55%;
     }
-    > th:nth-child(2) {
-      width: 22%;
+    > th:nth-child(4){
+        text-align: right;
+        position: relative;
+        right: 12px;
     }
 
-    > th:nth-child(n+3) {
-      text-align: center;
+    >td:nth-child(1){
+        >a{
+         color: gray;
+         font-weight: bold;
+         font-size: 12pt;
+        }
+      }
+      >td:nth-child(2){
+          text-align:center;
+      }
+
+    > th:nth-child(2) {
+      width: 22%;
     }
 
     > td > div.entry {
@@ -561,18 +579,15 @@ button.forum-btn-active:hover {
 }
 
 .thread-current-title {
-  color: gray;
+  color: #515353;
   font-family: sans-serif;
-  font-size: 22pt;
-  padding-bottom: 8px;
-  border-bottom: 3px solid ghostwhite;
+  font-size: 14pt;
 }
 
 .thread-current-replies {
   font-size: 14pt;
   font-weight: normal;
   position: relative;
-  top: -3.1px;
 }
 
 .viewed {
