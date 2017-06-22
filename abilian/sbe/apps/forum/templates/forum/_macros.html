@@ -3,41 +3,59 @@
 {%- macro m_postinfos(post) %}
   {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
   {%- set thread_href = url_for(".thread", thread_id=post.thread_id, community_id=g.community.slug) %}
-  <div class="post-infos">
-    <span class="date"><small>{{ post.created_at | age(date_threshold='day') }}</small></span>,
-    <a href="{{ url_for(post) }}">
+    <td><a href="{{ url_for(post) }}">
       <small>{{ post.thread.title }}</small>
-    </a>,
-    {% call m_user_link(post.creator) %}
-      {{ m_user_photo(post.creator, size=15) }}
-      <small>{{ post.creator }}</small>
-    {% endcall %}
-    </a>
-  </div>
+        </a></td>
+    <td>{% call m_user_link(post.creator) %}
+      {{ m_user_photo(post.creator, size=35) }}
+        {% endcall %}</td>
+
 {%- endmacro %}
 
 {%- macro m_postattachments(post) %}
   {%- if post.attachments %}
-    <hr style="margin-top: 0px;margin-bottom: 0px;">
-    <div id="attachments">
-      <ul>
+<tr>
         {{ m_postinfos(post) }}
-        {%- for attachment in post.attachments %}
-          <li>
-            <span class="attachment-item">
-              <img src="{{ attachment.icon }}" style="vertical-align: middle;"
-                   alt=""/>
-              <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
-              ({{ attachment.content_length|filesize }})
-            </span>
-          </li>
-        {%- endfor %}
-      </ul>
-    </div>
+        <td colspan="2">
+        <table border="0" style="width:100%">
+          {%- for attachment in post.attachments %}
+               <tr>
+                   <td style="line-height: 1.5;"><img src="{{ attachment.icon }}" style="vertical-align: middle;" alt=""/>
+                  <a href="{{ url_for(attachment) }}">{{ attachment.name |truncate(70, False, '...', 0)  }}</a></td>
+
+             <td style="float:right;"> <span style="color:silver;">{{ attachment.content_length|filesize }}</span> </td>
+            </tr>
+            {%- endfor %}
+        </table>
+        </td>
+</tr>
   {%- endif %}
 {%- endmacro %}
 
-{% macro forum_menu(action) %}
-  <button type="button" style="border: none;padding: 10px;"
-          {% if action.is_current() %}class="forum-btn-active" {% endif %}>{{ action.render() }}</button>
+{% macro forum_menu(global_actions) %}
+  {%- for action in global_actions %}
+    {% if loop.index == 2 %}
+      <div class="dropdown" style="display: inline;">
+        <button
+            style="color:#95989A;"
+            class="{% if action.is_filtered() %}forum-btn-active {% endif %}btn btn-default dropdown-toggle forum-action-dropdown"
+            type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="true">
+          {{ action.render() }}
+          <span class="glyphicon glyphicon-chevron-down"
+                style="position: relative;top: 3px;"></span>
+        </button>
+        <ul class="dropdown-menu forum-action-dropdownmenu" aria-labelledby="dropdownMenu2">
+          <li><a href='{{ url_for(".index", filter="year", community_id=g.community.slug) }}'>Year</a></li>
+          <li><a href='{{ url_for(".index", filter="month", community_id=g.community.slug) }}'>Month</a></li>
+          <li><a href='{{ url_for(".index", filter="week", community_id=g.community.slug) }}'>Week</a></li>
+          <li><a href='{{ url_for(".index", filter="today", community_id=g.community.slug) }}'>Today</a></li>
+        </ul>
+      </div>
+    {% else %}
+      <button
+          type="button" style="border: none;padding: 10px;"
+          {% if action.is_current() %}class="forum-btn-active" {% endif %}{% if loop.last %}class="forum-action-conversation"{% endif %}>{{ action.render() }}</button>
+    {% endif %}
+  {%- endfor %}
 {% endmacro %}

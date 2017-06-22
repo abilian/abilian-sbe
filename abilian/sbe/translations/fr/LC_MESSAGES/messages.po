@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-06-01 13:55+0200\n"
+"POT-Creation-Date: 2017-06-22 09:00-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -17,7 +17,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.4.0\n"
+"Generated-By: Babel 2.3.4\n"
 
 #: abilian/sbe/apps/calendar/actions.py:38
 msgid "Create a new event"
@@ -88,9 +88,8 @@ msgid "Past events"
 msgstr "Evénements passés"
 
 #: abilian/sbe/apps/calendar/templates/calendar/archives.html:16
-#: abilian/sbe/apps/calendar/templates/calendar/index.html:16
 msgid "No event has been posted to this calendar yet."
-msgstr "Aucun événement n'a encore été publié dans cette communauté."
+msgstr "Aucun événement n'a encore été publié dans ce calendrier."
 
 #: abilian/sbe/apps/calendar/templates/calendar/event.html:11
 msgid "Back to calendar"
@@ -99,6 +98,10 @@ msgstr "Revenir au calendrier"
 #: abilian/sbe/apps/calendar/templates/calendar/event.html:33
 msgid "More information"
 msgstr "Plus d'infos"
+
+#: abilian/sbe/apps/calendar/templates/calendar/index.html:16
+msgid "There are no upcoming events on this calendar yet."
+msgstr "Il n'y a pas d'événements à venir dans ce calendrier."
 
 #: abilian/sbe/apps/communities/actions.py:50
 #: abilian/sbe/apps/communities/blueprint.py:70
@@ -133,9 +136,9 @@ msgstr "Agenda"
 #: abilian/sbe/apps/communities/actions.py:78
 #: abilian/sbe/apps/communities/templates/community/members.html:7
 #: abilian/sbe/apps/communities/views/views.py:351
-#: abilian/sbe/apps/communities/views/wizard.py:137
-#: abilian/sbe/apps/communities/views/wizard.py:157
-#: abilian/sbe/apps/communities/views/wizard.py:209
+#: abilian/sbe/apps/communities/views/wizard.py:136
+#: abilian/sbe/apps/communities/views/wizard.py:155
+#: abilian/sbe/apps/communities/views/wizard.py:205
 #: abilian/sbe/apps/social/templates/social/groups.html:39
 msgid "Members"
 msgstr "Membres"
@@ -259,8 +262,8 @@ msgstr "Détruire la communauté"
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:33
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:76
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:49
-#: abilian/sbe/apps/forum/templates/forum/thread.html:188
-#: abilian/sbe/apps/forum/templates/forum/thread.html:307
+#: abilian/sbe/apps/forum/templates/forum/thread.html:182
+#: abilian/sbe/apps/forum/templates/forum/thread.html:302
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:80
 #: abilian/sbe/apps/preferences/templates/preferences/sbe_notifications.html:19
 #: abilian/sbe/apps/social/templates/social/invite.html:30
@@ -525,18 +528,18 @@ msgstr "email"
 msgid "%(community)s members"
 msgstr "membres de %(community)s "
 
-#: abilian/sbe/apps/communities/views/wizard.py:171
+#: abilian/sbe/apps/communities/views/wizard.py:169
 msgid "To add new members, please follow the CSV file model."
 msgstr ""
 "Pour ajouter des nouveaux membres, essayez de suivre le modèle de fichier"
 " CSV."
 
-#: abilian/sbe/apps/communities/views/wizard.py:184
-#: abilian/sbe/apps/communities/views/wizard.py:249
+#: abilian/sbe/apps/communities/views/wizard.py:181
+#: abilian/sbe/apps/communities/views/wizard.py:245
 msgid "No new members were found"
 msgstr "Aucun nouveau membre n'a été trouvé"
 
-#: abilian/sbe/apps/communities/views/wizard.py:283
+#: abilian/sbe/apps/communities/views/wizard.py:279
 #, fuzzy
 msgid "Members added Successfully"
 msgstr "Les paramètres de la communautés ont été enregistrés"
@@ -552,7 +555,7 @@ msgstr "Déplacer vers un autre dossier"
 
 #: abilian/sbe/apps/documents/actions.py:155
 #: abilian/sbe/apps/documents/actions.py:263
-#: abilian/sbe/apps/forum/actions.py:82 abilian/sbe/apps/wiki/actions.py:75
+#: abilian/sbe/apps/forum/actions.py:95 abilian/sbe/apps/wiki/actions.py:75
 msgid "Delete"
 msgstr "Supprimer"
 
@@ -631,12 +634,14 @@ msgstr "Filtrer..."
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:49
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:97
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:35
 msgid "Size"
 msgstr "Taille"
 
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:52
 #: abilian/sbe/apps/documents/templates/documents/_macros.html:100
 #: abilian/sbe/apps/documents/templates/documents/descendants.html:38
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:29
 msgid "Owner"
 msgstr "Propriétaire"
 
@@ -662,7 +667,7 @@ msgid "Are you sure you want to delete the file \"{filename}\" ?"
 msgstr "Êtes-vous sûr de vouloir supprimer le fichier \"{filename}\" ?"
 
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:21
-#: abilian/sbe/apps/forum/templates/forum/thread.html:309
+#: abilian/sbe/apps/forum/templates/forum/thread.html:304
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:82
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:50
 msgid "Really Delete"
@@ -1108,30 +1113,34 @@ msgstr "Le nom du document ne peut être vide."
 msgid "\"{original}\" already present in folder, renamed \"{name}\""
 msgstr "\"{original}\" déjà présent dans le dossier, renommé en \"{name}\""
 
-#: abilian/sbe/apps/forum/actions.py:69 abilian/sbe/apps/forum/views.py:249
-msgid "New conversation"
-msgstr "Démarrer une conversation"
-
-#: abilian/sbe/apps/forum/actions.py:71
-#: abilian/sbe/apps/forum/templates/forum/index.html:8
+#: abilian/sbe/apps/forum/actions.py:81
 msgid "Recent conversations"
 msgstr "Conversations récentes"
 
-#: abilian/sbe/apps/forum/actions.py:72
-#: abilian/sbe/apps/forum/templates/forum/archives.html:7
+#: abilian/sbe/apps/forum/actions.py:83
+msgid "Top"
+msgstr ""
+
+#: abilian/sbe/apps/forum/actions.py:84
 msgid "Archives"
 msgstr "Archives"
 
-#: abilian/sbe/apps/forum/actions.py:76 abilian/sbe/apps/forum/actions.py:106
+#: abilian/sbe/apps/forum/actions.py:88 abilian/sbe/apps/forum/actions.py:119
 #: abilian/sbe/apps/forum/forms.py:73
 msgid "Attachments"
 msgstr "Pièces jointes"
 
-#: abilian/sbe/apps/forum/actions.py:90
+#: abilian/sbe/apps/forum/actions.py:91
+#: abilian/sbe/apps/forum/templates/forum/thread.html:17
+#: abilian/sbe/apps/forum/views.py:286
+msgid "New conversation"
+msgstr "Démarrer une conversation"
+
+#: abilian/sbe/apps/forum/actions.py:103
 msgid "Close thread"
 msgstr "Fermer la discussion"
 
-#: abilian/sbe/apps/forum/actions.py:98
+#: abilian/sbe/apps/forum/actions.py:111
 msgid "Re-open thread"
 msgstr "Ré-ouvrir la discussion"
 
@@ -1151,67 +1160,77 @@ msgstr "Description de la modification du message"
 msgid "_____Write above this line to post_____"
 msgstr "_____Écrivez au-dessus de cette ligne pour répondre_____"
 
-#: abilian/sbe/apps/forum/views.py:247
+#: abilian/sbe/apps/forum/views.py:284
 msgid "Post this message"
 msgstr "Envoyer ce message"
 
-#: abilian/sbe/apps/forum/views.py:357
+#: abilian/sbe/apps/forum/views.py:394
 msgid "Thread \"{title}\" deleted."
 msgstr "La conversation \"{title}\" a été supprimée."
 
-#: abilian/sbe/apps/forum/views.py:371
+#: abilian/sbe/apps/forum/views.py:408
 msgid "The thread is now closed for edition and new contributions."
 msgstr ""
 "La discussion est maintenant fermée pour l'édition et les nouvelles "
 "contributions."
 
-#: abilian/sbe/apps/forum/views.py:373
+#: abilian/sbe/apps/forum/views.py:410
 msgid "The thread is now re-opened for edition and new contributions."
 msgstr ""
 "La discussion est maintenant réouverte pour l'édition et les nouvelles "
 "contributions."
 
-#: abilian/sbe/apps/forum/templates/forum/archives.html:29
+#: abilian/sbe/apps/forum/templates/forum/archives.html:10
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:12
+#: abilian/sbe/apps/forum/templates/forum/index.html:10
+msgid "Showing :"
+msgstr ""
+
+#: abilian/sbe/apps/forum/templates/forum/archives.html:25
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:26
+#: abilian/sbe/apps/forum/templates/forum/index.html:20
+msgid "Topic"
+msgstr "Sujet"
+
+#: abilian/sbe/apps/forum/templates/forum/archives.html:28
+#: abilian/sbe/apps/forum/templates/forum/index.html:26
+msgid "Replies"
+msgstr "Réponses"
+
+#: abilian/sbe/apps/forum/templates/forum/archives.html:36
 msgid "No message has been posted to this community yet"
 msgstr "Aucun message"
 
-#: abilian/sbe/apps/forum/templates/forum/attachments.html:9
-msgid "Recent conversations attachments"
-msgstr "Pièces jointes des conversations récentes"
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:32
+#, fuzzy
+msgid "Document"
+msgstr "1 document"
 
-#: abilian/sbe/apps/forum/templates/forum/attachments.html:34
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:43
 msgid "No attachment has been posted to this community yet"
 msgstr "Aucune pièce jointe n'a encore été publié dans cette communauté"
 
 #: abilian/sbe/apps/forum/templates/forum/index.html:23
-msgid "Topic"
-msgstr "Sujet"
-
-#: abilian/sbe/apps/forum/templates/forum/index.html:26
 msgid "Participants"
 msgstr "Participants"
 
 #: abilian/sbe/apps/forum/templates/forum/index.html:29
-msgid "Replies"
-msgstr "Réponses"
-
-#: abilian/sbe/apps/forum/templates/forum/index.html:32
 msgid "Viewers"
 msgstr "Lecteurs"
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:35
+#: abilian/sbe/apps/forum/templates/forum/index.html:32
 msgid "Views"
 msgstr "Vues"
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:38
+#: abilian/sbe/apps/forum/templates/forum/index.html:35
 msgid "Activity"
 msgstr "Dernière activité"
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:48
+#: abilian/sbe/apps/forum/templates/forum/index.html:45
 msgid "No message has been posted to this community yet."
 msgstr "Aucun message n'a encore été posté dans cette communauté."
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:54
+#: abilian/sbe/apps/forum/templates/forum/index.html:52
 msgid "All conversations"
 msgstr "Toutes les conversations"
 
@@ -1220,60 +1239,59 @@ msgstr "Toutes les conversations"
 msgid "Back to conversation list"
 msgstr "Revenir à la liste des conversations"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:25
-#: abilian/sbe/apps/forum/templates/forum/thread.html:76
-msgid "replies"
-msgstr "réponses"
+#: abilian/sbe/apps/forum/templates/forum/thread.html:36
+#, fuzzy
+msgid "Posted by"
+msgstr "Lu par"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:28
-#, python-format
-msgid "Posted by %(creator)s"
-msgstr "Posté par %(creator)s"
-
-#: abilian/sbe/apps/forum/templates/forum/thread.html:53
+#: abilian/sbe/apps/forum/templates/forum/thread.html:47
 msgid "created"
 msgstr "créé"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:63
+#: abilian/sbe/apps/forum/templates/forum/thread.html:57
 msgid "last reply"
 msgstr "dernière réponse"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:84
+#: abilian/sbe/apps/forum/templates/forum/thread.html:70
+msgid "replies"
+msgstr "réponses"
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:78
 msgid "views"
 msgstr "vues"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:89
+#: abilian/sbe/apps/forum/templates/forum/thread.html:83
 msgid "participants"
 msgstr "participants"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:110
+#: abilian/sbe/apps/forum/templates/forum/thread.html:104
 msgid "Frequent Posters"
 msgstr "Participants fréquents"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:171
+#: abilian/sbe/apps/forum/templates/forum/thread.html:165
 msgid "Post a comment"
 msgstr "Ajouter un commentaire"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:185
+#: abilian/sbe/apps/forum/templates/forum/thread.html:179
 msgid "Post this comment"
 msgstr "Envoyer ce commentaire"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:204
+#: abilian/sbe/apps/forum/templates/forum/thread.html:198
 #: abilian/sbe/apps/wiki/actions.py:55
 msgid "Edit"
 msgstr "Éditer"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:233
+#: abilian/sbe/apps/forum/templates/forum/thread.html:227
 #, python-format
 msgid "edited by %(user)s - %(date)s"
 msgstr "édité par %(user)s - %(date)s"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:299
+#: abilian/sbe/apps/forum/templates/forum/thread.html:294
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:72
 msgid "Delete Thread"
 msgstr "Supprimer cette discussion"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:303
+#: abilian/sbe/apps/forum/templates/forum/thread.html:298
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:76
 msgid "Are you sure you want to delete this thread?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette discussion?"
@@ -1712,4 +1730,10 @@ msgstr "(source)"
 
 #~ msgid "Csv file is not valid"
 #~ msgstr "Le fichier csv n'est pas valide"
+
+#~ msgid "Recent conversations attachments"
+#~ msgstr "Pièces jointes des conversations récentes"
+
+#~ msgid "Posted by %(creator)s"
+#~ msgstr "Posté par %(creator)s"
 

@@ -16,6 +16,19 @@ class ForumAction(Action):
     def is_current(self):
         return request.path == self.url()
 
+    def is_filtered(self):
+        filter_keys = ["today", "month", "year", "week"]
+        current_url = request.path.split("/")
+        filter = current_url[-1].strip()
+
+        if filter not in filter_keys:
+            return False
+
+        if self.url() == "#filter":
+            return True
+
+        return False
+
     def url(self, context=None):
         if self._url or self.endpoint:
             return super(ForumAction, self).url(context=context)
@@ -65,17 +78,17 @@ _close_template_action = u'''
 '''
 
 _actions = (
+    ForumAction('forum:global', 'index', _l(u'Recent conversations')),
     ForumAction(
-        'forum:global', 'new_thread', _l(u'New conversation'), icon='plus'),
-    ForumAction(
-        'forum:global', 'index', _l(u'Recent conversations'), icon='list'),
-    ForumAction('forum:global', 'archives', _l(u'Archives'), icon='calendar'),
+        'forum:global', 'index/<string:filter>', _l(u'Top'), url='#filter'),
+    ForumAction('forum:global', 'archives', _l(u'Archives')),
     ForumAction(
         'forum:global',
         'attachments',
         _l(u'Attachments'),
-        icon='file',
         condition=is_in_thread),
+    ForumAction(
+        'forum:global', 'new_thread', _l(u'New conversation'), icon='plus'),
     ForumModalAction(
         'forum:thread',
         'delete',
