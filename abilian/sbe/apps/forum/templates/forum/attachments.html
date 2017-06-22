@@ -5,21 +5,21 @@
 {% from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
-    {%- block forumsidebar %}
+  {%- block forumsidebar %}
 
-      <div class="forum-menu-container">
-        <div class="forum-menu" role="group" style="width:100%;">
-       <span style="color:gray;">{{_("Showing :")}}</span>
-       {%- set global_actions = actions.for_category('forum:global') %}
-       {{forum_menu(global_actions)}}
-        </div>
+    <div class="forum-menu-container">
+      <div class="forum-menu" role="group" style="width:100%;">
+        <span style="color:gray;">{{ _("Showing :") }}</span>
+        {%- set global_actions = actions.for_category('forum:global') %}
+        {{ forum_menu(global_actions) }}
       </div>
+    </div>
 
-    {%- endblock %}
+  {%- endblock %}
 
-    {% for month, posts in grouped_posts %}
-      <br>
-      <h2>{{ month }}</h2>
+  {% for month, posts in grouped_posts %}
+    <br>
+    <h2>{{ month }}</h2>
     <table border="0" class="attachment-table">
       <tr>
         <th style="width:33%;">
@@ -35,12 +35,12 @@
           {{ _("Size") }}
         </th>
       </tr>
-     {% for post in posts %}
-          {{ m_postattachments(post) }}
-     {% endfor %}
+      {% for post in posts %}
+        {{ m_postattachments(post) }}
+      {% endfor %}
     </table>
-    {% else %}
-      <p>{{ _("No attachment has been posted to this community yet") }}</p>
-    {% endfor %}
+  {% else %}
+    <p>{{ _("No attachment has been posted to this community yet") }}</p>
+  {% endfor %}
 {% endblock %}
 

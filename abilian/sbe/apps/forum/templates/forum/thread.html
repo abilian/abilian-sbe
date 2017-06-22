@@ -14,7 +14,8 @@
     <p>
       <a class="conversation-back-btn" href="{{ url_for('.index', community_id=g.community.slug) }}">
         <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
-        <button class="forum-action-conversation conversation-new-btn"><a><i class="glyphicon glyphicon-plus"></i> {{_("New conversation") }}</a></button>
+      <button class="forum-action-conversation conversation-new-btn"><a><i
+          class="glyphicon glyphicon-plus"></i> {{ _("New conversation") }}</a></button>
     </p>
     <br>
 
@@ -28,17 +29,19 @@
         </div>
 
         <div class="media-body" style="line-height:13px;color:#797C7E;">
-    <h2 class="thread-current-title">
-        {{ thread.title }}
-      </h2>
+          <h2 class="thread-current-title">
+            {{ thread.title }}
+          </h2>
 
-      <div style="margin-bottom: 10px;">
-       <span style="color:gray;">{{ _("Posted by")}}</span> <span style="font-weight:bold;">{{ m_user_link(thread.creator) }}</span>
-       <span style="float:right;color:gray;"> {{ thread.created_at | age(date_threshold='day') }} </span>
-         {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
-        {{ m_post_edit_link(post) }}
-      </div>
-        <br>
+          <div style="margin-bottom: 10px;">
+            <span style="color:gray;">{{ _("Posted by") }}</span>
+            <span
+              style="font-weight:bold;">{{ m_user_link(thread.creator) }}</span>
+            <span style="float:right;color:gray;"> {{ thread.created_at | age(date_threshold='day') }} </span>
+            {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
+            {{ m_post_edit_link(post) }}
+          </div>
+          <br>
           {{ m_post_content(thread.posts[0]) }}
         </div>
         <br>
@@ -204,7 +207,7 @@
   <div class="body" style="margin-bottom: -11px;line-height: 18px;">
     {{ post.body_html|safe }}
   </div>
- <br>
+  <br>
   {%- if post.attachments %}
     <div class="attachments">
       <ul>
@@ -248,11 +251,11 @@
         <span class="date">{{ post.created_at | age(date_threshold='day') }}</span>
         {{ m_post_edit_link(post) }}
       </div>
-       <br><br>
+      <br><br>
       {{ m_post_content(post) }}
     </div>
   </div>
-<hr>
+  <hr>
 {%- endmacro %}
 
 {%- block sidebar %}

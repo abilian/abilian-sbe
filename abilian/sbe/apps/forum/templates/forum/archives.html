@@ -4,23 +4,22 @@
 {% from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
-    {%- block forumsidebar %}
-      <div class="forum-menu-container">
-        <div class="forum-menu" role="group" style="width:100%;">
-       <span style="color:gray;">{{_("Showing :")}}</span>
-       {%- set global_actions = actions.for_category('forum:global') %}
-       {{forum_menu(global_actions)}}
-        </div>
+  {%- block forumsidebar %}
+    <div class="forum-menu-container">
+      <div class="forum-menu" role="group" style="width:100%;">
+        <span style="color:gray;">{{ _("Showing :") }}</span>
+        {%- set global_actions = actions.for_category('forum:global') %}
+        {{ forum_menu(global_actions) }}
       </div>
-    {%- endblock %}
+    </div>
+  {%- endblock %}
 
-    {% for month, threads in grouped_threads %}
-      <h2>{{ month }}</h2>
+  {% for month, threads in grouped_threads %}
+    <h2>{{ month }}</h2>
 
-        <table border="0" class="thread-table">
+    <table border="0" class="thread-table">
       <tr>
-        <th style="width:3.5%;">
-        </th>
+        <th style="width:3.5%;"></th>
         <th>
           {{ _("Topic") }}
         </th>
@@ -32,9 +31,9 @@
         {{ m_thread(thread) }}
       {% endfor %}
     </table>
-    {% else %}
-      <p>{{ _("No message has been posted to this community yet") }}</p>
-    {% endfor %}
+  {% else %}
+    <p>{{ _("No message has been posted to this community yet") }}</p>
+  {% endfor %}
 {% endblock %}
 
 
@@ -42,12 +41,12 @@
   {%- set thread_href = url_for(".thread", thread_id=thread.id, community_id=g.community.slug) %}
   {%- set thread_length = thread.posts|length %}
   <tr>
-  <td></td>
-  <td><a href="{{ thread_href }}" class="thread-title">{{ thread.title }}</a>
-  <p style="color:silver;">{{ thread.posts[0].body_html|safe|striptags|truncate(155, False, '...', 0) }}</p>
-  </td>
-  <td style="text-align:center;">
-  {{ thread_length-1 }}
-  </td>
- </tr>
+    <td></td>
+    <td><a href="{{ thread_href }}" class="thread-title">{{ thread.title }}</a>
+      <p style="color:silver;">{{ thread.posts[0].body_html|safe|striptags|truncate(155, False, '...', 0) }}</p>
+    </td>
+    <td style="text-align:center;">
+      {{ thread_length-1 }}
+    </td>
+  </tr>
 {% endmacro %}

@@ -3,32 +3,39 @@
 {%- macro m_postinfos(post) %}
   {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
   {%- set thread_href = url_for(".thread", thread_id=post.thread_id, community_id=g.community.slug) %}
-    <td><a href="{{ url_for(post) }}">
+  <td>
+    <a href="{{ url_for(post) }}">
       <small>{{ post.thread.title }}</small>
-        </a></td>
-    <td>{% call m_user_link(post.creator) %}
+    </a>
+  </td>
+  <td>
+    {% call m_user_link(post.creator) %}
       {{ m_user_photo(post.creator, size=35) }}
-        {% endcall %}</td>
+    {% endcall %}
+  </td>
 
 {%- endmacro %}
 
 {%- macro m_postattachments(post) %}
   {%- if post.attachments %}
-<tr>
-        {{ m_postinfos(post) }}
-        <td colspan="2">
+    <tr>
+      {{ m_postinfos(post) }}
+      <td colspan="2">
         <table border="0" style="width:100%">
           {%- for attachment in post.attachments %}
-               <tr>
-                   <td style="line-height: 1.5;"><img src="{{ attachment.icon }}" style="vertical-align: middle;" alt=""/>
-                  <a href="{{ url_for(attachment) }}">{{ attachment.name |truncate(70, False, '...', 0)  }}</a></td>
+            <tr>
+              <td style="line-height: 1.5;"><img src="{{ attachment.icon }}" style="vertical-align: middle;" alt=""/>
+                <a href="{{ url_for(attachment) }}">{{ attachment.name |truncate(70, False, '...', 0) }}</a>
+              </td>
 
-             <td style="float:right;"> <span style="color:silver;">{{ attachment.content_length|filesize }}</span> </td>
+              <td style="float:right;">
+                <span style="color:silver;">{{ attachment.content_length|filesize }}</span>
+              </td>
             </tr>
-            {%- endfor %}
+          {%- endfor %}
         </table>
-        </td>
-</tr>
+      </td>
+    </tr>
   {%- endif %}
 {%- endmacro %}
 
