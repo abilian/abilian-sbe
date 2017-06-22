@@ -121,16 +121,16 @@
 
   {%- block after_form %}
   {%- endblock %}
-<script>
-$( "#title" ).after("<span class='thread-title-counter'></span>")
-$("#title").bind("keyup change",function(){
-   var title_length = $("#title").val().length;
-   $(".thread-title-counter").html(title_length+"/150");
-   if(title_length>150){
-   $(".thread-title-counter").css({"background":"orange","color":"white"});
-   }else{
-   $(".thread-title-counter").css({"background":"ghostwhite","color":"silver"});
-   }
-});
-</script>
+  <script>
+    $("#title").after("<span class='thread-title-counter'></span>")
+    $("#title").bind("keyup change", function () {
+      var title_length = $("#title").val().length;
+      $(".thread-title-counter").html(title_length + "/150");
+      if (title_length > 150) {
+        $(".thread-title-counter").css({"background": "orange", "color": "white"});
+      } else {
+        $(".thread-title-counter").css({"background": "ghostwhite", "color": "silver"});
+      }
+    });
+  </script>
 {% endblock %}
