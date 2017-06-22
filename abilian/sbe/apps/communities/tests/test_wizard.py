@@ -113,11 +113,14 @@ def test_wizard_extract_data(db):
     existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
         wizard_read_csv(simulate_csv_file()), is_csv=True)
 
-    assert existing_accounts_objects == {"csv_roles":
-                                         {"user_1@example.com": "manager",
-                                          "user_2@example.com": "member",
-                                          "user_7@example.com": "member",},
-                                         "account_objects": [user2]}
+    assert existing_accounts_objects == {
+        "csv_roles": {
+            "user_1@example.com": "manager",
+            "user_2@example.com": "member",
+            "user_7@example.com": "member",
+        },
+        "account_objects": [user2]
+    }
     assert existing_members_objects == [user1]
     assert sorted(accounts_list) == sorted([{
         'status': 'existing',

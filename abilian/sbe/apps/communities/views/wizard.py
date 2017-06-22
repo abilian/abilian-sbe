@@ -3,8 +3,8 @@
 """
 from __future__ import absolute_import, print_function
 
-import json
 import csv
+import json
 
 from flask import current_app, flash, g, redirect, render_template, request, \
     url_for

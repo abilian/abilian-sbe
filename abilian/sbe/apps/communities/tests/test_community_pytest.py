@@ -7,12 +7,13 @@ from __future__ import absolute_import, division, print_function, \
 
 import pytest
 import sqlalchemy as sa
-from abilian.core.entities import Entity
-from abilian.core.models.subjects import User
 from mock import mock
 from pytest import fixture
 
+from abilian.core.entities import Entity
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents.models import Folder
+
 from .. import signals, views
 from ..models import MEMBER, Community, CommunityIdColumn, community_content
 

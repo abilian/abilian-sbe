@@ -3,12 +3,13 @@
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
-from abilian.services.security import Admin
 from flask import url_for
 
-from .base import CommunityIndexingTestCase as BaseIndexingTestCase
+from abilian.services.security import Admin
+
 from .. import views
 from ..models import Community
+from .base import CommunityIndexingTestCase as BaseIndexingTestCase
 
 
 class CommunityIndexingTestCase(BaseIndexingTestCase):
