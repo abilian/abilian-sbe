@@ -1,0 +1,167 @@
+@media only screen and (max-width: 1200px) {
+  .step.current {
+    height: 70px;
+  }
+
+  .arrow-steps .step.current a {
+    font-size: 13px;
+    position: relative;
+    top: 14px;
+  }
+
+  .step {
+    height: 70px;
+  }
+
+  .arrow-steps .step a {
+    font-size: 13px;
+    position: relative;
+    top: 14px;
+  }
+    
+  span.step_align {
+    margin-top: 30px;
+  }
+
+  .arrow-steps .step:after,
+  .arrow-steps .step:before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    right: -17px;
+    width: 0;
+    height: 0;
+    border-top: 35px solid transparent;
+    border-bottom: 33px solid transparent;
+    border-left: 17px solid ghostwhite;
+    z-index: 2;
+  }
+}
+
+@media only screen and (min-width: 1200px) {
+
+  .arrow-steps .step:after,
+  .arrow-steps .step:before {
+    content: " ";
+    position: absolute;
+    top: 0;
+    right: -17px;
+    width: 0;
+    height: 0;
+    border-top: 20px solid transparent;
+    border-bottom: 20px solid transparent;
+    border-left: 17px solid ghostwhite;
+    z-index: 2;
+  }
+}
+
+.clearfix:after {
+  clear: both;
+  content: "";
+  display: block;
+  height: 0;
+}
+
+/* Responsive Arrow Progress Bar */
+
+.container {
+  font-family: 'Lato', sans-serif;
+}
+
+.arrow-steps .step {
+  font-size: 14px;
+  text-align: center;
+  vertical-align: middle;
+  color: #ddd;
+  cursor: default;
+  margin: 0 1px 0 0;
+  padding: 10px 0px 10px 0px;
+  width: 33%;
+  float: left;
+  position: relative;
+  background-color: ghostwhite;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.arrow-steps .step a {
+  color: #777;
+  text-decoration: none;
+}
+
+.arrow-steps .step:before {
+  right: auto;
+  left: 0;
+  border-left: 17px solid #fff;
+  z-index: 0;
+}
+
+.arrow-steps .step:first-child:before {
+  border: none;
+}
+
+.arrow-steps .step:last-child:after {
+  border: none;
+}
+
+.arrow-steps .step:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.arrow-steps .step:last-child {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.arrow-steps .step span {
+  position: relative;
+}
+
+*.arrow-steps .step.done span:before {
+  opacity: 1;
+  content: "✓";
+  position: absolute;
+  top: -2px;
+  left: -10px;
+  font-size: 11px;
+  line-height: 21px;
+}
+
+.arrow-steps .step.current {
+  color: #fff;
+  background-color: yellowgreen;
+  font-weight: bold;
+}
+
+.arrow-steps .step.current a {
+  color: #fff;
+  text-decoration: none;
+}
+
+.arrow-steps .step.current:after {
+  border-left: 17px solid yellowgreen;
+}
+
+.arrow-steps .step.done {
+  color: #173352;
+  background-color: #2f69aa;
+}
+
+.arrow-steps .step.done a {
+  color: #173352;
+  text-decoration: none;
+}
+
+.arrow-steps .step.done:after {
+  border-left: 17px solid #2f69aa;
+}
+
+.step-number {
+  color: white;
+  width: 10px;
+  height: 10px;
+  position: relative !important;
+}

@@ -1,0 +1,129 @@
+{# standard macros for the 'members' page.  DO NOT OVERRIDE.  Instead, you
+ should override 'members_macros.html'.
+ This allow to override only some of the macros without copying all others.
+#}
+{% from "macros/user.html" import m_user_link, m_user_photo %}
+
+{% macro std_thead() %}
+  <tr style="color:silver;">
+    <th class="hide" style="">Last Name</th>
+    <th class="hide">First Name</th>
+    <th>{{ _('Name') }}</th>
+    <th class="hide">{# last activity seconds since epoch #}</th>
+    <th width="10%" class="text-center">{{ _('Role') }}</th>
+    {% if is_manager %}
+      <th>{{ _('Action') }}</th>
+    {% endif %}
+    <th></th>
+  </tr>
+{% endmacro %}
+
+{% macro std_table_config() %}
+  {
+  "aoColumns": [
+  { "bVisible": false },
+  { "bVisible": false },
+  { "aDataSort": [0, 1], "asSorting": [ "asc", "desc" ] },
+  { "bVisible": false },
+  { "aDataSort": [3], "asSorting": [ "asc", "desc" ] },
+  { "asSorting": [ "asc", "desc" ]}
+  {%- if is_manager %}
+    , { }
+  {% endif %}
+  ],
+  "sPaginationType": "bootstrap",
+  "bFilter":         true,
+  "bLengthChange":   false
+  }
+{% endmacro %}
+
+
+{% macro std_member_row(user, m_id, role, last_activity_date) %}
+  <td class="hide">{{ user.last_name }}</td>
+  <td class="hide">{{ user.first_name }}</td>
+  <td style="padding-top: 11px;padding-left: 10px;">
+    <div class="media">
+      <div class="media-left">
+        {% call m_user_link(user, css="media-object") %}
+          {{ m_user_photo(user, size="32") }}
+        {%- endcall %}
+      </div>
+
+      <div class="media-body" style="position: relative;top: -4.5px;">
+        {%- if not user.can_login %}
+          <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i><s>
+        {%- endif %}
+        {{ m_user_link(user) }}
+        <br/>
+        (<i>{{ user.email }}</i>)
+        {%- if not user.can_login %}</s>{%- endif %}
+      </div>
+    </div>
+  </td>
+
+  <!-- bug jinja : do not use [not is_manager] -->
+  {%- if is_manager == False %}
+    <td style="padding-top: 11px;padding-left: 10px;">{{ _(role) }}</td>
+  {%- else %}
+    <td style="padding-top: 11px;padding-left: 10px;">
+      <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
+            method="POST" style="display: inline;">
+        {{ csrf_token }}
+        <input type="hidden" name="user" value="{{ user.id }}"/>
+        <input type="hidden" name="action" value="set-user-role"/>
+        <select onchange="role_change(this)" id="{{ user.email }}" name="role" class="form-control role-change"
+                style="width: auto;border-radius: 0px;">
+          <option value="member" default="default" {% if csv_roles %}{%- if csv_roles[user.email] == 'member' %}
+                  selected="selected"{%- endif %}{% endif %}>{{ _("Member") }}</option>
+          <option value="manager" {% if csv_roles %}{%- if csv_roles[user.email] == 'manager' %}selected="selected"
+          {%- endif %}{%- endif %}>{{ _("Manager") }}</option>
+        </select>
+      </form>
+    </td>
+    <td style="padding-top: 11px;padding-left: 10px;padding-right: 10px;">
+      <input type="hidden" name="membership" value="{{ m_id }}">
+      <input type="hidden" name="user" value="{{ user.id }}">
+      <a id="{{ user.email }}" onclick="delete_current(this)" class="btn btn-danger"><i class="fa fa-times"></i></a>
+    </td>
+  {% endif %}
+
+  <script>
+    function delete_current(e) {
+      $(e).closest('tr').fadeOut('slow', function () {
+        $(e).closest('tr').remove();
+        var wizard_emails = $("#wizard-emails").val();
+        var tmp_emails = jQuery.parseJSON(wizard_emails);
+        jQuery.each(tmp_emails, function (i, val) {
+          if (val.email === e.id) {
+            delete tmp_emails[i];
+          }
+
+        });
+        tmp_emails = jQuery.grep(tmp_emails, function (n, i) {
+          return (n !== "" && n != null);
+        });
+
+        $("#wizard-emails").val(JSON.stringify(tmp_emails));
+
+        $("#account-nb").html($(".table-condensed tr").length - 1);
+        if ($(".table-condensed tr").length === 1) {
+          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
+          $("#wizard-msg").fadeIn();
+        }
+      });
+    }
+
+    function role_change(e) {
+      var wizard_emails = $("#wizard-emails").val();
+      var tmp_emails = jQuery.parseJSON(wizard_emails);
+      jQuery.each(tmp_emails, function (i, val) {
+        if (val.email === e.id) {
+          tmp_emails[i].role = $(e).val();
+        }
+      });
+
+      $("#wizard-emails").val(JSON.stringify(tmp_emails));
+    }
+  </script>
+
+{% endmacro %}

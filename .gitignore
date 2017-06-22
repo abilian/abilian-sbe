@@ -35,6 +35,8 @@ celerybeat-schedule
 etc/local_prod.ini
 migration-data/
 references/
+migrations/
+node_modules/
 
 misc2
 placeholders
