@@ -33,6 +33,11 @@
                     sWidth: "31%"
                 },
                 {
+                    aDataSort: [1, 2],
+                    asSorting: ["asc", "desc"],
+                    sWidth: "5%"
+                },
+                {
                     aDataSort: [1, 4],
                     asSorting: ["asc", "desc"],
                     sWidth: "8%"
@@ -49,7 +54,13 @@
                     aDataSort: [1, 8],
                     asSorting: ["asc", "desc"],
                     sWidth: "12%"
+                },
+                {
+                    aDataSort: [1, 2],
+                    asSorting: ["asc", "desc"],
+                    sWidth: "1%"
                 }
+
             ],
             //{# see http://datatables.net/ref #}
             sPaginationType: "bootstrap",

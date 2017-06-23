@@ -77,7 +77,74 @@ table#objects-table tbody td > img + i,
 }
 
 #objects-table_wrapper img {
-  border-radius: 20%;
+  border-radius: 0%;
+}
+
+.document-table{
+    >tbody >tr >td{
+        background: white !important;
+        line-height: 5.5;
+        border-top : 1px solid ghostwhite;
+    }
+}
+
+.document-preview{
+  background-position: -6px;
+  background-size: 76px;
+  padding: 64px 0 0 0;
+  border: 2px solid #fff;
+  outline: 1px solid #eee;
+  margin: 3px;
+  width: 68px;
+  height: 38px;
+  display: block;
+  float: left;
+  margin-right: 10px;
+}
+
+.folder-contents-count{
+background: yellowgreen;
+font-weight: bold;
+font-size: 10pt;
+position: relative;
+display: compact;
+width: 19px;
+height: 19px;
+color: white;
+border-radius: 50%;
+left: 17px;
+top: -57px;
+margin-bottom: -100px;
+
+    > .documents-nb{
+      position: relative;
+      top: -26px;
+      left: 6px;
+    }
+}
+
+.upload-files-btn{
+    padding: 5px;
+    border: none;
+    background: yellowgreen;
+    color: white;
+    width: 4cm;
+    border-radius: 3px;
+}
+
+.add-folder-btn{
+    padding: 5px;
+    border: 1px solid silver;
+    background: white;
+    width: 4cm;
+    color: gray;
+    border-radius: 3px;
+}
+
+.document-preview:hover{
+-ms-transform: scale(2,2); /* IE 9 */
+-webkit-transform: scale(2,2); /* Safari */
+transform: scale(2,2); /* Standard syntax */
 }
 
 /* File Uploads (currently not used) */
