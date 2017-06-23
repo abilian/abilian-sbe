@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-06-23 08:20-0700\n"
+"POT-Creation-Date: 2017-06-22 09:08-0700\n"
 "PO-Revision-Date: 2016-02-10 14:17+0100\n"
 "Last-Translator: ybourbotte@abilian.com\n"
 "Language: fr\n"
@@ -38,8 +38,8 @@ msgid "Edit event"
 msgstr "Modifier l'événement"
 
 #: abilian/sbe/apps/calendar/forms.py:63
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:61
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:141
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:48
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:96
 #: abilian/sbe/apps/forum/forms.py:61 abilian/sbe/apps/wiki/forms.py:35
 msgid "Title"
 msgstr "Titre"
@@ -190,8 +190,6 @@ msgid "Image"
 msgstr "Image"
 
 #: abilian/sbe/apps/communities/forms.py:71
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:62
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:142
 msgid "Type"
 msgstr "Type"
 
@@ -264,8 +262,8 @@ msgstr "Détruire la communauté"
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:33
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:76
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:49
-#: abilian/sbe/apps/forum/templates/forum/thread.html:185
-#: abilian/sbe/apps/forum/templates/forum/thread.html:305
+#: abilian/sbe/apps/forum/templates/forum/thread.html:182
+#: abilian/sbe/apps/forum/templates/forum/thread.html:302
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:80
 #: abilian/sbe/apps/preferences/templates/preferences/sbe_notifications.html:19
 #: abilian/sbe/apps/social/templates/social/invite.html:30
@@ -309,24 +307,24 @@ msgstr "Lu par"
 msgid "member"
 msgstr "membre"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:15
+#: abilian/sbe/apps/communities/templates/community/members.html:13
 msgid "Add members"
 msgstr "Ajouter des membres"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:19
+#: abilian/sbe/apps/communities/templates/community/members.html:15
 msgid "Download list"
 msgstr "Télécharger la liste"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:85
+#: abilian/sbe/apps/communities/templates/community/members.html:84
 msgid "Add a member"
 msgstr "Ajouter un membre"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:92
+#: abilian/sbe/apps/communities/templates/community/members.html:91
 msgid "User"
 msgstr "Utilisateur"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:97
-#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:16
+#: abilian/sbe/apps/communities/templates/community/members.html:96
+#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:15
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:13
 #: abilian/sbe/apps/communities/views/views.py:415
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:33
@@ -335,22 +333,22 @@ msgstr "Utilisateur"
 msgid "Role"
 msgstr "Rôle"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:99
-#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:82
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:76
+#: abilian/sbe/apps/communities/templates/community/members.html:98
+#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:79
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:72
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:77
 msgid "Member"
 msgstr "Membre"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:100
-#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:83
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:79
+#: abilian/sbe/apps/communities/templates/community/members.html:99
+#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:80
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:75
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:79
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:40
 msgid "Manager"
 msgstr "Manager"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:105
+#: abilian/sbe/apps/communities/templates/community/members.html:104
 msgid "Add"
 msgstr "Ajouter"
 
@@ -363,14 +361,14 @@ msgstr ""
 msgid "Last activity in this community"
 msgstr "Dernière activité dans cette communauté"
 
-#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:19
+#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:17
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:15
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:19
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:93
 msgid "Action"
 msgstr "Action"
 
-#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:58
+#: abilian/sbe/apps/communities/templates/community/members_std_macros.html:56
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:54
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:28
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:36
@@ -392,33 +390,33 @@ msgstr "Ajouter de nouveaux membres"
 msgid "Insert or import new members into your community"
 msgstr "Insérer ou importer de nouveaux membres dans votre communauté"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:28
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:25
 msgid "Insert your emails collection"
 msgstr "Ajouter les membres à partir de leurs emails"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:34
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:135
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:171
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:29
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:118
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:154
 msgid "Emails Collection"
 msgstr "Collection Emails"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:39
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:32
 msgid "Import members from CSV file"
 msgstr "Importer les membres à partir d'un fichier CSV"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:44
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:34
 msgid "Download CSV file model"
 msgstr "Télécharger le modèle de fichier CSV"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:49
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:39
 msgid "Choose a File"
 msgstr "Choisir le fichier"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:53
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:41
 msgid "Browse"
 msgstr "Parcourir"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:59
+#: abilian/sbe/apps/communities/templates/community/wizard_add_emails.html:45
 #: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:64
 msgid "Next step"
 msgstr "étape suivante"
@@ -452,15 +450,15 @@ msgstr ""
 " is vont être ajoutés à la communauté"
 
 #: abilian/sbe/apps/communities/templates/community/wizard_check_members.html:84
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:178
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:174
 msgid "There is no existing accounts"
 msgstr "Il n'y a pas de comptes existants"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:24
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:25
 msgid "New Users Accounts"
 msgstr "Nouveaux comptes utilisateur"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:26
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:27
 msgid ""
 "The members below are not registered on the platform. Please create their"
 " accounts so that they can join the community."
@@ -475,25 +473,23 @@ msgid "Profile"
 msgstr "Profil"
 
 #: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:33
-#, fuzzy
 msgid ""
-"Complete the information below to create a new user. They will receive a "
+"Complete the information below to create a new user. It will receive a "
 "mail instruction to connect."
 msgstr ""
 "Compléter les informations ci-dessous pour créer un nouvel utilisateur. "
 "Il recevra un mail d'instruction pour se connecter."
 
 #: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:41
-#, fuzzy
-msgid "You need to complete all the fields"
+msgid "You need to coplete all the fields"
 msgstr "Vous devez compléter tous les champs"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:94
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:90
 #: abilian/sbe/apps/preferences/templates/preferences/sbe_notifications.html:16
 msgid "Save"
 msgstr "Enregistrer"
 
-#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:170
+#: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:166
 #, fuzzy
 msgid "There is no new accounts"
 msgstr "Il n'y a pas de comptes existants"
@@ -632,33 +628,33 @@ msgstr "Tout cocher"
 msgid "Unselect all"
 msgstr "Tout décocher"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:26
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:33
 msgid "Filter..."
 msgstr "Filtrer..."
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:63
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:143
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:49
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:97
 #: abilian/sbe/apps/forum/templates/forum/attachments.html:35
 msgid "Size"
 msgstr "Taille"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:66
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:146
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:52
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:100
 #: abilian/sbe/apps/documents/templates/documents/descendants.html:38
 #: abilian/sbe/apps/forum/templates/forum/attachments.html:29
 msgid "Owner"
 msgstr "Propriétaire"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:68
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:148
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:54
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:102
 msgid "Age"
 msgstr "Age"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:157
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:110
 msgid "Delete selected elements?"
 msgstr "Supprimer les éléments sélectionnés?"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:172
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:125
 msgid "This folder is currently empty. Why don't you upload some content?"
 msgstr "Ce dossier est vide. Et si vous y ajoutiez quelques fichiers?"
 
@@ -671,7 +667,7 @@ msgid "Are you sure you want to delete the file \"{filename}\" ?"
 msgstr "Êtes-vous sûr de vouloir supprimer le fichier \"{filename}\" ?"
 
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:21
-#: abilian/sbe/apps/forum/templates/forum/thread.html:307
+#: abilian/sbe/apps/forum/templates/forum/thread.html:304
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:82
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:50
 msgid "Really Delete"
@@ -842,6 +838,10 @@ msgstr "Suivant"
 #: abilian/sbe/apps/documents/templates/documents/document.html:113
 msgid "Document preview not yet available"
 msgstr "Pas d'aperçu disponible"
+
+#: abilian/sbe/apps/documents/templates/documents/folder.html:9
+msgid "Folder contents"
+msgstr "Contenu du dossier"
 
 #: abilian/sbe/apps/documents/templates/documents/mail_file_sent.fr.txt:1
 #, python-format
@@ -1131,7 +1131,7 @@ msgid "Attachments"
 msgstr "Pièces jointes"
 
 #: abilian/sbe/apps/forum/actions.py:91
-#: abilian/sbe/apps/forum/templates/forum/thread.html:18
+#: abilian/sbe/apps/forum/templates/forum/thread.html:17
 #: abilian/sbe/apps/forum/views.py:286
 msgid "New conversation"
 msgstr "Démarrer une conversation"
@@ -1186,18 +1186,18 @@ msgstr ""
 msgid "Showing :"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/archives.html:24
+#: abilian/sbe/apps/forum/templates/forum/archives.html:25
 #: abilian/sbe/apps/forum/templates/forum/attachments.html:26
 #: abilian/sbe/apps/forum/templates/forum/index.html:20
 msgid "Topic"
 msgstr "Sujet"
 
-#: abilian/sbe/apps/forum/templates/forum/archives.html:27
+#: abilian/sbe/apps/forum/templates/forum/archives.html:28
 #: abilian/sbe/apps/forum/templates/forum/index.html:26
 msgid "Replies"
 msgstr "Réponses"
 
-#: abilian/sbe/apps/forum/templates/forum/archives.html:35
+#: abilian/sbe/apps/forum/templates/forum/archives.html:36
 msgid "No message has been posted to this community yet"
 msgstr "Aucun message"
 
@@ -1239,59 +1239,59 @@ msgstr "Toutes les conversations"
 msgid "Back to conversation list"
 msgstr "Revenir à la liste des conversations"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:37
+#: abilian/sbe/apps/forum/templates/forum/thread.html:36
 #, fuzzy
 msgid "Posted by"
 msgstr "Lu par"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:50
+#: abilian/sbe/apps/forum/templates/forum/thread.html:47
 msgid "created"
 msgstr "créé"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:60
+#: abilian/sbe/apps/forum/templates/forum/thread.html:57
 msgid "last reply"
 msgstr "dernière réponse"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:73
+#: abilian/sbe/apps/forum/templates/forum/thread.html:70
 msgid "replies"
 msgstr "réponses"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:81
+#: abilian/sbe/apps/forum/templates/forum/thread.html:78
 msgid "views"
 msgstr "vues"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:86
+#: abilian/sbe/apps/forum/templates/forum/thread.html:83
 msgid "participants"
 msgstr "participants"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:107
+#: abilian/sbe/apps/forum/templates/forum/thread.html:104
 msgid "Frequent Posters"
 msgstr "Participants fréquents"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:168
+#: abilian/sbe/apps/forum/templates/forum/thread.html:165
 msgid "Post a comment"
 msgstr "Ajouter un commentaire"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:182
+#: abilian/sbe/apps/forum/templates/forum/thread.html:179
 msgid "Post this comment"
 msgstr "Envoyer ce commentaire"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:201
+#: abilian/sbe/apps/forum/templates/forum/thread.html:198
 #: abilian/sbe/apps/wiki/actions.py:55
 msgid "Edit"
 msgstr "Éditer"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:230
+#: abilian/sbe/apps/forum/templates/forum/thread.html:227
 #, python-format
 msgid "edited by %(user)s - %(date)s"
 msgstr "édité par %(user)s - %(date)s"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:297
+#: abilian/sbe/apps/forum/templates/forum/thread.html:294
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:72
 msgid "Delete Thread"
 msgstr "Supprimer cette discussion"
 
-#: abilian/sbe/apps/forum/templates/forum/thread.html:301
+#: abilian/sbe/apps/forum/templates/forum/thread.html:298
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:76
 msgid "Are you sure you want to delete this thread?"
 msgstr "Êtes-vous sûr de vouloir supprimer cette discussion?"
@@ -1736,7 +1736,4 @@ msgstr "(source)"
 
 #~ msgid "Posted by %(creator)s"
 #~ msgstr "Posté par %(creator)s"
-
-#~ msgid "Folder contents"
-#~ msgstr "Contenu du dossier"
 
