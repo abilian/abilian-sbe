@@ -5,8 +5,7 @@
 
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
 
-{% block content %}
-  {% call m_box_content(title=_('Folder contents')) %}
+{% block documentcontent %}
     <div style="margin: 5px 0;">
       <i class="fa fa-folder-open-o fa-large"></i>
       {{ m_breadcrumbs2(breadcrumbs) }}
@@ -20,9 +19,10 @@
     {%- endif %}
 
     {{ m_docs_table(children, True) }}
-  {% endcall %}
 {% endblock %}
 
+<br><br>
+{#
 {% block sidebar %}
   {%- set content_actions = actions.for_category('documents:content') %}
   {%- if content_actions %}
@@ -34,8 +34,7 @@
       </ul>
     {% endcall %}
   {%- endif %}
-{% endblock %}
-
+{% endblock %} #}
 
 {% block modals %}
   {% include "documents/_modals_folder.html" %}
