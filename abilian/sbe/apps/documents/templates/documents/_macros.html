@@ -12,24 +12,17 @@
       {{ csrf_token }}
       {%- if edit %}
         <div class="btn-toolbar" style="margin-bottom: 0;">
-          <div class="btn-group" style="margin-right: 20px">
+          <div class="btn-group" style="margin-right: 20px;display:none;">
             <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
               <i class="fa fa-check"></i>
               <span class="caret"></span>
             </a>
             <ul class="dropdown-menu">
-              <li><a href="#select-all">{{ _("Select all") }}</a></li>
-              <li><a href="#unselect-all">{{ _("Unselect all") }}</a></li>
+              <li><a class="doc-select-all" href="#select-all">{{ _("Select all") }}</a></li>
+              <li><a class="doc-unselect-all" href="#unselect-all">{{ _("Unselect all") }}</a></li>
             </ul>
           </div>
-
-          {%- for action in actions.for_category('documents:folder-listing') %}
-            <div class="btn-group">
-              {{ action.render() }}
-            </div>
-          {%- endfor %}
-
-          <div class="btn-group pull-right" style="margin-right: 20px;">
+          <div class="btn-group" style="margin-right: 20px;">
             <input id="filter" type="text" class="form-control" placeholder="{{ _("Filter...") }}"
                    style="margin-bottom: 0;">
           </div>
@@ -38,36 +31,71 @@
       {% endif %}
 
       <hr style="margin: 10px 0 10px 0;"/>
+        <button type="button" class="upload-files-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color:white;" href="#modal-upload-files" data-toggle="modal"> Upload file(s)</a></button>
+        <button type="button" class="add-folder-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color: gray;" href="#modal-new-folder" data-toggle="modal"> New folder</a></button>
 
-      <table class="table table-striped table-condensed" id="objects-table">
+
+<div style="float:right;margin-left: 12px;" class="btn-group" role="group" aria-label="...">
+  <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span></button>
+  <button type="button" class="btn btn-default"><span class="glyphicon glyphicon-th-large" aria-hidden="true"></span></button>
+</div>
+    &nbsp;
+    {% if edit %}
+        <span style="float:right;">
+        {%- for action in actions.for_category('documents:folder-listing') %}
+            <div class="btn-group">
+              {{ action.render() }}
+            </div>
+          {%- endfor %}
+        </span>
+    {% endif %}
+
+    <br><br>
+      <table style="background: white;" class="document-table table table-striped table-condensed" id="objects-table">
         <thead>
-        <tr>
-          <th style="width: 1%;"></th>
+        <tr style="color: #919191;
+border-bottom: 2px solid ghostwhite;">
+          <th style="width: 1%;"><input class="doc-check-all" style="position: relative;top: 2px;left: -4px;" type="checkbox" ></th>
           <th class="hide">type</th>
           <th class="hide">title for sorting</th>
           <th style="width: 39%;">{{ _("Title") }}</th>
-          <th style="width: 10%;">{{ _("Size") }}</th>
+          <th>{{ _("Type") }}</th>
+          <th style="width: 20%;">{{ _("Size") }}</th>
           <th class="hide">Last Name</th>
           <th class="hide">First Name</th>
           <th style="width: 25%;">{{ _("Owner") }}</th>
           <th class="hide">date</th>
           <th style="width: 25%;">{{ _("Age") }}</th>
+          <th></th>
         </tr>
         </thead>
 
         <tbody>
         {%- for obj in objects %}
           <tr>
-            <td><input type="checkbox" name="object-selected"
+            <td><input style="position: relative;top: 2px;" type="checkbox" name="object-selected"
                        value="{{ obj.sbe_type }}:{{ obj.id }}"></td>
             <td class="hide">{{ obj.object_type }}</td>
             <td class="hide">{{ obj.title }}</td>
             <td>
-              <img src="{{ obj.icon }}" style="vertical-align: middle;" alt=""/>
+            {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+              <i style="font-size: 23pt;margin-right: 10px;position: relative;top: 4.5px;" class="fa fa-folder-o" aria-hidden="true"></i> <span class="folder-contents-count"><span class="documents-nb">{{ obj.filtered_children|length }}</span></span>
+            {%else%}
+                {% set icon_src = url_for(".document_preview_image",
+          community_id=g.community.slug, doc_id= obj.id,
+          size=obj.preview_size) %}
+               <img class="document-preview" style="background-image: url('{{icon_src}}');" src="" alt="" data-page="0"/>
+            {%endif%}
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>{%- endif %}
-              <a href="{{ url_for(obj) }}">{{ obj.title }}</a>
+              <a style="position: relative;
+top: 3px;
+left: 49px;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
             </td>
+            <!-- ici -->
+            <td style="text-align: center;">
+             <img src="{{ obj.icon }}" style="vertical-align: middle;" alt=""/>
+              </td>
             <td>
               {%- if obj.is_document %}
                 {{ obj.content_length|filesize }}
@@ -79,27 +107,46 @@
             <td>
               <a href="{{ url_for("social.user", user_id=owner.id) }}"
                  title="{{ owner.name }}"><img alt="{{ owner.name }}"
-                                               src="{{ user_photo_url(owner, size=20) }}"
-                                               style="vertical-align: middle;">
-                {{ owner.short_name }}</a>
+                                               src="{{ user_photo_url(owner, size=40) }}"
+                                               style="vertical-align: middle;"></a>
             </td>
             <td class="hide">{{ obj.created_at.isoformat() }} </td>
             <td>{{ obj.created_at|age(add_direction=False) }}</td>
+            <td>
+            <div class="dropdown" style="left: -39px;">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="border-radius: 0px;
+position: absolute;
+top: 53px;
+margin-bottom: -144px;">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li role="separator" class="divider"></li>
+    <li><a href="#">Separated link</a></li>
+    </ul>
+      </div>
+              </td>
           </tr>
         {%- endfor %}
         </tbody>
         <tfoot>
-        <tr>
+        <tr style="color: #919191;
+border-top: 2px solid ghostwhite;">
           <th></th>
           <th class="hide">type</th>
           <th class="hide">title for sorting</th>
           <th>{{ _("Title") }}</th>
+          <th>{{ _("Type") }}</th>
           <th>{{ _("Size") }}</th>
           <th class="hide">Last Name</th>
           <th class="hide">First Name</th>
           <th>{{ _("Owner") }}</th>
           <th class="hide">date</th>
           <th>{{ _("Age") }}</th>
+          <th></th>
         </tr>
         </tfoot>
       </table>
@@ -125,6 +172,14 @@
       <em>{{ _("This folder is currently empty. Why don't you upload some content?") }}</em>
     </p>
   {%- endif %}
-
+ <script>
+$(".doc-check-all").change(function() {
+    if($(this).prop('checked')==true) {
+      $( ".doc-select-all" ).trigger( "click" );
+    }else{
+      $( ".doc-unselect-all" ).trigger( "click" );
+    }
+});
+</script>
   <div style="clear: both;"></div>
 {% endmacro %}
