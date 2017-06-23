@@ -1,0 +1,95 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+{% import "community/members_macros.html" as macros with context %}
+{%- from "community/macros.html" import wizard_steps -%}
+{% from "macros/user.html" import m_user_link, m_user_photo %}
+
+{% block memberscontent %}
+  {% call m_box_content(_("Members Wizard")) %}
+
+    {{ wizard_steps(steps,2) }}
+    <br>
+
+    <div class="row">
+      <form class="form-horizontal" id="wizard-1">
+        <div style="margin-right: 8%;margin-left: 9.5%;">
+          <div class="tab-content col-sm-12">
+            <br>
+            <h3 class="titre ">{{ _("Existing and new members") }}</h3>
+            <h4 class="sous_titre ">
+              {{ _("Check if the user is already a member of the community and if he currently has an account on the platform") }}
+            </h4>
+            <br>
+            {% if existing_members_objects %}
+              <div style="border: 1px solid silver;padding-top: 19px;padding-left: 20px;width: 96.7%;">
+                <label class="">{{ _("Already a member of the community") }}</label>
+                <h6 class=" sous_titre_step2">
+                  {{ _("The users below are already members of the community :") }}
+                </h6>
+                <br>
+
+                <div style="position: relative;top: -13px;">
+                  {% for member in existing_members_objects %}
+                    <p>{% call m_user_link(member, css="media-object") %}
+                      {{ m_user_photo(member, size="32") }}{{ member }} ({{ member.email }})
+                    {%- endcall %}
+                    </p>
+                  {% endfor %}
+                </div>
+              </div>
+            {% endif %}
+            <br>
+            <div class="form-group bloc col-lg-12 col-sm-offset-1">
+              <label class="">{{ _("New member(s) of the community") }}
+                <div class="existing-account" style="color: silver; font-size: 11pt; font-weight: normal;">
+                  <h6 class=" sous_titre_step2">
+                    {{ _("The users below already have an account on the platform, and is going to be added to the community") }}
+                  </h6>
+                  <table class="table table-condensed table-striped col-lg-8"
+                         id="{{ table_id }}">
+                    <thead>
+                    {{ macros.wizard_thead() }}
+                    </thead>
+                    <tbody>
+                    {% for user in existing_accounts_object %}
+                      <tr>
+                        {{ macros.wizard_member_row(user) }}
+                      </tr>
+                    {% endfor %}
+                    </tbody>
+                  </table>
+                  <a onclick="wizard_next()" class="users-wizard-next btn default"
+                     style="float: right;color: white;background: yellowgreen;margin-bottom: 13px;">
+                    <i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
+                </div>
+              </label>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    {% set table_id = uuid() %}
+
+    <form method="POST" class="form-inline wizard-form"
+          action=" {{ url_for('.wizard_new_accounts',community_id=g.community.slug) }}">
+      {{ csrf_token }}
+      <input id="wizard-emails" type="hidden" name="wizard-emails" value="{{ wizard_emails }}">
+    </form>
+
+    <script>
+      if ($(".table-condensed tr").length == 1) {
+        $(".table-condensed").closest('tr').remove();
+        $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
+        $("#wizard-msg").fadeIn();
+      }
+
+      function wizard_next() {
+        $(".wizard-form").submit();
+      }
+    </script>
+
+    <div class="clearfix"></div>
+  {% endcall %}
+{% endblock %}

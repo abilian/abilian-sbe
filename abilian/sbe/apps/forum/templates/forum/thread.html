@@ -12,28 +12,15 @@
   {% call m_box_content() %}
     {#  TODO #}
     <p>
-      <a style="color:silver;" href="{{ url_for('.index', community_id=g.community.slug) }}">
+      <a class="conversation-back-btn" href="{{ url_for('.index', community_id=g.community.slug) }}">
         <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
+      <button class="forum-action-conversation conversation-new-btn"><a><i
+          class="glyphicon glyphicon-plus"></i> {{ _("New conversation") }}</a></button>
     </p>
+    <br>
 
     <article class="thread">
       {%- set post = thread.posts[0] %}
-      <h2 class="thread-current-title">
-        {{ thread.title }}
-        <i class="fa fa-angle-right" aria-hidden="true"></i>
-        <span
-            class="thread-current-replies" color="silver">{{ (thread.posts|length)-1}} {{ _("replies") }}</span>
-      </h2>
-      <div>
-        {{ _("Posted by %(creator)s", creator=m_user_link(thread.creator)) }}
-        –
-        {{ thread.created_at | age(date_threshold='day') }}
-        {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
-        {{ m_post_edit_link(post) }}
-      </div>
-
-      {{ viewers_snapshot(viewers) }}
-
       <div class="media post thread-content" style="margin-bottom: -38px;">
         <div class="media-left">
           {% call m_user_link(thread.creator) %}
@@ -41,12 +28,22 @@
           {% endcall %}
         </div>
 
-        <div class="media-body">
+        <div class="media-body" style="line-height:13px;color:#797C7E;">
+          <h2 class="thread-current-title">
+            {{ thread.title }}
+          </h2>
+
+          <div style="margin-bottom: 10px;">
+            <span style="color:gray;">{{ _("Posted by") }}</span>
+            <span
+              style="font-weight:bold;">{{ m_user_link(thread.creator) }}</span>
+            <span style="float:right;color:gray;"> {{ thread.created_at | age(date_threshold='day') }} </span>
+            {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
+            {{ m_post_edit_link(post) }}
+          </div>
+          <br>
           {{ m_post_content(thread.posts[0]) }}
         </div>
-
-        <div class="media-post-tail"></div>
-
         <br>
         <div class="viewers-panel-container">
           <ul class="viewers-panel-info">
@@ -207,10 +204,10 @@
 {%- endmacro %}
 
 {%- macro m_post_content(post) %}
-  <div class="body">
+  <div class="body" style="margin-bottom: -11px;line-height: 18px;">
     {{ post.body_html|safe }}
   </div>
-
+  <br>
   {%- if post.attachments %}
     <div class="attachments">
       <ul>
@@ -244,7 +241,7 @@
       {% endcall %}
     </div>
 
-    <div class="media-body">
+    <div class="media-body" style="line-height:13px;">
       <a id="post_{{ post.id }}"></a>
 
       <div>
@@ -254,10 +251,11 @@
         <span class="date">{{ post.created_at | age(date_threshold='day') }}</span>
         {{ m_post_edit_link(post) }}
       </div>
-
+      <br><br>
       {{ m_post_content(post) }}
     </div>
   </div>
+  <hr>
 {%- endmacro %}
 
 {%- block sidebar %}

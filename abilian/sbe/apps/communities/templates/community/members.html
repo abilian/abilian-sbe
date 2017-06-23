@@ -5,24 +5,30 @@
 
 {% block memberscontent %}
   {% call m_box_content(_("Members")) %}
-
     {%- if is_manager %}
-      <div style="position: relative;top: -9px;">
-        <div class="btn-group members-download-btn" role="group" aria-label="...">
+      <div style="
+    position: relative;top: -9px;">
+        <div class="btn-group" role="group" aria-label="..." style="float:right;position: relative;
+top: 39px;">
+          <a href="{{ url_for('.wizard_data_insertion',community_id=g.community.slug) }}" class="btn btn-default"
+             style="background: ghostwhite;color: gray;"><i class="fa fa-rocket" aria-hidden="true"></i>
+            {{ _("Add members") }}</a>
           <a class="btn btn-info pull-right"
              href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
-            <i class="glyphicon glyphicon-download-alt"></i> {{ _('Download list') }}
+            <i class="glyphicon glyphicon-download-alt"></i>
+            {{ _('Download list') }}
           </a>
         </div>
 
         {{ add_member() }}
       </div>
+
     {%- endif %}
 
-    <p class="forum-divider"></p>
+    <p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 17px;margin-bottom: 32px;"></p>
 
     {% set table_id = uuid() %}
-    <table class="table table-condensed table-striped" id="{{ table_id }}">
+    <table class="table table-condensed table-striped members-table" id="{{ table_id }}">
       <thead>
       {{ macros.thead() }}
       </thead>
@@ -35,9 +41,6 @@
       {% endfor %}
       </tbody>
     </table>
-    <script type="application/json">
-
-    </script>
 
     {%- deferJS %}
       <script>
@@ -149,9 +152,3 @@
     </script>
   {%- enddeferJS %}
 {% endmacro %}
-
-{# Do we need this one ?
-{% block modals %}
-  {% include "community/_modals.html" %}
-{% endblock %}
-#}

@@ -8,9 +8,10 @@
   <tr style="color:silver;">
     <th class="hide" style="">Last Name</th>
     <th class="hide">First Name</th>
-    <th>{{ _('Name') }}</th>
+    <th style="text-align: left !important;">{{ _('Name') }}</th>
+    <th>{{ _('Posts') }}</th>
     <th class="hide">{# last activity seconds since epoch #}</th>
-    <th width="20%" style="position: relative;left: -52px;">{{ _('Last activity in this community') }}</th>
+    <th width="20%">{{ _('Last activity in this community') }}</th>
     <th width="10%">
       <center>{{ _('Role') }}</center>
     </th>
@@ -26,6 +27,7 @@
   { "bVisible": false },
   { "bVisible": false },
   { "aDataSort": [0, 1], "asSorting": [ "asc", "desc" ] },
+  { "asSorting": [ "asc", "desc" ]},
   { "bVisible": false },
   { "aDataSort": [3], "asSorting": [ "asc", "desc" ] },
   { "asSorting": [ "asc", "desc" ]}
@@ -62,15 +64,16 @@
       </div>
     </div>
   </td>
+  <td style="width: 18%;"><span class="badge members-data">{{ threads_count[user] }}</span></td>
   <td class="hide">{{ seconds_since_epoch(last_activity_date) }}</td>
-  <td class="members-last-activity">{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</td>
+  <td><span class="members-data">{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</span></td>
   <!-- bug jinja : do not use [not is_manager] -->
   {%- if is_manager == False %}
     <td>{{ _(role) }}</td>
   {%- else %}
     <td>
-      <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
-            method="POST" style="display: inline;">
+      <form action="{{ url_for('.members_post', community_id=g.community.slug) }}" method="POST"
+            style="display: inline;">
         {{ csrf_token }}
         <input type="hidden" name="user" value="{{ user.id }}"/>
         <input type="hidden" name="action" value="set-user-role"/>
@@ -87,7 +90,7 @@
         {{ csrf_token }}
         <input type="hidden" name="membership" value="{{ m_id }}">
         <input type="hidden" name="user" value="{{ user.id }}">
-        <button type="submit" name="action" value="delete"
+        <button style="position: relative;left: 4.5px;" type="submit" name="action" value="delete"
                 class="btn btn-danger" data-original-title="" title=""><i
             class="fa fa-times"></i></button>
       </form>

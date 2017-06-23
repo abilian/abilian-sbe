@@ -21,6 +21,7 @@
 
 {% block main %}
   <div class="row">
+
     <div class="col-md-13">
       {%- block content %}
       {%- endblock %}
@@ -40,4 +41,3 @@
   <button type="button"
           class="{% if action.is_current() %}forum-action-active{% else %}forum-action{% endif %}">{{ action.render() }}</button>
 {% endmacro %}
-

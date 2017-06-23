@@ -1,0 +1,179 @@
+{% extends "community/_base.html" %}
+
+{% from "macros/box.html" import m_box_content, m_box_menu %}
+{% import "community/members_macros.html" as macros with context %}
+{%- from "community/macros.html" import wizard_steps -%}
+
+{% block memberscontent %}
+  {% call m_box_content(_("Members Wizard")) %}
+
+    {{ wizard_steps(steps, 1) }}
+    <br>
+    <br>
+    <br>
+    <p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 9px;margin-bottom: 16px;"></p>
+    <div class="container">
+      <div class="row">
+        <form id="wizard-1" novalidate="novalidate">
+          <div class="tab-content col-sm-10">
+            <br>
+            <div style="position: relative;left: -12px;">
+              <h3 class="titre col-sm-offset-4"> {{ _("Add new members") }}</h3>
+              <h4 class="sous_titre col-sm-offset-4"> {{ _("Insert or import new members into your community") }}</h4>
+            </div>
+            <br>
+            <div class="bloc col-sm-8 col-sm-offset-3">
+              <label class="col-sm-offset-1"><i class="fa fa-bookmark" style="color:yellowgreen;"
+                                                aria-hidden="true"></i>
+                {{ _("Insert your emails collection") }}
+              </label> <span class="email-count" style="color: silver;font-size: 11pt;"></span>
+              <div class="input-group col-sm-offset-1 col-lg-10 input">
+                <span class="input-group-addon">
+                  <i class="glyphicon glyphicon-user"></i>
+                </span>
+                <input placeholder="{{ _('Emails Collection') }}" class="form-control"
+                       id="collection" type="text" value="" data-role="tagsinput">
+              </div>
+              <br>
+              <br>
+              <label class="col-sm-offset-1 importer">{{ _("Import members from CSV file") }}</label>
+              <br>
+              <a href="{{ url_for('abilian_sbe_static', filename='csv/csv_example.csv') }}"
+                 download="csv_example.csv" class="col-sm-offset-1">
+                <span class="glyphicon glyphicon-save" aria-hidden="true"></span>
+                {{ _("Download CSV file model") }}
+              </a>
+              <div class="row">
+                <div class="col-sm-offset-1 col-lg-10">
+                  <div class="input-group">
+                    <input type="text" class="form-control input" placeholder="{{ _('Choose a File') }}"
+                           id="csv-file-name" disabled>
+                    <span class="input-group-btn">
+                      <button class="btn btn-default input" type="button"
+                              onclick="fileadd()">{{ _("Browse") }}</button>
+                    </span>
+                  </div>
+                  <br>
+                  <hr>
+                  <a class="users-wizard-next btn default input" style="float:right;color: gray;background: ghostwhite;position: relative;
+top: -2px;" disabled><i class="fa fa-check-circle"></i> {{ _('Next step') }}</a></div>
+              </div>
+            </div>
+            <script>
+              function fileadd() {
+                $(".file-add").trigger("click");
+              }
+            </script>
+          </div>
+        </form>
+      </div>
+    </div>
+    <input id="wizard-form-choice" type="hidden" value="emails-tag">
+    <div class="col-lg-6 col-md-offset-3">
+      <form id="csv_form" method="post" action="{{ url_for('.wizard_check_data',community_id=g.community.slug) }}"
+            enctype="multipart/form-data">
+        {{ csrf_token }}
+        <input style="display:none;" type="file" id="csv_file" class="file-add form-control col-sm-2" name="csv_file">
+      </form>
+      <form method="POST" class="form-inline"
+            action=" {{ url_for('.wizard_check_data',community_id=g.community.slug) }}">
+        {{ csrf_token }}
+        <input id="wizard-emails" type="hidden" name="wizard-emails" value="">
+        <br>
+        <br>
+      </form>
+    </div>
+    {%- deferJS %}
+      <script>
+        function validEmail(v) {
+          var r = new RegExp(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
+          return (v.match(r) == null) ? false : true;
+        }
+
+        if ($("#collection").val() != "") {
+          location.reload();
+        }
+        $('#collection').tagsinput({
+          delimiter: ' '
+        });
+
+        $('#collection').on('beforeItemAdd', function (event) {
+          var is_valid = validEmail(event.item);
+          if (!is_valid) {
+            event.cancel = true;
+          }
+        });
+
+        $('#collection').on('itemAdded', function (event) {
+          var nb_items = $("#collection").tagsinput('items').length;
+          if (nb_items != 0) {
+            $('.email-count').html(nb_items +
+                " <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>"
+            );
+            $('.users-wizard-next').css({
+              "background": "yellowgreen",
+              "color": "white"
+            });
+            $('.users-wizard-next').attr("disabled", false);
+            $('#wizard-form-choice').val("emails-tag");
+            $("#csv_file").val("");
+            $("#csv-file-name").val("");
+            $(".bootstrap-tagsinput input:first").attr("placeholder", "");
+            $("#csv-file-name").attr("placeholder", "Choisir le fichier");
+          } else {
+            $('.email-count').html("");
+          }
+        });
+
+        $('#collection').on('itemRemoved', function (event) {
+          var nb_items = $("#collection").tagsinput('items').length;
+          if (nb_items != 0) {
+            $('.email-count').html(nb_items +
+                " <i style='position: relative;top: -0.6px;' class='fa fa-envelope' aria-hidden='true'></i>"
+            );
+          } else {
+            $(".bootstrap-tagsinput input:first").attr("placeholder", "{{_('Emails Collection')}}");
+            $('.email-count').html("");
+            $('.users-wizard-next').css({
+              "background": "ghostwhite",
+              "color": "gray"
+            });
+            $('.users-wizard-next').attr("disabled", true);
+          }
+        });
+
+        $('.bootstrap-tagsinput').on('paste', function (e) {
+          var pasteData = e.originalEvent.clipboardData.getData('text');
+          $("#collection").tagsinput("add", pasteData);
+          setTimeout(function () {
+            $(".bootstrap-tagsinput input:first").val("");
+          }, 5);
+        });
+
+        $(".users-wizard-next").click(function () {
+          var form_selection = $("#wizard-form-choice").val();
+          if (form_selection === "emails-tag") {
+            $('#wizard-emails').val($("#collection").val());
+            $('.form-inline').submit();
+          }
+          if (form_selection === "csv-file") {
+            $("#csv_form").submit();
+          }
+        });
+        $("#csv_file").change(function () {
+          var file_local = $("#csv_file").val().split("\\");
+          $("#csv-file-name").val(file_local[file_local.length - 1]);
+          $('.users-wizard-next').css({
+            "background": "yellowgreen",
+            "color": "white"
+          }).attr("disabled", false);
+          $("#collection").tagsinput('removeAll');
+          $(".content_tags").attr("placeholder", "{{_('Emails Collection')}}");
+          $(".email-count").html("");
+          $("#wizard-form-choice").val("csv-file");
+        });
+      </script>
+    {%- enddeferJS %}
+    <div class="clearfix"></div>
+  {% endcall %}
+{% endblock %}
