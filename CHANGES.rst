@@ -1,6 +1,11 @@
 Changelog for Abilian SBE
 =========================
 
+0.3.7 (2017-06-23)
+------------------
+
+- Wizard to import users in communities.
+
 0.3.7 (2017-06-22)
 ------------------
 
