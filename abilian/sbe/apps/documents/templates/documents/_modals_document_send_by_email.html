@@ -3,7 +3,11 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form
-          action="{{ url_for(".document_send", doc_id=doc.id, community_id=doc.community.slug) }}"
+          {%if doc%}
+          action='{{ url_for(".document_send", doc_id=doc.id, community_id=doc.community.slug) }}'
+          {%else%}
+          action='{{ url_for(".document_send", doc_id=obj.id, community_id=obj.community.slug) }}'
+          {%endif%}
           method="POST">
         {{ csrf_token }}
 
