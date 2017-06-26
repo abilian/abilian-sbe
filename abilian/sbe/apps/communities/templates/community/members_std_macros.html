@@ -12,9 +12,7 @@
     <th>{{ _('Posts') }}</th>
     <th class="hide">{# last activity seconds since epoch #}</th>
     <th width="20%">{{ _('Last activity in this community') }}</th>
-    <th width="10%">
-      <center>{{ _('Role') }}</center>
-    </th>
+    <th width="10%"><center>{{ _('Role') }}</center></th>
     {% if is_manager %}
       <th>{{ _('Action') }}</th>
     {% endif %}
@@ -64,7 +62,7 @@
       </div>
     </div>
   </td>
-  <td style="width: 18%;"><span class="badge members-data">{{ threads_count[user] }}</span></td>
+<td style="width: 18%;"><span class="badge members-data">{{threads_count[user]}}</span></td>
   <td class="hide">{{ seconds_since_epoch(last_activity_date) }}</td>
   <td><span class="members-data">{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</span></td>
   <!-- bug jinja : do not use [not is_manager] -->
@@ -72,8 +70,7 @@
     <td>{{ _(role) }}</td>
   {%- else %}
     <td>
-      <form action="{{ url_for('.members_post', community_id=g.community.slug) }}" method="POST"
-            style="display: inline;">
+      <form action="{{ url_for('.members_post', community_id=g.community.slug) }}" method="POST" style="display: inline;">
         {{ csrf_token }}
         <input type="hidden" name="user" value="{{ user.id }}"/>
         <input type="hidden" name="action" value="set-user-role"/>
