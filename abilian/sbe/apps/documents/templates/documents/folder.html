@@ -22,7 +22,7 @@
 {% endblock %}
 
 <br><br>
-{#
+
 {% block sidebar %}
   {%- set content_actions = actions.for_category('documents:content') %}
   {%- if content_actions %}
@@ -34,7 +34,7 @@
       </ul>
     {% endcall %}
   {%- endif %}
-{% endblock %} #}
+{% endblock %}
 
 {% block modals %}
   {% include "documents/_modals_folder.html" %}
