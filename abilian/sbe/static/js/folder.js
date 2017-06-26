@@ -33,11 +33,6 @@
                     sWidth: "31%"
                 },
                 {
-                    aDataSort: [1, 2],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "5%"
-                },
-                {
                     aDataSort: [1, 4],
                     asSorting: ["asc", "desc"],
                     sWidth: "8%"
