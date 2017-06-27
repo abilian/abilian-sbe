@@ -5,6 +5,9 @@
   {{ breadcrumbs[-1].label }}
 {% endmacro %}
 
+<script>
+    var document_data = [];
+</script>
 
 {% macro m_docs_table(objects, edit=True) %}
   {%- if objects %}
@@ -71,6 +74,11 @@ border-bottom: 2px solid ghostwhite;">
 
         <tbody>
         {%- for obj in objects %}
+          <input type="hidden" id="url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id, community_id=obj.community.slug) }}" />
+          <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
+          <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
+          <input type="hidden" id="community{{obj.id}}" value="{{obj.community.slug}}" />
+
           <tr>
             <td><input style="position: relative;top: 2px;" type="checkbox" name="object-selected"
                        value="{{ obj.sbe_type }}:{{ obj.id }}"></td>
@@ -119,7 +127,7 @@ top: 53px;
 margin-bottom: -144px;">
     <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
     <li><a href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
-      <li><a href="#"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Rename')}}</a></li>
+      <li><a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Rename')}}</a></li>
     <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
     <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
     <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
@@ -148,6 +156,22 @@ border-top: 2px solid ghostwhite;">
         </tfoot>
       </table>
     </form>
+    <script>
+function edit_document(obj){
+
+    var title = $("#title"+obj.id).val();
+    var description = $("#description"+obj.id).val();
+    var community = $("#community"+obj.id).val();
+    var doc_url = $("#url"+obj.id).val();
+
+    $("#modal-edit-form").attr("action",doc_url);
+    $("#form-document-title").val(title);
+    $("#form-document-description").val(description);
+    $('#modal-edit').modal('show');
+}
+
+</script>
+
 
     <script type="application/json">
         {%- set data = {
@@ -179,5 +203,9 @@ $(".doc-check-all").change(function() {
 });
 </script>
   <div style="clear: both;"></div>
+
+{% set obj = objects[0] %}
+{% include "documents/_modals_document_edit.html" %}
+
 {% endmacro %}
 
