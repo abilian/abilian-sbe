@@ -1,13 +1,12 @@
+{% if obj %}
+{% set doc = obj %}
+{% endif %}
 <div class="modal fade" id="modal-send-by-email" role="dialog"
      data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form
-          {%if doc%}
           action='{{ url_for(".document_send", doc_id=doc.id, community_id=doc.community.slug) }}'
-          {%else%}
-          action='{{ url_for(".document_send", doc_id=obj.id, community_id=obj.community.slug) }}'
-          {%endif%}
           method="POST">
         {{ csrf_token }}
 

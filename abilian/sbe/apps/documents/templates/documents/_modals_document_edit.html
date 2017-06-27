@@ -1,7 +1,10 @@
+{% if obj %}
+{% set doc = obj %}
+{% endif %}
 <div class="modal fade" id="modal-edit" role="dialog" data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST"
+      <form id="modal-edit-form" method="POST"
             action="{{ url_for(".document_edit", doc_id=doc.id, community_id=doc.community.slug) }}"
             enctype="multipart/form-data">
 
@@ -16,7 +19,7 @@
           <div class="form-group">
             <label class="control-label" for="inputName">{{ _("Name") }}</label>
 
-            <input type="text" class="form-control" id="inputName" name="title"
+            <input id="form-document-title" type="text" class="form-control" id="inputName" name="title"
                    data-check-url="{{ url_for(".check_valid_name", community_id=g.community.slug) }}"
                    value="{{ doc.title }}">
             <span class="help-block"></span>
@@ -26,7 +29,7 @@
             <label class="control-label"
                    for="inputDescription">{{ _("Description") }}</label>
 
-            <textarea class="form-control resizeable-vertical" rows="5"
+            <textarea id="form-document-description" class="form-control resizeable-vertical" rows="5"
                       cols="80" id="inputDescription"
                       name="description">{{ doc.description }}</textarea>
           </div>
@@ -44,7 +47,7 @@
 
 {%- deferJS %}
   <script>
-    require(
+   /* require(
         ['Abilian', 'SBEFolderEditSetup'],
         function (Abilian, setupFolderEdit) {
           Abilian.fn.onAppInit(function () {
@@ -55,6 +58,6 @@
 
             $('#modal-edit input[type="text"]').preventEnterKey();
           });
-        });
+        });*/
   </script>
 {%- enddeferJS %}
