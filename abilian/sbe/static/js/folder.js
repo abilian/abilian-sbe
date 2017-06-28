@@ -18,8 +18,7 @@
             return row_text.match(new RegExp(filter_value, "i"));
         });
 
-        var config = document.getElementById("objects-table").parentElement
-            .nextElementSibling;
+        var config = document.getElementById("objects-table").nextElementSibling;
         config = JSON.parse(config.textContent);
 
         var dtParams = {
