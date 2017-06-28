@@ -82,7 +82,7 @@ border-bottom: 2px solid ghostwhite;">
           <input type="hidden" id="community{{obj.id}}" value="{{obj.community.slug}}" />
 
           <tr>
-            <td><input style="position: relative;top: 2px;" type="checkbox" name="object-selected"
+            <td><input id="check_{{obj.id}}" style="position: relative;top: 2px;" type="checkbox" name="object-selected"
                        value="{{ obj.sbe_type }}:{{ obj.id }}"></td>
             <td class="hide">{{ obj.object_type }}</td>
             <td class="hide">{{ obj.title }}</td>
@@ -130,7 +130,7 @@ margin-bottom: -144px;">
     <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
     <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
       <li><a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Rename')}}</a></li>
-    <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
+    <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
     <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
     <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
     </ul>
@@ -156,14 +156,13 @@ border-top: 2px solid ghostwhite;">
         </tr>
         </tfoot>
       </table>
-    </form>
-  <script type="application/json">
+      <script type="application/json">
         {%- set data = {
             'deleteConfirmMsg': _("Delete selected elements?"),
          } %}
         {{ data | tojson | safe }}
   </script>
-
+    </form>
 <script>
 function edit_document(obj){
 
@@ -182,6 +181,10 @@ function email_send_document(obj){
 
     var doc_url = $("#email_url"+obj.id).val();
     $("#modal-email-form").attr("action",doc_url);
+}
+
+function move_document(obj){
+   $("#check_"+obj.id).prop('checked', true);
 }
 
 </script>
