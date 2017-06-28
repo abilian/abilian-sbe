@@ -5,7 +5,7 @@
      data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form
+      <form id="modal-email-form"
           action='{{ url_for(".document_send", doc_id=doc.id, community_id=doc.community.slug) }}'
           method="POST">
         {{ csrf_token }}
