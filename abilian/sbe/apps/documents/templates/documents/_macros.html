@@ -124,7 +124,13 @@ top: 53px;
 margin-bottom: -144px;">
     <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
     <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
-      <li><a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Rename')}}</a></li>
+      <li>
+          {% if not obj.content_type|length %}
+          <a onclick="edit_folder(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a>
+          {%else%}
+          <a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a>
+          {%endif%}
+      </li>
     <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
     <li><a onclick="replace_document(this)" id="{{obj.id}}" href="#modal-upload-new-version" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
     <li><a onclick="delete_document(this)" id="{{obj.id}}" href="#modal-delete" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
@@ -133,6 +139,7 @@ margin-bottom: -144px;">
               </td>
           <td class="hide">
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="delete_url{{obj.id}}" value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}" />
@@ -180,6 +187,19 @@ function edit_document(obj){
     $("#form-document-title").val(title);
     $("#form-document-description").val(description);
     $('#modal-edit').modal('show');
+}
+
+function edit_folder(obj){
+
+    var title = $("#title"+obj.id).val();
+    var description = $("#description"+obj.id).val();
+    var community = $("#community"+obj.id).val();
+    var doc_url = $("#editfolder_url"+obj.id).val();
+
+    $("#modal-editfolder-form").attr("action",doc_url);
+    $("#form-folder-title").val(title);
+    $("#form-folder-description").val(description);
+    $('#folder-modal-edit').modal('show');
 }
 
 function email_send_document(obj){
@@ -247,6 +267,7 @@ $(".doc-check-all").change(function() {
 {% include "documents/_modals_document_send_by_email.html" %}
 {% include "documents/_modals_document_upload_new_version.html" %}
 {% include "documents/_modals_document_delete.html" %}
+{% include "documents/_modals_folder_edit.html" %}
 
 {% endmacro %}
 
