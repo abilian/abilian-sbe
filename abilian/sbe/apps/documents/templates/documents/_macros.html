@@ -70,17 +70,12 @@ border-bottom: 2px solid ghostwhite;">
           <th class="hide">date</th>
           <th style="width: 25%;">{{ _("Age") }}</th>
           <th></th>
+          <th class="hide">info</th>
         </tr>
         </thead>
 
         <tbody>
         {%- for obj in objects %}
-          <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id, community_id=obj.community.slug) }}" />
-            <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
-          <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
-          <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
-          <input type="hidden" id="community{{obj.id}}" value="{{obj.community.slug}}" />
-
           <tr>
             <td><input id="check_{{obj.id}}" style="position: relative;top: 2px;" type="checkbox" name="object-selected"
                        value="{{ obj.sbe_type }}:{{ obj.id }}"></td>
@@ -136,6 +131,13 @@ margin-bottom: -144px;">
     </ul>
       </div>
               </td>
+          <td class="hide">
+            <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
+          <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
+          <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
+          <input type="hidden" id="community{{obj.id}}" value="{{obj.community.slug}}" />
+          </td>
           </tr>
         {%- endfor %}
         </tbody>
@@ -153,6 +155,7 @@ border-top: 2px solid ghostwhite;">
           <th class="hide">date</th>
           <th>{{ _("Age") }}</th>
           <th></th>
+          <th class="hide">info</th>
         </tr>
         </tfoot>
       </table>

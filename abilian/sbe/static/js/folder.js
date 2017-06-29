@@ -53,6 +53,11 @@
                     aDataSort: [1, 2],
                     asSorting: ["asc", "desc"],
                     sWidth: "1%"
+                },
+                {
+                    aDataSort: [1, 2],
+                    asSorting: ["asc", "desc"],
+                    sWidth: "1%"
                 }
 
             ],
