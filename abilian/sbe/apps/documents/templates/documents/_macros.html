@@ -44,7 +44,7 @@
 </div>
     &nbsp;
     {% if edit %}
-        <span style="float:right;">
+        <span id="horizontal-doc-menu" style="float:right;display:none;">
         {%- for action in actions.for_category('documents:folder-listing') %}
             <div class="btn-group">
               {{ action.render() }}
@@ -203,9 +203,16 @@ function delete_document(obj){
 
 function move_document(obj){
    $(".doc-check-all").prop("checked",false);
-   $( ".doc-unselect-all" ).trigger( "click" );
+   $(":checkbox").prop("checked",false);
    $("#check_"+obj.id).prop('checked', true);
 }
+
+$('input[type="checkbox"]').change(function(){
+    if($(":checkbox:checked").length>0){
+        $("#horizontal-doc-menu").show();
+    }else{
+        $("#horizontal-doc-menu").hide();
+    } });
 
 </script>
     {%- deferJS %}
@@ -224,9 +231,12 @@ function move_document(obj){
  <script>
 $(".doc-check-all").change(function() {
     if($(this).prop('checked')==true) {
-      $( ".doc-select-all" ).trigger( "click" );
+      $(":checkbox").prop("checked",true);
     }else{
-      $( ".doc-unselect-all" ).trigger( "click" );
+      $(":checkbox").prop("checked",false);
+         if($(":checkbox:checked").length==0){
+            $("#horizontal-doc-menu").hide();
+         }
     }
 });
 </script>
