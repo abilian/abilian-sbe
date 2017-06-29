@@ -126,13 +126,14 @@ margin-bottom: -144px;">
     <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
       <li><a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Rename')}}</a></li>
     <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
-    <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
+    <li><a onclick="replace_document(this)" id="{{obj.id}}" href="#modal-upload-new-version" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
     <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
     </ul>
       </div>
               </td>
           <td class="hide">
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
           <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
           <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
@@ -186,7 +187,15 @@ function email_send_document(obj){
     $("#modal-email-form").attr("action",doc_url);
 }
 
+function replace_document(obj){
+
+    var doc_url = $("#replace_url"+obj.id).val();
+    $(".modal-replacedoc-form").attr("action",doc_url);
+}
+
 function move_document(obj){
+   $(".doc-check-all").prop("checked",false);
+   $( ".doc-unselect-all" ).trigger( "click" );
    $("#check_"+obj.id).prop('checked', true);
 }
 
@@ -218,6 +227,7 @@ $(".doc-check-all").change(function() {
 {% set obj = objects[0] %}
 {% include "documents/_modals_document_edit.html" %}
 {% include "documents/_modals_document_send_by_email.html" %}
+{% include "documents/_modals_document_upload_new_version.html" %}
 
 {% endmacro %}
 
