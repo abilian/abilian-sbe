@@ -127,7 +127,7 @@ margin-bottom: -144px;">
       <li><a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Rename')}}</a></li>
     <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
     <li><a onclick="replace_document(this)" id="{{obj.id}}" href="#modal-upload-new-version" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
-    <li><a href="#modal-move-files" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
+    <li><a onclick="delete_document(this)" id="{{obj.id}}" href="#modal-delete" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
     </ul>
       </div>
               </td>
@@ -135,6 +135,7 @@ margin-bottom: -144px;">
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="delete_url{{obj.id}}" value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}" />
           <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
           <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
           <input type="hidden" id="community{{obj.id}}" value="{{obj.community.slug}}" />
@@ -193,6 +194,13 @@ function replace_document(obj){
     $(".modal-replacedoc-form").attr("action",doc_url);
 }
 
+function delete_document(obj){
+    var title = $("#title"+obj.id).val();
+    var doc_url = $("#delete_url"+obj.id).val();
+    $("#modal-delete-document").attr("action",doc_url);
+    $("#delete-doc-title").html(title);
+}
+
 function move_document(obj){
    $(".doc-check-all").prop("checked",false);
    $( ".doc-unselect-all" ).trigger( "click" );
@@ -228,6 +236,7 @@ $(".doc-check-all").change(function() {
 {% include "documents/_modals_document_edit.html" %}
 {% include "documents/_modals_document_send_by_email.html" %}
 {% include "documents/_modals_document_upload_new_version.html" %}
+{% include "documents/_modals_document_delete.html" %}
 
 {% endmacro %}
 
