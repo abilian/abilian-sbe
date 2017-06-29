@@ -1,7 +1,10 @@
-<div class="modal fade" id="modal-edit" role="dialog">
+{% if obj %}
+{% set doc = obj %}
+{% endif %}
+<div class="modal fade" id="folder-modal-edit" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" action="{{ folder_post_url }}"
+      <form id="modal-editfolder-form" method="POST" action="{{ folder_post_url }}"
             enctype="multipart/form-data" role="form">
         {{ csrf_token }}
 
@@ -13,7 +16,7 @@
         <div class="modal-body">
           <div class="form-group">
             <label class="control-label" for="inputName">{{ _('Name') }}</label>
-            <input type="text" class="form-control" id="inputName" name="title"
+            <input id="form-folder-title" type="text" class="form-control" id="inputName" name="title"
                    data-check-url="{{ url_for(".check_valid_name", community_id=g.community.slug) }}"
                    value="{{ folder.title }}"/>
             <span class="help-block"></span>
@@ -22,7 +25,7 @@
           <div class="form-group">
             <label class="control-label"
                    for="inputDescription">{{ _("Description") }}</label>
-            <textarea rows="5" class="form-control not-resizeable"
+            <textarea id="form-folder-description" rows="5" class="form-control not-resizeable"
                       id="inputDescription"
                       name="description">{{ folder.description }}</textarea>
           </div>
