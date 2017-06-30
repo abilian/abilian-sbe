@@ -83,10 +83,9 @@ border-bottom: 2px solid ghostwhite;">
             {%endif%}
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>{%- endif %}
-              <a style="position: relative;
-top: 3px;
-left: 81px;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
-
+              <br>
+              <a style="position: relative;top: 3px;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
+           <br>
               {%- if obj.is_document %}
                 {{ obj.content_length|filesize }}
               {%- endif %}
@@ -97,7 +96,7 @@ left: 81px;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
                                                src="{{ user_photo_url(owner, size=40) }}"
                                                style="vertical-align: middle;"></a>
            {{ obj.created_at|age(add_direction=False) }}
-
+<br>
             <div class="dropdown" style="left: -39px;">
   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
     <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
