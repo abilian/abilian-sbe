@@ -184,8 +184,8 @@ function edit_document(obj){
     var doc_url = $("#edit_url"+obj.id).val();
 
     $("#modal-edit-form").attr("action",doc_url);
-    $("#form-document-title").val(title);
-    $("#form-document-description").val(description);
+    $(".form-document-title").val(title);
+    $(".form-document-description").val(description);
     $('#modal-edit').modal('show');
 }
 
@@ -197,8 +197,8 @@ function edit_folder(obj){
     var doc_url = $("#editfolder_url"+obj.id).val();
 
     $("#modal-editfolder-form").attr("action",doc_url);
-    $("#form-folder-title").val(title);
-    $("#form-folder-description").val(description);
+    $(".form-folder-title").val(title);
+    $(".form-folder-description").val(description);
     $('#folder-modal-edit').modal('show');
 }
 

@@ -16,8 +16,8 @@
         <div class="modal-body">
           <div class="form-group">
             <label class="control-label" for="inputName">{{ _('Name') }}</label>
-            <input id="form-folder-title" type="text" class="form-control" id="inputName" name="title"
-                   data-check-url="{{ url_for(".check_valid_name", community_id=g.community.slug) }}"
+            <input type="text" class="form-control form-folder-title" id="inputName" name="title"
+                   data-check-url="{{ url_for('.check_valid_name', community_id=g.community.slug) }}"
                    value="{{ folder.title }}"/>
             <span class="help-block"></span>
           </div>
@@ -25,7 +25,7 @@
           <div class="form-group">
             <label class="control-label"
                    for="inputDescription">{{ _("Description") }}</label>
-            <textarea id="form-folder-description" rows="5" class="form-control not-resizeable"
+            <textarea rows="5" class="form-control not-resizeable form-folder-description"
                       id="inputDescription"
                       name="description">{{ folder.description }}</textarea>
           </div>

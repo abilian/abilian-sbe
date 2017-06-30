@@ -5,7 +5,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="modal-delete-document"
-          action="{{ url_for(".document_delete", doc_id=doc.id, community_id=doc.community.slug) }}"
+          action="{{ url_for('.document_delete', doc_id=doc.id, community_id=doc.community.slug) }}"
           method="POST">
         {{ csrf_token }}
 

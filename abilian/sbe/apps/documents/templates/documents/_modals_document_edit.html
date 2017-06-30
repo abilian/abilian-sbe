@@ -5,7 +5,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="modal-edit-form" method="POST"
-            action="{{ url_for(".document_edit", doc_id=doc.id, community_id=doc.community.slug) }}"
+            action="{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}"
             enctype="multipart/form-data">
 
         {{ csrf_token }}
@@ -19,8 +19,8 @@
           <div class="form-group">
             <label class="control-label" for="inputName">{{ _("Name") }}</label>
 
-            <input id="form-document-title" type="text" class="form-control" id="inputName" name="title"
-                   data-check-url="{{ url_for(".check_valid_name", community_id=g.community.slug) }}"
+            <input type="text" class="form-control form-document-title" id="inputName" name="title"
+                   data-check-url="{{ url_for('.check_valid_name', community_id=g.community.slug) }}"
                    value="{{ doc.title }}">
             <span class="help-block"></span>
           </div>
@@ -29,7 +29,7 @@
             <label class="control-label"
                    for="inputDescription">{{ _("Description") }}</label>
 
-            <textarea id="form-document-description" class="form-control resizeable-vertical" rows="5"
+            <textarea class="form-control resizeable-vertical form-document-description" rows="5"
                       cols="80" id="inputDescription"
                       name="description">{{ doc.description }}</textarea>
           </div>
