@@ -66,7 +66,33 @@ def folder_view(folder_id):
         children=folder.filtered_children,
         breadcrumbs=bc,
         csrf_token=csrf.field())
-    return render_template("documents/folder.html", **ctx)
+    if request.cookies.get('view_style') == 'thumbnail_view':
+        resp = make_response(render_template("documents/folder.html", **ctx))
+        resp.set_cookie('view_style','thumbnail_view')
+
+    if not request.cookies.get('view_style'):
+        resp = make_response(render_template("documents/folder.html", **ctx))
+        resp.set_cookie('view_style','thumbnail_view')
+
+    if request.cookies.get('view_style') == 'gallery_view':
+        resp = make_response(render_template("documents/folder_gallery_view.html", **ctx))
+
+    return resp
+
+@route("/folder/change_view_style/<int:folder_id>", methods=["GET","POST"])
+@csrf.protect
+def change_view_style(folder_id):
+    folder = get_folder(folder_id)
+    if request.method == "POST":
+        view_style = request.form["view_style"]
+        resp = make_response(redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug)))
+        if view_style == "gallery_view":
+            resp.set_cookie('view_style','gallery_view')
+        else:
+            resp.set_cookie('view_style','thumbnail_view')
+        return resp
+    else:
+        return redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug))
 
 
 @route("/folder/<int:folder_id>/json")
