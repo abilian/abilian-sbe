@@ -1,6 +1,11 @@
 Changelog for Abilian SBE
 =========================
 
+0.3.9 (2017-06-26)
+------------------
+
+- Fix regression on community members.
+
 0.3.8 (2017-06-23)
 ------------------
 
