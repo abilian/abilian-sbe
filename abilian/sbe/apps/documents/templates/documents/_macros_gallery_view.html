@@ -1,0 +1,249 @@
+{% macro m_breadcrumbs2(breadcrumbs) %}
+  {% for obj in breadcrumbs[0:-1] %}
+    <a href="{{ obj.path }}">{{ obj.label }}</a> <span class="divider">/</span>
+  {% endfor %}
+  {{ breadcrumbs[-1].label }}
+{% endmacro %}
+
+<script>
+    var document_data = [];
+</script>
+
+{% macro m_docs_table(objects, edit=True) %}
+  {%- if objects %}
+    <form action="{{ url_for('.change_view_style', folder_id=folder.id, community_id=folder.community.slug) }}" method="POST" >
+    {{ csrf_token }}
+<div style="float:right;margin-left: 12px;" class="btn-group" role="group" aria-label="...">
+  <button type="submit" class="btn btn-default" name="view_style" value="thumbnail_view" ><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span></button>
+  <button type="submit" class="btn btn-default" name="view_style" value="gallery_view" ><span class="glyphicon glyphicon-th-large" aria-hidden="true"></span></button>
+</div>
+    </form>
+
+    <form name="folder-listing" style="margin-bottom: 0;" method="POST">
+      {{ csrf_token }}
+      {%- if edit %}
+        <div class="btn-toolbar" style="margin-bottom: 0;">
+          <div class="btn-group" style="margin-right: 20px;display:none;">
+            <a class="btn btn-default dropdown-toggle" data-toggle="dropdown" href="#">
+              <i class="fa fa-check"></i>
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="doc-select-all" href="#select-all">{{ _("Select all") }}</a></li>
+              <li><a class="doc-unselect-all" href="#unselect-all">{{ _("Unselect all") }}</a></li>
+            </ul>
+          </div>
+          <div class="btn-group" style="margin-right: 20px;">
+            <input id="filter" type="text" class="form-control" placeholder="{{ _('Filter...') }}"
+                   style="margin-bottom: 0;">
+          </div>
+
+        </div>
+      {% endif %}
+
+      <hr style="margin: 10px 0 10px 0;"/>
+        <button type="button" class="upload-files-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color:white;" href="#modal-upload-files" data-toggle="modal"> Upload file(s)</a></button>
+        <button type="button" class="add-folder-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color: gray;" href="#modal-new-folder" data-toggle="modal"> New folder</a></button>
+    &nbsp;
+    {% if edit %}
+        <span id="horizontal-doc-menu" style="float:right;display:none;">
+        {%- for action in actions.for_category('documents:folder-listing') %}
+            <div class="btn-group">
+              {{ action.render() }}
+            </div>
+          {%- endfor %}
+        </span>
+    {% endif %}
+
+    <br><br>
+      <table style="background: white;" class="document-table table table-striped table-condensed" id="objects-table">
+        <thead>
+        <tr style="color: #919191;
+border-bottom: 2px solid ghostwhite;">
+         <th>{{ _("Title") }}</th>
+          <th>{{ _("Size") }}</th>
+          <th>{{ _("Owner") }}</th>
+          <th>{{ _("Age") }}</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {%- for obj in objects %}
+            {{(loop.index%4)}}
+        {% if (loop.index%4) == 0  %}<tr>{%endif%}
+            <td>
+            {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+              <span style="position: relative;left: 7px;">
+              <i style="font-size: 23pt;margin-right: 10px;position: relative;top: 4.5px;color:dimgray;" class="fa fa-folder-o" aria-hidden="true"></i> <span class="folder-contents-count"><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span>
+            {%else%}
+                {% set icon_src = url_for(".document_preview_image",
+          community_id=g.community.slug, doc_id= obj.id,
+          size=obj.preview_size) %}
+               <img style="width: 200px;" class="" src="{{icon_src}}" alt="" data-page="0"/>
+            {%endif%}
+              {%- if obj.object_type == 'folder' %}<i>
+                {{ obj.filtered_children|length }}</i>{%- endif %}
+              <a style="position: relative;
+top: 3px;
+left: 81px;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
+
+              {%- if obj.is_document %}
+                {{ obj.content_length|filesize }}
+              {%- endif %}
+
+            {% set owner = obj.owner %}
+              <a href="{{ url_for("social.user", user_id=owner.id) }}"
+                 title="{{ owner.name }}"><img alt="{{ owner.name }}"
+                                               src="{{ user_photo_url(owner, size=40) }}"
+                                               style="vertical-align: middle;"></a>
+           {{ obj.created_at|age(add_direction=False) }}
+
+            <div class="dropdown" style="left: -39px;">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="border-radius: 0px;
+position: absolute;
+top: 53px;
+margin-bottom: -144px;">
+    <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
+    <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
+      <li>
+          {% if not obj.content_type|length %}
+          <a onclick="edit_folder(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a>
+          {%else%}
+          <a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a>
+          {%endif%}
+      </li>
+    <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
+    <li><a onclick="replace_document(this)" id="{{obj.id}}" href="#modal-upload-new-version" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
+    <li><a onclick="delete_document(this)" id="{{obj.id}}" href="#modal-delete" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
+    </ul>
+      </div>
+
+
+            <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="delete_url{{obj.id}}" value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}" />
+          <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
+          <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
+          <input type="hidden" id="community{{obj.id}}" value="{{obj.community.slug}}" />
+          </td>
+        {% if (loop.index%4) == 0 %}<tr>{%endif%}
+        {%- endfor %}
+        </tbody>
+        <tfoot>
+        <tr style="color: #919191;
+border-top: 2px solid ghostwhite;">
+          <th>{{ _("Title") }}</th>
+          <th>{{ _("Size") }}</th>
+          <th>{{ _("Owner") }}</th>
+          <th>{{ _("Age") }}</th>
+        </tr>
+        </tfoot>
+      </table>
+      <script type="application/json">
+        {%- set data = {
+            'deleteConfirmMsg': _("Delete selected elements?"),
+         } %}
+        {{ data | tojson | safe }}
+  </script>
+    </form>
+<script>
+function edit_document(obj){
+
+    var title = $("#title"+obj.id).val();
+    var description = $("#description"+obj.id).val();
+    var community = $("#community"+obj.id).val();
+    var doc_url = $("#edit_url"+obj.id).val();
+
+    $("#modal-edit-form").attr("action",doc_url);
+    $(".form-document-title").val(title);
+    $(".form-document-description").val(description);
+    $('#modal-edit').modal('show');
+}
+
+function edit_folder(obj){
+
+    var title = $("#title"+obj.id).val();
+    var description = $("#description"+obj.id).val();
+    var community = $("#community"+obj.id).val();
+    var doc_url = $("#editfolder_url"+obj.id).val();
+
+    $("#modal-editfolder-form").attr("action",doc_url);
+    $(".form-folder-title").val(title);
+    $(".form-folder-description").val(description);
+    $('#folder-modal-edit').modal('show');
+}
+
+function email_send_document(obj){
+
+    var doc_url = $("#email_url"+obj.id).val();
+    $("#modal-email-form").attr("action",doc_url);
+}
+
+function replace_document(obj){
+
+    var doc_url = $("#replace_url"+obj.id).val();
+    $(".modal-replacedoc-form").attr("action",doc_url);
+}
+
+function delete_document(obj){
+    var title = $("#title"+obj.id).val();
+    var doc_url = $("#delete_url"+obj.id).val();
+    $("#modal-delete-document").attr("action",doc_url);
+    $("#delete-doc-title").html(title);
+}
+
+function move_document(obj){
+   $(".doc-check-all").prop("checked",false);
+   $(":checkbox").prop("checked",false);
+   $("#check_"+obj.id).prop('checked', true);
+}
+
+$('input[type="checkbox"]').change(function(){
+    if($(":checkbox:checked").length>0){
+        $("#horizontal-doc-menu").show();
+    }else{
+        $("#horizontal-doc-menu").hide();
+    } });
+
+</script>
+    {%- deferJS %}
+      <!--<script>
+        require(['Abilian', 'SBEFolderListingSetup'],
+            function (Abilian, setupFolderListing) {
+              Abilian.fn.onAppInit(setupFolderListing);
+            });
+      </script>
+    {%- enddeferJS %}
+  {%- else %}
+    <p>
+      <em>{{ _("This folder is currently empty. Why don't you upload some content?") }}</em>
+    </p>
+  {%- endif %}
+ <script>-->
+$(".doc-check-all").change(function() {
+    if($(this).prop('checked')==true) {
+      $(":checkbox").prop("checked",true);
+    }else{
+      $(":checkbox").prop("checked",false);
+         if($(":checkbox:checked").length==0){
+            $("#horizontal-doc-menu").hide();
+         }
+    }
+});
+</script>
+  <div style="clear: both;"></div>
+
+{% set obj = objects[0] %}
+{% include "documents/_modals_document_edit.html" %}
+{% include "documents/_modals_document_send_by_email.html" %}
+{% include "documents/_modals_document_upload_new_version.html" %}
+{% include "documents/_modals_document_delete.html" %}
+{% include "documents/_modals_folder_edit.html" %}
+
+{% endmacro %}
+
