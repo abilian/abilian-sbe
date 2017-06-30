@@ -79,6 +79,7 @@ def folder_view(folder_id):
 
     return resp
 
+
 @route("/folder/change_view_style/<int:folder_id>", methods=["GET","POST"])
 @csrf.protect
 def change_view_style(folder_id):
