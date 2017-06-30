@@ -15,14 +15,12 @@ top: 39px;">
             {{ _("Add members") }}</a>
           <a class="btn btn-info pull-right"
              href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
-            <i class="glyphicon glyphicon-download-alt"></i>
-            {{ _('Download list') }}
+            <i class="glyphicon glyphicon-download-alt"></i> {{ _('Download list') }}
           </a>
         </div>
 
         {{ add_member() }}
       </div>
-
     {%- endif %}
 
     <p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 17px;margin-bottom: 32px;"></p>
@@ -41,6 +39,9 @@ top: 39px;">
       {% endfor %}
       </tbody>
     </table>
+    <script type="application/json">
+       {{ macros.table_config() }}
+    </script>
 
     {%- deferJS %}
       <script>
@@ -152,3 +153,4 @@ top: 39px;">
     </script>
   {%- enddeferJS %}
 {% endmacro %}
+
