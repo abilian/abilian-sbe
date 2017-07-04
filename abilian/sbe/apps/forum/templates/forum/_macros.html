@@ -43,7 +43,7 @@
   {%- for action in global_actions %}
     {% if loop.index == 2 %}
       <div class="dropdown" style="display: inline;">
-        <button
+        <div
             style="color:#95989A;"
             class="{% if action.is_filtered() %}forum-btn-active {% endif %}btn btn-default dropdown-toggle forum-action-dropdown"
             type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
@@ -51,7 +51,7 @@
           {{ action.render() }}
           <span class="glyphicon glyphicon-chevron-down"
                 style="position: relative;top: 3px;"></span>
-        </button>
+        </div>
         <ul class="dropdown-menu forum-action-dropdownmenu" aria-labelledby="dropdownMenu2">
           <li><a href='{{ url_for(".index", filter="year", community_id=g.community.slug) }}'>Year</a></li>
           <li><a href='{{ url_for(".index", filter="month", community_id=g.community.slug) }}'>Month</a></li>
@@ -60,9 +60,9 @@
         </ul>
       </div>
     {% else %}
-      <button
-          type="button" style="border: none;padding: 10px;"
-          {% if action.is_current() %}class="forum-btn-active" {% endif %}{% if loop.last %}class="forum-action-conversation"{% endif %}>{{ action.render() }}</button>
+      <div
+          type="button" style="border: none;padding: 10px;display:inline;"
+          {% if action.is_current() %}class="forum-btn-active" {% endif %}{% if loop.last %}class="forum-action-conversation"{% endif %}>{{ action.render() }}</div>
     {% endif %}
   {%- endfor %}
 {% endmacro %}
