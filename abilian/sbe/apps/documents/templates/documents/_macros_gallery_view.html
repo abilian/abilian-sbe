@@ -77,7 +77,6 @@ border-bottom: 2px solid ghostwhite;">
           {% if cnt.append(cnt.pop() + 1) %}{% endif %}
           {% endif %}
             <td>
-                {{cnt[0]}}
 
     <div style="border: 1px solid silver;
 width: 258px;
@@ -86,7 +85,23 @@ margin-left: -3px;
 margin-top: 5px;">
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
               <span style="position: relative;left: 7px;">
-              <i style="font-size: 158pt;margin-right: 10px;position: relative;top: 4.5px;color:dimgray;left:25px;" class="fa fa-folder-o" aria-hidden="true"></i> <span class="folder-contents-count"><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span>
+              <i style="font-size: 158pt;margin-right: 10px;position: relative;top: 4.5px;color:dimgray;left:25px;margin-bottom: 20px;" class="fa fa-folder-o" aria-hidden="true"></i> <span class="folder-contents-count" style="background: yellowgreen;
+font-weight: bold;
+font-size: 10pt;
+position: relative;
+display: compact;
+width: 50px;
+height: 50px;
+color: white;
+border-radius: 50%;
+left: 182px;
+top: -201px;
+margin-bottom: -100px;
+}"><span class="documents-nb" style="position: relative;
+font-size: 30pt;
+top: 25px;
+left: 14px;">{{ obj.filtered_children|length }}</span></span></span>
+        <hr>
             {%else%}
                 {% set icon_src = url_for(".document_preview_image",
           community_id=g.community.slug, doc_id= obj.id,
@@ -152,6 +167,12 @@ margin-bottom: -144px;">
           </td>
 
         {%- endfor %}
+        {% set diffrence = 4 - objects|length %}
+        {% if diffrence > 0 %}
+          {% for l in range(diffrence) %}
+                <td width="300"></td>
+          {% endfor %}
+        {% endif %}
         </tbody>
         <tfoot>
         <tr style="color: #919191;
