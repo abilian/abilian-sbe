@@ -85,7 +85,7 @@ margin-left: -3px;
 margin-top: 5px;">
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
               <span style="position: relative;left: 7px;">
-              <i style="font-size: 158pt;margin-right: 10px;position: relative;top: 4.5px;color:dimgray;left:25px;margin-bottom: 20px;" class="fa fa-folder-o" aria-hidden="true"></i> <span class="folder-gallery-contents-count" style=""><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span>
+              <i class="fa fa-folder-o gallery-folder" aria-hidden="true"></i> <span class="folder-gallery-contents-count" style=""><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span>
         <hr>
             {%else%}
                 {% set icon_src = url_for(".document_preview_image",
@@ -95,8 +95,7 @@ margin-top: 5px;">
             {%endif%}
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>{%- endif %}
-        <div style="margin-left: 11px; margin-top: 56px;padding-bottom: 50px;position: relative;
-top: 20px;">
+        <div class="document-gallery-infos">
            <p style="margin-bottom: -27px;"> {%- if obj.is_document %}
                 {{ obj.content_length|filesize }}
                 {%- endif %} </p>
@@ -113,13 +112,7 @@ top: 20px;">
 float: right;
 top: -67px;
 right: 11px;">
-  <button class="dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" style="border: none;
-font-size: 20pt;
-color: #797C7E;
-background: transparent;
-position: relative;
-top: 25px;
-right: 8px;">
+  <button class="dropdown-toggle document-gallery-dropdown" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
     <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
   </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="border-radius: 0px;
