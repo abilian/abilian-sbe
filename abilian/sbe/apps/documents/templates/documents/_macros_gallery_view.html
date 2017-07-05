@@ -77,6 +77,10 @@ border-bottom: 2px solid ghostwhite;">
           {% if cnt.append(cnt.pop() + 1) %}{% endif %}
           {% endif %}
             <td>
+            {%if obj.content_type %}
+            {% set content_type = obj.content_type.split("/") %}
+            {%endif%}
+
     <div class="document-gallery-box" >
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
              <div style="height: 332px;"> <span style="position: relative;left: 7px;">
@@ -86,8 +90,13 @@ border-bottom: 2px solid ghostwhite;">
                 {% set icon_src = url_for(".document_preview_image",
           community_id=g.community.slug, doc_id= obj.id,
           size=obj.preview_size) %}
+
+             {%if content_type[0] == 'image' %}
               <div style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;background:url({{icon_src}});"></div>
+            {%else%}
+             <img style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;" src="{{icon_src}}"/>
             {%endif%}
+        {%endif%}
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>{%- endif %}
         <div class="document-gallery-infos">
