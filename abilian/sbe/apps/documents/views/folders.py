@@ -66,15 +66,15 @@ def folder_view(folder_id):
         children=folder.filtered_children,
         breadcrumbs=bc,
         csrf_token=csrf.field())
-    if session.get('view_style') == 'thumbnail_view':
+    if session.get('sbe_doc_view_style') == 'thumbnail_view':
         resp = render_template("documents/folder.html", **ctx)
-        session['view_style']='thumbnail_view'
+        session['sbe_doc_view_style']='thumbnail_view'
 
-    if not session.get('view_style'):
+    if not session.get('sbe_doc_view_style'):
         resp = render_template("documents/folder.html", **ctx)
-        session['view_style']='thumbnail_view'
+        session['sbe_doc_view_style']='thumbnail_view'
 
-    if session.get('view_style') == 'gallery_view':
+    if session.get('sbe_doc_view_style') == 'gallery_view':
         resp = render_template("documents/folder_gallery_view.html", **ctx)
 
     return resp
@@ -87,9 +87,9 @@ def change_view_style(folder_id):
     if request.method == "POST":
         view_style = request.form["view_style"]
         if view_style == "gallery_view":
-            session['view_style']='gallery_view'
+            session['sbe_doc_view_style']='gallery_view'
         else:
-            session['view_style']='thumbnail_view'
+            session['sbe_doc_view_style']='thumbnail_view'
         return redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug))
     else:
         return redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug))
