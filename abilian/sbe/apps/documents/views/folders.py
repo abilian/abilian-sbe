@@ -17,7 +17,7 @@ from zipfile import ZipFile, is_zipfile
 import sqlalchemy as sa
 import whoosh.query as wq
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
-    redirect, render_template, render_template_string, request, send_file
+    redirect, render_template, render_template_string, request, send_file, session
 from flask._compat import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
@@ -66,16 +66,16 @@ def folder_view(folder_id):
         children=folder.filtered_children,
         breadcrumbs=bc,
         csrf_token=csrf.field())
-    if request.cookies.get('view_style') == 'thumbnail_view':
-        resp = make_response(render_template("documents/folder.html", **ctx))
-        resp.set_cookie('view_style','thumbnail_view')
+    if session.get('view_style') == 'thumbnail_view':
+        resp = render_template("documents/folder.html", **ctx)
+        session['view_style']='thumbnail_view'
 
-    if not request.cookies.get('view_style'):
-        resp = make_response(render_template("documents/folder.html", **ctx))
-        resp.set_cookie('view_style','thumbnail_view')
+    if not session.get('view_style'):
+        resp = render_template("documents/folder.html", **ctx)
+        session['view_style']='thumbnail_view'
 
-    if request.cookies.get('view_style') == 'gallery_view':
-        resp = make_response(render_template("documents/folder_gallery_view.html", **ctx))
+    if session.get('view_style') == 'gallery_view':
+        resp = render_template("documents/folder_gallery_view.html", **ctx)
 
     return resp
 
@@ -86,12 +86,11 @@ def change_view_style(folder_id):
     folder = get_folder(folder_id)
     if request.method == "POST":
         view_style = request.form["view_style"]
-        resp = make_response(redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug)))
         if view_style == "gallery_view":
-            resp.set_cookie('view_style','gallery_view')
+            session['view_style']='gallery_view'
         else:
-            resp.set_cookie('view_style','thumbnail_view')
-        return resp
+            session['view_style']='thumbnail_view'
+        return redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug))
     else:
         return redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug))
 
