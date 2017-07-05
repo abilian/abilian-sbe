@@ -108,7 +108,15 @@ border-bottom: 2px solid ghostwhite;">
             <p style="margin-bottom: -25px;color:#797C7E;"> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
 
             <p style="margin-bottom: -40px;padding-bottom: 27px;color:#797C7E;">
+            {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+            {% if obj.filtered_children|length %}
              <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
+            {%else%}
+            <span style="color: #797C7E;">{{ obj.title }}</span>
+            {%endif%}
+            {%else%}
+            <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
+            {%endif%}
             </p>
            </div>
 
