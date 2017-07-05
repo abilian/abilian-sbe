@@ -6,19 +6,19 @@
 {% from "documents/_macros_gallery_view.html" import m_docs_table, m_breadcrumbs2 with context %}
 
 {% block documentcontent %}
-    <div style="margin: 5px 0;">
-      <i class="fa fa-folder-open-o fa-large"></i>
-      {{ m_breadcrumbs2(breadcrumbs) }}
-    </div>
+  <div style="margin: 5px 0;">
+    <i class="fa fa-folder-open-o fa-large"></i>
+    {{ m_breadcrumbs2(breadcrumbs) }}
+  </div>
 
-    <hr>
+  <hr>
 
-    {%- if folder.description %}
-      <p>{{ folder.description }}</p>
-      <p>&nbsp;</p>
-    {%- endif %}
+  {%- if folder.description %}
+    <p>{{ folder.description }}</p>
+    <p>&nbsp;</p>
+  {%- endif %}
 
-    {{ m_docs_table(children, True) }}
+  {{ m_docs_table(children, True) }}
 {% endblock %}
 
 <br><br>

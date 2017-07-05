@@ -1,7 +1,7 @@
 {#- base template for communities (as container for social apps) #}
 {% extends "base.html" %}
 {% from "macros/box.html" import m_box_forum %}
-{%- set steps =[_("Add Members"),_("Existing and new members"),_("Create Accounts")] %}
+{%- set steps =[_("Add Members"), _("Existing and new members"), _("Create Accounts")] %}
 
 {% block header %}
   <h1 class="community-header">
@@ -27,10 +27,8 @@
       {%- endblock %}
     </div>
 
-
     {%- block documentcontent %}
-      {%- endblock %}
-
+    {%- endblock %}
 
     {%- block forumcontent %}
     {%- endblock %}
