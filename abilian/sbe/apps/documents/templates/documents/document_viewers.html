@@ -9,7 +9,8 @@
 {%- from "community/macros.html" import show_all_viewers -%}
 
 {% macro user_markup(user) %}
-  <a href="{{ url_for("social.user", user_id=user.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
+  <a href="{{ url_for("social.user", user_id=user.id) }}"
+    ><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
     {{ user }}
   </a>
 {% endmacro %}
@@ -39,7 +40,6 @@
       </p>
     {%- endif %}
 
-
     <div>
 
       <h2><i class="fa fa-file-o fa-lg"></i>
@@ -66,7 +66,7 @@
           {%- endif %}
         </small>
         <hr>
-      {{show_all_viewers(viewers,_("viewed by"))}}
+        {{ show_all_viewers(viewers,_("viewed by")) }}
       </div>
     </div>
 

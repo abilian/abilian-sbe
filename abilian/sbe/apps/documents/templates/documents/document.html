@@ -44,9 +44,7 @@
         <a class="btn btn-success btn-lg pull-right"
            href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
           <i class="glyphicon glyphicon-download"></i>
-          {{ _('Download') }} (
-          <small>{{ doc.content_length|filesize }}</small>
-          )
+          {{ _('Download') }} (<small>{{ doc.content_length|filesize }}</small>)
         </a>
       {%- endif %}
 
@@ -73,7 +71,7 @@
             {%- endif %}
           {%- endif %}
         </small>
-        {{viewers_snapshot(viewers,_("viewed by"))}}
+        {{ viewers_snapshot(viewers,_("viewed by")) }}
       </div>
     </div>
 

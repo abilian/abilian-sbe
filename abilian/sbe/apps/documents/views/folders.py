@@ -17,7 +17,8 @@ from zipfile import ZipFile, is_zipfile
 import sqlalchemy as sa
 import whoosh.query as wq
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
-    redirect, render_template, render_template_string, request, send_file, session
+    redirect, render_template, render_template_string, request, send_file, \
+    session
 from flask._compat import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
@@ -80,7 +81,7 @@ def folder_view(folder_id):
     return resp
 
 
-@route("/folder/change_view_style/<int:folder_id>", methods=["GET","POST"])
+@route("/folder/change_view_style/<int:folder_id>", methods=["GET", "POST"])
 @csrf.protect
 def change_view_style(folder_id):
     folder = get_folder(folder_id)
@@ -90,9 +91,17 @@ def change_view_style(folder_id):
             session['sbe_doc_view_style'] = 'gallery_view'
         else:
             session['sbe_doc_view_style'] = 'thumbnail_view'
-        return redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug))
+        return redirect(
+            url_for(
+                ".folder_view",
+                folder_id=folder_id,
+                community_id=folder.community.slug))
     else:
-        return redirect(url_for(".folder_view",folder_id=folder_id,community_id=folder.community.slug))
+        return redirect(
+            url_for(
+                ".folder_view",
+                folder_id=folder_id,
+                community_id=folder.community.slug))
 
 
 @route("/folder/<int:folder_id>/json")

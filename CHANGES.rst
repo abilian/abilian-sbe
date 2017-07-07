@@ -1,6 +1,11 @@
 Changelog for Abilian SBE
 =========================
 
+0.3.10 (2017-07-03)
+-------------------
+
+- Fix HTML bug on the forum that prevents work under Firefox.
+
 0.3.9 (2017-06-26)
 ------------------
 
