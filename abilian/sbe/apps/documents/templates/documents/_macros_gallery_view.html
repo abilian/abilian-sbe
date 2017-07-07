@@ -108,15 +108,7 @@ border-bottom: 2px solid ghostwhite;">
             <p style="margin-bottom: -25px;color:#797C7E;"> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
 
             <p style="margin-bottom: -40px;padding-bottom: 27px;color:#797C7E;">
-            {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
-            {% if obj.filtered_children|length %}
-             <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
-            {%else%}
-            <span style="color: #797C7E;">{{ obj.title }}</span>
-            {%endif%}
-            {%else%}
             <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
-            {%endif%}
             </p>
            </div>
 
@@ -241,20 +233,14 @@ $('input[type="checkbox"]').change(function(){
     } });
 
 </script>
-    {%- deferJS %}
-      <!--<script>
-        require(['Abilian', 'SBEFolderListingSetup'],
-            function (Abilian, setupFolderListing) {
-              Abilian.fn.onAppInit(setupFolderListing);
-            });
-      </script>
-    {%- enddeferJS %}
+
   {%- else %}
     <p>
       <em>{{ _("This folder is currently empty. Why don't you upload some content?") }}</em>
     </p>
   {%- endif %}
  <script>-->
+<script>
 $(".doc-check-all").change(function() {
     if($(this).prop('checked')==true) {
       $(":checkbox").prop("checked",true);
@@ -266,14 +252,16 @@ $(".doc-check-all").change(function() {
     }
 });
 </script>
-  <div style="clear: both;"></div>
 
+  <div style="clear: both;"></div>
+{%if objects %}
 {% set obj = objects[0] %}
 {% include "documents/_modals_document_edit.html" %}
 {% include "documents/_modals_document_send_by_email.html" %}
 {% include "documents/_modals_document_upload_new_version.html" %}
 {% include "documents/_modals_document_delete.html" %}
 {% include "documents/_modals_folder_edit.html" %}
+{%endif%}
 
 {% endmacro %}
 

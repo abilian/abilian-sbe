@@ -264,12 +264,14 @@ $(".doc-check-all").change(function() {
 </script>
   <div style="clear: both;"></div>
 
+{%if objects%}
 {% set obj = objects[0] %}
 {% include "documents/_modals_document_edit.html" %}
 {% include "documents/_modals_document_send_by_email.html" %}
 {% include "documents/_modals_document_upload_new_version.html" %}
 {% include "documents/_modals_document_delete.html" %}
 {% include "documents/_modals_folder_edit.html" %}
+{%endif%}
 
 {% endmacro %}
 
