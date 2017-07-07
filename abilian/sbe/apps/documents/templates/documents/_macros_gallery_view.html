@@ -127,6 +127,7 @@ position: absolute;
 top: 53px;
 margin-bottom: -144px;">
     {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+    <li><a href="{{ url_for('.permissions', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="glyphicon glyphicon-lock"></i> {{_('Permissions')}}</a></li>
     <li><a href="{{ url_for('.descendants_view', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="fa fa-code-fork fa-rotate-90"></i> {{_('View descendants')}}</a></li>
     {%endif%}
     <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
