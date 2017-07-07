@@ -10,10 +10,14 @@
 </script>
 
 {% macro m_docs_table(objects, edit=True) %}
+ <div type="button" class="upload-files-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color:white;" href="#modal-upload-files" data-toggle="modal"> Upload file(s)</a></div>
+        <div type="button" class="add-folder-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color: gray;" href="#modal-new-folder" data-toggle="modal"> New folder</a></div>
+<hr>
   {%- if objects %}
     <form action="{{ url_for('.change_view_style', folder_id=folder.id, community_id=folder.community.slug) }}" method="POST" >
     {{ csrf_token }}
-<div style="float:right;margin-left: 12px;" class="btn-group" role="group" aria-label="...">
+<div style="float:right;margin-left: 12px;position: relative;
+top: -65px;" class="btn-group" role="group" aria-label="...">
   <button type="submit" class="btn btn-default" name="view_style" value="thumbnail_view" ><span class="glyphicon glyphicon-th-list" aria-hidden="true"></span></button>
   <button type="submit" class="btn btn-default" name="view_style" value="gallery_view" ><span class="glyphicon glyphicon-th-large" aria-hidden="true"></span></button>
 </div>
@@ -33,17 +37,14 @@
               <li><a class="doc-unselect-all" href="#unselect-all">{{ _("Unselect all") }}</a></li>
             </ul>
           </div>
-          <div class="btn-group" style="margin-right: 20px;">
+          <div class="btn-group" style="margin-right: 20px;position: relative;
+top: -8px;margin-bottom: -47px;">
             <input id="filter" type="text" class="form-control" placeholder="{{ _('Filter...') }}"
                    style="margin-bottom: 0;">
           </div>
 
         </div>
       {% endif %}
-
-      <hr style="margin: 10px 0 10px 0;"/>
-        <div type="button" class="upload-files-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color:white;" href="#modal-upload-files" data-toggle="modal"> Upload file(s)</a></div>
-        <div type="button" class="add-folder-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color: gray;" href="#modal-new-folder" data-toggle="modal"> New folder</a></div>
     &nbsp;
     {% if edit %}
         <span id="horizontal-doc-menu" style="float:right;display:none;">
@@ -56,7 +57,7 @@
     {% endif %}
 
     <br><br>
-      <table style="background: white;" class="document-table-thumbnail table table-striped table-condensed" id="objects-table">
+      <table style="background: white;position:relative;margin-top: -54px;" class="document-table-thumbnail table table-striped table-condensed" id="objects-table">
         <thead>
         <tr style="color: #919191;
 border-bottom: 2px solid ghostwhite;">
