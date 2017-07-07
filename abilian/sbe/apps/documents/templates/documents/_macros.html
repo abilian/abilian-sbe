@@ -125,6 +125,9 @@ left: 81px;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
 position: absolute;
 top: 53px;
 margin-bottom: -144px;">
+    {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+    <li><a href="{{ url_for('.descendants_view', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="fa fa-code-fork fa-rotate-90"></i> {{_('View descendants')}}</a></li>
+    {%endif%}
     <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
     <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
       <li>
