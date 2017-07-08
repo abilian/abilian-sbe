@@ -83,7 +83,7 @@ border-bottom: 2px solid ghostwhite;">
             {%if obj.content_type %}
             {% set content_type = obj.content_type.split("/") %}
             {%endif%}
-
+    <input id="check_{{obj.id}}" style="position: relative;top: 2px;display:none;" type="checkbox" name="object-selected" value="{{ obj.sbe_type }}:{{ obj.id }}">
     <div class="document-gallery-box" >
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
              <div style="height: 332px;"> <span style="position: relative;left: 7px;">
@@ -246,8 +246,8 @@ $('input[type="checkbox"]').change(function(){
       <em>{{ _("This folder is currently empty. Why don't you upload some content?") }}</em>
     </p>
   {%- endif %}
- <script>-->
-<script>
+
+ <script>
 $(".doc-check-all").change(function() {
     if($(this).prop('checked')==true) {
       $(":checkbox").prop("checked",true);
@@ -259,6 +259,15 @@ $(".doc-check-all").change(function() {
     }
 });
 </script>
+
+{%- deferJS %}
+      <script>
+        require(['Abilian', 'SBEFolderGalleryListingSetup'],
+            function (Abilian, setupFolderListing) {
+              Abilian.fn.onAppInit(setupFolderListing);
+            });
+      </script>
+{%- enddeferJS %}
 
   <div style="clear: both;"></div>
 {%if objects %}
