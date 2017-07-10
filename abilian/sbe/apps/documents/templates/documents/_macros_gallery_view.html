@@ -68,7 +68,7 @@ top: -8px;margin-bottom: -47px;">
           {% else %}
           {% if cnt.append(cnt.pop() + 1) %}{% endif %}
           {% endif %}
-            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-10">
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-10 gallery_element">
             {%if obj.content_type %}
             {% set content_type = obj.content_type.split("/") %}
             {%endif%}
@@ -242,6 +242,20 @@ $(".doc-check-all").change(function() {
             });
       </script>
 {%- enddeferJS %}
+
+<script>
+    $("#filter").keyup(function(event) {
+        $(".gallery_element .document-gallery-infos p:nth-child(1)").each(function(e) {
+
+            var doc_name = $(this).text().toLowerCase().split(".")[0];
+            if (doc_name.indexOf($("#filter").val().toLowerCase()) >= 0) {
+                $(this).closest(".gallery_element").css("display", "block");
+            } else {
+                $(this).closest(".gallery_element").css("display", "none");
+            }
+        });
+    });
+</script>
 
   <div style="clear: both;"></div>
 {%if objects %}
