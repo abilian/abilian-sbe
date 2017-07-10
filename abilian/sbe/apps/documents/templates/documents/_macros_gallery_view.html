@@ -59,34 +59,24 @@ top: -8px;margin-bottom: -47px;">
     {% endif %}
 
     <br><br>
-      <table style="background: white;position:relative;margin-top: -54px;" class="document-table-gallery table table-striped table-condensed" id="objects-table">
-        <thead>
-        <tr style="color: #919191;
-border-bottom: 2px solid ghostwhite;">
-         <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-        </tr>
-        </thead>
-
-        <tbody>
+      <div class="row">
         {% set cnt = [1] %}
         {%- for obj in objects %}
           {%if cnt[0]%5 == 0 %}
             {% if cnt.append(cnt.pop() + 2) %}{% endif %}
-            <tr>
+            </div>
+            <div class="row">
           {% else %}
           {% if cnt.append(cnt.pop() + 1) %}{% endif %}
           {% endif %}
-            <td>
+            <div class="col-md-3">
             {%if obj.content_type %}
             {% set content_type = obj.content_type.split("/") %}
             {%endif%}
     <input id="check_{{obj.id}}" style="position: relative;top: 2px;display:none;" type="checkbox" name="object-selected" value="{{ obj.sbe_type }}:{{ obj.id }}">
     <div class="document-gallery-box" >
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
-             <div style="height: 332px;"> <span style="position: relative;left: 7px;">
+             <div style="height: 310px;"> <span style="position: relative;left: 7px;">
                  <i class="fa fa-folder-o gallery-folder" aria-hidden="true"></i> <span class="folder-gallery-contents-count" style=""><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span></div>
         <hr>
             {%else%}
@@ -103,21 +93,20 @@ border-bottom: 2px solid ghostwhite;">
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>{%- endif %}
         <div class="document-gallery-infos">
-           <p style="margin-bottom: -27px;"> {%- if obj.is_document %}
-                {{ obj.content_length|filesize }}
-                {%- endif %} </p>
-
               {% set owner = obj.owner %}
-            <p style="margin-bottom: -25px;color:#797C7E;"> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
-
-            <p style="margin-bottom: -40px;padding-bottom: 27px;color:#797C7E;">
+             <p style="padding-bottom: 27px;color:#797C7E;">
             <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
             </p>
+            <p style="color:#797C7E;position: relative;
+top: -27px;"> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
+            <p style="position: relative;top: -28px;"> {%- if obj.is_document %}
+                {{ obj.content_length|filesize }}
+                {%- endif %} </p>
            </div>
 
             <div class="dropdown" style="position: relative;
 float: right;
-top: -67px;
+top: -125px;
 right: 11px;">
   <button class="dropdown-toggle document-gallery-dropdown" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
     <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
@@ -153,8 +142,11 @@ margin-bottom: -144px;">
           <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
           <input type="hidden" id="community{{obj.id}}" value="{{obj.community.slug}}" />
         </div>
-          </td>
-
+                <!---end of doc -->
+                </div>
+        {%if loop.last%}
+        </div>
+        {%endif%}
         {%- endfor %}
         {% set diffrence = 4 - objects|length %}
         {% if diffrence > 0 %}
@@ -162,17 +154,8 @@ margin-bottom: -144px;">
                 <td width="300"></td>
           {% endfor %}
         {% endif %}
-        </tbody>
-        <tfoot>
-        <tr style="color: #919191;
-border-top: 2px solid ghostwhite;">
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-        </tr>
-        </tfoot>
-      </table>
+
+
       <script type="application/json">
         {%- set data = {
             'deleteConfirmMsg': _("Delete selected elements?"),
@@ -180,6 +163,7 @@ border-top: 2px solid ghostwhite;">
         {{ data | tojson | safe }}
   </script>
     </form>
+
 <script>
 function edit_document(obj){
 
