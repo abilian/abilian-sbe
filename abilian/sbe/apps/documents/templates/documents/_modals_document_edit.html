@@ -5,7 +5,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="modal-edit-form" method="POST"
-            action="{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}"
+            action="{{ url_for('.document_edit', doc_id=doc.id,folder_id=folder.id, community_id=doc.community.slug) }}"
             enctype="multipart/form-data">
 
         {{ csrf_token }}

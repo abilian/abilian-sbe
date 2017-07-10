@@ -31,7 +31,7 @@ from ..models import Document
 from ..repository import repository
 from ..tasks import convert_document_content, preview_document
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
-    check_write_access, edit_object, get_document, match
+    check_write_access, edit_object, get_document, get_folder, match
 from .views import blueprint
 
 route = blueprint.route
@@ -75,10 +75,11 @@ def document_view(doc_id):
 #
 # Actions on documents
 #
-@route("/doc/<int:doc_id>", methods=['POST'])
+@route("/doc/<int:doc_id>/<int:folder_id>/", methods=['POST'])
 @csrf.protect
-def document_edit(doc_id):
+def document_edit(doc_id,folder_id):
     doc = get_document(doc_id)
+    folder = get_folder(folder_id)
     check_write_access(doc)
 
     changed = edit_object(doc)
@@ -89,7 +90,7 @@ def document_edit(doc_id):
     else:
         flash(_(u"You didn't change any property."), "success")
 
-    return redirect(url_for(doc))
+    return redirect(url_for(folder))
 
 
 @route("/doc/<int:doc_id>/viewers", methods=['GET'])
