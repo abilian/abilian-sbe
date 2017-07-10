@@ -58,7 +58,6 @@ top: -8px;margin-bottom: -47px;">
         </span>
     {% endif %}
 
-    <br><br>
       <div class="row">
         {% set cnt = [1] %}
         {%- for obj in objects %}
@@ -69,7 +68,7 @@ top: -8px;margin-bottom: -47px;">
           {% else %}
           {% if cnt.append(cnt.pop() + 1) %}{% endif %}
           {% endif %}
-            <div class="col-md-3">
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-10">
             {%if obj.content_type %}
             {% set content_type = obj.content_type.split("/") %}
             {%endif%}
@@ -94,12 +93,11 @@ top: -8px;margin-bottom: -47px;">
                 {{ obj.filtered_children|length }}</i>{%- endif %}
         <div class="document-gallery-infos">
               {% set owner = obj.owner %}
-             <p style="padding-bottom: 27px;color:#797C7E;">
+             <p>
             <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
             </p>
-            <p style="color:#797C7E;position: relative;
-top: -27px;"> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
-            <p style="position: relative;top: -28px;"> {%- if obj.is_document %}
+            <p> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
+            <p> {%- if obj.is_document %}
                 {{ obj.content_length|filesize }}
                 {%- endif %} </p>
            </div>
@@ -148,14 +146,6 @@ margin-bottom: -144px;">
         </div>
         {%endif%}
         {%- endfor %}
-        {% set diffrence = 4 - objects|length %}
-        {% if diffrence > 0 %}
-          {% for l in range(diffrence) %}
-                <td width="300"></td>
-          {% endfor %}
-        {% endif %}
-
-
       <script type="application/json">
         {%- set data = {
             'deleteConfirmMsg': _("Delete selected elements?"),
