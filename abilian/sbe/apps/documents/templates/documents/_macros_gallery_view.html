@@ -92,7 +92,7 @@ top: -8px;margin-bottom: -47px;">
         <div class="document-gallery-infos">
               {% set owner = obj.owner %}
              <p>
-            <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title }}</a>
+            <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
             </p>
             <p> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
             <p> {%- if obj.is_document %}
@@ -127,7 +127,7 @@ margin-bottom: -144px;">
     </ul>
       </div>
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}" />
-            <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, current_folder_id=folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="delete_url{{obj.id}}" value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}" />
