@@ -509,9 +509,9 @@ def iter_permissions(folder, user):
 #
 # Actions on folders
 #
-@route("/folder/<int:folder_id>", methods=['POST'])
+@route("/folder/<int:folder_id>/<int:current_folder_id>", methods=['POST'])
 @csrf.protect
-def folder_post(folder_id):
+def folder_post(folder_id, current_folder_id):
     """
     A POST on a folder can result on several different actions (depending on the
     `action` parameter).
@@ -520,7 +520,7 @@ def folder_post(folder_id):
     action = request.form.get("action")
 
     if action == 'edit':
-        return folder_edit(folder)
+        return folder_edit(folder, current_folder_id)
 
     elif action == 'upload':
         return upload_new(folder)
@@ -549,17 +549,18 @@ def folder_post(folder_id):
         return redirect(url_for(folder))
 
 
-def folder_edit(folder):
+def folder_edit(folder, current_folder_id):
     check_write_access(folder)
 
     changed = edit_object(folder)
+    current_folder = get_folder(current_folder_id)
 
     if changed:
         db.session.commit()
         flash(_("Folder properties successfully edited."), "success")
     else:
         flash(_("You didn't change any property."), "success")
-    return redirect(url_for(folder))
+    return redirect(url_for(current_folder))
 
 
 ARCHIVE_IGNORE_FILES_GLOBS = {'__MACOSX/*', '.DS_Store'}
