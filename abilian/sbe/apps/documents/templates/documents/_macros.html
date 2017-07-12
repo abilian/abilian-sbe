@@ -129,15 +129,15 @@ margin-bottom: -144px;">
     <li><a href="{{ url_for('.permissions', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="glyphicon glyphicon-lock"></i> {{_('Permissions')}}</a></li>
     <li><a href="{{ url_for('.descendants_view', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="fa fa-code-fork fa-rotate-90"></i> {{_('View descendants')}}</a></li>
     {%endif%}
-    <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
     <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
-      <li>
-          {% if not obj.content_type|length %}
-          <a onclick="edit_folder(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a>
-          {%else%}
-          <a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a>
-          {%endif%}
-      </li>
+  {% if not obj.content_type|length %}
+      <li><form action="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}" method="post">{{ csrf_token }}
+<button class="document-folder-download" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button></form></li>
+  <li><a onclick="edit_folder(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a></li>
+  {%else%}
+  <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
+  <li><a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a></li>
+  {%endif%}
     <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
     <li><a onclick="replace_document(this)" id="{{obj.id}}" href="#modal-upload-new-version" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
     <li><a onclick="delete_document(this)" id="{{obj.id}}" href="#modal-delete" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
