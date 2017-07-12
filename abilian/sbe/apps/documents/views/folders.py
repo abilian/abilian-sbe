@@ -509,9 +509,10 @@ def iter_permissions(folder, user):
 #
 # Actions on folders
 #
+@route("/folder/<int:folder_id>", methods=['POST'])
 @route("/folder/<int:folder_id>/<int:current_folder_id>", methods=['POST'])
 @csrf.protect
-def folder_post(folder_id, current_folder_id):
+def folder_post(folder_id, current_folder_id=None):
     """
     A POST on a folder can result on several different actions (depending on the
     `action` parameter).
@@ -670,6 +671,8 @@ def upload_new(folder):
 
 def download_multiple(folder):
     folders, docs = get_selected_objects(folder)
+    if not folders:
+        folders = [folder]
 
     def rel_path(path, content):
         return '{}/{}'.format(path, content.title)
