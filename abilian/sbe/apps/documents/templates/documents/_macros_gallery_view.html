@@ -70,7 +70,7 @@ top: -8px;margin-bottom: -47px;">
             {%if obj.content_type %}
             {% set content_type = obj.content_type.split("/") %}
             {%endif%}
-    <input id="check_{{obj.id}}" style="position: relative;top: 2px;display:none;" type="checkbox" name="object-selected" value="{{ obj.sbe_type }}:{{ obj.id }}">
+    <input id="check_{{obj.id}}" style="position: relative;top: 2px;" type="checkbox" name="object-selected" value="{{ obj.sbe_type }}:{{ obj.id }}">
     <div class="document-gallery-box" >
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
              <div style="height: 310px;"> <span style="position: relative;left: 7px;">
@@ -129,6 +129,11 @@ margin-bottom: -144px;">
       </div>
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, current_folder_id=folder.id, community_id=obj.community.slug) }}" />
+
+
+            <input type="hidden" id="move_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, community_id=obj.community.slug) }}" />
+
+
             <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="delete_url{{obj.id}}" value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}" />
@@ -151,6 +156,7 @@ margin-bottom: -144px;">
     </form>
 
 <script>
+var folder_url = "{{ url_for('.folder_post', folder_id=folder.id, community_id=folder.community.slug) }}";
 function edit_document(obj){
 
     var title = $("#title"+obj.id).val();
@@ -197,6 +203,9 @@ function delete_document(obj){
 }
 
 function move_document(obj){
+   //$('form[id=modal-folder-move]').attr("action",folder_url);
+   //var move_url = $("#move_url"+obj.id).val();
+   //alert(move_url);
    $(".doc-check-all").prop("checked",false);
    $(":checkbox").prop("checked",false);
    $("#check_"+obj.id).prop('checked', true);

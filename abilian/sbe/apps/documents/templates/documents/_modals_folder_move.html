@@ -1,9 +1,7 @@
 <div class="modal fade" id="modal-move-files" role="dialog">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" name="modal-move-files" action="{{ folder_post_url }}"
-            enctype="multipart/form-data">
-
+      <form method="POST" id="modal-folder-move" action="{{ folder_post_url }}" enctype="multipart/form-data">
         {{ csrf_token }}
         <div class="modal-header">{{ _("Move files or documents") }}</div>
 
