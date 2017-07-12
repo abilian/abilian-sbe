@@ -115,8 +115,9 @@ margin-bottom: -144px;">
     <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
 
     {% if not obj.content_type|length %}
-<li><form action="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}" method="post">{{ csrf_token }}
-<button class="document-folder-download" style="margin-top: 1px;margin-bottom:0px;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button></form></li>
+<li>
+<button class="document-folder-download" style="margin-top: 1px;margin-bottom:0px;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+  </li>
   <li><a onclick="edit_folder(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a></li>
   {%else%}
   <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
@@ -129,11 +130,6 @@ margin-bottom: -144px;">
       </div>
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, current_folder_id=folder.id, community_id=obj.community.slug) }}" />
-
-
-            <input type="hidden" id="move_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, community_id=obj.community.slug) }}" />
-
-
             <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="delete_url{{obj.id}}" value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}" />
@@ -144,16 +140,20 @@ margin-bottom: -144px;">
                 <!---end of doc -->
                 </div>
         {%if loop.last%}
-        </div>
+        </div></form>
         {%endif%}
         {%- endfor %}
+
       <script type="application/json">
         {%- set data = {
             'deleteConfirmMsg': _("Delete selected elements?"),
          } %}
         {{ data | tojson | safe }}
   </script>
-    </form>
+<form action="" method="post">
+    {{ csrf_token }}
+<button class="document-folder-download" style="margin-top: 1px;margin-bottom:0px;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+</form>
 
 <script>
 var folder_url = "{{ url_for('.folder_post', folder_id=folder.id, community_id=folder.community.slug) }}";
@@ -203,9 +203,6 @@ function delete_document(obj){
 }
 
 function move_document(obj){
-   //$('form[id=modal-folder-move]').attr("action",folder_url);
-   //var move_url = $("#move_url"+obj.id).val();
-   //alert(move_url);
    $(".doc-check-all").prop("checked",false);
    $(":checkbox").prop("checked",false);
    $("#check_"+obj.id).prop('checked', true);
