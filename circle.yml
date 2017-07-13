@@ -8,6 +8,7 @@ dependencies:
   cache_directories:
      - "~/.cache/"
   pre:
+    - sudo apt-get update
     - sudo apt-get install poppler-utils
   override:
     - pip install -U pip>=9
