@@ -4,15 +4,15 @@
   {% endfor %}
   {{ breadcrumbs[-1].label }}
 {% endmacro %}
-
 <script>
     var document_data = [];
 </script>
-
 {% macro m_docs_table(objects, edit=True) %}
- <div type="button" class="upload-files-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color:white;" href="#modal-upload-files" data-toggle="modal"> Upload file(s)</a></div>
+
+  <div type="button" class="upload-files-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color:white;" href="#modal-upload-files" data-toggle="modal"> Upload file(s)</a></div>
         <div type="button" class="add-folder-btn"><i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color: gray;" href="#modal-new-folder" data-toggle="modal"> New folder</a></div>
 <hr>
+
   {%- if objects %}
     <form action="{{ url_for('.change_view_style', folder_id=folder.id, community_id=folder.community.slug) }}" method="POST" >
     {{ csrf_token }}
@@ -37,15 +37,14 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
               <li><a class="doc-unselect-all" href="#unselect-all">{{ _("Unselect all") }}</a></li>
             </ul>
           </div>
-          <div class="btn-group" style="margin-right: 20px;position: relative;
-top: -8px;margin-bottom: -47px;">
+          <div class="btn-group" >
             <input id="filter" type="text" class="form-control" placeholder="{{ _('Filter...') }}"
                    style="margin-bottom: 0;">
           </div>
 
         </div>
       {% endif %}
-    &nbsp;
+
     {% if edit %}
         <span id="horizontal-doc-menu" style="float:right;display:none;">
         {%- for action in actions.for_category('documents:folder-listing') %}
@@ -56,69 +55,52 @@ top: -8px;margin-bottom: -47px;">
         </span>
     {% endif %}
 
-    <br><br>
-      <table style="background: white;position:relative;margin-top: -54px;" class="document-table-thumbnail table table-striped table-condensed" id="objects-table">
-        <thead>
-        <tr style="color: #919191;
-border-bottom: 2px solid ghostwhite;">
-          <th style="width: 1%;"><input class="doc-check-all" style="position: relative;top: 2px;left: -4px;" type="checkbox" >
-          </th>
-          <th class="hide">type</th>
-          <th class="hide">title for sorting</th>
-          <th style="width: 39%;">{{ _("Title") }}</th>
-          <th style="width: 20%;">{{ _("Size") }}</th>
-          <th class="hide">Last Name</th>
-          <th class="hide">First Name</th>
-          <th style="width: 25%;">{{ _("Owner") }}</th>
-          <th class="hide">date</th>
-          <th style="width: 25%;">{{ _("Age") }}</th>
-          <th></th>
-          <th class="hide">info</th>
-        </tr>
-        </thead>
-
-        <tbody>
+      <div class="row">
+        {% set cnt = [1] %}
         {%- for obj in objects %}
-          <tr>
-            <td><input id="check_{{obj.id}}" style="position: relative;top: 2px;" type="checkbox" name="object-selected"
-                       value="{{ obj.sbe_type }}:{{ obj.id }}"></td>
-            <td class="hide">{{ obj.object_type }}</td>
-            <td class="hide">{{ obj.title }}</td>
-            <td>
+          {%if cnt[0]%5 == 0 %}
+            {% if cnt.append(cnt.pop() + 2) %}{% endif %}
+            </div>
+            <div class="row">
+          {% else %}
+          {% if cnt.append(cnt.pop() + 1) %}{% endif %}
+          {% endif %}
+            <div class="col-lg-3 col-md-4 col-sm-5 col-xs-10 gallery_element">
+            {%if obj.content_type %}
+            {% set content_type = obj.content_type.split("/") %}
+            {%endif%}
+    <input id="check_{{obj.id}}" style="position: relative;top: 2px;" type="checkbox" name="object-selected" value="{{ obj.sbe_type }}:{{ obj.id }}">
+    <div class="document-gallery-box" >
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
-              <span style="position: relative;left: 7px;">
-              <i style="font-size: 23pt;margin-right: 10px;position: relative;top: 4.5px;color:dimgray;" class="fa fa-folder-o" aria-hidden="true"></i> <span class="folder-contents-count"><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span>
+             <div style="height: 310px;"> <span style="position: relative;left: 7px;">
+                 <i class="fa fa-folder-o gallery-folder" aria-hidden="true"></i> <span class="folder-gallery-contents-count" style=""><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span></div>
+        <hr>
             {%else%}
                 {% set icon_src = url_for(".document_preview_image",
           community_id=g.community.slug, doc_id= obj.id,
           size=obj.preview_size) %}
-               <img class="document-preview" style="background-image: url('{{icon_src}}');" src="" alt="" data-page="0"/>
+
+             {%if content_type[0] == 'image' %}
+              <div style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;background:url({{icon_src}});"></div>
+            {%else%}
+             <img style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;" src="{{icon_src}}"/>
             {%endif%}
+        {%endif%}
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>{%- endif %}
-              <a style="position: relative;
-top: 3px;
-left: 81px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
-            </td>
-            <td>
-              {%- if obj.is_document %}
+        <div class="document-gallery-infos">
+              {% set owner = obj.owner %}
+             <p>
+            <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
+            </p>
+            <p> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
+            <p> {%- if obj.is_document %}
                 {{ obj.content_length|filesize }}
-              {%- endif %}
-            </td>
-            {% set owner = obj.owner %}
-            <td class="hide">{{ owner.last_name }}</td>
-            <td class="hide">{{ owner.first_name }}</td>
-            <td>
-              <a href="{{ url_for("social.user", user_id=owner.id) }}"
-                 title="{{ owner.name }}"><img alt="{{ owner.name }}"
-                                               src="{{ user_photo_url(owner, size=40) }}"
-                                               style="vertical-align: middle;"></a>
-            </td>
-            <td class="hide">{{ obj.created_at.isoformat() }} </td>
-            <td>{{ obj.created_at|age(add_direction=False) }}</td>
-            <td>
-            <div class="dropdown" style="left: -39px;">
-  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                {%- endif %} </p>
+           </div>
+
+            <div class="dropdown document-gallery-dropdownbase" >
+  <button class="dropdown-toggle document-gallery-dropdown" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
     <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
   </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="border-radius: 0px;
@@ -130,9 +112,11 @@ margin-bottom: -144px;">
     <li><a href="{{ url_for('.descendants_view', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="fa fa-code-fork fa-rotate-90"></i> {{_('View descendants')}}</a></li>
     {%endif%}
     <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
-  {% if not obj.content_type|length %}
-      <li><form action="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}" method="post">{{ csrf_token }}
-<button class="document-folder-download" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button></form></li>
+
+    {% if not obj.content_type|length %}
+<li>
+<button type="button" class="document-folder-download" onclick="download_folder(this)" style="margin-top: 1px;margin-bottom:0px;" name="action" value="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+  </li>
   <li><a onclick="edit_folder(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a></li>
   {%else%}
   <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
@@ -143,9 +127,7 @@ margin-bottom: -144px;">
     <li><a onclick="delete_document(this)" id="{{obj.id}}" href="#modal-delete" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
     </ul>
       </div>
-              </td>
-          <td class="hide">
-            <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id, folder_id=folder.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, current_folder_id=folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
@@ -153,36 +135,27 @@ margin-bottom: -144px;">
           <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
           <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
           <input type="hidden" id="community{{obj.id}}" value="{{obj.community.slug}}" />
-          </td>
-          </tr>
+        </div>
+                <!---end of doc -->
+                </div>
+        {%if loop.last%}
+        </div></form>
+        {%endif%}
         {%- endfor %}
-        </tbody>
-        <tfoot>
-        <tr style="color: #919191;
-border-top: 2px solid ghostwhite;">
-          <th></th>
-          <th class="hide">type</th>
-          <th class="hide">title for sorting</th>
-          <th>{{ _("Title") }}</th>
-          <th>{{ _("Size") }}</th>
-          <th class="hide">Last Name</th>
-          <th class="hide">First Name</th>
-          <th>{{ _("Owner") }}</th>
-          <th class="hide">date</th>
-          <th>{{ _("Age") }}</th>
-          <th></th>
-          <th class="hide">info</th>
-        </tr>
-        </tfoot>
-      </table>
+
       <script type="application/json">
         {%- set data = {
             'deleteConfirmMsg': _("Delete selected elements?"),
          } %}
         {{ data | tojson | safe }}
   </script>
-    </form>
+<form id="folder_content_download" action="" method="post">
+    {{ csrf_token }}
+<button class="document-folder-download" id="document-folder-download" style="margin-top: 1px;margin-bottom:0px;display:none;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+</form>
+
 <script>
+var folder_url = "{{ url_for('.folder_post', folder_id=folder.id, community_id=folder.community.slug) }}";
 function edit_document(obj){
 
     var title = $("#title"+obj.id).val();
@@ -207,6 +180,11 @@ function edit_folder(obj){
     $(".form-folder-title").val(title);
     $(".form-folder-description").val(description);
     $('#folder-modal-edit').modal('show');
+}
+
+function download_folder(e){
+    $("#folder_content_download").attr("action",e.value);
+    $( "#document-folder-download" ).trigger( "click" );
 }
 
 function email_send_document(obj){
@@ -242,19 +220,13 @@ $('input[type="checkbox"]').change(function(){
     } });
 
 </script>
-    {%- deferJS %}
-      <script>
-        require(['Abilian', 'SBEFolderListingSetup'],
-            function (Abilian, setupFolderListing) {
-              Abilian.fn.onAppInit(setupFolderListing);
-            });
-      </script>
-    {%- enddeferJS %}
+
   {%- else %}
     <p>
       <em>{{ _("This folder is currently empty. Why don't you upload some content?") }}</em>
     </p>
   {%- endif %}
+
  <script>
 $(".doc-check-all").change(function() {
     if($(this).prop('checked')==true) {
@@ -267,9 +239,32 @@ $(".doc-check-all").change(function() {
     }
 });
 </script>
-  <div style="clear: both;"></div>
 
-{%if objects%}
+{%- deferJS %}
+      <script>
+        require(['Abilian', 'SBEFolderGalleryListingSetup'],
+            function (Abilian, setupFolderListing) {
+              Abilian.fn.onAppInit(setupFolderListing);
+            });
+      </script>
+{%- enddeferJS %}
+
+<script>
+    $("#filter").keyup(function(event) {
+        $(".gallery_element .document-gallery-infos p:nth-child(1)").each(function(e) {
+
+            var doc_name = $(this).text().toLowerCase().split(".")[0];
+            if (doc_name.indexOf($("#filter").val().toLowerCase()) >= 0) {
+                $(this).closest(".gallery_element").css("display", "block");
+            } else {
+                $(this).closest(".gallery_element").css("display", "none");
+            }
+        });
+    });
+</script>
+
+  <div style="clear: both;"></div>
+{%if objects %}
 {% set obj = objects[0] %}
 {% include "documents/_modals_document_edit.html" %}
 {% include "documents/_modals_document_send_by_email.html" %}

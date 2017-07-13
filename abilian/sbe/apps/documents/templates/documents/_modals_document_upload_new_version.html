@@ -1,10 +1,13 @@
+{% if obj %}
+{% set doc = obj %}
+{% endif %}
 <div class="modal fade" id="modal-upload-new-version" role="dialog"
      data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
 
-      <form id="fileupload"
-            action="{{ url_for(".document_upload", doc_id=doc.id, community_id=doc.community.slug) }}"
+      <form id="fileupload" class="modal-replacedoc-form"
+            action="{{ url_for('.document_upload', doc_id=doc.id, community_id=doc.community.slug) }}"
             method="POST" enctype="multipart/form-data">
         {{ csrf_token }}
 

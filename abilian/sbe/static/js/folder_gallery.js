@@ -1,7 +1,7 @@
 (function(factory) {
     "use strict";
     define(
-        "SBEFolderListingSetup",
+        "SBEFolderGalleryListingSetup",
         ["Abilian", "jquery", "jquery.dataTables", "bootbox"],
         factory
     );
@@ -18,64 +18,6 @@
             return row_text.match(new RegExp(filter_value, "i"));
         });
 
-        var config = document.getElementById("objects-table").nextElementSibling;
-        config = JSON.parse(config.textContent);
-
-        var dtParams = {
-            aoColumns: [
-                { asSorting: [], sWidth: "1%" },
-                { bVisible: false, sType: "cmistype" },
-                { bVisible: false, sType: "string" },
-                {
-                    aDataSort: [1, 2],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "31%"
-                },
-                {
-                    aDataSort: [1, 4],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "8%"
-                },
-                { bVisible: false },
-                { bVisible: false },
-                {
-                    aDataSort: [5, 6, 1],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "18%"
-                },
-                { bVisible: false, sType: "date" },
-                {
-                    aDataSort: [1, 8],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "12%"
-                },
-                {
-                    aDataSort: [1, 2],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "1%"
-                },
-                {
-                    aDataSort: [1, 2],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "1%"
-                }
-
-            ],
-            //{# see http://datatables.net/ref #}
-            sPaginationType: "bootstrap",
-            bFilter: true,
-            bLengthChange: false,
-            bStateSave: true,
-            iDisplayLength: 50,
-            sDom: "lrtip"
-        },
-            objectsTable = $("#objects-table").dataTable(dtParams);
-
-        /* on page reload datatable keep previously filtered rows. Force
-         refilter with current filter value */
-        var filter = $("#filter");
-        objectsTable.fnFilter(filter.val());
-
         /* check / uncheck all */
         function setSelected(checked) {
             $("input[name='object-selected']").prop("checked", checked);
@@ -89,22 +31,6 @@
         $("a[href='#unselect-all']").click(function(e) {
             setSelected(false);
             e.preventDefault();
-        });
-
-        /* enter key */
-        filter.bind("keypress", function(e) {
-            if (e.keyCode == 13) {
-                /* let return key for refilter */
-                objectsTable.fnFilter(this.value);
-                e.preventDefault();
-            }
-        });
-
-        filter.bind("keyup", function(e) {
-            if (e.keyCode == 13) {
-                e.preventDefault();
-            }
-            objectsTable.fnFilter(this.value);
         });
 
         /* actions */

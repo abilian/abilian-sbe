@@ -17,7 +17,8 @@ from zipfile import ZipFile, is_zipfile
 import sqlalchemy as sa
 import whoosh.query as wq
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
-    redirect, render_template, render_template_string, request, send_file
+    redirect, render_template, render_template_string, request, send_file, \
+    session
 from flask._compat import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
@@ -66,7 +67,41 @@ def folder_view(folder_id):
         children=folder.filtered_children,
         breadcrumbs=bc,
         csrf_token=csrf.field())
-    return render_template("documents/folder.html", **ctx)
+    if session.get('sbe_doc_view_style') == 'thumbnail_view':
+        resp = render_template("documents/folder.html", **ctx)
+        session['sbe_doc_view_style'] = 'thumbnail_view'
+
+    if not session.get('sbe_doc_view_style'):
+        resp = render_template("documents/folder.html", **ctx)
+        session['sbe_doc_view_style'] = 'thumbnail_view'
+
+    if session.get('sbe_doc_view_style') == 'gallery_view':
+        resp = render_template("documents/folder_gallery_view.html", **ctx)
+
+    return resp
+
+
+@route("/folder/change_view_style/<int:folder_id>", methods=["GET", "POST"])
+@csrf.protect
+def change_view_style(folder_id):
+    folder = get_folder(folder_id)
+    if request.method == "POST":
+        view_style = request.form["view_style"]
+        if view_style == "gallery_view":
+            session['sbe_doc_view_style'] = 'gallery_view'
+        else:
+            session['sbe_doc_view_style'] = 'thumbnail_view'
+        return redirect(
+            url_for(
+                ".folder_view",
+                folder_id=folder_id,
+                community_id=folder.community.slug))
+    else:
+        return redirect(
+            url_for(
+                ".folder_view",
+                folder_id=folder_id,
+                community_id=folder.community.slug))
 
 
 @route("/folder/<int:folder_id>/json")
@@ -475,8 +510,9 @@ def iter_permissions(folder, user):
 # Actions on folders
 #
 @route("/folder/<int:folder_id>", methods=['POST'])
+@route("/folder/<int:folder_id>/<int:current_folder_id>", methods=['POST'])
 @csrf.protect
-def folder_post(folder_id):
+def folder_post(folder_id, current_folder_id=None):
     """
     A POST on a folder can result on several different actions (depending on the
     `action` parameter).
@@ -485,7 +521,7 @@ def folder_post(folder_id):
     action = request.form.get("action")
 
     if action == 'edit':
-        return folder_edit(folder)
+        return folder_edit(folder, current_folder_id)
 
     elif action == 'upload':
         return upload_new(folder)
@@ -514,17 +550,18 @@ def folder_post(folder_id):
         return redirect(url_for(folder))
 
 
-def folder_edit(folder):
+def folder_edit(folder, current_folder_id):
     check_write_access(folder)
 
     changed = edit_object(folder)
+    current_folder = get_folder(current_folder_id)
 
     if changed:
         db.session.commit()
         flash(_("Folder properties successfully edited."), "success")
     else:
         flash(_("You didn't change any property."), "success")
-    return redirect(url_for(folder))
+    return redirect(url_for(current_folder))
 
 
 ARCHIVE_IGNORE_FILES_GLOBS = {'__MACOSX/*', '.DS_Store'}
@@ -634,6 +671,8 @@ def upload_new(folder):
 
 def download_multiple(folder):
     folders, docs = get_selected_objects(folder)
+    if not folders:
+        folders = [folder]
 
     def rel_path(path, content):
         return '{}/{}'.format(path, content.title)

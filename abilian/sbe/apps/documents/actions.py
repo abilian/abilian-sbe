@@ -182,7 +182,7 @@ _actions = (
     # edit
     FolderModalAction(
         'documents:content', 'edit', _l('Edit properties'),
-        icon='pencil', url='#modal-edit',
+        icon='pencil', url='#folder-modal-edit',
         permission=WRITE),
     # new folder
     FolderModalAction(
