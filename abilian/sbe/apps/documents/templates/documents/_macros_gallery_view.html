@@ -37,8 +37,7 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
               <li><a class="doc-unselect-all" href="#unselect-all">{{ _("Unselect all") }}</a></li>
             </ul>
           </div>
-          <div class="btn-group" style="margin-right: 20px;position: relative;
-top: -8px;margin-bottom: -47px;">
+          <div class="btn-group" >
             <input id="filter" type="text" class="form-control" placeholder="{{ _('Filter...') }}"
                    style="margin-bottom: 0;">
           </div>
@@ -116,7 +115,7 @@ margin-bottom: -144px;">
 
     {% if not obj.content_type|length %}
 <li>
-<button class="document-folder-download" style="margin-top: 1px;margin-bottom:0px;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+<button type="button" class="document-folder-download" onclick="download_folder(this)" style="margin-top: 1px;margin-bottom:0px;" name="action" value="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
   </li>
   <li><a onclick="edit_folder(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a></li>
   {%else%}
@@ -150,9 +149,9 @@ margin-bottom: -144px;">
          } %}
         {{ data | tojson | safe }}
   </script>
-<form action="" method="post">
+<form id="folder_content_download" action="" method="post">
     {{ csrf_token }}
-<button class="document-folder-download" style="margin-top: 1px;margin-bottom:0px;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+<button class="document-folder-download" id="document-folder-download" style="margin-top: 1px;margin-bottom:0px;display:none;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
 </form>
 
 <script>
@@ -181,6 +180,11 @@ function edit_folder(obj){
     $(".form-folder-title").val(title);
     $(".form-folder-description").val(description);
     $('#folder-modal-edit').modal('show');
+}
+
+function download_folder(e){
+    $("#folder_content_download").attr("action",e.value);
+    $( "#document-folder-download" ).trigger( "click" );
 }
 
 function email_send_document(obj){
