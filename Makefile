@@ -108,16 +108,16 @@ lint-less:
 lint-python:
 	@echo "--> Linting Python files"
 	@make flake8
-	@make mypy
+	@make lint-mypy
 
 lint-py3k:
 	pylint --py3k abilian tests
 
+lint-mypy:
+	-mypy abilian
+
 flake8:
 	flake8 abilian tests
-
-mypy:
-	-mypy abilian
 
 format:
 	isort -rc abilian demo tests
