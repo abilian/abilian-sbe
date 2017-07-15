@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.2
+abilian-core==0.9.5
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -43,19 +43,19 @@ jsmin==2.2.2              # via abilian-core
 kombu==3.0.37             # via celery
 langid==1.1.6
 lxml==3.8.0               # via abilian-core
-mako==1.0.6               # via alembic
+mako==1.0.7               # via alembic
 markdown==2.6.8
 markupsafe==1.0           # via abilian-core, jinja2, mako
-numpy==1.13.0             # via langid, pandas
+numpy==1.13.1             # via langid, pandas
 olefile==0.44             # via pillow
 openpyxl==2.4.8
-pandas==0.20.2            # via abilian-core
+pandas==0.20.3            # via abilian-core
 pathlib==1.0.1            # via abilian-core
-pillow==4.1.1             # via abilian-core
+pillow==4.2.1             # via abilian-core
 psycopg2==2.7.1           # via abilian-core
-pycparser==2.17           # via cffi
+pycparser==2.18           # via cffi
 pygeoip==0.3.2            # via abilian-core
-python-dateutil==2.6.0    # via abilian-core, pandas
+python-dateutil==2.6.1    # via abilian-core, pandas
 python-editor==1.0.3      # via alembic
 python-magic==0.4.13      # via abilian-core
 pytz==2017.2              # via babel, celery, pandas

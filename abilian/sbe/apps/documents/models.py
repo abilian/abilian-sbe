@@ -26,6 +26,7 @@ from sqlalchemy.orm import backref, foreign, relationship, remote
 from sqlalchemy.orm.session import Session
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, Text, UnicodeText
+from typing import Dict, Any
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
 
@@ -75,12 +76,16 @@ class CmisObject(Entity, InheritSecurity):
 
     __tablename__ = 'cmisobject'
     __indexable__ = False
-    __indexation_args__ = {}
+    __indexation_args__ = {}  # type: Dict[str, Any]
     __indexation_args__.update(Entity.__indexation_args__)
+
     index_to = Entity.__indexation_args__.setdefault('index_to', ())
     index_to += (
         ('community.id', ('community_id',)),
-        ('community.slug', ('community_slug',)),)
+        #
+        ('community.slug', ('community_slug',)),
+        #
+    )
     __indexation_args__['index_to'] = index_to
     del index_to
 
