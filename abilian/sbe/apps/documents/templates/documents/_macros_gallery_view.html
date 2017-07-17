@@ -124,7 +124,11 @@ margin-bottom: -144px;">
   {%endif%}
     <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
     <li><a onclick="replace_document(this)" id="{{obj.id}}" href="#modal-upload-new-version" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
+    {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+      <li><a id="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id, current_folder_id=folder.id) }}" onclick="delete_folder(this)"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
+    {%else%}
     <li><a onclick="delete_document(this)" id="{{obj.id}}" href="#modal-delete" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
+    {%endif%}
     </ul>
       </div>
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}" />
@@ -152,6 +156,11 @@ margin-bottom: -144px;">
 <form id="folder_content_download" action="" method="post">
     {{ csrf_token }}
 <button class="document-folder-download" id="document-folder-download" style="margin-top: 1px;margin-bottom:0px;display:none;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+</form>
+
+<form id="folder_content_delete" action="" method="post">
+    {{ csrf_token }}
+<button class="document-folder-download" id="folder-delete" style="margin-top: 1px;margin-bottom:0px;display:none;" name="action" value="delete" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Delete')}}</button>
 </form>
 
 <script>
@@ -185,6 +194,11 @@ function edit_folder(obj){
 function download_folder(e){
     $("#folder_content_download").attr("action",e.value);
     $( "#document-folder-download" ).trigger( "click" );
+}
+
+function delete_folder(e){
+    $("#folder_content_delete").attr("action",e.id);
+    $( "#folder-delete" ).trigger( "click" );
 }
 
 function email_send_document(obj){

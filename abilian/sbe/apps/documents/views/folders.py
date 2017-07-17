@@ -530,7 +530,7 @@ def folder_post(folder_id, current_folder_id=None):
         return download_multiple(folder)
 
     elif action == 'delete':
-        return delete_multiple(folder)
+        return delete_multiple(folder, current_folder_id)
 
     elif action == 'new':
         return create_subfolder(folder)
@@ -714,10 +714,13 @@ def download_multiple(folder):
     return resp
 
 
-def delete_multiple(folder):
+def delete_multiple(folder, current_folder_id):
     check_write_access(folder)
 
     folders, docs = get_selected_objects(folder)
+    current_folder = get_folder(current_folder_id)
+    if not folders:
+        folders = [folder]
 
     for obj in docs + folders:
         app = current_app._get_current_object()
@@ -744,7 +747,7 @@ def delete_multiple(folder):
     else:
         flash(_("No object deleted"), "error")
 
-    return redirect(url_for(folder))
+    return redirect(url_for(current_folder))
 
 
 def move_multiple(folder):
