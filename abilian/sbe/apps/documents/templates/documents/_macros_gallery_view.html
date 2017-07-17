@@ -125,7 +125,7 @@ margin-bottom: -144px;">
     <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
     <li><a onclick="replace_document(this)" id="{{obj.id}}" href="#modal-upload-new-version" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
     {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
-      <li><a id="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id, current_folder_id=folder.id) }}" onclick="delete_folder(this)"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
+      <li><a name="{{obj.title}}" id="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id, current_folder_id=folder.id) }}" onclick="delete_folder(this)" href="#modal-delete-folder" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
     {%else%}
     <li><a onclick="delete_document(this)" id="{{obj.id}}" href="#modal-delete" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
     {%endif%}
@@ -197,8 +197,10 @@ function download_folder(e){
 }
 
 function delete_folder(e){
-    $("#folder_content_delete").attr("action",e.id);
-    $( "#folder-delete" ).trigger( "click" );
+    var title = e.name;
+    var folder_url = e.id;
+    $("#modal-delete-folders").attr("action",folder_url);
+    $("#delete-folder-title").html(title);
 }
 
 function email_send_document(obj){
@@ -284,6 +286,7 @@ $(".doc-check-all").change(function() {
 {% include "documents/_modals_document_send_by_email.html" %}
 {% include "documents/_modals_document_upload_new_version.html" %}
 {% include "documents/_modals_document_delete.html" %}
+{% include "documents/_modals_folder_delete.html" %}
 {% include "documents/_modals_folder_edit.html" %}
 {%endif%}
 

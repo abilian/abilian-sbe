@@ -1,0 +1,30 @@
+{% if obj %}
+{% set doc = obj %}
+{% endif %}
+<div class="modal fade" id="modal-delete-folder" role="dialog" data-keyboard="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="modal-delete-folders"
+          action="{{ url_for('.document_delete', doc_id=doc.id, community_id=doc.community.slug) }}"
+          method="POST">
+        {{ csrf_token }}
+
+        <div class="modal-header">
+          <button class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">{{ _("Delete Folder") }}</h4>
+        </div>
+
+        <div class="modal-body">
+          {{ _('Are you sure you want to delete the folder : ') }} <span id="delete-folder-title">{{doc.title}}</span>
+        </div>
+
+        <div class="modal-footer">
+          <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+            <input type="hidden" name="action" value="delete"/>
+          <button type="button"
+                  class="btn btn-danger" onclick="this.form.submit()">{{ _("Really Delete") }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
