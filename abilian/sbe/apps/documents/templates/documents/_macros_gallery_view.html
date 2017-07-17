@@ -81,7 +81,7 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
           size=obj.preview_size) %}
 
              {%if content_type[0] == 'image' %}
-              <div style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;background:url({{icon_src}});"></div>
+        <a style="color: #797C7E;" href="{{ url_for(obj) }}"><div style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;background:url({{icon_src}});"></div></a>
             {%else%}
         <a style="color: #797C7E;" href="{{ url_for(obj) }}"><img style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;" src="{{icon_src}}"/></a>
             {%endif%}
