@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.5
+abilian-core==0.9.6
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==1.4.9               # via kombu
 anyjson==0.3.3            # via kombu
@@ -20,7 +20,7 @@ clamd==1.0.2              # via abilian-core
 click==6.7                # via flask
 closure==20161201         # via abilian-core
 cssmin==0.2.0             # via abilian-core
-decorator==4.0.11         # via validators
+decorator==4.1.1          # via validators
 et-xmlfile==1.0.1         # via openpyxl
 flask-assets==0.12        # via abilian-core
 flask-babel==0.11.2       # via abilian-core
