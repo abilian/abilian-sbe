@@ -134,7 +134,7 @@ margin-bottom: -144px;">
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, current_folder_id=folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
-            <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, current_folder_id= folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="delete_url{{obj.id}}" value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}" />
           <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
           <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
