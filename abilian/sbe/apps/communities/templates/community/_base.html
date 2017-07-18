@@ -22,8 +22,11 @@
 
 {% block main %}
 
+<div class="row">
+    <div class="col-md-9">
     {%- block content %}
     {%- endblock %}
+    </div>
 
     {%- block documentcontent %}
     {%- endblock %}
@@ -38,7 +41,7 @@
       {%- block sidebar %}
       {%- endblock %}
     </div>
-  </div>
+ </div>
 
   {%- block modals %}
   {% endblock %}
