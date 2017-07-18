@@ -117,14 +117,11 @@ left: 81px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0
             <td class="hide">{{ obj.created_at.isoformat() }} </td>
             <td>{{ obj.created_at|age(add_direction=False) }}</td>
             <td>
-            <div class="dropdown" style="left: -39px;">
+            <div class="dropdown">
   <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
     <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
   </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="border-radius: 0px;
-position: absolute;
-top: 53px;
-margin-bottom: -144px;">
+  <ul class="dropdown-menu document-thumbnail-menu" aria-labelledby="dropdownMenu1" >
     {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
     <li><a href="{{ url_for('.permissions', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="glyphicon glyphicon-lock"></i> {{_('Permissions')}}</a></li>
     <li><a href="{{ url_for('.descendants_view', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="fa fa-code-fork fa-rotate-90"></i> {{_('View descendants')}}</a></li>
