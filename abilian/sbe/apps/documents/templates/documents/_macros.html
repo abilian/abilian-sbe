@@ -47,7 +47,7 @@ top: -8px;margin-bottom: -47px;">
       {% endif %}
     &nbsp;
     {% if edit %}
-        <span id="horizontal-doc-menu" style="float:right;display:none;">
+        <span id="horizontal-doc-menu" class="document-horizontal-menu">
         {%- for action in actions.for_category('documents:folder-listing') %}
             <div class="btn-group">
               {{ action.render() }}
