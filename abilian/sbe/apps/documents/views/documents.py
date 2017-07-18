@@ -281,10 +281,11 @@ def refresh_preview(doc_id):
     return redirect(url_for(doc))
 
 
-@route("/doc/<int:doc_id>/send", methods=['POST'])
+@route("/doc/<int:doc_id>/<int:current_folder_id>/send", methods=['POST'])
 @csrf.protect
-def document_send(doc_id):
+def document_send(doc_id, current_folder_id):
     doc = get_document(doc_id)
+    current_folder = get_folder(current_folder_id)
 
     recipient = request.form.get("recipient")
     user_msg = request.form.get('message')
@@ -308,7 +309,7 @@ def document_send(doc_id):
     mail.send(msg)
     flash(_(u"Email successfully sent"), "success")
 
-    return redirect(url_for(doc))
+    return redirect(url_for(current_folder))
 
 
 @route("/doc/<int:doc_id>/preview")
