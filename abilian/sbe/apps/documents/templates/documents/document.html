@@ -45,18 +45,37 @@
 
 
     <div>
-      {%- if doc.antivirus_ok %}
-        <a class="btn btn-success btn-lg pull-right"
+      <h2><i class="fa fa-file-o fa-lg"></i>
+        {{ m_breadcrumbs_path(breadcrumbs) }}
+      </h2>
+    <br>
+    <a class="conversation-back-btn" href="{{ url_for('.index', community_id=g.community.slug) }}">
+        <i class="fa fa-arrow-left"></i> {{ _("Back to document list") }}
+        </a>
+
+      <span id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline;right:158px; top:0px;">
+            <div class="btn-group">
+              <button class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default" name="action" value="download" title="Download"><i class="glyphicon glyphicon-download"></i></button>
+            </div>
+            <div class="btn-group">
+              <a class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder"><i class="glyphicon glyphicon-move"></i></a>
+            </div>
+            <div class="btn-group">
+              <button class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger" name="action" value="delete" title="Delete"><i class="glyphicon glyphicon-trash"></i></button>
+            </div>
+            <div class="btn-group">
+              <a class="btn action action-documents-folder-listing action-documents-folder-listing-change-owner btn-default" href="#modal-change-owner" data-toggle="modal" role="button" title="Change owner"><i class="glyphicon glyphicon-user"></i></a>
+            </div>
+        </span>
+
+     {%- if doc.antivirus_ok %}
+        <a class="btn btn-success btn-md pull-right"
            href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
           <i class="glyphicon glyphicon-download"></i>
           {{ _('Download') }} (<small>{{ doc.content_length|filesize }}</small>)
         </a>
       {%- endif %}
-
-      <h2><i class="fa fa-file-o fa-lg"></i>
-        {{ m_breadcrumbs_path(breadcrumbs) }}
-      </h2>
-
+    <br><br>
       <div>
         <small>
           {{ _('Created: %(date)s (%(age)s) by %(creator)s',
