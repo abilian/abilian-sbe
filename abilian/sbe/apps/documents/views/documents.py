@@ -135,6 +135,7 @@ def document_delete(doc_id):
     flash(_(u"File successfully deleted."), "success")
     return redirect(url_for(parent_folder))
 
+
 @route("/doc/<int:doc_id>/<int:current_folder_id>/upload", methods=['POST'])
 @route("/doc/<int:doc_id>/upload", methods=['POST'])
 @csrf.protect
