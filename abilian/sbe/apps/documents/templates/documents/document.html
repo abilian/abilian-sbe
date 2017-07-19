@@ -8,13 +8,18 @@
 {%- from "community/macros.html" import viewers_snapshot -%}
 
 {% macro user_markup(user) %}
-  <a href="{{ url_for("social.user", user_id=user.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
+  <a href="{{ url_for('social.user', user_id=user.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
     {{ user }}
   </a>
 {% endmacro %}
 
+{% macro m_breadcrumbs_path(breadcrumbs) %}
+  {% for obj in breadcrumbs[0:-1] %}
+    <a href="{{ obj.path }}">{{ obj.label }}</a> <span class="divider">/</span>
+  {% endfor %}
+{% endmacro %}
+
 {% block content %}
-  {% call m_box_content(title=_("Document view")) %}
 
     {%- if doc.antivirus_required %}
       <div style="margin: 5px 0;">
@@ -49,7 +54,7 @@
       {%- endif %}
 
       <h2><i class="fa fa-file-o fa-lg"></i>
-        {{ m_breadcrumbs2(breadcrumbs) }}
+        {{ m_breadcrumbs_path(breadcrumbs) }}
       </h2>
 
       <div>
@@ -83,7 +88,7 @@
     <h3 class="main">{{ _('Preview') }}</h3>
 
     <div class="preview-container" data-page-num="{{ doc.page_num }}">
-      <img src="{{ url_for(".document_preview_image",
+      <img src="{{ url_for('.document_preview_image',
           community_id=g.community.slug, doc_id=doc.id,
           size=doc.preview_size) }}" alt="" class="preview" data-page="0"/>
 
@@ -122,8 +127,6 @@
     {%- endif %}
 
     {{ m_audit_log(audit_entries) }}
-
-  {% endcall %}
 
 {% endblock %}
 
