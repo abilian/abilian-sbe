@@ -109,7 +109,7 @@ left: 81px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0
             <td class="hide">{{ owner.last_name }}</td>
             <td class="hide">{{ owner.first_name }}</td>
             <td>
-              <a href="{{ url_for("social.user", user_id=owner.id) }}"
+              <a href="{{ url_for('social.user', user_id=owner.id) }}"
                  title="{{ owner.name }}"><img alt="{{ owner.name }}"
                                                src="{{ user_photo_url(owner, size=40) }}"
                                                style="vertical-align: middle;"></a>
@@ -128,8 +128,9 @@ left: 81px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0
     {%endif%}
     <li><a onclick="email_send_document(this)" id="{{obj.id}}" href="#modal-send-by-email" data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i> {{_('Send by mail')}}</a></li>
   {% if not obj.content_type|length %}
-      <li><form action="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}" method="post">{{ csrf_token }}
-<button class="document-folder-download" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button></form></li>
+<li>
+<button type="button" class="document-folder-download" onclick="download_folder(this)" style="margin-top: -25px;margin-bottom: -28px;" name="action" value="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+  </li>
   <li><a onclick="edit_folder(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a></li>
   {%else%}
   <li><a href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</a></li>
@@ -183,6 +184,12 @@ border-top: 2px solid ghostwhite;">
         {{ data | tojson | safe }}
   </script>
     </form>
+
+<form id="folder_content_download" action="" method="post">
+    {{ csrf_token }}
+<button class="document-folder-download" id="document-folder-download" style="margin-top: 1px;margin-bottom:0px;display:none;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+</form>
+
 <script>
 function edit_document(obj){
 
@@ -220,6 +227,11 @@ function replace_document(obj){
 
     var doc_url = $("#replace_url"+obj.id).val();
     $(".modal-replacedoc-form").attr("action",doc_url);
+}
+    
+function download_folder(e){
+    $("#folder_content_download").attr("action",e.value);
+    $( "#document-folder-download" ).trigger( "click" );
 }
 
 function delete_document(obj){
