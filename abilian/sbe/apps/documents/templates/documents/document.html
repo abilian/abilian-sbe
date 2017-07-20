@@ -55,16 +55,16 @@
 
       <span id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline;right:158px; top:0px;">
             <div class="btn-group">
-              <button class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default" name="action" value="download" title="Download"><i class="glyphicon glyphicon-download"></i></button>
+              <a class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default" href="#modal-edit"  title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
             </div>
             <div class="btn-group">
-              <a class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder"><i class="glyphicon glyphicon-move"></i></a>
+              <a class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i class="glyphicon glyphicon-envelope"></i></a>
             </div>
             <div class="btn-group">
-              <button class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger" name="action" value="delete" title="Delete"><i class="glyphicon glyphicon-trash"></i></button>
+              <a href="#modal-delete" class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger" data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
             </div>
             <div class="btn-group">
-              <a class="btn action action-documents-folder-listing action-documents-folder-listing-change-owner btn-default" href="#modal-change-owner" data-toggle="modal" role="button" title="Change owner"><i class="glyphicon glyphicon-user"></i></a>
+              <a class="btn action action-documents-folder-listing action-documents-folder-listing-change-owner btn-default" href="#modal-change-owner" data-toggle="modal" role="button" title="Change owner"><span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></a>
             </div>
         </span>
 
