@@ -77,24 +77,7 @@
       {%- endif %}
     <br><br>
       <div>
-        <small>
-          {{ _('Created: %(date)s (%(age)s) by %(creator)s',
-               date=(doc.created_at | datetimeformat('short')),
-              age=doc.created_at | age(add_direction=False),
-              creator=user_markup(doc.creator)) }}
-          {%- if doc.updated_at != doc.created_at %}
-            <br/>
-            {{ _('Last modification: %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
-            {%- set lock = doc.lock %}
-            {%- if lock %}
-              <div class="lock">
-                <i class="fa fa-lock"></i>
-                {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
-                  user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
-              </div>
-            {%- endif %}
-          {%- endif %}
-        </small>
+
         {{ viewers_snapshot(viewers,_("viewed by")) }}
       </div>
     </div>
@@ -149,7 +132,30 @@
 
 {% endblock %}
 
+
 {% block sidebar %}
+<div style="border: 1px solid #eee;padding: 14px;">
+<small>
+    <p><b>{{doc.title}}</b></p>
+           {{_("Owner")}} : {{user_markup(doc.creator)}} <br>
+          {{ _('Uploaded: %(date)s (%(age)s)',
+               date=(doc.created_at | datetimeformat('short')),
+              age=doc.created_at | age(add_direction=False)) }}
+          {%- if doc.updated_at != doc.created_at %}
+            <br/>
+            {{ _('Modified: %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
+            {%- set lock = doc.lock %}
+            {%- if lock %}
+              <div class="lock">
+                <i class="fa fa-lock"></i>
+                {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
+                  user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
+              </div>
+            {%- endif %}
+          {%- endif %}
+        </small>
+</div>
+<br>
   {%- set content_actions = actions.for_category('documents:content') %}
   {%- if content_actions %}
     {% call m_box_menu() %}
