@@ -46,7 +46,7 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
       {% endif %}
 
     {% if edit %}
-        <span id="horizontal-doc-menu" style="float:right;display:none;">
+        <span id="horizontal-doc-menu" class="document-horizontal-menu">
         {%- for action in actions.for_category('documents:folder-listing') %}
             <div class="btn-group">
               {{ action.render() }}
@@ -73,7 +73,7 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
     <div class="document-gallery-box" >
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
              <div style="height: 310px;"> <span style="position: relative;left: 7px;">
-                 <i class="fa fa-folder-o gallery-folder" aria-hidden="true"></i> <span class="folder-gallery-contents-count" style=""><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span></div>
+                 <a style="color: #797C7E;" href="{{ url_for(obj) }}"> <i class="fa fa-folder-o gallery-folder" aria-hidden="true"></i></a> <span class="folder-gallery-contents-count" style=""><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span></div>
         <hr>
             {%else%}
                 {% set icon_src = url_for(".document_preview_image",
@@ -81,9 +81,9 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
           size=obj.preview_size) %}
 
              {%if content_type[0] == 'image' %}
-              <div style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;background:url({{icon_src}});"></div>
+        <a style="color: #797C7E;" href="{{ url_for(obj) }}"><div style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;background:url({{icon_src}});"></div></a>
             {%else%}
-             <img style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;" src="{{icon_src}}"/>
+        <a style="color: #797C7E;" href="{{ url_for(obj) }}"><img style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;" src="{{icon_src}}"/></a>
             {%endif%}
         {%endif%}
               {%- if obj.object_type == 'folder' %}<i>
@@ -123,14 +123,18 @@ margin-bottom: -144px;">
   <li><a onclick="edit_document(this)" id="{{obj.id}}" data-toggle="modal"><i class="fa fa-pencil" aria-hidden="true"></i> {{_('Edit')}}</a></li>
   {%endif%}
     <li><a onclick="move_document(this)" id="{{obj.id}}" href="#modal-move-files" data-toggle="modal"><i class="fa fa-arrows" aria-hidden="true"></i> {{_('Move')}}</a></li>
+    {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+      <li><a name="{{obj.title}}" id="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id, current_folder_id=folder.id) }}" onclick="delete_folder(this)" href="#modal-delete-folder" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
+    {%else%}
     <li><a onclick="replace_document(this)" id="{{obj.id}}" href="#modal-upload-new-version" data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i> {{_('Replace')}}</a></li>
     <li><a onclick="delete_document(this)" id="{{obj.id}}" href="#modal-delete" data-toggle="modal"><i class="fa fa-trash-o" aria-hidden="true"></i> {{_('Delete')}}</a></li>
+    {%endif%}
     </ul>
       </div>
             <input type="hidden" id="edit_url{{obj.id}}" value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="editfolder_url{{obj.id}}" value="{{ url_for('.folder_post', folder_id=obj.id, current_folder_id=folder.id, community_id=obj.community.slug) }}" />
-            <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=obj.community.slug) }}" />
-            <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="replace_url{{obj.id}}" value="{{ url_for('.document_upload', doc_id=obj.id, current_folder_id= folder.id, community_id=obj.community.slug) }}" />
+            <input type="hidden" id="email_url{{obj.id}}" value="{{ url_for('.document_send', doc_id=obj.id, current_folder_id= folder.id, community_id=obj.community.slug) }}" />
             <input type="hidden" id="delete_url{{obj.id}}" value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}" />
           <input type="hidden" id="title{{obj.id}}" value="{{obj.title}}" />
           <input type="hidden"  id="description{{obj.id}}" value="{%if obj.description%}{{obj.description}}{%else%}{%endif%}" />
@@ -152,6 +156,11 @@ margin-bottom: -144px;">
 <form id="folder_content_download" action="" method="post">
     {{ csrf_token }}
 <button class="document-folder-download" id="document-folder-download" style="margin-top: 1px;margin-bottom:0px;display:none;" name="action" value="download" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Download')}}</button>
+</form>
+
+<form id="folder_content_delete" action="" method="post">
+    {{ csrf_token }}
+<button class="document-folder-download" id="folder-delete" style="margin-top: 1px;margin-bottom:0px;display:none;" name="action" value="delete" title="Download" ><i class="fa fa-download" aria-hidden="true"></i> {{_('Delete')}}</button>
 </form>
 
 <script>
@@ -185,6 +194,13 @@ function edit_folder(obj){
 function download_folder(e){
     $("#folder_content_download").attr("action",e.value);
     $( "#document-folder-download" ).trigger( "click" );
+}
+
+function delete_folder(e){
+    var title = e.name;
+    var folder_url = e.id;
+    $("#modal-delete-folders").attr("action",folder_url);
+    $("#delete-folder-title").html(title);
 }
 
 function email_send_document(obj){
@@ -270,6 +286,7 @@ $(".doc-check-all").change(function() {
 {% include "documents/_modals_document_send_by_email.html" %}
 {% include "documents/_modals_document_upload_new_version.html" %}
 {% include "documents/_modals_document_delete.html" %}
+{% include "documents/_modals_folder_delete.html" %}
 {% include "documents/_modals_folder_edit.html" %}
 {%endif%}
 

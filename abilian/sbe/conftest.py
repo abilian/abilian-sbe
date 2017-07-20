@@ -12,7 +12,7 @@ from __future__ import absolute_import, division, print_function, \
 
 from pytest import fixture, yield_fixture
 
-from abilian.sbe import create_app
+from abilian.sbe.app import create_app
 from abilian.services import get_service
 
 
