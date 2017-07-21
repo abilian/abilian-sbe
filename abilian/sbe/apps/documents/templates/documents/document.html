@@ -3,7 +3,7 @@
 {% from "macros/box.html" import m_box_content, m_box_menu with context %}
 {% from "documents/audit_macros.html" import m_audit_log %}
 {% from "macros/table.html" import m_table %}
-
+{%- from "community/macros.html" import show_all_viewers -%}
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
 {%- from "community/macros.html" import viewers_snapshot -%}
 
@@ -168,7 +168,12 @@ padding-bottom: 10px;">
           {%- endif %}
         </small>
 </div>
-
+{%if g.is_manager %}
+<div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
+<p><b>{{_('Readers')}}</b></p>
+{{ show_all_viewers(viewers,_("viewed by")) }}
+</div>
+{%endif%}
 <div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
     <p><b>{{_('Last Changes')}}</b></p>
     {{ m_audit_log(audit_entries) }}
