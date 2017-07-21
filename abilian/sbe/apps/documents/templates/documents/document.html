@@ -87,8 +87,8 @@
       <p>&nbsp;</p>
     {%- endif %}
 
-    <h3 class="main">{{ _('Preview') }}</h3>
-
+<div style="border:1px solid #eee; width:100%;padding-top: 10px;
+padding-bottom: 10px;">
     <div class="preview-container" data-page-num="{{ doc.page_num }}">
       <img src="{{ url_for('.document_preview_image',
           community_id=g.community.slug, doc_id=doc.id,
@@ -119,6 +119,8 @@
       {%- endif %}
     </div>
 
+</div>
+
     {%- if doc.extra_metadata %}
       <h3 class="main collapsed" data-toggle="collapse"
           href="#doc_extra_metadata">Extra Metadata</h3>
@@ -128,7 +130,7 @@
       </div>
     {%- endif %}
 
-    {{ m_audit_log(audit_entries) }}
+
 
 {% endblock %}
 
@@ -137,13 +139,13 @@
 <div style="border: 1px solid #eee;padding: 14px;">
 <small>
     <p><b>{{doc.title}}</b></p>
-           {{_("Owner")}} : {{user_markup(doc.creator)}} <br>
-          {{ _('Uploaded: %(date)s (%(age)s)',
+           <b>{{_("Owner")}}</b> : {{user_markup(doc.creator)}} <br>
+           {{ _('<b>Uploaded:</b> %(date)s (%(age)s)',
                date=(doc.created_at | datetimeformat('short')),
               age=doc.created_at | age(add_direction=False)) }}
           {%- if doc.updated_at != doc.created_at %}
             <br/>
-            {{ _('Modified: %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
+            {{ _('<b>Modified:</b> %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
             {%- set lock = doc.lock %}
             {%- if lock %}
               <div class="lock">
@@ -155,6 +157,11 @@
           {%- endif %}
         </small>
 </div>
+<br>
+<div style="border: 1px solid #eee;padding: 14px;">
+    {{ m_audit_log(audit_entries) }}
+</div>
+
 <br>
   {%- set content_actions = actions.for_category('documents:content') %}
   {%- if content_actions %}
