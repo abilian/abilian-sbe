@@ -1,0 +1,62 @@
+{% macro _key_fmt(key) %}<strong>{{ key }}</strong>{% endmacro %}
+{% macro _value_fmt(value) %}<em>{{ value }}</em>{% endmacro %}
+
+{% macro m_audit_field_changes(changes) %}
+  <ul>
+    {%- for key in changes.columns|sort %}
+      {% set values = changes.columns[key] %}
+      <li>
+        {%- if values.columns|default(None) != None %}
+          {{ _('{key} changed:').format(key=_key_fmt(key)) }}
+          {{ m_audit_field_changes(values) }}
+        {%- else %}
+          {%- set old_value, new_value = values %}
+          {%- if old_value and old_value not in (NEVER_SET, NO_VALUE) %}
+            {{ _('{key} changed from {old_value} to {new_value}').format(
+                 key=_key_fmt(key), old_value=_value_fmt(old_value), new_value=_value_fmt(new_value)) }}
+          {%- else %}
+            {{ _('{key} set to {new_value}').format(key=_key_fmt(key), new_value=_value_fmt(new_value)) }}
+          {%- endif %}
+        {%- endif %}
+      </li>
+    {%- endfor %}
+    {%- for key, (appended, removed) in changes.collections.iteritems() %}
+      <li>
+        <b>{{ key }}</b>:
+        {%- if appended %}
+          Added {%- for label in appended %} <span class="badge">{{ label }}</span>{%- endfor %}
+        {%- endif %}
+        {%- if removed %}
+          Removed {%- for label in removed %} <span class="badge">{{ label }}</span>{%- endfor %}
+        {%- endif %}
+      </li>
+    {%- endfor %}
+  </ul>
+{% endmacro %}
+
+{% macro m_audit_entry(entry) %}
+    <div>
+      {#- FIXME: use macro for user avatar #}
+      <img src="{{ user_photo_url(entry.user, size=16) }}" style="margin-bottom: 2px;" alt=""/>
+
+      <a href="{{ url_for('social.user', user_id=entry.user.id) }}">{{ entry.user.name }}</a>
+      {%- if entry.related or entry.op == 1 %}
+        made changes on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
+        {{ m_audit_field_changes(entry.changes) }}
+      {%- elif entry.type == 0 %}
+        created this record on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
+      {%- endif %}
+    </div>
+{% endmacro %}
+
+{% macro m_audit_log(entries) %}
+  {%- if entries %}
+    <h3 class="main collapsed" data-toggle="collapse"
+        href="#audit_log_entries">{{ _("Audit Log") }}</h3>
+    <div id="audit_log_entries" class="collapse" style="margin-bottom: 25px;">
+      {%- for entry in entries %}
+        {{ m_audit_entry(entry) }}
+      {%- endfor %}
+    </div>
+  {%- endif %}
+{% endmacro %}

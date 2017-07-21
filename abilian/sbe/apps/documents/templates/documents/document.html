@@ -1,7 +1,7 @@
 {% extends "community/_base.html" %}
 
 {% from "macros/box.html" import m_box_content, m_box_menu with context %}
-{% from "macros/audit.html" import m_audit_log %}
+{% from "documents/audit_macros.html" import m_audit_log %}
 {% from "macros/table.html" import m_table %}
 
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
@@ -87,7 +87,7 @@
       <p>&nbsp;</p>
     {%- endif %}
 
-<div style="border:1px solid #eee; width:100%;padding-top: 10px;
+<div style="border:1px solid silver; width:100%;padding-top: 10px;
 padding-bottom: 10px;">
     <div class="preview-container" data-page-num="{{ doc.page_num }}">
       <img src="{{ url_for('.document_preview_image',
@@ -157,8 +157,8 @@ padding-bottom: 10px;">
           {%- endif %}
         </small>
 </div>
-<br>
-<div style="border: 1px solid #eee;padding: 14px;">
+
+<div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
     {{ m_audit_log(audit_entries) }}
 </div>
 
