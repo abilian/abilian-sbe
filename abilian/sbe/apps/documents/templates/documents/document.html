@@ -45,7 +45,7 @@
 
 
     <div>
-      <h2><i class="fa fa-file-o fa-lg"></i>
+      <h2>
         {{ m_breadcrumbs_path(breadcrumbs) }}
       </h2>
     <br>
@@ -63,9 +63,20 @@
             <div class="btn-group">
               <a href="#modal-delete" class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger" data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
             </div>
-            <div class="btn-group">
-              <a class="btn action action-documents-folder-listing action-documents-folder-listing-change-owner btn-default" href="#modal-change-owner" data-toggle="modal" role="button" title="Change owner"><span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span></a>
-            </div>
+<div class="btn-group">
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li><a href="#">Action</a></li>
+    <li><a href="#">Another action</a></li>
+    <li><a href="#">Something else here</a></li>
+    <li role="separator" class="divider"></li>
+    <li><a href="#">Separated link</a></li>
+  </ul>
+</div>
+          </div>
         </span>
 
      {%- if doc.antivirus_ok %}
@@ -159,6 +170,7 @@ padding-bottom: 10px;">
 </div>
 
 <div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
+    <p><b>{{_('Last Changes')}}</b></p>
     {{ m_audit_log(audit_entries) }}
 </div>
 
