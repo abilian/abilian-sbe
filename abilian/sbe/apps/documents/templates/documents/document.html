@@ -22,7 +22,7 @@
 {% block content %}
 
 <script>
-    window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+    //window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}
@@ -78,12 +78,12 @@
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
     <li>
         <a class="" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder">
-        <i class="glyphicon glyphicon-move"></i> Move
+        <i class="glyphicon glyphicon-move"></i> {{_("Move")}}
         </a>
     </li>
     <li>
-      <a class="" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder">
-        <i class="fa fa-refresh" aria-hidden="true"></i> Replace
+      <a onclick="replace_document()" class="" href="#modal-upload-new-version" data-toggle="modal" role="button" title="Move to another folder">
+        <i class="fa fa-refresh" aria-hidden="true"></i> {{_("Replace")}}
         </a>
     </li>
   </ul>
@@ -109,7 +109,7 @@
       <p>{{ doc.description }}</p>
       <p>&nbsp;</p>
     {%- endif %}
-
+<br>
 <div style="border:1px solid silver; width:100%;padding-top: 10px;
 padding-bottom: 10px;">
     <div class="preview-container" data-page-num="{{ doc.page_num }}">
@@ -200,6 +200,14 @@ padding-bottom: 10px;">
       </script>
 {%- enddeferJS %}
 
+<script>
+function replace_document(){
+
+    var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, current_folder_id= breadcrumbs[0]['path'].split('/')[-1], community_id=doc.community.slug) }}";
+    $(".modal-replacedoc-form").attr("action",doc_url);
+}
+</script>
+
 <br>
   {%- set content_actions = actions.for_category('documents:content') %}
   {%- if content_actions %}
@@ -216,4 +224,5 @@ padding-bottom: 10px;">
 {% block modals %}
   {% include "documents/_modals_document.html" %}
   {% include "documents/_modals_folder_move.html" %}
+  {% include "documents/_modals_document_upload_new_version.html" %}
 {% endblock %}

@@ -5,7 +5,7 @@
 
     {%- for key in changes.columns|sort %}
       {% set values = changes.columns[key] %}
-      <p>
+      <p style="position: relative;left: 33px;width: 79%;font-size: 9pt;">
         {%- if values.columns|default(None) != None %}
           {{ _('{key} changed:').format(key=_key_fmt(key)) }}
           {{ m_audit_field_changes(values) }}
@@ -36,15 +36,15 @@
 
 {% macro m_audit_entry(entry) %}
       {#- FIXME: use macro for user avatar #}
-      <td width="18%"><img src="{{ user_photo_url(entry.user, size=30) }}" style="margin-bottom: 2px;" alt=""/></td>
       <td>
+      <img src="{{ user_photo_url(entry.user, size=30) }}" style="margin-bottom: 2px;" alt=""/>
       <a href="{{ url_for('social.user', user_id=entry.user.id) }}">{{ entry.user.name }}</a>
       {%- if entry.related or entry.op == 1 %}
         <span style="color:silver;font-size: 9pt;position: relative;top: -1.5px;">{{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span> <br>
         {{ m_audit_field_changes(entry.changes) }}
       {%- elif entry.type == 0 %}
           <span style="color:silver;font-size: 9pt;position: relative;top: -1.5px;">{{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span><br>
-        created this record
+          <p style="position: relative;left: 33px;width: 79%;font-size: 9pt;">created this record</p>
       {%- endif %}
      </td>
 {% endmacro %}
