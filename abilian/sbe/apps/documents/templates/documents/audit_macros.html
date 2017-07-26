@@ -40,10 +40,11 @@
       <td>
       <a href="{{ url_for('social.user', user_id=entry.user.id) }}">{{ entry.user.name }}</a>
       {%- if entry.related or entry.op == 1 %}
-        <span style="color:silver;">{{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span> <br>
+        <span style="color:silver;font-size: 9pt;position: relative;top: -1.5px;">{{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span> <br>
         {{ m_audit_field_changes(entry.changes) }}
       {%- elif entry.type == 0 %}
-        created this record on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
+          <span style="color:silver;font-size: 9pt;position: relative;top: -1.5px;">{{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span><br>
+        created this record
       {%- endif %}
      </td>
 {% endmacro %}
