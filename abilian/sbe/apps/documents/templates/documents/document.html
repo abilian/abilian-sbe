@@ -47,7 +47,10 @@
       </p>
     {%- endif %}
 
-<input id="check_{{doc.id}}" style="position: relative;top: 2px;" type="checkbox" name="object-selected" value="{{ doc.sbe_type }}:{{ doc.id }}">
+<form name="folder-listing" style="margin-bottom: 0;" method="POST">
+    <input id="check_{{doc.id}}" style="display:none;" type="checkbox" name="object-selected" value="{{ doc.sbe_type }}:{{ doc.id }}" checked>
+</form>
+
     <div>
       <h2>
         {{ m_breadcrumbs_path(breadcrumbs) }}
