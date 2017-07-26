@@ -12,8 +12,7 @@
         {%- else %}
           {%- set old_value, new_value = values %}
           {%- if old_value and old_value not in (NEVER_SET, NO_VALUE) %}
-            {{ _('{key} changed from {old_value} to {new_value}').format(
-                 key=_key_fmt(key), old_value=_value_fmt(old_value), new_value=_value_fmt(new_value)) }}
+          {{ _('{key} changed from ').format(key=_key_fmt(key))}}  {{_value_fmt(old_value)|truncate(32, False, '...', 0)}} <b>to</b> {{_value_fmt(new_value)|truncate(32, False, '...', 0)}}
           {%- else %}
             {{ _('{key} set to {new_value}').format(key=_key_fmt(key), new_value=_value_fmt(new_value)) }}
           {%- endif %}
