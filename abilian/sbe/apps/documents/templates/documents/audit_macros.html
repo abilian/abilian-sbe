@@ -1,0 +1,63 @@
+{% macro _key_fmt(key) %}<strong>{{ key }}</strong>{% endmacro %}
+{% macro _value_fmt(value) %}<em>{{ value }}</em>{% endmacro %}
+
+{% macro m_audit_field_changes(changes) %}
+
+    {%- for key in changes.columns|sort %}
+      {% set values = changes.columns[key] %}
+      <p style="position: relative;left: 33px;width: 79%;font-size: 9pt;">
+        {%- if values.columns|default(None) != None %}
+          {{ _('{key} changed:').format(key=_key_fmt(key)) }}
+          {{ m_audit_field_changes(values) }}
+        {%- else %}
+          {%- set old_value, new_value = values %}
+          {%- if old_value and old_value not in (NEVER_SET, NO_VALUE) %}
+          {{ _('{key} changed from ').format(key=_key_fmt(key))}}  {{_value_fmt(old_value)|truncate(32, False, '...', 0)}} <b>to</b> {{_value_fmt(new_value)|truncate(32, False, '...', 0)}}
+          {%- else %}
+            {{ _('{key} set to {new_value}').format(key=_key_fmt(key), new_value=_value_fmt(new_value)) }}
+          {%- endif %}
+        {%- endif %}
+      </p>
+    {%- endfor %}
+    {%- for key, (appended, removed) in changes.collections.iteritems() %}
+      <p>
+        <b>{{ key }}</b>:
+        {%- if appended %}
+          Added {%- for label in appended %} <span class="badge">{{ label }}</span>{%- endfor %}
+        {%- endif %}
+        {%- if removed %}
+          Removed {%- for label in removed %} <span class="badge">{{ label }}</span>{%- endfor %}
+        {%- endif %}
+      </p>
+    {%- endfor %}
+
+{% endmacro %}
+
+{% macro m_audit_entry(entry) %}
+      {#- FIXME: use macro for user avatar #}
+      <td>
+      <img src="{{ user_photo_url(entry.user, size=30) }}" style="margin-bottom: 2px;" alt=""/>
+      <a href="{{ url_for('social.user', user_id=entry.user.id) }}">{{ entry.user.name }}</a>
+      {%- if entry.related or entry.op == 1 %}
+        <span style="color:silver;font-size: 9pt;position: relative;top: -1.5px;">{{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span> <br>
+        {{ m_audit_field_changes(entry.changes) }}
+      {%- elif entry.type == 0 %}
+          <span style="color:silver;font-size: 9pt;position: relative;top: -1.5px;">{{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span><br>
+          <p style="position: relative;left: 33px;width: 79%;font-size: 9pt;">created this record</p>
+      {%- endif %}
+     </td>
+{% endmacro %}
+
+{% macro m_audit_log(entries) %}
+  {%- if entries %}
+    <div>
+    <table>
+      {%- for entry in entries %}
+        <tr>
+        {{ m_audit_entry(entry) }}
+        </tr>
+      {%- endfor %}
+        </table>
+    </div>
+  {%- endif %}
+{% endmacro %}

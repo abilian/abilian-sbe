@@ -10,7 +10,7 @@ from abilian.i18n import _l
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
-
+from abilian.sbe.apps.communities.security import is_manager
 from ..actions import register_actions
 
 __all__ = ['blueprint']
@@ -24,6 +24,7 @@ blueprint.record_once(register_actions)
 @blueprint.url_value_preprocessor
 def init_document_values(endpoint, values):
     g.current_tab = 'documents'
+    g.is_manager = is_manager()
 
     g.breadcrumb.append(
         BreadcrumbItem(

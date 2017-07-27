@@ -1,9 +1,9 @@
 {% extends "community/_base.html" %}
 
 {% from "macros/box.html" import m_box_content, m_box_menu with context %}
-{% from "macros/audit.html" import m_audit_log %}
+{% from "documents/audit_macros.html" import m_audit_log %}
 {% from "macros/table.html" import m_table %}
-
+{%- from "community/macros.html" import show_all_viewers -%}
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
 {%- from "community/macros.html" import viewers_snapshot -%}
 
@@ -20,6 +20,10 @@
 {% endmacro %}
 
 {% block content %}
+
+<script>
+    //window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+</script>
 
     {%- if doc.antivirus_required %}
       <div style="margin: 5px 0;">
@@ -43,9 +47,12 @@
       </p>
     {%- endif %}
 
+<form name="folder-listing" style="margin-bottom: 0;" method="POST">
+    <input id="check_{{doc.id}}" style="display:none;" type="checkbox" name="object-selected" value="{{ doc.sbe_type }}:{{ doc.id }}" checked>
+</form>
 
     <div>
-      <h2><i class="fa fa-file-o fa-lg"></i>
+      <h2>
         {{ m_breadcrumbs_path(breadcrumbs) }}
       </h2>
     <br>
@@ -55,17 +62,33 @@
 
       <span id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline;right:158px; top:0px;">
             <div class="btn-group">
-              <button class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default" name="action" value="download" title="Download"><i class="glyphicon glyphicon-download"></i></button>
+              <a class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default" href="#modal-edit"  title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
             </div>
             <div class="btn-group">
-              <a class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder"><i class="glyphicon glyphicon-move"></i></a>
+              <a class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i class="glyphicon glyphicon-envelope"></i></a>
             </div>
             <div class="btn-group">
-              <button class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger" name="action" value="delete" title="Delete"><i class="glyphicon glyphicon-trash"></i></button>
+              <a href="#modal-delete" class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger" data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
             </div>
-            <div class="btn-group">
-              <a class="btn action action-documents-folder-listing action-documents-folder-listing-change-owner btn-default" href="#modal-change-owner" data-toggle="modal" role="button" title="Change owner"><i class="glyphicon glyphicon-user"></i></a>
-            </div>
+<div class="btn-group">
+<div class="dropdown">
+  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+    <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+  </button>
+  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+    <li>
+        <a class="" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder">
+        <i class="glyphicon glyphicon-move"></i> {{_("Move")}}
+        </a>
+    </li>
+    <li>
+      <a onclick="replace_document()" class="" href="#modal-upload-new-version" data-toggle="modal" role="button" title="Move to another folder">
+        <i class="fa fa-refresh" aria-hidden="true"></i> {{_("Replace")}}
+        </a>
+    </li>
+  </ul>
+</div>
+          </div>
         </span>
 
      {%- if doc.antivirus_ok %}
@@ -77,24 +100,7 @@
       {%- endif %}
     <br><br>
       <div>
-        <small>
-          {{ _('Created: %(date)s (%(age)s) by %(creator)s',
-               date=(doc.created_at | datetimeformat('short')),
-              age=doc.created_at | age(add_direction=False),
-              creator=user_markup(doc.creator)) }}
-          {%- if doc.updated_at != doc.created_at %}
-            <br/>
-            {{ _('Last modification: %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
-            {%- set lock = doc.lock %}
-            {%- if lock %}
-              <div class="lock">
-                <i class="fa fa-lock"></i>
-                {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
-                  user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
-              </div>
-            {%- endif %}
-          {%- endif %}
-        </small>
+
         {{ viewers_snapshot(viewers,_("viewed by")) }}
       </div>
     </div>
@@ -103,9 +109,9 @@
       <p>{{ doc.description }}</p>
       <p>&nbsp;</p>
     {%- endif %}
-
-    <h3 class="main">{{ _('Preview') }}</h3>
-
+<br>
+<div style="border:1px solid silver; width:100%;padding-top: 10px;
+padding-bottom: 10px;">
     <div class="preview-container" data-page-num="{{ doc.page_num }}">
       <img src="{{ url_for('.document_preview_image',
           community_id=g.community.slug, doc_id=doc.id,
@@ -136,6 +142,8 @@
       {%- endif %}
     </div>
 
+</div>
+
     {%- if doc.extra_metadata %}
       <h3 class="main collapsed" data-toggle="collapse"
           href="#doc_extra_metadata">Extra Metadata</h3>
@@ -145,11 +153,62 @@
       </div>
     {%- endif %}
 
-    {{ m_audit_log(audit_entries) }}
+
 
 {% endblock %}
 
+
 {% block sidebar %}
+<div style="border: 1px solid #eee;padding: 14px;">
+<small>
+    <p><b>{{doc.title}}</b></p>
+           <b>{{_("Owner")}}</b> : {{user_markup(doc.creator)}} <br>
+           {{ _('<b>Uploaded:</b> %(date)s (%(age)s)',
+               date=(doc.created_at | datetimeformat('short')),
+              age=doc.created_at | age(add_direction=False)) }}
+          {%- if doc.updated_at != doc.created_at %}
+            <br/>
+            {{ _('<b>Modified:</b> %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
+            {%- set lock = doc.lock %}
+            {%- if lock %}
+              <div class="lock">
+                <i class="fa fa-lock"></i>
+                {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
+                  user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
+              </div>
+            {%- endif %}
+          {%- endif %}
+        </small>
+</div>
+{%if g.is_manager %}
+<div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
+<p style="color:gray;"><b>{{_('Readers')}}</b></p>
+{{ show_all_viewers(viewers,_("viewed by")) }}
+</div>
+{%endif%}
+<div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
+    <p style="color:gray;"><b>{{_('Last Changes')}}</b></p>
+    {{ m_audit_log(audit_entries) }}
+</div>
+
+{%- deferJS %}
+      <script>
+        require(['Abilian', 'SBEFolderGalleryListingSetup'],
+            function (Abilian, setupFolderListing) {
+              Abilian.fn.onAppInit(setupFolderListing);
+            });
+      </script>
+{%- enddeferJS %}
+
+<script>
+function replace_document(){
+
+    var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, current_folder_id= breadcrumbs[0]['path'].split('/')[-1], community_id=doc.community.slug) }}";
+    $(".modal-replacedoc-form").attr("action",doc_url);
+}
+</script>
+
+<br>
   {%- set content_actions = actions.for_category('documents:content') %}
   {%- if content_actions %}
     {% call m_box_menu() %}
@@ -164,4 +223,6 @@
 
 {% block modals %}
   {% include "documents/_modals_document.html" %}
+  {% include "documents/_modals_folder_move.html" %}
+  {% include "documents/_modals_document_upload_new_version.html" %}
 {% endblock %}
