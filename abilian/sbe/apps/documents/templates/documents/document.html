@@ -15,14 +15,14 @@
 
 {% macro m_breadcrumbs_path(breadcrumbs) %}
   {% for obj in breadcrumbs[0:-1] %}
-    <a href="{{ obj.path }}">{{ obj.label }}</a> <span class="divider">/</span>
+    <a href="{{ obj.path }}">{{ obj.label }}</a> <span class="divider">/{{doc.title}}</span>
   {% endfor %}
 {% endmacro %}
 
 {% block content %}
 
 <script>
-    //window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+    window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}

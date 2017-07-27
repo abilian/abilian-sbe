@@ -97,9 +97,8 @@ border-bottom: 2px solid ghostwhite;">
             {%endif%}
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>{%- endif %}
-              <a style="position: relative;
-top: 3px;
-left: 81px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
+              <a style="position: relative;top: 3px;left: 81px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
+
             </td>
             <td>
               {%- if obj.is_document %}
