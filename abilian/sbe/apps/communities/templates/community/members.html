@@ -4,6 +4,7 @@
 {% import "community/members_macros.html" as macros with context %}
 
 {% block memberscontent %}
+<div class="col-md-12">
   {% call m_box_content(_("Members")) %}
     {%- if is_manager %}
       <div style="
@@ -66,6 +67,7 @@ top: 39px;">
     {%- enddeferJS %}
     <div class="clearfix"></div>
   {% endcall %}
+</div>
 {% endblock %}
 
 {% block sidebar %}
