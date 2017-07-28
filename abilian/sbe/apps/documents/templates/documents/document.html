@@ -23,7 +23,7 @@ color: gray;">{{doc.title}}</span></span>
 {% block content %}
 
 <script>
-  //  window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+   window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}
@@ -184,7 +184,7 @@ padding-bottom: 10px;">
 {% block sidebar %}
 <div style="border: 1px solid #eee;padding: 14px;">
 <small>
-    <p><b>{{doc.title}}</b></p>
+    <p><b>{{doc.title|truncate(32, False, '...', 0)}}</b></p>
            <b>{{_("Owner")}}</b> : {{user_markup(doc.creator)}} <br>
            {{ _('<b>Uploaded:</b> %(date)s (%(age)s)',
                date=(doc.created_at | datetimeformat('short')),
