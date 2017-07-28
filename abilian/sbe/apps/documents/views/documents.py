@@ -75,11 +75,13 @@ def document_view(doc_id):
 #
 # Actions on documents
 #
+@route("/doc/<int:doc_id>/", methods=['POST'])
 @route("/doc/<int:doc_id>/<int:folder_id>/", methods=['POST'])
 @csrf.protect
-def document_edit(doc_id,folder_id):
+def document_edit(doc_id,folder_id=None):
     doc = get_document(doc_id)
-    folder = get_folder(folder_id)
+    if folder_id:
+        folder = get_folder(folder_id)
     check_write_access(doc)
 
     changed = edit_object(doc)
@@ -89,8 +91,10 @@ def document_edit(doc_id,folder_id):
         flash(_(u"Document properties successfully edited."), "success")
     else:
         flash(_(u"You didn't change any property."), "success")
-
-    return redirect(url_for(folder))
+    if folder_id:
+        return redirect(url_for(folder))
+    else:
+        return redirect(url_for(doc))
 
 
 @route("/doc/<int:doc_id>/viewers", methods=['GET'])
