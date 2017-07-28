@@ -22,7 +22,7 @@
 {% block content %}
 
 <script>
-    window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+  //  window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}
@@ -84,6 +84,27 @@
     <li>
       <a onclick="replace_document()" class="" href="#modal-upload-new-version" data-toggle="modal" role="button" title="Move to another folder">
         <i class="fa fa-refresh" aria-hidden="true"></i> {{_("Replace")}}
+        </a>
+    </li>
+       <li>
+           <form id="document_checkout" action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}" method="POST" target="_new">
+            {{ csrf_token }}
+        {%if doc.lock == None %}
+        <input type="hidden" name="action" value="checkout" />
+         <a type="submit" class="btn btn-link"  onclick="$('#document_checkout').submit(); setTimeout(function () { window.location = '{{url_for(doc)}}'  }, 500);">
+        <i class="glyphicon glyphicon-download"></i> {{_(" Checkout")}}
+        </a>
+        {%else%}
+         <input type="hidden" name="action" value="unlock" />
+         <a type="submit" class="btn btn-link"  onclick="$('#document_checkout').submit();">
+        <i class="fa fa-unlock"></i> {{_(" Unlock")}}
+        </a>
+        {%endif%}
+        </form>
+    </li>
+       <li>
+        <a href="{{ url_for(doc) }}" data-toggle="modal" role="button" title="Move to another folder">
+        <i class="glyphicon glyphicon-refresh"></i> {{_(" Refresh preview")}}
         </a>
     </li>
   </ul>
