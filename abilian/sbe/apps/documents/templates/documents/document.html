@@ -23,7 +23,7 @@ color: gray;">{{doc.title}}</span></span>
 {% block content %}
 
 <script>
- //  window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+ window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}
