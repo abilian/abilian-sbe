@@ -23,7 +23,7 @@ color: gray;">{{doc.title}}</span></span>
 {% block content %}
 
 <script>
-   window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+ //  window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}
@@ -75,7 +75,7 @@ color: gray;">{{doc.title}}</span></span>
               <a onclick="edit_document()" class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default" href="#modal-edit"  title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
             </div>
             <div class="btn-group">
-              <a class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i class="glyphicon glyphicon-envelope"></i></a>
+              <a onclick="email_document()" class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i class="glyphicon glyphicon-envelope"></i></a>
             </div>
             <div class="btn-group">
               <a href="#modal-delete" class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger" data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
@@ -224,6 +224,10 @@ padding-bottom: 10px;">
 {%- enddeferJS %}
 
 <script>
+    function email_document(){
+     var doc_url = "{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}";
+    $("#modal-email-form").attr("action",doc_url);
+    }
     function edit_document(){
      var doc_url = "{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}";
     $("#modal-edit-form").attr("action",doc_url);
