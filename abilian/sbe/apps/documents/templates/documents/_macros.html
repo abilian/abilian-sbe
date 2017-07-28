@@ -103,6 +103,8 @@ border-bottom: 2px solid ghostwhite;">
             <td>
               {%- if obj.is_document %}
                 {{ obj.content_length|filesize }}
+              {%else%}
+                {{obj.title}}
               {%- endif %}
             </td>
             {% set owner = obj.owner %}
@@ -112,7 +114,7 @@ border-bottom: 2px solid ghostwhite;">
               <a href="{{ url_for('social.user', user_id=owner.id) }}"
                  title="{{ owner.name }}"><img alt="{{ owner.name }}"
                                                src="{{ user_photo_url(owner, size=40) }}"
-                                               style="vertical-align: middle;"></a>
+                                               style="vertical-align: middle;border-radius: 22px;"></a>
             </td>
             <td class="hide">{{ obj.created_at.isoformat() }} </td>
             <td>{{ obj.created_at|age(add_direction=False) }}</td>
