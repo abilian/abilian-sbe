@@ -5,6 +5,7 @@
 {% from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
+<div class="col-md-12">
   <div class="forum-menu-container">
     <div class="forum-menu" role="group" style="width:100%;">
       <span style="color:gray;">{{ _("Showing :") }}</span>
@@ -52,6 +53,7 @@
       <a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a>
     </p>
   {% endif %}
+</div>
 {% endblock %}
 
 

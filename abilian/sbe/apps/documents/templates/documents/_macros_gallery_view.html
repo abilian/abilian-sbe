@@ -73,7 +73,7 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
     <div class="document-gallery-box" >
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
              <div style="height: 310px;"> <span style="position: relative;left: 7px;">
-                 <a style="color: #797C7E;" href="{{ url_for(obj) }}"> <i class="fa fa-folder-o gallery-folder" aria-hidden="true"></i></a> <span class="folder-gallery-contents-count" style=""><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span></div>
+                 <a style="color: #797C7E;" href="{{ url_for(obj) }}"> <i class="fa fa-folder-o gallery-folder" aria-hidden="true"></i></a></span><div class="gallery-numberCircle"><span>{{ obj.filtered_children|length }}</span></div></div>
         <hr>
             {%else%}
                 {% set icon_src = url_for(".document_preview_image",
@@ -105,7 +105,7 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
   </button>
   <ul class="dropdown-menu" aria-labelledby="dropdownMenu1" style="border-radius: 0px;
 position: absolute;
-top: 53px;
+top: 63px;
 margin-bottom: -144px;">
     {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
     <li><a href="{{ url_for('.permissions', community_id=obj.community.slug, folder_id=obj.id) }}"><i class="glyphicon glyphicon-lock"></i> {{_('Permissions')}}</a></li>

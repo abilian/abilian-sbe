@@ -87,22 +87,24 @@ border-bottom: 2px solid ghostwhite;">
             <td>
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
               <span style="position: relative;left: 7px;">
-              <i style="font-size: 23pt;margin-right: 10px;position: relative;top: 4.5px;color:dimgray;" class="fa fa-folder-o" aria-hidden="true"></i> <span class="folder-contents-count"><span class="documents-nb">{{ obj.filtered_children|length }}</span></span></span>
+              <i class="fa fa-folder-o document-folder-icon" aria-hidden="true"></i></span>
+            <div class="numberCircle"><span>{{ obj.filtered_children|length }}</span></div>
             {%else%}
                 {% set icon_src = url_for(".document_preview_image",
           community_id=g.community.slug, doc_id= obj.id,
           size=obj.preview_size) %}
-               <img class="document-preview" style="background-image: url('{{icon_src}}');" src="" alt="" data-page="0"/>
+                <a style="color: #797C7E;" href="{{ url_for(obj) }}"> <img class="document-preview" style="background-image: url('{{icon_src}}');" src="" alt="" data-page="0"/></a>
             {%endif%}
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>{%- endif %}
-              <a style="position: relative;
-top: 3px;
-left: 81px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
+              <a style="position: relative;top: 3px;left: 50px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
+
             </td>
             <td>
               {%- if obj.is_document %}
                 {{ obj.content_length|filesize }}
+              {%else%}
+                {{obj.title}}
               {%- endif %}
             </td>
             {% set owner = obj.owner %}
@@ -112,7 +114,7 @@ left: 81px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0
               <a href="{{ url_for('social.user', user_id=owner.id) }}"
                  title="{{ owner.name }}"><img alt="{{ owner.name }}"
                                                src="{{ user_photo_url(owner, size=40) }}"
-                                               style="vertical-align: middle;"></a>
+                                               style="vertical-align: middle;border-radius: 22px;"></a>
             </td>
             <td class="hide">{{ obj.created_at.isoformat() }} </td>
             <td>{{ obj.created_at|age(add_direction=False) }}</td>

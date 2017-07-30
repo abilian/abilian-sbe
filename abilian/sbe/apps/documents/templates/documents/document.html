@@ -8,21 +8,22 @@
 {%- from "community/macros.html" import viewers_snapshot -%}
 
 {% macro user_markup(user) %}
-  <a href="{{ url_for('social.user', user_id=user.id) }}"><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
+  <a href="{{ url_for('social.user', user_id=user.id) }}"><img style="border-radius: 22px;" alt="" src="{{ user_photo_url(user, size=16) }}"/>
     {{ user }}
   </a>
 {% endmacro %}
 
 {% macro m_breadcrumbs_path(breadcrumbs) %}
   {% for obj in breadcrumbs[0:-1] %}
-    <a href="{{ obj.path }}">{{ obj.label }}</a> <span class="divider">/</span>
+    <a href="{{ obj.path }}">{{ obj.label }}</a> <span class="divider">/ <span style="font-size: 14pt;
+color: gray;">{{doc.title}}</span></span>
   {% endfor %}
 {% endmacro %}
 
 {% block content %}
 
 <script>
-    //window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+ window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}
@@ -60,12 +61,21 @@
         <i class="fa fa-arrow-left"></i> {{ _("Back to document list") }}
         </a>
 
-      <span id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline;right:158px; top:0px;">
+      <span id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline;right:0px; top:0px;">
+          <div class="btn-group">
+          {%- if doc.antivirus_ok %}
+        <a class="btn btn-success btn-md pull-right"
+           href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
+          <i class="glyphicon glyphicon-download"></i>
+          {{ _('Download') }} (<small>{{ doc.content_length|filesize }}</small>)
+        </a>
+      {%- endif %}
+          </div>
             <div class="btn-group">
-              <a class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default" href="#modal-edit"  title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
+              <a onclick="edit_document()" class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default" href="#modal-edit"  title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
             </div>
             <div class="btn-group">
-              <a class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i class="glyphicon glyphicon-envelope"></i></a>
+              <a onclick="email_document()" class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default" href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i class="glyphicon glyphicon-envelope"></i></a>
             </div>
             <div class="btn-group">
               <a href="#modal-delete" class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger" data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
@@ -86,22 +96,35 @@
         <i class="fa fa-refresh" aria-hidden="true"></i> {{_("Replace")}}
         </a>
     </li>
+       <li>
+           <form id="document_checkout" action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}" method="POST" target="_new">
+            {{ csrf_token }}
+        {%if doc.lock == None %}
+        <input type="hidden" name="action" value="checkout" />
+         <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit" class="btn btn-link"  onclick="$('#document_checkout').submit(); setTimeout(function () { window.location = '{{url_for(doc)}}'  }, 500);">
+        <i class="glyphicon glyphicon-download"></i> {{_(" Checkout")}}
+        </a>
+        {%else%}
+         <input type="hidden" name="action" value="unlock" />
+         <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit" class="btn btn-link"  onclick="$('#document_checkout').submit();">
+        <i class="fa fa-unlock"></i> {{_(" Unlock")}}
+        </a>
+        {%endif%}
+        </form>
+    </li>
+       <li>
+        <a href="{{ url_for(doc) }}" data-toggle="modal" role="button" title="Move to another folder">
+        <i class="glyphicon glyphicon-refresh"></i> {{_(" Refresh preview")}}
+        </a>
+    </li>
   </ul>
 </div>
           </div>
         </span>
 
-     {%- if doc.antivirus_ok %}
-        <a class="btn btn-success btn-md pull-right"
-           href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
-          <i class="glyphicon glyphicon-download"></i>
-          {{ _('Download') }} (<small>{{ doc.content_length|filesize }}</small>)
-        </a>
-      {%- endif %}
+
     <br><br>
       <div>
-
-        {{ viewers_snapshot(viewers,_("viewed by")) }}
       </div>
     </div>
 
@@ -161,7 +184,7 @@ padding-bottom: 10px;">
 {% block sidebar %}
 <div style="border: 1px solid #eee;padding: 14px;">
 <small>
-    <p><b>{{doc.title}}</b></p>
+    <p><b>{{doc.title|truncate(32, False, '...', 0)}}</b></p>
            <b>{{_("Owner")}}</b> : {{user_markup(doc.creator)}} <br>
            {{ _('<b>Uploaded:</b> %(date)s (%(age)s)',
                date=(doc.created_at | datetimeformat('short')),
@@ -201,24 +224,19 @@ padding-bottom: 10px;">
 {%- enddeferJS %}
 
 <script>
+    function email_document(){
+     var doc_url = "{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}";
+    $("#modal-email-form").attr("action",doc_url);
+    }
+    function edit_document(){
+     var doc_url = "{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}";
+    $("#modal-edit-form").attr("action",doc_url);
+    }
 function replace_document(){
-
     var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, current_folder_id= breadcrumbs[0]['path'].split('/')[-1], community_id=doc.community.slug) }}";
     $(".modal-replacedoc-form").attr("action",doc_url);
 }
 </script>
-
-<br>
-  {%- set content_actions = actions.for_category('documents:content') %}
-  {%- if content_actions %}
-    {% call m_box_menu() %}
-      <ul class="nav nav-list">
-        {%- for action in content_actions %}
-          <li>{{ action.render() }}</li>
-        {%- endfor %}
-      </ul>
-    {% endcall %}
-  {%- endif %}
 {% endblock %}
 
 {% block modals %}
