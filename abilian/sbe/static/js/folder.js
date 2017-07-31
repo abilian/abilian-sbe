@@ -27,9 +27,10 @@
                 { bVisible: false, sType: "cmistype" },
                 { bVisible: false, sType: "string" },
                 {
-                    aDataSort: [1, 2],
+                    sWidth: "31%",
+                    sType: "string",
                     asSorting: ["asc", "desc"],
-                    sWidth: "31%"
+                    aDataSort: [2]
                 },
                 {
                     aDataSort: [1, 4],
@@ -48,14 +49,12 @@
                   sWidth: "12%"
                 },
                 {
+                  aDataSort: [],
                   sWidth: "1%",
-                  bVisible: false,
-                  asSorting: []
                 },
                 {
+                  aDataSort: [],
                   sWidth: "1%",
-                  bVisible: false,
-                  asSorting: []
                 }
 
             ],
