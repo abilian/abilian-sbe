@@ -45,19 +45,17 @@
                 },
                 { bVisible: false, sType: "date" },
                 {
-                    aDataSort: [1, 8],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "12%"
+                  sWidth: "12%"
                 },
                 {
-                    aDataSort: [1, 2],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "1%"
+                  sWidth: "1%",
+                  bVisible: false,
+                  asSorting: []
                 },
                 {
-                    aDataSort: [1, 2],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "1%"
+                  sWidth: "1%",
+                  bVisible: false,
+                  asSorting: []
                 }
 
             ],
