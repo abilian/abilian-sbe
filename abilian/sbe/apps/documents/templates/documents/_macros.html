@@ -57,7 +57,7 @@ top: -8px;margin-bottom: -47px;">
     {% endif %}
 
     <br><br>
-      <table style="background: white;position:relative;margin-top: -54px;" class="document-table-thumbnail table table-striped table-condensed" id="objects-table" border="1">
+      <table style="background: white;position:relative;margin-top: -54px;" class="document-table-thumbnail table table-striped table-condensed" id="objects-table">
         <thead>
         <tr style="color: #919191;
 border-bottom: 2px solid ghostwhite;">
@@ -66,6 +66,7 @@ border-bottom: 2px solid ghostwhite;">
           <th class="hide">type</th>
           <th class="hide">title for sorting</th>
           <th style="width: 39%;">{{ _("Title") }}</th>
+          <th class="hide">for size</th>
           <th style="width: 20%;">{{ _("Size") }}</th>
           <th class="hide">Last Name</th>
           <th class="hide">First Name</th>
@@ -100,6 +101,13 @@ border-bottom: 2px solid ghostwhite;">
               <a style="position: relative;top: 3px;left: 58px;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
 
             </td>
+            <td class="hide">
+              {%- if obj.is_document %}
+                {{ obj.content_length }}
+              {%else%}
+                {{ "0" }}
+              {%- endif %}
+              </td>
             <td>
               {%- if obj.is_document %}
                 {{ obj.content_length|filesize }}
@@ -168,6 +176,7 @@ border-top: 2px solid ghostwhite;">
           <th class="hide">type</th>
           <th class="hide">title for sorting</th>
           <th>{{ _("Title") }}</th>
+          <th class="hide">for size</th>
           <th>{{ _("Size") }}</th>
           <th class="hide">Last Name</th>
           <th class="hide">First Name</th>

@@ -32,6 +32,8 @@
                     asSorting: ["asc", "desc"],
                     aDataSort: [2]
                 },
+                { bVisible: false, sType: "numeric",
+                },
                 {
                     aDataSort: [1, 4],
                     asSorting: ["asc", "desc"],
