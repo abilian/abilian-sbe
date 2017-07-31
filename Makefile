@@ -109,6 +109,7 @@ lint-python:
 	@echo "--> Linting Python files"
 	@make flake8
 	@make lint-mypy
+	@make lint-py3k
 
 lint-py3k:
 	pylint --py3k abilian tests

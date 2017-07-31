@@ -465,10 +465,12 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                     })
                 assert rv.status_code == 302
                 assert len(outbox) == 1
+
                 msg = outbox[0]
                 self.assertEqual(msg.subject,
                                  u'[Abilian Test] Unknown sent you a file')
                 self.assertEqual(msg.recipients, [u'dest@example.com'])
+
                 expected_disposition = attachment_utf8(
                     'utf-8%20est%20arriv%C3%A9%21.txt')
                 msg = str(msg)
@@ -486,10 +488,10 @@ class TestPathIndexable(unittest.TestCase):
 
     def setUp(self):
         id_gen = count()
-        obj = self.MockPath(id_gen.next())
-        obj = self.MockPath(id_gen.next(), parent=obj)
-        obj = self.MockPath(id_gen.next(), parent=obj)
-        self.obj = self.MockPath(id_gen.next(), parent=obj)
+        obj = self.MockPath(next(id_gen))
+        obj = self.MockPath(next(id_gen), parent=obj)
+        obj = self.MockPath(next(id_gen), parent=obj)
+        self.obj = self.MockPath(next(id_gen), parent=obj)
 
     def test_iter_to_root(self):
         assert [o.id for o in self.obj._iter_to_root()] == [3, 2, 1, 0]
