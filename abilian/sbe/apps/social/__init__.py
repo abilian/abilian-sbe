@@ -1,6 +1,7 @@
 """
 Default ("home") page for social apps.
 """
+from __future__ import absolute_import
 
 
 def register_plugin(app):
