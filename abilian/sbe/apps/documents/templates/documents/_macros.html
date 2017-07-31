@@ -88,7 +88,7 @@ border-bottom: 2px solid ghostwhite;">
             <td>
             {%if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
               <span style="position: relative;left: 7px;">
-              <i class="fa fa-folder-o document-folder-icon" aria-hidden="true"></i></span>
+                  <a style="color: #797C7E;" href="{{ url_for(obj) }}"><i class="fa fa-folder-o document-folder-icon" aria-hidden="true"></i></a></span>
             <div class="numberCircle"><span>{{ obj.filtered_children|length }}</span></div>
             {%else%}
                 {% set icon_src = url_for(".document_preview_image",
