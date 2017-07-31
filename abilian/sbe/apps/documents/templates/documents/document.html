@@ -16,7 +16,7 @@
 {% macro m_breadcrumbs_path(breadcrumbs) %}
   {% for obj in breadcrumbs[0:-1] %}
     <a href="{{ obj.path }}">{{ obj.label }}</a> <span class="divider">/ <span style="font-size: 14pt;
-color: gray;">{{doc.title}}</span></span>
+color: gray;">{%if doc.lock %}<i style="color:black;" class="fa fa-lock"></i>{%endif%} {{doc.title}}</span></span>
   {% endfor %}
 {% endmacro %}
 

@@ -48,6 +48,7 @@
                 },
                 { bVisible: false, sType: "date" },
                 {
+                  asSorting: ["asc", "desc"],
                   sWidth: "12%"
                 },
                 {
