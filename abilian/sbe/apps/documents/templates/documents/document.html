@@ -23,7 +23,7 @@ color: gray;">{%if doc.lock %}<i style="color:black;" class="fa fa-lock"></i>{%e
 {% block content %}
 
 <script>
-// window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}
