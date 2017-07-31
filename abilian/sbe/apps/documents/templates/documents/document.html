@@ -23,7 +23,7 @@ color: gray;">{%if doc.lock %}<i style="color:black;" class="fa fa-lock"></i>{%e
 {% block content %}
 
 <script>
- window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
+// window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
 </script>
 
     {%- if doc.antivirus_required %}
@@ -121,7 +121,7 @@ color: gray;">{%if doc.lock %}<i style="color:black;" class="fa fa-lock"></i>{%e
 </div>
           </div>
         </span>
-
+<span onclick="view_info()" class="glyphicon glyphicon-chevron-right" id="view_info" aria-hidden="true" style="float: right;font-size: 18pt;position: relative;top: -72px;left: 283px;cursor:pointer;z-index:10;"></span>
 
     <br><br>
       <div>
@@ -182,6 +182,7 @@ padding-bottom: 10px;">
 
 
 {% block sidebar %}
+<br><br>
 <div style="border: 1px solid #eee;padding: 14px;">
 <small>
     <p><b>{{doc.title|truncate(32, False, '...', 0)}}</b></p>
@@ -224,6 +225,20 @@ padding-bottom: 10px;">
 {%- enddeferJS %}
 
 <script>
+    var show = 0;
+    function view_info(){
+    if(show ==0){
+      $("#view_info").css("left","0");
+      $("#sidebar").hide();
+        $( "div[class='col-md-9']" ).attr("class","col-md-12");
+      show = 1;
+    }else{
+      $("#view_info").css("left","283px");
+      $("#sidebar").show();
+      $( "div[class='col-md-12']" ).attr("class","col-md-9");
+      show = 0;
+    }
+    }
     function email_document(){
      var doc_url = "{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}";
     $("#modal-email-form").attr("action",doc_url);
