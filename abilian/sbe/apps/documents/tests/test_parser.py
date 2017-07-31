@@ -1,9 +1,9 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from ..cmis.parser import Entry
 
 
-XML_ENTRY = """\
+XML_ENTRY = b"""\
 <?xml version="1.0" encoding="utf-8"?>
 <entry xmlns="http://www.w3.org/2005/Atom"
   xmlns:app="http://www.w3.org/2007/app"
@@ -22,7 +22,7 @@ XML_ENTRY = """\
 </entry>
 """
 
-XML_ENTRY_WITH_CONTENT = """\
+XML_ENTRY_WITH_CONTENT = b"""\
 <?xml version="1.0" encoding="utf-8"?>
 <entry xmlns="http://www.w3.org/2005/Atom"
   xmlns:app="http://www.w3.org/2007/app"

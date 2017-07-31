@@ -4,8 +4,6 @@ Celery tasks related to document transformation and preview.
 """
 from __future__ import absolute_import, print_function
 
-import base64
-import hashlib
 import mailbox
 import re
 from os.path import expanduser
@@ -26,6 +24,7 @@ from abilian.core.celery import periodic_task
 from abilian.core.extensions import db, mail
 from abilian.core.models.subjects import User
 from abilian.core.signals import activity
+from abilian.core.util import md5
 from abilian.i18n import _l, render_template_i18n
 from abilian.web import url_for
 
@@ -146,9 +145,7 @@ def build_local_part(name, uid):
     key = current_app.config['SECRET_KEY']
     serializer = Serializer(key)
     signature = serializer.dumps(uid)
-    digest = hashlib.md5(signature).digest()
-    digest = base64.b32encode(digest).split('=', 1)[0]  # remove base32 padding
-    # digest = unicode(digest)
+    digest = md5(signature)
     local_part = name + tag + uid + u'-' + digest
 
     if len(local_part) > 64:

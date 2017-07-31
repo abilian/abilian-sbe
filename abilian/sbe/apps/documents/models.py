@@ -26,7 +26,8 @@ from sqlalchemy.orm import backref, foreign, relationship, remote
 from sqlalchemy.orm.session import Session
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, Text, UnicodeText
-from typing import Dict, Any
+from toolz import first
+from typing import Any, Dict
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
 
@@ -331,7 +332,7 @@ class Folder(CmisObject, PathAndSecurityIndexable):
         obj = self
         try:
             for name in path_segments[:]:
-                obj = filter(lambda x: x.title == name, obj.children)[0]
+                obj = first(x for x in obj.children if x.title == name)
             return obj
         except IndexError:
             return None
