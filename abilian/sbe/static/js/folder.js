@@ -27,9 +27,12 @@
                 { bVisible: false, sType: "cmistype" },
                 { bVisible: false, sType: "string" },
                 {
-                    aDataSort: [1, 2],
+                    sWidth: "31%",
+                    sType: "string",
                     asSorting: ["asc", "desc"],
-                    sWidth: "31%"
+                    aDataSort: [2]
+                },
+                { bVisible: false, sType: "numeric",
                 },
                 {
                     aDataSort: [1, 4],
@@ -45,19 +48,16 @@
                 },
                 { bVisible: false, sType: "date" },
                 {
-                    aDataSort: [1, 8],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "12%"
+                  asSorting: ["asc", "desc"],
+                  sWidth: "12%"
                 },
                 {
-                    aDataSort: [1, 2],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "1%"
+                  aDataSort: [],
+                  sWidth: "1%",
                 },
                 {
-                    aDataSort: [1, 2],
-                    asSorting: ["asc", "desc"],
-                    sWidth: "1%"
+                  aDataSort: [],
+                  sWidth: "1%",
                 }
 
             ],
