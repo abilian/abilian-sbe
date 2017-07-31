@@ -109,6 +109,7 @@ lint-python:
 	@echo "--> Linting Python files"
 	@make flake8
 	@make lint-mypy
+	@make lint-py3k
 
 lint-py3k:
 	pylint --py3k abilian tests
@@ -120,7 +121,8 @@ flake8:
 	flake8 abilian tests
 
 format:
-	isort -rc abilian demo tests
+	isort -a  "from __future__ import absolute_import, print_function" -rc \
+		abilian demo tests
 	-yapf --style google -r -i abilian demo tests
 	isort -rc abilian demo tests
 
