@@ -3,7 +3,6 @@ from __future__ import absolute_import, print_function
 import os.path
 import uuid
 
-from abilian.services import get_service
 from flask import Blueprint, current_app, request
 from flask_login import current_user
 from lxml.etree import XMLSyntaxError
@@ -12,6 +11,7 @@ from werkzeug.exceptions import Forbidden, NotFound
 from werkzeug.wrappers import BaseResponse as Response
 
 from abilian.core.extensions import db
+from abilian.services import get_service
 
 from .. import repository
 from .constants import DAV_PROPS, HTTP_BAD_REQUEST, HTTP_CONFLICT, \

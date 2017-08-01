@@ -16,7 +16,6 @@ from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
 import whoosh.query as wq
-from abilian.services import get_service
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
     redirect, render_template, render_template_string, request, send_file
 from flask._compat import text_type
@@ -31,6 +30,7 @@ from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
 from abilian.i18n import _, _n
 from abilian.sbe.apps.communities.views import default_view_kw
+from abilian.services import get_service
 from abilian.services.security import READ, WRITE, Role, security
 from abilian.web import csrf, http, url_for
 from abilian.web.action import actions

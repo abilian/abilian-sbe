@@ -5,10 +5,10 @@ Indexing related utilities for Folder, Documents
 from __future__ import absolute_import, print_function
 
 import sqlalchemy as sa
-from abilian.services import get_service
 from flask import current_app
 
 from abilian.core.entities import Entity
+from abilian.services import get_service
 
 from .models import CmisObject
 

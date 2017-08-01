@@ -5,7 +5,6 @@ from __future__ import absolute_import, print_function
 
 from datetime import datetime, timedelta
 
-from abilian.services import get_service
 from celery import shared_task
 from celery.schedules import crontab
 from flask import current_app
@@ -20,6 +19,7 @@ from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.wiki.models import WikiPage
+from abilian.services import get_service
 from abilian.services.activity import ActivityEntry
 from abilian.services.auth.views import get_serializer
 from abilian.web import url_for

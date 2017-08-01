@@ -8,10 +8,9 @@ from markdown import Markdown
 from mock import MagicMock, patch
 from six import text_type
 from six.moves.urllib.parse import quote_plus
-
-from abilian.core.models.subjects import User
 from toolz import first
 
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
     CommunityIndexingTestCase
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
