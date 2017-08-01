@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from os.path import dirname, join
 
+from abilian.services import get_service
 from flask import current_app, flash, g, jsonify, make_response, redirect, \
     render_template, request, url_for
 from flask_babel import gettext as _
@@ -41,9 +42,10 @@ def groups():
 
 
 def is_admin(group):
+    security = get_service('security')
     is_admin = g.user in group.admins
     if not is_admin and 'security' in current_app.extensions:
-        is_admin = current_app.services['security'].has_role(g.user, 'admin')
+        is_admin = security.has_role(g.user, 'admin')
 
     return is_admin
 

@@ -2,6 +2,7 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+from abilian.services import get_service
 from flask import current_app, g, url_for
 from flask_login import current_user
 
@@ -29,8 +30,8 @@ class EventAction(CalendarAction):
 
 
 def is_admin(context):
-    svc = current_app.services['security']
-    return svc.has_role(current_user, Admin, object=context.get('object'))
+    security = get_service('security')
+    return security.has_role(current_user, Admin, object=context.get('object'))
 
 
 _actions = [
