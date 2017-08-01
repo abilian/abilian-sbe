@@ -190,7 +190,7 @@ class Community(Entity):
         self.members_can_send_by_email = False
         Entity.__init__(self, **kw)
         if self.has_documents and not self.folder:
-            #FIXME: this should be done in documents by using signals
+            # FIXME: this should be done in documents by using signals
             name = self.name
             if not name:
                 # during creation, we may have to provide a temporary name for
@@ -199,8 +199,8 @@ class Community(Entity):
                 name = u'{}_{}-{}'.format(self.__class__.__name__,
                                           str(self.id), time.asctime())
             self.folder = repository.root_folder.create_subfolder(name)
-            #if not self.group:
-            #  self.group = Group(name=self.name)
+            # if not self.group:
+            #   self.group = Group(name=self.name)
 
         if not self.image:
             fn = join(dirname(__file__), "views/data", "community.png")

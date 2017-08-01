@@ -8,8 +8,8 @@ import pkgutil
 from cgi import escape
 
 import sqlalchemy as sa
-from flask import Response, flash, g, jsonify, redirect, \
-    render_template, request
+from flask import Response, flash, g, jsonify, redirect, render_template, \
+    request
 from six import text_type
 from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError

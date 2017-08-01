@@ -86,7 +86,7 @@ def get_object(path):
 @webdav.before_app_request
 def create_root_folder():
     # TODO: create root folder on repository startup instead.
-    #assert repository.root_folder
+    # assert repository.root_folder
     pass
 
 

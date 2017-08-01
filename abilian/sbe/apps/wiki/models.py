@@ -88,7 +88,7 @@ class WikiPage(Entity):
         return html
 
         # TODO: remove Javascript from content
-        #return bleach.clean(html, strip=True)
+        # return bleach.clean(html, strip=True)
 
 
 @listens_for(WikiPage.name, "set", active_history=True)

@@ -97,7 +97,7 @@ def document_viewers(doc_id):
     doc = get_document(doc_id)
     check_read_access(doc)
     doc.ensure_antivirus_scheduled()
-    #db.session.commit()
+    # db.session.commit()
 
     bc = breadcrumbs_for(doc)
     actions.context['object'] = doc
@@ -346,33 +346,33 @@ def document_view_pdf(doc_id):
 #
 # Tagging (currently not used!)
 #
-#@route("/tag")
-#def tag():
-#  tag = request.args.get("tag")
-#  if not tag:
-#    return redirect("/dm/")
+# @route("/tag")
+# def tag():
+#     tag = request.args.get("tag")
+#     if not tag:
+#         return redirect("/dm/")
 #
-#  bc = [dict(path="/", label="Home"), dict(path="/dm/", label="DM")]
-#  bc += [dict(path=request.path, label="Filter by tag")]
-#  # TODO ...
-#  docs = Document.query.filter(Document.tags.like("%" + tag + "%"))
-#  docs = list(docs.all())
-#  docs = [f for f in docs if tag in f.tags.split(",")]
-#  title = "Files filtered by tag: %s" % tag
-#  return render_template("dm/home.html", title=title, breadcrumbs=bc,
-# files=docs)
+#     bc = [dict(path="/", label="Home"), dict(path="/dm/", label="DM")]
+#     bc += [dict(path=request.path, label="Filter by tag")]
+#     # TODO ...
+#     docs = Document.query.filter(Document.tags.like("%" + tag + "%"))
+#     docs = list(docs.all())
+#     docs = [f for f in docs if tag in f.tags.split(",")]
+#     title = "Files filtered by tag: %s" % tag
+#     return render_template("dm/home.html", title=title, breadcrumbs=bc,
+#                            files=docs)
 #
 #
-#@route("/<int:file_id>/tag", methods=['POST'])
-#def tag_post(file_id):
-#  doc = get_document(file_id)
-#  tags = request.form.get("tags")
+# @route("/<int:file_id>/tag", methods=['POST'])
+# def tag_post(file_id):
+#     doc = get_document(file_id)
+#     tags = request.form.get("tags")
 #
-#  doc.tags = tags
-#  self = current_app._get_current_object()
-#  activity.send(self, actor=g.user, verb="tag", object=doc)
+#     doc.tags = tags
+#     self = current_app._get_current_object()
+#     activity.send(self, actor=g.user, verb="tag", object=doc)
 #
-#  db.session.commit()
+#     db.session.commit()
 #
-#  flash("Tags successfully successfully updated", "success")
-#  return redirect(url_for(".document_view", doc_id=doc.id))
+#     flash("Tags successfully successfully updated", "success")
+#     return redirect(url_for(".document_view", doc_id=doc.id))

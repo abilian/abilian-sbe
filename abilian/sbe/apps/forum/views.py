@@ -9,8 +9,8 @@ from datetime import date, datetime, timedelta
 from itertools import groupby
 
 import sqlalchemy as sa
-from flask import current_app, flash, g, make_response, \
-    render_template, request
+from flask import current_app, flash, g, make_response, render_template, \
+    request
 from flask_babel import format_date
 from flask_login import current_user
 from six import text_type
