@@ -57,4 +57,4 @@ def test_parse_document_entry():
     e = Entry(XML_ENTRY_WITH_CONTENT)
     assert e.name == "testDocument"
     assert e.type == "cmis:document"
-    assert e.content == "Test content string"
+    assert e.content == b"Test content string"

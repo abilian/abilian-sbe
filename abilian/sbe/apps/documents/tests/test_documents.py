@@ -11,7 +11,7 @@ from zipfile import ZipFile
 
 import pytest
 from flask import g, get_flashed_messages
-from six import binary_type, text_type
+from six import binary_type
 from werkzeug.datastructures import FileStorage
 
 from abilian.sbe.apps.communities.models import WRITER
@@ -31,7 +31,7 @@ class BaseTests(CommunityBaseTestCase):
     def setUp(self):
         super(BaseTests, self).setUp()
 
-        self.root_folder = Folder(title=u"root")
+        self.root_folder = Folder(title="root")
         db.session.add(self.root_folder)
         db.session.flush()
 
@@ -184,7 +184,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             self.session.flush()
             assert doc2.parent == self.folder
             assert len(self.folder.children) == 2
-            assert doc2.name == name + u'-1'
+            assert doc2.name == name + '-1'
 
             messages = get_flashed_messages()
             assert len(messages) == 1
@@ -267,14 +267,14 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         self.assert_404(response)
 
     def test_text_upload(self):
-        NAME = 'wikipedia-fr.txt'
+        name = 'wikipedia-fr.txt'
         with self.client_login(self.user.email, password='azerty'):
-            self._test_upload(NAME, "text/plain", test_preview=False)
+            self._test_upload(name, "text/plain", test_preview=False)
 
     def test_pdf_upload(self):
-        NAME = "onepage.pdf"
+        name = "onepage.pdf"
         with self.client_login(self.user.email, password='azerty'):
-            self._test_upload(NAME, "application/pdf")
+            self._test_upload(name, "application/pdf")
 
     def test_image_upload(self):
         NAME = "picture.jpg"
@@ -295,13 +295,13 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
         fd = self.open_file('content.zip')
         result = [('/'.join(path), f)
-                  for path, f in explore_archive(fd, u'content.zip')]
-        assert result == [(u'', fd)]
+                  for path, f in explore_archive(fd, 'content.zip')]
+        assert result == [('', fd)]
 
         fd = self.open_file('content.zip')
-        archive_content = explore_archive(fd, u'content.zip', uncompress=True)
+        archive_content = explore_archive(fd, 'content.zip', uncompress=True)
         result = {
-            '/'.join(path) + u'/' + f.filename
+            '/'.join(path) + '/' + f.filename
             for path, f in archive_content
         }
         assert result == {
@@ -309,11 +309,11 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             'existing-doc/subfolder_in_renamed/doc.txt',
             'folder 1/doc.txt',
             'folder 1/dos cp437: é.txt',
-            u'folder 1/osx: utf-8: é.txt',
+            'folder 1/osx: utf-8: é.txt',
         }
 
     def test_zip_upload_uncompress(self):
-        folder = Folder(title=u'folder 1', parent=self.community.folder)
+        folder = Folder(title='folder 1', parent=self.community.folder)
         self.session.add(folder)
         self.session.flush()
         folder = self.community.folder
@@ -329,8 +329,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         with self.client_login(self.user.email, password='azerty'):
             response = self.client.post(url, data=data)
 
+        assert response.status_code == 302
         expected = {'existing-doc', 'folder 1', 'existing-doc-1'}
-        self.assert_status(response, 302)
         assert expected == {f.title for f in folder.children}
         expected = {'folder 1', 'existing-doc-1'}
         assert expected == {f.title for f in folder.subfolders}
@@ -349,19 +349,19 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 community_id=self.community.slug,
                 folder_id=folder.id)
             response = self.client.post(url, data=data)
-            self.assert_302(response)
+            assert response.status_code == 302
 
             doc = folder.children[0]
             data = {
                 'action': 'download',
-                'object-selected': ["cmis:document:%d" % doc.id]
+                'object-selected': ["cmis:document:%d" % doc.id],
             }
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
                 folder_id=folder.id)
             response = self.client.post(url, data=data)
-            self.assert_200(response)
+            assert response.status_code == 200
             assert response.content_type == 'application/zip'
 
             zipfile = ZipFile(BytesIO(response.data))
@@ -369,18 +369,18 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
     def test_recursive_zip(self):
         with self.client_login(self.user.email, password='azerty'):
-            data = {'action': 'new', 'title': u'my folder'}
+            data = {'action': 'new', 'title': 'my folder',}
             folder = self.community.folder
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
                 folder_id=folder.id)
             response = self.client.post(url, data=data)
-            self.assert_302(response)
+            assert response.status_code == 302
 
             my_folder = folder.children[0]
 
-            title = u"onepage.pdf"
+            title = "onepage.pdf"
             content_type = "application/pdf"
             data = {
                 'file': (self.open_file(title), title, content_type),
@@ -391,18 +391,18 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 community_id=self.community.slug,
                 folder_id=my_folder.id)
             response = self.client.post(url, data=data)
-            self.assert_302(response)
+            assert response.status_code == 302
 
             data = {
                 'action': 'download',
-                'object-selected': ["cmis:folder:%d" % my_folder.id]
+                'object-selected': ["cmis:folder:%d" % my_folder.id],
             }
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
                 folder_id=folder.id)
             response = self.client.post(url, data=data)
-            self.assert_200(response)
+            assert response.status_code == 200
             assert response.content_type == 'application/zip'
 
             zipfile = ZipFile(BytesIO(response.data))
@@ -503,4 +503,4 @@ class TestPathIndexable(unittest.TestCase):
                 for o in self.obj._iter_to_root(skip_self=True)] == [2, 1, 0]
 
     def test_indexable_parent_ids(self):
-        self.assertEqual(self.obj._indexable_parent_ids, u'/0/1/2')
+        self.assertEqual(self.obj._indexable_parent_ids, '/0/1/2')
