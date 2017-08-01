@@ -8,6 +8,7 @@ from itertools import groupby, islice
 
 import whoosh
 import whoosh.query as wq
+from abilian.services import get_service
 from flask import current_app, g, render_template
 from flask_babel import format_date
 from six import text_type
@@ -104,13 +105,13 @@ def get_attachments_from_forum(community):
 
 # FIXME: significant performance issues here, needs major refactoring
 def get_attachments_from_dms(community):
-    svc = current_app.services['indexing']
+    index_service = get_service('indexing')
     filters = wq.And([
         wq.Term('community_id', community.id),
         wq.Term('object_type', Document.entity_type)
     ])
     sortedby = whoosh.sorting.FieldFacet('created_at', reverse=True)
-    documents = svc.search(u'', filter=filters, sortedby=sortedby, limit=50)
+    documents = index_service.search('', filter=filters, sortedby=sortedby, limit=50)
 
     attachments = []
     for doc in documents:

@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from os.path import dirname, join
 
+from abilian.services import get_service
 from flask import current_app, flash, g, jsonify, make_response, redirect, \
     render_template, request, url_for
 from flask_babel import gettext as _
@@ -41,9 +42,10 @@ def groups():
 
 
 def is_admin(group):
+    security = get_service('security')
     is_admin = g.user in group.admins
     if not is_admin and 'security' in current_app.extensions:
-        is_admin = current_app.services['security'].has_role(g.user, 'admin')
+        is_admin = security.has_role(g.user, 'admin')
 
     return is_admin
 
@@ -60,7 +62,7 @@ def group_home(group_id):
 @social.route("/groups/<int:group_id>/json")
 def group_json(group_id):
     members = Group.query.get(group_id).members
-    q = request.args.get("q", u'').lower()
+    q = request.args.get("q", '').lower()
     if q:
         members = filter(
             lambda u: any(term.startswith(q)
@@ -93,11 +95,11 @@ def group_post(group_id):
     elif action == 'leave':
         g.user.leave(group)
     elif action in membership_actions:
-        user_id = request.form.get('user', u'').strip()
+        user_id = request.form.get('user', '').strip()
         try:
             user_id = int(user_id)
         except:
-            flash(_(u'Error: No user selected'), 'error')
+            flash(_('Error: No user selected'), 'error')
             return redirect(url_for(".group_home", group_id=group_id))
 
         user = User.query.get(user_id)

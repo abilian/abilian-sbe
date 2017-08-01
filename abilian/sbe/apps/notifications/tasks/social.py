@@ -5,6 +5,7 @@ from __future__ import absolute_import, print_function
 
 from datetime import datetime, timedelta
 
+from abilian.services import get_service
 from celery import shared_task
 from celery.schedules import crontab
 from flask import current_app
@@ -47,7 +48,7 @@ def send_daily_social_digest_task():
 
 def send_daily_social_digest():
     for user in User.query.filter(User.can_login == True).all():
-        preferences = current_app.services['preferences']
+        preferences = get_service('preferences')
         prefs = preferences.get_preferences(user)
 
         if not prefs.get('sbe:notifications:daily', False):

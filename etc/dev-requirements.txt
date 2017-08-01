@@ -25,6 +25,9 @@ honcho
 # Documentation generator
 Sphinx
 
+# Lint .rst files
+restructuredtext-lint
+
 # Standard theme for readthedocs.com
 sphinx-rtd-theme
 

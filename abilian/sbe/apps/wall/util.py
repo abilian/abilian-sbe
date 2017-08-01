@@ -7,6 +7,7 @@ Some functions to retrieve activity entries.
 from __future__ import absolute_import, print_function
 
 import sqlalchemy as sa
+from abilian.services import get_service
 from flask import current_app, g
 from flask_login import current_user
 from werkzeug.exceptions import Forbidden
@@ -59,7 +60,7 @@ def get_recent_entries(num=20, user=None, community=None):
     limit = min(num * 2, 100)
     entries = []
     deleted = False
-    security = current_app.services['security']
+    security = get_service('security')
     has_permission = security.has_permission
 
     for entry in query.yield_per(limit):

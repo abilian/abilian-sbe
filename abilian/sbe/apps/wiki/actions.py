@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import absolute_import, print_function
 
+from abilian.services import get_service
 from flask import current_app, url_for
 from flask_babel import lazy_gettext as _l
 from flask_login import current_user
@@ -29,8 +30,8 @@ class WikiPageAction(Action):
 
 
 def is_admin(context):
-    svc = current_app.services['security']
-    return svc.has_role(current_user, Admin, object=context.get('object'))
+    security = get_service('security')
+    return security.has_role(current_user, Admin, object=context.get('object'))
 
 
 class WikiPageModalAction(ModalActionMixin, WikiPageAction):

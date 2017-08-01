@@ -95,7 +95,7 @@ vagrant-tests:
 #
 # Linting & formatting
 #
-lint: lint-js lint-python lint-less
+lint: lint-js lint-python lint-less lint-doc
 
 lint-js:
 	@echo "--> Linting JavaScript files"
@@ -117,7 +117,11 @@ lint-py3k:
 lint-mypy:
 	-mypy abilian
 
+lint-doc:
+	rst-lint *.rst
+
 flake8:
+	@echo "--> Linting .rst files"
 	flake8 abilian tests
 
 format:
