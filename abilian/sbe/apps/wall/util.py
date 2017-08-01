@@ -7,7 +7,7 @@ Some functions to retrieve activity entries.
 from __future__ import absolute_import, print_function
 
 import sqlalchemy as sa
-from flask import current_app, g
+from flask import g
 from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 

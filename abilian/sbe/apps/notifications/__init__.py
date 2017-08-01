@@ -17,7 +17,7 @@ def register_plugin(app):
     sbe.init_app(app)
 
     # TODO: Slightly confusing. Reorg?
-    from .views import notifications, social
+    from .views import notifications, social  # noqa
     from .tasks.social import DIGEST_TASK_NAME, DEFAULT_DIGEST_SCHEDULE
 
     CELERYBEAT_SCHEDULE = app.config.setdefault('CELERYBEAT_SCHEDULE', {})

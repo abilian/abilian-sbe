@@ -2,7 +2,7 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-from flask import current_app, g, url_for
+from flask import g, url_for
 from flask_login import current_user
 
 from abilian.i18n import _l

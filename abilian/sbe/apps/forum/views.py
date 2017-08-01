@@ -9,7 +9,7 @@ from datetime import date, datetime, timedelta
 from itertools import groupby
 
 import sqlalchemy as sa
-from flask import current_app, flash, g, make_response, redirect, \
+from flask import current_app, flash, g, make_response, \
     render_template, request
 from flask_babel import format_date
 from flask_login import current_user
@@ -21,7 +21,6 @@ from werkzeug.exceptions import BadRequest, NotFound
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.security import is_manager
-from abilian.services.security import MANAGE
 from abilian.services.viewtracker import viewtracker
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction, Endpoint
