@@ -3,7 +3,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from os.path import dirname, join
 
-from abilian.services import get_service
 from flask import current_app, flash, g, jsonify, make_response, redirect, \
     render_template, request, url_for
 from flask_babel import gettext as _
@@ -12,6 +11,7 @@ from werkzeug.exceptions import InternalServerError, NotFound
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
+from abilian.services import get_service
 from abilian.services.image import CROP, resize
 from abilian.services.security import security
 from abilian.web import csrf
