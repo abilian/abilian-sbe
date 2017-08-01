@@ -61,23 +61,41 @@ You will need to install the following packages using homebrew
 
     brew install python2.7 jpeg git libmagic poppler imagemagick
 
+Running with gunicorn
+---------------------
+
+.. code:: bash
+
+    gunicorn 'abilian.sbe.app.create_app()'
+
+
+Developing
+==========
+
+Branching policy
+----------------
+
+We currently have two branches:
+
+- `master` for stable version (0.3.x)
+- `develop` for next version (0.4.devx)
 
 Testing
-=======
+-------
 
 Short test
-----------
+~~~~~~~~~~
 
 Make sure all the dependencies are installed (cf. above), then run ``make
 test``.
 
 With coverage
--------------
+~~~~~~~~~~~~~
 
 Run ``make test-with-coverage``.
 
 Full test suite
----------------
+~~~~~~~~~~~~~~~
 
 Install `tox <http://pypi.python.org/pypi/tox>`_. Run ``tox -e ALL``.
 
@@ -89,17 +107,10 @@ Install `tox <http://pypi.python.org/pypi/tox>`_. Run ``tox -e ALL``.
    ``POSTGRES_HOST``, ``POSTGRES_PORT``, ``POSTGRES_DB``, ``POSTGRES_USER``,
    ``POSTGRES_PASSWORD``)
 
-Running with gunicorn
----------------------
-
-.. code:: bash
-
-    gunicorn 'abilian.sbe.app.create_app()'
-
 Build Status
-============
+------------
 
-The project is under continuous integration with Travis:
+The project is under continuous integration with Travis and CircleCI:
 
 .. image:: https://travis-ci.org/abilian/abilian-sbe.svg?branch=master
    :target: https://travis-ci.org/abilian/abilian-sbe
