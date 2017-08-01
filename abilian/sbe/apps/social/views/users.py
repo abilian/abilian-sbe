@@ -8,9 +8,8 @@ import pkgutil
 from cgi import escape
 
 import sqlalchemy as sa
-from abilian.services import get_service
-from flask import Response, current_app, flash, g, jsonify, redirect, \
-    render_template, request
+from flask import Response, flash, g, jsonify, redirect, render_template, \
+    request
 from six import text_type
 from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError
@@ -21,6 +20,7 @@ from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.models import Membership
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.views import get_recent_entries
+from abilian.services import get_service
 from abilian.web import url_for
 from abilian.web.filters import age
 from abilian.web.views import ObjectEdit, default_view

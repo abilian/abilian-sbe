@@ -22,7 +22,6 @@ from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 from abilian.services.indexing.adapter import SAAdapter
-from abilian.services.viewtracker import viewtracker
 
 
 class ThreadClosedError(RuntimeError):

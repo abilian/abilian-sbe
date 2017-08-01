@@ -9,8 +9,8 @@ from datetime import date, datetime, timedelta
 from itertools import groupby
 
 import sqlalchemy as sa
-from flask import current_app, flash, g, make_response, redirect, \
-    render_template, request
+from flask import current_app, flash, g, make_response, render_template, \
+    request
 from flask_babel import format_date
 from flask_login import current_user
 from six import text_type
@@ -21,7 +21,6 @@ from werkzeug.exceptions import BadRequest, NotFound
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.security import is_manager
-from abilian.services.security import MANAGE
 from abilian.services.viewtracker import viewtracker
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction, Endpoint
@@ -100,8 +99,11 @@ def get_viewed_posts(entities):
 def get_viewed_times(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
-        views = [view for view in views
-                 if view.user != view.entity.creator and view.user in g.community.members]
+        views = [
+            view for view in views
+            if view.user != view.entity.creator and view.user in
+            g.community.members
+        ]
 
         all_hits = viewtracker.get_hits(views=views)
         views_id = [view.view_id for view in all_hits]

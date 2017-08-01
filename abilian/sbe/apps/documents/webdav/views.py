@@ -3,8 +3,7 @@ from __future__ import absolute_import, print_function
 import os.path
 import uuid
 
-from abilian.services import get_service
-from flask import Blueprint, current_app, request
+from flask import Blueprint, request
 from flask_login import current_user
 from lxml.etree import XMLSyntaxError
 from werkzeug.datastructures import Headers
@@ -12,6 +11,7 @@ from werkzeug.exceptions import Forbidden, NotFound
 from werkzeug.wrappers import BaseResponse as Response
 
 from abilian.core.extensions import db
+from abilian.services import get_service
 
 from .. import repository
 from .constants import DAV_PROPS, HTTP_BAD_REQUEST, HTTP_CONFLICT, \
@@ -86,7 +86,7 @@ def get_object(path):
 @webdav.before_app_request
 def create_root_folder():
     # TODO: create root folder on repository startup instead.
-    #assert repository.root_folder
+    # assert repository.root_folder
     pass
 
 

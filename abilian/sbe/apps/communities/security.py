@@ -6,11 +6,11 @@ from __future__ import absolute_import, print_function
 
 from functools import wraps
 
-from abilian.services import get_service
-from flask import current_app, g
+from flask import g
 from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 
+from abilian.services import get_service
 from abilian.services.security import MANAGE
 
 

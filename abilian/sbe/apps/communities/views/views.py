@@ -4,7 +4,6 @@
 from __future__ import absolute_import, print_function
 
 import hashlib
-import json
 import logging
 from collections import Counter
 from datetime import datetime
@@ -16,19 +15,15 @@ from time import gmtime, strftime
 
 import openpyxl
 import pytz
-import requests
 import sqlalchemy as sa
 from flask import current_app, flash, g, jsonify, redirect, render_template, \
     request, session, url_for
 from flask_login import current_user, login_required
-from flask_mail import Message
 from openpyxl.writer.write_only import WriteOnlyCell
 from six import text_type
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
-from werkzeug.utils import secure_filename
 from whoosh.searching import Hit
 
-from abilian.core.commands.base import createuser
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
@@ -37,7 +32,6 @@ from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
-from abilian.services.auth.views import send_reset_password_instructions
 from abilian.services.security import Role
 from abilian.web import csrf, views
 from abilian.web.action import Endpoint
