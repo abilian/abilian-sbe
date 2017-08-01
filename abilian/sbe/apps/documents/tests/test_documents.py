@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import unittest
 from io import BytesIO
@@ -11,6 +11,7 @@ from zipfile import ZipFile
 
 import pytest
 from flask import g, get_flashed_messages
+from six import binary_type, text_type
 from werkzeug.datastructures import FileStorage
 
 from abilian.sbe.apps.communities.models import WRITER
@@ -47,8 +48,8 @@ class BaseTests(CommunityBaseTestCase):
 class TestBlobs(BaseTests):
 
     def test_document(self):
-        root = Folder(title=u"root")
-        doc = Document(parent=root, title=u"test")
+        root = Folder(title="root")
+        doc = Document(parent=root, title="test")
         data = self.open_file("onepage.pdf").read()
         doc.set_content(data, "application/pdf")
         self.session.add(doc)
@@ -59,9 +60,9 @@ class TestBlobs(BaseTests):
         doc.ensure_antivirus_scheduled()
 
     def test_antivirus_properties(self):
-        root = Folder(title=u"root")
-        doc = Document(parent=root, title=u"test")
-        doc.set_content('content', 'text/plain')
+        root = Folder(title="root")
+        doc = Document(parent=root, title="test")
+        doc.set_content(b'content', 'text/plain')
         appcfg = self.app.config
         meta = doc.content_blob.meta
 
@@ -128,27 +129,27 @@ class TestBlobs(BaseTests):
 class IndexingTestCase(CommunityIndexingTestCase):
 
     def test_folder_indexed(self):
-        folder = Folder(title=u'Folder 1', parent=self.community.folder)
+        folder = Folder(title='Folder 1', parent=self.community.folder)
         self.session.add(folder)
-        folder_other = Folder(title=u'Folder 2: other', parent=self.c2.folder)
+        folder_other = Folder(title='Folder 2: other', parent=self.c2.folder)
         self.session.add(folder_other)
         self.session.commit()
 
         svc = self.svc
         obj_types = (Folder.entity_type,)
         with self.login(self.user_no_community):
-            res = svc.search(u'folder', object_types=obj_types)
+            res = svc.search('folder', object_types=obj_types)
             assert len(res) == 0
 
         with self.login(self.user):
-            res = svc.search(u'folder', object_types=obj_types)
+            res = svc.search('folder', object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
             assert hit['object_key'] == folder.object_key
             assert hit['community_slug'] == self.community.slug
 
         with self.login(self.user_c2):
-            res = svc.search(u'folder', object_types=obj_types)
+            res = svc.search('folder', object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
             assert hit['object_key'] == folder_other.object_key
@@ -168,7 +169,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         with self.login(self.user):
             g.user = self.user
             g.community = CommunityPresenter(self.community)
-            name = u'document'
+            name = 'document'
             fs = FileStorage(
                 BytesIO(b'content'), filename=name, content_type='text/plain')
             doc = view_util.create_document(self.folder, fs)
@@ -195,8 +196,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             self.assert_status(response, 302)
             self.assertEqual(
                 response.headers['Location'],
-                u'http://localhost/communities/{}/docs/folder/{}'
-                u''.format(self.community.slug, self.folder.id),)
+                'http://localhost/communities/{}/docs/folder/{}'
+                ''.format(self.community.slug, self.folder.id),)
 
     def _test_upload(self,
                      title,
@@ -271,18 +272,18 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             self._test_upload(NAME, "text/plain", test_preview=False)
 
     def test_pdf_upload(self):
-        NAME = u"onepage.pdf"
+        NAME = "onepage.pdf"
         with self.client_login(self.user.email, password='azerty'):
             self._test_upload(NAME, "application/pdf")
 
     def test_image_upload(self):
-        NAME = u"picture.jpg"
+        NAME = "picture.jpg"
         with self.client_login(self.user.email, password='azerty'):
             self._test_upload(NAME, "image/jpeg")
 
     @pytest.mark.skip()  # FIXME: magic detection mismatch?
     def test_binary_upload(self):
-        NAME = u"random.bin"
+        NAME = "random.bin"
         with self.client_login(self.user.email, password='azerty'):
             self._test_upload(
                 NAME,
@@ -291,21 +292,24 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
     def test_explore_archive(self):
         from abilian.sbe.apps.documents.views.folders import explore_archive
+
         fd = self.open_file('content.zip')
-        result = [(u'/'.join(path), f)
+        result = [('/'.join(path), f)
                   for path, f in explore_archive(fd, u'content.zip')]
         assert result == [(u'', fd)]
 
         fd = self.open_file('content.zip')
         archive_content = explore_archive(fd, u'content.zip', uncompress=True)
         result = {
-            u'/'.join(path) + u'/' + f.filename
+            '/'.join(path) + u'/' + f.filename
             for path, f in archive_content
         }
         assert result == {
-            u'existing-doc/file.txt',
-            u'existing-doc/subfolder_in_renamed/doc.txt', u'folder 1/doc.txt',
-            u'folder 1/dos cp437: é.txt', u'folder 1/osx: utf-8: é.txt'
+            'existing-doc/file.txt',
+            'existing-doc/subfolder_in_renamed/doc.txt',
+            'folder 1/doc.txt',
+            'folder 1/dos cp437: é.txt',
+            u'folder 1/osx: utf-8: é.txt',
         }
 
     def test_zip_upload_uncompress(self):
@@ -314,8 +318,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         self.session.flush()
         folder = self.community.folder
         files = []
-        files.append((BytesIO(b'A document'), u'existing-doc', 'text/plain'))
-        files.append((self.open_file('content.zip'), u'content.zip',
+        files.append((BytesIO(b'A document'), 'existing-doc', 'text/plain'))
+        files.append((self.open_file('content.zip'), 'content.zip',
                       'application/zip'))
         data = {'file': files, 'action': 'upload', 'uncompress_files': True}
         url = url_for(
@@ -325,15 +329,15 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         with self.client_login(self.user.email, password='azerty'):
             response = self.client.post(url, data=data)
 
-        expected = {u'existing-doc', u'folder 1', u'existing-doc-1'}
+        expected = {'existing-doc', 'folder 1', 'existing-doc-1'}
         self.assert_status(response, 302)
         assert expected == {f.title for f in folder.children}
-        expected = {u'folder 1', u'existing-doc-1'}
+        expected = {'folder 1', 'existing-doc-1'}
         assert expected == {f.title for f in folder.subfolders}
 
     def test_zip(self):
         with self.client_login(self.user.email, password='azerty'):
-            title = u"onepage.pdf"
+            title = "onepage.pdf"
             content_type = "application/pdf"
             data = {
                 'file': (self.open_file(title), title, content_type),
@@ -413,7 +417,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
         with self.client_login(self.user.email, password='azerty'):
             # upload files
-            for filename in (u'ascii title.txt', u'utf-8 est arrivé!.txt'):
+            for filename in ('ascii title.txt', 'utf-8 est arrivé!.txt'):
                 content_type = "text/plain"
                 data = {
                     'file': (BytesIO(b'file content'), filename, content_type),
@@ -441,17 +445,19 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                     url,
                     data={
                         'recipient': 'dest@example.com',
-                        'message': u'Voilà un fichier'
+                        'message': 'Voilà un fichier',
                     })
                 self.assertEqual(rv.status_code, 302,
                                  "expected 302, got:" + rv.status)
                 assert len(outbox) == 1
+
                 msg = outbox[0]
-                self.assertEqual(msg.subject,
-                                 u'[Abilian Test] Unknown sent you a file')
-                assert msg.recipients == [u'dest@example.com']
-                expected_disposition = attachment('ascii title.txt')
-                msg = str(msg)
+                assert msg.subject == '[Abilian Test] Unknown sent you a file'
+                assert msg.recipients == ['dest@example.com']
+
+                expected_disposition = binary_type(
+                    attachment('ascii title.txt'))
+                msg = binary_type(msg)
                 assert expected_disposition in msg
 
             # mail unicode filename
@@ -461,21 +467,19 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                     url,
                     data={
                         'recipient': 'dest@example.com',
-                        'message': u'Voilà un fichier'
+                        'message': 'Voilà un fichier',
                     })
                 assert rv.status_code == 302
                 assert len(outbox) == 1
 
                 msg = outbox[0]
-                self.assertEqual(msg.subject,
-                                 u'[Abilian Test] Unknown sent you a file')
-                self.assertEqual(msg.recipients, [u'dest@example.com'])
+                assert msg.subject == '[Abilian Test] Unknown sent you a file'
+                assert msg.recipients == ['dest@example.com']
 
-                expected_disposition = attachment_utf8(
-                    'utf-8%20est%20arriv%C3%A9%21.txt')
-                msg = str(msg)
-                self.assertTrue(expected_disposition in msg,
-                                (expected_disposition, msg))
+                expected_disposition = binary_type(
+                    attachment_utf8('utf-8%20est%20arriv%C3%A9%21.txt'))
+                msg = binary_type(msg)
+                assert expected_disposition in msg, (expected_disposition, msg)
 
 
 class TestPathIndexable(unittest.TestCase):

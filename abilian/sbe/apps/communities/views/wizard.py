@@ -9,6 +9,7 @@ from os.path import splitext
 
 from flask import current_app, flash, g, redirect, render_template, request, \
     url_for
+from six import PY2
 from validate_email import validate_email
 from werkzeug.utils import secure_filename
 
@@ -104,7 +105,11 @@ def wizard_read_csv(csv_file):
     if file_extension != ".csv":
         return []
 
-    contents = csv.reader(csv_file, delimiter=b";")
+    if PY2:
+        contents = csv.reader(csv_file, delimiter=b";")
+    else:
+        contents = csv.reader(csv_file, delimiter=";")
+
     new_accounts = []
 
     for row in contents:
