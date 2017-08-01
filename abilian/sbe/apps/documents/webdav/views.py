@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function
 import os.path
 import uuid
 
+from abilian.services import get_service
 from flask import Blueprint, current_app, request
 from flask_login import current_user
 from lxml.etree import XMLSyntaxError
@@ -51,7 +52,9 @@ def log_request():
 
 @webdav.before_request
 def only_admin():
-    if not current_app.services('security').has_role(current_user, "admin"):
+    security = get_service('security')
+
+    if not security.has_role(current_user, "admin"):
         raise Forbidden()
 
 

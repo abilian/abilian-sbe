@@ -5,6 +5,7 @@ Indexing related utilities for Folder, Documents
 from __future__ import absolute_import, print_function
 
 import sqlalchemy as sa
+from abilian.services import get_service
 from flask import current_app
 
 from abilian.core.entities import Entity
@@ -19,8 +20,8 @@ def reindex_tree(obj):
     """
     assert isinstance(obj, CmisObject)
 
-    svc = current_app.services['indexing']
-    if not svc.running:
+    index_service = get_service('indexing')
+    if not index_service.running:
         return
 
     descendants = sa.select([CmisObject.id, CmisObject._parent_id]) \
@@ -45,7 +46,7 @@ def reindex_tree(obj):
         .options(sa.orm.noload('*')) \
         .params(ancestor_id=obj.id)
 
-    to_update = svc.app_state.to_update
+    to_update = index_service.app_state.to_update
     key = 'changed'
 
     for item in query.yield_per(1000):

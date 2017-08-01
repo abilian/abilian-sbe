@@ -16,6 +16,7 @@ from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
 import whoosh.query as wq
+from abilian.services import get_service
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
     redirect, render_template, render_template_string, request, send_file
 from flask._compat import text_type
@@ -864,7 +865,7 @@ def descendants_view(folder_id):
     actions.context['object'] = folder
 
     root_path_ids = folder._indexable_parent_ids + '/{}'.format(folder.id)
-    svc = current_app.services['indexing']
+    index_service = get_service('indexing')
 
     # yapf: disable
     filters = wq.And([wq.Term('community_id', folder.community.id),
@@ -873,7 +874,7 @@ def descendants_view(folder_id):
                              wq.Term('object_type', Document.entity_type)])])
     # yapf: enable
 
-    results = svc.search('', filter=filters, limit=None)
+    results = index_service.search('', filter=filters, limit=None)
     by_path = {}
     owner_ids = set()
     for hit in results:

@@ -8,6 +8,7 @@ import pkgutil
 from cgi import escape
 
 import sqlalchemy as sa
+from abilian.services import get_service
 from flask import Response, current_app, flash, g, jsonify, redirect, \
     render_template, request
 from six import text_type
@@ -138,7 +139,7 @@ def users_dt_json():
 @social.route("/users/<int:user_id>")
 @default_view(social, User, 'user_id')
 def user(user_id):
-    security = current_app.services['security']
+    security = get_service('security')
     user = User.query.get(user_id)
 
     # FIXME: use user profiles
@@ -167,7 +168,7 @@ def user(user_id):
 
 
 def can_edit(user):
-    security = current_app.services.get('security')
+    security = get_service('security')
     if not security:
         return True
 
