@@ -9,19 +9,19 @@ from ..webdav.xml import MultiStatus, Propfind
 
 
 def test_propfind_sample1():
-    xml = open(dirname(__file__) + "/data/propfind1.xml").read()
+    xml = open(dirname(__file__) + "/data/propfind1.xml", 'rb').read()
     propfind = Propfind(xml)
     assert propfind.mode == 'prop'
 
 
 def test_propfind_sample2():
-    xml = open(dirname(__file__) + "/data/propfind2.xml").read()
+    xml = open(dirname(__file__) + "/data/propfind2.xml", 'rb').read()
     propfind = Propfind(xml)
     assert propfind.mode == 'prop'
 
 
 def test_propfind_sample3():
-    xml = open(dirname(__file__) + "/data/propfind3.xml").read()
+    xml = open(dirname(__file__) + "/data/propfind3.xml", 'rb').read()
     propfind = Propfind(xml)
     assert propfind.mode == 'allprop'
 

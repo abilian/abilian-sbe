@@ -141,8 +141,8 @@ def get_selected_objects(folder):
         if x.startswith("cmis:folder")
     ]
 
-    docs = map(get_document, doc_ids)
-    folders = map(get_folder, folder_ids)
+    docs = list(map(get_document, doc_ids))
+    folders = list(map(get_folder, folder_ids))
 
     for obj in docs + folders:
         if obj.parent != folder:

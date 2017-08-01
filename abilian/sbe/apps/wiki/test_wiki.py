@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
@@ -10,6 +10,8 @@ from six import text_type
 from six.moves.urllib.parse import quote_plus
 
 from abilian.core.models.subjects import User
+from toolz import first
+
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
     CommunityIndexingTestCase
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
@@ -19,11 +21,11 @@ from .models import WikiPage
 
 
 def test_wikilink_extension():
-    text = u'/*€('
-    wikilink = u'[[' + text + ']]'
+    text = '/*€('
+    wikilink = '[[' + text + ']]'
 
     def build_url(label, base, end):
-        return u'/?title=' + quote_plus(label.encode('utf-8')) + end
+        return '/?title=' + quote_plus(label.encode('utf-8')) + end
 
     extension = SBEWikiLinkExtension([('build_url', build_url)])
     ctx = {}
@@ -36,7 +38,7 @@ def test_wikilink_extension():
         result = md.convert(wikilink)
 
     qtext = text_type(quote_plus(text.encode('utf-8')))
-    expected = u'<p><a class="wikilink" href="/?title={href}/">{text}</a></p>'
+    expected = '<p><a class="wikilink" href="/?title={href}/">{text}</a></p>'
     expected = expected.format(href=qtext, text=text)
     assert expected == result
 
@@ -46,7 +48,7 @@ def test_wikilink_extension():
         result = md.convert(wikilink)
 
     qtext = text_type(quote_plus(text.encode('utf-8')))
-    expected = u'<p><a class="wikilink new" href="/?title={href}/">{text}</a></p>'
+    expected = '<p><a class="wikilink new" href="/?title={href}/">{text}</a></p>'
     expected = expected.format(href=qtext, text=text)
     assert expected == result
 
@@ -62,36 +64,37 @@ class TestModels(WikiBaseTestCase):
 
     def test_create_page(self):
         page = WikiPage(title=u"Some page", body_src=u'abc')
-        self.assertEqual(page.title, u'Some page')
-        self.assertEqual(page.name, u'Some page')
-        self.assertEqual(page.body_src, 'abc')
-        self.assertEqual(page.body_html, '<p>abc</p>')
-        self.assertEqual(len(page.revisions), 1)
+        assert page.title == 'Some page'
+        assert page.name == 'Some page'
+        assert page.body_src == 'abc'
+        assert page.body_html == '<p>abc</p>'
+        assert len(page.revisions) == 1
 
         revision = page.revisions[0]
-        self.assertEqual(revision.number, 0)
-        self.assertEqual(revision.author, g.user)
+        assert revision.number == 0
+        assert revision.author == g.user
 
     def test_rename_page(self):
-        page = WikiPage(title=u"Some page", body_src=u'abc')
-        self.assertEqual(page.title, u'Some page')
-        self.assertEqual(page.name, u'Some page')
-        page.title = u'Title Renamed'
-        self.assertEqual(page.title, u'Title Renamed')
-        self.assertEqual(page.name, u'Title Renamed')
+        page = WikiPage(title="Some page", body_src=u'abc')
+        assert page.title == 'Some page'
+        assert page.name == 'Some page'
 
-        page.name = u'Name'
-        self.assertEqual(page.title, u'Name')
-        self.assertEqual(page.name, u'Name')
+        page.title = 'Title Renamed'
+        assert page.title == 'Title Renamed'
+        assert page.name == 'Title Renamed'
+
+        page.name = 'Name'
+        assert page.title == 'Name'
+        assert page.name == 'Name'
 
     def test_create_revision(self):
         page = WikiPage('abc')
         page.create_revision("def", "page updated")
 
-        self.assertEqual(len(page.revisions), 2)
+        assert len(page.revisions) == 2
         last_revision = page.revisions[1]
-        self.assertEqual(last_revision.number, 1)
-        self.assertEqual(last_revision.author, g.user)
+        assert last_revision.number == 1
+        assert last_revision.author == g.user
 
 
 class TestIndexing(CommunityIndexingTestCase):
@@ -101,29 +104,31 @@ class TestIndexing(CommunityIndexingTestCase):
         g.user = User.query.all()[0]
 
     def test_wiki_indexed(self):
-        page = WikiPage(title=u'Community 1', community=self.community)
+        page = WikiPage(title='Community 1', community=self.community)
         self.session.add(page)
-        page_other = WikiPage(title=u'Community 2: other', community=self.c2)
+        page_other = WikiPage(title='Community 2: other', community=self.c2)
         self.session.add(page_other)
         self.session.commit()
 
         svc = self.svc
         obj_types = (WikiPage.entity_type,)
         with self.login(self.user_no_community):
-            res = svc.search(u'community', object_types=obj_types)
-            self.assertEqual(len(res), 0)
+            res = svc.search('community', object_types=obj_types)
+            assert len(res) == 0
 
         with self.login(self.user):
-            res = svc.search(u'community', object_types=obj_types)
-            self.assertEqual(len(res), 1)
+            res = svc.search('community', object_types=obj_types)
+            assert len(res) == 1
+
             hit = res[0]
-            self.assertEqual(hit['object_key'], page.object_key)
+            assert hit['object_key'] == page.object_key
 
         with self.login(self.user_c2):
-            res = svc.search(u'community', object_types=obj_types)
-            self.assertEqual(len(res), 1)
+            res = svc.search('community', object_types=obj_types)
+            assert len(res) == 1
+
             hit = res[0]
-            self.assertEqual(hit['object_key'], page_other.object_key)
+            assert hit['object_key'] == page_other.object_key
 
 
 class TestsViews(WikiBaseTestCase):
@@ -152,7 +157,7 @@ class TestsViews(WikiBaseTestCase):
         response = self.client.get(url)
         assert response.status_code == 200
         # make sure the title is filled when comming from wikilink
-        self.assertIn('value="Some page name"', response.data)
+        assert 'value="Some page name"' in response.get_data(as_text=True)
 
         title = 'Some page'
         body = "LuuP3jai"
@@ -165,7 +170,7 @@ class TestsViews(WikiBaseTestCase):
             "wiki.page", community_id=self.community.slug, title=title)
         response = self.client.get(url)
         assert response.status_code == 200
-        self.assertIn(body, response.data)
+        assert body in response.get_data(as_text=True)
 
         # edit
         url = url_for(
@@ -174,8 +179,9 @@ class TestsViews(WikiBaseTestCase):
         assert response.status_code == 200
 
         # Slightly hackish way to get the page_id
-        line = [l for l in response.data.split("\n")
-                if 'name="page_id"' in l][0]
+        line = first(
+            l for l in response.get_data(as_text=True).split("\n")
+            if 'name="page_id"' in l)
         m = re.search('value="(.*?)"', line)
         page_id = int(m.group(1))
 

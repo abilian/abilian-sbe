@@ -76,31 +76,33 @@ def get_nb_viewers(entities):
 
 
 def get_viewed_posts(entities):
-    if entities:
-        views = viewtracker.get_views(entities=entities, user=current_user)
-        all_hits = viewtracker.get_hits(views=views)
-        nb_viewed_posts = {}
-        for view in views:
-            related_hits = filter(lambda hit: hit.view_id == view.id, all_hits)
-            if view.entity in entities:
-                cutoff = related_hits[-1].viewed_at
-                nb_viewed_posts[view.entity] = len(
-                    filter(lambda post: post.created_at > cutoff,
-                           view.entity.posts))
+    if not entities:
+        return
 
-        never_viewed = set(entities) - {view.entity for view in views}
-        for entity in never_viewed:
-            nb_viewed_posts[entity] = len(entity.posts) - 1
+    views = viewtracker.get_views(entities=entities, user=current_user)
+    all_hits = viewtracker.get_hits(views=views)
+    nb_viewed_posts = {}
+    for view in views:
+        related_hits = [hit for hit in all_hits if hit.view_id == view.id]
+        entity = view.entity
+        if entity in entities:
+            cutoff = related_hits[-1].viewed_at
+            nb_viewed_posts[entity] = len(
+                [post for post in entity.posts if post.created_at > cutoff])
 
-        return nb_viewed_posts
+    never_viewed = set(entities) - {view.entity for view in views}
+    for entity in never_viewed:
+        nb_viewed_posts[entity] = len(entity.posts) - 1
+
+    return nb_viewed_posts
 
 
 def get_viewed_times(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
-        views = filter(
-            lambda view: view.user != view.entity.creator and view.user in g.community.members,
-            views)
+        views = [view for view in views
+                 if view.user != view.entity.creator and view.user in g.community.members]
+
         all_hits = viewtracker.get_hits(views=views)
         views_id = [view.view_id for view in all_hits]
 
