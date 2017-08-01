@@ -3,6 +3,8 @@
 Forum views
 """
 
+from __future__ import absolute_import, print_function
+
 from datetime import datetime
 
 from flask import g

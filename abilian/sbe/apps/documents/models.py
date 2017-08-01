@@ -6,7 +6,6 @@ TODO: move to an independent service / app.
 """
 from __future__ import absolute_import, print_function
 
-import hashlib
 import itertools
 import logging
 import mimetypes
@@ -26,7 +25,8 @@ from sqlalchemy.orm import backref, foreign, relationship, remote
 from sqlalchemy.orm.session import Session
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, Text, UnicodeText
-from typing import Dict, Any
+from toolz import first
+from typing import Any, Dict, Union
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
 
@@ -34,6 +34,7 @@ from abilian.core.entities import Entity, db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.blob import Blob
 from abilian.core.models.subjects import Group, User
+from abilian.core.util import md5
 from abilian.services.conversion import converter
 from abilian.services.indexing import indexable_role
 from abilian.services.security import Admin, Anonymous, InheritSecurity, \
@@ -222,9 +223,9 @@ class PathAndSecurityIndexable(object):
         iter_from_root = reversed(list(self._iter_to_root()))
         if self.parent:
             # skip root folder only on non-root folder!
-            iter_from_root.next()
+            next(iter_from_root)
         allowed = set(
-            o[0] for o in security.get_role_assignements(iter_from_root.next()))
+            o[0] for o in security.get_role_assignements(next(iter_from_root)))
 
         for obj in iter_from_root:
             if obj.inherit_security:
@@ -304,23 +305,27 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
     @property
     def depth(self):
+        # type: () -> int
         if self.parent is None:
             return 0
-        else:
-            return self.parent.depth + 1
+
+        return self.parent.depth + 1
 
     def create_subfolder(self, title):
+        # type: (str) -> Folder
         subfolder = Folder(title=title, parent=self)
         assert subfolder in self.children
         return subfolder
 
     def create_document(self, title):
+        # type: (str) -> Document
         doc = Document(title=title, parent=self)
         assert doc.parent == self
         assert doc in self.children
         return doc
 
     def get_object_by_path(self, path):
+        # type: (str) -> Union[Document, Folder, None]
         assert path.startswith("/")
         assert "//" not in path
 
@@ -331,7 +336,7 @@ class Folder(CmisObject, PathAndSecurityIndexable):
         obj = self
         try:
             for name in path_segments[:]:
-                obj = filter(lambda x: x.title == name, obj.children)[0]
+                obj = first(x for x in obj.children if x.title == name)
             return obj
         except IndexError:
             return None
@@ -447,7 +452,7 @@ class BaseContent(CmisObject):
         self.content_length = len(value)
 
     def set_content(self, content, content_type=None):
-        new_digest = hashlib.md5(content).hexdigest()
+        new_digest = md5(content)
         if new_digest == self.content_digest:
             return
 

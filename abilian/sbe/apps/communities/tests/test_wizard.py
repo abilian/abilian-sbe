@@ -1,6 +1,6 @@
 # Note: this test suite is using pytest instead of the unittest-based scaffolding
 # provided by SBE. Hopefully one day all of SBE will follow.
-from __future__ import unicode_literals
+from __future__ import absolute_import, print_function, unicode_literals
 
 from tempfile import NamedTemporaryFile
 

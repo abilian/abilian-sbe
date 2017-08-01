@@ -8,6 +8,7 @@ from flask import g
 
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.blueprint import Blueprint
+from abilian.sbe.apps.communities.security import is_manager
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
 from abilian.sbe.apps.communities.security import is_manager
