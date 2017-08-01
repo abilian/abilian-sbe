@@ -1,6 +1,11 @@
 Changelog for Abilian SBE
 =========================
 
+0.3.12 (2017-08-01)
+-------------------
+
+- Clean up and work towards migration to Python 3.
+
 0.3.10 (2017-07-03)
 -------------------
 
