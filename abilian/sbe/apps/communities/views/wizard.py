@@ -5,6 +5,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import csv
 import json
+from os.path import splitext
 
 from flask import current_app, flash, g, redirect, render_template, request, \
     url_for
@@ -97,10 +98,10 @@ def wizard_extract_data(emails, is_csv=False):
 
 
 def wizard_read_csv(csv_file):
-    """read new members data from csv file"""
-    file_extension = secure_filename(csv_file.filename).split(".")[-1]
+    """Read new members data from CSV file."""
 
-    if file_extension != "csv":
+    file_extension = splitext(csv_file.filename)[-1]
+    if file_extension != ".csv":
         return []
 
     contents = csv.reader(csv_file, delimiter=b";")
@@ -134,11 +135,11 @@ def wizard_read_csv(csv_file):
 @tab('members')
 def wizard_data_insertion():
     """
-    Insertion of new members data into the community via emails or csv file
+    Insert new members data into the community via emails or CSV file.
     """
     g.breadcrumb.append(BreadcrumbItem(
         label=_('Members'),
-        url=Endpoint('communities.members', community_id=g.community.slug))
+        url=Endpoint('communities.members', community_id=g.community.slug)),
     )
 
     return render_template(
@@ -157,7 +158,7 @@ def wizard_check_data():
 
     g.breadcrumb.append(BreadcrumbItem(
         label=_('Members'),
-        url=Endpoint('communities.members', community_id=g.community.slug))
+        url=Endpoint('communities.members', community_id=g.community.slug)),
     )
 
     is_csv = False
@@ -235,9 +236,9 @@ def wizard_new_accounts():
 @route("/<string:community_id>/members/wizard/complete", methods=['POST'])
 @csrf.protect
 def wizard_saving():
-    """
-    Automatically add existing accounts to the current community.
-    Create accounts for new emails, add them to the community and send them a password reset email
+    """Automatically add existing accounts to the current community.
+
+    Create accounts for new emails, add them to the community and send them a password reset email.
     """
     community = g.community._model
     existing_accounts = request.form.get("existing_account")

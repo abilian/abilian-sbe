@@ -24,7 +24,7 @@ def simulate_csv_file():
     csv.write("example.com;example;userfour;member\n")
 
     csv.seek(0)
-    csv.filename = csv.name.split("/")[-1]
+    csv.filename = csv.name
 
     return csv
 
