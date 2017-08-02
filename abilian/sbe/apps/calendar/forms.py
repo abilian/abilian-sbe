@@ -88,5 +88,5 @@ class EventForm(Form):
             raise ValidationError(_l("End date/time must be after start"))
 
 
-EventForm.start.kwargs['raw_data'] = [u" | 09:00"]
-EventForm.end.kwargs['raw_data'] = [u" | 18:00"]
+EventForm.start.kwargs['raw_data'] = [" | 09:00"]
+EventForm.end.kwargs['raw_data'] = [" | 18:00"]

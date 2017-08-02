@@ -224,13 +224,13 @@ class PathAndSecurityIndexable(object):
         if self.parent:
             # skip root folder only on non-root folder!
             next(iter_from_root)
-        allowed = set(
-            o[0] for o in security.get_role_assignements(next(iter_from_root)))
+        allowed = {
+            o[0] for o in security.get_role_assignements(next(iter_from_root))}
 
         for obj in iter_from_root:
             if obj.inherit_security:
                 continue
-            obj_allowed = set(o[0] for o in security.get_role_assignements(obj))
+            obj_allowed = {o[0] for o in security.get_role_assignements(obj)}
 
             if Anonymous in obj_allowed:
                 continue
@@ -247,7 +247,7 @@ class PathAndSecurityIndexable(object):
 
             # 2. remaining_users are users explicitly listed in parents but not on
             # obj. Are they in a group?
-            remaining_users = set(o for o in remaining if isinstance(o, User))
+            remaining_users = {o for o in remaining if isinstance(o, User)}
             allowed |= (remaining_users & extended_allowed)
 
             # remaining groups: find if some users are eligible

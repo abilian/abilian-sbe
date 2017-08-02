@@ -59,7 +59,7 @@ def get_new_filename(folder, name):
 
     If name already exists, a numbered suffix is added.
     """
-    existing = set((c.name for c in folder.children))
+    existing = {c.name for c in folder.children}
     renamed = name in existing
 
     if renamed:

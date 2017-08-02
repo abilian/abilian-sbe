@@ -141,7 +141,7 @@ def permissions(folder_id):
     bc = breadcrumbs_for(folder)
     actions.context['object'] = folder
     local_roles_assignments = folder.get_local_roles_assignments()
-    principals = set((p for p, r in local_roles_assignments))
+    principals = {p for p, r in local_roles_assignments}
     security._fill_role_cache_batch(principals)
 
     users_and_local_roles = [(user, role, repository.has_access(user, folder))
@@ -835,7 +835,7 @@ def check_valid_name():
     else:
         raise InternalServerError()
 
-    existing = set((e.title for e in parent.children))
+    existing = {e.title for e in parent.children}
 
     if action in ('folder-edit', 'document-edit'):
         try:
