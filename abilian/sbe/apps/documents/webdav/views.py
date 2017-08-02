@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function
 import os.path
 import uuid
 
-from flask import Blueprint, current_app, request
+from flask import Blueprint, request
 from flask_login import current_user
 from lxml.etree import XMLSyntaxError
 from werkzeug.datastructures import Headers
@@ -86,7 +86,7 @@ def get_object(path):
 @webdav.before_app_request
 def create_root_folder():
     # TODO: create root folder on repository startup instead.
-    #assert repository.root_folder
+    # assert repository.root_folder
     pass
 
 

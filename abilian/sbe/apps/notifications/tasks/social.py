@@ -189,7 +189,7 @@ class CommunityDigest(object):
         obj = activity.object
 
         # TODO ?
-        #target = activity.target
+        # target = activity.target
 
         if activity.verb == 'join':
             self.new_members.append(actor)

@@ -577,20 +577,13 @@ ARCHIVE_IGNORE_FILES = {
 ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate('*/')))
 
 
-def explore_archive(fd, filename=None, uncompress=False):
-    """
-    Given an uploaded file descriptor, return it or a list of archive
+def explore_archive(fd, uncompress=False):
+    """Given an uploaded file descriptor, return it or a list of archive
     content.
 
     Yield tuple(filepath, file-like object), where filepath is a list
     whose components are directories and last one is filename.
     """
-    if filename is None:
-        filename = fd.filename
-
-    if not isinstance(filename, text_type):
-        filename = text_type(fd.filename, errors='ignore')
-
     if not uncompress:
         yield [], fd
         raise StopIteration

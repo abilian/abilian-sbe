@@ -30,7 +30,7 @@ class TestUsers(TestCase):
 
         assert u"John Test User" == user.name
         assert u"John Test User" == text_type(user)
-        #self.assertEquals(len(user.messages), 0)
+        # self.assertEquals(len(user.messages), 0)
 
     def test_user_follow(self):
         # id is provided by DB (which is not used in this test), and is required for
@@ -106,15 +106,15 @@ class TestContent(TestCase):
             last_name=u"Test User",
             email=u"test@example.com",
             password="toto")
-        #self.assertEquals(len(user.messages), 0)
+        # self.assertEquals(len(user.messages), 0)
 
         message = Message()
         message.author = user
         check_editable(message)
 
-        #self.assertEquals(len(user.messages), 1)
-        #self.assertEquals(user.messages[0], message)
-        #self.assertEquals(message.author_id, user.uid)
+        # self.assertEquals(len(user.messages), 1)
+        # self.assertEquals(user.messages[0], message)
+        # self.assertEquals(message.author_id, user.uid)
 
     def test_tags(self):
         m = Message(content=u"abc #123 #cde #voilà_l_été #789")

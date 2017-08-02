@@ -212,8 +212,9 @@ _actions = (
             and ctx['object'].content_type in ('text/html',
                                                'text/plain',
                                                'application/pdf'))),
-    #viewers
-    DocumentModalAction('documents:content',
+    # viewers
+    DocumentModalAction(
+        'documents:content',
         'document_viewers',
         _l(u'Viewers list'),
         icon='user',

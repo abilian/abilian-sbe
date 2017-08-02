@@ -2,13 +2,12 @@
 
 from __future__ import absolute_import, print_function
 
-from flask import current_app, g, request, url_for
+from flask import g, request, url_for
 from flask_login import current_user
 
 from abilian.i18n import _l
-from abilian.sbe.apps.communities.security import is_manager
 from abilian.services import get_service
-from abilian.services.security import Admin, Manager
+from abilian.services.security import Admin
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 

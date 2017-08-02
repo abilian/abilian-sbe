@@ -118,10 +118,10 @@ lint-mypy:
 	-mypy abilian
 
 lint-doc:
+	@echo "--> Linting .rst files"
 	rst-lint *.rst
 
 flake8:
-	@echo "--> Linting .rst files"
 	flake8 abilian tests
 
 format:

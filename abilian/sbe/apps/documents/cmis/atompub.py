@@ -173,7 +173,7 @@ def getRepositoryInfo():
 
     result = render_template("cmis/service.xml", **ctx)
     response = Response(result, mimetype=MIME_TYPE_ATOM_SERVICE)
-    #return {'root': ROOT}
+    # return {'root': ROOT}
     return response
 
 

@@ -1,14 +1,14 @@
 # coding=utf-8
 from __future__ import absolute_import, print_function
 
-from flask import current_app, url_for
+from flask import url_for
 from flask_babel import lazy_gettext as _l
 from flask_login import current_user
 
 from abilian.sbe.apps.communities.actions import CommunityEndpoint
 from abilian.sbe.apps.communities.security import is_manager
 from abilian.services import get_service
-from abilian.services.security import Admin, Manager
+from abilian.services.security import Admin
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 

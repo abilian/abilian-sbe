@@ -42,7 +42,7 @@ def make_json_response(obj, response_code=200):
 #
 
 
-#[POST] /api/users/USER_ID	Create User Profile
+# [POST] /api/users/USER_ID	Create User Profile
 @restapi.route("/users", methods=['POST'])
 @login_required
 def create_user():
@@ -53,16 +53,16 @@ def create_user():
     return make_json_response(user, 201)
 
 
-#[GET] /api/users	List Users in Your Organization
+# [GET] /api/users	List Users in Your Organization
 @restapi.route("/users")
 @login_required
 def list_users():
-    #l = [ u.to_dict() for u in User.query.all() ]
+    # l = [ u.to_dict() for u in User.query.all() ]
     l = list(User.query.all())
     return make_json_response(l)
 
 
-#[GET] /api/users/USER_ID	View User Profile
+# [GET] /api/users/USER_ID	View User Profile
 @restapi.route("/users/<int:user_id>")
 @login_required
 def get_user(user_id):
@@ -70,17 +70,17 @@ def get_user(user_id):
     return make_json_response(user)
 
 
-#[GET] /api/users/USER_ID/messages	View Stream of Messages by User
+# [GET] /api/users/USER_ID/messages	View Stream of Messages by User
 @restapi.route("/users/<int:user_id>/messages")
 @login_required
 def user_stream(user_id):
     user = User.query.get(user_id)
     messages = Message.query.by_creator(user).all()
-    #messages = list(user.messages)
+    # messages = list(user.messages)
     return make_json_response(messages)
 
 
-#[PUT] /api/users/USER_ID	Update User Profile
+# [PUT] /api/users/USER_ID	Update User Profile
 @restapi.route("/users/<int:user_id>", methods=['PUT'])
 @login_required
 def update_user(user_id):
@@ -91,7 +91,7 @@ def update_user(user_id):
     return make_json_response(user)
 
 
-#[DELETE] /api/users/USER_ID	Deactivate a User
+# [DELETE] /api/users/USER_ID	Deactivate a User
 @restapi.route("/users/<int:user_id>", methods=['DELETE'])
 @login_required
 def delete_user(user_id):
@@ -106,7 +106,7 @@ def delete_user(user_id):
 #
 
 
-#[GET] /api/users/USER_ID/followers	View Followers of User
+# [GET] /api/users/USER_ID/followers	View Followers of User
 @restapi.route("/users/<int:user_id>/followers")
 @login_required
 def get_followers(user_id):
@@ -115,7 +115,7 @@ def get_followers(user_id):
     return make_json_response(followers)
 
 
-#[GET] /api/users/USER_ID/followees	View List of Users Being Followed
+# [GET] /api/users/USER_ID/followees	View List of Users Being Followed
 @restapi.route("/users/<int:user_id>/followees")
 @login_required
 def get_followees(user_id):
@@ -124,7 +124,7 @@ def get_followees(user_id):
     return make_json_response(followees)
 
 
-#[POST] /api/users/USER_ID/followers	Follow a User
+# [POST] /api/users/USER_ID/followers	Follow a User
 @restapi.route("/users/<int:user_id>/followers", methods=['POST'])
 @login_required
 def follow(user_id):
@@ -134,7 +134,7 @@ def follow(user_id):
     return make_json_response("", 204)
 
 
-#[DELETE] /api/users/USER_ID/followers/CONTACT_USER_ID	Unfollow a User
+# [DELETE] /api/users/USER_ID/followers/CONTACT_USER_ID	Unfollow a User
 @restapi.route(
     "/users/<int:user_id>/followers/<int:contact_user_id>", methods=['DELETE'])
 @login_required
@@ -199,7 +199,7 @@ def create_group():
 #
 
 
-#[POST] /api/messages	Creating New Messages
+# [POST] /api/messages	Creating New Messages
 @restapi.route("/messages", methods=['POST'])
 @login_required
 def create_message():
@@ -210,7 +210,7 @@ def create_message():
     return make_json_response(message, 201)
 
 
-#[GET] /api/messages	Reading Stream Messages
+# [GET] /api/messages	Reading Stream Messages
 @restapi.route("/messages")
 @login_required
 def get_messages():
@@ -218,7 +218,7 @@ def get_messages():
     return make_json_response(messages)
 
 
-#[GET] /api/messages/MESSAGE_ID	Read a Single Stream Message
+# [GET] /api/messages/MESSAGE_ID	Read a Single Stream Message
 @restapi.route("/messages/<int:message_id>")
 @login_required
 def get_message(message_id):
@@ -226,7 +226,7 @@ def get_message(message_id):
     return make_json_response(message)
 
 
-#[PUT] /api/messages/MESSAGE_ID	Updating Existing Messages
+# [PUT] /api/messages/MESSAGE_ID	Updating Existing Messages
 @restapi.route("/messages/<int:message_id>", methods=['PUT'])
 @login_required
 def update_message(message_id):
@@ -237,7 +237,7 @@ def update_message(message_id):
     return make_json_response(message)
 
 
-#[DELETE] /api/messages/MESSAGE_ID	Destroy an existing message
+# [DELETE] /api/messages/MESSAGE_ID	Destroy an existing message
 @restapi.route("/messages/<int:message_id>", methods=['DELETE'])
 @login_required
 def delete_message(message_id):
@@ -253,21 +253,21 @@ def delete_message(message_id):
 # TODO: use an "objects" namespace instead to make it generic?
 
 
-#[POST] /api/messages/MESSAGE_ID/likes	Liking a Message
+# [POST] /api/messages/MESSAGE_ID/likes	Liking a Message
 @restapi.route("/messages/<int:message_id>/likes", methods=['POST'])
 @login_required
 def like_message(message_id):
     pass
 
 
-#[POST] /api/comments/COMMENT_ID/likes/LIKES_ID	Liking a Comment
+# [POST] /api/comments/COMMENT_ID/likes/LIKES_ID	Liking a Comment
 @restapi.route("/comments/<int:comment_id>/likes", methods=['POST'])
 @login_required
 def like_comment(comment_id):
     pass
 
 
-#[DELETE] /api/messages/MESSAGE_ID/likes/LIKES_ID	Un-liking a Message
+# [DELETE] /api/messages/MESSAGE_ID/likes/LIKES_ID	Un-liking a Message
 @restapi.route(
     "/messages/<int:message_id>/likes/<int:like_id>", methods=['DELETE'])
 @login_required
@@ -275,7 +275,7 @@ def unlike_message(message_id, like_id):
     pass
 
 
-#[DELETE] /api/comments/COMMENT_ID/likes/LIKES_ID
+# [DELETE] /api/comments/COMMENT_ID/likes/LIKES_ID
 @restapi.route(
     "/comments/<int:comment_id>/likes/<int:like_id>", methods=['DELETE'])
 @login_required
@@ -288,7 +288,7 @@ def unlike_comment(comment_id, like_id):
 #
 
 
-#[GET] /api/messages/search	Searching Messages
+# [GET] /api/messages/search	Searching Messages
 @restapi.route("/search/messages")
 @login_required
 def search_messages():
@@ -299,7 +299,7 @@ def search_messages():
     return make_json_response(messages)
 
 
-#[GET] /api/users/search	Search Users in Your Company
+# [GET] /api/users/search	Search Users in Your Company
 @restapi.route("/search/users")
 @login_required
 def search_users():

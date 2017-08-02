@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from tempfile import NamedTemporaryFile
 
+import pytest
 from flask import g
 
 from abilian.core.models.subjects import User
@@ -12,9 +13,10 @@ from abilian.sbe.apps.communities.views.wizard import wizard_extract_data, \
     wizard_read_csv
 
 
-def simulate_csv_file():
+@pytest.fixture
+def csv_file():
     # create a tmp csv file
-    csv = NamedTemporaryFile(suffix=".csv", prefix="tmp_", delete=False)
+    csv = NamedTemporaryFile("w+", suffix=".csv", prefix="tmp_", delete=False)
     csv.write("user_1@example.com;userone;userone;manager\n")
     csv.write("user_2@example.com;usertwo;usertwo;member\n")
     csv.write("user_7@example.com;userseven;userseven;member\n")
@@ -24,14 +26,13 @@ def simulate_csv_file():
     csv.write("example.com;example;userfour;member\n")
 
     csv.seek(0)
-    csv.filename = csv.name.split("/")[-1]
+    csv.filename = csv.name
 
     return csv
 
 
-def test_wizard_read_csv():
-    csv = simulate_csv_file()
-    wizard_read = wizard_read_csv(csv)
+def test_wizard_read_csv(csv_file):
+    wizard_read = wizard_read_csv(csv_file)
 
     assert wizard_read == [{
         'first_name': 'userone',
@@ -51,7 +52,7 @@ def test_wizard_read_csv():
     }]
 
 
-def test_wizard_extract_data(db):
+def test_wizard_extract_data(db, csv_file):
     session = db.session
     community = Community(name='Hp')
     g.community = community
@@ -61,8 +62,11 @@ def test_wizard_extract_data(db):
     user3 = User(email='user_3@example.com')
 
     new_emails = [
-        "user_1@example.com", "user_2@example.com", "user_3@example.com",
-        "user_4@example.com", "user_5@example.com"
+        "user_1@example.com",
+        "user_2@example.com",
+        "user_3@example.com",
+        "user_4@example.com",
+        "user_5@example.com",
     ]
 
     # creating community
@@ -79,39 +83,46 @@ def test_wizard_extract_data(db):
     session.flush()
 
     # check wizard function in case of email list
-    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
-        new_emails)
+    existing_accounts_objects, existing_members_objects, accounts_list \
+        = wizard_extract_data(new_emails)
     assert set(existing_accounts_objects) == {user2, user3}
     assert existing_members_objects == [user1]
-    assert sorted(accounts_list) == sorted([{
-        'status': 'existing',
-        'first_name': None,
-        'last_name': None,
-        'role': 'member',
-        'email': 'user_2@example.com'
-    }, {
-        'status': 'existing',
-        'first_name': None,
-        'last_name': None,
-        'role': 'member',
-        'email': 'user_3@example.com'
-    }, {
-        'status': 'new',
-        'first_name': '',
-        'last_name': '',
-        'role': 'member',
-        'email': 'user_5@example.com'
-    }, {
-        'status': 'new',
-        'first_name': '',
-        'last_name': '',
-        'role': 'member',
-        'email': 'user_4@example.com'
-    }])
+
+    def sorter(x):
+        return x['email']
+
+    assert sorted(
+        accounts_list, key=sorter) == sorted(
+            [{
+                'status': 'existing',
+                'first_name': None,
+                'last_name': None,
+                'role': 'member',
+                'email': 'user_2@example.com'
+            }, {
+                'status': 'existing',
+                'first_name': None,
+                'last_name': None,
+                'role': 'member',
+                'email': 'user_3@example.com'
+            }, {
+                'status': 'new',
+                'first_name': '',
+                'last_name': '',
+                'role': 'member',
+                'email': 'user_5@example.com'
+            }, {
+                'status': 'new',
+                'first_name': '',
+                'last_name': '',
+                'role': 'member',
+                'email': 'user_4@example.com'
+            }],
+            key=sorter)
 
     # check wizard function in case of csv file
-    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
-        wizard_read_csv(simulate_csv_file()), is_csv=True)
+    existing_accounts_objects, existing_members_objects, accounts_list \
+        = wizard_extract_data(wizard_read_csv(csv_file), is_csv=True)
 
     assert existing_accounts_objects == {
         "csv_roles": {
@@ -122,16 +133,19 @@ def test_wizard_extract_data(db):
         "account_objects": [user2]
     }
     assert existing_members_objects == [user1]
-    assert sorted(accounts_list) == sorted([{
-        'status': 'existing',
-        'first_name': None,
-        'last_name': None,
-        'role': 'member',
-        'email': 'user_2@example.com'
-    }, {
-        'status': 'new',
-        'first_name': 'userseven',
-        'last_name': 'userseven',
-        'role': 'member',
-        'email': 'user_7@example.com'
-    }])
+    assert sorted(
+        accounts_list, key=sorter) == sorted(
+            [{
+                'status': 'existing',
+                'first_name': None,
+                'last_name': None,
+                'role': 'member',
+                'email': 'user_2@example.com'
+            }, {
+                'status': 'new',
+                'first_name': 'userseven',
+                'last_name': 'userseven',
+                'role': 'member',
+                'email': 'user_7@example.com'
+            }],
+            key=sorter)

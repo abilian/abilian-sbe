@@ -49,14 +49,14 @@ class Test(TestCase):
         assert thread.meta['abilian.sbe.forum']['closed'] is True
 
     def test_thread_closed_guard(self):
-        thread = Thread(title=u'Test Thread')
+        thread = Thread(title='Test Thread')
         thread.create_post()
         thread.closed = True
 
         with pytest.raises(ThreadClosedError):
             thread.create_post()
 
-        p = Post(body_html=u'ok')
+        p = Post(body_html='ok')
 
         with pytest.raises(ThreadClosedError):
             p.thread = thread
@@ -85,59 +85,58 @@ class Test(TestCase):
             p.thread = None
 
     def test_change_thread_copy_name(self):
-        thread = Thread(title=u'thread 1')
-        thread2 = Thread(title=u'thread 2')
-        post = Post(thread=thread, body_html=u'post content')
+        thread = Thread(title='thread 1')
+        thread2 = Thread(title='thread 2')
+        post = Post(thread=thread, body_html='post content')
         assert post.name == thread.name
 
         post.thread = thread2
         assert post.name == thread2.name
 
     def test_task_process_email(self):
-        """
-        test the process_email function
-        """
-        marker = u'_____Write above this line to post_____'
+        """Test the process_email function."""
 
-        message = get_emailmessage_from_file('reply.email')
-        newpost = process(message, marker)
+        marker = '_____Write above this line to post_____'
+
+        message = get_email_message_from_file('reply.email')
+        newpost = process(message, marker)[0]
         assert newpost
 
-        message = get_emailmessage_from_file('reply_nocharset_specified.email')
-        newpost = process(message, marker)
+        message = get_email_message_from_file('reply_nocharset_specified.email')
+        newpost = process(message, marker)[0]
         assert newpost
 
-        message = get_emailmessage_from_file('reply_no_marker.email')
+        message = get_email_message_from_file('reply_no_marker.email')
         self.assertRaises(LookupError, process, message, marker)
 
         # dubious check
-        message = get_emailmessage_from_file('reply_no_textpart.email')
+        message = get_email_message_from_file('reply_no_textpart.email')
         self.assertRaises(LookupError, process, message, marker)
 
 
 class IndexingTestCase(CommunityIndexingTestCase):
 
     def test_thread_indexed(self):
-        thread = Thread(title=u'Community 1', community=self.community)
+        thread = Thread(title='Community 1', community=self.community)
         self.session.add(thread)
-        thread_other = Thread(title=u'Community 2: other', community=self.c2)
+        thread_other = Thread(title='Community 2: other', community=self.c2)
         self.session.add(thread_other)
         self.session.commit()
 
         svc = self.svc
         obj_types = (Thread.entity_type,)
         with self.login(self.user_no_community):
-            res = svc.search(u'community', object_types=obj_types)
+            res = svc.search('community', object_types=obj_types)
             assert len(res) == 0
 
         with self.login(self.user):
-            res = svc.search(u'community', object_types=obj_types)
+            res = svc.search('community', object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
             assert hit['object_key'] == thread.object_key
 
         with self.login(self.user_c2):
-            res = svc.search(u'community', object_types=obj_types)
+            res = svc.search('community', object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
             assert hit['object_key'] == thread_other.object_key
@@ -145,7 +144,7 @@ class IndexingTestCase(CommunityIndexingTestCase):
 
 class NoLoginViewTest(CommunityBaseTestCase):
     """
-    Test correct url response, without login or security involved
+    Test correct url response, without login or security involved.
     """
 
     def test(self):
@@ -159,12 +158,12 @@ class ViewTestCase(CommunityBaseTestCase):
     SERVICES = ('security',)
 
     def test_posts_ordering(self):
-        thread = Thread(community=self.community, title=u'test ordering')
+        thread = Thread(community=self.community, title='test ordering')
         self.session.add(thread)
         t1 = datetime(2014, 6, 20, 15, 0, 0)
-        p1 = Post(thread=thread, body_html=u'post 1', created_at=t1)
+        p1 = Post(thread=thread, body_html='post 1', created_at=t1)
         t2 = datetime(2014, 6, 20, 15, 1, 0)
-        p2 = Post(thread=thread, body_html=u'post 2', created_at=t2)
+        p2 = Post(thread=thread, body_html='post 2', created_at=t2)
         self.session.flush()
         p1_id, p2_id = p1.id, p2.id
         assert [p.id for p in thread.posts] == [p1_id, p2_id]
@@ -179,11 +178,11 @@ class ViewTestCase(CommunityBaseTestCase):
     def test_create_thread_and_post(self):
         # activate email reply
         self.app.config['SBE_FORUM_REPLY_BY_MAIL'] = True
-        self.app.config['MAIL_ADDRESS_TAG_CHAR'] = u'+'
+        self.app.config['MAIL_ADDRESS_TAG_CHAR'] = '+'
 
         # create a new user, add him/her to the current community as a MANAGER
         self.user = User(
-            email=u'user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.community.set_membership(self.user, MANAGER)
         self.session.commit()
@@ -215,7 +214,7 @@ class ViewTestCase(CommunityBaseTestCase):
 
             # check the email was sent with the new thread
             assert len(outbox) == 1
-            assert outbox[0].subject == u'[My Community] Brand new thread'
+            assert outbox[0].subject == '[My Community] Brand new thread'
 
         # reset the outbox for checking threadpost email
         with mail.record_messages() as outbox:
@@ -236,7 +235,7 @@ class ViewTestCase(CommunityBaseTestCase):
 
             # check the email was sent with the new threadpost
             assert len(outbox) == 1
-            expected = u'[My Community] Brand new thread'
+            expected = '[My Community] Brand new thread'
             assert text_type(outbox[0].subject) == expected
 
     def test_create_thread_informative(self):
@@ -246,7 +245,7 @@ class ViewTestCase(CommunityBaseTestCase):
         assert self.community.type == 'informative'
         # create a new user, add him/her to the current community
         self.user = User(
-            email=u'user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.community.set_membership(self.user, MEMBER)
         self.session.commit()
@@ -285,17 +284,15 @@ class ViewTestCase(CommunityBaseTestCase):
 
 
 def get_string_from_file(filename='notification.email'):
-    """Load a test email, return as string.
-    """
+    """Load a test email, return as string."""
     filepath = Path(__file__).parent / 'data' / filename
     with filepath.open('rt', encoding='utf-8') as email_file:
         email_string = email_file.read()
     return email_string
 
 
-def get_emailmessage_from_file(filename='notification.email'):
-    """Load a mail parse it into a email.message.
-    """
+def get_email_message_from_file(filename='notification.email'):
+    """Load a mail and parse it into a email.message."""
     email_string = get_string_from_file(filename)
     parser = FeedParser()
     parser.feed(email_string)
@@ -339,7 +336,7 @@ class TasksTest(BaseTestCase):
 
     def test_build_reply_email_address(self):
         expected_reply_address = 'test+P-fr-3-4-5a6f41c0e7d916b6f15992d7207e47b2@testcase.app.tld'
-        self.app.config['MAIL_ADDRESS_TAG_CHAR'] = u'+'
+        self.app.config['MAIL_ADDRESS_TAG_CHAR'] = '+'
         post = Mock()
         post.id = 2
         post.thread_id = 3
@@ -347,16 +344,16 @@ class TasksTest(BaseTestCase):
         member.id = 4
         with self.app.test_request_context(
                 '/build_reply_email_address',
-                headers=[('Accept-Language', u'fr')]):
+                headers=[('Accept-Language', 'fr')]):
             replyto = build_reply_email_address('test', post, member,
                                                 'testcase.app.tld')
         self.assertIn(expected_reply_address, replyto)
 
     def test_extract_mail_destination(self):
-        self.app.config['MAIL_ADDRESS_TAG_CHAR'] = u'+'
-        self.app.config['MAIL_SENDER'] = u'test@testcase.app.tld'
+        self.app.config['MAIL_ADDRESS_TAG_CHAR'] = '+'
+        self.app.config['MAIL_SENDER'] = 'test@testcase.app.tld'
         test_address = 'test+test+P-fr-3-4-5a6f41c0e7d916b6f15992d7207e47b2@testcase.app.tld'
         infos = extract_email_destination(test_address)
-        self.assertIn(u'fr', infos[0])  # locale
-        self.assertIn(u'3', infos[1])  # thread_id
-        self.assertIn(u'4', infos[2])  # post.id
+        self.assertIn('fr', infos[0])  # locale
+        self.assertIn('3', infos[1])  # thread_id
+        self.assertIn('4', infos[2])  # post.id

@@ -49,7 +49,7 @@ def invite_post():
             # FIXME: what do we do with this ?
             invite = Invite(sender=g.user, email=email)  # noqa
 
-            #subject = _(u"%s would like to invite you to the %s community") % (g.user.name, "Yaka")
+            # subject = _(u"%s would like to invite you to the %s community") % (g.user.name, "Yaka")
             subject = "%s would like to invite you to the %s community" % (
                 g.user.name, "Yaka")
             msg = Email(subject, recipients=[email], sender=g.user.email)
