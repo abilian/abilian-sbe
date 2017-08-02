@@ -126,9 +126,9 @@ flake8:
 
 format:
 	isort -a  "from __future__ import absolute_import, print_function" -rc \
-		abilian demo tests
-	-yapf --style google -r -i abilian demo tests
-	isort -rc abilian demo tests
+		abilian demo tests *.py
+	-yapf --style google -r -i abilian demo tests *.py
+	isort -rc abilian demo tests *.py
 
 format-js:
 	prettier --tab-width 4 --write ./abilian/sbe/static/js/**.js

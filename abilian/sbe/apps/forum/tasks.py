@@ -20,6 +20,7 @@ from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
 from six import text_type
+from typing import List
 
 from abilian.core.celery import periodic_task
 from abilian.core.extensions import db, mail
@@ -28,7 +29,6 @@ from abilian.core.signals import activity
 from abilian.core.util import md5
 from abilian.i18n import _l, render_template_i18n
 from abilian.web import url_for
-from typing import List
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 from .models import PostAttachment, Thread

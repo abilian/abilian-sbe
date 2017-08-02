@@ -3,7 +3,7 @@
 """
 """
 
-from __future__ import absolute_import
+from __future__ import absolute_import, print_function
 
 import logging
 
@@ -14,13 +14,13 @@ from abilian.sbe.app import Application
 
 
 def create_app():
-  return Application(name='myapp')
+    return Application(name='myapp')
 
 
 if __name__ == '__main__':
-  logging.basicConfig()
-  logging.getLogger().setLevel(logging.INFO)
-  manager = Manager(create_app)
-  setup_abilian_commands(manager)
+    logging.basicConfig()
+    logging.getLogger().setLevel(logging.INFO)
+    manager = Manager(create_app)
+    setup_abilian_commands(manager)
 
-  manager.run()
+    manager.run()

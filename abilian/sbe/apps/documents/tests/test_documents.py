@@ -3,6 +3,7 @@
 """
 from __future__ import absolute_import, print_function, unicode_literals
 
+import sys
 import unittest
 from io import BytesIO
 from itertools import count
@@ -11,7 +12,6 @@ from zipfile import ZipFile
 
 import flask_mail
 import pytest
-import sys
 from flask import g, get_flashed_messages
 from toolz import first
 from werkzeug.datastructures import FileStorage
@@ -293,12 +293,12 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 "application/octet-stream",
                 assert_preview_available=False)
 
-    @pytest.mark.skipif(sys.version_info >= (3, 0), reason="Doesn't work yet on Py3k")
+    @pytest.mark.skipif(
+        sys.version_info >= (3, 0), reason="Doesn't work yet on Py3k")
     def test_explore_archive(self):
 
         fd = self.open_file('content.zip')
-        result = [('/'.join(path), f)
-                  for path, f in explore_archive(fd)]
+        result = [('/'.join(path), f) for path, f in explore_archive(fd)]
         assert result == [('', fd)]
 
         fd = self.open_file('content.zip')
@@ -372,7 +372,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
     def test_recursive_zip(self):
         with self.client_login(self.user.email, password='azerty'):
-            data = {'action': 'new', 'title': 'my folder',}
+            data = {
+                'action': 'new',
+                'title': 'my folder',
+            }
             folder = self.community.folder
             url = url_for(
                 "documents.folder_post",
