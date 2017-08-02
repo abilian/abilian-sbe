@@ -40,7 +40,7 @@ class develop(_develop):
 
 setuptools.setup(
     name='abilian-sbe',
-    version='0.4dev5',
+    version='0.4dev6',
     # use_scm_version=True,
     url='https://github.com/abilian/abilian-sbe',
     license='LGPL',
