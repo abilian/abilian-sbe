@@ -4,6 +4,7 @@ Celery tasks related to document transformation and preview.
 """
 from __future__ import absolute_import, print_function
 
+import email
 import mailbox
 import re
 from os.path import expanduser
@@ -27,6 +28,7 @@ from abilian.core.signals import activity
 from abilian.core.util import md5
 from abilian.i18n import _l, render_template_i18n
 from abilian.web import url_for
+from typing import List
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 from .models import PostAttachment, Thread
@@ -301,8 +303,8 @@ def add_paragraph(newpost):
 
 
 def clean_html(newpost):
-    """Clean leftover empty blockquotes.
-    """
+    # type: (text_type) -> text_type
+    """Clean leftover empty blockquotes."""
 
     clean = re.sub(
         r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)",
@@ -325,56 +327,61 @@ def clean_html(newpost):
 
 
 def decode_payload(part):
-    """Get the payload and decode (base64 & quoted printable).
-    """
+    # type: (email.message.Message) -> text_type
+    """Get the payload and decode (base64 & quoted printable)."""
 
     payload = part.get_payload(decode=True)
-    if not (isinstance(payload, text_type)):
-        # What about other encodings? -> using chardet
-        if part.get_content_charset() is None:
+    if isinstance(payload, bytes):
+        charset = part.get_content_charset()
+        found = chardet.detect(payload)
+        if charset is not None:
+            try:
+                payload = payload.decode(charset)
+            except UnicodeDecodeError:
+                payload = payload.decode('raw-unicode-escape')
+        else:
+            # What about other encodings? -> using chardet
             found = chardet.detect(payload)
             payload = payload.decode(found['encoding'])
-        else:
-            payload = payload.decode(part.get_content_charset())
     return payload
 
 
 def process(message, marker):
+    # type: (email.message.Message, text_type) -> (text_type, List[dict])
     """
     Check the message for marker presence and return the text up to it if present.
 
     :raises LookupError otherwise.
-    :param message: email.Message()
-    :param marker: unicode
-    :return: sanitized html upto marker from message
+    :return: sanitized html upto marker from message and attachements
     """
-    content = {'plain': u'', 'html': u''}
+    assert isinstance(message, email.message.Message)
+    content = {'plain': '', 'html': ''}
     attachments = []
     # Iterate all message's parts for text/*
     for part in message.walk():
         content_type = part.get_content_type()
-        content_disp = part.get('Content-Disposition')
+        content_disposition = part.get('Content-Disposition')
 
-        if content_type in ['text/plain', 'text/html'] and content_disp is None:
-            payload = content[part.get_content_subtype()] + decode_payload(part)
-            content[part.get_content_subtype()] = payload
-
-        if content_disp is not None:
+        if content_disposition is not None:
             attachments.append({
                 'filename': part.get_filename(),
                 'content_type': part.get_content_type(),
-                'data': part.get_payload(decode=True)
+                'data': part.get_payload(decode=True),
             })
 
-    if 'html' in content and marker in content['html']:
+        elif content_type in ['text/plain', 'text/html']:
+            subtype = part.get_content_subtype()
+            payload = decode_payload(part)
+            content[subtype] += payload
+
+    if marker in content['html']:
         newpost = extract_content(content['html'], marker[:9])
         newpost = add_paragraph(validate_html(newpost))
         newpost = clean_html(newpost)
-    elif 'plain' in content and marker in content['plain']:
+    elif marker in content['plain']:
         newpost = extract_content(content['plain'], marker[:9])
         newpost = add_paragraph(newpost)
     else:
-        logger.error('No marker:{} in email'.format(marker))
         raise LookupError('No marker:{} in email'.format(marker))
 
     return newpost, attachments
@@ -382,6 +389,7 @@ def process(message, marker):
 
 @shared_task()
 def process_email(message):
+    # type: (email.message.Message) -> bool
     """
     Email.Message object from command line script Run message (parsed email).
 
