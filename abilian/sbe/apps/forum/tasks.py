@@ -331,11 +331,14 @@ def decode_payload(part):
     """Get the payload and decode (base64 & quoted printable)."""
 
     payload = part.get_payload(decode=True)
-    if not (isinstance(payload, text_type)):
-        assert isinstance(payload, bytes)
+    if isinstance(payload, bytes):
         charset = part.get_content_charset()
+        found = chardet.detect(payload)
         if charset is not None:
-            payload = payload.decode(charset)
+            try:
+                payload = payload.decode(charset)
+            except UnicodeDecodeError:
+                payload = payload.decode('raw-unicode-escape')
         else:
             # What about other encodings? -> using chardet
             found = chardet.detect(payload)

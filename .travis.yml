@@ -2,6 +2,7 @@ language: python
 cache: pip
 python:
   - "2.7"
+  - "3.6"
 
 env:
   global:
@@ -48,7 +49,7 @@ before_script:
 
 # Run tests
 script:
-  - py.test --tb=short -q --cov abilian abilian tests
+  - py.test --tb=short -q --cov abilian .
   # There are no docs yet!
   #- sphinx-build -W -b html docs/ docs/_build/
 
