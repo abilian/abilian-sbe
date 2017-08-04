@@ -466,7 +466,7 @@ def check_maildir():
     src_mdir.lock()  # Useless but recommended if old mbox is used by error
 
     try:
-        for key, message in src_mdir.iteritems():
+        for key, message in src_mdir.items():
             processed = process_email(message)
 
             # delete the message if all went fine
