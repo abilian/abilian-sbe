@@ -88,8 +88,7 @@ class Thread(Entity):
 
     @property
     def closed(self):
-        """True if this thread doesn't accept more posts.
-        """
+        """True if this thread doesn't accept more posts."""
         return self.meta.get('abilian.sbe.forum', {}).get('closed', False)
 
     @closed.setter

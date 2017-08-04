@@ -103,7 +103,7 @@ class CmisObject(Entity, InheritSecurity):
     __table_args__ = (UniqueConstraint('_parent_id', 'title'),)
 
     # Set in concrete classes
-    sbe_type = None
+    sbe_type = None  # type: str
 
     # Convenience default values
     content_length = 0

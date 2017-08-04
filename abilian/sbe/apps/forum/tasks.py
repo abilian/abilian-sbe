@@ -20,7 +20,7 @@ from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
 from six import text_type
-from typing import List
+from typing import List, Tuple
 
 from abilian.core.celery import periodic_task
 from abilian.core.extensions import db, mail
@@ -330,24 +330,25 @@ def decode_payload(part):
     # type: (email.message.Message) -> text_type
     """Get the payload and decode (base64 & quoted printable)."""
 
-    payload = part.get_payload(decode=True)
-    if isinstance(payload, bytes):
-        charset = part.get_content_charset()
-        found = chardet.detect(payload)
-        if charset is not None:
-            try:
-                payload = payload.decode(charset)
-            except UnicodeDecodeError:
-                payload = payload.decode('raw-unicode-escape')
-        else:
-            # What about other encodings? -> using chardet
-            found = chardet.detect(payload)
-            payload = payload.decode(found['encoding'])
+    payload_bytes = part.get_payload(decode=True)
+    assert isinstance(payload_bytes, bytes)
+
+    charset = part.get_content_charset()
+    if charset is not None:
+        try:
+            payload = payload_bytes.decode(charset)
+        except UnicodeDecodeError:
+            payload = payload_bytes.decode('raw-unicode-escape')
+    else:
+        # What about other encodings? -> using chardet
+        found = chardet.detect(payload_bytes)
+        payload = payload_bytes.decode(found['encoding'])
+
     return payload
 
 
 def process(message, marker):
-    # type: (email.message.Message, text_type) -> (text_type, List[dict])
+    # type: (email.message.Message, text_type) -> Tuple[text_type, List[dict]]
     """
     Check the message for marker presence and return the text up to it if present.
 
