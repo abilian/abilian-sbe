@@ -330,21 +330,23 @@ def decode_payload(part):
     # type: (email.message.Message) -> text_type
     """Get the payload and decode (base64 & quoted printable)."""
 
-    payload_bytes = part.get_payload(decode=True)
-    assert isinstance(payload_bytes, bytes)
+    payload = part.get_payload(decode=True)
+
+    if isinstance(payload, text_type):
+        return payload
 
     charset = part.get_content_charset()
     if charset is not None:
         try:
-            payload = payload_bytes.decode(charset)
+            payload_str = payload.decode(charset)
         except UnicodeDecodeError:
-            payload = payload_bytes.decode('raw-unicode-escape')
+            payload_str = payload.decode('raw-unicode-escape')
     else:
         # What about other encodings? -> using chardet
-        found = chardet.detect(payload_bytes)
-        payload = payload_bytes.decode(found['encoding'])
+        found = chardet.detect(payload)
+        payload_str = payload.decode(found['encoding'])
 
-    return payload
+    return payload_str
 
 
 def process(message, marker):
