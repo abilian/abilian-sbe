@@ -2,7 +2,7 @@
 """
 Celery tasks related to document transformation and preview.
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, division, print_function
 
 import email
 import mailbox
@@ -169,10 +169,10 @@ def build_reply_email_address(name, post, member, domain):
     :param post: Post()   to get post.thread_id
     :param member: User() to get user.id
     :param domain: (str)  the last domain name of the email address
-    :return: (unicode)    reply address for forum in the form
-    test+P-fr-3-4-SDB7T5DXNZPD5YAHHVIKVOE2PM@testcase.app.tld
+    :return: (Unicode)    reply address for forum in the form
+       test+P-fr-3-4-SDB7T5DXNZPD5YAHHVIKVOE2PM@testcase.app.tld
 
-    'P' for 'post' - locale - thread id - user id - signature digest
+       'P' for 'post' - locale - thread id - user id - signature digest
     """
     locale = get_locale()
     uid = u'-'.join([u'P', str(locale), str(post.thread_id), str(member.id)])

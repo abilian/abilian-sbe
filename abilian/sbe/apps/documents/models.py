@@ -225,7 +225,9 @@ class PathAndSecurityIndexable(object):
             # skip root folder only on non-root folder!
             next(iter_from_root)
         allowed = {
-            o[0] for o in security.get_role_assignements(next(iter_from_root))}
+            o[0]
+            for o in security.get_role_assignements(next(iter_from_root))
+        }
 
         for obj in iter_from_root:
             if obj.inherit_security:
