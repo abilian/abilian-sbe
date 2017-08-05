@@ -36,7 +36,7 @@ def index():
         return date(year, month, 1)
 
     groups = sorted(groupby(get_month, events).items())
-    ctx = {'groups': groups,}
+    ctx = {'groups': groups}
     return render_template('calendar/index.html', **ctx)
 
 
@@ -53,7 +53,7 @@ def archives():
         return date(year, month, 1)
 
     groups = sorted(groupby(get_month, events).items())
-    ctx = {'groups': groups,}
+    ctx = {'groups': groups}
     return render_template('calendar/archives.html', **ctx)
 
 

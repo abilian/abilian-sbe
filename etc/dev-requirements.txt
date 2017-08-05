@@ -40,6 +40,7 @@ flake8-tidy-imports
 flake8-truveris
 flake8-mutable
 # pep8-naming
+pylint
 
 # deps management
 pip-tools

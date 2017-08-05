@@ -115,7 +115,7 @@ flake8:
 	flake8 abilian tests
 
 lint-py3k:
-	pylint --py3k -d W1633,W1629,W1630 abilian tests
+	pylint --py3k -d W1633,W1629,W1630,W1648 abilian tests
 
 lint-mypy:
 	-mypy abilian
