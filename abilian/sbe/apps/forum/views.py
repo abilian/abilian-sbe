@@ -148,7 +148,7 @@ def index(filter=None):
         ]
 
     if filter == 'year':
-        year_duration = datetime.utcnow() - timedelta(days=256)
+        year_duration = datetime.utcnow() - timedelta(days=365)
         threads = [
             thread for thread in threads if thread.created_at > year_duration
         ]
