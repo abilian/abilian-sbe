@@ -10,6 +10,8 @@ import setuptools
 from setuptools.command.develop import develop as _develop
 from setuptools.command.sdist import sdist as _sdist
 
+VERSION = "0.4.dev7"
+
 session = pip.download.PipSession()
 
 _install_requires = pip.req.parse_requirements(
@@ -40,7 +42,7 @@ class develop(_develop):
 
 setuptools.setup(
     name='abilian-sbe',
-    version='0.4dev6',
+    version=VERSION,
     # use_scm_version=True,
     url='https://github.com/abilian/abilian-sbe',
     license='LGPL',
