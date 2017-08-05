@@ -97,7 +97,7 @@ def users_dt_json():
     columns.extend([func.lower(User.last_name), func.lower(User.first_name)])
 
     direction = asc if sort_dir == 'asc' else desc
-    order_by = map(direction, columns)
+    order_by = [direction(column) for column in columns]
 
     # sqlite does not support 'NULLS FIRST|LAST' in ORDER BY clauses
     engine = query.session.get_bind(User.__mapper__)

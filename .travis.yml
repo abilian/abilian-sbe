@@ -54,6 +54,7 @@ before_script:
 # Run tests
 script:
   - py.test --tb=short -q --cov abilian .
+  - make lint-python
   # There are no docs yet!
   #- sphinx-build -W -b html docs/ docs/_build/
 

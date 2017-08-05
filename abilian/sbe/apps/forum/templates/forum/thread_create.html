@@ -59,7 +59,7 @@
           {% for error in field.errors %}
             {% if 'dict' in error.__class__.__name__ %}
               {% if not loop.first %}<br/>{% endif %}
-              {% for key, val in error.iteritems() %}
+              {% for key, val in error.items() %}
                 {{ field._field_nameTolabel[key] }}&nbsp;:&nbsp;{{ val|join(', ') }}
               {% endfor %}
             {% else %}
