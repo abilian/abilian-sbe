@@ -108,11 +108,14 @@ lint-less:
 lint-python:
 	@echo "--> Linting Python files"
 	@make flake8
-	@make lint-mypy
 	@make lint-py3k
+	@make lint-mypy
+
+flake8:
+	flake8 abilian tests
 
 lint-py3k:
-	pylint --py3k abilian tests
+	pylint --py3k -d W1633,W1629,W1630 abilian tests
 
 lint-mypy:
 	-mypy abilian
@@ -121,14 +124,11 @@ lint-doc:
 	@echo "--> Linting .rst files"
 	rst-lint *.rst
 
-flake8:
-	flake8 abilian tests
-
 format:
 	isort -a  "from __future__ import absolute_import, print_function" -rc \
-		abilian demo tests
-	-yapf --style google -r -i abilian demo tests
-	isort -rc abilian demo tests
+		abilian demo tests *.py
+	-yapf --style google -r -i abilian demo tests *.py
+	isort -rc abilian demo tests *.py
 
 format-js:
 	prettier --tab-width 4 --write ./abilian/sbe/static/js/**.js

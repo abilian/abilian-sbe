@@ -1,7 +1,8 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function, unicode_literals
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 
 from datetime import datetime, timedelta
 from email.parser import FeedParser
@@ -31,14 +32,14 @@ class Test(TestCase):
         thread = Thread(title="Test thread")
         post = thread.create_post()
         assert post in thread.posts
-        assert post.name == u'Test thread'
+        assert post.name == 'Test thread'
 
-        thread.title = u'new title'
-        assert thread.name == u'new title'
-        assert post.name == u'new title'
+        thread.title = 'new title'
+        assert thread.name == 'new title'
+        assert post.name == 'new title'
 
     def test_closed_property(self):
-        thread = Thread(title=u'Test Thread')
+        thread = Thread(title='Test Thread')
         assert thread.closed is False
         thread.closed = True
         assert thread.closed is True
@@ -190,12 +191,12 @@ class ViewTestCase(CommunityBaseTestCase):
 
         mail = self.app.extensions['mail']
         with mail.record_messages() as outbox:
-            title = u"Brand new thread"
-            content = u"shiny thread message"
+            title = "Brand new thread"
+            content = "shiny thread message"
             url = url_for("forum.new_thread", community_id=self.community.slug)
             data = dict(title=title, message=content)
-            data['__action'] = u"create"
-            data['send_by_email'] = u"y"
+            data['__action'] = "create"
+            data['send_by_email'] = "y"
             response = self.client.post(url, data=data)
             self.assertStatus(response, 302)
 
@@ -218,7 +219,7 @@ class ViewTestCase(CommunityBaseTestCase):
 
         # reset the outbox for checking threadpost email
         with mail.record_messages() as outbox:
-            content = data['message'] = u"my cherished post"
+            content = data['message'] = "my cherished post"
             del data['title']
             response = self.client.post(url, data=data)
             self.assertStatus(response, 302)
@@ -250,17 +251,17 @@ class ViewTestCase(CommunityBaseTestCase):
         self.community.set_membership(self.user, MEMBER)
         self.session.commit()
 
-        title = u"Brand new thread"
-        content = u"shiny thread message"
+        title = "Brand new thread"
+        content = "shiny thread message"
         url = url_for("forum.new_thread", community_id=self.community.slug)
         data = dict(title=title, message=content)
-        data['__action'] = u"create"
+        data['__action'] = "create"
 
         mail = self.app.extensions['mail']
         self.client_login(self.user.email, self.user.password)
 
         with mail.record_messages() as outbox:
-            data['send_by_email'] = u"y"  # actually should not be in html form
+            data['send_by_email'] = "y"  # actually should not be in html form
             response = self.client.post(url, data=data)
             self.assertStatus(response, 302)
             assert len(outbox) == 0
@@ -269,7 +270,7 @@ class ViewTestCase(CommunityBaseTestCase):
         self.session.commit()
 
         with mail.record_messages() as outbox:
-            data['send_by_email'] = u"y"  # should be in html form
+            data['send_by_email'] = "y"  # should be in html form
             response = self.client.post(url, data=data)
             self.assertStatus(response, 302)
             assert len(outbox) == 1

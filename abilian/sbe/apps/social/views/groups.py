@@ -64,11 +64,13 @@ def group_json(group_id):
     members = Group.query.get(group_id).members
     q = request.args.get("q", '').lower()
     if q:
-        members = filter(
-            lambda u: any(term.startswith(q)
-                          for name in (u.first_name.lower(), u.last_name.lower())
-                          for term in name.split()),
-            members)
+        members = [
+            u for u in members
+            if any(
+                term.startswith(q)
+                for name in (u.first_name.lower(), u.last_name.lower())
+                for term in name.split())
+        ]
 
     result = {'results': [{'id': obj.id, 'text': obj.name} for obj in members]}
     return jsonify(result)

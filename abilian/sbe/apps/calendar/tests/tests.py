@@ -47,7 +47,7 @@ class IndexingTestCase(CommunityIndexingTestCase):
             assert hit['object_key'] == event1.object_key
 
         with self.login(self.user_c2):
-            res = svc.search(u'event', object_types=obj_types)
+            res = svc.search('event', object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
             assert hit['object_key'] == event2.object_key

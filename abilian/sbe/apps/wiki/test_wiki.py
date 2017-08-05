@@ -62,7 +62,7 @@ class WikiBaseTestCase(CommunityBaseTestCase):
 class TestModels(WikiBaseTestCase):
 
     def test_create_page(self):
-        page = WikiPage(title=u"Some page", body_src=u'abc')
+        page = WikiPage(title="Some page", body_src='abc')
         assert page.title == 'Some page'
         assert page.name == 'Some page'
         assert page.body_src == 'abc'
@@ -74,7 +74,7 @@ class TestModels(WikiBaseTestCase):
         assert revision.author == g.user
 
     def test_rename_page(self):
-        page = WikiPage(title="Some page", body_src=u'abc')
+        page = WikiPage(title="Some page", body_src='abc')
         assert page.title == 'Some page'
         assert page.name == 'Some page'
 

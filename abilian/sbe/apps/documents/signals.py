@@ -27,7 +27,7 @@ def new_community_member(community, membership, is_new, **kwargs):
     current_roles &= VALID_ROLES  # ensure we don't remove roles not managed
     # by us
 
-    for role_to_ungrant in current_roles - set((local_role,)):
+    for role_to_ungrant in current_roles - {local_role}:
         security.ungrant_role(user, role_to_ungrant, community.folder)
 
     if local_role not in current_roles:

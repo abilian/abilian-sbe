@@ -2,7 +2,7 @@
 """
 Celery tasks related to document transformation and preview.
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, division, print_function
 
 import email
 import mailbox
@@ -20,6 +20,7 @@ from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
 from six import text_type
+from typing import List, Tuple
 
 from abilian.core.celery import periodic_task
 from abilian.core.extensions import db, mail
@@ -28,7 +29,6 @@ from abilian.core.signals import activity
 from abilian.core.util import md5
 from abilian.i18n import _l, render_template_i18n
 from abilian.web import url_for
-from typing import List
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 from .models import PostAttachment, Thread
@@ -169,10 +169,10 @@ def build_reply_email_address(name, post, member, domain):
     :param post: Post()   to get post.thread_id
     :param member: User() to get user.id
     :param domain: (str)  the last domain name of the email address
-    :return: (unicode)    reply address for forum in the form
-    test+P-fr-3-4-SDB7T5DXNZPD5YAHHVIKVOE2PM@testcase.app.tld
+    :return: (Unicode)    reply address for forum in the form
+       test+P-fr-3-4-SDB7T5DXNZPD5YAHHVIKVOE2PM@testcase.app.tld
 
-    'P' for 'post' - locale - thread id - user id - signature digest
+       'P' for 'post' - locale - thread id - user id - signature digest
     """
     locale = get_locale()
     uid = u'-'.join([u'P', str(locale), str(post.thread_id), str(member.id)])
@@ -331,23 +331,26 @@ def decode_payload(part):
     """Get the payload and decode (base64 & quoted printable)."""
 
     payload = part.get_payload(decode=True)
-    if isinstance(payload, bytes):
-        charset = part.get_content_charset()
+
+    if isinstance(payload, text_type):
+        return payload
+
+    charset = part.get_content_charset()
+    if charset is not None:
+        try:
+            payload_str = payload.decode(charset)
+        except UnicodeDecodeError:
+            payload_str = payload.decode('raw-unicode-escape')
+    else:
+        # What about other encodings? -> using chardet
         found = chardet.detect(payload)
-        if charset is not None:
-            try:
-                payload = payload.decode(charset)
-            except UnicodeDecodeError:
-                payload = payload.decode('raw-unicode-escape')
-        else:
-            # What about other encodings? -> using chardet
-            found = chardet.detect(payload)
-            payload = payload.decode(found['encoding'])
-    return payload
+        payload_str = payload.decode(found['encoding'])
+
+    return payload_str
 
 
 def process(message, marker):
-    # type: (email.message.Message, text_type) -> (text_type, List[dict])
+    # type: (email.message.Message, text_type) -> Tuple[text_type, List[dict]]
     """
     Check the message for marker presence and return the text up to it if present.
 
@@ -466,7 +469,7 @@ def check_maildir():
     src_mdir.lock()  # Useless but recommended if old mbox is used by error
 
     try:
-        for key, message in src_mdir.iteritems():
+        for key, message in src_mdir.items():
             processed = process_email(message)
 
             # delete the message if all went fine
