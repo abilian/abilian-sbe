@@ -127,39 +127,31 @@ def index(filter=None):
         .order_by(Thread.last_post_at.desc())
 
     threads = query.all()
-    filter_keys = ["today", "month", "year", "week"]
     has_more = False
 
     nb_viewed_times = get_viewed_times(threads)
     for thread in threads:
         thread.nb_views = nb_viewed_times.get(thread, 0)
 
+    dt = None
     if filter == 'today':
+        dt = timedelta(days=1)
+    elif filter == 'week':
+        dt = timedelta(days=7)
+    elif filter == 'month':
+        dt = timedelta(days=31)
+    elif filter == 'year':
+        dt = timedelta(days=365)
+    else:
+        raise BadRequest()
+
+    if dt:
+        cutoff_date = datetime.utcnow() - dt
         threads = [
-            thread for thread in threads
-            if thread.created_at.strftime("%d-%m-%y") == datetime.utcnow()
-            .strftime("%d-%m-%y")
+            thread for thread in threads if thread.created_at > cutoff_date
         ]
 
-    if filter == 'month':
-        month_duration = datetime.utcnow() - timedelta(days=30)
-        threads = [
-            thread for thread in threads if thread.created_at > month_duration
-        ]
-
-    if filter == 'year':
-        year_duration = datetime.utcnow() - timedelta(days=365)
-        threads = [
-            thread for thread in threads if thread.created_at > year_duration
-        ]
-
-    if filter == 'week':
-        week_duration = datetime.utcnow() - timedelta(days=7)
-        threads = [
-            thread for thread in threads if thread.created_at > week_duration
-        ]
-
-    if filter != None and filter in filter_keys:
+    if dt:
         threads = sorted(threads, key=lambda thread: -thread.nb_views)
     else:
         has_more = query.count() > MAX_THREADS
