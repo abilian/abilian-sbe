@@ -142,7 +142,7 @@ def index(filter=None):
         dt = timedelta(days=31)
     elif filter == 'year':
         dt = timedelta(days=365)
-    else:
+    elif filter:
         raise BadRequest()
 
     if dt:
