@@ -43,7 +43,7 @@ def index():
 @route('/archives/')
 def archives():
     events = Event.query \
-        .order_by(Event.start) \
+        .order_by(Event.start.desc()) \
         .filter(Event.end <= datetime.now()) \
         .all()
 
