@@ -190,6 +190,7 @@ update-deps:
 	git --no-pager diff requirements.txt
 
 sync-deps:
+	pip install -U pip setuptools wheel
 	pip install -r requirements.txt
 	pip install -r etc/dev-requirements.txt
 	pip install -e .
