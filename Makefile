@@ -7,7 +7,8 @@ INSTANCE_FOLDER=$(shell 												\
 	$(VIRTUAL_ENV)/bin/python											\
 	 -c 'from flask import Flask; print Flask("myapp").instance_path')
 
-default: test
+
+all: test lint
 
 install:
 	pip install -r requirements.txt
