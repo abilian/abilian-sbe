@@ -1,7 +1,7 @@
 Changelog for Abilian SBE
 =========================
 
-0.3.16 (2017-10-02)
+0.3.17 (2017-10-02)
 -------------------
 
 - Remove unwanted button
