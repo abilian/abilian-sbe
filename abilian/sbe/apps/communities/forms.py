@@ -12,7 +12,7 @@ from flask_babel import gettext as _
 from flask_babel import lazy_gettext as _l
 from six import text_type
 from wtforms.fields import BooleanField, StringField, TextAreaField
-from wtforms.validators import ValidationError, optional, required
+from wtforms.validators import ValidationError, optional, data_required
 
 from abilian.core.models.subjects import Group
 from abilian.web.forms import Form
@@ -51,10 +51,10 @@ def _group_choices():
 
 
 class CommunityForm(Form):
-    name = StringField(label=_l(u"Name"), validators=[required()])
+    name = StringField(label=_l(u"Name"), validators=[data_required()])
     description = TextAreaField(
         label=_l(u"Description"),
-        validators=[required(), length(max=500)],
+        validators=[data_required(), length(max=500)],
         widget=TextArea(resizeable="vertical"))
 
     linked_group = Select2Field(
@@ -68,7 +68,7 @@ class CommunityForm(Form):
         widget=ImageInput(width=65, height=65),
         validators=[optional()])
 
-    type = Select2Field(label=_(u"Type"), validators=[required()],
+    type = Select2Field(label=_(u"Type"), validators=[data_required()],
                         filters=(strip,),
                         choices=[(_l(u'informative'), 'informative'),
                                  (_l(u'participative'), 'participative')])
