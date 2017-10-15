@@ -4,17 +4,16 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.18
+abilian-core==0.9.21
 alembic==0.8.10           # via abilian-core, flask-migrate
-amqp==1.4.9               # via kombu
-anyjson==0.3.3            # via kombu
+amqp==2.2.2               # via kombu
 babel==2.5.1              # via flask-babel
-bcrypt==3.1.3             # via abilian-core
-billiard==3.3.0.23        # via celery
+bcrypt==3.1.4             # via abilian-core
+billiard==3.5.0.3         # via celery
 bleach==2.1.1             # via abilian-core
 blinker==1.4              # via flask-debugtoolbar, flask-mail
-celery==3.1.25            # via abilian-core
-cffi==1.11.1              # via bcrypt
+celery==4.1.0             # via abilian-core
+cffi==1.11.2              # via bcrypt
 chardet==3.0.4
 clamd==1.0.2              # via abilian-core
 click==6.7                # via flask
@@ -40,9 +39,9 @@ itsdangerous==0.24        # via flask, flask-debugtoolbar
 jdcal==1.3                # via openpyxl
 jinja2==2.9.6             # via abilian-core, flask, flask-babel
 jsmin==2.2.2              # via abilian-core
-kombu==3.0.37             # via celery
+kombu==4.1.0              # via celery
 langid==1.1.6
-lxml==4.0.0               # via abilian-core
+lxml==4.1.0               # via abilian-core
 mako==1.0.7               # via alembic
 markdown==2.6.9
 markupsafe==1.0           # via abilian-core, jinja2, mako
@@ -67,10 +66,11 @@ sqlalchemy==1.1.14
 sqlparse==0.2.4           # via abilian-core
 straight.plugin==1.4.1    # via abilian-core
 toolz==0.8.2
-tqdm==4.19.1.post1        # via abilian-core
+tqdm==4.19.4              # via abilian-core
 typing==3.6.2             # via abilian-core
 validate-email==1.3
 validators==0.12.0        # via wtforms-components
+vine==1.1.4               # via amqp
 webassets==0.12.1         # via flask-assets
 webencodings==0.5.1       # via html5lib
 werkzeug==0.12.2          # via flask, flask-debugtoolbar, flask-wtf
