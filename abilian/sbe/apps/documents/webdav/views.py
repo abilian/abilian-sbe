@@ -275,8 +275,8 @@ def lock(path):
     </D:lockdiscovery>
 </D:prop>''' % token
 
-    hlist = [('Content-Type', 'text/xml'),
-             ('Lock-Token', '<urn:uuid:%s>' % token)]
+    hlist = [('Content-Type', 'text/xml'), ('Lock-Token',
+                                            '<urn:uuid:%s>' % token)]
 
     return Response(
         xml, headers=Headers.linked(hlist))  # , status ='423 Locked'

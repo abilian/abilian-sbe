@@ -67,8 +67,8 @@ def get_nb_viewers(entities):
         views = viewtracker.get_views(entities=entities)
         threads = [
             thread.entity for thread in views
-            if thread.user in g.community.members and thread.user !=
-            thread.entity.creator
+            if thread.user in g.community.members and
+            thread.user != thread.entity.creator
         ]
 
         return Counter(threads)
@@ -101,8 +101,8 @@ def get_viewed_times(entities):
         views = viewtracker.get_views(entities=entities)
         views = [
             view for view in views
-            if view.user != view.entity.creator and view.user in
-            g.community.members
+            if view.user != view.entity.creator and
+            view.user in g.community.members
         ]
 
         all_hits = viewtracker.get_hits(views=views)
@@ -346,8 +346,8 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
         return [self.POST_BUTTON, views.object.CANCEL_BUTTON]
 
 
-route('/new_thread/')(
-    ThreadCreate.as_view('new_thread', view_endpoint='.thread'))
+route('/new_thread/')(ThreadCreate.as_view(
+    'new_thread', view_endpoint='.thread'))
 
 
 class ThreadPostCreate(ThreadCreate):
@@ -363,7 +363,8 @@ class ThreadPostCreate(ThreadCreate):
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
         Thread.query.filter(Thread.id == thread_id).update({
-            Thread.last_post_at: datetime.utcnow()
+            Thread.last_post_at:
+            datetime.utcnow()
         })
         return args, kwargs
 
@@ -379,8 +380,8 @@ class ThreadViewers(ThreadView):
     template = 'forum/thread_viewers.html'
 
 
-route('/<int:thread_id>/')(
-    ThreadPostCreate.as_view('thread_post', view_endpoint='.thread'))
+route('/<int:thread_id>/')(ThreadPostCreate.as_view(
+    'thread_post', view_endpoint='.thread'))
 
 route('/<int:thread_id>/viewers')(ThreadViewers.as_view('thread_viewers'))
 
@@ -473,7 +474,8 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
                 user_id=current_user.id,
                 user=text_type(current_user),
                 date=utc_dt(datetime.utcnow()).isoformat(),
-                reason=self.form.reason.data,))
+                reason=self.form.reason.data,
+            ))
         self.obj.meta['abilian.sbe.forum'] = obj_meta  # trigger change for SA
 
         attachments_to_remove = []

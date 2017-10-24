@@ -23,7 +23,8 @@ manager = Manager(description='SBE forum commands', help='SBE forum commands')
     '--filename',
     help='email filename; defaults to standard input',
     default=u'-',
-    required=False,)
+    required=False,
+)
 def inject_email(filename=u'-'):
     """Read one email from stdin, parse it, forward it in a celery task to be persisted."""
 
@@ -58,9 +59,14 @@ def inject_email(filename=u'-'):
                 '%s'
                 '\n------ END -------\n',
                 message,
-                extra={'stack': True,})
+                extra={
+                    'stack': True,
+                })
     else:
-        logger.error('no email was parsed from stdin', extra={'stack': True,})
+        logger.error(
+            'no email was parsed from stdin', extra={
+                'stack': True,
+            })
 
 
 @manager.command

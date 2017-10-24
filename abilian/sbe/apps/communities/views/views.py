@@ -486,8 +486,9 @@ def members_excel_export():
 
     response = current_app.response_class(fd, mimetype=XLSX_MIME)
 
-    filename = u'{}-members-{}.xlsx'.format(
-        community.slug, strftime("%d:%m:%Y-%H:%M:%S", gmtime()))
+    filename = u'{}-members-{}.xlsx'.format(community.slug,
+                                            strftime("%d:%m:%Y-%H:%M:%S",
+                                                     gmtime()))
     response.headers['content-disposition'] = \
         u'attachment;filename="{}"'.format(filename)
 

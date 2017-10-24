@@ -52,8 +52,8 @@ def get_recent_entries(num=20, user=None, community=None):
 
         query = query.filter(
             sa.or_(
-                AE.target_id.in_(community_ids), AE.object_id.in_(
-                    community_ids)))
+                AE.target_id.in_(community_ids),
+                AE.object_id.in_(community_ids)))
 
     query = query.order_by(AE.happened_at.desc()).limit(1000)
     # get twice entries as needed, but ceil to 100

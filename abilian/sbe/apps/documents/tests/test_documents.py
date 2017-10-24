@@ -200,7 +200,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             self.assertEqual(
                 response.headers['Location'],
                 'http://localhost/communities/{}/docs/folder/{}'
-                ''.format(self.community.slug, self.folder.id),)
+                ''.format(self.community.slug, self.folder.id),
+            )
 
     def _test_upload(self,
                      title,

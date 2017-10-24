@@ -6,6 +6,7 @@ from __future__ import absolute_import, print_function
 from datetime import datetime
 
 import sqlalchemy as sa
+import sqlalchemy.orm
 from flask import current_app, flash, g, make_response, redirect, \
     render_template, request
 from flask_login import current_user

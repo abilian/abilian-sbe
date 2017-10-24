@@ -118,7 +118,8 @@ _actions = (
         'attachments',
         _l(u'Attachments'),
         url='attachments',
-        icon='file'),)
+        icon='file'),
+)
 
 
 def register_actions(state):

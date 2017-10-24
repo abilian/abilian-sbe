@@ -104,8 +104,8 @@ class ActivityEntryPresenter(BasePresenter):
             ctx = {}
             ctx['verb'] = entry.verb
 
-            ctx['object_name'] = entry.object.name or getattr(entry.object,
-                                                              'title', "???")
+            ctx['object_name'] = entry.object.name or getattr(
+                entry.object, 'title', "???")
             ctx['object_url'] = url_for(entry.object)
             ctx['object_type'] = object_class_localized
             ctx['object'] = OBJ_TEMPLATE.render(**ctx)

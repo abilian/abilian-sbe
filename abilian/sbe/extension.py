@@ -23,7 +23,8 @@ JS = (
     'js/folder_gallery.js',
     'js/folder_upload.js',
     'js/document_viewer.js',
-    'js/bootstrap-tagsinput.js',)
+    'js/bootstrap-tagsinput.js',
+)
 
 
 class AbilianSBE(object):
