@@ -344,8 +344,8 @@ class TasksTest(BaseTestCase):
         member = Mock()
         member.id = 4
         with self.app.test_request_context(
-                '/build_reply_email_address',
-                headers=[('Accept-Language', 'fr')]):
+                '/build_reply_email_address', headers=[('Accept-Language',
+                                                        'fr')]):
             replyto = build_reply_email_address('test', post, member,
                                                 'testcase.app.tld')
         self.assertIn(expected_reply_address, replyto)

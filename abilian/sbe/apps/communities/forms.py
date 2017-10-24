@@ -12,7 +12,7 @@ from flask_babel import gettext as _
 from flask_babel import lazy_gettext as _l
 from six import text_type
 from wtforms.fields import BooleanField, StringField, TextAreaField
-from wtforms.validators import ValidationError, optional, data_required
+from wtforms.validators import ValidationError, data_required, optional
 
 from abilian.core.models.subjects import Group
 from abilian.web.forms import Form

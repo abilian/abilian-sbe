@@ -12,6 +12,7 @@ import tempfile
 from datetime import datetime
 from functools import partial
 from io import StringIO
+from typing import Any, List
 from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
@@ -21,7 +22,6 @@ from flask import Markup, current_app, flash, g, jsonify, make_response, \
 from flask._compat import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
-from typing import Any, List
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
 
@@ -95,10 +95,12 @@ def folder_json(folder_id):
             continue
 
         data = {
-            'id': parent.id,
-            'url': folder_url(
-                folder_id=parent.id, community_id=parent.community.slug),
-            'title': parent.title,
+            'id':
+            parent.id,
+            'url':
+            folder_url(folder_id=parent.id, community_id=parent.community.slug),
+            'title':
+            parent.title,
         }
         bc.append(data)
 
@@ -112,10 +114,12 @@ def folder_json(folder_id):
 
     for folder in subfolders:
         data = {
-            'id': folder.id,
-            'url': folder_url(
-                folder_id=folder.id, community_id=folder.community.slug),
-            'title': folder.title,
+            'id':
+            folder.id,
+            'url':
+            folder_url(folder_id=folder.id, community_id=folder.community.slug),
+            'title':
+            folder.title,
         }
         folders.append(data)
 
@@ -237,8 +241,8 @@ def permissions_update(folder_id):
     if action in ("activate_inheritance", "deactivate_inheritance"):
         inherit_security = (action == "activate_inheritance")
 
-        if not (inherit_security or has_permission(
-                g.user, 'manage', folder, inherit=False)):
+        if not (inherit_security or
+                has_permission(g.user, 'manage', folder, inherit=False)):
             # don't let user shoot himself in the foot
             flash(_('You must have the "manager" local role on this folder in '
                     'order to deactivate inheritance.'), 'error')
@@ -687,13 +691,15 @@ def delete_multiple(folder):
             msg = _("%(file_num)d files and %(folder_num)d folders sucessfully "
                     "deleted.", file_num=len(docs), folder_num=len(folders))
         elif docs and not folders:
-            msg = _n("1 file sucessfully deleted.",
-                     "%(num)d files sucessfully deleted.",
-                     num=len(docs))
+            msg = _n(
+                "1 file sucessfully deleted.",
+                "%(num)d files sucessfully deleted.",
+                num=len(docs))
         else:
-            msg = _n("1 folder sucessfully deleted.",
-                     "%(num)d folders sucessfully deleted.",
-                     num=len(folders))
+            msg = _n(
+                "1 folder sucessfully deleted.",
+                "%(num)d folders sucessfully deleted.",
+                num=len(folders))
 
         flash(msg, "success")
     else:
