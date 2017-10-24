@@ -52,7 +52,7 @@ openpyxl==2.4.9
 pandas==0.20.3            # via abilian-core
 pathlib==1.0.1            # via abilian-core
 pillow==4.3.0             # via abilian-core
-psycopg2==2.7.3.1         # via abilian-core
+psycopg2==2.7.3.2         # via abilian-core
 pycparser==2.18           # via cffi
 pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.6.1    # via abilian-core, pandas
