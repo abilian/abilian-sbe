@@ -49,7 +49,7 @@ markupsafe==1.0           # via abilian-core, jinja2, mako
 numpy==1.13.3             # via langid, pandas
 olefile==0.44             # via pillow
 openpyxl==2.4.9
-pandas==0.20.3            # via abilian-core
+pandas==0.21.0            # via abilian-core
 pathlib==1.0.1            # via abilian-core
 pillow==4.3.0             # via abilian-core
 psycopg2==2.7.3.2         # via abilian-core
