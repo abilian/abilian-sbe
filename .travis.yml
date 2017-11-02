@@ -24,9 +24,9 @@ addons:
 
 # Install OS dependencies
 before_install:
-  - add-apt-repository 'deb http://ubuntu.mirrors.ovh.net/ftp.ubuntu.com/ubuntu/ xenial main'
-  - apt-get update
-  - apt-get install sqlite3
+  - sudo add-apt-repository 'deb http://ubuntu.mirrors.ovh.net/ftp.ubuntu.com/ubuntu/ xenial main'
+  - sudo apt-get update
+  - sudo apt-get install sqlite3
   - python -c "import sqlite3; print('SQLITE3:', sqlite3.sqlite_version)"
 
   - export NPM_CONFIG_PREFIX=~/npm-packages
