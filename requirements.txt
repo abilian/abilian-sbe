@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.23
+abilian-core==0.9.24
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.1              # via flask-babel
@@ -42,7 +42,7 @@ jinja2==2.9.6             # via abilian-core, flask, flask-babel
 jsmin==2.2.2              # via abilian-core
 kombu==4.1.0              # via celery
 langid==1.1.6
-lxml==4.1.0               # via abilian-core
+lxml==4.1.1               # via abilian-core
 mako==1.0.7               # via alembic
 markdown==2.6.9
 markupsafe==1.0           # via abilian-core, jinja2, mako
@@ -64,7 +64,7 @@ raven==6.3.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
 sqlalchemy-utils==0.32.19  # via abilian-core, wtforms-alchemy
-sqlalchemy==1.1.14
+sqlalchemy==1.1.15
 sqlparse==0.2.4           # via abilian-core
 straight.plugin==1.4.1    # via abilian-core
 toolz==0.8.2
