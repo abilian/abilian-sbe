@@ -63,7 +63,7 @@ pyyaml==3.12              # via abilian-core
 raven==6.3.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
-sqlalchemy-utils==0.32.19  # via abilian-core, wtforms-alchemy
+sqlalchemy-utils==0.32.21  # via abilian-core, wtforms-alchemy
 sqlalchemy==1.1.15
 sqlparse==0.2.4           # via abilian-core
 straight.plugin==1.4.1    # via abilian-core
