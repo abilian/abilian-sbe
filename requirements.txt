@@ -17,7 +17,7 @@ cffi==1.11.2              # via bcrypt
 chardet==3.0.4
 clamd==1.0.2              # via abilian-core
 click==6.7                # via flask
-closure==20161201         # via abilian-core
+closure==20171112         # via abilian-core
 contextlib2==0.5.5        # via raven
 cssmin==0.2.0             # via abilian-core
 decorator==4.1.2          # via validators
