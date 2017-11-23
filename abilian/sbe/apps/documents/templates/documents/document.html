@@ -102,19 +102,19 @@ window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path']
         {%if doc.lock == None %}
         <input type="hidden" name="action" value="checkout" />
          <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit" class="btn btn-link"  onclick="$('#document_checkout').submit(); setTimeout(function () { window.location = '{{url_for(doc)}}'  }, 500);">
-        <i class="glyphicon glyphicon-download"></i> {{_(" Checkout")}}
+        <i class="glyphicon glyphicon-download"></i> {{_("Checkout")}}
         </a>
         {%else%}
          <input type="hidden" name="action" value="unlock" />
          <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit" class="btn btn-link"  onclick="$('#document_checkout').submit();">
-        <i class="fa fa-unlock"></i> {{_(" Unlock")}}
+        <i class="fa fa-unlock"></i> {{_("Unlock")}}
         </a>
         {%endif%}
         </form>
     </li>
        <li>
         <a href="{{ url_for(doc) }}" data-toggle="modal" role="button" title="Move to another folder">
-        <i class="glyphicon glyphicon-refresh"></i> {{_(" Refresh preview")}}
+        <i class="glyphicon glyphicon-refresh"></i> {{_("Refresh preview")}}
         </a>
     </li>
   </ul>

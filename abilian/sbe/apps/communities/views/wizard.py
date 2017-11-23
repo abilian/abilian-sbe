@@ -11,7 +11,6 @@ from flask import current_app, flash, g, redirect, render_template, request, \
     url_for
 from six import PY2
 from validate_email import validate_email
-from werkzeug.utils import secure_filename
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
@@ -288,5 +287,5 @@ def wizard_saving():
 
             send_reset_password_instructions(user)
 
-    flash(_("Members added Successfully"), 'success')
+    flash(_("New members added successfully"), 'success')
     return redirect(url_for(".members", community_id=community.slug))
