@@ -66,7 +66,8 @@ class Application(BaseApplication):
         # "abilian.sbe.apps.calendar",
         "abilian.sbe.apps.communities",
         "abilian.sbe.apps.social",
-        "abilian.sbe.apps.preferences",)
+        "abilian.sbe.apps.preferences",
+    )
 
     script_manager = command_manager
 

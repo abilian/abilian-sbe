@@ -347,7 +347,8 @@ def page_compare():
         page=page,
         diff=diff,
         rev1=from_rev,
-        rev2=to_rev,)
+        rev2=to_rev,
+    )
 
 
 @route('/delete/', methods=["POST"])

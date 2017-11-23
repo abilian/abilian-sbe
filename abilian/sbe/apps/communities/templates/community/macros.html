@@ -30,6 +30,9 @@
   {% if not label %}
     {% set label = _("Read by") %}
   {% endif %}
+  {% if not viewers %}
+    {% set viewers = [] %}
+  {% endif %}
   {% set nb_viewers=viewers|length %}
   <p class="viewed">
     {{ label }}

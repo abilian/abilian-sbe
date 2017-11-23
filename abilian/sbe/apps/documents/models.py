@@ -12,6 +12,7 @@ import mimetypes
 import os
 import threading
 import uuid
+from typing import Any, Dict, Union
 
 import pkg_resources
 import sqlalchemy as sa
@@ -26,7 +27,6 @@ from sqlalchemy.orm.session import Session
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, Text, UnicodeText
 from toolz import first
-from typing import Any, Dict, Union
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
 
@@ -198,7 +198,8 @@ class PathAndSecurityIndexable(object):
     __indexation_args__ = dict(
         index_to=(
             ('_indexable_parent_ids', ('parent_ids',)),
-            ('_indexable_roles_and_users', ('allowed_roles_and_users',)),),)
+            ('_indexable_roles_and_users', ('allowed_roles_and_users',)),
+        ),)
 
     def _iter_to_root(self, skip_self=False):
         obj = self if not skip_self else self.parent
@@ -471,9 +472,10 @@ class BaseContent(CmisObject):
         content name so that 'xxx.pdf' is not flagged as binary/octet-stream for
         example
         """
-        if not content_type or content_type in (
-                'application/octet-stream', 'binary/octet-stream',
-                'application/binary', 'multipart/octet-stream'):
+        if not content_type or content_type in ('application/octet-stream',
+                                                'binary/octet-stream',
+                                                'application/binary',
+                                                'multipart/octet-stream'):
             # absent or generic content type: try to find something more useful to be
             # able to do preview/indexing/...
             guessed_content_type = mimetypes.guess_type(
@@ -676,7 +678,8 @@ class Document(BaseContent, PathAndSecurityIndexable):
             self.title,
             self.path,
             self.content_length,
-            id(self),)
+            id(self),
+        )
 
     # locking management; used for checkin/checkout - this could be generalized to
     # any entity

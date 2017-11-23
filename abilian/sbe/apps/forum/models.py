@@ -84,7 +84,8 @@ class Thread(Entity):
         primaryjoin='Thread.id == Post.thread_id',
         order_by='Post.created_at',
         cascade="all, delete-orphan",
-        back_populates='thread',)
+        back_populates='thread',
+    )
 
     @property
     def closed(self):

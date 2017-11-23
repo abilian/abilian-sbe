@@ -4,21 +4,21 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.11
+abilian-core==0.9.27
 alembic==0.8.10           # via abilian-core, flask-migrate
-amqp==1.4.9               # via kombu
-anyjson==0.3.3            # via kombu
-babel==2.4.0              # via flask-babel
-bcrypt==3.1.3             # via abilian-core
-billiard==3.3.0.23        # via celery
-bleach==1.5.0             # via abilian-core
+amqp==2.2.2               # via kombu
+babel==2.5.1              # via flask-babel
+bcrypt==3.1.4             # via abilian-core
+billiard==3.5.0.3         # via celery
+bleach==2.1.1             # via abilian-core
 blinker==1.4              # via flask-debugtoolbar, flask-mail
-celery==3.1.25            # via abilian-core
-cffi==1.10.0              # via bcrypt
+celery==4.1.0             # via abilian-core
+cffi==1.11.2              # via bcrypt
 chardet==3.0.4
 clamd==1.0.2              # via abilian-core
 click==6.7                # via flask
-closure==20161201         # via abilian-core
+closure==20171112         # via abilian-core
+contextlib2==0.5.5        # via raven
 cssmin==0.2.0             # via abilian-core
 decorator==4.1.2          # via validators
 et-xmlfile==1.0.1         # via openpyxl
@@ -27,54 +27,58 @@ flask-babel==0.11.2       # via abilian-core
 flask-debugtoolbar==0.10.1  # via abilian-core
 flask-login==0.4.0        # via abilian-core
 flask-mail==0.9.1         # via abilian-core
-flask-migrate==2.1.0      # via abilian-core
-flask-script==2.0.5       # via abilian-core
+flask-migrate==2.1.1      # via abilian-core
+flask-script==2.0.6       # via abilian-core
 flask-sqlalchemy==2.1     # via abilian-core, flask-migrate
 flask-testing==0.6.2      # via abilian-core
 flask-wtf==0.12           # via abilian-core
 flask==0.12.2             # via abilian-core, flask-assets, flask-babel, flask-debugtoolbar, flask-login, flask-mail, flask-migrate, flask-script, flask-sqlalchemy, flask-testing, flask-wtf
-html5lib==0.9999999       # via bleach
+html5lib==1.0b10          # via bleach
 infinity==1.4             # via intervals
 intervals==0.8.0          # via wtforms-components
 itsdangerous==0.24        # via flask, flask-debugtoolbar
 jdcal==1.3                # via openpyxl
-jinja2==2.9.6             # via flask, flask-babel
+jinja2==2.10              # via abilian-core, flask, flask-babel
 jsmin==2.2.2              # via abilian-core
-kombu==3.0.37             # via celery
+kombu==4.1.0              # via celery
 langid==1.1.6
-lxml==3.8.0               # via abilian-core
+lxml==4.1.1               # via abilian-core
 mako==1.0.7               # via alembic
-markdown==2.6.8
+markdown==2.6.9
 markupsafe==1.0           # via abilian-core, jinja2, mako
-numpy==1.13.1             # via langid, pandas
+numpy==1.13.3             # via langid, pandas
 olefile==0.44             # via pillow
-openpyxl==2.4.8
-pandas==0.20.3            # via abilian-core
+openpyxl==2.4.9
+pandas==0.21.0            # via abilian-core
 pathlib==1.0.1            # via abilian-core
-pillow==4.2.1             # via abilian-core
-psycopg2==2.7.3           # via abilian-core
+pillow==4.3.0             # via abilian-core
+psycopg2==2.7.3.2         # via abilian-core
 pycparser==2.18           # via cffi
 pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.6.1    # via abilian-core, pandas
 python-editor==1.0.3      # via alembic
 python-magic==0.4.13      # via abilian-core
-pytz==2017.2              # via babel, celery, pandas
+pytz==2017.3              # via babel, celery, pandas
 pyyaml==3.12              # via abilian-core
-redis==2.10.5             # via abilian-core
-six==1.10.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
-sqlalchemy-utils==0.32.14  # via abilian-core, wtforms-alchemy
-sqlalchemy==1.1.13
-sqlparse==0.2.3           # via abilian-core
+raven==6.3.0              # via abilian-core
+redis==2.10.6             # via abilian-core
+six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
+sqlalchemy-utils==0.32.21  # via abilian-core, wtforms-alchemy
+sqlalchemy==1.1.15
+sqlparse==0.2.4           # via abilian-core
 straight.plugin==1.4.1    # via abilian-core
 toolz==0.8.2
-tqdm==4.15.0              # via abilian-core
-typing==3.6.1
+tqdm==4.19.4              # via abilian-core
+typing==3.6.2             # via abilian-core
 validate-email==1.3
 validators==0.12.0        # via wtforms-components
+vine==1.1.4               # via amqp
 webassets==0.12.1         # via flask-assets
+webencodings==0.5.1       # via html5lib
 werkzeug==0.12.2          # via flask, flask-debugtoolbar, flask-wtf
 whoosh==2.7.4             # via abilian-core
 wtforms-alchemy==0.15.0   # via abilian-core
 wtforms-components==0.10.3  # via abilian-core, wtforms-alchemy
-wtforms==2.1              # via flask-wtf, wtforms-alchemy, wtforms-components
-xlwt==1.2.0
+wtforms-sqlalchemy==0.1   # via abilian-core
+wtforms==2.1              # via flask-wtf, wtforms-alchemy, wtforms-components, wtforms-sqlalchemy
+xlwt==1.3.0

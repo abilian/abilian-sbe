@@ -2,7 +2,7 @@
 SQLAlchemy>=1.1
 
 # Abilian Core
-abilian-core>=0.6.10.2
+abilian-core>=0.9
 
 # Email validation (when sending digests)
 validate_email
@@ -17,9 +17,6 @@ markdown
 # needed by folder: export to xls
 xlwt
 openpyxl>=2.3.0
-
-# mypy (experimental)
-typing
 
 # Better FP library than itertools IMHO.
 toolz

@@ -31,7 +31,8 @@ DEFAULT_DIGEST_SCHEDULE = {
     'task': DIGEST_TASK_NAME,
     'schedule': crontab(
         hour=10,
-        minute=0,)
+        minute=0,
+    )
 }
 
 
@@ -90,7 +91,8 @@ def make_message(user):
     happened_after = datetime.utcnow() - timedelta(days=1)
     list_id = u'"{} daily digest" <daily.digest.{}>'.format(
         config['SITE_NAME'],
-        config.get('SERVER_NAME', u'example.com'),)
+        config.get('SERVER_NAME', u'example.com'),
+    )
     base_extra_headers = {
         'List-Id': list_id,
         'List-Post': 'NO',

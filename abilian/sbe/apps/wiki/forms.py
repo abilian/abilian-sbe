@@ -6,7 +6,7 @@ from __future__ import absolute_import, print_function
 
 from flask import g
 from wtforms import HiddenField, StringField, TextAreaField
-from wtforms.validators import ValidationError, required
+from wtforms.validators import ValidationError, data_required
 
 from abilian.i18n import _, _l
 from abilian.web.forms import Form
@@ -32,12 +32,13 @@ def int_or_none(val):
 
 class WikiPageForm(Form):
     title = StringField(
-        label=_l(u"Title"), filters=(strip,), validators=[required()])
+        label=_l(u"Title"), filters=(strip,), validators=[data_required()])
     body_src = TextAreaField(
         label=_l("Body"),
         filters=(strip, clean_up),
-        validators=[required()],
-        widget=TextArea(rows=10, resizeable='vertical'),)
+        validators=[data_required()],
+        widget=TextArea(rows=10, resizeable='vertical'),
+    )
 
     message = StringField(label=_l("Commit message"))
     page_id = HiddenField(filters=(int_or_none,), validators=[flaghidden()])
@@ -72,5 +73,5 @@ def page_exists(title):
 
 # Not used yet
 class CommentForm(Form):
-    message = TextAreaField(label=_l("Message"), validators=[required()])
+    message = TextAreaField(label=_l("Message"), validators=[data_required()])
     page_id = HiddenField()

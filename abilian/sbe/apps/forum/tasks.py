@@ -9,6 +9,7 @@ import mailbox
 import re
 from os.path import expanduser
 from pathlib import Path
+from typing import List, Tuple
 
 import bleach
 import chardet
@@ -20,7 +21,6 @@ from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
 from six import text_type
-from typing import List, Tuple
 
 from abilian.core.celery import periodic_task
 from abilian.core.extensions import db, mail
@@ -258,14 +258,16 @@ def send_post_to_user(community, post, member):
         post=post,
         member=member,
         MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
-        SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,)
+        SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,
+    )
     msg.html = render_template_i18n(
         "forum/mail/new_message.html",
         community=community,
         post=post,
         member=member,
         MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
-        SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,)
+        SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,
+    )
     logger.debug("Sending new post by email to %r", member.email)
 
     try:

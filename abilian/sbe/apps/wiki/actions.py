@@ -92,7 +92,8 @@ _actions = (
         'help',
         _l(u'Syntax help'),
         endpoint='.wiki_help',
-        icon='info-sign'),)
+        icon='info-sign'),
+)
 
 
 def register_actions(state):
