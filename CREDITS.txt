@@ -3,7 +3,17 @@ Core developers:
 - Stefane Fermigier
 - Bertrand Mathieu
 - Yvon Bourbotte
+- Vincent Dardel
+
+Translators:
+
+- Chinese (Simplified): Rosablanca Suen - https://crowdin.com/profile/rosatravels
+- Chinese (Traditional): Rosablanca Suen - https://crowdin.com/profile/rosatravels
+- Spanish: NeHoMaR - https://crowdin.com/profile/NeHoMaR
+- Turkish: ozmodias - https://crowdin.com/profile/ozmodias
+
 
 Pictures:
 
 "Community": http://www.flickr.com/photos/eschipul/ (CC BY)
+
