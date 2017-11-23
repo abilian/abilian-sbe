@@ -76,7 +76,7 @@ endif
 # testing
 #
 test:
-	pytest -ff -x --tb=short $(PKG) tests
+	pytest --ff -x --tb=short $(PKG) tests
 
 test-with-coverage:
 	pytest --tb=short --durations 10 \

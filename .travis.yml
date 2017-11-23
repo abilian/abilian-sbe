@@ -8,8 +8,6 @@ python:
   - "3.6"
 
 env:
-  global:
-    - LD_LIBRARY_PATH=~/sqlite-3.9.1/lib
   matrix:
     - SQLALCHEMY_DATABASE_URI="sqlite://"
     - SQLALCHEMY_DATABASE_URI="postgres://postgres@localhost/abilian_sbe"
@@ -18,7 +16,7 @@ services:
   - redis-server
 
 addons:
-  postgresql: "9.3"
+  postgresql: "9.4"
   apt:
     packages:
       - poppler-utils
@@ -26,15 +24,15 @@ addons:
 
 # Install OS dependencies
 before_install:
+  - sudo add-apt-repository 'deb http://ubuntu.mirrors.ovh.net/ftp.ubuntu.com/ubuntu/ xenial main'
+  - sudo apt-get update
+  - sudo apt-get install sqlite3
   - python -c "import sqlite3; print('SQLITE3:', sqlite3.sqlite_version)"
+
   - export NPM_CONFIG_PREFIX=~/npm-packages
   - mkdir "${NPM_CONFIG_PREFIX}"
   - npm install -g less
   - export PATH=~/npm-packages/bin:$PATH
-  - wget 'http://jenkins.abilian.com/_fixtures/libsqlite-3.9.1-precise-bin.tar.gz'
-  - tar xpvzf libsqlite-3.9.1-precise-bin.tar.gz -C ~
-  - echo $LD_LIBRARY_PATH
-  - ls ~/sqlite-3.9.1/lib
 
 # Install Python dependencies
 install:

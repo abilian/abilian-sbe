@@ -4,7 +4,11 @@
 
 # Our favorite test runner with some plugins and CI builder
 pytest
+pytest-sugar
 pytest-xdist
+
+# currently KO
+# pytest-randomly
 
 # Backport of Python 3 mocking library
 mock>=1.0.1
@@ -12,6 +16,7 @@ mock>=1.0.1
 # Coverage
 coverage>=4.1
 pytest-cov
+
 
 # Python clone of Foreman, useful to test Heroku config locally
 honcho
