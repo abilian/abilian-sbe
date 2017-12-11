@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-11-23 18:41+0100\n"
+"POT-Creation-Date: 2017-12-11 12:33+0100\n"
 "PO-Revision-Date: 2017-11-23 12:11-0500\n"
 "Last-Translator: sf <sf@fermigier.com>\n"
 "Language: zh_Hans_CN\n"
@@ -34,8 +34,8 @@ msgid "Edit event"
 msgstr ""
 
 #: abilian/sbe/apps/calendar/forms.py:65
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:68
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:178
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:48
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:96
 #: abilian/sbe/apps/forum/forms.py:63 abilian/sbe/apps/wiki/forms.py:35
 msgid "Title"
 msgstr "称呼"
@@ -63,8 +63,8 @@ msgstr ""
 
 #: abilian/sbe/apps/calendar/forms.py:75
 #: abilian/sbe/apps/communities/forms.py:56
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:30
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:27
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:27
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:24
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:25
 #: abilian/sbe/apps/social/forms.py:40
 msgid "Description"
@@ -118,7 +118,7 @@ msgid "Activities"
 msgstr "活动"
 
 #: abilian/sbe/apps/communities/actions.py:58
-#: abilian/sbe/apps/documents/views/views.py:31
+#: abilian/sbe/apps/documents/views/views.py:30
 #: abilian/sbe/apps/social/views/users.py:43
 msgid "Documents"
 msgstr "文件"
@@ -137,11 +137,11 @@ msgid "Calendar"
 msgstr ""
 
 #: abilian/sbe/apps/communities/actions.py:78
-#: abilian/sbe/apps/communities/templates/community/members.html:8
+#: abilian/sbe/apps/communities/templates/community/members.html:7
 #: abilian/sbe/apps/communities/views/views.py:345
-#: abilian/sbe/apps/communities/views/wizard.py:145
-#: abilian/sbe/apps/communities/views/wizard.py:164
-#: abilian/sbe/apps/communities/views/wizard.py:214
+#: abilian/sbe/apps/communities/views/wizard.py:146
+#: abilian/sbe/apps/communities/views/wizard.py:165
+#: abilian/sbe/apps/communities/views/wizard.py:215
 #: abilian/sbe/apps/social/templates/social/groups.html:39
 msgid "Members"
 msgstr "成员"
@@ -171,8 +171,8 @@ msgstr ""
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:11
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:11
 #: abilian/sbe/apps/communities/views/views.py:406
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:20
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:18
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:17
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:15
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:17
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:16
 #: abilian/sbe/apps/documents/templates/documents/permissions.html:90
@@ -258,14 +258,13 @@ msgid "Destroy community"
 msgstr "破坏社区"
 
 #: abilian/sbe/apps/communities/templates/community/edit.html:39
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:22
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:39
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:39
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:33
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:19
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:36
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:36
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:30
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_change_owner.html:28
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_delete.html:22
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:36
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_move.html:22
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:33
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_move.html:24
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:33
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:76
 #: abilian/sbe/apps/documents/templates/documents/_modals_roles.html:49
@@ -315,25 +314,25 @@ msgstr ""
 msgid "member"
 msgstr "成员"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:16
+#: abilian/sbe/apps/communities/templates/community/members.html:15
 #, fuzzy
 msgid "Add members"
 msgstr "添加成员"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:19
+#: abilian/sbe/apps/communities/templates/community/members.html:18
 #, fuzzy
 msgid "Download list"
 msgstr "下载"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:88
+#: abilian/sbe/apps/communities/templates/community/members.html:86
 msgid "Add a member"
 msgstr "添加成员"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:95
+#: abilian/sbe/apps/communities/templates/community/members.html:93
 msgid "User"
 msgstr "用户"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:100
+#: abilian/sbe/apps/communities/templates/community/members.html:98
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:15
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:13
 #: abilian/sbe/apps/communities/views/views.py:409
@@ -343,14 +342,14 @@ msgstr "用户"
 msgid "Role"
 msgstr "角色"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:102
+#: abilian/sbe/apps/communities/templates/community/members.html:100
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:79
 #: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:76
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:77
 msgid "Member"
 msgstr "成员"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:103
+#: abilian/sbe/apps/communities/templates/community/members.html:101
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:80
 #: abilian/sbe/apps/communities/templates/community/wizard_new_accounts.html:79
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:79
@@ -358,7 +357,7 @@ msgstr "成员"
 msgid "Manager"
 msgstr "管理员"
 
-#: abilian/sbe/apps/communities/templates/community/members.html:108
+#: abilian/sbe/apps/communities/templates/community/members.html:106
 msgid "Add"
 msgstr "添加"
 
@@ -533,28 +532,22 @@ msgstr "电子邮件"
 msgid "%(community)s members"
 msgstr "现任成员"
 
-#: abilian/sbe/apps/communities/views/wizard.py:178
+#: abilian/sbe/apps/communities/views/wizard.py:179
 msgid "To add new members, please follow the CSV file model."
 msgstr ""
 
-#: abilian/sbe/apps/communities/views/wizard.py:190
-#: abilian/sbe/apps/communities/views/wizard.py:254
+#: abilian/sbe/apps/communities/views/wizard.py:191
+#: abilian/sbe/apps/communities/views/wizard.py:255
 msgid "No new members were found"
 msgstr ""
 
-#: abilian/sbe/apps/communities/views/wizard.py:290
+#: abilian/sbe/apps/communities/views/wizard.py:291
 #, fuzzy
-msgid "New members added successfully"
+msgid "Members added Successfully"
 msgstr "已成功创建社区%(name)s"
 
 #: abilian/sbe/apps/documents/actions.py:150
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:142
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:146
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:201
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:118
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:122
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:158
-#: abilian/sbe/apps/documents/templates/documents/document.html:70
+#: abilian/sbe/apps/documents/templates/documents/document.html:47
 msgid "Download"
 msgstr "下载"
 
@@ -564,11 +557,6 @@ msgstr "移动至此文件夹"
 
 #: abilian/sbe/apps/documents/actions.py:163
 #: abilian/sbe/apps/documents/actions.py:316
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:151
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:154
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:127
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:130
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:163
 #: abilian/sbe/apps/forum/actions.py:95 abilian/sbe/apps/wiki/actions.py:76
 msgid "Delete"
 msgstr "删除"
@@ -584,8 +572,6 @@ msgid "List content"
 msgstr "列表内容"
 
 #: abilian/sbe/apps/documents/actions.py:197
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:137
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:112
 msgid "View descendants"
 msgstr ""
 
@@ -604,8 +590,6 @@ msgid "New folder"
 msgstr "新的文件夹"
 
 #: abilian/sbe/apps/documents/actions.py:236
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:136
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:111
 msgid "Permissions"
 msgstr "权限"
 
@@ -622,141 +606,104 @@ msgid "Checkout (Download for edit)"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:287
-#: abilian/sbe/apps/documents/templates/documents/document.html:110
 msgid "Unlock"
 msgstr ""
 
 #: abilian/sbe/apps/documents/actions.py:296
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:16
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:13
 msgid "Upload new version"
 msgstr "上传新版本"
 
 #: abilian/sbe/apps/documents/actions.py:307
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:15
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:12
 msgid "Send by email"
 msgstr "通过邮件发送"
 
 #: abilian/sbe/apps/documents/actions.py:324
-#: abilian/sbe/apps/documents/templates/documents/document.html:117
 msgid "Refresh preview"
 msgstr "刷新预览"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:36
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:36
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:21
 msgid "Select all"
 msgstr "全选"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:37
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:37
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:22
 msgid "Unselect all"
 msgstr "取消全选"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:42
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:41
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:33
 msgid "Filter..."
 msgstr "过滤器..."
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:70
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:180
-#: abilian/sbe/apps/forum/templates/forum/attachments.html:36
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:49
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:97
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:35
 msgid "Size"
 msgstr "大小"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:73
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:183
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:52
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:100
 #: abilian/sbe/apps/documents/templates/documents/descendants.html:38
-#: abilian/sbe/apps/documents/templates/documents/document.html:189
-#: abilian/sbe/apps/forum/templates/forum/attachments.html:30
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:29
 msgid "Owner"
 msgstr "机主"
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:75
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:185
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:54
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:102
 msgid "Age"
 msgstr "年龄："
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:139
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:114
-#, fuzzy
-msgid "Send by mail"
-msgstr "通过邮件发送"
-
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:144
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:147
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:120
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:123
-#: abilian/sbe/apps/forum/templates/forum/thread.html:199
-#: abilian/sbe/apps/wiki/actions.py:56
-msgid "Edit"
-msgstr "编辑"
-
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:149
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:125
-#: abilian/sbe/apps/documents/templates/documents/document.html:91
-msgid "Move"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:153
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:129
-#: abilian/sbe/apps/documents/templates/documents/document.html:96
-#, fuzzy
-msgid "Replace"
-msgstr "人员"
-
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:193
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:152
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:110
 msgid "Delete selected elements?"
 msgstr ""
 
-#: abilian/sbe/apps/documents/templates/documents/_macros.html:286
-#: abilian/sbe/apps/documents/templates/documents/_macros_gallery_view.html:242
+#: abilian/sbe/apps/documents/templates/documents/_macros.html:125
 msgid "This folder is currently empty. Why don't you upload some content?"
 msgstr "此文件夹当前为空。你为什么不上传一些内容？"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:14
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:11
 msgid "Delete File"
 msgstr "刪除檔案"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:18
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:15
 #, fuzzy
-msgid "Are you sure you want to delete the file : "
+msgid "Are you sure you want to delete the file \"{filename}\" ?"
 msgstr "确实要删除文件 '{0}'?"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:24
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_delete.html:25
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_delete.html:21
 #: abilian/sbe/apps/forum/templates/forum/thread.html:305
 #: abilian/sbe/apps/forum/templates/forum/thread_attachments.html:82
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:50
 msgid "Really Delete"
 msgstr "真要删除吗？"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:15
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:12
 msgid "Edit document properties"
 msgstr "编辑文档属性"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:41
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:38
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:38
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:35
 msgid "Save changes"
 msgstr "保存修改"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:20
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:17
 msgid "Recipient"
 msgstr "收件人"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:31
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:28
 #: abilian/sbe/apps/forum/forms.py:70 abilian/sbe/apps/wiki/forms.py:76
 msgid "Message"
 msgstr "信息"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:34
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:31
 msgid "Message..."
 msgstr "信息"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:40
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_send_by_email.html:37
 msgid "Send"
 msgstr "发送"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:35
+#: abilian/sbe/apps/documents/templates/documents/_modals_document_upload_new_version.html:32
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_upload.html:78
 #: abilian/sbe/apps/wiki/templates/wiki/_base.html:78
 msgid "Upload"
@@ -772,25 +719,15 @@ msgstr "移动到系统文件夹。"
 msgid "New owner"
 msgstr "新的文件夹"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_delete.html:14
-#, fuzzy
-msgid "Delete Folder"
-msgstr "创建文件夹"
-
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_delete.html:18
-#, fuzzy
-msgid "Are you sure you want to delete the folder : "
-msgstr "确实要删除此门户网站吗?"
-
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:13
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:10
 msgid "Edit folder properties"
 msgstr "編輯資料夾屬性"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_move.html:6
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_move.html:8
 msgid "Move files or documents"
 msgstr "移动文件或文档"
 
-#: abilian/sbe/apps/documents/templates/documents/_modals_folder_move.html:25
+#: abilian/sbe/apps/documents/templates/documents/_modals_folder_move.html:27
 msgid "Move to selected folder"
 msgstr "移动到系统文件夹。"
 
@@ -849,101 +786,72 @@ msgstr "添加本地文件"
 msgid "Add a local role for a user"
 msgstr "为用户添加本地角色"
 
-#: abilian/sbe/apps/documents/templates/documents/audit_macros.html:10
-#, fuzzy
-msgid "{key} changed:"
-msgstr "保存修改"
-
-#: abilian/sbe/apps/documents/templates/documents/audit_macros.html:15
-msgid "{key} changed from "
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/audit_macros.html:17
-msgid "{key} set to {new_value}"
-msgstr ""
-
 #: abilian/sbe/apps/documents/templates/documents/descendants.html:10
 #, fuzzy
 msgid "Folder descendants"
 msgstr "文件夹内容"
 
-#: abilian/sbe/apps/documents/templates/documents/document.html:42
-#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:34
-msgid "Waiting for virus check..."
-msgstr "正在等待病毒检查..。"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:47
-#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:39
-msgid "Virus found. Access disabled."
-msgstr "发现病毒。访问已禁用。"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:61
-#, fuzzy
-msgid "Back to document list"
-msgstr "返回对话列表"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:105
-msgid "Checkout"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:144
-#: abilian/sbe/apps/documents/templates/documents/document.html:146
-msgid "Previous"
-msgstr "上一步"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:148
-#: abilian/sbe/apps/documents/templates/documents/document.html:150
-msgid "Next"
-msgstr "下一步"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:164
-msgid "Document preview not yet available"
-msgstr "文档预览尚未可用"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:190
-#, python-format
-msgid "<b>Uploaded:</b> %(date)s (%(age)s)"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:195
-#, python-format
-msgid "<b>Modified:</b> %(date_age)s"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:200
-#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:62
-#, python-format
-msgid "Locked for edition by %(user)s at %(date)s (%(age)s)"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:209
-#, fuzzy
-msgid "Readers"
-msgstr "读者"
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:210
-#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:69
-msgid "viewed by"
-msgstr ""
-
-#: abilian/sbe/apps/documents/templates/documents/document.html:214
-#, fuzzy
-msgid "Last Changes"
-msgstr "保存修改"
-
-#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:19
+#: abilian/sbe/apps/documents/templates/documents/document.html:17
+#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:18
 msgid "Document view"
 msgstr "文档视图"
 
+#: abilian/sbe/apps/documents/templates/documents/document.html:32
+#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:33
+msgid "Waiting for virus check..."
+msgstr "正在等待病毒检查..。"
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:37
+#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:38
+msgid "Virus found. Access disabled."
+msgstr "发现病毒。访问已禁用。"
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:59
 #: abilian/sbe/apps/documents/templates/documents/document_viewers.html:51
 #, python-format
 msgid "Created: %(date)s (%(age)s) by %(creator)s"
 msgstr ""
 
+#: abilian/sbe/apps/documents/templates/documents/document.html:65
 #: abilian/sbe/apps/documents/templates/documents/document_viewers.html:57
 #, python-format
 msgid "Last modification: %(date_age)s"
 msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:70
+#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:62
+#, python-format
+msgid "Locked for edition by %(user)s at %(date)s (%(age)s)"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:76
+#: abilian/sbe/apps/documents/templates/documents/document_viewers.html:69
+msgid "viewed by"
+msgstr ""
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:85
+#, fuzzy
+msgid "Preview"
+msgstr "查看"
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:93
+#: abilian/sbe/apps/documents/templates/documents/document.html:95
+msgid "Previous"
+msgstr "上一步"
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:97
+#: abilian/sbe/apps/documents/templates/documents/document.html:99
+msgid "Next"
+msgstr "下一步"
+
+#: abilian/sbe/apps/documents/templates/documents/document.html:113
+msgid "Document preview not yet available"
+msgstr "文档预览尚未可用"
+
+#: abilian/sbe/apps/documents/templates/documents/folder.html:9
+#, fuzzy
+msgid "Folder contents"
+msgstr "文件夹内容"
 
 #: abilian/sbe/apps/documents/templates/documents/mail_file_sent.fr.txt:1
 #, python-format
@@ -1023,48 +931,48 @@ msgstr "用户当前继承的角色"
 msgid "Audit Log"
 msgstr "审核日志"
 
-#: abilian/sbe/apps/documents/views/documents.py:92
+#: abilian/sbe/apps/documents/views/documents.py:89
 msgid "Document properties successfully edited."
 msgstr "已成功编辑文档属性。"
 
-#: abilian/sbe/apps/documents/views/documents.py:94
-#: abilian/sbe/apps/documents/views/folders.py:568
+#: abilian/sbe/apps/documents/views/documents.py:91
+#: abilian/sbe/apps/documents/views/folders.py:531
 msgid "You didn't change any property."
 msgstr "你没有改变任何财产"
 
-#: abilian/sbe/apps/documents/views/documents.py:140
+#: abilian/sbe/apps/documents/views/documents.py:135
 msgid "File successfully deleted."
 msgstr "文件成功删除。"
 
-#: abilian/sbe/apps/documents/views/documents.py:160
+#: abilian/sbe/apps/documents/views/documents.py:152
 msgid "New version successfully uploaded"
 msgstr "新版本成功上传"
 
-#: abilian/sbe/apps/documents/views/documents.py:308
+#: abilian/sbe/apps/documents/views/documents.py:294
 msgid "{sender} sent you a file"
 msgstr "{寄件人} 给你发了个文件"
 
-#: abilian/sbe/apps/documents/views/documents.py:323
+#: abilian/sbe/apps/documents/views/documents.py:309
 msgid "Email successfully sent"
 msgstr "成功发送邮件"
 
-#: abilian/sbe/apps/documents/views/folders.py:227
+#: abilian/sbe/apps/documents/views/folders.py:192
 msgid "On {date}, {manager} has activated inheritance"
 msgstr "在{日期} 上, {经理} 已激活继承"
 
-#: abilian/sbe/apps/documents/views/folders.py:229
+#: abilian/sbe/apps/documents/views/folders.py:194
 msgid "On {date}, {manager} has deactivated inheritance"
 msgstr "在{日期} 上, {经理} 已激活继承"
 
-#: abilian/sbe/apps/documents/views/folders.py:231
+#: abilian/sbe/apps/documents/views/folders.py:196
 msgid "On {date}, {manager} has given role \"{role}\" to {principal}"
 msgstr "在 {日期}, {经理} 给了角色 \"{role}\" {principal}"
 
-#: abilian/sbe/apps/documents/views/folders.py:233
+#: abilian/sbe/apps/documents/views/folders.py:198
 msgid "On {date}, {manager} has revoked role \"{role}\" from {principal}"
 msgstr "在 {日期}, {经理} 给了角色 \"{role}\" {principal}"
 
-#: abilian/sbe/apps/documents/views/folders.py:282
+#: abilian/sbe/apps/documents/views/folders.py:247
 msgid ""
 "You must have the \"manager\" local role on this folder in order to "
 "deactivate inheritance."
@@ -1072,113 +980,113 @@ msgstr ""
 "为了停用继承, 您必须在此文件夹上具有 \"\n"
 "经理\" 本地角色。"
 
-#: abilian/sbe/apps/documents/views/folders.py:345
+#: abilian/sbe/apps/documents/views/folders.py:310
 msgid ""
 "Cannot remove \"manager\" local role for yourself: you don't have "
 "\"manager\" role (either by security inheritance or by group membership)"
 msgstr "无法为自己删除 \"经理\" 本地角色: 您没有 \"经理\" 角色 (通过安全继承或按组成员身份)"
 
-#: abilian/sbe/apps/documents/views/folders.py:352
+#: abilian/sbe/apps/documents/views/folders.py:317
 msgid "Role {role} for user {user} removed on folder {folder}"
 msgstr "在文件夹{folder} 上删除用户{user} 的角色{role}"
 
-#: abilian/sbe/apps/documents/views/folders.py:365
+#: abilian/sbe/apps/documents/views/folders.py:330
 msgid ""
 "Cannot remove \"manager\" local role for group \"{group}\": you don't "
 "have \"manager\" role by security inheritance or by local role"
 msgstr "无法为自己删除 \"经理\" 本地角色: 您没有 \"经理\" 角色 (通过安全继承或按组成员身份)"
 
-#: abilian/sbe/apps/documents/views/folders.py:370
+#: abilian/sbe/apps/documents/views/folders.py:335
 msgid "Role {role} for group {group} removed on folder {folder}"
 msgstr "在文件夹{folder} 上删除组{group} 的角色{role}"
 
-#: abilian/sbe/apps/documents/views/folders.py:554
+#: abilian/sbe/apps/documents/views/folders.py:518
 msgid "Unknown action."
 msgstr "未知操作"
 
-#: abilian/sbe/apps/documents/views/folders.py:566
+#: abilian/sbe/apps/documents/views/folders.py:529
 msgid "Folder properties successfully edited."
 msgstr "已成功编辑文档属性。"
 
-#: abilian/sbe/apps/documents/views/folders.py:662
+#: abilian/sbe/apps/documents/views/folders.py:625
 #: abilian/sbe/apps/wiki/views.py:430
 #, python-format
 msgid "One new document successfully uploaded"
 msgid_plural "%(num)d new document successfully uploaded"
 msgstr[0] "%(num)d 新文档成功上传"
 
-#: abilian/sbe/apps/documents/views/folders.py:734
+#: abilian/sbe/apps/documents/views/folders.py:692
 #, python-format
 msgid "%(file_num)d files and %(folder_num)d folders sucessfully deleted."
 msgstr "%(file_num)d 文件和%(folder_num)d 文件夹已成功删除。"
 
-#: abilian/sbe/apps/documents/views/folders.py:739
+#: abilian/sbe/apps/documents/views/folders.py:697
 #, python-format
 msgid "1 file sucessfully deleted."
 msgid_plural "%(num)d files sucessfully deleted."
 msgstr[0] "%(num)d 文件已成功删除。"
 
-#: abilian/sbe/apps/documents/views/folders.py:744
+#: abilian/sbe/apps/documents/views/folders.py:702
 #, python-format
 msgid "1 folder sucessfully deleted."
 msgid_plural "%(num)d folders sucessfully deleted."
 msgstr[0] "%(num)d 文件已成功删除。"
 
-#: abilian/sbe/apps/documents/views/folders.py:748
+#: abilian/sbe/apps/documents/views/folders.py:706
 msgid "No object deleted"
 msgstr "没有选中天体。"
 
-#: abilian/sbe/apps/documents/views/folders.py:760
+#: abilian/sbe/apps/documents/views/folders.py:718
 msgid "Move elements: no elements selected."
 msgstr "移动元素: 未选择任何元素。"
 
-#: abilian/sbe/apps/documents/views/folders.py:766
+#: abilian/sbe/apps/documents/views/folders.py:724
 msgid "Move elements: no destination folder selected. Aborted."
 msgstr "移动元素: 没有选定目标文件夹。中止."
 
-#: abilian/sbe/apps/documents/views/folders.py:773
+#: abilian/sbe/apps/documents/views/folders.py:731
 msgid "Move elements: source and destination folder are identical, nothing done."
 msgstr "移动元素: 源和目标文件夹相同, 没有完成任何操作。"
 
-#: abilian/sbe/apps/documents/views/folders.py:779
+#: abilian/sbe/apps/documents/views/folders.py:737
 msgid "You are not allowed to move elements from this folder"
 msgstr "您不被允许将文件上载到此文件夹。"
 
-#: abilian/sbe/apps/documents/views/folders.py:784
+#: abilian/sbe/apps/documents/views/folders.py:742
 msgid "You are not allowed to write in folder \"{folder}\""
 msgstr "您不允许在文件夹 \"{folder}\" 中写入"
 
-#: abilian/sbe/apps/documents/views/folders.py:798
+#: abilian/sbe/apps/documents/views/folders.py:756
 msgid ""
 "Move elements: destination folder is included in moved elements. Moved "
 "nothing."
 msgstr "移动元素: 目标文件夹包含在移动的元素中。什么也没动"
 
-#: abilian/sbe/apps/documents/views/folders.py:814
+#: abilian/sbe/apps/documents/views/folders.py:772
 msgid ""
 "Move elements: canceled, some elements exists in destination folder: "
 "{elements}"
 msgstr "移动元素: 已取消, 目标文件夹中存在某些元素: {elements}"
 
-#: abilian/sbe/apps/documents/views/folders.py:822
+#: abilian/sbe/apps/documents/views/folders.py:780
 msgid "1 folder"
 msgid_plural "{count} folders"
 msgstr[0] "{count} 文件夹"
 
-#: abilian/sbe/apps/documents/views/folders.py:824
+#: abilian/sbe/apps/documents/views/folders.py:782
 msgid "0 folder"
 msgstr "文件夹"
 
-#: abilian/sbe/apps/documents/views/folders.py:826
+#: abilian/sbe/apps/documents/views/folders.py:784
 msgid "1 document"
 msgid_plural "{count} documents"
 msgstr[0] "{count} 文档"
 
-#: abilian/sbe/apps/documents/views/folders.py:828
+#: abilian/sbe/apps/documents/views/folders.py:786
 msgid "0 document"
 msgstr "0文件"
 
-#: abilian/sbe/apps/documents/views/folders.py:830
+#: abilian/sbe/apps/documents/views/folders.py:788
 msgid "{folders} and {documents} moved to {target}"
 msgstr ""
 "{\n"
@@ -1186,13 +1094,13 @@ msgstr ""
 "文件} 搬到{\n"
 "目标}"
 
-#: abilian/sbe/apps/documents/views/folders.py:878
+#: abilian/sbe/apps/documents/views/folders.py:836
 msgid "An element named \"{name}\" is already present in folder"
 msgstr ""
 "文件夹中已存在名为 \"{\n"
 "名称}\" 的元素"
 
-#: abilian/sbe/apps/documents/views/folders.py:881
+#: abilian/sbe/apps/documents/views/folders.py:839
 msgid "Cannot rename: \"{name}\" is already present in parent folder"
 msgstr ""
 "无法重命名: \"{\n"
@@ -1277,19 +1185,19 @@ msgid "The thread is now re-opened for edition and new contributions."
 msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/archives.html:10
-#: abilian/sbe/apps/forum/templates/forum/attachments.html:13
-#: abilian/sbe/apps/forum/templates/forum/index.html:11
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:12
+#: abilian/sbe/apps/forum/templates/forum/index.html:10
 msgid "Showing :"
 msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/archives.html:24
-#: abilian/sbe/apps/forum/templates/forum/attachments.html:27
-#: abilian/sbe/apps/forum/templates/forum/index.html:21
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:26
+#: abilian/sbe/apps/forum/templates/forum/index.html:20
 msgid "Topic"
 msgstr ""
 
 #: abilian/sbe/apps/forum/templates/forum/archives.html:27
-#: abilian/sbe/apps/forum/templates/forum/index.html:27
+#: abilian/sbe/apps/forum/templates/forum/index.html:26
 #, fuzzy
 msgid "Replies"
 msgstr "人员"
@@ -1298,40 +1206,40 @@ msgstr "人员"
 msgid "No message has been posted to this community yet"
 msgstr "尚未向该社区发送任何消息"
 
-#: abilian/sbe/apps/forum/templates/forum/attachments.html:33
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:32
 #, fuzzy
 msgid "Document"
 msgstr "{count} 文档"
 
-#: abilian/sbe/apps/forum/templates/forum/attachments.html:44
+#: abilian/sbe/apps/forum/templates/forum/attachments.html:43
 msgid "No attachment has been posted to this community yet"
 msgstr "尚未向该社区发送任何消息"
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:24
+#: abilian/sbe/apps/forum/templates/forum/index.html:23
 #, fuzzy
 msgid "Participants"
 msgstr "参与"
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:30
+#: abilian/sbe/apps/forum/templates/forum/index.html:29
 msgid "Viewers"
 msgstr ""
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:33
+#: abilian/sbe/apps/forum/templates/forum/index.html:32
 #, fuzzy
 msgid "Views"
 msgstr "查看"
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:36
+#: abilian/sbe/apps/forum/templates/forum/index.html:35
 #, fuzzy
 msgid "Activity"
 msgstr "按活动排序"
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:46
+#: abilian/sbe/apps/forum/templates/forum/index.html:45
 #, fuzzy
 msgid "No message has been posted to this community yet."
 msgstr "尚未向该社区发送任何消息"
 
-#: abilian/sbe/apps/forum/templates/forum/index.html:53
+#: abilian/sbe/apps/forum/templates/forum/index.html:52
 msgid "All conversations"
 msgstr "所有对话"
 
@@ -1379,6 +1287,11 @@ msgstr "发表评论"
 #: abilian/sbe/apps/forum/templates/forum/thread.html:180
 msgid "Post this comment"
 msgstr "发表评论"
+
+#: abilian/sbe/apps/forum/templates/forum/thread.html:199
+#: abilian/sbe/apps/wiki/actions.py:56
+msgid "Edit"
+msgstr "编辑"
 
 #: abilian/sbe/apps/forum/templates/forum/thread.html:228
 #, fuzzy, python-format
@@ -1847,4 +1760,49 @@ msgstr "来源"
 
 #~ msgid "Save article"
 #~ msgstr "保存文章"
+
+#~ msgid "Send by mail"
+#~ msgstr "通过邮件发送"
+
+#~ msgid "Move"
+#~ msgstr ""
+
+#~ msgid "Replace"
+#~ msgstr "人员"
+
+#~ msgid "Are you sure you want to delete the file : "
+#~ msgstr "确实要删除文件 '{0}'?"
+
+#~ msgid "Delete Folder"
+#~ msgstr "创建文件夹"
+
+#~ msgid "Are you sure you want to delete the folder : "
+#~ msgstr "确实要删除此门户网站吗?"
+
+#~ msgid "{key} changed:"
+#~ msgstr "保存修改"
+
+#~ msgid "{key} changed from "
+#~ msgstr ""
+
+#~ msgid "{key} set to {new_value}"
+#~ msgstr ""
+
+#~ msgid "Back to document list"
+#~ msgstr "返回对话列表"
+
+#~ msgid "Checkout"
+#~ msgstr ""
+
+#~ msgid "<b>Uploaded:</b> %(date)s (%(age)s)"
+#~ msgstr ""
+
+#~ msgid "<b>Modified:</b> %(date_age)s"
+#~ msgstr ""
+
+#~ msgid "Readers"
+#~ msgstr "读者"
+
+#~ msgid "Last Changes"
+#~ msgstr "保存修改"
 
