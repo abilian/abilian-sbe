@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.27
+abilian-core==0.9.28
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.1              # via flask-babel
@@ -30,7 +30,7 @@ flask-mail==0.9.1         # via abilian-core
 flask-migrate==2.1.1      # via abilian-core
 flask-script==2.0.6       # via abilian-core
 flask-sqlalchemy==2.1     # via abilian-core, flask-migrate
-flask-testing==0.6.2      # via abilian-core
+flask-testing==0.7.1      # via abilian-core
 flask-wtf==0.12           # via abilian-core
 flask==0.12.2             # via abilian-core, flask-assets, flask-babel, flask-debugtoolbar, flask-login, flask-mail, flask-migrate, flask-script, flask-sqlalchemy, flask-testing, flask-wtf
 html5lib==1.0.1           # via bleach
@@ -49,7 +49,7 @@ markupsafe==1.0           # via abilian-core, jinja2, mako
 numpy==1.13.3             # via langid, pandas
 olefile==0.44             # via pillow
 openpyxl==2.4.9
-pandas==0.21.0            # via abilian-core
+pandas==0.21.1            # via abilian-core
 pathlib==1.0.1            # via abilian-core
 pillow==4.3.0             # via abilian-core
 psycopg2==2.7.3.2         # via abilian-core
@@ -60,14 +60,14 @@ python-editor==1.0.3      # via alembic
 python-magic==0.4.15      # via abilian-core
 pytz==2017.3              # via babel, celery, pandas
 pyyaml==3.12              # via abilian-core
-raven==6.3.0              # via abilian-core
+raven==6.4.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
 sqlalchemy-utils==0.32.21  # via abilian-core, wtforms-alchemy
 sqlalchemy==1.1.15
 sqlparse==0.2.4           # via abilian-core
 straight.plugin==1.4.1    # via abilian-core
-toolz==0.8.2
+toolz==0.9.0
 tqdm==4.19.5              # via abilian-core
 typing==3.6.2             # via abilian-core
 validate-email==1.3
