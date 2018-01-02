@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.28
+abilian-core==0.9.29
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.1              # via flask-babel
@@ -18,6 +18,7 @@ chardet==3.0.4
 clamd==1.0.2              # via abilian-core
 click==6.7                # via flask
 closure==20171112         # via abilian-core
+contextlib2==0.5.5        # via raven
 cssmin==0.2.0             # via abilian-core
 decorator==4.1.2          # via validators
 et-xmlfile==1.0.1         # via openpyxl
@@ -46,11 +47,10 @@ mako==1.0.7               # via alembic
 markdown==2.6.10
 markupsafe==1.0           # via abilian-core, jinja2, mako
 numpy==1.13.3             # via langid, pandas
-olefile==0.44             # via pillow
 openpyxl==2.4.9
-pandas==0.21.1            # via abilian-core
+pandas==0.22.0            # via abilian-core
 pathlib==1.0.1            # via abilian-core
-pillow==4.3.0             # via abilian-core
+pillow==5.0.0             # via abilian-core
 psycopg2==2.7.3.2         # via abilian-core
 pycparser==2.18           # via cffi
 pygeoip==0.3.2            # via abilian-core
@@ -63,7 +63,7 @@ raven==6.4.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
 sqlalchemy-utils==0.32.21  # via abilian-core, wtforms-alchemy
-sqlalchemy==1.1.15
+sqlalchemy==1.2.0
 sqlparse==0.2.4           # via abilian-core
 straight.plugin==1.4.1    # via abilian-core
 toolz==0.9.0
@@ -74,7 +74,7 @@ validators==0.12.0        # via wtforms-components
 vine==1.1.4               # via amqp
 webassets==0.12.1         # via flask-assets
 webencodings==0.5.1       # via html5lib
-werkzeug==0.13            # via flask, flask-debugtoolbar, flask-wtf
+werkzeug==0.14.1          # via flask, flask-debugtoolbar, flask-wtf
 whoosh==2.7.4             # via abilian-core
 wtforms-alchemy==0.15.0   # via abilian-core
 wtforms-components==0.10.3  # via abilian-core, wtforms-alchemy
