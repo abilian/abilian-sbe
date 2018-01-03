@@ -10,7 +10,7 @@ import setuptools
 from setuptools.command.develop import develop as _develop
 from setuptools.command.sdist import sdist as _sdist
 
-VERSION = "0.4.dev7"
+VERSION = "0.4.dev8"
 
 session = pip.download.PipSession()
 
