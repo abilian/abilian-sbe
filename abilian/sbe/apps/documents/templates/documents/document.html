@@ -21,7 +21,6 @@
 
   <span style="font-size: 14pt; color: gray;">{%if doc.lock %}<i style="color:black;" class="fa fa-lock"></i>{%endif%}
   {{doc.title}}</span>
-
 {% endmacro %}
 
 {% block content %}
@@ -45,6 +44,7 @@
       </span>
       {% trans %}Waiting for virus check...{% endtrans %}
     </p>
+
   {%- elif not doc.antivirus_ok %}
     <p class="alert alert-danger">
       <i class="fa fa-exclamation-triangle"></i>
@@ -66,80 +66,86 @@
       <i class="fa fa-arrow-left"></i> {{ _("Back to document list") }}
     </a>
 
-    <span id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline;right:0px; top:0px;">
-          <div class="btn-group">
-          {%- if doc.antivirus_ok %}
-            <a class="btn btn-success btn-md pull-right"
-               href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
-          <i class="glyphicon glyphicon-download"></i>
-          {{ _('Download') }} (<small>{{ doc.content_length|filesize }}</small>)
-        </a>
-          {%- endif %}
-          </div>
-            <div class="btn-group">
-              <a onclick="edit_document()"
-                 class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default"
-                 href="#modal-edit" title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
-            </div>
-            <div class="btn-group">
-              <a onclick="email_document()"
-                 class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default"
-                 href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i
-                  class="glyphicon glyphicon-envelope"></i></a>
-            </div>
-            <div class="btn-group">
-              <a href="#modal-delete"
-                 class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger"
-                 data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
-            </div>
-<div class="btn-group">
-<div class="dropdown">
-  <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
-          aria-haspopup="true" aria-expanded="true">
-    <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
-  </button>
-  <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-    <li>
-        <a class="" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder">
-        <i class="glyphicon glyphicon-move"></i> {{ _("Move") }}
-        </a>
-    </li>
-    <li>
-      <a onclick="replace_document()" class="" href="#modal-upload-new-version" data-toggle="modal" role="button"
-         title="Move to another folder">
-        <i class="fa fa-refresh" aria-hidden="true"></i> {{ _("Replace") }}
-        </a>
-    </li>
-       <li>
-           <form id="document_checkout"
-                 action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}"
-                 method="POST" target="_new">
-            {{ csrf_token }}
-             {% if doc.lock == None %}
-               <input type="hidden" name="action" value="checkout"/>
-               <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"
-                  class="btn btn-link"
-                  onclick="$('#document_checkout').submit(); setTimeout(function () { window.location = '{{ url_for(doc) }}'  }, 500);">
-        <i class="glyphicon glyphicon-download"></i> {{ _("Checkout") }}
-        </a>
-             {% else %}
-               <input type="hidden" name="action" value="unlock"/>
-               <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"
-                  class="btn btn-link" onclick="$('#document_checkout').submit();">
-        <i class="fa fa-unlock"></i> {{ _("Unlock") }}
-        </a>
-             {% endif %}
-        </form>
-    </li>
-       <li>
-        <a href="{{ url_for(doc) }}" data-toggle="modal" role="button" title="Move to another folder">
-        <i class="glyphicon glyphicon-refresh"></i> {{ _("Refresh preview") }}
-        </a>
-    </li>
-  </ul>
-</div>
-          </div>
-        </span>
+    <div id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline;right:0px; top:0px;">
+      <div class="btn-group">
+        {%- if doc.antivirus_ok %}
+          <a class="btn btn-success btn-md pull-right"
+             href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
+            <i class="glyphicon glyphicon-download"></i>
+            {{ _('Download') }} (<small>{{ doc.content_length|filesize }}</small>)
+          </a>
+        {%- endif %}
+      </div>
+      <div class="btn-group">
+        <a onclick="edit_document()"
+           class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default"
+           href="#modal-edit" title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
+      </div>
+      <div class="btn-group">
+        <a onclick="email_document()"
+           class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default"
+           href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i
+            class="glyphicon glyphicon-envelope"></i></a>
+      </div>
+      <div class="btn-group">
+        <a href="#modal-delete"
+           class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger"
+           data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
+      </div>
+      <div class="btn-group">
+        <div class="dropdown">
+          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+                  aria-haspopup="true" aria-expanded="true">
+            <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <li>
+              <a class="" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder">
+                <i class="glyphicon glyphicon-move"></i>
+                {{ _("Move") }}
+              </a>
+            </li>
+            <li>
+              <a onclick="replace_document()" class="" href="#modal-upload-new-version" data-toggle="modal"
+                 role="button"
+                 title="Move to another folder">
+                <i class="fa fa-refresh" aria-hidden="true"></i>
+                {{ _("Replace") }}
+              </a>
+            </li>
+            <li>
+              <form id="document_checkout"
+                    action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}"
+                    method="POST" target="_new">
+                {{ csrf_token }}
+                {% if doc.lock == None %}
+                  <input type="hidden" name="action" value="checkout"/>
+                  <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"
+                     class="btn btn-link"
+                     onclick="$('#document_checkout').submit(); setTimeout(function () { window.location = '{{ url_for(doc) }}'  }, 500);">
+                    <i class="glyphicon glyphicon-download"></i>
+                    {{ _("Checkout") }}
+                  </a>
+                {% else %}
+                  <input type="hidden" name="action" value="unlock"/>
+                  <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"
+                     class="btn btn-link" onclick="$('#document_checkout').submit();">
+                    <i class="fa fa-unlock"></i>
+                    {{ _("Unlock") }}
+                  </a>
+                {% endif %}
+              </form>
+            </li>
+            <li>
+              <a href="{{ url_for(doc) }}" data-toggle="modal" role="button" title="Move to another folder">
+                <i class="glyphicon glyphicon-refresh"></i>
+                {{ _("Refresh preview") }}
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
     <span onclick="view_info()" class="glyphicon glyphicon-chevron-right" id="view_info" aria-hidden="true"
           style="float: right;font-size: 18pt;position: relative;top: -72px;left: 283px;cursor:pointer;z-index:10;"></span>
 
@@ -148,18 +154,19 @@
     </div>
   </div>
 
-    {%- if doc.description %}
-      <p>{{ doc.description }}</p>
-      <p>&nbsp;</p>
-    {%- endif %}
+  {%- if doc.description %}
+    <p>{{ doc.description }}</p>
+    <p>&nbsp;</p>
+  {%- endif %}
 
   <br>
 
-  <div style="border:1px solid silver; width:100%;padding-top: 10px; padding-bottom: 10px;">
+  <div style="border:1px solid silver; width:100%; padding-top: 10px; padding-bottom: 10px;">
     <div class="preview-container" data-page-num="{{ doc.page_num }}">
       <img src="{{ url_for('.document_preview_image',
-          community_id=g.community.slug, doc_id=doc.id,
-          size=doc.preview_size) }}" alt="" class="preview" data-page="0"/>
+                        community_id=g.community.slug, doc_id=doc.id,
+                        size=doc.preview_size) }}"
+           alt="" class="preview" data-page="0"/>
 
       {%- if has_preview %}
         <a class="preview-nav-button preview-prev" title="{{ _('Previous') }}">
@@ -185,17 +192,17 @@
         {{ _("Document preview not yet available") }}
       {%- endif %}
     </div>
-
   </div>
 
-    {%- if doc.extra_metadata %}
-      <h3 class="main collapsed" data-toggle="collapse"
-          href="#doc_extra_metadata">Extra Metadata</h3>
-      <div id="doc_extra_metadata" class="collapse">
-        {%- set sorted = doc.extra_metadata|dictsort %}
-        {{ m_table(sorted) }}
-      </div>
-    {%- endif %}
+  {%- if doc.extra_metadata %}
+    <h3 class="main collapsed" data-toggle="collapse"
+        href="#doc_extra_metadata">Extra Metadata</h3>
+
+    <div id="doc_extra_metadata" class="collapse">
+      {%- set sorted = doc.extra_metadata|dictsort %}
+      {{ m_table(sorted) }}
+    </div>
+  {%- endif %}
 
 {% endblock %}
 
@@ -208,7 +215,7 @@
       <b>{{ _("Owner") }}</b> : {{ user_markup(doc.creator) }} <br>
       {{ _('<b>Uploaded:</b> %(date)s (%(age)s)',
                date=(doc.created_at | datetimeformat('short')),
-              age=doc.created_at | age(add_direction=False)) }}
+               age=doc.created_at | age(add_direction=False)) }}
       {%- if doc.updated_at != doc.created_at %}
         <br/>
         {{ _('<b>Modified:</b> %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
@@ -249,7 +256,7 @@
   var show = 0;
 
   function view_info() {
-    if (show == 0) {
+    if (show === 0) {
       $("#view_info").css("left", "0");
       $("#sidebar").hide();
       $("div[class='col-md-9']").attr("class", "col-md-12");
@@ -273,7 +280,7 @@
   }
 
   function replace_document() {
-    var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, current_folder_id= breadcrumbs[0]['path'].split('/')[-1], community_id=doc.community.slug) }}";
+    var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, current_folder_id=breadcrumbs[0]['path'].split('/')[-1], community_id=doc.community.slug) }}";
     $(".modal-replacedoc-form").attr("action", doc_url);
   }
 </script>
