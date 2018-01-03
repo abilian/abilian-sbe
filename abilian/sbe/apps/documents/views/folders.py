@@ -68,16 +68,14 @@ def folder_view(folder_id):
         children=folder.filtered_children,
         breadcrumbs=bc,
         csrf_token=csrf.field())
-    if session.get('sbe_doc_view_style') == 'thumbnail_view':
-        resp = render_template("documents/folder.html", **ctx)
-        session['sbe_doc_view_style'] = 'thumbnail_view'
 
-    if not session.get('sbe_doc_view_style'):
+    view_style = session.get('sbe_doc_view_style', 'thumbnail_view')
+    if view_style == 'thumbnail_view':
         resp = render_template("documents/folder.html", **ctx)
-        session['sbe_doc_view_style'] = 'thumbnail_view'
-
-    if session.get('sbe_doc_view_style') == 'gallery_view':
+    elif view_style == 'gallery_view':
         resp = render_template("documents/folder_gallery_view.html", **ctx)
+    else:
+        raise InternalServerError("Unknown value for sbe_doc_view_style")
 
     return resp
 
