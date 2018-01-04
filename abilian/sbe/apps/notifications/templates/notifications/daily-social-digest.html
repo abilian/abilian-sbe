@@ -62,8 +62,8 @@
 
       {%- for thread, info in digest.updated_conversations.items() %}
         <p><a href="{{ url_for(info['post'], _external=True,
-                               _scheme=config['PREFERRED_URL_SCHEME'])}}">{{ thread }}</a><br>
-          by {{ info['actors']|join(', ')}}
+                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ thread }}</a><br>
+          by {{ info['actors']|join(', ') }}
         </p>
       {%- endfor %}
     {%- endif %}
@@ -89,15 +89,15 @@
         <p><a href="{{ url_for('wiki.page',
                                community_id=digest.community.slug,
                                title=page.title, _external=True,
-                               _scheme=config['PREFERRED_URL_SCHEME'])}}">{{ page }}</a><br>
-        <small>by
-          {% for actor, changes in actors.items() %}{{ actor }}
-            {% if changes > 1 %}(x{{ changes }}){% endif %}
-          {%- if not loop.last %}, {% endif %}
-          {%- endfor %}.
-        </small>
+                               _scheme=config['PREFERRED_URL_SCHEME']) }}">{{ page }}</a><br>
+          <small>by
+            {% for actor, changes in actors.items() %}{{ actor }}
+              {% if changes > 1 %}(x{{ changes }}){% endif %}
+              {%- if not loop.last %}, {% endif %}
+            {%- endfor %}.
+          </small>
 
-                  {{ actors }}
+          {{ actors }}
 
         </p>
       {%- endfor %}
@@ -110,8 +110,9 @@
   <br>
   You can modify your notifications by going to the application's
   <a href="{{ url_for("preferences.index", _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}">Preferences</a>
-   page.
+  page.
   <br>
   You can unsubscribe by following
-  <a href="{{ url_for("notifications.unsubscribe_sbe", token=token, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}">this link</a>.
+  <a href="{{ url_for("notifications.unsubscribe_sbe", token=token, _external=True, _scheme=config['PREFERRED_URL_SCHEME']) }}">this
+    link</a>.
 {% endblock %}
