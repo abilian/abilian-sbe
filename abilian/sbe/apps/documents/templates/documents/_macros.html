@@ -368,11 +368,11 @@ border-top: 2px solid ghostwhite;">
 
   <script>
     $(".doc-check-all").change(function () {
-      if ($(this).prop('checked') == true) {
+      if ($(this).prop('checked') === true) {
         $(":checkbox").prop("checked", true);
       } else {
         $(":checkbox").prop("checked", false);
-        if ($(":checkbox:checked").length == 0) {
+        if ($(":checkbox:checked").length === 0) {
           $("#horizontal-doc-menu").hide();
         }
       }
