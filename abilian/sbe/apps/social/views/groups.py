@@ -67,8 +67,9 @@ def group_json(group_id):
         members = [
             u for u in members
             if any(
-                term.startswith(q) for name in (u.first_name.lower(
-                ), u.last_name.lower()) for term in name.split())
+                term.startswith(q)
+                for name in (u.first_name.lower(), u.last_name.lower())
+                for term in name.split())
         ]
 
     result = {'results': [{'id': obj.id, 'text': obj.name} for obj in members]}

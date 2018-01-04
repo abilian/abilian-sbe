@@ -95,9 +95,9 @@ def get_attachments_from_forum(community):
     for post in posts_with_attachments:
         for att in post.attachments:
             url = current_app.default_view.url_for(att)
-            attachment = Attachment(url, att.name,
-                                    text_type(att.owner), att.created_at,
-                                    att.content_length, att.content_type)
+            attachment = Attachment(url, att.name, text_type(att.owner),
+                                    att.created_at, att.content_length,
+                                    att.content_type)
             attachments.append(attachment)
 
     return attachments
@@ -118,8 +118,7 @@ def get_attachments_from_dms(community):
     for doc in documents:
         url = url_for(doc)
         attachment = Attachment(url, doc['name'], doc['owner_name'],
-                                doc['created_at'],
-                                doc.get('content_length'),
+                                doc['created_at'], doc.get('content_length'),
                                 doc.get('content_type', u''))
         attachments.append(attachment)
 

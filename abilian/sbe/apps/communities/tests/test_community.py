@@ -147,8 +147,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
                 'user':
                 self.user_c2.id,
                 'membership':
-                [m.id for m in community.memberships
-                 if m.user == self.user_c2][0],
+                [m.id for m in community.memberships if m.user == self.user_c2
+                ][0],
             }
             response = self.client.post(url, data=data)
             assert response.status_code == 302

@@ -255,7 +255,8 @@ class PathAndSecurityIndexable(object):
 
             # remaining groups: find if some users are eligible
             remaining_groups_members = set(
-                itertools.chain(*(p.members for p in remaining
+                itertools.chain(*(p.members
+                                  for p in remaining
                                   if isinstance(p, Group))))
             allowed |= remaining_groups_members - extended_allowed
 

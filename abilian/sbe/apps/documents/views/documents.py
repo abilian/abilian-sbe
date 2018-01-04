@@ -79,7 +79,7 @@ def document_view(doc_id):
 @route("/doc/<int:doc_id>/", methods=['POST'])
 @route("/doc/<int:doc_id>/<int:folder_id>/", methods=['POST'])
 @csrf.protect
-def document_edit(doc_id,folder_id=None):
+def document_edit(doc_id, folder_id=None):
     doc = get_document(doc_id)
     if folder_id:
         folder = get_folder(folder_id)

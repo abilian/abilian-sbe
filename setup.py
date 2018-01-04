@@ -10,7 +10,6 @@ import setuptools
 from setuptools.command.develop import develop as _develop
 from setuptools.command.sdist import sdist as _sdist
 
-
 session = pip.download.PipSession()
 
 _install_requires = pip.req.parse_requirements(

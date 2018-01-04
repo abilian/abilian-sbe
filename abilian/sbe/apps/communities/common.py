@@ -19,7 +19,8 @@ def object_viewers(entity):
     if is_manager():
         views = viewtracker.get_views(entity=entity)
         community_members_id = [
-            user.id for user in g.community.members
+            user.id
+            for user in g.community.members
             if user.id != entity.creator.id
         ]
         viewers = []

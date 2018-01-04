@@ -69,7 +69,8 @@ def get_new_filename(folder, name):
         prefix = u'{}-'.format(name)
         prefix_len = len(prefix)
         # find all numbered suffixes from name-1.ext, name-5.ext,...
-        suffixes = (n[prefix_len:].rsplit(u'.', 1)[0] for n in existing
+        suffixes = (n[prefix_len:].rsplit(u'.', 1)[0]
+                    for n in existing
                     if n.startswith(prefix) and n.endswith(ext))
         suffixes = [int(val) for val in suffixes if re.match(r'^\d+$', val)]
 
@@ -133,11 +134,13 @@ def get_selected_objects(folder):
     selected_ids = request.form.getlist("object-selected")
 
     doc_ids = [
-        int(x.split(":")[-1]) for x in selected_ids
+        int(x.split(":")[-1])
+        for x in selected_ids
         if x.startswith("cmis:document")
     ]
     folder_ids = [
-        int(x.split(":")[-1]) for x in selected_ids
+        int(x.split(":")[-1])
+        for x in selected_ids
         if x.startswith("cmis:folder")
     ]
 

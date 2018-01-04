@@ -193,7 +193,8 @@ def permissions(folder_id):
     if folder.inherit_security:
         inherited_roles_assignments = folder.get_inherited_roles_assignments()
         users_and_inherited_roles = [
-            (user, role, False) for user, role in inherited_roles_assignments
+            (user, role, False)
+            for user, role in inherited_roles_assignments
             if isinstance(user, User)
         ]
         groups_and_inherited_roles = [

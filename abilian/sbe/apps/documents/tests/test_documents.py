@@ -506,8 +506,9 @@ class TestPathIndexable(unittest.TestCase):
 
     def test_iter_to_root(self):
         assert [o.id for o in self.obj._iter_to_root()] == [3, 2, 1, 0]
-        assert [o.id
-                for o in self.obj._iter_to_root(skip_self=True)] == [2, 1, 0]
+        assert [o.id for o in self.obj._iter_to_root(skip_self=True)] == [
+            2, 1, 0
+        ]
 
     def test_indexable_parent_ids(self):
         self.assertEqual(self.obj._indexable_parent_ids, '/0/1/2')

@@ -66,7 +66,8 @@ def get_nb_viewers(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
         threads = [
-            thread.entity for thread in views
+            thread.entity
+            for thread in views
             if thread.user in g.community.members and
             thread.user != thread.entity.creator
         ]

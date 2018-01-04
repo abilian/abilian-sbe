@@ -196,8 +196,8 @@ class Community(Entity):
                 # during creation, we may have to provide a temporary name for
                 # subfolder, we don't want empty names on folders since they must be
                 # unique among siblings
-                name = u'{}_{}-{}'.format(self.__class__.__name__,
-                                          str(self.id), time.asctime())
+                name = u'{}_{}-{}'.format(self.__class__.__name__, str(self.id),
+                                          time.asctime())
             self.folder = repository.root_folder.create_subfolder(name)
             # if not self.group:
             #   self.group = Group(name=self.name)
