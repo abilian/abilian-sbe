@@ -55,16 +55,16 @@
                         <tr>
                           <td style="color: gray;font-weight: bold;position: relative;top: 6px;left:3px;">
                             <input
-                              id="email{{ loop.index-1 }}" value="{{ user.email }}" type="hidden"
-                              name="account"/> {{ user.email }}
+                                id="email{{ loop.index-1 }}" value="{{ user.email }}" type="hidden"
+                                name="account"/> {{ user.email }}
                           </td>
                           <td>
                             <input placeholder="First Name" id="first_name{{ loop.index-1 }}" name="first_name"
-                                     class="form-control wizard-required" type="text" value="{{ user.first_name }}"/>
+                                   class="form-control wizard-required" type="text" value="{{ user.first_name }}"/>
                           </td>
                           <td>
                             <input name="last_name" id="last_name{{ loop.index-1 }}" placeholder="Last Name"
-                                     class="form-control wizard-required" type="text" value="{{ user.last_name }}"/>
+                                   class="form-control wizard-required" type="text" value="{{ user.last_name }}"/>
                           </td>
                           <td>
                             <select onchange="" id="role{{ loop.index-1 }}" name="role"
@@ -173,6 +173,7 @@
         });
 
       }
+
       if ($(".table-condensed tr").length === 1) {
         $(".table-condensed").closest('tr').remove();
         $(".table-condensed").append("<tr><td id='wizard-msg' colspan='5' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
