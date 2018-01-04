@@ -1,14 +1,16 @@
 {% extends "community/_base.html" %}
 
 {% from "macros/box.html" import m_box_content, m_box_menu with context %}
-{% from "documents/audit_macros.html" import m_audit_log %}
+{% from "documents/_macros_audit.html" import m_audit_log %}
 {% from "macros/table.html" import m_table %}
 {%- from "community/macros.html" import show_all_viewers -%}
 {% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
 {%- from "community/macros.html" import viewers_snapshot -%}
 
 {% macro user_markup(user) %}
-  <a href="{{ url_for('social.user', user_id=user.id) }}"><img style="border-radius: 22px;" alt="" src="{{ user_photo_url(user, size=16) }}"/>
+  <a href="{{ url_for('social.user', user_id=user.id) }}"><img
+      style="border-radius: 22px;" alt=""
+      src="{{ user_photo_url(user, size=16) }}"/>
     {{ user }}
   </a>
 {% endmacro %}
@@ -19,8 +21,9 @@
     <span class="divider">/</span>
   {% endfor %}
 
-  <span style="font-size: 14pt; color: gray;">{%if doc.lock %}<i style="color:black;" class="fa fa-lock"></i>{%endif%}
-  {{doc.title}}</span>
+  <span style="font-size: 14pt; color: gray;">{% if doc.lock %}
+    <i style="color:black;" class="fa fa-lock"></i>{% endif %}
+    {{ doc.title }}</span>
 {% endmacro %}
 
 {% block content %}
@@ -146,8 +149,9 @@
         </div>
       </div>
     </div>
-    <span onclick="view_info()" class="glyphicon glyphicon-chevron-right" id="view_info" aria-hidden="true"
-          style="float: right;font-size: 18pt;position: relative;top: -72px;left: 283px;cursor:pointer;z-index:10;"></span>
+    <span onclick="view_info()" class="glyphicon glyphicon-chevron-right" id="view_info"
+          aria-hidden="true"
+          style="float: right; font-size: 18pt; position: relative; top: -72px; left: 283px; cursor: pointer; z-index:10;"></span>
 
     <br><br>
     <div>

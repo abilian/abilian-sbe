@@ -9,8 +9,8 @@
 {%- from "community/macros.html" import show_all_viewers -%}
 
 {% macro user_markup(user) %}
-  <a href="{{ url_for("social.user", user_id=user.id) }}"
-  ><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
+  <a href="{{ url_for("social.user", user_id=user.id) }}"><img
+      alt="" src="{{ user_photo_url(user, size=16) }}"/>
     {{ user }}
   </a>
 {% endmacro %}
@@ -50,8 +50,8 @@
         <small>
           {{ _('Created: %(date)s (%(age)s) by %(creator)s',
                date=(doc.created_at | datetimeformat('short')),
-              age=doc.created_at | age(add_direction=False),
-              creator=user_markup(doc.creator)) }}
+                     age=doc.created_at | age(add_direction=False),
+                     creator=user_markup(doc.creator)) }}
           {%- if doc.updated_at != doc.created_at %}
             <br/>
             {{ _('Last modification: %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
