@@ -160,7 +160,7 @@ clean:
 	find . -name __pycache__ -delete
 	find . -type d -empty -delete
 	rm -rf .mypy_cache
-	rm -rf instance/data instance/cache instance/tmp instance/webassets instance/whoosh
+	rm -rf instance/cache instance/tmp instance/webassets instance/whoosh
 	rm -f migration.log
 	rm -rf build dist
 	rm -rf data tests/data tests/integration/data
@@ -174,6 +174,7 @@ clean:
 	rm -rf tests.functional.test/
 
 tidy: clean
+	rm -rf instance/data
 	rm -rf .tox
 
 

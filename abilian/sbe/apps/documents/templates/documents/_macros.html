@@ -7,19 +7,21 @@
 {% endmacro %}
 
 <script>
-    var document_data = [];
+  var document_data = [];
 </script>
 
 {% macro m_docs_table(objects, edit=True) %}
   <div type="button" class="upload-files-btn">
-    <i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color:white;" href="#modal-upload-files" data-toggle="modal"> Upload file(s)</a>
+    <i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color:white;" href="#modal-upload-files"
+                                               data-toggle="modal"> Upload file(s)</a>
   </div>
 
   <div type="button" class="add-folder-btn">
-    <i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color: gray;" href="#modal-new-folder" data-toggle="modal"> New folder</a>
+    <i class="glyphicon glyphicon-plus"></i><a style="text-decoration:none;color: gray;" href="#modal-new-folder"
+                                               data-toggle="modal"> New folder</a>
   </div>
 
-<hr>
+  <hr>
   {%- if objects %}
     <form action="{{ url_for('.change_view_style', folder_id=folder.id, community_id=folder.community.slug) }}"
           method="POST">
@@ -55,23 +57,25 @@ top: -8px;margin-bottom: -47px;">
 
         </div>
       {% endif %}
-    &nbsp;
-    {% if edit %}
+      &nbsp;
+      {% if edit %}
         <span id="horizontal-doc-menu" class="document-horizontal-menu">
         {%- for action in actions.for_category('documents:folder-listing') %}
-            <div class="btn-group">
+          <div class="btn-group">
               {{ action.render() }}
             </div>
-          {%- endfor %}
+        {%- endfor %}
         </span>
-    {% endif %}
+      {% endif %}
 
-    <br><br>
-      <table style="background: white;position:relative;margin-top: -54px;" class="document-table-thumbnail table table-striped table-condensed" id="objects-table">
+      <br><br>
+      <table style="background: white;position:relative;margin-top: -54px;"
+             class="document-table-thumbnail table table-striped table-condensed" id="objects-table">
         <thead>
         <tr style="color: #919191;
 border-bottom: 2px solid ghostwhite;">
-          <th style="width: 1%;"><input class="doc-check-all" style="position: relative;top: 2px;left: -4px;" type="checkbox" >
+          <th style="width: 1%;"><input class="doc-check-all" style="position: relative;top: 2px;left: -4px;"
+                                        type="checkbox">
           </th>
           <th class="hide">type</th>
           <th class="hide">title for sorting</th>
@@ -155,7 +159,7 @@ border-bottom: 2px solid ghostwhite;">
                 <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
                         data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="true">
-                <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+                  <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
                 </button>
                 <ul class="dropdown-menu document-thumbnail-menu" aria-labelledby="dropdownMenu1">
                   {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
@@ -200,15 +204,15 @@ border-bottom: 2px solid ghostwhite;">
                   {% endif %}
                   <li>
                     <a onclick="move_document(this)" id="{{ obj.id }}" href="#modal-move-files" data-toggle="modal"><i
-                      class="fa fa-arrows" aria-hidden="true"></i>
+                        class="fa fa-arrows" aria-hidden="true"></i>
                       {{ _('Move') }}</a>
                   </li>
                   {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
                     <li>
                       <a name="{{ obj.title }}"
-                           id="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id, current_folder_id=folder.id) }}"
-                           onclick="delete_folder(this)" href="#modal-delete-folder" data-toggle="modal"><i
-                        class="fa fa-trash-o" aria-hidden="true"></i>
+                         id="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id, current_folder_id=folder.id) }}"
+                         onclick="delete_folder(this)" href="#modal-delete-folder" data-toggle="modal"><i
+                          class="fa fa-trash-o" aria-hidden="true"></i>
                         {{ _('Delete') }}</a></li>
                   {% else %}
                     <li>
@@ -266,11 +270,11 @@ border-top: 2px solid ghostwhite;">
         </tfoot>
       </table>
 
-      <script type="application/json">
+      <script>
         {%- set data = {
             'deleteConfirmMsg': _("Delete selected elements?"),
          } %}
-        {{ data | tojson | safe }}
+        var CONFIG = {{ data | tojson | safe }};
       </script>
     </form>
 

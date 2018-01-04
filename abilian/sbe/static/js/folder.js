@@ -14,9 +14,6 @@
       return row_text.match(new RegExp(filter_value, "i"));
     });
 
-    var config = document.getElementById("objects-table").nextElementSibling;
-    config = JSON.parse(config.textContent);
-
     var dtParams = {
         aoColumns: [
           { asSorting: [], sWidth: "1%" },
@@ -90,7 +87,7 @@
 
     /* enter key */
     filter.bind("keypress", function(e) {
-      if (e.keyCode == 13) {
+      if (e.keyCode === 13) {
         /* let return key for refilter */
         objectsTable.fnFilter(this.value);
         e.preventDefault();
@@ -98,7 +95,7 @@
     });
 
     filter.bind("keyup", function(e) {
-      if (e.keyCode == 13) {
+      if (e.keyCode === 13) {
         e.preventDefault();
       }
       objectsTable.fnFilter(this.value);
@@ -109,7 +106,7 @@
       e.preventDefault();
       var $button = $(this),
         buttonForm = $(this.form),
-        msg = config.deleteConfirmMsg,
+        msg = CONFIG.deleteConfirmMsg,
         elements = $(document.forms["folder-listing"])
           .find('input[name="object-selected"]:checked')
           .closest("td")

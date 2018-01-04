@@ -73,153 +73,152 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
           {% else %}
             {% if cnt.append(cnt.pop() + 1) %}{% endif %}
           {% endif %}
-        <div class="col-lg-3 col-md-4 col-sm-5 col-xs-10 gallery_element">
-          {% if obj.content_type %}
-            {% set content_type = obj.content_type.split("/") %}
-          {% endif %}
-          <input id="check_{{ obj.id }}" style="position: relative;top: 2px;" type="checkbox" name="object-selected"
-                 value="{{ obj.sbe_type }}:{{ obj.id }}">
-          <div class="document-gallery-box">
-            {% if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
-              <div style="height: 310px;"> <span style="position: relative;left: 7px;">
+          <div class="col-lg-3 col-md-4 col-sm-5 col-xs-10 gallery_element">
+            {% if obj.content_type %}
+              {% set content_type = obj.content_type.split("/") %}
+            {% endif %}
+            <input id="check_{{ obj.id }}" style="position: relative;top: 2px;" type="checkbox" name="object-selected"
+                   value="{{ obj.sbe_type }}:{{ obj.id }}">
+            <div class="document-gallery-box">
+              {% if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+                <div style="height: 310px;"> <span style="position: relative;left: 7px;">
                  <a style="color: #797C7E;" href="{{ url_for(obj) }}"> <i class="fa fa-folder-o gallery-folder"
                                                                           aria-hidden="true"></i></a></span>
-                <div class="gallery-numberCircle"><span>{{ obj.filtered_children|length }}</span></div>
-              </div>
-              <hr>
-            {% else %}
-              {% set icon_src = url_for(".document_preview_image",
+                  <div class="gallery-numberCircle"><span>{{ obj.filtered_children|length }}</span></div>
+                </div>
+                <hr>
+              {% else %}
+                {% set icon_src = url_for(".document_preview_image",
                                         community_id=g.community.slug, doc_id= obj.id,
                                         size=obj.preview_size) %}
 
-              {% if content_type[0] == 'image' %}
-                <a style="color: #797C7E;" href="{{ url_for(obj) }}">
-                  <div
-                      style="width: 256px; height: 332px; border-bottom:1px solid #eee; background-position: -68px;background:url({{ icon_src }});">
-                  </div>
-                </a>
-              {% else %}
-                <a style="color: #797C7E;" href="{{ url_for(obj) }}"><img
-                    style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;"
-                    src="{{ icon_src }}"/></a>
+                {% if content_type[0] == 'image' %}
+                  <a style="color: #797C7E;" href="{{ url_for(obj) }}">
+                    <div
+                        style="width: 256px; height: 332px; border-bottom:1px solid #eee; background-position: -68px;background:url({{ icon_src }});">
+                    </div>
+                  </a>
+                {% else %}
+                  <a style="color: #797C7E;" href="{{ url_for(obj) }}"><img
+                      style="width: 256px;height: 332px;border-bottom:1px solid #eee;background-position: -68px;"
+                      src="{{ icon_src }}"/></a>
+                {% endif %}
               {% endif %}
-            {% endif %}
-            {%- if obj.object_type == 'folder' %}<i>
-              {{ obj.filtered_children|length }}</i>{%- endif %}
-            <div class="document-gallery-infos">
-              {% set owner = obj.owner %}
-              <p>
-                <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
-              </p>
-              <p> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
-              <p>
-                {%- if obj.is_document %}
-                  {{ obj.content_length|filesize }}
-                {%- endif %}
-              </p>
+              {%- if obj.object_type == 'folder' %}<i>
+                {{ obj.filtered_children|length }}</i>{%- endif %}
+              <div class="document-gallery-infos">
+                {% set owner = obj.owner %}
+                <p>
+                  <a style="color: #797C7E;" href="{{ url_for(obj) }}">{{ obj.title|truncate(32, False, '...', 0) }}</a>
+                </p>
+                <p> {{ obj.created_at|age(add_direction=False) }} par {{ owner.name }} </p>
+                <p>
+                  {%- if obj.is_document %}
+                    {{ obj.content_length|filesize }}
+                  {%- endif %}
+                </p>
+              </div>
+
+              <div class="dropdown document-gallery-dropdownbase">
+                <button class="dropdown-toggle document-gallery-dropdown" type="button" id="dropdownMenu1"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                  <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenu1"
+                    style="border-radius: 0; position: absolute; top: 63px; margin-bottom: -144px;">
+                  {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+                    <li><a href="{{ url_for('.permissions', community_id=obj.community.slug, folder_id=obj.id) }}"><i
+                        class="glyphicon glyphicon-lock"></i> {{ _('Permissions') }}</a></li>
+                    <li><a href="{{ url_for('.descendants_view', community_id=obj.community.slug, folder_id=obj.id) }}"><i
+                        class="fa fa-code-fork fa-rotate-90"></i> {{ _('View descendants') }}</a></li>
+                  {% endif %}
+
+                  <li>
+                    <a onclick="email_send_document(this)" id="{{ obj.id }}" href="#modal-send-by-email"
+                       data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i>
+                      {{ _('Send by mail') }}</a>
+                  </li>
+
+                  {% if not obj.content_type|length %}
+                    <li>
+                      <button type="button" class="document-folder-download" onclick="download_folder(this)"
+                              style="margin-top: 1px;margin-bottom: 0;" name="action"
+                              value="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}"
+                              title="Download"><i class="fa fa-download" aria-hidden="true"></i>
+                        {{ _('Download') }}
+                      </button>
+                    </li>
+                    <li>
+                      <a onclick="edit_folder(this)" id="{{ obj.id }}" data-toggle="modal"><i
+                          class="fa fa-pencil"
+                          aria-hidden="true"></i> {{ _('Edit') }}</a>
+                    </li>
+                  {% else %}
+                    <li>
+                      <a
+                          href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i
+                          class="fa fa-download" aria-hidden="true"></i> {{ _('Download') }}</a>
+                    </li>
+                    <li>
+                      <a onclick="edit_document(this)" id="{{ obj.id }}" data-toggle="modal"><i
+                          class="fa fa-pencil"
+                          aria-hidden="true"></i> {{ _('Edit') }}</a>
+                    </li>
+                  {% endif %}
+                  <li>
+                    <a onclick="move_document(this)" id="{{ obj.id }}" href="#modal-move-files" data-toggle="modal"><i
+                        class="fa fa-arrows" aria-hidden="true"></i> {{ _('Move') }}</a>
+                  </li>
+                  {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
+                    <li>
+                      <a name="{{ obj.title }}"
+                         id="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id, current_folder_id=folder.id) }}"
+                         onclick="delete_folder(this)" href="#modal-delete-folder" data-toggle="modal"><i
+                          class="fa fa-trash-o" aria-hidden="true"></i>
+                        {{ _('Delete') }}</a>
+                    </li>
+                  {% else %}
+                    <li>
+                      <a onclick="replace_document(this)" id="{{ obj.id }}" href="#modal-upload-new-version"
+                         data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i>
+                        {{ _('Replace') }}</a>
+                    </li>
+                    <li>
+                      <a onclick="delete_document(this)" id="{{ obj.id }}" href="#modal-delete" data-toggle="modal"><i
+                          class="fa fa-trash-o" aria-hidden="true"></i>
+                        {{ _('Delete') }}</a>
+                    </li>
+                  {% endif %}
+                </ul>
+              </div>
+
+              <input type="hidden" id="edit_url{{ obj.id }}"
+                     value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}"/>
+              <input type="hidden" id="editfolder_url{{ obj.id }}"
+                     value="{{ url_for('.folder_post', folder_id=obj.id, current_folder_id=folder.id, community_id=obj.community.slug) }}"/>
+              <input type="hidden" id="replace_url{{ obj.id }}"
+                     value="{{ url_for('.document_upload', doc_id=obj.id, current_folder_id= folder.id, community_id=obj.community.slug) }}"/>
+              <input type="hidden" id="email_url{{ obj.id }}"
+                     value="{{ url_for('.document_send', doc_id=obj.id, current_folder_id= folder.id, community_id=obj.community.slug) }}"/>
+              <input type="hidden" id="delete_url{{ obj.id }}"
+                     value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}"/>
+              <input type="hidden" id="title{{ obj.id }}" value="{{ obj.title }}"/>
+              <input type="hidden" id="description{{ obj.id }}"
+                     value="{% if obj.description %}{{ obj.description }}{% else %}{% endif %}"/>
+              <input type="hidden" id="community{{ obj.id }}" value="{{ obj.community.slug }}"/>
             </div>
-
-            <div class="dropdown document-gallery-dropdownbase">
-              <button class="dropdown-toggle document-gallery-dropdown" type="button" id="dropdownMenu1"
-                      data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
-              </button>
-              <ul class="dropdown-menu" aria-labelledby="dropdownMenu1"
-                  style="border-radius: 0; position: absolute; top: 63px; margin-bottom: -144px;">
-                {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
-                  <li><a href="{{ url_for('.permissions', community_id=obj.community.slug, folder_id=obj.id) }}"><i
-                      class="glyphicon glyphicon-lock"></i> {{ _('Permissions') }}</a></li>
-                  <li><a href="{{ url_for('.descendants_view', community_id=obj.community.slug, folder_id=obj.id) }}"><i
-                      class="fa fa-code-fork fa-rotate-90"></i> {{ _('View descendants') }}</a></li>
-                {% endif %}
-
-                <li>
-                  <a onclick="email_send_document(this)" id="{{ obj.id }}" href="#modal-send-by-email"
-                     data-toggle="modal"><i class="fa fa-envelope-o" aria-hidden="true"></i>
-                    {{ _('Send by mail') }}</a>
-                </li>
-
-                {% if not obj.content_type|length %}
-                  <li>
-                    <button type="button" class="document-folder-download" onclick="download_folder(this)"
-                            style="margin-top: 1px;margin-bottom: 0;" name="action"
-                            value="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id) }}"
-                            title="Download"><i class="fa fa-download" aria-hidden="true"></i>
-                      {{ _('Download') }}
-                    </button>
-                  </li>
-                  <li>
-                    <a onclick="edit_folder(this)" id="{{ obj.id }}" data-toggle="modal"><i
-                        class="fa fa-pencil"
-                        aria-hidden="true"></i> {{ _('Edit') }}</a>
-                  </li>
-                {% else %}
-                  <li>
-                    <a
-                        href="{{ url_for('.document_download', community_id=obj.community.slug, doc_id=obj.id, attach=True) }}"><i
-                        class="fa fa-download" aria-hidden="true"></i> {{ _('Download') }}</a>
-                  </li>
-                  <li>
-                    <a onclick="edit_document(this)" id="{{ obj.id }}" data-toggle="modal"><i
-                        class="fa fa-pencil"
-                        aria-hidden="true"></i> {{ _('Edit') }}</a>
-                  </li>
-                {% endif %}
-                <li>
-                  <a onclick="move_document(this)" id="{{ obj.id }}" href="#modal-move-files" data-toggle="modal"><i
-                      class="fa fa-arrows" aria-hidden="true"></i> {{ _('Move') }}</a>
-                </li>
-                {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}
-                  <li>
-                    <a name="{{ obj.title }}"
-                       id="{{ url_for('.folder_post', community_id=obj.community.slug, folder_id=obj.id, current_folder_id=folder.id) }}"
-                       onclick="delete_folder(this)" href="#modal-delete-folder" data-toggle="modal"><i
-                        class="fa fa-trash-o" aria-hidden="true"></i>
-                      {{ _('Delete') }}</a>
-                  </li>
-                {% else %}
-                  <li>
-                    <a onclick="replace_document(this)" id="{{ obj.id }}" href="#modal-upload-new-version"
-                       data-toggle="modal"><i class="fa fa-refresh" aria-hidden="true"></i>
-                      {{ _('Replace') }}</a>
-                  </li>
-                  <li>
-                    <a onclick="delete_document(this)" id="{{ obj.id }}" href="#modal-delete" data-toggle="modal"><i
-                        class="fa fa-trash-o" aria-hidden="true"></i>
-                      {{ _('Delete') }}</a>
-                  </li>
-                {% endif %}
-              </ul>
-            </div>
-
-            <input type="hidden" id="edit_url{{ obj.id }}"
-                   value="{{ url_for('.document_edit', doc_id=obj.id,folder_id=folder.id, community_id=obj.community.slug) }}"/>
-            <input type="hidden" id="editfolder_url{{ obj.id }}"
-                   value="{{ url_for('.folder_post', folder_id=obj.id, current_folder_id=folder.id, community_id=obj.community.slug) }}"/>
-            <input type="hidden" id="replace_url{{ obj.id }}"
-                   value="{{ url_for('.document_upload', doc_id=obj.id, current_folder_id= folder.id, community_id=obj.community.slug) }}"/>
-            <input type="hidden" id="email_url{{ obj.id }}"
-                   value="{{ url_for('.document_send', doc_id=obj.id, current_folder_id= folder.id, community_id=obj.community.slug) }}"/>
-            <input type="hidden" id="delete_url{{ obj.id }}"
-                   value="{{ url_for('.document_delete', doc_id=obj.id, community_id=obj.community.slug) }}"/>
-            <input type="hidden" id="title{{ obj.id }}" value="{{ obj.title }}"/>
-            <input type="hidden" id="description{{ obj.id }}"
-                   value="{% if obj.description %}{{ obj.description }}{% else %}{% endif %}"/>
-            <input type="hidden" id="community{{ obj.id }}" value="{{ obj.community.slug }}"/>
+            <!---end of doc -->
           </div>
-          <!---end of doc -->
-        </div>
-        {% if loop.last %}
-          </div></form>
-        {% endif %}
         {%- endfor %}
+        </div>
+    </form>
 
-      <script type="application/json">
-        {%- set data = {
-            'deleteConfirmMsg': _("Delete selected elements?"),
-         } %}
-        {{ data | tojson | safe }}
-      </script>
+    <script>
+      {%- set data = {
+          'deleteConfirmMsg': _("Delete selected elements?"),
+       } %}
+      var CONFIG = {{ data | tojson | safe }};
+    </script>
 
     <form id="folder_content_download" action="" method="post">
       {{ csrf_token }}

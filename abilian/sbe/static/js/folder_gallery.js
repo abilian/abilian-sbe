@@ -34,7 +34,7 @@
       e.preventDefault();
       var $button = $(this),
         buttonForm = $(this.form),
-        msg = config.deleteConfirmMsg,
+        msg = CONFIG.deleteConfirmMsg,
         elements = $(document.forms["folder-listing"])
           .find('input[name="object-selected"]:checked')
           .closest("td")
