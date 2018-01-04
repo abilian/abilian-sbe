@@ -89,28 +89,28 @@
             function (Abilian, $, bootbox) {
               function setupDeleteButtons() {
                 $('#attachments li form > button[value="delete"]')
-                    .click(function (e) {
-                      e.preventDefault();
-                      var $button = $(this);
-                      var button_form = $(this.form);
-                      var filename = $button.closest('li').find('a').text();
-                      var msg = '<h2>"' + filename + '"</h2>'
-                          + '<p class="lead">{{ _("Delete attachment?") }}</p>';
-                      bootbox.confirm(msg,
-                          function (confirm) {
-                            if (confirm) {
-                              var action_val = $('<input />',
-                                  {
-                                    'type': 'hidden',
-                                    'name': 'action',
-                                    'value': $button.attr('value')
-                                  });
-                              button_form.append(action_val);
-                              button_form.submit();
-                            }
-                          });
-                    })
-                    .removeAttr('disabled');
+                .click(function (e) {
+                  e.preventDefault();
+                  var $button = $(this);
+                  var button_form = $(this.form);
+                  var filename = $button.closest('li').find('a').text();
+                  var msg = '<h2>"' + filename + '"</h2>'
+                      + '<p class="lead">{{ _("Delete attachment?") }}</p>';
+                  bootbox.confirm(msg,
+                      function (confirm) {
+                        if (confirm) {
+                          var action_val = $('<input />',
+                              {
+                                'type': 'hidden',
+                                'name': 'action',
+                                'value': $button.attr('value')
+                              });
+                          button_form.append(action_val);
+                          button_form.submit();
+                        }
+                      });
+                })
+                .removeAttr('disabled');
               }
 
               Abilian.fn.onAppInit(setupDeleteButtons);
