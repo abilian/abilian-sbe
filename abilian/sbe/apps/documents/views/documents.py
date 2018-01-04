@@ -141,14 +141,11 @@ def document_delete(doc_id):
     return redirect(url_for(parent_folder))
 
 
-@route("/doc/<int:doc_id>/<int:current_folder_id>/upload", methods=['POST'])
 @route("/doc/<int:doc_id>/upload", methods=['POST'])
 @csrf.protect
-def document_upload(doc_id, current_folder_id=None):
+def document_upload(doc_id):
     doc = get_document(doc_id)
     check_write_access(doc)
-    if current_folder_id:
-        current_folder = get_folder(current_folder_id)
 
     fd = request.files['file']
     doc.set_content(fd.read(), fd.content_type)
@@ -158,9 +155,6 @@ def document_upload(doc_id, current_folder_id=None):
     activity.send(self, actor=g.user, verb="update", object=doc)
     db.session.commit()
     flash(_(u"New version successfully uploaded"), "success")
-    if current_folder:
-        return redirect(url_for(current_folder))
-
     return redirect(url_for(doc))
 
 
@@ -293,12 +287,9 @@ def refresh_preview(doc_id):
 
 
 @route("/doc/<int:doc_id>/send", methods=['POST'])
-@route("/doc/<int:doc_id>/<int:current_folder_id>/send", methods=['POST'])
 @csrf.protect
-def document_send(doc_id, current_folder_id=None):
+def document_send(doc_id):
     doc = get_document(doc_id)
-    if current_folder_id:
-        current_folder = get_folder(current_folder_id)
 
     recipient = request.form.get("recipient")
     user_msg = request.form.get('message')
@@ -322,10 +313,7 @@ def document_send(doc_id, current_folder_id=None):
     mail.send(msg)
     flash(_(u"Email successfully sent"), "success")
 
-    if current_folder_id:
-        return redirect(url_for(current_folder))
-    else:
-        return redirect(url_for(doc))
+    return redirect(url_for(doc))
 
 
 @route("/doc/<int:doc_id>/preview")

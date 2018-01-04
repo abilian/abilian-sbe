@@ -1,5 +1,5 @@
 {# modals included in Folder templates (folder.html and permissions.html) #}
-{%- set folder_post_url = url_for(".folder_post", folder_id=folder.id, current_folder_id=folder.id, community_id=folder.community.slug) %}
+{%- set folder_post_url = url_for(".folder_post", folder_id=folder.id, community_id=folder.community.slug) %}
 
 {% include "documents/_modals_folder_upload.html" %}
 {% include "documents/_modals_folder_move.html" %}

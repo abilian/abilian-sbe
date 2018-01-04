@@ -436,16 +436,15 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             ascii_doc = folder.children[0]
             unicode_doc = folder.children[1]
 
-            def get_send_url(doc_id, current_folder_id):
+            def get_send_url(doc_id):
                 return url_for(
                     'documents.document_send',
                     community_id=self.community.slug,
-                    current_folder_id=current_folder_id,
                     doc_id=doc_id)
 
             # mail ascii filename
             with mail.record_messages() as outbox:
-                url = get_send_url(ascii_doc.id, folder.id)
+                url = get_send_url(ascii_doc.id)
                 rv = self.client.post(
                     url,
                     data={
@@ -468,7 +467,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
             # mail unicode filename
             with mail.record_messages() as outbox:
-                url = get_send_url(unicode_doc.id, folder.id)
+                url = get_send_url(unicode_doc.id)
                 rv = self.client.post(
                     url,
                     data={

@@ -27,10 +27,9 @@
 {% endmacro %}
 
 {% block content %}
-
-  <script>
-    window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");
-  </script>
+{#  <script>#}
+{#    window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");#}
+{#  </script>#}
 
   {%- if doc.antivirus_required %}
     <div style="margin: 5px 0;">
@@ -75,7 +74,8 @@
           <a class="btn btn-success btn-md pull-right"
              href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
             <i class="glyphicon glyphicon-download"></i>
-            {{ _('Download') }} (<small>{{ doc.content_length|filesize }}</small>)
+            {{ _('Download') }}
+            <small>({{ doc.content_length|filesize }})</small>
           </a>
         {%- endif %}
       </div>
@@ -247,47 +247,47 @@
     {{ m_audit_log(audit_entries) }}
   </div>
 
-{%- deferJS %}
+  {%- deferJS %}
+    <script>
+      require(['Abilian', 'SBEFolderGalleryListingSetup'],
+          function (Abilian, setupFolderListing) {
+            Abilian.fn.onAppInit(setupFolderListing);
+          });
+    </script>
+  {%- enddeferJS %}
+
   <script>
-    require(['Abilian', 'SBEFolderGalleryListingSetup'],
-        function (Abilian, setupFolderListing) {
-          Abilian.fn.onAppInit(setupFolderListing);
-        });
-  </script>
-{%- enddeferJS %}
+    var show = 0;
 
-<script>
-  var show = 0;
-
-  function view_info() {
-    if (show === 0) {
-      $("#view_info").css("left", "0");
-      $("#sidebar").hide();
-      $("div[class='col-md-9']").attr("class", "col-md-12");
-      show = 1;
-    } else {
-      $("#view_info").css("left", "283px");
-      $("#sidebar").show();
-      $("div[class='col-md-12']").attr("class", "col-md-9");
-      show = 0;
+    function view_info() {
+      if (show === 0) {
+        $("#view_info").css("left", "0");
+        $("#sidebar").hide();
+        $("div[class='col-md-9']").attr("class", "col-md-12");
+        show = 1;
+      } else {
+        $("#view_info").css("left", "283px");
+        $("#sidebar").show();
+        $("div[class='col-md-12']").attr("class", "col-md-9");
+        show = 0;
+      }
     }
-  }
 
-  function email_document() {
-    var doc_url = "{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}";
-    $("#modal-email-form").attr("action", doc_url);
-  }
+    function email_document() {
+      var doc_url = "{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}";
+      $("#modal-email-form").attr("action", doc_url);
+    }
 
-  function edit_document() {
-    var doc_url = "{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}";
-    $("#modal-edit-form").attr("action", doc_url);
-  }
+    function edit_document() {
+      var doc_url = "{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}";
+      $("#modal-edit-form").attr("action", doc_url);
+    }
 
-  function replace_document() {
-    var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, current_folder_id=breadcrumbs[0]['path'].split('/')[-1], community_id=doc.community.slug) }}";
-    $(".modal-replacedoc-form").attr("action", doc_url);
-  }
-</script>
+    function replace_document() {
+      var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, community_id=doc.community.slug) }}";
+      $(".modal-replacedoc-form").attr("action", doc_url);
+    }
+  </script>
 {% endblock %}
 
 {% block modals %}

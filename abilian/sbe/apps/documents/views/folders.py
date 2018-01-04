@@ -514,9 +514,8 @@ def iter_permissions(folder, user):
 # Actions on folders
 #
 @route("/folder/<int:folder_id>", methods=['POST'])
-@route("/folder/<int:folder_id>/<int:current_folder_id>", methods=['POST'])
 @csrf.protect
-def folder_post(folder_id, current_folder_id=None):
+def folder_post(folder_id):
     """
     A POST on a folder can result on several different actions (depending on the
     `action` parameter).
@@ -525,7 +524,7 @@ def folder_post(folder_id, current_folder_id=None):
     action = request.form.get("action")
 
     if action == 'edit':
-        return folder_edit(folder, current_folder_id)
+        return folder_edit(folder)
 
     elif action == 'upload':
         return upload_new(folder)
@@ -534,7 +533,7 @@ def folder_post(folder_id, current_folder_id=None):
         return download_multiple(folder)
 
     elif action == 'delete':
-        return delete_multiple(folder, current_folder_id)
+        return delete_multiple(folder)
 
     elif action == 'new':
         return create_subfolder(folder)
@@ -554,18 +553,17 @@ def folder_post(folder_id, current_folder_id=None):
         return redirect(url_for(folder))
 
 
-def folder_edit(folder, current_folder_id):
+def folder_edit(folder):
     check_write_access(folder)
 
     changed = edit_object(folder)
-    current_folder = get_folder(current_folder_id)
 
     if changed:
         db.session.commit()
         flash(_("Folder properties successfully edited."), "success")
     else:
         flash(_("You didn't change any property."), "success")
-    return redirect(url_for(current_folder))
+    return redirect(url_for(folder))
 
 
 ARCHIVE_IGNORE_FILES_GLOBS = {'__MACOSX/*', '.DS_Store'}
@@ -711,13 +709,10 @@ def download_multiple(folder):
     return resp
 
 
-def delete_multiple(folder, current_folder_id):
+def delete_multiple(folder):
     check_write_access(folder)
 
     folders, docs = get_selected_objects(folder)
-    current_folder = get_folder(current_folder_id)
-    if not folders:
-        folders = [folder]
 
     for obj in docs + folders:
         app = current_app._get_current_object()
@@ -746,7 +741,7 @@ def delete_multiple(folder, current_folder_id):
     else:
         flash(_("No object deleted"), "error")
 
-    return redirect(url_for(current_folder))
+    return redirect(url_for(folder))
 
 
 def move_multiple(folder):
