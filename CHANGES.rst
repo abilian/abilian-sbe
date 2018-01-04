@@ -1,6 +1,23 @@
 Changelog for Abilian SBE
 =========================
 
+0.4.2 (2018-01-04)
+------------------
+
+- Fix errors on document delete
+- Cleanup code
+
+0.4.1 (2018-01-03)
+------------------
+
+- Previous release was broken.
+
+0.4.0 (2018-01-03)
+------------------
+
+- Completely revamped document management UI
+
+
 0.3.17 (2017-10-02)
 -------------------
 
