@@ -5,55 +5,55 @@
 {% from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
-<div class="col-md-12">
-  <div class="forum-menu-container">
-    <div class="forum-menu" role="group" style="width:100%;">
-      <span style="color:gray;">{{ _("Showing :") }}</span>
-      {%- set global_actions = actions.for_category('forum:global') %}
-      {{ forum_menu(global_actions) }}
+  <div class="col-md-12">
+    <div class="forum-menu-container">
+      <div class="forum-menu" role="group" style="width:100%;">
+        <span style="color:gray;">{{ _("Showing :") }}</span>
+        {%- set global_actions = actions.for_category('forum:global') %}
+        {{ forum_menu(global_actions) }}
+      </div>
     </div>
+
+    {% if threads %}
+      <table border="0" class="thread-table">
+        <tr>
+          <th>
+            {{ _("Topic") }}
+          </th>
+          <th>
+            {{ _("Participants") }}
+          </th>
+          <th style="width: 8.9%;">
+            {{ _("Replies") }}
+          </th>
+          <th>
+            {{ _("Viewers") }}
+          </th>
+          <th>
+            {{ _("Views") }}
+          </th>
+          <th style="width: 8%;">
+            {{ _("Activity") }}
+          </th>
+        </tr>
+        {% for thread in threads %}
+          {{ m_thread(thread) }}
+        {% endfor %}
+      </table>
+      <br>
+      <br>
+    {% else %}
+      <p>{{ _("No message has been posted to this community yet.") }}</p>
+    {% endif %}
+
+    {% if has_more or True %}
+      <br>
+      <p class="thread-all">
+        <i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i>
+        <a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a>
+      </p>
+    {% endif %}
   </div>
-
-  {% if threads %}
-    <table border="0" class="thread-table">
-      <tr>
-        <th>
-          {{ _("Topic") }}
-        </th>
-        <th>
-          {{ _("Participants") }}
-        </th>
-        <th style="width: 8.9%;">
-          {{ _("Replies") }}
-        </th>
-        <th>
-          {{ _("Viewers") }}
-        </th>
-        <th>
-          {{ _("Views") }}
-        </th>
-        <th style="width: 8%;">
-          {{ _("Activity") }}
-        </th>
-      </tr>
-      {% for thread in threads %}
-        {{ m_thread(thread) }}
-      {% endfor %}
-    </table>
-    <br>
-    <br>
-  {% else %}
-    <p>{{ _("No message has been posted to this community yet.") }}</p>
-  {% endif %}
-
-  {% if has_more or True %}
-    <br>
-    <p class="thread-all">
-      <i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i>
-      <a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a>
-    </p>
-  {% endif %}
-</div>
 {% endblock %}
 
 

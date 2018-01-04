@@ -34,7 +34,7 @@
           <div style="margin-bottom: 10px;">
             <span style="color:gray;">{{ _("Posted by") }}</span>
             <span
-              style="font-weight:bold;">{{ m_user_link(thread.creator) }}</span>
+                style="font-weight:bold;">{{ m_user_link(thread.creator) }}</span>
             <span style="float:right;color:gray;"> {{ thread.created_at | age(date_threshold='day') }} </span>
             {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
             {{ m_post_edit_link(post) }}
