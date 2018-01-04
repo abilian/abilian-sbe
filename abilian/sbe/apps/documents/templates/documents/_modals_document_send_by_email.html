@@ -1,13 +1,13 @@
 {% if obj %}
-{% set doc = obj %}
+  {% set doc = obj %}
 {% endif %}
 <div class="modal fade" id="modal-send-by-email" role="dialog"
      data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="modal-email-form"
-          action=''
-          method="POST">
+            action=''
+            method="POST">
         {{ csrf_token }}
 
         <div class="modal-header">

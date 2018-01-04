@@ -10,7 +10,7 @@
 
 {% macro user_markup(user) %}
   <a href="{{ url_for("social.user", user_id=user.id) }}"
-    ><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
+  ><img alt="" src="{{ user_photo_url(user, size=16) }}"/>
     {{ user }}
   </a>
 {% endmacro %}

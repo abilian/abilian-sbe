@@ -109,9 +109,10 @@ border-bottom: 2px solid ghostwhite;">
                 {% set icon_src = url_for(".document_preview_image",
                       community_id=g.community.slug, doc_id=obj.id,
                       size=obj.preview_size) %}
-                <a style="color: #797C7E;" href="{{ url_for(obj) }}"><img class="document-preview"
-                                                                          style="background-image: url('{{ icon_src }}');"
-                                                                          src="" alt="" data-page="0"/></a>
+                <a style="color: #797C7E;" href="{{ url_for(obj) }}"><img
+                    class="document-preview"
+                    style="background-image: url('{{ icon_src }}');"
+                    src="" alt="" data-page="0"/></a>
               {% endif %}
               {%- if obj.object_type == 'folder' %}<i>
                 {{ obj.filtered_children|length }}</i>
@@ -139,9 +140,10 @@ border-bottom: 2px solid ghostwhite;">
             <td class="hide">{{ owner.first_name }}</td>
             <td>
               <a href="{{ url_for('social.user', user_id=owner.id) }}"
-                 title="{{ owner.name }}"><img alt="{{ owner.name }}"
-                                               src="{{ user_photo_url(owner, size=40) }}"
-                                               style="vertical-align: middle;border-radius: 22px;"></a>
+                 title="{{ owner.name }}"><img
+                  alt="{{ owner.name }}"
+                  src="{{ user_photo_url(owner, size=40) }}"
+                  style="vertical-align: middle;border-radius: 22px;"></a>
             </td>
 
             <td class="hide">{{ obj.created_at.isoformat() }} </td>
@@ -150,9 +152,10 @@ border-bottom: 2px solid ghostwhite;">
 
             <td>
               <div class="dropdown">
-                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
+                <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1"
+                        data-toggle="dropdown"
                         aria-haspopup="true" aria-expanded="true">
-                  <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+                <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
                 </button>
                 <ul class="dropdown-menu document-thumbnail-menu" aria-labelledby="dropdownMenu1">
                   {%- if obj.object_type == 'abilian.sbe.apps.documents.models.Folder' %}

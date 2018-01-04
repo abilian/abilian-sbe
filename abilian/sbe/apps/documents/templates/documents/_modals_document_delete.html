@@ -1,12 +1,12 @@
 {% if obj %}
-{% set doc = obj %}
+  {% set doc = obj %}
 {% endif %}
 <div class="modal fade" id="modal-delete" role="dialog" data-keyboard="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <form id="modal-delete-document"
-          action="{{ url_for('.document_delete', doc_id=doc.id, community_id=doc.community.slug) }}"
-          method="POST">
+            action="{{ url_for('.document_delete', doc_id=doc.id, community_id=doc.community.slug) }}"
+            method="POST">
         {{ csrf_token }}
 
         <div class="modal-header">
@@ -15,7 +15,7 @@
         </div>
 
         <div class="modal-body">
-          {{ _('Are you sure you want to delete the file : ') }} <span id="delete-doc-title">{{doc.title}}</span>
+          {{ _('Are you sure you want to delete the file : ') }} <span id="delete-doc-title">{{ doc.title }}</span>
         </div>
 
         <div class="modal-footer">
