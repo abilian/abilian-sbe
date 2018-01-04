@@ -161,7 +161,7 @@
           });
 
           tmp_emails = jQuery.grep(tmp_emails, function (n, i) {
-            return (n !== "" && n != null);
+            return (n !== "" && n !== null);
           });
           $("#new_accounts").val(JSON.stringify(tmp_emails));
 
