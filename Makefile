@@ -125,14 +125,16 @@ lint-doc:
 	@echo "--> Linting .rst files"
 	rst-lint *.rst
 
-format:
+format: format-py format-js
+
+format-py:
 	isort -a  "from __future__ import absolute_import, print_function" -rc \
 		abilian demo tests *.py
 	-yapf --style google -r -i abilian demo tests *.py
 	isort -rc abilian demo tests *.py
 
 format-js:
-	prettier --tab-width 4 --write ./abilian/sbe/static/js/**.js
+	prettier --trailing-comma es5 --write ./abilian/sbe/static/js/**.js
 
 #
 # running
