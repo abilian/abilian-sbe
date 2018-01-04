@@ -6,36 +6,36 @@
 {% block content %}
 
   {% call m_box(_("Profile")) %}
-     <img width="140" height="140"
-          src="{{ user_photo_url(user, size=140) }}"
-          class="media-object avatar pull-left" alt=""/>
+    <img width="140" height="140"
+         src="{{ user_photo_url(user, size=140) }}"
+         class="media-object avatar pull-left" alt=""/>
 
-      <div class="info col-xs-6">
-        <h2 class="title">{{ user.name }}
-{#
+    <div class="info col-xs-6">
+      <h2 class="title">{{ user.name }}
+        {#
           {%- if can_edit %}
             <a class="btn btn-default"
                 href="{{ url_for('.user_edit', user_id=user.id) }}"><i
                 class="fa fa-edit"></i>{{ _("Edit") }}</a>
           {%- endif %}
 #}
-        </h2>
+      </h2>
 
-        {%- if user.email %}
-          <div class="row">
-            <a class="col-xs-10 email" href="mailto:{{ user.email }}"><i
-                class="fa fa-envelope"></i> {{ user.email }}</a>
-          </div>
-        {%- endif %}
+      {%- if user.email %}
+        <div class="row">
+          <a class="col-xs-10 email" href="mailto:{{ user.email }}"><i
+              class="fa fa-envelope"></i> {{ user.email }}</a>
+        </div>
+      {%- endif %}
 
-        {%- if user.location %}
-          <div class="row">
-            <b class="col-xs-3"><i class="fa fa-map-marker"></i>{{ _("Location:") }}
-            </b><span class="col-xs-8">{{ user.location }}</span>
-          </div>
-        {%- endif %}
+      {%- if user.location %}
+        <div class="row">
+          <b class="col-xs-3"><i class="fa fa-map-marker"></i>{{ _("Location:") }}
+          </b><span class="col-xs-8">{{ user.location }}</span>
+        </div>
+      {%- endif %}
 
-      </div>
+    </div>
   {% endcall %}
 
   <div class="clearfix"></div>

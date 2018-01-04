@@ -2,7 +2,7 @@
   {% set user_href = url_for(".user", user_id=message.creator.id) %}
   <li class="stream-item clearfix">
     <a href="{{ user_href }}" class="user-photo" target=""
-        style="background-image: url('{{ user_photo_url(message.creator, size=45) }}');"></a>
+       style="background-image: url('{{ user_photo_url(message.creator, size=45) }}');"></a>
 
     <div class="activity-body">
       {%- if message.group %}
@@ -25,7 +25,7 @@
     <div class="form-group error">
       {% set css_class = 'has_error ' + kwargs.pop('class', '') %}
       <label class="control-label"
-          for="input-{{ field.name }}">{{ field.label }}</label>
+             for="input-{{ field.name }}">{{ field.label }}</label>
 
       <div class="controls">
         {{ field(class=css_class, **kwargs) }}
@@ -36,7 +36,7 @@
   {% else %}
     <div class="form-group">
       <label class="control-label"
-          for="input-{{ field.name }}">{{ field.label }}</label>
+             for="input-{{ field.name }}">{{ field.label }}</label>
 
       <div class="controls">
         {{ field(**kwargs) }}
@@ -60,16 +60,16 @@
     {%- for image in images %}
       <li id="image-{{ image.id }}">
         <a href="{{ url_for(image) }}"><img alt=""
-            src="{{ url_for(image) }}/preview?size=100"/></a>
+                                            src="{{ url_for(image) }}/preview?size=100"/></a>
       </li>
       <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
           var id = "#image-{{ image.id }}";
           $(id).popover({
             placement: "top",
-            html:      true,
-            title:     "{{ image.name }}",
-            content:   function() {
+            html: true,
+            title: "{{ image.name }}",
+            content: function () {
               return 'Uploaded on {{ image.created_at.strftime("%Y-%m-%d") }}';
             }
           });
@@ -108,7 +108,7 @@
         </div>
       {%- elif entry.type == 0 %}
         <div>
-          <img src="{{ user_photo_url(entry.user, size=16) }}" alt="" />
+          <img src="{{ user_photo_url(entry.user, size=16) }}" alt=""/>
           <a href="{{ url_for(entry.user) }}">{{ entry.user.name }}</a>
           created a new {{ entry.entity.__class__.__name__ }},
           <a href="{{ url_for(entry.entity) }}">{{ entry.entity.name }}</a>,
