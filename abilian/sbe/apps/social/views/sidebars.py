@@ -5,7 +5,7 @@ TODO: make it smarter (direct access from 'g' using lazy objects?) and
 cacheable.
 """
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime, timedelta
 

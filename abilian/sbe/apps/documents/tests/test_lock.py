@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime, timedelta
 
@@ -16,14 +16,14 @@ from abilian.testing import BaseTestCase
 
 def test_lock():
     date = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)
-    l = Lock(user_id=3, user=u'Joe Smith', date=date)
+    l = Lock(user_id=3, user='Joe Smith', date=date)
 
     d = l.as_dict()
     assert d == dict(
-        user_id=3, user=u'Joe Smith', date=u'2015-10-22T14:58:42+00:00')
+        user_id=3, user='Joe Smith', date='2015-10-22T14:58:42+00:00')
     l = Lock.from_dict(d)
     assert l.user_id == 3
-    assert l.user == u'Joe Smith'
+    assert l.user == 'Joe Smith'
     assert l.date == date
 
 
@@ -34,11 +34,11 @@ class LockTestCase(BaseTestCase):
     def test_lock(self):
         session = self.app.db.session()
         user = User(
-            email=u'test@example.com',
-            first_name=u'Joe',
-            last_name=u'Smith',
+            email='test@example.com',
+            first_name='Joe',
+            last_name='Smith',
             can_login=True)
-        other = User(email=u'other@exemple.com')
+        other = User(email='other@exemple.com')
         session.add(user)
         session.add(other)
         session.commit()
@@ -54,7 +54,7 @@ class LockTestCase(BaseTestCase):
             self.login(user)
             l = Lock.new()
             assert l.user_id == user.id
-            assert l.user == u'Joe Smith'
+            assert l.user == 'Joe Smith'
             assert l.date == created_at
             assert l.is_owner()
             assert l.is_owner(user)

@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import sqlalchemy as sa
 
@@ -35,7 +35,7 @@ class Repository(object):
             return folder
 
         # Should only happen during tests
-        folder = Folder(title=u'root')
+        folder = Folder(title='root')
         return folder
 
     def get_object(self, id=None, path=None):

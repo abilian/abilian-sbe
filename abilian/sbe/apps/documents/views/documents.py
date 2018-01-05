@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
 
@@ -89,9 +89,9 @@ def document_edit(doc_id, folder_id=None):
 
     if changed:
         db.session.commit()
-        flash(_(u"Document properties successfully edited."), "success")
+        flash(_("Document properties successfully edited."), "success")
     else:
-        flash(_(u"You didn't change any property."), "success")
+        flash(_("You didn't change any property."), "success")
     if folder_id:
         return redirect(url_for(folder))
     else:
@@ -137,7 +137,7 @@ def document_delete(doc_id):
     repository.delete_object(doc)
     db.session.commit()
 
-    flash(_(u"File successfully deleted."), "success")
+    flash(_("File successfully deleted."), "success")
     return redirect(url_for(parent_folder))
 
 
@@ -154,7 +154,7 @@ def document_upload(doc_id):
     self = current_app._get_current_object()
     activity.send(self, actor=g.user, verb="update", object=doc)
     db.session.commit()
-    flash(_(u"New version successfully uploaded"), "success")
+    flash(_("New version successfully uploaded"), "success")
     return redirect(url_for(doc))
 
 
@@ -185,12 +185,12 @@ def checkin_checkout(doc_id):
     doc = get_document(doc_id)
     action = request.form.get('action')
 
-    if action not in (u'checkout', u'lock', u'unlock'):
-        raise BadRequest(u'Unknown action: %r' % action)
+    if action not in ('checkout', 'lock', 'unlock'):
+        raise BadRequest('Unknown action: %r' % action)
 
     session = sa.orm.object_session(doc)
 
-    if action in (u'lock', u'checkout'):
+    if action in ('lock', 'checkout'):
         doc.lock = current_user
         d = doc.updated_at
         # prevent change of last modification date
@@ -199,12 +199,12 @@ def checkin_checkout(doc_id):
         doc.updated_at = d
         session.commit()
 
-        if action == u'lock':
+        if action == 'lock':
             return redirect(url_for(doc))
-        elif action == u'checkout':
+        elif action == 'checkout':
             return document_download(doc_id, attach=True)
 
-    if action == u'unlock':
+    if action == 'unlock':
         del doc.lock
         d = doc.updated_at
         # prevent change of last modification date
@@ -294,9 +294,9 @@ def document_send(doc_id):
     recipient = request.form.get("recipient")
     user_msg = request.form.get('message')
 
-    site_name = u'[{}] '.format(current_app.config['SITE_NAME'])
+    site_name = '[{}] '.format(current_app.config['SITE_NAME'])
     sender_name = g.user.name
-    subject = site_name + _(u'{sender} sent you a file').format(sender=sender_name)
+    subject = site_name + _('{sender} sent you a file').format(sender=sender_name)
     msg = Message(subject)
     msg.sender = g.user.email
     msg.recipients = [recipient]
@@ -311,7 +311,7 @@ def document_send(doc_id):
     msg.attach(filename, doc.content_type, doc.content)
 
     mail.send(msg)
-    flash(_(u"Email successfully sent"), "success")
+    flash(_("Email successfully sent"), "success")
 
     return redirect(url_for(doc))
 

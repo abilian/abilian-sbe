@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from unittest import TestCase
 
@@ -22,14 +22,14 @@ class TestUsers(TestCase):
 
     def test_user(self):
         user = User(
-            first_name=u"John",
-            last_name=u"Test User",
-            email=u"test@example.com",
+            first_name="John",
+            last_name="Test User",
+            email="test@example.com",
             password="toto")
         check_editable(user)
 
-        assert u"John Test User" == user.name
-        assert u"John Test User" == text_type(user)
+        assert "John Test User" == user.name
+        assert "John Test User" == text_type(user)
         # self.assertEquals(len(user.messages), 0)
 
     def test_user_follow(self):
@@ -37,15 +37,15 @@ class TestUsers(TestCase):
         # having in (user1 != user2) == True
         user1 = User(
             id=1,
-            first_name=u"John",
-            last_name=u"Test User 1",
-            email=u"test1@example.com",
+            first_name="John",
+            last_name="Test User 1",
+            email="test1@example.com",
             password="toto")
         user2 = User(
             id=2,
-            first_name=u"Joe",
-            last_name=u"Test User 2",
-            email=u"test2@example.com",
+            first_name="Joe",
+            last_name="Test User 2",
+            email="test2@example.com",
             password="toto")
 
         assert len(user1.followers) == 0
@@ -73,11 +73,11 @@ class TestUsers(TestCase):
 
     def test_group(self):
         user = User(
-            first_name=u"John",
-            last_name=u"Test User",
-            email=u"test@example.com",
+            first_name="John",
+            last_name="Test User",
+            email="test@example.com",
             password="toto")
-        group = Group(name=u"Group 1")
+        group = Group(name="Group 1")
 
         user.join(group)
 
@@ -102,9 +102,9 @@ class TestContent(TestCase):
 
     def test_status_update(self):
         user = User(
-            first_name=u"John",
-            last_name=u"Test User",
-            email=u"test@example.com",
+            first_name="John",
+            last_name="Test User",
+            email="test@example.com",
             password="toto")
         # self.assertEquals(len(user.messages), 0)
 
@@ -117,8 +117,8 @@ class TestContent(TestCase):
         # self.assertEquals(message.author_id, user.uid)
 
     def test_tags(self):
-        m = Message(content=u"abc #123 #cde #voilà_l_été #789")
-        assert m.tags == [u'123', u'cde', u'voilà_l_été', u'789']
+        m = Message(content="abc #123 #cde #voilà_l_été #789")
+        assert m.tags == ['123', 'cde', 'voilà_l_été', '789']
 
     def test_get_all_entity_classes(self):
         classes = all_entity_classes()

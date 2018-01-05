@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import date
 from itertools import groupby, islice
@@ -119,7 +119,7 @@ def get_attachments_from_dms(community):
         url = url_for(doc)
         attachment = Attachment(url, doc['name'], doc['owner_name'],
                                 doc['created_at'], doc.get('content_length'),
-                                doc.get('content_type', u''))
+                                doc.get('content_type', ''))
         attachments.append(attachment)
 
     return attachments
@@ -134,7 +134,7 @@ def group_monthly(objects):
 
     def format_month(year, month):
         month = format_date(date(year, month, 1), "MMMM").capitalize()
-        return u"%s %s" % (month, year)
+        return "%s %s" % (month, year)
 
     grouped = groupby(objects, grouper)
     grouped = [(format_month(year, month), list(objs))

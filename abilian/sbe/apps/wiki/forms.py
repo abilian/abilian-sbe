@@ -2,7 +2,7 @@
 """
 Forms for the Wiki module.
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import g
 from wtforms import HiddenField, StringField, TextAreaField
@@ -32,7 +32,7 @@ def int_or_none(val):
 
 class WikiPageForm(Form):
     title = StringField(
-        label=_l(u"Title"), filters=(strip,), validators=[data_required()])
+        label=_l("Title"), filters=(strip,), validators=[data_required()])
     body_src = TextAreaField(
         label=_l("Body"),
         filters=(strip, clean_up),
@@ -49,7 +49,7 @@ class WikiPageForm(Form):
         title = field.data
         if title != field.object_data and page_exists(title):
             raise ValidationError(
-                _(u"A page with this name already exists. Please use another name.")
+                _("A page with this name already exists. Please use another name.")
             )
 
     def validate_last_revision_id(self, field):
@@ -60,7 +60,7 @@ class WikiPageForm(Form):
             return
 
         if val != current:
-            raise ValidationError(_(u'this page has been edited since'))
+            raise ValidationError(_('this page has been edited since'))
 
 
 def page_exists(title):

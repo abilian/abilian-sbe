@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import g, request, url_for
 from flask_login import current_user
@@ -66,7 +66,7 @@ class ForumModalAction(ModalActionMixin, ThreadAction):
     pass
 
 
-_close_template_action = u'''
+_close_template_action = '''
 <form method="POST" action="{{ url }}" encoding="multipart/form-data">
   {{ csrf.field() }}
   <button type="submit" class="btn btn-link" name="action"
@@ -78,21 +78,21 @@ _close_template_action = u'''
 '''
 
 _actions = (
-    ForumAction('forum:global', 'index', _l(u'Recent conversations')),
+    ForumAction('forum:global', 'index', _l('Recent conversations')),
     ForumAction(
-        'forum:global', 'index/<string:filter>', _l(u'Top'), url='#filter'),
-    ForumAction('forum:global', 'archives', _l(u'Archives')),
+        'forum:global', 'index/<string:filter>', _l('Top'), url='#filter'),
+    ForumAction('forum:global', 'archives', _l('Archives')),
     ForumAction(
         'forum:global',
         'attachments',
-        _l(u'Attachments'),
+        _l('Attachments'),
         condition=is_in_thread),
     ForumAction(
-        'forum:global', 'new_thread', _l(u'New conversation'), icon='plus'),
+        'forum:global', 'new_thread', _l('New conversation'), icon='plus'),
     ForumModalAction(
         'forum:thread',
         'delete',
-        _l(u'Delete'),
+        _l('Delete'),
         condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
         url='#modal-delete',
         icon='trash'),
@@ -116,7 +116,7 @@ _actions = (
     ThreadAction(
         'forum:thread',
         'attachments',
-        _l(u'Attachments'),
+        _l('Attachments'),
         url='attachments',
         icon='file'),
 )

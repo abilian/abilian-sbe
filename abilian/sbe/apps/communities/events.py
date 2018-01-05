@@ -3,7 +3,7 @@
 Lightweight integration and denormalisation using events (signals).
 """
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from blinker import ANY
 

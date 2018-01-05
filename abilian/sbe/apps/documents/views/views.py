@@ -2,7 +2,7 @@
 """
 Document management blueprint.
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import g
 
@@ -29,5 +29,5 @@ def init_document_values(endpoint, values):
 
     g.breadcrumb.append(
         BreadcrumbItem(
-            label=_l(u'Documents'),
+            label=_l('Documents'),
             url=Endpoint('documents.index', community_id=g.community.slug)))

@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import pkgutil
@@ -38,11 +38,11 @@ DEFAULT_USER_MUGSHOT = pkgutil.get_data('abilian.sbe',
 
 def make_tabs(user):
     return [
-        dict(id='profile', label=_(u'Profile'), link=url_for(user, tab='profile')),
+        dict(id='profile', label=_('Profile'), link=url_for(user, tab='profile')),
         # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
-        dict(id='documents', label=_(u'Documents'), link=url_for(user, tab='documents')),
-        dict(id='images', label=_(u'Images'), link=url_for(user, tab='images')),
-        dict(id='audit', label=_(u'Audit'), link=url_for(user, tab='audit')),
+        dict(id='documents', label=_('Documents'), link=url_for(user, tab='documents')),
+        dict(id='images', label=_('Images'), link=url_for(user, tab='images')),
+        dict(id='audit', label=_('Audit'), link=url_for(user, tab='audit')),
     ]
 
 
@@ -117,10 +117,10 @@ def users_dt_json():
         name = escape(getattr(user, "name") or "")
 
         cell0 = (
-            u'<a href="{url}"><img src="{src}" width="{size}" height="{size}">'
+            '<a href="{url}"><img src="{src}" width="{size}" height="{size}">'
             '</a>'.format(url=user_url, src=mugshot, size=MUGSHOT_SIZE))
-        cell1 = (u'<div class="info"><a href="{user_url}">{name}</a> '
-                 u'</div>'.format(**locals()))
+        cell1 = ('<div class="info"><a href="{user_url}">{name}</a> '
+                 '</div>'.format(**locals()))
         cell2 = age(user.created_at)
         cell3 = age(user.last_active)
 
@@ -182,7 +182,7 @@ class UserProfileEdit(ObjectEdit):
     Model = User
     Form = UserProfileForm
     pk = 'user_id'
-    _message_success = _l(u'Profile edited')
+    _message_success = _l('Profile edited')
 
     def init_object(self, args, kwargs):
         args, kwargs = super(UserProfileEdit, self).init_object(args, kwargs)
@@ -204,7 +204,7 @@ class UserProfileEdit(ObjectEdit):
         else:
             log_msg = 'Unexpected error while saving user profile'
         logger.error(log_msg, exc_info=True, extra={'stack': True})
-        flash(_(u'Error occured'), "error")
+        flash(_('Error occured'), "error")
         return self.redirect_to_view()
 
 
@@ -280,7 +280,7 @@ def users_json():
 
         item = {
             'id': user.id,
-            'text': u'{} ({})'.format(user.name, user.email),
+            'text': '{} ({})'.format(user.name, user.email),
             'name': user.name,
             'email': user.email,
             'role': role,

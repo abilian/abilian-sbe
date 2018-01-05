@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask_babel import lazy_gettext as _l
 from wtforms import StringField, TextAreaField
@@ -23,7 +23,7 @@ class UserProfileForm(ModelForm):
 
 class UserProfileViewForm(UserProfileForm):
     communautes = QuerySelect2Field(
-        u'Communautés d\'appartenance',
+        'Communautés d\'appartenance',
         get_label='name',
         view_widget=abilian_widgets.ListWidget(),
         query_factory=lambda: Community.query.all(),

@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from sqlalchemy.exc import IntegrityError
 
@@ -15,13 +15,13 @@ class TestService(BaseTestCase):
     def setUp(self):
         super(TestService, self).setUp()
         self.repository = self.app.extensions['content_repository']
-        self.root = Folder(title=u"")
+        self.root = Folder(title="")
         self.session.add(self.root)
         self.session.flush()
 
     def test_create_doc(self):
         root = self.root
-        doc = root.create_document(u"doc")
+        doc = root.create_document("doc")
         db.session.flush()
         assert doc.path == "/doc"
         assert len(root.children) == 1
@@ -29,10 +29,10 @@ class TestService(BaseTestCase):
 
     def test_create_folder(self):
         root = self.root
-        folder = root.create_subfolder(u"folder")
+        folder = root.create_subfolder("folder")
         db.session.flush()
-        self.assertEqual(folder.title, u'folder')
-        self.assertEqual(folder.name, u'folder')
+        self.assertEqual(folder.title, 'folder')
+        self.assertEqual(folder.name, 'folder')
         assert folder.path == "/folder"
         assert len(root.children) == 1
         assert len(folder.children) == 0
@@ -40,10 +40,10 @@ class TestService(BaseTestCase):
 
     def test_move(self):
         root = self.root
-        doc = root.create_document(u"doc")
-        folder = root.create_subfolder(u"folder")
+        doc = root.create_document("doc")
+        folder = root.create_subfolder("folder")
 
-        self.repository.move_object(doc, folder, u"newdoc")
+        self.repository.move_object(doc, folder, "newdoc")
         assert doc in folder.children
         assert doc not in root.children
         assert len(root.children) == 1
@@ -53,10 +53,10 @@ class TestService(BaseTestCase):
 
     def test_copy(self):
         root = self.root
-        doc = root.create_document(u"doc")
-        folder = root.create_subfolder(u"folder")
+        doc = root.create_document("doc")
+        folder = root.create_subfolder("folder")
 
-        doc_copy = self.repository.copy_object(doc, folder, u"copydoc")
+        doc_copy = self.repository.copy_object(doc, folder, "copydoc")
 
         assert len(root.children) == 2
         assert len(folder.children) == 1
@@ -67,9 +67,9 @@ class TestService(BaseTestCase):
 
     def test_copy_nested_folders(self):
         root = self.root
-        folder1 = root.create_subfolder(u"folder1")
-        folder2 = root.create_subfolder(u"folder2")
-        subfolder = folder1.create_subfolder(u"subfolder")
+        folder1 = root.create_subfolder("folder1")
+        folder2 = root.create_subfolder("folder2")
+        subfolder = folder1.create_subfolder("subfolder")
 
         folder1_copy = self.repository.copy_object(folder1, folder2)
 
@@ -85,9 +85,9 @@ class TestService(BaseTestCase):
 
     def test_move_nested_folders(self):
         root = self.root
-        folder1 = root.create_subfolder(u"folder1")
-        folder2 = root.create_subfolder(u"folder2")
-        subfolder = folder1.create_subfolder(u"subfolder")  # noqa
+        folder1 = root.create_subfolder("folder1")
+        folder2 = root.create_subfolder("folder2")
+        subfolder = folder1.create_subfolder("subfolder")  # noqa
 
         self.repository.move_object(folder1, folder2)
 
@@ -96,15 +96,15 @@ class TestService(BaseTestCase):
 
     def test_rename(self):
         root = self.root
-        folder = root.create_subfolder(u"folder")
-        doc = folder.create_document(u"doc")
+        folder = root.create_subfolder("folder")
+        doc = folder.create_document("doc")
 
-        self.repository.rename_object(doc, u"doc1")
+        self.repository.rename_object(doc, "doc1")
         self.assertEqual(doc.title, 'doc1')
         self.assertEqual(doc.name, 'doc1')
         assert doc.path == '/folder/doc1'
 
-        self.repository.rename_object(folder, u"folder1")
+        self.repository.rename_object(folder, "folder1")
         self.assertEqual(folder.title, 'folder1')
         self.assertEqual(folder.name, 'folder1')
         assert folder.path == '/folder1'
@@ -113,8 +113,8 @@ class TestService(BaseTestCase):
     def test_delete(self):
         root = self.root
 
-        doc = root.create_document(u"doc")
-        folder = root.create_subfolder(u"folder")
+        doc = root.create_document("doc")
+        folder = root.create_subfolder("folder")
         self.session.flush()
 
         assert doc.parent == root
@@ -136,9 +136,9 @@ class TestService(BaseTestCase):
         assert Document.query.get(doc_id) is None
 
         # test delete tree
-        folder = root.create_subfolder(u"folder")
-        sub = folder.create_subfolder(u'subfolder')  # noqa
-        doc = folder.create_document(u"doc")  # noqa
+        folder = root.create_subfolder("folder")
+        sub = folder.create_subfolder('subfolder')  # noqa
+        doc = folder.create_document("doc")  # noqa
         self.session.flush()
 
         self.repository.delete_object(folder)
@@ -148,8 +148,8 @@ class TestService(BaseTestCase):
 
     def test_no_duplicate_name(self):
         root = self.root
-        root.create_subfolder(u'folder_1')
-        root.create_subfolder(u'folder_1')
+        root.create_subfolder('folder_1')
+        root.create_subfolder('folder_1')
         try:
             self.session.flush()
             self.fail('Could create folders with duplicate name')

@@ -5,7 +5,7 @@ Models for the Forum.
 Note: a few features are planned but not implemented yet, and are commented
 out.
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from collections import Counter
 from datetime import datetime
@@ -53,7 +53,7 @@ class Thread(Entity):
 
     #: The thread title (aka subject)
     _title = Column(
-        'title', Unicode(255), nullable=False, default=u"", info=SEARCHABLE)
+        'title', Unicode(255), nullable=False, default="", info=SEARCHABLE)
 
     last_post_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
@@ -144,7 +144,7 @@ class Post(Entity):
     # body_src = Column(UnicodeText, default=u"", nullable=False)
 
     #: HTML rendering of the post
-    body_html = Column(UnicodeText, default=u"", nullable=False)
+    body_html = Column(UnicodeText, default="", nullable=False)
 
     @hybrid_property
     def title(self):
@@ -165,7 +165,7 @@ class ThreadIndexAdapter(SAAdapter):
 
     def get_document(self, obj):
         kw = super(ThreadIndexAdapter, self).get_document(obj)
-        kw['text'] = u' '.join(
+        kw['text'] = ' '.join(
             chain((kw['text'],), [p.body_html for p in obj.posts]))
         return kw
 

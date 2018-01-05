@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import difflib
 from os.path import dirname, join
@@ -45,9 +45,9 @@ def init_wiki_values(endpoint, values):
     g.current_tab = 'wiki'
 
     endpoint = Endpoint('wiki.index', community_id=g.community.slug)
-    g.breadcrumb.append(BreadcrumbItem(label=_l(u'Wiki'), url=endpoint))
+    g.breadcrumb.append(BreadcrumbItem(label=_l('Wiki'), url=endpoint))
 
-    title = request.args.get('title', u'').strip()
+    title = request.args.get('title', '').strip()
     if title and title != 'Home':
         g.breadcrumb.append(
             BreadcrumbItem(
@@ -85,7 +85,7 @@ class BasePageView(object):
 
     @property
     def is_home_page(self):
-        return self.obj is not None and self.obj.title == u'Home'
+        return self.obj is not None and self.obj.title == 'Home'
 
     @property
     def template_kwargs(self):
@@ -104,10 +104,10 @@ class BasePageView(object):
             try:
                 self.obj = get_page_by_title(title)
             except NoResultFound:
-                if title == u'Home':
+                if title == 'Home':
                     self.obj = create_home_page()
                 else:
-                    flash(_(u"This page doesn't exit. You must create it first."),
+                    flash(_("This page doesn't exit. You must create it first."),
                            "warning")
                     self.redirect(
                         url_for(
@@ -139,7 +139,7 @@ class PageView(BasePageView, ObjectView):
         args, kwargs = BasePageView.init_object(self, args, kwargs)
         if not self.obj:
             title = kwargs['title']
-            if title == u'Home':
+            if title == 'Home':
                 self.obj = create_home_page()
             else:
                 return redirect(
@@ -168,7 +168,7 @@ class PageEdit(BasePageView, ObjectEdit):
     # template = 'wiki/page_edit.html'
     title = _("Edit page")
     last_revision = None  # type: int
-    _message_success = _l(u"Wiki page successfully edited.")
+    _message_success = _l("Wiki page successfully edited.")
 
     def init_object(self, args, kwargs):
         if request.method != 'POST':
@@ -211,7 +211,7 @@ class PageEdit(BasePageView, ObjectEdit):
     def redirect_if_no_change(self):
         form = self.form
         if all(f.data == f.object_data for f in (form.title, form.body_src)):
-            flash(_(u"You didn't make any change to this page."))
+            flash(_("You didn't make any change to this page."))
             return self.redirect(url_for(self.obj))
 
     @property
@@ -240,14 +240,14 @@ class PageEdit(BasePageView, ObjectEdit):
                     for l in difflib.ndiff(
                         self.last_revision.body_src.splitlines(True),
                         edited_src.splitlines(True))
-                    if not l[0] == u'?'
+                    if not l[0] == '?'
                 ]
                 current_diff = [
                     l
                     for l in difflib.ndiff(
                         self.last_revision.body_src.splitlines(True),
                         current.body_src.splitlines(True))
-                    if not l[0] == u'?'
+                    if not l[0] == '?'
                 ]
                 field.errors.append(
                     Markup(
@@ -265,7 +265,7 @@ route('/edit')(PageEdit.as_view('page_edit', view_endpoint='.page'))
 
 class PageCreate(PageEdit, ObjectCreate):
     title = _l("Create page")
-    _message_success = _l(u"Wiki page successfully created.")
+    _message_success = _l("Wiki page successfully created.")
 
     get_form_kwargs = ObjectCreate.get_form_kwargs
 
@@ -325,7 +325,7 @@ def page_compare():
         if arg.startswith("rev"):
             revs_to_compare.append(int(arg[3:]))
     if len(revs_to_compare) != 2:
-        flash(_(u"You must check exactly 2 revisions."), "error")
+        flash(_("You must check exactly 2 revisions."), "error")
         return redirect(
             url_for(
                 ".page_changes", title=title, community_id=g.community.slug))
@@ -359,7 +359,7 @@ def page_delete():
     try:
         page = get_page_by_title(title)
     except NoResultFound:
-        flash(_(u"This page doesn't exist"), "error")
+        flash(_("This page doesn't exist"), "error")
         return redirect(url_for(".index", community_id=g.community.slug))
 
     db.session.delete(page)
@@ -370,7 +370,7 @@ def page_delete():
         app, actor=g.user, verb="delete", object=page, target=community)
 
     db.session.commit()
-    flash(_(u"Page %(title)s deleted.", title=title))
+    flash(_("Page %(title)s deleted.", title=title))
     return redirect(url_for(".index", community_id=g.community.slug))
 
 
@@ -426,12 +426,12 @@ def attachment_upload():
     if saved_count:
         db.session.commit()
         flash(
-            _n(u"One new document successfully uploaded",
-               u"%(num)d new document successfully uploaded",
+            _n("One new document successfully uploaded",
+               "%(num)d new documents successfully uploaded",
                count=saved_count,
                num=len(files)), "success")
     else:
-        flash(_(u'No file uploaded.'))
+        flash(_('No file uploaded.'))
 
     return redirect(url_for(page))
 
@@ -454,7 +454,7 @@ def attachment_delete():
         name = attachment.name
         db.session.delete(attachment)
         db.session.commit()
-        flash(_(u'Attachment "{name}" has been deleted').format(name=name))
+        flash(_('Attachment "{name}" has been deleted').format(name=name))
 
     return redirect(url_for(page))
 
@@ -500,7 +500,7 @@ def get_page_by_title(title):
 def create_home_page():
     filename = join(dirname(__file__), 'data', 'default_page.txt')
     default_src = open(filename, 'rt').read()
-    page = WikiPage(title=u"Home", body_src=default_src)
+    page = WikiPage(title="Home", body_src=default_src)
     page.community_id = g.community.id
     db.session.add(page)
     db.session.commit()

@@ -12,7 +12,7 @@ def register_plugin(app):
 
     from .views import blueprint
     from .models import setup_listener
-    from .commands import manager
+    from .commands import manager  # pylint: disable=bad-python3-import
     from . import signals  # noqa
     from . import lock
 

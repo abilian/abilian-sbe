@@ -2,7 +2,7 @@
 """
 Set up the markdown converter. Add extensions here (for now).
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import markdown
 from flask import url_for

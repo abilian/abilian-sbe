@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime, timedelta
 
@@ -89,9 +89,9 @@ def make_message(user):
     subject = sbe_config['DAILY_SOCIAL_DIGEST_SUBJECT']
     digests = []
     happened_after = datetime.utcnow() - timedelta(days=1)
-    list_id = u'"{} daily digest" <daily.digest.{}>'.format(
+    list_id = '"{} daily digest" <daily.digest.{}>'.format(
         config['SITE_NAME'],
-        config.get('SERVER_NAME', u'example.com'),
+        config.get('SERVER_NAME', 'example.com'),
     )
     base_extra_headers = {
         'List-Id': list_id,
@@ -138,7 +138,7 @@ def make_message(user):
         _external=True,
         _scheme=config['PREFERRED_URL_SCHEME'])
     extra_headers = dict(base_extra_headers)
-    extra_headers['List-Unsubscribe'] = u'<{}>'.format(unsubscribe_url)
+    extra_headers['List-Unsubscribe'] = '<{}>'.format(unsubscribe_url)
 
     msg = Message(
         subject,

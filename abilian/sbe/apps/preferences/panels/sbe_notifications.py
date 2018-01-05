@@ -3,7 +3,7 @@
 This panel manages user setting for email reminders related to the SBE
 (social netowking) app.
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import current_app as app
 from flask import flash, redirect, render_template, request, url_for
@@ -19,13 +19,13 @@ from abilian.web.forms import Form, widgets
 
 class SbeNotificationsForm(Form):
     daily = BooleanField(
-        label=_(u"Receive by email a daily digest of activities in your communities"),
+        label=_("Receive by email a daily digest of activities in your communities"),
         widget=widgets.BooleanWidget(on_off_mode=True))
 
 
 class SbeNotificationsPanel(PreferencePanel):
     id = 'sbe_notifications'
-    label = _l(u'Community notifications')
+    label = _l('Community notifications')
 
     def is_accessible(self):
         return True
@@ -65,7 +65,7 @@ class SbeNotificationsPanel(PreferencePanel):
                 preferences.set_preferences(**{key: value})
 
             db.session.commit()
-            flash(_(u"Preferences saved."), "info")
+            flash(_("Preferences saved."), "info")
             return redirect(url_for(".sbe_notifications"))
         else:
             return render_template(

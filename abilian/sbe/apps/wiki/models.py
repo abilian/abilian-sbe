@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
 
@@ -40,13 +40,13 @@ class WikiPage(Entity):
     #: The body, using some markup language (Markdown for now)
     body_src = Column(
         UnicodeText,
-        default=u"",
+        default="",
         nullable=False,
         info=SEARCHABLE | dict(index_to=('text',)))
 
     __table_args__ = (UniqueConstraint('title', 'community_id'),)
 
-    def __init__(self, title=u"", body_src=u"", message=u"", *args, **kwargs):
+    def __init__(self, title="", body_src="", message="", *args, **kwargs):
         Entity.__init__(self, *args, **kwargs)
         self.title = title
         self.create_revision(body_src, message)
@@ -64,7 +64,7 @@ class WikiPage(Entity):
         if self.name != title:
             self.name = title
 
-    def create_revision(self, body_src, message=u""):
+    def create_revision(self, body_src, message=""):
         revision = WikiPageRevision()
         if self.revisions:
             revision.number = max(r.number for r in self.revisions) + 1
@@ -121,10 +121,10 @@ class WikiPageRevision(db.Model):
     number = Column(Integer, nullable=False)
 
     #: The body, using some markup language (Markdown for now)
-    body_src = Column(UnicodeText, default=u"", nullable=False)
+    body_src = Column(UnicodeText, default="", nullable=False)
 
     #: Commit message
-    message = Column(UnicodeText, default=u"", nullable=False)
+    message = Column(UnicodeText, default="", nullable=False)
 
     #: The author of this revision
     author = relationship(User)

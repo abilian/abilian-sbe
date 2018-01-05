@@ -2,7 +2,7 @@
 Not used!
 """
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import flash, g, redirect, render_template, request, url_for
 from flask_babel import gettext as _
@@ -35,7 +35,7 @@ def invite():
 def invite_post():
     action = request.form.get("action", "cancel")
     if action == 'cancel':
-        flash(_(u"Action aborted"), "info")
+        flash(_("Action aborted"), "info")
         return redirect(url_for(".home"))
 
     emails = request.form.get("emails").split("\n")
@@ -57,5 +57,5 @@ def invite_post():
             msg.body = render_template('social/mail/invite.txt', **params)
             conn.send(msg)
 
-    flash(_(u"Invitation sent"), "info")
+    flash(_("Invitation sent"), "info")
     return redirect(url_for(".home"))

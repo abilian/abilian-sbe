@@ -2,7 +2,7 @@
 """
 
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import fileinput
 import logging
@@ -22,10 +22,10 @@ manager = Manager(description='SBE forum commands', help='SBE forum commands')
     '-f',
     '--filename',
     help='email filename; defaults to standard input',
-    default=u'-',
+    default='-',
     required=False,
 )
-def inject_email(filename=u'-'):
+def inject_email(filename='-'):
     """Read one email from stdin, parse it, forward it in a celery task to be persisted."""
 
     parser = FeedParser()

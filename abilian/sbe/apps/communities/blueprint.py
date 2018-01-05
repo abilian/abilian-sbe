@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import Blueprint as BaseBlueprint
 from flask import g
@@ -67,7 +67,7 @@ def pull_community(endpoint, values):
     g.nav['active'] = 'section:communities'
     g.breadcrumb.append(
         BreadcrumbItem(
-            label=_l(u'Communities'), url=Endpoint('communities.index')))
+            label=_l('Communities'), url=Endpoint('communities.index')))
 
     try:
         slug = values.pop('community_id')

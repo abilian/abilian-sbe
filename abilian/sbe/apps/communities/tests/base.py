@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import READER, Community
@@ -11,7 +11,7 @@ class CommunityBaseTestCase(BaseTestCase):
 
     def setUp(self):
         super(CommunityBaseTestCase, self).setUp()
-        self.community = Community(name=u"My Community")
+        self.community = Community(name="My Community")
         self.session.add(self.community)
         self.session.flush()
 
@@ -28,19 +28,17 @@ class CommunityIndexingTestCase(CommunityBaseTestCase):
         super(CommunityIndexingTestCase, self).setUp()
         self.svc = self.app.services['indexing']
         self.user = User(
-            email=u'user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.community.set_membership(self.user, READER)
-        self.c2 = Community(name=u'Other community')
+        self.c2 = Community(name='Other community')
         self.session.add(self.c2)
         self.user_c2 = User(
-            email=u'user_2@example.com', password='azerty', can_login=True)
+            email='user_2@example.com', password='azerty', can_login=True)
         self.session.add(self.user_c2)
         self.c2.set_membership(self.user_c2, READER)
 
         self.user_no_community = User(
-            email=u'no_community@example.com',
-            password='azerty',
-            can_login=True)
+            email='no_community@example.com', password='azerty', can_login=True)
         self.session.add(self.user_no_community)
         self.session.commit()

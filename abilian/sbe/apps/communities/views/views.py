@@ -1,7 +1,8 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 
 import hashlib
 import logging
@@ -138,7 +139,7 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
 @login_required
 def index():
     query = Community.query
-    sort_order = request.args.get('sort', u'').strip()
+    sort_order = request.args.get('sort', '').strip()
     if not sort_order:
         sort_order = session.get('sort_communities_order', 'alpha')
 
@@ -219,7 +220,7 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
     decorators = views.ObjectEdit.decorators + (require_admin, tab('settings'))
 
     def breadcrumb(self):
-        return BreadcrumbItem(label=_(u'Settings'),
+        return BreadcrumbItem(label=_('Settings'),
                               icon='cog',
                               url=Endpoint('communities.settings',
                                            community_id=g.community.slug))
@@ -252,7 +253,7 @@ add_url(
     view_func=CommunityEdit.as_view(
         'settings',
         view_endpoint='.community',
-        message_success=_l(u"Community settings saved successfully.")))
+        message_success=_l("Community settings saved successfully.")))
 
 
 class CommunityCreate(views.ObjectCreate, CommunityEdit):
@@ -262,10 +263,10 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
     base_template = views.ObjectCreate.base_template
 
     def breadcrumb(self):
-        return BreadcrumbItem(label=_(u'Create new community'))
+        return BreadcrumbItem(label=_('Create new community'))
 
     def message_success(self):
-        return _(u"Community %(name)s created successfully", name=self.obj.name)
+        return _("Community %(name)s created successfully", name=self.obj.name)
 
 
 add_url(
@@ -281,10 +282,10 @@ add_url(
     "/<string:community_id>/destroy",
     methods=['POST'],
     view_func=CommunityDelete.as_view(
-        'delete', message_success=_l(u"Community destroyed.")))
+        'delete', message_success=_l("Community destroyed.")))
 
 # Community Image
-_DEFAULT_IMAGE = Path(__file__).parent / u'data' / u'community.png'
+_DEFAULT_IMAGE = Path(__file__).parent / 'data' / 'community.png'
 _DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open('rb').read()).hexdigest()
 route('/_default_image')(image_views.StaticImageView.as_view(
     'community_default_image', set_expire=True, image=_DEFAULT_IMAGE))
@@ -342,7 +343,7 @@ def _members_query():
 @tab('members')
 def members():
     g.breadcrumb.append(BreadcrumbItem(
-        label=_(u'Members'),
+        label=_('Members'),
         url=Endpoint('communities.members', community_id=g.community.slug))
     )
     memberships = _members_query().all()
@@ -367,7 +368,7 @@ def members_post():
 
     user_id = request.form.get("user")
     if not user_id:
-        flash(_(u"You must provide a user."), 'error')
+        flash(_("You must provide a user."), 'error')
         return redirect(url_for(".members", community_id=community.slug))
     user_id = int(user_id)
     user = User.query.get(user_id)
@@ -403,10 +404,10 @@ def members_post():
 
 
 MEMBERS_EXPORT_HEADERS = [
-    _l(u'Name'),
-    _l(u'email'),
-    _l(u'Last activity in this community'),
-    _l(u'Role'),
+    _l('Name'),
+    _l('email'),
+    _l('Last activity in this community'),
+    _l('Role'),
 ]
 
 MEMBERS_EXPORT_ATTRS = ['User', 'User.email', 'last_activity_date', 'role']
@@ -414,7 +415,7 @@ MEMBERS_EXPORT_ATTRS = ['User', 'User.email', 'last_activity_date', 'role']
 HEADER_FONT = openpyxl.styles.Font(bold=True)
 HEADER_ALIGN = openpyxl.styles.Alignment(
     horizontal='center', vertical='top', wrapText=True)
-XLSX_MIME = u'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 
 @route("/<string:community_id>/members/excel")
@@ -428,11 +429,11 @@ def members_excel_export():
     if wb.worksheets:
         wb.remove_sheet(wb.active)
 
-    ws_title = _(u'%(community)s members', community=community.name)
+    ws_title = _('%(community)s members', community=community.name)
     ws_title = ws_title.strip()
     if len(ws_title) > 31:
         # sheet title cannot exceed 31 char. max length
-        ws_title = ws_title[:30] + u'…'
+        ws_title = ws_title[:30] + '…'
     ws = wb.create_sheet(title=ws_title)
     row = 0
     cells = []
@@ -466,7 +467,7 @@ def members_excel_export():
 
             # estimate width
             value = text_type(cell.value)
-            width = max(len(l) for l in value.split(u'\n')) + 1
+            width = max(len(l) for l in value.split('\n')) + 1
             cols_width[col] = max(width, cols_width[col])
 
         ws.append(cells)
@@ -486,11 +487,11 @@ def members_excel_export():
 
     response = current_app.response_class(fd, mimetype=XLSX_MIME)
 
-    filename = u'{}-members-{}.xlsx'.format(community.slug,
-                                            strftime("%d:%m:%Y-%H:%M:%S",
-                                                     gmtime()))
+    filename = '{}-members-{}.xlsx'.format(community.slug,
+                                           strftime("%d:%m:%Y-%H:%M:%S",
+                                                    gmtime()))
     response.headers['content-disposition'] = \
-        u'attachment;filename="{}"'.format(filename)
+        'attachment;filename="{}"'.format(filename)
 
     return response
 

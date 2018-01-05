@@ -1,6 +1,6 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from unittest import TestCase, skip
 
@@ -14,17 +14,17 @@ def check_editable(object):
 
 
 def test_title_prevails():
-    f = Folder(name=u'name', title=u'title')
-    assert f.title == u'title'
-    assert f.name == u'title'
+    f = Folder(name='name', title='title')
+    assert f.title == 'title'
+    assert f.name == 'title'
 
-    f = Folder(name=u'name', title=None)
-    assert f.title == u'name'
-    assert f.name == u'name'
+    f = Folder(name='name', title=None)
+    assert f.title == 'name'
+    assert f.name == 'name'
 
-    f = Folder(name=u'name')
-    assert f.title == u'name'
-    assert f.name == u'name'
+    f = Folder(name='name')
+    assert f.title == 'name'
+    assert f.name == 'name'
 
 
 def test_folder_editables():

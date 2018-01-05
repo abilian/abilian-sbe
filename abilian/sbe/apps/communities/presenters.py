@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask_babel import lazy_gettext as _l
 
@@ -9,7 +9,9 @@ class CommunityPresenter(BasePresenter):
 
     @property
     def breadcrumbs(self):
-        return [
-            dict(label=_l("Communities"), path="/communities/"),
-            dict(label=self._model.name)
-        ]
+        return [{
+            'label': _l("Communities"),
+            'path': "/communities/"
+        }, {
+            'label': self._model.name
+        }]

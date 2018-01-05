@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 import time
@@ -36,7 +36,7 @@ from . import signals
 
 logger = logging.getLogger(__name__)
 
-MEMBER = Role('member', label=_l(u'role_member'), assignable=False)
+MEMBER = Role('member', label=_l('role_member'), assignable=False)
 VALID_ROLES = frozenset([READER, WRITER, MANAGER, MEMBER])
 
 
@@ -62,7 +62,7 @@ class Membership(db.Model):
     __table_args__ = (UniqueConstraint('user_id', 'community_id'),)
 
     def __repr__(self):
-        return u'<Membership user={}, community={}, role={}>'.format(
+        return '<Membership user={}, community={}, role={}>'.format(
             repr(self.user), repr(self.community),
             str(self.role)).encode('utf-8')
 
@@ -97,7 +97,7 @@ def indexable_roles_and_users(community):
     Will be removed when communities are upgraded to use standard role based
     access (by setting permissions and using security service).
     """
-    return u' '.join(indexable_role(user) for user in community.members)
+    return ' '.join(indexable_role(user) for user in community.members)
 
 
 class Community(Entity):
@@ -114,7 +114,7 @@ class Community(Entity):
 
     # : A public description.
     description = Column(
-        Unicode(500), default=u"", nullable=False, info=SEARCHABLE)
+        Unicode(500), default="", nullable=False, info=SEARCHABLE)
 
     #: An image or logo for this community.
     image_id = Column(ForeignKey(Blob.id), index=True)
@@ -196,8 +196,8 @@ class Community(Entity):
                 # during creation, we may have to provide a temporary name for
                 # subfolder, we don't want empty names on folders since they must be
                 # unique among siblings
-                name = u'{}_{}-{}'.format(self.__class__.__name__, str(self.id),
-                                          time.asctime())
+                name = '{}_{}-{}'.format(self.__class__.__name__, str(self.id),
+                                         time.asctime())
             self.folder = repository.root_folder.create_subfolder(name)
             # if not self.group:
             #   self.group = Group(name=self.name)

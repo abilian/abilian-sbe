@@ -2,7 +2,8 @@
 """
 Celery tasks related to document transformation and preview.
 """
-from __future__ import absolute_import, division, print_function
+from __future__ import absolute_import, division, print_function, \
+    unicode_literals
 
 import email
 import mailbox
@@ -33,7 +34,7 @@ from abilian.web import url_for
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 from .models import PostAttachment, Thread
 
-MAIL_REPLY_MARKER = _l(u'_____Write above this line to post_____')
+MAIL_REPLY_MARKER = _l('_____Write above this line to post_____')
 
 # logger = logging.getLogger(__package__)
 # Celery logger
@@ -148,7 +149,7 @@ def build_local_part(name, uid):
     serializer = Serializer(key)
     signature = serializer.dumps(uid)
     digest = md5(signature)
-    local_part = name + tag + uid + u'-' + digest
+    local_part = name + tag + uid + '-' + digest
 
     if len(local_part) > 64:
         if (len(local_part) - len(digest) - 1) > 64:
@@ -175,9 +176,9 @@ def build_reply_email_address(name, post, member, domain):
        'P' for 'post' - locale - thread id - user id - signature digest
     """
     locale = get_locale()
-    uid = u'-'.join([u'P', str(locale), str(post.thread_id), str(member.id)])
+    uid = '-'.join(['P', str(locale), str(post.thread_id), str(member.id)])
     local_part = build_local_part(name, uid)
-    return local_part + u'@' + domain
+    return local_part + '@' + domain
 
 
 def extract_email_destination(address):
@@ -195,9 +196,9 @@ def extract_email_destination(address):
     if local_part != signed_local_part:
         raise ValueError('Invalid signature in reply address')
 
-    values = uid.split(u'-')
+    values = uid.split('-')
     header = values.pop(0)
-    assert header == u'P'
+    assert header == 'P'
     return values
 
 
@@ -215,13 +216,13 @@ def has_subtag(address):
 
 def send_post_to_user(community, post, member):
     recipient = member.email
-    subject = u'[%s] %s' % (community.name, post.title)
+    subject = '[%s] %s' % (community.name, post.title)
     config = current_app.config
     sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
     SBE_FORUM_REPLY_BY_MAIL = config.get('SBE_FORUM_REPLY_BY_MAIL', False)
-    SERVER_NAME = config.get('SERVER_NAME', u'example.com')
-    list_id = u'"{} forum" <forum.{}.{}>'.format(community.name, community.slug,
-                                                 SERVER_NAME)
+    SERVER_NAME = config.get('SERVER_NAME', 'example.com')
+    list_id = '"{} forum" <forum.{}.{}>'.format(community.name, community.slug,
+                                                SERVER_NAME)
     forum_url = url_for(
         'forum.index', community_id=community.slug, _external=True)
     forum_archive = url_for(
@@ -229,7 +230,7 @@ def send_post_to_user(community, post, member):
 
     extra_headers = {
         'List-Id': list_id,
-        'List-Archive': u'<{}>'.format(forum_archive),
+        'List-Archive': '<{}>'.format(forum_archive),
         'List-Post': '<{}>'.format(forum_url),
         'X-Auto-Response-Suppress': 'All',
         'Auto-Submitted': 'auto-generated',
@@ -299,8 +300,8 @@ def add_paragraph(newpost):
     """
 
     newpost = newpost.strip()
-    if not newpost.startswith(u'<p>'):
-        newpost = u'<p>' + newpost + u'</p>'
+    if not newpost.startswith('<p>'):
+        newpost = '<p>' + newpost + '</p>'
     return newpost
 
 
@@ -441,7 +442,7 @@ def process_email(message):
         # FIXME: check membership, send back an informative email in case of an error
         post = thread.create_post(body_html=newpost)
         obj_meta = post.meta.setdefault('abilian.sbe.forum', {})
-        obj_meta['origin'] = u'email'
+        obj_meta['origin'] = 'email'
         obj_meta['send_by_email'] = True
         activity.send(
             app, actor=g.user, verb='post', object=post, target=community)

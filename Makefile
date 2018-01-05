@@ -116,7 +116,7 @@ flake8:
 	flake8 abilian tests
 
 lint-py3k:
-	pylint --py3k -d W1633,W1629,W1630,W1648 abilian tests
+	pylint --py3k abilian tests
 
 lint-mypy:
 	-mypy abilian
@@ -128,7 +128,7 @@ lint-doc:
 format: format-py format-js
 
 format-py:
-	isort -a  "from __future__ import absolute_import, print_function" -rc \
+	isort -a  "from __future__ import absolute_import, print_function, unicode_literals" -rc \
 		abilian demo tests *.py
 	-yapf --style google -r -i abilian demo tests *.py
 	isort -rc abilian demo tests *.py

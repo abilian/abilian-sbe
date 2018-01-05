@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import url_for as url_for_orig
 from flask import g
@@ -47,40 +47,40 @@ _actions = (
     NavItem(
         'section',
         'communities',
-        title=_l(u'Communities'),
+        title=_l('Communities'),
         url=lambda context: url_for_orig('communities.index'),
         condition=lambda ctx: current_user.is_authenticated),
     # Tabs
-    CommunityTabAction('communities:tabs', 'wall', _l(u'Activities')),
+    CommunityTabAction('communities:tabs', 'wall', _l('Activities')),
     CommunityTabAction(
         'communities:tabs',
         'documents',
-        _l(u'Documents'),
+        _l('Documents'),
         condition=lambda ctx: g.community.has_documents),
     CommunityTabAction(
         'communities:tabs',
         'wiki',
-        _l(u'Wiki'),
+        _l('Wiki'),
         condition=lambda ctx: g.community.has_wiki),
     CommunityTabAction(
         'communities:tabs',
         'forum',
-        _l(u'Conversations'),
+        _l('Conversations'),
         condition=lambda ctx: g.community.has_forum),
     CommunityTabAction(
         'communities:tabs',
         'calendar',
-        _l(u'Calendar'),
+        _l('Calendar'),
         condition=lambda ctx: g.community.has_calendar),
     CommunityTabAction(
         'communities:tabs',
         'members',
-        _l(u'Members'),
+        _l('Members'),
         endpoint="communities.members"),
     CommunityTabAction(
         'communities:tabs',
         'settings',
-        _l(u'Settings'),
+        _l('Settings'),
         icon='cog',
         condition=lambda ctx: current_user.has_role("admin"),
         endpoint="communities.settings"))

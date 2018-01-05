@@ -3,7 +3,7 @@
 Forum views
 """
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
 
@@ -45,18 +45,18 @@ def activity_time_format(time, now=None):
         time_delta.seconds // 60, time_delta.seconds
 
     if days == 0 and hours == 0 and minutes == 0:
-        return u"{}{}".format(seconds, _l(u"s"))
+        return "{}{}".format(seconds, _l("s"))
 
     if days == 0 and hours == 0:
-        return u"{}{}".format(minutes, _l(u"m"))
+        return "{}{}".format(minutes, _l("m"))
 
     if days == 0:
-        return u"{}{}".format(hours, _l(u"h"))
+        return "{}{}".format(hours, _l("h"))
 
     if days < 30:
-        return u"{}{}".format(days, _l(u"d"))
+        return "{}{}".format(days, _l("d"))
 
     if time.year == now.year:
-        return u"{} {}".format(month_abbreviation, time.day)
+        return "{} {}".format(month_abbreviation, time.day)
 
-    return u"{} {}".format(month_abbreviation, str(time.year))
+    return "{} {}".format(month_abbreviation, str(time.year))

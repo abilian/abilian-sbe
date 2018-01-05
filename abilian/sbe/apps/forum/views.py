@@ -2,7 +2,7 @@
 """
 Forum views
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from collections import Counter
 from datetime import date, datetime, timedelta
@@ -48,7 +48,7 @@ def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
     """
     kw = default_view_kw(kw, obj.thread, obj_type, obj_id, **kwargs)
     kw['thread_id'] = obj.thread_id
-    kw['_anchor'] = u'post_{:d}'.format(obj.id)
+    kw['_anchor'] = 'post_{:d}'.format(obj.id)
     return kw
 
 
@@ -58,7 +58,7 @@ def init_forum_values(endpoint, values):
 
     g.breadcrumb.append(
         BreadcrumbItem(
-            label=_l(u'Conversations'),
+            label=_l('Conversations'),
             url=Endpoint('forum.index', community_id=g.community.slug)))
 
 
@@ -179,7 +179,7 @@ def group_monthly(entities_list):
 
     def format_month(year, month):
         month = format_date(date(year, month, 1), "MMMM").capitalize()
-        return u"%s %s" % (month, year)
+        return "%s %s" % (month, year)
 
     grouped_entities = groupby(entities_list, grouper)
     grouped_entities = [(format_month(year, month), list(entities))
@@ -278,7 +278,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
     base_template = 'community/_forumbase.html'
     template = 'forum/thread_create.html'
     POST_BUTTON = ButtonAction(
-        'form', 'create', btn_class='primary', title=_l(u'Post this message'))
+        'form', 'create', btn_class='primary', title=_l('Post this message'))
 
     title = _("New conversation")
 
@@ -303,7 +303,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
 
         self.post = self.thread.create_post(body_html=self.message_body)
         obj_meta = self.post.meta.setdefault('abilian.sbe.forum', {})
-        obj_meta['origin'] = u'web'
+        obj_meta['origin'] = 'web'
         obj_meta['send_by_email'] = self.send_by_email
         session = sa.orm.object_session(self.thread)
         uploads = current_app.extensions['uploads']
@@ -389,7 +389,7 @@ route('/<int:thread_id>/viewers')(ThreadViewers.as_view('thread_viewers'))
 
 class ThreadDelete(BaseThreadView, views.ObjectDelete):
     methods = ['POST']
-    _message_success = _(u'Thread "{title}" deleted.')
+    _message_success = _('Thread "{title}" deleted.')
 
     def message_success(self):
         return text_type(self._message_success).format(title=self.obj.title)
@@ -402,22 +402,22 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
     """Close / Re-open a thread.
     """
     methods = ['POST']
-    _VALID_ACTIONS = {u'close', u'reopen'}
-    CLOSED_MSG = _l(u'The thread is now closed for edition and new '
-                    u'contributions.')
-    REOPENED_MSG = _l(u'The thread is now re-opened for edition and new '
-                      u'contributions.')
+    _VALID_ACTIONS = {'close', 'reopen'}
+    CLOSED_MSG = _l('The thread is now closed for edition and new '
+                    'contributions.')
+    REOPENED_MSG = _l('The thread is now re-opened for edition and new '
+                      'contributions.')
 
     def prepare_args(self, args, kwargs):
         args, kwargs = super(ThreadCloseView, self).prepare_args(args, kwargs)
         action = kwargs['action'] = request.form.get('action')
         if action not in self._VALID_ACTIONS:
-            raise BadRequest(u'Unknown action: {!r}'.format(action))
+            raise BadRequest('Unknown action: {!r}'.format(action))
 
         return args, kwargs
 
     def post(self, action=None):
-        is_closed = (action == u'close')
+        is_closed = (action == 'close')
         self.obj.closed = is_closed
         sa.orm.object_session(self.obj).commit()
 

@@ -1,7 +1,7 @@
 # coding=utf-8
 """
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import render_template
 
@@ -28,7 +28,7 @@ class TestNotificationViews(BaseTestCase):
     def setUp(self):
         super(TestNotificationViews, self).setUp()
         self.user = User(
-            email=u'user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.session.commit()
 
@@ -56,7 +56,7 @@ class NotificationTestCase(CommunityBaseTestCase):
     def setUp(self):
         super(NotificationTestCase, self).setUp()
         self.user = User(
-            email=u'user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.community.set_membership(self.user, WRITER)
         self.session.commit()

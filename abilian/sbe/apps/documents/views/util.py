@@ -1,4 +1,4 @@
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
@@ -64,18 +64,18 @@ def get_new_filename(folder, name):
 
     if renamed:
         name = name.rsplit('.', 1)
-        ext = u'.{}'.format(name[1]) if len(name) > 1 else u''
+        ext = '.{}'.format(name[1]) if len(name) > 1 else ''
         name = name[0]
-        prefix = u'{}-'.format(name)
+        prefix = '{}-'.format(name)
         prefix_len = len(prefix)
         # find all numbered suffixes from name-1.ext, name-5.ext,...
-        suffixes = (n[prefix_len:].rsplit(u'.', 1)[0]
+        suffixes = (n[prefix_len:].rsplit('.', 1)[0]
                     for n in existing
                     if n.startswith(prefix) and n.endswith(ext))
         suffixes = [int(val) for val in suffixes if re.match(r'^\d+$', val)]
 
         index = max(0, 0, *suffixes) + 1  # 0, 0: in case suffixes is empty
-        name = u'{}-{}{}'.format(name, index, ext)
+        name = '{}-{}{}'.format(name, index, ext)
 
     return name
 
@@ -89,7 +89,7 @@ def create_document(folder, fs):
         name = text_type(fs.filename, errors='ignore')
 
     if not name:
-        flash(_(u"Document name can't be empty."), "error")
+        flash(_("Document name can't be empty."), "error")
         return None
 
     original_name = name
@@ -99,7 +99,7 @@ def create_document(folder, fs):
 
     if original_name != name:
         # set message after document has been successfully created!
-        flash(_(u'"{original}" already present in folder, '
+        flash(_('"{original}" already present in folder, '
                 'renamed "{name}"').format(original=original_name, name=name),
               'info')
 

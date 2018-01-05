@@ -4,7 +4,7 @@ Entity objects for the Document Management applications.
 
 TODO: move to an independent service / app.
 """
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 import itertools
 import logging
@@ -90,11 +90,11 @@ class CmisObject(Entity, InheritSecurity):
     __indexation_args__['index_to'] = index_to
     del index_to
 
-    _title = Column('title', UnicodeText, nullable=False, default=u"")
+    _title = Column('title', UnicodeText, nullable=False, default="")
     description = Column(
         UnicodeText,
         nullable=False,
-        default=u"",
+        default="",
         info=SEARCHABLE | dict(index_to=('description', 'text')))
 
     _parent_id = Column(Integer, ForeignKey('cmisobject.id'), nullable=True)
@@ -152,9 +152,9 @@ class CmisObject(Entity, InheritSecurity):
     @property
     def path(self):
         if self.parent:
-            return self.parent.path + u"/" + self.title
+            return self.parent.path + "/" + self.title
         else:
-            return u""
+            return ""
 
     @property
     def is_folder(self):
@@ -214,7 +214,7 @@ class PathAndSecurityIndexable(object):
         self.parent.id.
         """
         ids = [text_type(obj.id) for obj in self._iter_to_root(skip_self=True)]
-        return u'/' + u'/'.join(reversed(ids))
+        return '/' + '/'.join(reversed(ids))
 
     @property
     def _indexable_roles_and_users(self):
@@ -262,7 +262,7 @@ class PathAndSecurityIndexable(object):
 
         # admin role is always granted access
         allowed.add(Admin)
-        return u' '.join(indexable_role(p) for p in allowed)
+        return ' '.join(indexable_role(p) for p in allowed)
 
 
 class Folder(CmisObject, PathAndSecurityIndexable):
@@ -646,7 +646,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     @property
     def text(self):
         return (self.text_blob.value.decode("utf8")
-                if self.text_blob is not None else u'')
+                if self.text_blob is not None else '')
 
     @text.setter
     def text(self, value):

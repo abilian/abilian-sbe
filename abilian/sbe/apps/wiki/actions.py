@@ -1,5 +1,5 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import url_for
 from flask_babel import lazy_gettext as _l
@@ -46,53 +46,74 @@ _actions = (
     WikiPageAction(
         'wiki:page',
         'page_viewers',
-        _l(u'Readers list'),
+        _l('Readers list'),
         icon='user',
         condition=lambda ctx: is_manager(context=ctx),
-        endpoint='.page_viewers'),
+        endpoint='.page_viewers',
+    ),
     WikiPageAction(
-        'wiki:page', 'view', _l(u'View'), endpoint='.page', icon='eye-open'),
+        'wiki:page',
+        'view',
+        _l('View'),
+        endpoint='.page',
+        icon='eye-open',
+    ),
     WikiPageAction(
-        'wiki:page', 'edit', _l(u'Edit'), endpoint='.page_edit', icon='pencil'),
+        'wiki:page',
+        'edit',
+        _l('Edit'),
+        endpoint='.page_edit',
+        icon='pencil',
+    ),
     WikiPageModalAction(
         'wiki:page',
         'upload_attachment',
-        _l(u'Upload an attachment'),
+        _l('Upload an attachment'),
         url='#upload-files',
-        icon='plus'),
+        icon='plus',
+    ),
     WikiPageAction(
         'wiki:page',
         'source',
-        _l(u'Source'),
+        _l('Source'),
         endpoint='.page_source',
-        icon=FAIcon('code')),
+        icon=FAIcon('code'),
+    ),
     WikiPageAction(
         'wiki:page',
         'changes',
-        _l(u'Changes'),
+        _l('Changes'),
         endpoint='.page_changes',
-        icon='time'),
+        icon='time',
+    ),
     WikiPageModalAction(
-        'wiki:page', 'delete', _l(u'Delete'), url='#modal-delete',
-        icon='trash'),
+        'wiki:page',
+        'delete',
+        _l('Delete'),
+        url='#modal-delete',
+        icon='trash',
+    ),
     WikiAction(
         'wiki:global',
         'new',
-        _l(u'New page'),
+        _l('New page'),
         endpoint='.page_new',
-        icon='plus'),
+        icon='plus',
+    ),
     WikiAction(
         'wiki:global',
         'pages',
-        _l(u'All pages'),
+        _l('All pages'),
         endpoint='.wiki_pages',
-        icon='list'),
+        icon='list',
+    ),
     WikiAction(
         'wiki:global',
         'help',
-        _l(u'Syntax help'),
+        _l('Syntax help'),
         endpoint='.wiki_help',
-        icon='info-sign'),
+        icon='info-sign',
+    ),
 )
 
 
