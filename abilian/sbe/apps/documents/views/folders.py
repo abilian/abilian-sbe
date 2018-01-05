@@ -20,7 +20,7 @@ import whoosh.query as wq
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
     redirect, render_template, render_template_string, request, send_file, \
     session
-from flask._compat import text_type
+from six import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError
@@ -63,11 +63,12 @@ def folder_view(folder_id):
     folder = get_folder(folder_id)
     bc = breadcrumbs_for(folder)
     actions.context['object'] = folder
-    ctx = dict(
-        folder=folder,
-        children=folder.filtered_children,
-        breadcrumbs=bc,
-        csrf_token=csrf.field())
+    ctx = {
+        'folder': folder,
+        'children': folder.filtered_children,
+        'breadcrumbs': bc,
+        'csrf_token': csrf.field(),
+    }
 
     view_style = session.get('sbe_doc_view_style', 'thumbnail_view')
     if view_style == 'thumbnail_view':
@@ -165,7 +166,11 @@ def members(folder_id):
     bc = breadcrumbs_for(folder)
     actions.context['object'] = folder
     members = folder.members()
-    ctx = dict(folder=folder, members=members, breadcrumbs=bc)
+    ctx = {
+        'folder': folder,
+        'members': members,
+        'breadcrumbs': bc,
+    }
     return render_template("community/members.html", **ctx)
 
 
@@ -250,16 +255,17 @@ def permissions(folder_id):
     audit_entries = [EntryPresenter(e) for e in security.entries_for(folder)]
     csrf_token = csrf.field()
 
-    ctx = dict(
-        folder=folder,
-        users_and_local_roles=users_and_local_roles,
-        users_and_inherited_roles=users_and_inherited_roles,
-        groups_and_local_roles=groups_and_local_roles,
-        groups_and_inherited_roles=groups_and_inherited_roles,
-        audit_entries=audit_entries,
-        csrf_token=csrf_token,
-        all_groups=all_groups,
-        breadcrumbs=bc)
+    ctx = {
+        'folder': folder,
+        'users_and_local_roles': users_and_local_roles,
+        'users_and_inherited_roles': users_and_inherited_roles,
+        'groups_and_local_roles': groups_and_local_roles,
+        'groups_and_inherited_roles': groups_and_inherited_roles,
+        'audit_entries': audit_entries,
+        'csrf_token': csrf_token,
+        'all_groups': all_groups,
+        'breadcrumbs': bc,
+    }
 
     return render_template("documents/permissions.html", **ctx)
 
