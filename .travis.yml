@@ -34,6 +34,8 @@ before_install:
   - npm install -g less
   - export PATH=~/npm-packages/bin:$PATH
 
+  - npm install
+
 # Install Python dependencies
 install:
   - pip install -U pip setuptools wheel
