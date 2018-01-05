@@ -53,10 +53,10 @@
     function keyDown(e) {
       var code = e.keyCode;
       // Note: we prevent default keyboard action
-      if (code == 39) {
+      if (code === 39) {
         loadNext();
         return false;
-      } else if (code == 37) {
+      } else if (code === 37) {
         loadPrev();
         return false;
       }

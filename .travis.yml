@@ -45,7 +45,8 @@ install:
   # Debug info
   - pip --version
   - pip list
-  - pip3 install mypy
+  # TODO: install properly (using pyenv?)
+  # - pip3 install mypy
 
 # Create DB
 before_script:
