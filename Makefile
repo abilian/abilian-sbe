@@ -104,7 +104,7 @@ lint-js:
 
 lint-less:
 	@echo "--> Linting Less files"
-	-npm run stylelint
+	npm run stylelint
 
 lint-python:
 	@echo "--> Linting Python files"

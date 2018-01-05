@@ -23,8 +23,8 @@
     margin-top: 30px;
   }
 
-  .arrow-steps .step:after,
-  .arrow-steps .step:before {
+  .arrow-steps .step::after,
+  .arrow-steps .step::before {
     content: " ";
     position: absolute;
     top: 0;
@@ -39,8 +39,8 @@
 }
 
 @media only screen and (min-width: 1200px) {
-  .arrow-steps .step:after,
-  .arrow-steps .step:before {
+  .arrow-steps .step::after,
+  .arrow-steps .step::before {
     content: " ";
     position: absolute;
     top: 0;
@@ -54,7 +54,7 @@
   }
 }
 
-.clearfix:after {
+.clearfix::after {
   clear: both;
   content: "";
   display: block;
@@ -90,18 +90,18 @@
   text-decoration: none;
 }
 
-.arrow-steps .step:before {
+.arrow-steps .step::before {
   right: auto;
   left: 0;
   border-left: 17px solid #fff;
   z-index: 0;
 }
 
-.arrow-steps .step:first-child:before {
+.arrow-steps .step:first-child::before {
   border: none;
 }
 
-.arrow-steps .step:last-child:after {
+.arrow-steps .step:last-child::after {
   border: none;
 }
 
@@ -119,7 +119,7 @@
   position: relative;
 }
 
-*.arrow-steps .step.done span:before {
+*.arrow-steps .step.done span::before {
   opacity: 1;
   content: "✓";
   position: absolute;
@@ -140,7 +140,7 @@
   text-decoration: none;
 }
 
-.arrow-steps .step.current:after {
+.arrow-steps .step.current::after {
   border-left: 17px solid yellowgreen;
 }
 
@@ -154,7 +154,7 @@
   text-decoration: none;
 }
 
-.arrow-steps .step.done:after {
+.arrow-steps .step.done::after {
   border-left: 17px solid #2f69aa;
 }
 
