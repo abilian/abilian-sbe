@@ -25,7 +25,7 @@ addons:
 # Install OS dependencies
 before_install:
   - sudo add-apt-repository 'deb http://ubuntu.mirrors.ovh.net/ftp.ubuntu.com/ubuntu/ xenial main'
-  - sudo apt-get update
+  - sudo apt-get -qq update
   - sudo apt-get install sqlite3
   - python -c "import sqlite3; print('SQLITE3:', sqlite3.sqlite_version)"
 
@@ -36,13 +36,12 @@ before_install:
 
 # Install Python dependencies
 install:
-  - pip install -U 'pip>=9' setuptools
+  - pip install -U pip setuptools wheel
   - pip install -r requirements.txt -r etc/dev-requirements.txt
   - pip install -e '.[dev]'
   - pip check
   # Debug info
   - pip --version
-  - python -c "import sqlite3; print('SQLITE3:', sqlite3.sqlite_version)"
   - pip list
 
 # Create DB
@@ -52,7 +51,7 @@ before_script:
 # Run tests
 script:
   - py.test --tb=short -q --cov abilian .
-  - make lint-python
+  - make lint
   # There are no docs yet!
   #- sphinx-build -W -b html docs/ docs/_build/
 
