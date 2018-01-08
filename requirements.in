@@ -11,7 +11,7 @@ validate_email
 langid>=1.1,<1.2
 chardet
 
-# Markdown support for Wiki)
+# Markdown support for Wiki
 markdown
 
 # needed by folder: export to xls
