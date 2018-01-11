@@ -8,6 +8,7 @@
 
   <form method="post" action="{{ url_for("preferences.sbe_notifications_post") }}" role="form">
     {{ csrf.field() }}
+
     {% for field in form %}
       {{ m_field(field) }}
     {% endfor %}

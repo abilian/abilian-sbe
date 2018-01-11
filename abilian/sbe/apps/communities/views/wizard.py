@@ -146,8 +146,7 @@ def wizard_data_insertion():
         url=Endpoint('communities.members', community_id=g.community.slug)),
     )
 
-    return render_template(
-        "community/wizard_add_emails.html", csrf_token=csrf.field())
+    return render_template("community/wizard_add_emails.html")
 
 
 @route("/<string:community_id>/members/wizard/step2", methods=['GET', 'POST'])
@@ -191,13 +190,13 @@ def wizard_check_data():
         return redirect(
             url_for(".wizard_data_insertion", community_id=g.community.slug))
 
-    return render_template(
-        "community/wizard_check_members.html",
-        existing_accounts_object=existing_accounts_object,
-        csv_roles=existing_accounts_csv_roles if is_csv else False,
-        wizard_emails=final_email_list_json,
-        existing_members_objects=existing_members_objects,
-        csrf_token=csrf.field())
+    ctx = {
+        'existing_accounts_object': existing_accounts_object,
+        'csv_roles': existing_accounts_csv_roles if is_csv else False,
+        'wizard_emails': final_email_list_json,
+        'existing_members_objects': existing_members_objects
+    }
+    return render_template("community/wizard_check_members.html", **ctx)
 
 
 @route("/<string:community_id>/members/wizard/step3", methods=['GET', 'POST'])
@@ -234,7 +233,7 @@ def wizard_new_accounts():
         "community/wizard_new_accounts.html",
         existing_account=existing_account,
         new_accounts=new_accounts,
-        csrf_token=csrf.field())
+    )
 
 
 @route("/<string:community_id>/members/wizard/complete", methods=['POST'])

@@ -18,7 +18,6 @@ from abilian.web import csrf
 from abilian.web.views import default_view
 
 from .social import social
-from .util import Env
 
 DEFAULT_GROUP_MUGSHOT = open(
     join(dirname(__file__), "../../../static/images/frog.jpg"), 'rb').read()
@@ -27,18 +26,18 @@ DEFAULT_GROUP_MUGSHOT = open(
 @social.route("/groups/")
 def groups():
     tab = request.args.get("tab", "all_groups")
-    e = Env()
     if tab == 'all_groups':
-        e.groups = Group.query.order_by(Group.name).all()
+        groups = Group.query.order_by(Group.name).all()
         if not security.has_role(g.user, "admin"):
-            e.groups = [
-                group for group in e.groups
+            groups = [
+                group for group in groups
                 if group.public or g.user in group.members
             ]
     else:
-        e.groups = g.user.groups
-        e.groups.sort(key=lambda x: x.name)
-    return render_template("social/groups.html", **e)
+        groups = g.user.groups
+        groups.sort(key=lambda x: x.name)
+
+    return render_template("social/groups.html", groups=groups)
 
 
 def is_admin(group):
@@ -53,10 +52,9 @@ def is_admin(group):
 @social.route("/groups/<int:group_id>")
 @default_view(social, Group, 'group_id')
 def group_home(group_id):
-    e = Env(csrf_token=csrf.field())
-    e.group = Group.query.get(group_id)
-    e.is_admin = is_admin(e.group)
-    return render_template("social/group.html", **e)
+    group = Group.query.get(group_id)
+    ctx = {'group': group, 'is_admin': is_admin(group)}
+    return render_template("social/group.html", **ctx)
 
 
 @social.route("/groups/<int:group_id>/json")

@@ -6,7 +6,7 @@
       <form method="POST" class="form-horizontal"
             action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
             enctype="multipart/form-data">
-        {{ csrf_token }}
+        {{ csrf.field() }}
         <input type="hidden" name="action" value="add-group-role"/>
 
         <div class="modal-header">
@@ -63,7 +63,7 @@
       <form method="POST" class="form-horizontal"
             action="{{ url_for(".permissions_update", folder_id=folder.id, community_id=folder.community.slug) }}"
             enctype="multipart/form-data">
-        {{ csrf_token }}
+        {{ csrf.field() }}
         <input type="hidden" name="action" value="add-user-role"/>
 
         <div class="modal-header">

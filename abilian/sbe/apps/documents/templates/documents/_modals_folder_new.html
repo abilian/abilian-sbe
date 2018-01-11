@@ -4,7 +4,7 @@
 
       <form method="POST" action="{{ folder_post_url }}"
             enctype="multipart/form-data">
-        {{ csrf_token }}
+        {{ csrf.field() }}
 
         <div class="modal-header">
           <button class="close" data-dismiss="modal">&times;</button>

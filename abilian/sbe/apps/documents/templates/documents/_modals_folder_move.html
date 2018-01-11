@@ -2,7 +2,7 @@
   <div class="modal-dialog">
     <div class="modal-content">
       <form method="POST" id="modal-folder-move" action="{{ folder_post_url }}" enctype="multipart/form-data">
-        {{ csrf_token }}
+        {{ csrf.field() }}
         <div class="modal-header">{{ _("Move files or documents") }}</div>
 
         <div id="modal-move-files-directory-listing" class="modal-body">

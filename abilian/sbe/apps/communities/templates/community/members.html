@@ -89,7 +89,7 @@ top: 39px;">
 
   <div id="add-user-role" role="dialog">
     <form method="POST" class="form-inline" enctype="multipart/form-data" role="form">
-      {{ csrf_token }}
+      {{ csrf.field() }}
 
       <div class="form-group">
         <label for="user-select">{{ _('User') }}</label>

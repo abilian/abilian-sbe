@@ -9,7 +9,7 @@
       <form id="fileupload" class="modal-replacedoc-form"
             action=""
             method="POST" enctype="multipart/form-data">
-        {{ csrf_token }}
+        {{ csrf.field() }}
 
         <div class="modal-header">
           <button class="close" data-dismiss="modal">&times;</button>

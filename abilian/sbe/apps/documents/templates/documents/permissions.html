@@ -6,7 +6,7 @@
 {% macro m_users_table(users_and_roles, controls) %}
   {% set table_id = uuid() %}
   <form method="POST">
-    {{ csrf_token }}
+    {{ csrf.field() }}
     <table class="table table-condensed table-striped" id="{{ table_id }}">
       <thead>
       <tr>
@@ -83,7 +83,7 @@
 {% macro m_groups_table(groups_and_roles, controls) %}
   {% set table_id = uuid() %}
   <form method="POST">
-    {{ csrf_token }}
+    {{ csrf.field() }}
     <table class="table table-condensed table-striped" id="{{ table_id }}">
       <thead>
       <tr>
@@ -254,7 +254,7 @@
 
           Abilian.fn.onAppInit(function () {
             $("#deactivate_inheritance").click(function () {
-              var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="deactivate_inheritance" /></form>');
+              var form = $('<form>{{ csrf.field() }}<input type="text" name="action" value="deactivate_inheritance" /></form>');
               form.attr("method", "post");
               form.attr("action", "{{ request.path }}");
               $(document.body).append(form);
@@ -262,7 +262,7 @@
             });
 
             $("#activate_inheritance").click(function () {
-              var form = $('<form>{{ csrf_token }}<input type="text" name="action" value="activate_inheritance" /></form>');
+              var form = $('<form>{{ csrf.field() }}<input type="text" name="action" value="activate_inheritance" /></form>');
               form.attr("method", "post");
               form.attr("action", "{{ request.path }}");
               $(document.body).append(form);

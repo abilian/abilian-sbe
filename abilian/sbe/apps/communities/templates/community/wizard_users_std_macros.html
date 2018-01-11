@@ -68,7 +68,7 @@
     <td style="padding-top: 11px;padding-left: 10px;">
       <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
             method="POST" style="display: inline;">
-        {{ csrf_token }}
+        {{ csrf.field() }}
         <input type="hidden" name="user" value="{{ user.id }}"/>
         <input type="hidden" name="action" value="set-user-role"/>
         <select onchange="role_change(this)" id="{{ user.email }}" name="role" class="form-control role-change"

@@ -120,7 +120,7 @@
               <form id="document_checkout"
                     action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}"
                     method="POST" target="_new">
-                {{ csrf_token }}
+                {{ csrf.field() }}
                 {% if doc.lock == None %}
                   <input type="hidden" name="action" value="checkout"/>
                   <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"

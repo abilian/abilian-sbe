@@ -350,13 +350,13 @@ def members():
     community_threads_users = [thread.creator for thread in g.community.threads]
     threads_count = Counter(community_threads_users)
 
-    return render_template(
-        "community/members.html",
-        seconds_since_epoch=seconds_since_epoch,
-        is_manager=is_manager(user=current_user),
-        memberships=memberships,
-        threads_count=threads_count,
-        csrf_token=csrf.field())
+    ctx = {
+        'seconds_since_epoch': seconds_since_epoch,
+        'is_manager': is_manager(user=current_user),
+        'memberships': memberships,
+        'threads_count': threads_count,
+    }
+    return render_template("community/members.html", **ctx)
 
 
 @route("/<string:community_id>/members", methods=["POST"])

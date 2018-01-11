@@ -62,14 +62,14 @@ def document_view(doc_id):
     audit_entries = audit_service.entries_for(doc)
     viewtracker.record_hit(entity=doc, user=current_user)
 
-    ctx = dict(
-        doc=doc,
-        audit_entries=audit_entries,
-        breadcrumbs=bc,
-        folder=doc.parent,
-        has_preview=has_preview,
-        csrf_token=csrf.field(),
-        viewers=object_viewers(doc))
+    ctx = {
+        'doc': doc,
+        'audit_entries': audit_entries,
+        'breadcrumbs': bc,
+        'folder': doc.parent,
+        'has_preview': has_preview,
+        'viewers': object_viewers(doc),
+    }
     return render_template("documents/document.html", **ctx)
 
 
@@ -115,15 +115,14 @@ def document_viewers(doc_id):
     has_preview = doc.has_preview()
     audit_entries = audit_service.entries_for(doc)
 
-    ctx = dict(
-        doc=doc,
-        audit_entries=audit_entries,
-        breadcrumbs=bc,
-        folder=doc.parent,
-        has_preview=has_preview,
-        csrf_token=csrf.field(),
-        viewers=object_viewers(doc))
-
+    ctx = {
+        'doc': doc,
+        'audit_entries': audit_entries,
+        'breadcrumbs': bc,
+        'folder': doc.parent,
+        'has_preview': has_preview,
+        'viewers': object_viewers(doc),
+    }
     return render_template("documents/document_viewers.html", **ctx)
 
 

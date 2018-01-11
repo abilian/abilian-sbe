@@ -74,7 +74,7 @@
     <td>
       <form action="{{ url_for('.members_post', community_id=g.community.slug) }}" method="POST"
             style="display: inline;">
-        {{ csrf_token }}
+        {{ csrf.field() }}
         <input type="hidden" name="user" value="{{ user.id }}"/>
         <input type="hidden" name="action" value="set-user-role"/>
         <select onchange="this.form.submit();" id="role-select" name="role" class="form-control" style="width: auto;">
@@ -87,7 +87,7 @@
     <td>
       <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
             method="POST" style="display: inline;">
-        {{ csrf_token }}
+        {{ csrf.field() }}
         <input type="hidden" name="membership" value="{{ m_id }}">
         <input type="hidden" name="user" value="{{ user.id }}">
         <button style="position: relative;left: 4.5px;" type="submit" name="action" value="delete"

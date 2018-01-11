@@ -102,7 +102,7 @@
 
     <form method="POST" id="wizard-form" class="form-inline"
           action=" {{ url_for('.wizard_saving',community_id=g.community.slug) }}">
-      {{ csrf_token }}
+      {{ csrf.field() }}
       <input id="existing_account" type="hidden" name="existing_account" value="{{ existing_account }}">
       <input id="new_accounts" type="hidden" name="new_accounts" value='{{ new_accounts|tojson }}'>
     </form>

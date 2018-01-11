@@ -67,7 +67,6 @@ def folder_view(folder_id):
         'folder': folder,
         'children': folder.filtered_children,
         'breadcrumbs': bc,
-        'csrf_token': csrf.field(),
     }
 
     view_style = session.get('sbe_doc_view_style', 'thumbnail_view')
@@ -253,7 +252,6 @@ def permissions(folder_id):
                     principal=principal))
 
     audit_entries = [EntryPresenter(e) for e in security.entries_for(folder)]
-    csrf_token = csrf.field()
 
     ctx = {
         'folder': folder,
@@ -262,11 +260,9 @@ def permissions(folder_id):
         'groups_and_local_roles': groups_and_local_roles,
         'groups_and_inherited_roles': groups_and_inherited_roles,
         'audit_entries': audit_entries,
-        'csrf_token': csrf_token,
         'all_groups': all_groups,
         'breadcrumbs': bc,
     }
-
     return render_template("documents/permissions.html", **ctx)
 
 
@@ -962,7 +958,6 @@ def descendants_view(folder_id):
         'owners': owners,
         'breadcrumbs': bc,
         'get_icon': get_icon_for_hit,
-        'csrf_token': csrf.field(),
     }
     return render_template("documents/descendants.html", **ctx)
 

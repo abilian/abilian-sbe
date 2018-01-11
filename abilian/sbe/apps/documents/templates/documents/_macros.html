@@ -25,7 +25,7 @@
   {%- if objects %}
     <form action="{{ url_for('.change_view_style', folder_id=folder.id, community_id=folder.community.slug) }}"
           method="POST">
-      {{ csrf_token }}
+      {{ csrf.field() }}
       <div style="float:right;margin-left: 12px;position: relative;
 top: -65px;" class="btn-group" role="group" aria-label="...">
         <button type="submit" class="btn btn-default" name="view_style" value="thumbnail_view"><span
@@ -36,7 +36,7 @@ top: -65px;" class="btn-group" role="group" aria-label="...">
     </form>
 
     <form name="folder-listing" style="margin-bottom: 0;" method="POST">
-      {{ csrf_token }}
+      {{ csrf.field() }}
       {%- if edit %}
         <div class="btn-toolbar" style="margin-bottom: 0;">
           <div class="btn-group" style="margin-right: 20px;display:none;">
@@ -279,7 +279,7 @@ border-top: 2px solid ghostwhite;">
     </form>
 
     <form id="folder_content_download" action="" method="post">
-      {{ csrf_token }}
+      {{ csrf.field() }}
       <button class="document-folder-download" id="document-folder-download"
               style="margin-top: 1px;margin-bottom:0px;display:none;" name="action" value="download" title="Download"><i
           class="fa fa-download" aria-hidden="true"></i> {{ _('Download') }}</button>

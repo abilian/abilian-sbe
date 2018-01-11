@@ -74,7 +74,7 @@
 
     <form method="POST" class="form-inline wizard-form"
           action=" {{ url_for('.wizard_new_accounts',community_id=g.community.slug) }}">
-      {{ csrf_token }}
+      {{ csrf.field() }}
       <input id="wizard-emails" type="hidden" name="wizard-emails" value="{{ wizard_emails }}">
     </form>
 

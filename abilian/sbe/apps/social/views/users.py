@@ -28,7 +28,6 @@ from abilian.web.views.images import user_photo_url
 
 from ..forms import UserProfileForm, UserProfileViewForm
 from .social import social
-from .util import Env
 
 logger = logging.getLogger(__name__)
 
@@ -154,18 +153,17 @@ def user(user_id):
 
     # FIXME
     contact = user
-    env = Env(
-        user=user,
-        contact=contact,
-        view_form=view_form,
-        can_edit=can_edit(user),
-        tabs=make_tabs(user))
-
     entries = get_recent_entries(user=user)
     entries = ActivityEntryPresenter.wrap_collection(entries)
-    env.activity_entries = entries
-
-    return render_template("social/user.html", **env)
+    ctx = {
+        'user': user,
+        'contact': contact,
+        'view_form': view_form,
+        'can_edit': can_edit(user),
+        'tabs': make_tabs(user),
+        'activity_entries': entries,
+    }
+    return render_template("social/user.html", **ctx)
 
 
 def can_edit(user):
