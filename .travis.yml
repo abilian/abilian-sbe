@@ -26,7 +26,7 @@ addons:
 before_install:
   - sudo add-apt-repository 'deb http://ubuntu.mirrors.ovh.net/ftp.ubuntu.com/ubuntu/ xenial main'
   - sudo apt-get -qq update
-  - sudo apt-get install sqlite3
+  - sudo apt-get install sqlite3 
   - python -c "import sqlite3; print('SQLITE3:', sqlite3.sqlite_version)"
 
   - export NPM_CONFIG_PREFIX=~/npm-packages
@@ -40,7 +40,7 @@ before_install:
 install:
   - pip install -U pip setuptools wheel
   - pip install -r requirements.txt -r etc/dev-requirements.txt
-  - pip install -e '.[dev]'
+  - pip install psycopg2
   - pip check
   # Debug info
   - pip --version
