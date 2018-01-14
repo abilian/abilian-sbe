@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.31
+abilian-core==0.9.32
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.1              # via flask-babel
@@ -13,14 +13,14 @@ billiard==3.5.0.3         # via celery
 bleach==2.1.2             # via abilian-core
 blinker==1.4              # via flask-debugtoolbar, flask-mail
 celery==4.1.0             # via abilian-core
-cffi==1.11.2              # via bcrypt
+cffi==1.11.4              # via bcrypt
 chardet==3.0.4
 clamd==1.0.2              # via abilian-core
 click==6.7                # via flask
 closure==20171112         # via abilian-core
 contextlib2==0.5.5        # via raven
 cssmin==0.2.0             # via abilian-core
-decorator==4.1.2          # via validators
+decorator==4.2.1          # via validators
 et-xmlfile==1.0.1         # via openpyxl
 flask-assets==0.12        # via abilian-core
 flask-babel==0.11.2       # via abilian-core
