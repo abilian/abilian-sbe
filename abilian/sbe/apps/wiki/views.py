@@ -236,18 +236,14 @@ class PageEdit(BasePageView, ObjectEdit):
                 edited_src = field.data
                 field.data = current.body_src
                 edited_diff = [
-                    l
-                    for l in difflib.ndiff(
+                    l for l in difflib.ndiff(
                         self.last_revision.body_src.splitlines(True),
-                        edited_src.splitlines(True))
-                    if not l[0] == '?'
+                        edited_src.splitlines(True)) if not l[0] == '?'
                 ]
                 current_diff = [
-                    l
-                    for l in difflib.ndiff(
+                    l for l in difflib.ndiff(
                         self.last_revision.body_src.splitlines(True),
-                        current.body_src.splitlines(True))
-                    if not l[0] == '?'
+                        current.body_src.splitlines(True)) if not l[0] == '?'
                 ]
                 field.errors.append(
                     Markup(

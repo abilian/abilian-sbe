@@ -101,8 +101,7 @@ def get_viewed_times(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
         views = [
-            view for view in views
-            if view.user != view.entity.creator and
+            view for view in views if view.user != view.entity.creator and
             view.user in g.community.members
         ]
 
