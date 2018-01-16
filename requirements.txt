@@ -7,7 +7,7 @@
 abilian-core==0.9.32
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
-babel==2.5.1              # via flask-babel
+babel==2.5.3              # via flask-babel
 bcrypt==3.1.4             # via abilian-core
 billiard==3.5.0.3         # via celery
 bleach==2.1.2             # via abilian-core
@@ -62,7 +62,7 @@ raven==6.4.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
 sqlalchemy-utils==0.32.21  # via abilian-core, wtforms-alchemy
-sqlalchemy==1.2.0
+sqlalchemy==1.2.1
 sqlparse==0.2.4           # via abilian-core
 straight.plugin==1.4.1    # via abilian-core
 toolz==0.9.0
