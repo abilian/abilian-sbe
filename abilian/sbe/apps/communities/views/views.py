@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from flask import current_app, flash, g, jsonify, redirect, render_template, \
     request, session, url_for
 from flask_login import current_user, login_required
-from openpyxl.writer.write_only import WriteOnlyCell
+from openpyxl.cell import WriteOnlyCell
 from six import text_type
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from whoosh.searching import Hit

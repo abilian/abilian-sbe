@@ -47,7 +47,7 @@ mako==1.0.7               # via alembic
 markdown==2.6.11
 markupsafe==1.0           # via abilian-core, jinja2, mako
 numpy==1.14.0             # via langid, pandas
-openpyxl==2.4.10
+openpyxl==2.5.0
 pandas==0.22.0            # via abilian-core
 pathlib==1.0.1            # via abilian-core
 pillow==5.0.0             # via abilian-core
@@ -62,12 +62,12 @@ raven==6.5.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
 sqlalchemy-utils==0.32.21  # via abilian-core, wtforms-alchemy
-sqlalchemy==1.2.1
+sqlalchemy==1.2.2
 sqlparse==0.2.4           # via abilian-core
 straight.plugin==1.4.1    # via abilian-core
 toolz==0.9.0
 tqdm==4.19.5              # via abilian-core
-typing==3.6.2             # via abilian-core
+typing==3.6.4             # via abilian-core
 validate-email==1.3
 validators==0.12.0        # via wtforms-components
 vine==1.1.4               # via amqp
