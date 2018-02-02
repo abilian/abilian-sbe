@@ -24,7 +24,6 @@ develop-abilian: develop
 setup-git:
 	@echo "--> Configuring git and installing hooks"
 	git config branch.autosetuprebase always
-	cd .git/hooks && ln -sf ../../tools/hooks/* ./
 	@echo ""
 
 update-env:
