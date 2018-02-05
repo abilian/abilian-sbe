@@ -16,15 +16,9 @@ install:
 #
 # Environment
 #
-develop: setup-git update-env
-
-develop-abilian: develop
-	pip install -e ../abilian-core
-
-setup-git:
-	@echo "--> Configuring git and installing hooks"
-	git config branch.autosetuprebase always
-	@echo ""
+develop: update-env setup-git
+	pip uninstall -y abilian-core
+	pip install -q -e ../abilian-core
 
 update-env:
 	@echo "--> Installing/updating dependencies"
@@ -36,11 +30,11 @@ update-env:
 	yarn
 	@echo ""
 
-#remove template cache
-delete-cache:
-	@echo "--> Removing template cache"
-	rm -rf ./instance/webassets/compiled/*
-	rm -rf ./instance/webassets/cache/*
+setup-git:
+	@echo "--> Configuring git and installing hooks"
+	git config branch.autosetuprebase always
+	pre-commit install --install-hooks
+	@echo ""
 
 #
 # testing
@@ -172,9 +166,15 @@ clean:
 	rm -rf htmlcov ghostdriver.log coverage.xml junit*.xml
 	rm -rf tests.functional.test/
 
-tidy: clean
+tidy: clean delete-cache
 	rm -rf instance/data
 	rm -rf .tox
+
+# remove template cache
+delete-cache:
+	@echo "--> Removing template cache"
+	rm -rf ./instance/webassets/compiled/*
+	rm -rf ./instance/webassets/cache/*
 
 
 update-pot:
