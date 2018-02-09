@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.33
+abilian-core==0.9.34
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.3              # via flask-babel
@@ -55,7 +55,7 @@ pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.6.1    # via abilian-core, pandas
 python-editor==1.0.3      # via alembic
 python-magic==0.4.15      # via abilian-core
-pytz==2017.3              # via babel, celery, pandas
+pytz==2018.3              # via babel, celery, pandas
 pyyaml==3.12              # via abilian-core
 raven==6.5.0              # via abilian-core
 redis==2.10.6             # via abilian-core
