@@ -6,7 +6,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 import time
 from datetime import datetime
-from os.path import dirname, join
+from pathlib import Path
+from typing import Any, Dict
 
 import sqlalchemy as sa
 from blinker import ANY
@@ -105,7 +106,7 @@ def indexable_roles_and_users(community):
 class Community(Entity):
     """Ad-hoc objects that hold properties about a community.
     """
-    __indexation_args__ = {}
+    __indexation_args__ = {}  # type: Dict[str, Any]
     __indexation_args__.update(Entity.__indexation_args__)
     index_to = __indexation_args__.setdefault('index_to', ())
     index_to += (('id', ('id', 'community_id')),)
@@ -205,8 +206,8 @@ class Community(Entity):
             #   self.group = Group(name=self.name)
 
         if not self.image:
-            fn = join(dirname(__file__), "views/data", "community.png")
-            self.image = Blob(open(fn, 'rb').read())
+            fn = Path(__file__).parent / "views" / "data" / "community.png"
+            self.image = Blob(fn.open('rb').read())
 
     @property
     def has_calendar(self):

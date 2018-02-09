@@ -4,7 +4,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import difflib
-from os.path import dirname, join
+from pathlib import Path
 
 import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, redirect, \
@@ -469,8 +469,7 @@ def wiki_pages():
 
 @route('/help')
 def wiki_help():
-    filename = join(dirname(__file__), 'data', 'help.txt')
-    src = open(filename).read()
+    src = open(Path(__file__).parent / "data" / "help.txt").read()
     body = Markup(markdown(src))
     return render_template('wiki/help.html', body=body)
 
@@ -494,8 +493,8 @@ def get_page_by_title(title):
 
 
 def create_home_page():
-    filename = join(dirname(__file__), 'data', 'default_page.txt')
-    default_src = open(filename, 'rt').read()
+    path = Path(__file__).parent / 'data' / 'default_page.txt'
+    default_src = path.open('rt').read()
     page = WikiPage(title="Home", body_src=default_src)
     page.community_id = g.community.id
     db.session.add(page)

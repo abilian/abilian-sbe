@@ -1,7 +1,7 @@
 # coding=utf-8
 from __future__ import absolute_import, print_function, unicode_literals
 
-from os.path import dirname, join
+from pathlib import Path
 
 from flask import current_app, flash, g, jsonify, make_response, redirect, \
     render_template, request, url_for
@@ -19,8 +19,8 @@ from abilian.web.views import default_view
 
 from .social import social
 
-DEFAULT_GROUP_MUGSHOT = open(
-    join(dirname(__file__), "../../../static/images/frog.jpg"), 'rb').read()
+DEFAULT_GROUP_MUGSHOT = \
+    (Path(__file__).parent / ".." / ".." / ".." / "static" / "images" / "frog.jpg").open('rb').read()
 
 
 @social.route("/groups/")

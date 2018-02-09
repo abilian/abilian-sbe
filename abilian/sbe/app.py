@@ -135,7 +135,7 @@ def setup_sbe_app():
     bin_dir = Path(sys.prefix) / 'bin'
 
     if not bin_dir.exists() and bin_dir.is_dir():
-        logger.error('%s doesn\'t exists or is not a directory. Aborting',
+        logger.error("%s doesn't exists or is not a directory. Aborting",
                      repr(text_type(bin_dir)))
         return 1
 

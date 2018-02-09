@@ -9,9 +9,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 import itertools
 import logging
 import mimetypes
-import os
 import threading
 import uuid
+from pathlib import Path
 from typing import Any, Dict, Union
 
 import pkg_resources
@@ -60,8 +60,7 @@ def icon_url(filename):
 
 
 def icon_exists(filename):
-    fullpath = os.path.join(ICONS_FOLDER, filename)
-    return os.path.isfile(fullpath)
+    return Path(ICONS_FOLDER, filename).is_file()
 
 
 #

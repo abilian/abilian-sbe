@@ -7,7 +7,7 @@ import sys
 import unittest
 from io import BytesIO
 from itertools import count
-from os.path import dirname, join
+from pathlib import Path
 from zipfile import ZipFile
 
 import flask_mail
@@ -44,8 +44,8 @@ class BaseTests(CommunityBaseTestCase):
 
     @staticmethod
     def open_file(filename):
-        path = join(dirname(__file__), "data", "dummy_files", filename)
-        return open(path, 'rb')
+        path = Path(__file__).parent / "data" / "dummy_files" / filename
+        return path.open('rb')
 
 
 class TestBlobs(BaseTests):
@@ -297,7 +297,6 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
     @pytest.mark.skipif(
         sys.version_info >= (3, 0), reason="Doesn't work yet on Py3k")
     def test_explore_archive(self):
-
         fd = self.open_file('content.zip')
         result = [('/'.join(path), f) for path, f in explore_archive(fd)]
         assert result == [('', fd)]
