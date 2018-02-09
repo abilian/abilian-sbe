@@ -5,8 +5,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from typing import Any, Dict
 
-from flask import url_for as url_for_orig
 from flask import g
+from flask import url_for as url_for_orig
 
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import is_manager

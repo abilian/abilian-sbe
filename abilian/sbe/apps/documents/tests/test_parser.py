@@ -2,7 +2,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from ..cmis.parser import Entry
 
-
 XML_ENTRY = b"""\
 <?xml version="1.0" encoding="utf-8"?>
 <entry xmlns="http://www.w3.org/2005/Atom"

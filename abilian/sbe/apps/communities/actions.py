@@ -1,8 +1,8 @@
 # coding=utf-8
 from __future__ import absolute_import, print_function, unicode_literals
 
-from flask import url_for as url_for_orig
 from flask import g
+from flask import url_for as url_for_orig
 from flask_babel import lazy_gettext as _l
 from flask_login import current_user
 
