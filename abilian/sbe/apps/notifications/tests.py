@@ -40,15 +40,15 @@ class TestNotificationViews(BaseTestCase):
         token = generate_unsubscribe_token(self.user)
         url = url_for('notifications.unsubscribe_sbe', token=token)
 
-        r = self.client.get(url)
-        self.assert_200(r)
+        response = self.client.get(url)
+        assert response.status_code == 200
         prefs = preferences.get_preferences(self.user)
-        self.assertTrue(prefs['sbe:notifications:daily'])
+        assert prefs['sbe:notifications:daily']
 
-        r = self.client.post(url)
-        self.assert_200(r)
+        response = self.client.post(url)
+        assert response.status_code == 200
         prefs = preferences.get_preferences(self.user)
-        self.assertFalse(prefs['sbe:notifications:daily'])
+        assert not prefs['sbe:notifications:daily']
 
 
 class NotificationTestCase(CommunityBaseTestCase):

@@ -49,7 +49,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
     def test_index(self):
         with self.client_login(self.user.email, 'azerty'):
             response = self.client.get(url_for("communities.index"))
-        self.assert_200(response)
+            assert response.status_code == 200
 
     def test_community_home(self):
         url = self.app.default_view.url_for(self.community)
@@ -74,7 +74,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
 
             self.app.services['security'].grant_role(self.user, Admin)
             response = self.client.get(url)
-            self.assert_200(response)
+            assert response.status_code == 200
 
             data = {
                 '__action': 'edit',
@@ -105,7 +105,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             url = url_for(
                 "communities.members", community_id=self.community.slug)
             response = self.client.get(url)
-            self.assert_200(response)
+            assert response.status_code == 200
 
             # test add user
             data = {'action': 'add-user-role', 'user': self.user_c2.id}

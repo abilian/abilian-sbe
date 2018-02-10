@@ -13,4 +13,4 @@ class TestsViews(BaseTestCase):
     @skip("Doesn't work. Needs a real user.")
     def test_crm_notifications(self):
         response = self.client.get(url_for("preferences.crm_notifications"))
-        self.assert_200(response)
+        assert response.status_code == 200

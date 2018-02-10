@@ -135,7 +135,7 @@ class TestsViews(WikiBaseTestCase):
     def test_home(self):
         response = self.client.get(
             url_for("wiki.index", community_id=self.community.slug))
-        self.assertStatus(response, 302)
+        assert response.status_code == 302
 
         response = self.client.get(
             url_for(

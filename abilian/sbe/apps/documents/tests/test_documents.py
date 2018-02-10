@@ -197,7 +197,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         with self.client_login(self.user.email, password='azerty'):
             response = self.get(
                 url_for('documents.index', community_id=self.community.slug))
-            self.assert_status(response, 302)
+            assert response.status_code == 302
             self.assertEqual(
                 response.headers['Location'],
                 'http://localhost/communities/{}/docs/folder/{}'
@@ -220,7 +220,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             community_id=self.community.slug,
             folder_id=folder.id)
         response = self.client.post(url, data=data)
-        self.assert_status(response, 302)
+        assert response.status_code == 302
 
         doc = folder.children[0]
         assert doc.title == title
@@ -229,14 +229,14 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             community_id=self.community.slug,
             doc_id=doc.id)
         response = self.get(url)
-        self.assert_200(response)
+        assert response.status_code == 200
 
         url = url_for(
             "documents.document_download",
             community_id=self.community.slug,
             doc_id=doc.id)
         response = self.get(url)
-        self.assert_200(response)
+        assert response.status_code == 200
         assert response.headers['Content-Type'] == content_type
 
         content = self.open_file(title).read()
@@ -250,11 +250,11 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 size=500)
             response = self.get(url)
             if assert_preview_available:
-                self.assert_200(response)
+                assert response.status_code == 200
                 assert response.headers['Content-Type'] == 'image/jpeg'
             else:
                 # redirect to 'missing image'
-                self.assert_302(response)
+                assert response.status_code == 302
                 assert response.headers['Cache-Control'] == 'no-cache'
 
         url = url_for(
@@ -262,14 +262,14 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             community_id=self.community.slug,
             doc_id=doc.id)
         response = self.client.post(url)
-        self.assert_302(response)
+        assert response.status_code == 302
 
         url = url_for(
             "documents.document_view",
             community_id=self.community.slug,
             doc_id=doc.id)
         response = self.get(url)
-        self.assert_404(response)
+        assert response.status_code == 404
 
     def test_text_upload(self):
         name = 'wikipedia-fr.txt'
@@ -445,14 +445,13 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             # mail ascii filename
             with mail.record_messages() as outbox:
                 url = get_send_url(ascii_doc.id)
-                rv = self.client.post(
+                response = self.client.post(
                     url,
                     data={
                         'recipient': 'dest@example.com',
                         'message': 'Voilà un fichier',
                     })
-                self.assertEqual(rv.status_code, 302,
-                                 "expected 302, got:" + rv.status)
+                assert response.status_code == 302
                 assert len(outbox) == 1
 
                 msg = outbox[0]
@@ -468,13 +467,13 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             # mail unicode filename
             with mail.record_messages() as outbox:
                 url = get_send_url(unicode_doc.id)
-                rv = self.client.post(
+                response = self.client.post(
                     url,
                     data={
                         'recipient': 'dest@example.com',
                         'message': 'Voilà un fichier',
                     })
-                assert rv.status_code == 302
+                assert response.status_code == 302
                 assert len(outbox) == 1
 
                 msg = outbox[0]
@@ -510,4 +509,4 @@ class TestPathIndexable(unittest.TestCase):
         ]
 
     def test_indexable_parent_ids(self):
-        self.assertEqual(self.obj._indexable_parent_ids, '/0/1/2')
+        assert self.obj._indexable_parent_ids == '/0/1/2'
