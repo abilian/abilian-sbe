@@ -151,7 +151,7 @@ class NoLoginViewTest(CommunityBaseTestCase):
     def test(self):
         response = self.client.get(
             url_for("forum.index", community_id=self.community.slug))
-        self.assert200(response)
+        assert response.status_code == 200
 
 
 class ViewTestCase(CommunityBaseTestCase):
@@ -198,7 +198,7 @@ class ViewTestCase(CommunityBaseTestCase):
             data['__action'] = "create"
             data['send_by_email'] = "y"
             response = self.client.post(url, data=data)
-            self.assertStatus(response, 302)
+            assert response.status_code == 302
 
             # extract the thread_id from the redirection url in response
             threadid = response.location.rsplit('/', 2)[1]
@@ -210,8 +210,8 @@ class ViewTestCase(CommunityBaseTestCase):
                 community_id=self.community.slug,
                 title=title)
             response = self.client.get(url)
-            self.assertStatus(response, 200)
-            self.assertIn(content, response.data.decode("utf-8"))
+            assert response.status_code == 200
+            assert content in response.data.decode("utf-8")
 
             # check the email was sent with the new thread
             assert len(outbox) == 1
@@ -222,7 +222,7 @@ class ViewTestCase(CommunityBaseTestCase):
             content = data['message'] = "my cherished post"
             del data['title']
             response = self.client.post(url, data=data)
-            self.assertStatus(response, 302)
+            assert response.status_code == 302
 
             # retrieve the new thread, make sur it has the message
             url = url_for(
@@ -231,8 +231,8 @@ class ViewTestCase(CommunityBaseTestCase):
                 community_id=self.community.slug,
                 title=title)
             response = self.client.get(url)
-            self.assertStatus(response, 200)
-            self.assertIn(content, response.data.decode("utf-8"))
+            assert response.status_code == 200
+            assert content in response.data.decode("utf-8")
 
             # check the email was sent with the new threadpost
             assert len(outbox) == 1
@@ -263,7 +263,7 @@ class ViewTestCase(CommunityBaseTestCase):
         with mail.record_messages() as outbox:
             data['send_by_email'] = "y"  # actually should not be in html form
             response = self.client.post(url, data=data)
-            self.assertStatus(response, 302)
+            assert response.status_code == 302
             assert len(outbox) == 0
 
         self.community.set_membership(self.user, MANAGER)
@@ -272,13 +272,13 @@ class ViewTestCase(CommunityBaseTestCase):
         with mail.record_messages() as outbox:
             data['send_by_email'] = "y"  # should be in html form
             response = self.client.post(url, data=data)
-            self.assertStatus(response, 302)
+            assert response.status_code == 302
             assert len(outbox) == 1
 
         with mail.record_messages() as outbox:
             del data['send_by_email']
             response = self.client.post(url, data=data)
-            self.assertStatus(response, 302)
+            assert response.status_code == 302
             assert len(outbox) == 0
 
         self.client_logout()
@@ -343,18 +343,18 @@ class TasksTest(BaseTestCase):
         post.thread_id = 3
         member = Mock()
         member.id = 4
+        headers = [('Accept-Language', 'fr')]
         with self.app.test_request_context(
-                '/build_reply_email_address', headers=[('Accept-Language',
-                                                        'fr')]):
+                '/build_reply_email_address', headers=headers):
             replyto = build_reply_email_address('test', post, member,
                                                 'testcase.app.tld')
-        self.assertIn(expected_reply_address, replyto)
+        assert expected_reply_address in replyto
 
     def test_extract_mail_destination(self):
         self.app.config['MAIL_ADDRESS_TAG_CHAR'] = '+'
         self.app.config['MAIL_SENDER'] = 'test@testcase.app.tld'
         test_address = 'test+test+P-fr-3-4-5a6f41c0e7d916b6f15992d7207e47b2@testcase.app.tld'
         infos = extract_email_destination(test_address)
-        self.assertIn('fr', infos[0])  # locale
-        self.assertIn('3', infos[1])  # thread_id
-        self.assertIn('4', infos[2])  # post.id
+        assert 'fr' in infos[0]  # locale
+        assert '3' in infos[1]  # thread_id
+        assert '4' in infos[2]  # post.id

@@ -298,7 +298,6 @@ def validate_html(payload):
 def add_paragraph(newpost):
     """Add surrounding <p>newpost</p> if necessary.
     """
-
     newpost = newpost.strip()
     if not newpost.startswith('<p>'):
         newpost = '<p>' + newpost + '</p>'
