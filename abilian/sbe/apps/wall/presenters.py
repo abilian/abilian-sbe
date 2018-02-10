@@ -4,6 +4,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
+from singledispatch import singledispatch
 
 import bleach
 from flask import render_template_string
@@ -14,8 +15,6 @@ from abilian.i18n import _, _l
 from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.documents.models import Document
-from abilian.sbe.apps.documents.views.util import \
-    breadcrumbs_for as doc_breadcrumb
 from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.wiki.models import WikiPage
 from abilian.web.util import url_for
@@ -61,7 +60,7 @@ POST_BODY_TEMPLATE = '''
   </div>
   {%- endif %}
   </span>
- '''
+'''
 
 DOCUMENT_BODY_TEMPLATE = '''
 <div class="body">
@@ -154,33 +153,55 @@ class ActivityEntryPresenter(BasePresenter):
 
     @property
     def body(self):
-        if isinstance(self.object, Thread):
-            body = bleach.clean(
-                self.object.posts[0].body_html, tags=[], strip=True)
-            body = Markup(body).unescape()
-            if len(body) > 400:
-                body = body[0:400] + "…"
-            body = render_template_string(
-                POST_BODY_TEMPLATE,
-                object_url=self.object_url,
-                body=body,
-                post=self.object.posts[0])
-            return Markup(body)
-        elif isinstance(self.object, Post):
-            body = bleach.clean(self.object.body_html, tags=[], strip=True)
-            body = Markup(body).unescape()
-            if len(body) > 400:
-                body = body[0:400] + "…"
-            body = render_template_string(
-                POST_BODY_TEMPLATE,
-                object_url=self.object_url,
-                body=body,
-                post=self.object)
-            return Markup(body)
-        elif isinstance(self.object, Document):
-            parents = doc_breadcrumb(self.object)
-            body = render_template_string(
-                DOCUMENT_BODY_TEMPLATE, obj=self.object, parents=parents)
-            return Markup(body)
-        else:
-            return ""
+        return get_body(self.object)
+
+
+@singledispatch
+def get_body(object):
+    return ""
+
+
+@get_body.register(Thread)
+def get_body_thread(object):
+    # type: (Thread) -> Markup
+    body = bleach.clean(
+        object.posts[0].body_html, tags=[], strip=True)
+    body = Markup(body).unescape()
+    if len(body) > 400:
+        body = body[0:400] + "…"
+    body = render_template_string(
+        POST_BODY_TEMPLATE,
+        object_url=url_for(object),
+        body=body,
+        post=object.posts[0])
+    return Markup(body)
+
+
+@get_body.register(Post)
+def get_body_post(object):
+    # type: (Post) -> Markup
+    body = bleach.clean(object.body_html, tags=[], strip=True)
+    body = Markup(body).unescape()
+    if len(body) > 400:
+        body = body[0:400] + "…"
+    body = render_template_string(
+        POST_BODY_TEMPLATE,
+        object_url=url_for(object),
+        body=body,
+        post=object)
+    return Markup(body)
+
+
+@get_body.register(Document)
+def get_body_document(object):
+    # type: (Document) -> Markup
+    body = bleach.clean(object.body_html, tags=[], strip=True)
+    body = Markup(body).unescape()
+    if len(body) > 400:
+        body = body[0:400] + "…"
+    body = render_template_string(
+        DOCUMENT_BODY_TEMPLATE,
+        object_url=url_for(object),
+        body=body,
+        post=object)
+    return Markup(body)

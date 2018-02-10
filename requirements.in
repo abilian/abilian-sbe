@@ -21,3 +21,5 @@ openpyxl>=2.3.0
 # Better FP library than itertools IMHO.
 toolz
 
+# Needed for Python 2.7 only
+singledispatch
