@@ -77,9 +77,9 @@ class WikiPage(Entity):
 
     @property
     def last_revision(self):
-        return WikiPageRevision.query\
-            .filter(WikiPageRevision.page == self)\
-            .order_by(WikiPageRevision.number.desc())\
+        return WikiPageRevision.query \
+            .filter(WikiPageRevision.page == self) \
+            .order_by(WikiPageRevision.number.desc()) \
             .first()
 
     @property

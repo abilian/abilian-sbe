@@ -50,11 +50,8 @@ def init_wiki_values(endpoint, values):
 
     title = request.args.get('title', '').strip()
     if title and title != 'Home':
-        g.breadcrumb.append(
-            BreadcrumbItem(
-                label=title,
-                url=Endpoint(
-                    'wiki.page', community_id=g.community.slug, title=title)))
+        url = Endpoint('wiki.page', community_id=g.community.slug, title=title)
+        g.breadcrumb.append(BreadcrumbItem(label=title, url=url))
 
 
 @route('/')
@@ -109,12 +106,10 @@ class BasePageView(object):
                     self.obj = create_home_page()
                 else:
                     flash(_("This page doesn't exit. You must create it first."),
-                           "warning")
-                    self.redirect(
-                        url_for(
-                            ".page_new",
-                            title=title,
-                            community_id=g.community.slug))
+                          "warning")
+                    url = url_for(
+                        ".page_new", title=title, community_id=g.community.slug)
+                    self.redirect(url)
             actions.context['object'] = self.obj
         return args, kwargs
 
@@ -143,11 +138,9 @@ class PageView(BasePageView, ObjectView):
             if title == 'Home':
                 self.obj = create_home_page()
             else:
-                return redirect(
-                    url_for(
-                        ".page_edit",
-                        title=title,
-                        community_id=g.community.slug))
+                url = url_for(
+                    ".page_edit", title=title, community_id=g.community.slug)
+                return redirect(url)
 
         actions.context['object'] = self.obj
         viewtracker.record_hit(entity=self.obj, user=current_user)
@@ -198,9 +191,9 @@ class PageEdit(BasePageView, ObjectEdit):
         super(PageEdit, self).prepare_args(args, kwargs)
         last_revision_id = self.form.last_revision_id.data
         if last_revision_id:
-            self.last_revision = WikiPageRevision.query\
+            self.last_revision = WikiPageRevision.query \
                 .filter(WikiPageRevision.page == self.obj,
-                        WikiPageRevision.id == last_revision_id)\
+                        WikiPageRevision.id == last_revision_id) \
                 .first()
         return args, kwargs
 
@@ -246,13 +239,15 @@ class PageEdit(BasePageView, ObjectEdit):
                         self.last_revision.body_src.splitlines(True),
                         current.body_src.splitlines(True)) if not l[0] == '?'
                 ]
+                ctx = {
+                    'current': current,
+                    'current_diff': current_diff,
+                    'edited_diff': edited_diff,
+                }
                 field.errors.append(
                     Markup(
-                        render_template(
-                            'wiki/edit_conflict_error.html',
-                            current=current,
-                            current_diff=current_diff,
-                            edited_diff=edited_diff)))
+                        render_template('wiki/edit_conflict_error.html',
+                                        **ctx)))
 
         return None
 
@@ -299,8 +294,8 @@ def page_changes():
     try:
         page = get_page_by_title(title)
     except NoResultFound:
-        return redirect(
-            url_for(".page_edit", title=title, community_id=g.community.slug))
+        url = url_for(".page_edit", title=title, community_id=g.community.slug)
+        return redirect(url)
     revisions = page.revisions
     revisions = sorted(revisions, key=lambda x: -x.number)
     actions.context['object'] = page
@@ -323,9 +318,9 @@ def page_compare():
             revs_to_compare.append(int(arg[3:]))
     if len(revs_to_compare) != 2:
         flash(_("You must check exactly 2 revisions."), "error")
-        return redirect(
-            url_for(
-                ".page_changes", title=title, community_id=g.community.slug))
+        url = url_for(
+            ".page_changes", title=title, community_id=g.community.slug)
+        return redirect(url)
 
     revs_to_compare.sort()
     from_rev = revisions[revs_to_compare[0]]
@@ -341,13 +336,13 @@ def page_compare():
     diff = [line for line in diff if not line.startswith("?")]
 
     actions.context['object'] = page
-    return render_template(
-        'wiki/compare.html',
-        page=page,
-        diff=diff,
-        rev1=from_rev,
-        rev2=to_rev,
-    )
+    ctx = {
+        'page': page,
+        'diff': diff,
+        'rev1': from_rev,
+        'rev2': to_rev,
+    }
+    return render_template('wiki/compare.html', **ctx)
 
 
 @route('/delete/', methods=["POST"])
