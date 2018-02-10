@@ -198,11 +198,9 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             response = self.get(
                 url_for('documents.index', community_id=self.community.slug))
             assert response.status_code == 302
-            self.assertEqual(
-                response.headers['Location'],
-                'http://localhost/communities/{}/docs/folder/{}'
-                ''.format(self.community.slug, self.folder.id),
-            )
+            expected = 'http://localhost/communities/{}/docs/folder/{}' \
+                       ''.format(self.community.slug, self.folder.id)
+            assert response.headers['Location'] == expected
 
     def _test_upload(self,
                      title,
@@ -224,6 +222,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
         doc = folder.children[0]
         assert doc.title == title
+
         url = url_for(
             "documents.document_view",
             community_id=self.community.slug,

@@ -62,7 +62,7 @@ class NoLoginViewTest(CommunityBaseTestCase):
     def test(self):
         response = self.client.get(
             url_for("calendar.index", community_id=self.community.slug))
-        self.assert200(response)
+        assert response.status_code == 200
 
 
 # class ViewTestCase(CommunityBaseTestCase):

@@ -23,7 +23,7 @@ def app():
 
     yield app
 
-    # Signals are globals and apparently need to be cleaned up
+    # Signals are globals and apparently need to be cleaned up.
     # At this point, only the "activity" signal seems to have a side effect.
     activity._clear_state()
 
