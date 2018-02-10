@@ -4,11 +4,11 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
-from singledispatch import singledispatch
 
 import bleach
 from flask import render_template_string
 from jinja2 import Markup, Template
+from singledispatch import singledispatch
 
 from abilian.core.util import BasePresenter
 from abilian.i18n import _, _l
@@ -164,8 +164,7 @@ def get_body(object):
 @get_body.register(Thread)
 def get_body_thread(object):
     # type: (Thread) -> Markup
-    body = bleach.clean(
-        object.posts[0].body_html, tags=[], strip=True)
+    body = bleach.clean(object.posts[0].body_html, tags=[], strip=True)
     body = Markup(body).unescape()
     if len(body) > 400:
         body = body[0:400] + "…"
@@ -185,10 +184,7 @@ def get_body_post(object):
     if len(body) > 400:
         body = body[0:400] + "…"
     body = render_template_string(
-        POST_BODY_TEMPLATE,
-        object_url=url_for(object),
-        body=body,
-        post=object)
+        POST_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object)
     return Markup(body)
 
 

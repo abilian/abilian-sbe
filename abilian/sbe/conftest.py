@@ -61,13 +61,17 @@ def cleanup_db(db):
 
     # Need to run this sequence twice for some reason
     for i in range(0, 2):
-        for table in reversed(db.metadata.sorted_tables):
-            try:
-                db.session.execute(table.delete())
-            except:
-                pass
+        delete_tables(db)
     # Just in case ?
     db.drop_all()
+
+
+def delete_tables(db):
+    for table in reversed(db.metadata.sorted_tables):
+        try:
+            db.session.execute(table.delete())
+        except:
+            pass
 
 
 def stop_all_services(app):

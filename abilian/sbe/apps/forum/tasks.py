@@ -32,7 +32,7 @@ from abilian.i18n import _l, render_template_i18n
 from abilian.web import url_for
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
-from .models import PostAttachment, Thread
+from .models import Post, PostAttachment, Thread
 
 MAIL_REPLY_MARKER = _l('_____Write above this line to post_____')
 
@@ -52,8 +52,6 @@ def init_app(app):
 def send_post_by_email(post_id):
     """Send a post to community members by email.
     """
-    from .models import Post
-
     with current_app.test_request_context('/send_post_by_email'):
         post = Post.query.get(post_id)
         if post is None:
@@ -94,8 +92,6 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
     retries up to approximatively 3 days and 13 hours after initial attempt
     (geometric series is: 5min * (1-2**10) / 1-2) = 5115 mins).
     """
-    from .models import Post
-
     if not members_id:
         return
 
@@ -163,6 +159,7 @@ def build_local_part(name, uid):
 
 
 def build_reply_email_address(name, post, member, domain):
+    # type: (text_type, Post, User, text_type) -> text_type
     """
     Build a reply-to email address embedding the locale, thread_id and user.id.
 
@@ -182,6 +179,7 @@ def build_reply_email_address(name, post, member, domain):
 
 
 def extract_email_destination(address):
+    # type: (text_type) -> List[text_type]
     """Return the values encoded in the email address.
 
     :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
@@ -203,11 +201,11 @@ def extract_email_destination(address):
 
 
 def has_subtag(address):
+    # type: (text_type) -> bool
     """Return True if a subtag (defined in the config.py as 'MAIL_ADDRESS_TAG_CHAR')
     was found in the name part of the address
 
     :param address: email adress
-    :rtype: Boolean
     """
     name = address.rsplit('@', 1)[0]
     tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
@@ -253,22 +251,15 @@ def send_post_to_user(community, post, member):
             recipients=[recipient],
             extra_headers=extra_headers)
 
-    msg.body = render_template_i18n(
-        "forum/mail/new_message.txt",
-        community=community,
-        post=post,
-        member=member,
-        MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
-        SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,
-    )
-    msg.html = render_template_i18n(
-        "forum/mail/new_message.html",
-        community=community,
-        post=post,
-        member=member,
-        MAIL_REPLY_MARKER=MAIL_REPLY_MARKER,
-        SBE_FORUM_REPLY_BY_MAIL=SBE_FORUM_REPLY_BY_MAIL,
-    )
+    ctx = {
+        'community': community,
+        'post': post,
+        'member': member,
+        'MAIL_REPLY_MARKER': MAIL_REPLY_MARKER,
+        'SBE_FORUM_REPLY_BY_MAIL': SBE_FORUM_REPLY_BY_MAIL,
+    }
+    msg.body = render_template_i18n("forum/mail/new_message.txt", **ctx)
+    msg.html = render_template_i18n("forum/mail/new_message.html", **ctx)
     logger.debug("Sending new post by email to %r", member.email)
 
     try:

@@ -30,7 +30,7 @@ class TestNotificationViews(BaseTestCase):
         self.user = User(
             email='user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
-        self.session.commit()
+        self.session.flush()
 
     def test_unsubscribe(self):
         preferences = self.app.services['preferences']
@@ -59,18 +59,13 @@ class NotificationTestCase(CommunityBaseTestCase):
             email='user_1@example.com', password='azerty', can_login=True)
         self.session.add(self.user)
         self.community.set_membership(self.user, WRITER)
-        self.session.commit()
+        self.session.flush()
 
     def test_mail_templates(self):
         # this actually tests that templates are parsed without errors, not the
         # rendered content
         digests = [CommunityDigest(self.community)]
         token = generate_unsubscribe_token(self.user)
-        render_template(
-            "notifications/daily-social-digest.txt",
-            digests=digests,
-            token=token)
-        render_template(
-            "notifications/daily-social-digest.html",
-            digests=digests,
-            token=token)
+        ctx = {'digests': digests, 'token': token}
+        render_template("notifications/daily-social-digest.txt", **ctx)
+        render_template("notifications/daily-social-digest.html", **ctx)
