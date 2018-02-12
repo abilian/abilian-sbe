@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.9.34
+abilian-core==0.10.0
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.3              # via flask-babel
@@ -61,10 +61,9 @@ raven==6.5.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 singledispatch==3.4.0.3
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, singledispatch, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
-sqlalchemy-utils==0.32.21  # via abilian-core, wtforms-alchemy
+sqlalchemy-utils==0.32.21  # via wtforms-alchemy
 sqlalchemy==1.2.2
 sqlparse==0.2.4           # via abilian-core
-straight.plugin==1.4.1    # via abilian-core
 toolz==0.9.0
 tqdm==4.19.5              # via abilian-core
 typing==3.6.4             # via abilian-core
@@ -75,7 +74,7 @@ webassets==0.12.1         # via flask-assets
 webencodings==0.5.1       # via html5lib
 werkzeug==0.14.1          # via flask, flask-debugtoolbar, flask-wtf
 whoosh==2.7.4             # via abilian-core
-wtforms-alchemy==0.15.0   # via abilian-core
+wtforms-alchemy==0.16.6   # via abilian-core
 wtforms-components==0.10.3  # via abilian-core, wtforms-alchemy
 wtforms-sqlalchemy==0.1   # via abilian-core
 wtforms==2.1              # via flask-wtf, wtforms-alchemy, wtforms-components, wtforms-sqlalchemy
