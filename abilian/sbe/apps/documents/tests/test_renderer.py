@@ -15,14 +15,14 @@ def app(config):
     return create_app(config=config)
 
 
-def test_folder_renderer(test_request_context):
+def test_folder_renderer(app_context):
     folder = Folder(name="tototiti")
     result = to_xml(folder)
     assert "tototiti" in result
     assert "cmis:folder" in result
 
 
-def test_document_renderer(test_request_context):
+def test_document_renderer(app_context):
     document = Document(name="tototiti")
     result = to_xml(document)
     assert "tototiti" in result
@@ -33,7 +33,7 @@ def test_document_renderer(test_request_context):
     assert "<?xml" not in result
 
 
-def test_feed_renderer(test_request_context):
+def test_feed_renderer(app_context):
     folder = Folder(title="Toto Titi")
     document = Document(title="tatatutu")
     feed = Feed(folder, [document])
