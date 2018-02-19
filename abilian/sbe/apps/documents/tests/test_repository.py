@@ -2,6 +2,8 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+from typing import Any
+
 import pytest
 from pytest import fixture
 from sqlalchemy.exc import IntegrityError
@@ -21,7 +23,7 @@ def repository(app):
 
 @fixture
 def root(session):
-    # type: () -> Folder
+    # type: (Any) -> Folder
     root = Folder(title="")
     session.add(root)
     session.flush()
