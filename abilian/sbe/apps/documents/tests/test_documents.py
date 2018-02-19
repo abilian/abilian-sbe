@@ -29,7 +29,6 @@ from ..views.folders import explore_archive
 
 
 class BaseTests(CommunityBaseTestCase):
-    init_data = True
     no_login = True
 
     def setUp(self):
