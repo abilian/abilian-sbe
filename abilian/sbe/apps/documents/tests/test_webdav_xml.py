@@ -1,7 +1,8 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-from lxml import etree
 from pathlib import Path
+
+from lxml import etree
 
 from ..webdav.constants import DAV_PROPS
 from ..webdav.xml import MultiStatus, Propfind
