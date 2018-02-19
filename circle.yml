@@ -12,15 +12,14 @@ dependencies:
     - sudo apt-get install poppler-utils
   override:
     - pip install -U pip>=9
-    - pip install -U tox
+    - pip install -U tox wheel setuptools
     - npm install -g less
 
     # Just to fill up the cache
-    - pip install -r requirements.txt -r etc/dev-requirements.txt
+    - pip install -q -r requirements.txt -r etc/dev-requirements.txt
 
 test:
   override:
     - pip check
     - mkdir -p $CIRCLE_TEST_REPORTS/pytest
     - tox -e py27-postgres
-
