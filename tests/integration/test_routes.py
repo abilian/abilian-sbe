@@ -5,7 +5,6 @@ from abilian.web import url_for
 
 
 class TestViews(BaseTestCase):
-    init_data = True
     no_login = True
 
     def test_all_registered_urls(self):

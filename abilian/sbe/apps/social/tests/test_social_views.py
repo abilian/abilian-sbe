@@ -8,7 +8,6 @@ from abilian.sbe.testing import BaseTestCase
 
 class TestSocialViews(BaseTestCase):
 
-    init_data = True
     no_login = True
 
     # Tests start here
@@ -32,3 +31,28 @@ class TestSocialViews(BaseTestCase):
         response = self.client.get(url_for("social.user", user_id=user.id))
         assert response.status_code == 200
         self.assert_valid(response)
+
+
+# def test_home(client):
+#     response = client.get(url_for("social.home"))
+#     assert response.status_code == 200
+#     # self.assert_valid(response)
+#
+#
+# def test_users(client):
+#     response = client.get(url_for("social.users"))
+#     assert response.status_code == 200
+#     # self.assert_valid(response)
+#
+#
+# def test_groups(client):
+#     response = client.get(url_for("social.groups"))
+#     assert response.status_code == 200
+#     # self.assert_valid(response)
+#
+#
+# def test_user(client):
+#     user = User.query.all()[0]
+#     response = client.get(url_for("social.user", user_id=user.id))
+#     assert response.status_code == 200
+#     # self.assert_valid(response)
