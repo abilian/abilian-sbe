@@ -445,16 +445,19 @@ class BaseContent(CmisObject):
 
     @property
     def content(self):
+        # type: () -> bytes
         return self.content_blob.value
 
     @content.setter
     def content(self, value):
+        # type: (bytes) -> None
         assert isinstance(value, bytes)
         self.content_blob = Blob()
         self.content_blob.value = value
         self.content_length = len(value)
 
     def set_content(self, content, content_type=None):
+        # type: (bytes) -> None
         new_digest = md5(content)
         if new_digest == self.content_digest:
             return
@@ -465,19 +468,21 @@ class BaseContent(CmisObject):
         if content_type:
             self.content_type = content_type
 
-    def find_content_type(self, content_type=None):
+    def find_content_type(self, content_type=''):
         """Find possibly more appropriate content_type for this instance.
 
         If `content_type` is a binary one, try to find a better one based on
         content name so that 'xxx.pdf' is not flagged as binary/octet-stream for
         example
         """
-        if not content_type or content_type in ('application/octet-stream',
-                                                'binary/octet-stream',
-                                                'application/binary',
-                                                'multipart/octet-stream'):
-            # absent or generic content type: try to find something more useful to be
-            # able to do preview/indexing/...
+        if content_type not in (None, '', 'application/octet-stream',
+                                'binary/octet-stream', 'application/binary',
+                                'multipart/octet-stream'):
+            return content_type
+
+        # missing or generic content type: try to find something more useful to be
+        # able to do preview/indexing/...
+        if self.title:
             guessed_content_type = mimetypes.guess_type(
                 self.title, strict=False)[0]
             if (guessed_content_type and guessed_content_type !=
@@ -626,6 +631,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         self.text_blob = None
 
     def set_content(self, content, content_type=None):
+        # type: (bytes) -> None
         super(Document, self).set_content(content, content_type)
         async_conversion(self)
 

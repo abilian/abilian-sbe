@@ -2,9 +2,17 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-from unittest import TestCase, skip
+from pytest import fixture
 
+from abilian.sbe.app import create_app
 from abilian.sbe.apps.documents.models import Document, Folder, icon_for
+
+pytest_plugins = ['abilian.conftest']
+
+
+@fixture
+def app(config):
+    return create_app(config=config)
 
 
 def check_editable(object):
@@ -83,35 +91,36 @@ def test_folder_is_clonable():
     assert clone.path == root.path
 
 
-# FIXME: skipped for now as these tests break other tests down the line (in wiki).
-@skip
-class TestDocument(TestCase):
+def test_document_editables():
+    doc = Document()
+    check_editable(doc)
 
-    def test_document_editables(self):
-        doc = Document()
-        check_editable(doc)
 
-    def test_content_length(self):
-        doc = Document()
-        doc.set_content("tototiti", "application/binary")
-        assert doc.content_length == len("tototiti")
+def test_content_length(session):
+    doc = Document(title="toto")
+    doc.set_content(b"tototiti", "application/binary")
+    assert doc.content_length == len("tototiti")
 
-    def test_document_is_clonable(self):
-        root = Folder(title="/")
-        doc = root.create_document(title="toto")
-        doc.content = "tototiti"
 
-        clone = doc.clone()
-        assert clone.title == doc.title
+def test_document_is_clonable(session):
+    root = Folder(title="/")
+    doc = root.create_document(title="toto")
+    doc.content = b"tototiti"
 
-    def test_document_has_an_icon(self):
-        root = Folder(title="/")
-        doc = root.create_document(title="toto")
-        doc.content_type = "image/jpeg"
-        filename = doc.icon.split("/")[-1]
-        assert filename in ("jpg.png", "jpeg.png"), doc.icon
+    clone = doc.clone()
+    assert clone.title == doc.title
+    assert clone.content == doc.content
 
-    def test_icon_from_mime_type(self):
-        icon = icon_for("text/html")
-        filename = icon.split("/")[-1]
-        assert filename in ("html.png", "htm.png"), icon
+
+def test_document_has_an_icon(app_context):
+    root = Folder(title="/")
+    doc = root.create_document(title="toto")
+    doc.content_type = "image/jpeg"
+    filename = doc.icon.split("/")[-1]
+    assert filename in ("jpg.png", "jpeg.png"), doc.icon
+
+
+def test_icon_from_mime_type(app_context):
+    icon = icon_for("text/html")
+    filename = icon.split("/")[-1]
+    assert filename in ("html.png", "htm.png"), icon
