@@ -91,9 +91,7 @@ def preview_document(document_id):
                 'Preview failed: %s',
                 str(e),
                 exc_info=True,
-                extra={
-                    'stack': True
-                })
+                extra={'stack': True})
 
 
 @shared_task

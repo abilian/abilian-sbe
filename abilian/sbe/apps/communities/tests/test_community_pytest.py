@@ -8,6 +8,7 @@ from __future__ import absolute_import, division, print_function, \
 import pytest
 import six
 import sqlalchemy as sa
+from flask_login import login_user, logout_user
 from mock import mock
 from pytest import fixture
 
@@ -16,7 +17,8 @@ from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents.models import Folder
 
 from .. import signals, views
-from ..models import MEMBER, Community, CommunityIdColumn, community_content
+from ..models import MEMBER, READER, Community, CommunityIdColumn, \
+    community_content
 
 
 @fixture
@@ -55,7 +57,7 @@ def test_default_view_kw():
 
 def test_default_url(app, community):
     url = app.default_view.url_for(community)
-    assert url == 'http://localhost/communities/my-community/'
+    assert url.endswith('/localhost/communities/my-community/')
 
 
 def test_can_recreate_with_same_name(community, db):
@@ -113,7 +115,8 @@ def test_membership(community, db):
     assert memberships[0].user == user
     assert memberships[0].role is MEMBER
 
-    when_set.assert_called_once_with(community, is_new=True, membership=memberships[0])
+    when_set.assert_called_once_with(
+        community, is_new=True, membership=memberships[0])
     assert not when_removed.called
     when_set.reset_mock()
 
@@ -134,7 +137,8 @@ def test_membership(community, db):
 
     assert community.get_role(user) == "manager"
 
-    when_set.assert_called_once_with(community, is_new=False, membership=memberships[0])
+    when_set.assert_called_once_with(
+        community, is_new=False, membership=memberships[0])
     assert not when_removed.called
     when_set.reset_mock()
 
@@ -187,3 +191,107 @@ def test_community_content_decorator(community, db):
 
     index_to = dict(CommunityContent.__indexation_args__['index_to'])
     assert 'community_slug' in index_to
+
+
+################################################################################
+
+
+def login(user, remember=False, force=False):
+    """Perform user login for `user`, so that code needing a logged-in user
+    can work.
+
+    This method can also be used as a context manager, so that logout is
+    performed automatically::
+
+        with login(user):
+            assert ...
+
+    .. seealso:: :meth:`logout`
+    """
+    # self._login_tests_sanity_check()
+    success = login_user(user, remember=remember, force=force)
+    if not success:
+        raise ValueError('User is not active, cannot login; or use force=True',)
+
+    class LoginContext(object):
+
+        # def __init__(self, testcase):
+        #     self.testcase = testcase
+        #
+        def __enter__(self):
+            return None
+
+        def __exit__(self, type, value, traceback):
+            logout()
+
+    return LoginContext()
+
+
+def logout():
+    logout_user()
+
+
+def test_community_indexed(app, db):
+    index_service = app.services['indexing']
+    index_service.start()
+
+    security_service = app.services['security']
+    security_service.start()
+
+    obj_types = (Community.entity_type,)
+
+    user_no_community = User(email='no_community@example.com')
+    db.session.add(user_no_community)
+
+    community1 = Community(name="My Community")
+    db.session.add(community1)
+
+    community2 = Community(name='Other community')
+    db.session.add(community2)
+
+    user = User(email='user_1@example.com')
+    db.session.add(user)
+    community1.set_membership(user, READER)
+
+    user_c2 = User(email='user_2@example.com')
+    db.session.add(user_c2)
+    community2.set_membership(user_c2, READER)
+
+    db.session.commit()
+
+    with app.test_request_context():
+        with login(user_no_community):
+            res = index_service.search('community', object_types=obj_types)
+            assert len(res) == 0
+
+        with login(user):
+            res = index_service.search('community', object_types=obj_types)
+            assert len(res) == 1
+            hit = res[0]
+            assert hit['object_key'] == community1.object_key
+
+        with login(user_c2):
+            res = index_service.search('community', object_types=obj_types)
+            assert len(res) == 1
+            hit = res[0]
+            assert hit['object_key'] == community2.object_key
+
+
+def test_default_view_kw_with_hit(app, db, community):
+    index_service = app.services['indexing']
+    index_service.start()
+
+    security_service = app.services['security']
+    security_service.start()
+
+    user = User(email='user_1@example.com')
+    db.session.add(user)
+    community.set_membership(user, READER)
+
+    obj_types = (Community.entity_type,)
+
+    with app.test_request_context():
+        with login(user):
+            hit = index_service.search('community', object_types=obj_types)[0]
+            kw = views.default_view_kw({}, hit, hit['object_type'], hit['id'])
+            assert kw == {'community_id': community.slug}

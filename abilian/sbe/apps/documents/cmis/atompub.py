@@ -149,9 +149,8 @@ def authenticate():
 # @atompub.errorhandler(401)
 def custom_401(error):
     print("custom_401")
-    return Response('Authentication required', 401, {
-        'WWWAuthenticate': 'Basic realm="Login Required"'
-    })
+    return Response('Authentication required', 401,
+                    {'WWWAuthenticate': 'Basic realm="Login Required"'})
 
 
 @atompub.errorhandler(NoResultFound)

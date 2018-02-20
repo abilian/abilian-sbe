@@ -10,9 +10,9 @@ DI and functions over complex inheritance hierarchies FTW!
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-from abilian.conftest import TestConfig
 from pytest import fixture
 
+from abilian.conftest import TestConfig
 from abilian.sbe.app import create_app
 from abilian.services import get_service
 

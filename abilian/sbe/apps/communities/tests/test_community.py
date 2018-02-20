@@ -12,36 +12,6 @@ from ..models import Community
 from .base import CommunityIndexingTestCase as BaseIndexingTestCase
 
 
-class CommunityIndexingTestCase(BaseIndexingTestCase):
-
-    def test_community_indexed(self):
-        svc = self.svc
-        obj_types = (Community.entity_type,)
-        with self.login(self.user_no_community):
-            res = svc.search('community', object_types=obj_types)
-            assert len(res) == 0
-
-        with self.login(self.user):
-            res = svc.search('community', object_types=obj_types)
-            assert len(res) == 1
-            hit = res[0]
-            assert hit['object_key'] == self.community.object_key
-
-        with self.login(self.user_c2):
-            res = svc.search('community', object_types=obj_types)
-            assert len(res) == 1
-            hit = res[0]
-            assert hit['object_key'] == self.c2.object_key
-
-    def test_default_view_kw_with_hit(self):
-        with self.login(self.user):
-            hit = self.svc.search(
-                'community', object_types=(Community.entity_type,))[0]
-            kw = views.default_view_kw({}, hit, hit['object_type'], hit['id'])
-
-        assert kw == {'community_id': self.community.slug}
-
-
 class CommunityWebTestCase(BaseIndexingTestCase):
     # FIXME later
     SQLALCHEMY_WARNINGS_AS_ERROR = False
