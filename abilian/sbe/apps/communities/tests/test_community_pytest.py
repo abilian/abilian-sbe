@@ -54,8 +54,8 @@ def test_default_view_kw():
 
 
 def test_default_url(app, community):
-    assert app.default_view.url_for(
-        community) == 'http://localhost/communities/my-community/'
+    url = app.default_view.url_for(community)
+    assert url == 'http://localhost/communities/my-community/'
 
 
 def test_can_recreate_with_same_name(community, db):
@@ -86,8 +86,8 @@ def test_auto_slug(community):
 def test_membership(community, db):
     user = User(email="user@example.com")
 
-    l = community.memberships
-    assert l == []
+    memberships = community.memberships
+    assert memberships == []
 
     # setup signals testers with mocks.
     when_set = mock.MagicMock()
@@ -108,43 +108,43 @@ def test_membership(community, db):
     community.set_membership(user, "member")
     db.session.commit()
 
-    l = community.memberships
-    assert len(l) == 1
-    assert l[0].user == user
-    assert l[0].role is MEMBER
+    memberships = community.memberships
+    assert len(memberships) == 1
+    assert memberships[0].user == user
+    assert memberships[0].role is MEMBER
 
-    when_set.assert_called_once_with(community, is_new=True, membership=l[0])
+    when_set.assert_called_once_with(community, is_new=True, membership=memberships[0])
     assert not when_removed.called
     when_set.reset_mock()
 
     assert community.get_role(user) is MEMBER
 
-    assert community.get_memberships() == [l[0]]
-    assert community.get_memberships('member') == [l[0]]
+    assert community.get_memberships() == [memberships[0]]
+    assert community.get_memberships('member') == [memberships[0]]
     assert community.get_memberships('manager') == []
 
     # change user role
     community.set_membership(user, "manager")
     db.session.commit()
 
-    l = community.memberships
-    assert len(l) == 1
-    assert l[0].user == user
-    assert l[0].role == "manager"
+    memberships = community.memberships
+    assert len(memberships) == 1
+    assert memberships[0].user == user
+    assert memberships[0].role == "manager"
 
     assert community.get_role(user) == "manager"
 
-    when_set.assert_called_once_with(community, is_new=False, membership=l[0])
+    when_set.assert_called_once_with(community, is_new=False, membership=memberships[0])
     assert not when_removed.called
     when_set.reset_mock()
 
     # remove user
-    membership = l[0]
+    membership = memberships[0]
     community.remove_membership(user)
     db.session.commit()
 
-    l = community.memberships
-    assert l == []
+    memberships = community.memberships
+    assert memberships == []
 
     assert not when_set.called
     when_removed.assert_called_once_with(community, membership=membership)

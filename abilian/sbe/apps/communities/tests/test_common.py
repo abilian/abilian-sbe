@@ -12,10 +12,8 @@ from abilian.core.signals import activity
 from abilian.sbe.app import create_app
 from abilian.sbe.apps.communities.common import activity_time_format
 
-pytest_plugins = ['abilian.conftest']
 
-
-@pytest.yield_fixture
+@pytest.fixture
 def app():
     app = create_app()
 
@@ -30,25 +28,26 @@ def app():
     activity._clear_state()
 
 
-def test_activity_time_format(app_context):
+def test_activity_time_format(app):
     # We need the app context because of Babel.
 
-    then = datetime(2017, 1, 1, 12, 0, 0)
+    with app.app_context():
+        then = datetime(2017, 1, 1, 12, 0, 0)
 
-    now = then + timedelta(0, 5)
-    assert activity_time_format(then, now) == '5s'
+        now = then + timedelta(0, 5)
+        assert activity_time_format(then, now) == '5s'
 
-    now = then + timedelta(0, 5 * 60)
-    assert activity_time_format(then, now) == '5m'
+        now = then + timedelta(0, 5 * 60)
+        assert activity_time_format(then, now) == '5m'
 
-    now = then + timedelta(0, 5 * 60 * 60)
-    assert activity_time_format(then, now) == '5h'
+        now = then + timedelta(0, 5 * 60 * 60)
+        assert activity_time_format(then, now) == '5h'
 
-    now = then + timedelta(1, 5)
-    assert activity_time_format(then, now) == '1d'
+        now = then + timedelta(1, 5)
+        assert activity_time_format(then, now) == '1d'
 
-    now = then + timedelta(60, 5)
-    assert activity_time_format(then, now) == 'Jan 1'
+        now = then + timedelta(60, 5)
+        assert activity_time_format(then, now) == 'Jan 1'
 
-    now = then + timedelta(365 + 60, 5)
-    assert activity_time_format(then, now) == 'Jan 2017'
+        now = then + timedelta(365 + 60, 5)
+        assert activity_time_format(then, now) == 'Jan 2017'

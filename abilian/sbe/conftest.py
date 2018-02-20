@@ -10,26 +10,19 @@ DI and functions over complex inheritance hierarchies FTW!
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-from pytest import fixture, yield_fixture
+from abilian.conftest import TestConfig
+from pytest import fixture
 
 from abilian.sbe.app import create_app
 from abilian.services import get_service
 
 
-class TestConfig:
-    TESTING = True
-    SERVER_NAME = 'localhost'
-    # CSRF_ENABLED = False
-
-
-@fixture(scope='session')
+@fixture
 def app():
-    """We usually only create an app once per session."""
-    _app = create_app(config=TestConfig)
-    return _app
+    return create_app(config=TestConfig)
 
 
-@yield_fixture
+@fixture
 def db(app):
     """Return a fresh db for each test."""
     from abilian.core.extensions import db
