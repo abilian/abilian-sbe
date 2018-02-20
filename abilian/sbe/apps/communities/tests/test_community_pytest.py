@@ -215,9 +215,6 @@ def login(user, remember=False, force=False):
 
     class LoginContext(object):
 
-        # def __init__(self, testcase):
-        #     self.testcase = testcase
-        #
         def __enter__(self):
             return None
 

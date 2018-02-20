@@ -3,7 +3,7 @@
 # Additional packages for development.
 
 # Our favorite test runner with some plugins and CI builder
-pytest<3.4
+pytest
 pytest-sugar
 pytest-xdist
 
