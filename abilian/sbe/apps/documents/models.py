@@ -457,7 +457,7 @@ class BaseContent(CmisObject):
         self.content_length = len(value)
 
     def set_content(self, content, content_type=None):
-        # type: (bytes) -> None
+        # type: (bytes, Any) -> None
         new_digest = md5(content)
         if new_digest == self.content_digest:
             return
@@ -631,7 +631,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         self.text_blob = None
 
     def set_content(self, content, content_type=None):
-        # type: (bytes) -> None
+        # type: (bytes, Any) -> None
         super(Document, self).set_content(content, content_type)
         async_conversion(self)
 
