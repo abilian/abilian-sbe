@@ -14,23 +14,19 @@ class TestSocialViews(BaseTestCase):
     def test_home(self):
         response = self.client.get(url_for("social.home"))
         assert response.status_code == 200
-        self.assert_valid(response)
 
     def test_users(self):
         response = self.client.get(url_for("social.users"))
         assert response.status_code == 200
-        self.assert_valid(response)
 
     def test_groups(self):
         response = self.client.get(url_for("social.groups"))
         assert response.status_code == 200
-        self.assert_valid(response)
 
     def test_user(self):
         user = User.query.all()[0]
         response = self.client.get(url_for("social.user", user_id=user.id))
         assert response.status_code == 200
-        self.assert_valid(response)
 
 
 # def test_home(client):
