@@ -4,11 +4,11 @@
 })(function(Abilian, $) {
   "use strict";
   function setupModalFolderInputnameCheck(modal, object_id, action) {
-    var $submit = modal.find("button.btn-primary"),
-      $input = modal.find('input[name="title"]'),
-      checkUrl = $input.data("check-url"),
-      $help_span = $input.next("span.help-block"),
-      $control_group = $input.closest("div.form-group");
+    var $submit = modal.find("button.btn-primary");
+    var $input = modal.find('input[name="title"]');
+    var checkUrl = $input.data("check-url");
+    var $help_span = $input.next("span.help-block");
+    var $control_group = $input.closest("div.form-group");
 
     $submit.on("click", function(e) {
       var title = $input.val();

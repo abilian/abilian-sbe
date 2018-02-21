@@ -4,12 +4,12 @@
 })(function(Abilian, $) {
   "use strict";
   function setupDocumentViewer() {
-    var container = $(".preview-container"),
-      img = container.find("img.preview"),
-      imgSrc = img.attr("src"),
-      previewPrev = container.find(".preview-prev"),
-      previewNext = container.find(".preview-next"),
-      pageNum = container.data("pageNum");
+    var container = $(".preview-container");
+    var img = container.find("img.preview");
+    var imgSrc = img.attr("src");
+    var previewPrev = container.find(".preview-prev");
+    var previewNext = container.find(".preview-next");
+    var pageNum = container.data("pageNum");
 
     function showNav() {
       $(document).bind("keydown", keyDown);

@@ -17,13 +17,13 @@ STATIC_DIR = pkg_resources.resource_filename(__name__, 'static')
 LESSCSS_FILE = str(Path(STATIC_DIR, 'less', 'abilian-sbe.less'))
 JS = (
     'js/sbe-datatable.js',
-    'js/jquery.fileapi.js',
     'js/folder.js',
     'js/folder_edit.js',
     'js/folder_gallery.js',
     'js/folder_upload.js',
     'js/document_viewer.js',
-    'js/bootstrap-tagsinput.js',
+    'vendor/bootstrap-tagsinput.js',
+    'vendor/jquery.fileapi.js',
 )
 
 

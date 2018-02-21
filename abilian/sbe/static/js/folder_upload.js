@@ -8,12 +8,12 @@
 })(function(Abilian, $, FileAPI) {
   "use strict";
   function setupModalFolderUpload(modalId, url, messages) {
-    var hasErrors = false,
-      formData = { action: "upload" },
-      errorMessages = {
-        fileUploadError: "Error - File not uploaded",
-        fileTooLargeError: "Error: maximum file size exceeded",
-      };
+    var hasErrors = false;
+    var formData = { action: "upload" };
+    var errorMessages = {
+      fileUploadError: "Error - File not uploaded",
+      fileTooLargeError: "Error: maximum file size exceeded",
+    };
     $.extend(errorMessages, messages || {});
     formData[Abilian.csrf_fieldname] = Abilian.csrf_token;
 
@@ -26,23 +26,23 @@
 
     function onUploadComplete(evt, ui) {
       /* jshint validthis: true */
-      var type = evt.type,
-        uid = FileAPI.uid(ui.file),
-        widget = $(this).fileapi("widget"),
-        $fileUi = widget.$file(uid),
-        $statusEl = $fileUi.find(".statusicon"),
-        $icon = $statusEl.find(".glyphicon");
+      var type = evt.type;
+      var uid = FileAPI.uid(ui.file);
+      var widget = $(this).fileapi("widget");
+      var $fileUi = widget.$file(uid);
+      var $statusEl = $fileUi.find(".statusicon");
+      var $icon = $statusEl.find(".glyphicon");
 
       if (ui.error) {
-        var progress = $fileUi.find(".progress"),
-          errorEl = $('<span class="text-danger"></span>'),
-          errorMsg = errorMessages.fileUploadError;
+        var progress = $fileUi.find(".progress");
+        var errorEl = $('<span class="text-danger"></span>');
+        var errorMsg = errorMessages.fileUploadError;
         hasErrors = true;
         $icon.removeClass("glyphicon-upload");
         $icon.addClass("glyphicon-warning-sign text-danger");
 
         switch (ui.status) {
-          case 413: //Request Entity Too Large
+          case 413: // Request Entity Too Large
             errorMsg = errorMessages.fileTooLargeError;
             break;
         }
@@ -51,10 +51,10 @@
         return;
       }
 
-      if (type == "fileupload") {
+      if (type === "fileupload") {
         $icon.addClass("glyphicon-upload");
         $statusEl.removeClass("hidden");
-      } else if (type == "filecomplete") {
+      } else if (type === "filecomplete") {
         $icon.removeClass("glyphicon-upload");
         $icon.addClass("glyphicon-ok");
         $statusEl.removeClass("btn-default");
@@ -68,7 +68,7 @@
         multiple: true,
         url: url,
         data: formData,
-        dataType: null, //not JSON
+        dataType: null, // not JSON
         clearOnComplete: false,
         elements: {
           ctrl: { upload: ".js-upload" },

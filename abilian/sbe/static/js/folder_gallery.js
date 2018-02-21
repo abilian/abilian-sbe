@@ -32,14 +32,14 @@
     /* actions */
     function onClickDelete(e) {
       e.preventDefault();
-      var $button = $(this),
-        buttonForm = $(this.form),
-        msg = CONFIG.deleteConfirmMsg,
-        elements = $(document.forms["folder-listing"])
-          .find('input[name="object-selected"]:checked')
-          .closest("td")
-          .next("td"),
-        elList = $("<ul />").attr({ class: "folder-items" });
+      var $button = $(this);
+      var buttonForm = $(this.form);
+      var msg = CONFIG.deleteConfirmMsg;
+      var elements = $(document.forms["folder-listing"])
+        .find('input[name="object-selected"]:checked')
+        .closest("td")
+        .next("td");
+      var elList = $("<ul />").attr({ class: "folder-items" });
 
       elements.each(function() {
         var li = $("<li />").html($(this).html());
@@ -115,10 +115,10 @@
     $(document).on("click", "#modal-move-files-directory-listing a", function(
       e
     ) {
-      var self = $(this),
-        folder_id = self.attr("data-id"),
-        modal = $("#modal-move-files"),
-        url = self.attr("href");
+      var self = $(this);
+      var folder_id = self.attr("data-id");
+      var modal = $("#modal-move-files");
+      var url = self.attr("href");
 
       modal.find('input[name="target-folder"]').attr("value", folder_id);
 
@@ -127,10 +127,10 @@
     });
 
     $("#modal-move-files").on("show.bs.modal", function() {
-      var modal = $(this),
-        listing_form = $(document.forms["folder-listing"]),
-        elements = listing_form.find("input[name='object-selected']:checked"),
-        footer_inputs = $("#modal-move-files-inputs");
+      var modal = $(this);
+      var listing_form = $(document.forms["folder-listing"]);
+      var elements = listing_form.find("input[name='object-selected']:checked");
+      var footer_inputs = $("#modal-move-files-inputs");
 
       footer_inputs.empty();
       elements
