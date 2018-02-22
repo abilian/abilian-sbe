@@ -14,14 +14,12 @@ define(
       formData[Abilian.csrf_fieldname] = Abilian.csrf_token;
 
       function onComplete(evt, ui) {
-        /* jshint unused: false */
         if (!hasErrors) {
           location.reload();
         }
       }
 
       function onUploadComplete(evt, ui) {
-        /* jshint validthis: true */
         var type = evt.type;
         var uid = FileAPI.uid(ui.file);
         var widget = $(this).fileapi("widget");
@@ -88,7 +86,6 @@ define(
         })
         .on("fileupload.fileapi filecomplete.fileapi", onUploadComplete)
         .on("hidden.bs.modal", function(evt) {
-          /* jshint unused: false */
           /* clear file selection when modal is hidden (cancel button) */
           hasErrors = false;
           $(this)
