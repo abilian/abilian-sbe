@@ -1,6 +1,11 @@
 Changelog for Abilian SBE
 =========================
 
+0.4.5 (2018-02-22)
+------------------
+
+- JS cleanup
+
 0.4.2 (2018-01-04)
 ------------------
 
@@ -22,7 +27,7 @@ Changelog for Abilian SBE
 -------------------
 
 - Remove unwanted button
-- Cleanup and prepare for the future  
+- Cleanup and prepare for the future
 
 0.3.13 (2017-08-02)
 -------------------
@@ -186,4 +191,3 @@ Refactoring
 ----------------
 
 Initial release
-
