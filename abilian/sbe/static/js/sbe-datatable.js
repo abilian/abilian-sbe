@@ -1,8 +1,5 @@
 /* datatable: sort types and filters */
-(function(factory) {
-  "use strict";
-  require(["jquery", "jquery.dataTables"], factory);
-})(function($) {
+require(["jquery", "jquery.dataTables"], function($) {
   "use strict";
   var FOLDER_TYPE = "abilian.sbe.apps.documents.models.folder";
 

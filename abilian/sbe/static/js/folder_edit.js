@@ -1,7 +1,4 @@
-(function(factory) {
-  "use strict";
-  define("SBEFolderEditSetup", ["Abilian", "jquery"], factory);
-})(function(Abilian, $) {
+define("SBEFolderEditSetup", ["Abilian", "jquery"], function(Abilian, $) {
   "use strict";
   function setupModalFolderInputnameCheck(modal, object_id, action) {
     var $submit = modal.find("button.btn-primary");

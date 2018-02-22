@@ -1,7 +1,4 @@
-(function(factory) {
-  "use strict";
-  define("SBEDocumentViewerSetup", ["Abilian", "jquery"], factory);
-})(function(Abilian, $) {
+define("SBEDocumentViewerSetup", ["Abilian", "jquery"], function(Abilian, $) {
   "use strict";
   function setupDocumentViewer() {
     var container = $(".preview-container");
