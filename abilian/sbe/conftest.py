@@ -63,7 +63,7 @@ def delete_tables(db):
     for table in reversed(db.metadata.sorted_tables):
         try:
             db.session.execute(table.delete())
-        except:
+        except BaseException:
             pass
 
 

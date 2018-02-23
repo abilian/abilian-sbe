@@ -37,9 +37,19 @@ DEFAULT_USER_MUGSHOT = pkgutil.get_data('abilian.sbe',
 
 def make_tabs(user):
     return [
-        dict(id='profile', label=_('Profile'), link=url_for(user, tab='profile')),
+        dict(
+            id='profile',
+            label=_('Profile'),
+            link=url_for(
+                user,
+                tab='profile')),
         # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
-        dict(id='documents', label=_('Documents'), link=url_for(user, tab='documents')),
+        dict(
+            id='documents',
+            label=_('Documents'),
+            link=url_for(
+                user,
+                tab='documents')),
         dict(id='images', label=_('Images'), link=url_for(user, tab='images')),
         dict(id='audit', label=_('Audit'), link=url_for(user, tab='audit')),
     ]

@@ -61,7 +61,7 @@ def send_daily_social_digest():
 
         try:
             send_daily_social_digest_to(user)
-        except:
+        except BaseException:
             current_app.logger.error(
                 'Error sending daily social digest', exc_info=True)
 
@@ -112,10 +112,10 @@ def make_message(user):
         activities = AE.query \
             .order_by(AE.happened_at.asc()) \
             .filter(and_(AE.happened_at > happened_after,
-                 or_(and_(AE.target_type == community.object_type,
-                          AE.target_id == community.id),
-                     and_(AE.object_type == community.object_type,
-                          AE.object_id == community.id), ))) \
+                         or_(and_(AE.target_type == community.object_type,
+                                  AE.target_id == community.id),
+                             and_(AE.object_type == community.object_type,
+                                  AE.object_id == community.id), ))) \
             .all()
 
         # fill the internal digest lists with infos
@@ -212,7 +212,8 @@ class CommunityDigest(object):
             elif isinstance(obj, Post):
                 if obj.thread.id not in self.seen_entities:
                     # save actor and oldest/first modified Post in thread
-                    # oldest post because Activities are ordered_by Asc(A.happened_at)
+                    # oldest post because Activities are ordered_by
+                    # Asc(A.happened_at)
                     self.updated_conversations[obj.thread] = {
                         'actors': [actor],
                         'post': obj

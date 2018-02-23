@@ -174,7 +174,7 @@ def document_download(doc_id, attach=None):
         # Note: we omit text/html for security reasons.
         quoted_filename = quote(doc.title.encode('utf8'))
         response.headers['content-disposition'] \
-          = 'attachment;filename="{}"'.format(quoted_filename)
+            = 'attachment;filename="{}"'.format(quoted_filename)
 
     return response
 
@@ -254,7 +254,7 @@ def document_preview_image(doc_id):
         try:
             image = get_image(doc.digest, doc.content, doc.content_type, page,
                               size)
-        except:
+        except BaseException:
             # TODO: use generic "conversion failed" image
             image = ""
 
@@ -295,7 +295,8 @@ def document_send(doc_id):
 
     site_name = '[{}] '.format(current_app.config['SITE_NAME'])
     sender_name = g.user.name
-    subject = site_name + _('{sender} sent you a file').format(sender=sender_name)
+    subject = site_name + \
+        _('{sender} sent you a file').format(sender=sender_name)
     msg = Message(subject)
     msg.sender = g.user.email
     msg.recipients = [recipient]

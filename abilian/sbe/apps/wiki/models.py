@@ -51,7 +51,8 @@ class WikiPage(Entity):
         self.title = title
         self.create_revision(body_src, message)
 
-    # title is defined has an hybrid property to allow name <-> title sync (2 way)
+    # title is defined has an hybrid property to allow name <-> title sync (2
+    # way)
     @hybrid_property
     def title(self):
         return self._title

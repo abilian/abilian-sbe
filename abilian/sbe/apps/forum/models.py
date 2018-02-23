@@ -57,7 +57,8 @@ class Thread(Entity):
 
     last_post_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
-    # title is defined has an hybrid property to allow name <-> title sync (2 way)
+    # title is defined has an hybrid property to allow name <-> title sync (2
+    # way)
     @hybrid_property
     def title(self):
         return self._title

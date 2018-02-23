@@ -112,7 +112,7 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
         try:
             with current_app.test_request_context('/send_post_by_email'):
                 send_post_to_user(community, post, user)
-        except:
+        except BaseException:
             failed.add(user.id)
         else:
             successfully_sent.append(user.id)
@@ -264,7 +264,7 @@ def send_post_to_user(community, post, member):
 
     try:
         mail.send(msg)
-    except:
+    except BaseException:
         logger.error(
             "Send mail to user failed",
             exc_info=True)  # log to sentry if enabled
@@ -405,7 +405,7 @@ def process_email(message):
         locale = infos[0]
         thread_id = infos[1]
         user_id = infos[2]
-    except:
+    except BaseException:
         logger.error(
             'Recipient %r cannot be converted to locale/thread_id/user.id',
             to_address,
@@ -420,7 +420,7 @@ def process_email(message):
     # Extract text and attachments from message
     try:
         newpost, attachments = process(message, marker)
-    except:
+    except BaseException:
         logger.error('Could not Process message', exc_info=True)
         return False
 
@@ -429,7 +429,8 @@ def process_email(message):
         g.user = User.query.get(user_id)
         thread = Thread.query.get(thread_id)
         community = thread.community
-        # FIXME: check membership, send back an informative email in case of an error
+        # FIXME: check membership, send back an informative email in case of an
+        # error
         post = thread.create_post(body_html=newpost)
         obj_meta = post.meta.setdefault('abilian.sbe.forum', {})
         obj_meta['origin'] = 'email'

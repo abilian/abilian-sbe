@@ -120,7 +120,8 @@ class CmisObject(Entity, InheritSecurity):
 
         Entity.__init__(self, *args, **kwargs)
 
-    # title is defined has an hybrid property to allow 2 way sync name <-> title
+    # title is defined has an hybrid property to allow 2 way sync name <->
+    # title
     @hybrid_property
     def title(self):
         return self._title
@@ -516,7 +517,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     del index_to
 
     _indexable_roles_and_users = PathAndSecurityIndexable.\
-                                 _indexable_roles_and_users
+        _indexable_roles_and_users
 
     parent = relationship(
         "Folder",

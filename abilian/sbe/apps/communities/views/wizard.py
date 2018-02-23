@@ -174,7 +174,9 @@ def wizard_check_data():
         is_csv = True
         accounts_data = wizard_read_csv(request.files['csv_file'])
         if not accounts_data:
-            flash(_("To add new members, please follow the CSV file model."), 'warning')
+            flash(
+                _("To add new members, please follow the CSV file model."),
+                'warning')
             return redirect(
                 url_for(
                     ".wizard_data_insertion", community_id=g.community.slug))

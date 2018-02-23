@@ -37,7 +37,8 @@ class AbilianSBE(object):
             self.init_app(app)
 
     def init_app(self, app):
-        # False: it's ok if antivirus task was run but service couldn't get a result
+        # False: it's ok if antivirus task was run but service couldn't get a
+        # result
         app.config.setdefault('ANTIVIRUS_CHECK_REQUIRED', False)
         app.config.setdefault('SBE_FORUM_REPLY_BY_MAIL', False)
 

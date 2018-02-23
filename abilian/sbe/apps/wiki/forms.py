@@ -66,9 +66,9 @@ class WikiPageForm(Form):
 def page_exists(title):
     title = title.strip()
     return WikiPage.query \
-               .filter(WikiPage.community_id == g.community.id,
-                       WikiPage.title == title) \
-               .count() > 0
+        .filter(WikiPage.community_id == g.community.id,
+                WikiPage.title == title) \
+        .count() > 0
 
 
 # Not used yet

@@ -231,7 +231,8 @@ def permissions(folder_id):
             elif e.op == e.UNSET_INHERIT:
                 msg = _('On {date}, {manager} has deactivated inheritance')
             elif e.op == e.GRANT:
-                msg = _('On {date}, {manager} has given role "{role}" to {principal}')
+                msg = _(
+                    'On {date}, {manager} has given role "{role}" to {principal}')
             elif e.op == e.REVOKE:
                 msg = _('On {date}, {manager} has revoked role "{role}" from '
                         '{principal}')
@@ -351,7 +352,7 @@ def permissions_update(folder_id):
                 reindex_tree(folder)
                 transaction.commit()
                 flash(_("Role {role} for user {user} removed on folder {folder}"
-                ).format(role=role, user=user.name, folder=folder.name),
+                        ).format(role=role, user=user.name, folder=folder.name),
                       "success")
         elif action == 'delete-group-role':
             group = Group.query.get(object_id)
@@ -369,7 +370,7 @@ def permissions_update(folder_id):
                       'error')
             else:
                 flash(_("Role {role} for group {group} removed on folder {folder}"
-                ).format(role=role, group=group.name, folder=folder.name),
+                        ).format(role=role, group=group.name, folder=folder.name),
                       "success")
                 reindex_tree(folder)
                 transaction.commit()
@@ -778,7 +779,7 @@ def move_multiple(folder):
     if not security.has_permission(
             g.user, 'write', target_folder, inherit=True):
         flash(_('You are not allowed to write in folder "{folder}"'
-        ).format(folder=target_folder.title),
+                ).format(folder=target_folder.title),
               'error')
         return redirect(current_folder_url)
 
@@ -926,7 +927,9 @@ def descendants_view(folder_id):
 
     for children in by_path.values():
         children.sort(
-            key=lambda hit: (hit['object_type'] != Folder.entity_type, hit['name'].lower())
+            key=lambda hit: (
+                hit['object_type'] != Folder.entity_type,
+                hit['name'].lower())
         )
 
     descendants = []

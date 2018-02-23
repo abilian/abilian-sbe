@@ -193,7 +193,7 @@ def test_community_content_decorator(community, db):
     assert 'community_slug' in index_to
 
 
-################################################################################
+##########################################################################
 
 
 def login(user, remember=False, force=False):

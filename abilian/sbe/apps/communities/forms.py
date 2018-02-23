@@ -87,7 +87,8 @@ class CommunityForm(Form):
             if name != field.object_data:
                 # name changed: check for duplicates
                 if Community.query.filter(Community.name == name).count() > 0:
-                    raise ValidationError(_("A community with this name already exists"))
+                    raise ValidationError(
+                        _("A community with this name already exists"))
 
     def validate_description(self, field):
         field.data = field.data.strip()
@@ -104,19 +105,21 @@ class CommunityForm(Form):
         valid = any(map(filename.lower().endswith, ('.png', '.jpg', '.jpeg')))
 
         if not valid:
-            raise ValidationError(_('Only PNG or JPG image files are accepted'))
+            raise ValidationError(
+                _('Only PNG or JPG image files are accepted'))
 
         img_type = imghdr.what('ignored', data.read())
 
         if img_type not in ('png', 'jpeg'):
-            raise ValidationError(_('Only PNG or JPG image files are accepted'))
+            raise ValidationError(
+                _('Only PNG or JPG image files are accepted'))
 
         data.seek(0)
         try:
             # check this is actually an image file
             im = PIL.Image.open(data)
             im.load()
-        except:
+        except BaseException:
             raise ValidationError(_('Could not decode image file'))
 
         data.seek(0)

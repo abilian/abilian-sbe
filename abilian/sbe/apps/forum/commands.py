@@ -40,7 +40,7 @@ def inject_email(filename='-'):
     except KeyboardInterrupt:
         logger.info('Aborted by user, exiting.')
         sys.exit(1)
-    except:
+    except BaseException:
         logger.error('Error during email parsing', exc_info=True)
         sys.exit(1)
     finally:

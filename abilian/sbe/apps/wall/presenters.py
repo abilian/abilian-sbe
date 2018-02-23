@@ -143,11 +143,12 @@ class ActivityEntryPresenter(BasePresenter):
                 msg = _('has updated {object_type} {object}.').format(**ctx)
 
             else:
-                msg = _('has done action "{verb}" on object "{object}".').format(**ctx)
+                msg = _('has done action "{verb}" on object "{object}".').format(
+                    **ctx)
 
             return Markup(msg)
 
-        except:
+        except BaseException:
             logger.exception('Exception while presenting activity message')
             raise
 

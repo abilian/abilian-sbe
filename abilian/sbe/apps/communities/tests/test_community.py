@@ -56,7 +56,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             response = self.client.post(url, data=data)
             assert response.status_code == 302
             assert response.headers['Location'] == \
-                   'http://localhost/communities/{}/'.format(self.community.slug)
+                'http://localhost/communities/{}/'.format(self.community.slug)
 
             community = Community.query.get(self.community.id)
             assert community.name == 'edited community'
@@ -106,7 +106,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             self.session.expire(membership)
             assert membership.role == 'manager'
 
-            # Community.query.session is not self.db.session, but web app session.
+            # Community.query.session is not self.db.session, but web app
+            # session.
             community = Community.query.get(self.community.id)
             assert self.user_c2 in community.members
 
@@ -123,7 +124,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             response = self.client.post(url, data=data)
             assert response.status_code == 302
             assert response.headers['Location'] == \
-                   'http://localhost/communities/{}/members'.format(
-                       self.community.slug)
+                'http://localhost/communities/{}/members'.format(
+                self.community.slug)
 
             assert self.user_c2 not in community.members

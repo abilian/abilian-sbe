@@ -21,7 +21,8 @@ from abilian.web.views import default_view
 from .social import social
 
 DEFAULT_GROUP_MUGSHOT = \
-    (Path(__file__).parent / ".." / ".." / ".." / "static" / "images" / "frog.jpg").open('rb').read()
+    (Path(__file__).parent / ".." / ".." / ".." /
+     "static" / "images" / "frog.jpg").open('rb').read()
 
 
 @social.route("/groups/")
@@ -99,7 +100,7 @@ def group_post(group_id):
         user_id = request.form.get('user', '').strip()
         try:
             user_id = int(user_id)
-        except:
+        except BaseException:
             flash(_('Error: No user selected'), 'error')
             return redirect(url_for(".group_home", group_id=group_id))
 
