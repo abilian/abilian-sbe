@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.3
+abilian-core==0.10.4
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.3              # via flask-babel
@@ -63,7 +63,7 @@ redis==2.10.6             # via abilian-core
 singledispatch==3.4.0.3
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, singledispatch, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
 sqlalchemy-utils==0.33.0  # via wtforms-alchemy
-sqlalchemy==1.2.3
+sqlalchemy==1.2.4
 sqlparse==0.2.4           # via abilian-core
 toolz==0.9.0
 tqdm==4.19.5              # via abilian-core
