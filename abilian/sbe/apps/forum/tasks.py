@@ -10,7 +10,7 @@ import mailbox
 import re
 from os.path import expanduser
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Text, Tuple
 
 import bleach
 import chardet
@@ -159,7 +159,7 @@ def build_local_part(name, uid):
 
 
 def build_reply_email_address(name, post, member, domain):
-    # type: (text_type, Post, User, text_type) -> text_type
+    # type: (Text, Post, User, Text) -> Text
     """
     Build a reply-to email address embedding the locale, thread_id and user.id.
 
@@ -179,7 +179,7 @@ def build_reply_email_address(name, post, member, domain):
 
 
 def extract_email_destination(address):
-    # type: (text_type) -> List[text_type]
+    # type: (Text) -> List[Text]
     """Return the values encoded in the email address.
 
     :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
@@ -201,7 +201,7 @@ def extract_email_destination(address):
 
 
 def has_subtag(address):
-    # type: (text_type) -> bool
+    # type: (Text) -> bool
     """Return True if a subtag (defined in the config.py as 'MAIL_ADDRESS_TAG_CHAR')
     was found in the name part of the address
 
@@ -296,7 +296,7 @@ def add_paragraph(newpost):
 
 
 def clean_html(newpost):
-    # type: (text_type) -> text_type
+    # type: (Text) -> Text
     """Clean leftover empty blockquotes."""
 
     clean = re.sub(
@@ -320,7 +320,7 @@ def clean_html(newpost):
 
 
 def decode_payload(part):
-    # type: (email.message.Message) -> text_type
+    # type: (email.message.Message) -> Text
     """Get the payload and decode (base64 & quoted printable)."""
 
     payload = part.get_payload(decode=True)
@@ -343,7 +343,7 @@ def decode_payload(part):
 
 
 def process(message, marker):
-    # type: (email.message.Message, text_type) -> Tuple[text_type, List[dict]]
+    # type: (email.message.Message, Text) -> Tuple[Text, List[dict]]
     """
     Check the message for marker presence and return the text up to it if present.
 
