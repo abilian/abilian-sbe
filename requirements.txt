@@ -45,7 +45,7 @@ lxml==4.1.1               # via abilian-core
 mako==1.0.7               # via alembic
 markdown==2.6.11
 markupsafe==1.0           # via abilian-core, jinja2, mako
-numpy==1.14.1             # via langid, pandas
+numpy==1.14.2             # via langid, pandas
 openpyxl==2.5.1
 pandas==0.22.0            # via abilian-core
 pathlib==1.0.1            # via abilian-core
