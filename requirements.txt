@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.4
+abilian-core==0.10.5
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.3              # via flask-babel
@@ -41,7 +41,7 @@ jinja2==2.10              # via abilian-core, flask, flask-babel
 jsmin==2.2.2              # via abilian-core
 kombu==4.1.0              # via celery
 langid==1.1.6
-lxml==4.1.1               # via abilian-core
+lxml==4.2.0               # via abilian-core
 mako==1.0.7               # via alembic
 markdown==2.6.11
 markupsafe==1.0           # via abilian-core, jinja2, mako
