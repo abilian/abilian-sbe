@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
@@ -92,9 +91,10 @@ class BasePageView(object):
 
     @property
     def template_kwargs(self):
-        """
-        Template render arguments. You can override `base_template` for
-        instance. Only `view` and `form` cannot be overriden.
+        """Template render arguments.
+
+        You can override `base_template` for instance. Only `view` and
+        `form` cannot be overriden.
         """
         kw = super(BasePageView, self).template_kwargs
         kw['page'] = self.obj

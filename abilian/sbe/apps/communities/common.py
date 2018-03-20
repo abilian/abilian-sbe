@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-Forum views
-"""
+"""Forum views."""
 
 from __future__ import absolute_import, print_function, unicode_literals
 

@@ -1,7 +1,4 @@
-"""
-Parses XML messages and converts them to objects.
-
-"""
+"""Parses XML messages and converts them to objects."""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import base64
@@ -48,9 +45,8 @@ class Entry(object):
 
 
 class Property(object):
-    """
-    A property MAY hold zero, one, or more typed data value(s).
-    Each property MAY be single-valued or multi-valued. A single-valued property
+    """A property MAY hold zero, one, or more typed data value(s). Each
+    property MAY be single-valued or multi-valued. A single-valued property
     contains a single data value, whereas a multi-valued property contains an
     ordered list of data values of the same type. The ordering of values in a
     multi-valued property SHOULD be preserved by the repository.

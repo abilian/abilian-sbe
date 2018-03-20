@@ -1,8 +1,6 @@
 # coding=utf-8
-"""
-This panel manages user setting for email reminders related to the SBE
-(social netowking) app.
-"""
+"""This panel manages user setting for email reminders related to the SBE
+(social netowking) app."""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import current_app as app

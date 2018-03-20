@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
@@ -56,9 +55,7 @@ class IndexingTestCase(CommunityIndexingTestCase):
 
 
 class NoLoginViewTest(CommunityBaseTestCase):
-    """
-    Test correct url response, without login or security involved
-    """
+    """Test correct url response, without login or security involved."""
 
     @mark.skip
     def test(self):

@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-Forms for the Wiki module.
-"""
+"""Forms for the Wiki module."""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import g

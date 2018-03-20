@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-Configuration and injectable fixtures for Pytest.
+"""Configuration and injectable fixtures for Pytest.
 
 Supposed to replace the too-complex current UnitTest-based testing
 framework.

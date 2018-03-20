@@ -1,6 +1,4 @@
-"""
-Decorators and helpers to check access to communities.
-"""
+"""Decorators and helpers to check access to communities."""
 
 from __future__ import absolute_import, print_function, unicode_literals
 

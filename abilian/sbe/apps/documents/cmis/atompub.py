@@ -423,8 +423,7 @@ def createObject():
 #
 @route("/parents")
 def getObjectParents():
-    """Object Parents Feed (GET).
-    """
+    """Object Parents Feed (GET)."""
     id = request.args.get('id')
     log.debug("getObjectParents called on " + id)
 

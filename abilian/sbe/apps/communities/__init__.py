@@ -1,6 +1,5 @@
 # coding=utf-8
-""" Communities module
-"""
+"""Communities module."""
 from __future__ import absolute_import
 
 from abilian.sbe.extension import sbe

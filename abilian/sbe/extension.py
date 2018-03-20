@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
@@ -28,9 +27,7 @@ JS = (
 
 
 class AbilianSBE(object):
-    """
-    Base extension required by abilian.sbe.apps
-    """
+    """Base extension required by abilian.sbe.apps."""
 
     def __init__(self, app=None):
         if app is not None:

@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-Celery tasks related to document transformation and preview.
-"""
+"""Celery tasks related to document transformation and preview."""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
@@ -18,8 +16,7 @@ logger = logging.getLogger(__package__)
 
 @contextmanager
 def get_document(document_id, session=None):
-    """Context manager that yields (session, document).
-    """
+    """Context manager that yields (session, document)."""
     from .models import Document
 
     doc_session = session
@@ -39,8 +36,7 @@ def get_document(document_id, session=None):
 
 @shared_task
 def process_document(document_id):
-    """Run document processing chain.
-    """
+    """Run document processing chain."""
     with get_document(document_id) as (session, document):
         if document is None:
             return
@@ -66,8 +62,7 @@ def _run_antivirus(document):
 
 @shared_task
 def antivirus_scan(document_id):
-    """Return antivirus.scan() result
-    """
+    """Return antivirus.scan() result."""
     with get_document(document_id) as (session, document):
         if document is None:
             return
@@ -76,8 +71,7 @@ def antivirus_scan(document_id):
 
 @shared_task
 def preview_document(document_id):
-    """Compute the document preview images with its default preview size.
-    """
+    """Compute the document preview images with its default preview size."""
     with get_document(document_id) as (session, document):
         if document is None:
             # deleted after task queued, but before task run
@@ -102,8 +96,7 @@ def preview_document(document_id):
 
 @shared_task
 def convert_document_content(document_id):
-    """Convert document content.
-    """
+    """Convert document content."""
     with get_document(document_id) as (session, doc):
         if doc is None:
             # deleted after task queued, but before task run

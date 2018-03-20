@@ -1,6 +1,4 @@
-"""
-Default ("home") page for social apps.
-"""
+"""Default ("home") page for social apps."""
 from __future__ import absolute_import
 
 

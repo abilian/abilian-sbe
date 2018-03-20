@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-Celery tasks related to document transformation and preview.
-"""
+"""Celery tasks related to document transformation and preview."""
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
@@ -50,8 +48,7 @@ def init_app(app):
 
 @shared_task()
 def send_post_by_email(post_id):
-    """Send a post to community members by email.
-    """
+    """Send a post to community members by email."""
     with current_app.test_request_context('/send_post_by_email'):
         post = Post.query.get(post_id)
         if post is None:
@@ -82,8 +79,7 @@ def send_post_by_email(post_id):
 
 @shared_task(max_retries=10, rate_limit='12/m')
 def batch_send_post_to_users(post_id, members_id, failed_ids=None):
-    """
-    Task run from send_post_by_email; auto-retry for mails that could not be
+    """Task run from send_post_by_email; auto-retry for mails that could not be
     successfully sent.
 
     Task default rate limit is 6/min.: there is at least 5 seconds between 2
@@ -143,9 +139,7 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
 
 
 def build_local_part(name, uid):
-    """
-    Build local part as 'name-uid-digest', ensuring length < 64.
-    """
+    """Build local part as 'name-uid-digest', ensuring length < 64."""
     tag = current_app.config['MAIL_ADDRESS_TAG_CHAR']
     key = current_app.config['SECRET_KEY']
     serializer = Serializer(key)
@@ -167,8 +161,8 @@ def build_local_part(name, uid):
 
 def build_reply_email_address(name, post, member, domain):
     # type: (Text, Post, User, Text) -> Text
-    """
-    Build a reply-to email address embedding the locale, thread_id and user.id.
+    """Build a reply-to email address embedding the locale, thread_id and
+    user.id.
 
     :param name: (str)    first part of an email address
     :param post: Post()   to get post.thread_id
@@ -209,8 +203,8 @@ def extract_email_destination(address):
 
 def has_subtag(address):
     # type: (Text) -> bool
-    """Return True if a subtag (defined in the config.py as 'MAIL_ADDRESS_TAG_CHAR')
-    was found in the name part of the address
+    """Return True if a subtag (defined in the config.py as
+    'MAIL_ADDRESS_TAG_CHAR') was found in the name part of the address.
 
     :param address: email adress
     """
@@ -307,8 +301,7 @@ def validate_html(payload):
 
 
 def add_paragraph(newpost):
-    """Add surrounding <p>newpost</p> if necessary.
-    """
+    """Add surrounding <p>newpost</p> if necessary."""
     newpost = newpost.strip()
     if not newpost.startswith('<p>'):
         newpost = '<p>' + newpost + '</p>'
@@ -366,8 +359,8 @@ def decode_payload(part):
 
 def process(message, marker):
     # type: (email.message.Message, Text) -> Tuple[Text, List[dict]]
-    """
-    Check the message for marker presence and return the text up to it if present.
+    """Check the message for marker presence and return the text up to it if
+    present.
 
     :raises LookupError otherwise.
     :return: sanitized html upto marker from message and attachements
@@ -408,11 +401,11 @@ def process(message, marker):
 @shared_task()
 def process_email(message):
     # type: (email.message.Message) -> bool
-    """
-    Email.Message object from command line script Run message (parsed email).
+    """Email.Message object from command line script Run message (parsed
+    email).
 
-    Processing chain extract community thread post member from reply_to persist
-    post in db.
+    Processing chain extract community thread post member from reply_to
+    persist post in db.
     """
     app = current_app._get_current_object()
     # Extract post destination from To: field, (community/forum/thread/member)
@@ -483,8 +476,8 @@ def process_email(message):
 def check_maildir():
     """Check the MailDir for emails to be injected in Threads.
 
-    This task is registered only if `INCOMING_MAIL_USE_MAILDIR` is True. By
-    default it is run every minute.
+    This task is registered only if `INCOMING_MAIL_USE_MAILDIR` is True.
+    By default it is run every minute.
     """
     home = expanduser('~')
     maildirpath = str(Path(home) / 'Maildir')

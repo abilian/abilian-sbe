@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import Blueprint as BaseBlueprint
@@ -17,11 +16,10 @@ from .presenters import CommunityPresenter
 
 
 class Blueprint(BaseBlueprint):
-    """
-    Blueprint for community based views.
+    """Blueprint for community based views.
 
-    It sets g.community and perform access verification for the traversed
-    community.
+    It sets g.community and perform access verification for the
+    traversed community.
     """
     _BASE_URL_PREFIX = '/communities'
     _ROUTE_PARAM = '<string:community_id>'
@@ -56,14 +54,12 @@ def check_access():
 
 
 def init_current_tab(endpoint, values):
-    """Ensure g.current_tab exists.
-    """
+    """Ensure g.current_tab exists."""
     g.current_tab = None
 
 
 def pull_community(endpoint, values):
-    """url_value_preprocessor function.
-    """
+    """url_value_preprocessor function."""
     g.nav['active'] = 'section:communities'
     g.breadcrumb.append(
         BreadcrumbItem(

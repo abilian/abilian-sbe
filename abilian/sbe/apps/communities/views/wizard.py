@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import csv
@@ -25,8 +24,8 @@ from .views import route, tab
 
 
 def wizard_extract_data(emails, is_csv=False):
-    """Filter data and extract existing accounts, existing members and new emails.
-    """
+    """Filter data and extract existing accounts, existing members and new
+    emails."""
     if is_csv:
         csv_data = emails
         existing_account_csv_roles = {
@@ -142,9 +141,7 @@ def wizard_read_csv(csv_file):
 @route("/<string:community_id>/members/wizard/step1")
 @tab('members')
 def wizard_data_insertion():
-    """
-    Insert new members data into the community via emails or CSV file.
-    """
+    """Insert new members data into the community via emails or CSV file."""
     g.breadcrumb.append(
         BreadcrumbItem(
             label=_('Members'),
@@ -159,9 +156,7 @@ def wizard_data_insertion():
 @csrf.protect
 @tab('members')
 def wizard_check_data():
-    """
-    Filter and detect existing members, existing accounts and new emails
-    """
+    """Filter and detect existing members, existing accounts and new emails."""
     if request.method == "GET":
         return redirect(url_for(".members", community_id=g.community.slug))
 
@@ -221,9 +216,7 @@ def wizard_check_data():
 @csrf.protect
 @tab('members')
 def wizard_new_accounts():
-    """
-    Complete new emails information
-    """
+    """Complete new emails information."""
     if request.method == "GET":
         return redirect(url_for(".members", community_id=g.community.slug))
 
@@ -261,7 +254,8 @@ def wizard_new_accounts():
 def wizard_saving():
     """Automatically add existing accounts to the current community.
 
-    Create accounts for new emails, add them to the community and send them a password reset email.
+    Create accounts for new emails, add them to the community and send
+    them a password reset email.
     """
     community = g.community._model
     existing_accounts = request.form.get("existing_account")

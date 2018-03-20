@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import fileinput
@@ -26,7 +24,8 @@ manager = Manager(description='SBE forum commands', help='SBE forum commands')
     required=False,
 )
 def inject_email(filename='-'):
-    """Read one email from stdin, parse it, forward it in a celery task to be persisted."""
+    """Read one email from stdin, parse it, forward it in a celery task to be
+    persisted."""
 
     parser = FeedParser()
 
@@ -74,9 +73,8 @@ def inject_email(filename='-'):
 
 @manager.command
 def check_email():
-    """
-    Read one email from current user Maildir, parse it, forward it in a celery task to be persisted.
-    """
+    """Read one email from current user Maildir, parse it, forward it in a
+    celery task to be persisted."""
 
     # FIXME: doesn't appear legit.
     check_maildir.delay()

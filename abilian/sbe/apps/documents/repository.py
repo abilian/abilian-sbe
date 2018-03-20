@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import sqlalchemy as sa
@@ -15,10 +14,8 @@ class SecurityException(Exception):
 
 
 class Repository(object):
-    """
-    A simple document repository, implementing the basic functionalities of the
-    CMIS model.
-    """
+    """A simple document repository, implementing the basic functionalities of
+    the CMIS model."""
 
     def __init__(self, app=None):
         if app is not None:
@@ -39,9 +36,8 @@ class Repository(object):
         return folder
 
     def get_object(self, id=None, path=None):
-        """
-        Get the CMIS object (document or folder) with either the given `id` or the
-        given `path`.
+        """Get the CMIS object (document or folder) with either the given `id`
+        or the given `path`.
 
         Returns None if the object doesn't exist.
         """
@@ -162,10 +158,8 @@ class Repository(object):
         return security.has_permission(user, permission, obj, inherit=True)
 
     def has_access(self, user, obj):
-        """
-        Checks that user has actual right to reach this object, 'read' permission
-        on each of object's parents.
-        """
+        """Checks that user has actual right to reach this object, 'read'
+        permission on each of object's parents."""
         current = obj
         while current.parent is not None:
             if not self.has_permission(user, READ, current):

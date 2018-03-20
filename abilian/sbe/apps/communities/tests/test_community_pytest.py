@@ -1,7 +1,6 @@
 # coding=utf-8
-"""
-Tests from test_community are currently refactored using pytest in this module.
-"""
+"""Tests from test_community are currently refactored using pytest in this
+module."""
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
@@ -202,8 +201,8 @@ def test_community_content_decorator(community, db):
 
 
 def login(user, remember=False, force=False):
-    """Perform user login for `user`, so that code needing a logged-in user
-    can work.
+    """Perform user login for `user`, so that code needing a logged-in user can
+    work.
 
     This method can also be used as a context manager, so that logout is
     performed automatically::

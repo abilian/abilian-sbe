@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
@@ -45,8 +44,7 @@ VALID_ROLES = frozenset([READER, WRITER, MANAGER, MEMBER])
 
 
 class Membership(db.Model):
-    """Represents the membership of someone in a community.
-    """
+    """Represents the membership of someone in a community."""
     __tablename__ = 'community_membership'
 
     id = Column(Integer, primary_key=True)
@@ -104,15 +102,14 @@ def community_content(cls):
 def indexable_roles_and_users(community):
     """Mixin to use to replace Entity._indexable_roles_and_users.
 
-    Will be removed when communities are upgraded to use standard role based
-    access (by setting permissions and using security service).
+    Will be removed when communities are upgraded to use standard role
+    based access (by setting permissions and using security service).
     """
     return ' '.join(indexable_role(user) for user in community.members)
 
 
 class Community(Entity):
-    """Ad-hoc objects that hold properties about a community.
-    """
+    """Ad-hoc objects that hold properties about a community."""
     __indexation_args__ = {}  # type: Dict[str, Any]
     __indexation_args__.update(Entity.__indexation_args__)
     index_to = __indexation_args__.setdefault('index_to', ())
@@ -257,10 +254,8 @@ class Community(Entity):
         return memberships.all()
 
     def set_membership(self, user, role):
-        """
-        Add a member with the given role, or set the role of an existing
-        member.
-        """
+        """Add a member with the given role, or set the role of an existing
+        member."""
         assert isinstance(user, User)
         role = Role(role)
 
@@ -325,8 +320,7 @@ class Community(Entity):
                 security.ungrant_role(principal, role, self.folder)
 
     def get_role(self, user):
-        """Returns the given user's role in this community.
-        """
+        """Returns the given user's role in this community."""
         M = Membership
         membership = current_app.db.session() \
             .query(M.role) \

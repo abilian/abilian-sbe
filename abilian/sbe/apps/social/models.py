@@ -1,6 +1,4 @@
-"""
-Social content items: messages aka status updates, private messages, etc.
-"""
+"""Social content items: messages aka status updates, private messages, etc."""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import re
@@ -69,8 +67,7 @@ class TagApplication(Entity):
 
 
 class PrivateMessage(Entity):
-    """Private messages are like messages, except they are private.
-    """
+    """Private messages are like messages, except they are private."""
 
     __tablename__ = 'private_message'
     __indexable__ = False

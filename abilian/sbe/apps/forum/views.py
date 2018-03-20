@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-Forum views
-"""
+"""Forum views."""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from collections import Counter
@@ -47,9 +45,7 @@ route = forum.route
 
 
 def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
-    """
-    kwargs for Post default view
-    """
+    """kwargs for Post default view."""
     kw = default_view_kw(kw, obj.thread, obj_type, obj_id, **kwargs)
     kw['thread_id'] = obj.thread_id
     kw['_anchor'] = 'post_{:d}'.format(obj.id)
@@ -428,8 +424,7 @@ route('/<int:thread_id>/delete')(ThreadDelete.as_view('thread_delete'))
 
 
 class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
-    """Close / Re-open a thread.
-    """
+    """Close / Re-open a thread."""
     methods = ['POST']
     _VALID_ACTIONS = {'close', 'reopen'}
     CLOSED_MSG = _l(

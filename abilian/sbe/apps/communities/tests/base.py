@@ -17,9 +17,7 @@ class CommunityBaseTestCase(BaseTestCase):
 
 
 class CommunityIndexingTestCase(CommunityBaseTestCase):
-    """
-    Testcase for testing indexing and searching of community content.
-    """
+    """Testcase for testing indexing and searching of community content."""
 
     no_login = False
     SERVICES = ('security', 'indexing')

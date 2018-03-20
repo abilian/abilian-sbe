@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
@@ -51,9 +50,7 @@ class IndexingTestCase(CommunityIndexingTestCase):
 
 
 class NoLoginViewTest(CommunityBaseTestCase):
-    """
-    Test correct url response, without login or security involved.
-    """
+    """Test correct url response, without login or security involved."""
 
     def test(self):
         response = self.client.get(
@@ -153,8 +150,9 @@ class ViewTestCase(CommunityBaseTestCase):
             assert text_type(outbox[0].subject) == expected
 
     def test_create_thread_informative(self):
-        """
-        Test with 'informative' community. No mail sent, unless user is MANAGER
+        """Test with 'informative' community.
+
+        No mail sent, unless user is MANAGER
         """
         assert self.community.type == 'informative'
         # create a new user, add him/her to the current community
@@ -204,10 +202,8 @@ class CommandsTest(TestCase):
     @patch('fileinput.input')
     @patch('abilian.sbe.apps.forum.commands.process_email')
     def test_parse_forum_email(self, mock_process_email, mock_email):
-        """
-        No processing is tested only parsing into a email.message
-        and verifying inject_email() logic
-        """
+        """No processing is tested only parsing into a email.message and
+        verifying inject_email() logic."""
         # first load a test email returned by the mock_email
         mock_email.return_value = get_string_from_file('notification.email')
 

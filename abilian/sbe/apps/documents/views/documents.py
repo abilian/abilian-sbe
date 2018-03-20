@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
@@ -279,8 +278,7 @@ def document_preview_image(doc_id):
 
 @route("/doc/<int:doc_id>/refresh_preview")
 def refresh_preview(doc_id):
-    """Force to compute a new preview.
-    """
+    """Force to compute a new preview."""
     doc = get_document(doc_id)
     if not doc:
         raise NotFound()

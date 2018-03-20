@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-Static configuration for the application.
+"""Static configuration for the application.
 
 TODO: add more (runtime) flexibility in plugin discovery, selection
 and activation.
@@ -97,10 +96,8 @@ _BASE_SERVER_ACTIVATE = BaseWSGIServer.server_activate
 
 
 def _on_http_server_activate(self, *args, **kwargs):
-    """
-    This function is used as to monkey patch BaseWSGIServer.server_activate
-    during `setup_sbe_demo`.
-    """
+    """This function is used as to monkey patch BaseWSGIServer.server_activate
+    during `setup_sbe_demo`."""
     _BASE_SERVER_ACTIVATE(self, *args, **kwargs)
     # now we are listening to socket
     host, port = self.server_address
@@ -118,11 +115,10 @@ def _on_http_server_activate(self, *args, **kwargs):
 
 # run with python -m abilian.sbe.app setup_sbe_app
 def setup_sbe_app():
-    """
-    Basic set up SBE application. Must be run inside a virtualenv.
+    """Basic set up SBE application. Must be run inside a virtualenv.
 
-    Will create `abilian_sbe` script, run a local server and open browser on app's
-    setup wizard.
+    Will create `abilian_sbe` script, run a local server and open
+    browser on app's setup wizard.
     """
     logger = logging.getLogger('sbe_demo')
     logger.setLevel(logging.INFO)

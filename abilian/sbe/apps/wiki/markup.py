@@ -1,6 +1,7 @@
 # coding=utf-8
-"""
-Set up the markdown converter. Add extensions here (for now).
+"""Set up the markdown converter.
+
+Add extensions here (for now).
 """
 from __future__ import absolute_import, print_function, unicode_literals
 

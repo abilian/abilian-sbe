@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import fnmatch
@@ -524,9 +523,8 @@ def permissions_export(folder_id):
 
 
 def iter_permissions(folder, user):
-    """
-    Iterator returning permissions settings on folder and its subfolders tree.
-    """
+    """Iterator returning permissions settings on folder and its subfolders
+    tree."""
     if not security.has_permission(user, "manage", folder, inherit=True):
         raise StopIteration
 
@@ -593,10 +591,8 @@ def iter_permissions(folder, user):
 @route("/folder/<int:folder_id>", methods=['POST'])
 @csrf.protect
 def folder_post(folder_id):
-    """
-    A POST on a folder can result on several different actions (depending on the
-    `action` parameter).
-    """
+    """A POST on a folder can result on several different actions (depending on
+    the `action` parameter)."""
     folder = get_folder(folder_id)
     action = request.form.get("action")
 

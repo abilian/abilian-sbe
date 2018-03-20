@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
@@ -80,7 +79,10 @@ def users():
 
 @social.route("/users/dt_json")
 def users_dt_json():
-    """JSON call to fill a DataTable. Needs some refactoring."""
+    """JSON call to fill a DataTable.
+
+    Needs some refactoring.
+    """
     args = request.args
 
     length = int(args.get("iDisplayLength", 0))

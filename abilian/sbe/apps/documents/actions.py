@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from typing import Any, Dict
@@ -46,8 +45,7 @@ class CmisContentAction(Action):
 
 
 class BaseFolderAction(CmisContentAction):
-    """Apply to all folders, including root folder.
-    """
+    """Apply to all folders, including root folder."""
     sbe_type = 'cmis:folder'
 
 
@@ -85,8 +83,7 @@ class FolderButtonAction(BaseFolderAction):
 
 
 class FolderAction(BaseFolderAction):
-    """Apply to all folders except root folder.
-    """
+    """Apply to all folders except root folder."""
     sbe_type = 'cmis:folder'
 
     def pre_condition(self, ctx):
@@ -97,8 +94,7 @@ class FolderAction(BaseFolderAction):
 
 
 class FolderPermisionsAction(BaseFolderAction):
-    """Apply to all folders except root folder.
-    """
+    """Apply to all folders except root folder."""
     sbe_type = 'cmis:folder'
 
     def pre_condition(self, ctx):

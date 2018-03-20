@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-Entity objects for the Document Management applications.
+"""Entity objects for the Document Management applications.
 
 TODO: move to an independent service / app.
 """
@@ -70,8 +69,7 @@ def icon_exists(filename):
 # Domain classes
 #
 class CmisObject(Entity, InheritSecurity):
-    """(Abstract) Base class for CMIS objects.
-    """
+    """(Abstract) Base class for CMIS objects."""
 
     # normally set by communities.models.community_content,
     # but we have to fix a circ.dep to use it
@@ -193,8 +191,9 @@ class CmisObject(Entity, InheritSecurity):
 def _cmis_sync_name_title(entity, new_value, old_value, initiator):
     """Synchronize CmisObject name -> title.
 
-    CmisObject.title -> name is done via hybrid_property, avoiding infinite
-    loop (since "set" is received before attribute has received value)
+    CmisObject.title -> name is done via hybrid_property, avoiding
+    infinite loop (since "set" is received before attribute has received
+    value)
     """
     if entity.title != new_value:
         entity.title = new_value
@@ -202,9 +201,7 @@ def _cmis_sync_name_title(entity, new_value, old_value, initiator):
 
 
 class PathAndSecurityIndexable(object):
-    """
-    Mixin for folder and documents indexation.
-    """
+    """Mixin for folder and documents indexation."""
     __indexation_args__ = dict(
         index_to=(
             ('_indexable_parent_ids', ('parent_ids', )),
@@ -220,18 +217,15 @@ class PathAndSecurityIndexable(object):
 
     @property
     def _indexable_parent_ids(self):
-        """
-        Return a string made of ids separated by a slash: "/1/3/4/5", "5" being
-        self.parent.id.
-        """
+        """Return a string made of ids separated by a slash: "/1/3/4/5", "5"
+        being self.parent.id."""
         ids = [text_type(obj.id) for obj in self._iter_to_root(skip_self=True)]
         return '/' + '/'.join(reversed(ids))
 
     @property
     def _indexable_roles_and_users(self):
-        """
-        Returns a string made of type:id elements, like "user:2 group:1 user:6"
-        """
+        """Returns a string made of type:id elements, like "user:2 group:1
+        user:6"."""
         iter_from_root = reversed(list(self._iter_to_root()))
         if self.parent:
             # skip root folder only on non-root folder!
@@ -456,8 +450,7 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
 
 class BaseContent(CmisObject):
-    """A base class for cmisobject with an attached file.
-    """
+    """A base class for cmisobject with an attached file."""
     __tablename__ = None  # type: str
 
     _content_id = Column(Integer, db.ForeignKey(Blob.id))
@@ -521,9 +514,9 @@ class BaseContent(CmisObject):
     def find_content_type(self, content_type=''):
         """Find possibly more appropriate content_type for this instance.
 
-        If `content_type` is a binary one, try to find a better one based on
-        content name so that 'xxx.pdf' is not flagged as binary/octet-stream for
-        example
+        If `content_type` is a binary one, try to find a better one
+        based on content name so that 'xxx.pdf' is not flagged as
+        binary/octet-stream for example
         """
         if content_type not in (
             None,
@@ -559,8 +552,7 @@ class BaseContent(CmisObject):
 
 
 class Document(BaseContent, PathAndSecurityIndexable):
-    """A document, in the CMIS sense.
-    """
+    """A document, in the CMIS sense."""
     __tablename__ = None  # type: str
 
     __indexable__ = True
@@ -673,9 +665,8 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def antivirus_scanned(self):
-        """
-        True if antivirus task was run, even if antivirus didn't return a result
-        """
+        """True if antivirus task was run, even if antivirus didn't return a
+        result."""
         return self.content_blob and 'antivirus' in self.content_blob.meta
 
     @property
@@ -689,8 +680,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def antivirus_required(self):
-        """True if antivirus doesn't need to be run.
-        """
+        """True if antivirus doesn't need to be run."""
         required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
         return required and (
             not self.antivirus_scanned or self.antivirus_status is None
@@ -698,8 +688,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def antivirus_ok(self):
-        """True if user can safely access document content.
-        """
+        """True if user can safely access document content."""
         required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
         if required:
             return self.antivirus_status is True

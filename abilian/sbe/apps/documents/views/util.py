@@ -31,10 +31,11 @@ def breadcrumbs_for(object):
 
 
 def get_document(id):
-    """
-    Gets a document given its id. Will raise appropriates errors in case
-    the document doesn't exist (404), or the current user doesn't have read access
-    on the document (403).
+    """Gets a document given its id.
+
+    Will raise appropriates errors in case the document doesn't exist
+    (404), or the current user doesn't have read access on the document
+    (403).
     """
     doc = repository.get_document_by_id(id)
     check_read_access(doc)
@@ -42,10 +43,11 @@ def get_document(id):
 
 
 def get_folder(id):
-    """
-    Gets a folder given its id. Will raise appropriates errors in case
-    the folder doesn't exist (404), or the current user doesn't have read access
-    on the folder (403).
+    """Gets a folder given its id.
+
+    Will raise appropriates errors in case the folder doesn't exist
+    (404), or the current user doesn't have read access on the folder
+    (403).
     """
     folder = repository.get_folder_by_id(id)
     check_read_access(folder)
@@ -53,8 +55,7 @@ def get_folder(id):
 
 
 def get_new_filename(folder, name):
-    """
-    Given a desired name for a new content in folder, return a name suitable
+    """Given a desired name for a new content in folder, return a name suitable
     for new content.
 
     If name already exists, a numbered suffix is added.
@@ -130,10 +131,8 @@ def edit_object(obj):
 
 
 def get_selected_objects(folder):
-    """
-    Returns a tuple, (folders, docs), of folders and docs in the specified
-    folder that have been selected from the UI.
-    """
+    """Returns a tuple, (folders, docs), of folders and docs in the specified
+    folder that have been selected from the UI."""
     selected_ids = request.form.getlist("object-selected")
 
     doc_ids = [
@@ -156,10 +155,11 @@ def get_selected_objects(folder):
 
 
 def check_read_access(obj):
-    """
-    Checks the current user has appropriate read access on the given object.
-    Will raise appropriates errors in case the object doesn't exist (404),
-    or the current user doesn't have read access on the object (403).
+    """Checks the current user has appropriate read access on the given object.
+
+    Will raise appropriates errors in case the object doesn't exist
+    (404), or the current user doesn't have read access on the object
+    (403).
     """
     if not obj:
         raise NotFound()
@@ -173,10 +173,12 @@ def check_read_access(obj):
 
 
 def check_write_access(obj):
-    """
-    Checks the current user has appropriate write access on the given object.
-    Will raise appropriates errors in case the object doesn't exist (404),
-    or the current user doesn't have write access on the object (403).
+    """Checks the current user has appropriate write access on the given
+    object.
+
+    Will raise appropriates errors in case the object doesn't exist
+    (404), or the current user doesn't have write access on the object
+    (403).
     """
     if not obj:
         raise NotFound()
@@ -194,10 +196,12 @@ def check_write_access(obj):
 
 
 def check_manage_access(obj):
-    """
-    Checks the current user has appropriate manage access on the given object.
-    Will raise appropriates errors in case the object doesn't exist (404),
-    or the current user doesn't have manage access on the object (403).
+    """Checks the current user has appropriate manage access on the given
+    object.
+
+    Will raise appropriates errors in case the object doesn't exist
+    (404), or the current user doesn't have manage access on the object
+    (403).
     """
 
     if not obj:

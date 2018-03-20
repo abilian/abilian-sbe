@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-Folders / Documents module
-"""
+"""Folders / Documents module."""
 from __future__ import absolute_import
 
 from abilian.sbe.extension import sbe

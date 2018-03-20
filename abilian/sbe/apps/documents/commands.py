@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-"""
+""""""
 from __future__ import absolute_import, print_function, unicode_literals
 
 import sqlalchemy as sa
@@ -17,8 +16,7 @@ manager = Manager(
 
 @manager.command
 def antivirus():
-    """Schedule documents to antivirus scan.
-    """
+    """Schedule documents to antivirus scan."""
 
     documents = Document.query \
         .filter(Document.content_blob != None) \

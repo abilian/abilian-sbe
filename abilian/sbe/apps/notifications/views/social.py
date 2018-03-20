@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-First cut at a notification system.
-"""
+"""First cut at a notification system."""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import current_app as app

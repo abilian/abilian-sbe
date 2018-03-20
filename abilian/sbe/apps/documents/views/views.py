@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Document management blueprint.
-"""
+"""Document management blueprint."""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from flask import g

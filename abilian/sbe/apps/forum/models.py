@@ -1,6 +1,5 @@
 # coding=utf-8
-"""
-Models for the Forum.
+"""Models for the Forum.
 
 Note: a few features are planned but not implemented yet, and are commented
 out.
@@ -166,8 +165,7 @@ class Post(Entity):
 
 
 class ThreadIndexAdapter(SAAdapter):
-    """Index a thread and its posts.
-    """
+    """Index a thread and its posts."""
 
     @staticmethod
     def can_adapt(obj_cls):
@@ -184,8 +182,7 @@ class ThreadIndexAdapter(SAAdapter):
 # event listener to sync name with thread's name
 @listens_for(Thread.name, "set", active_history=True)
 def _thread_sync_name(thread, new_value, old_value, initiator):
-    """Synchronize name with thread's name.
-    """
+    """Synchronize name with thread's name."""
     if new_value == old_value:
         return new_value
 
@@ -196,8 +193,7 @@ def _thread_sync_name(thread, new_value, old_value, initiator):
 
 @listens_for(Post.thread, "set", active_history=True)
 def _thread_change_sync_name(post, new_thread, old_thread, initiator):
-    """Change name on thread change.
-    """
+    """Change name on thread change."""
     if new_thread == old_thread or new_thread is None:
         return new_thread
     post.name = new_thread.name
@@ -208,8 +204,7 @@ def _thread_change_sync_name(post, new_thread, old_thread, initiator):
 @listens_for(Thread.posts, 'remove')
 @listens_for(Thread.posts, 'set')
 def _guard_closed_thread_collection(thread, value, *args):
-    """Prevent add/remove/replace posts on a closed thread.
-    """
+    """Prevent add/remove/replace posts on a closed thread."""
     if isinstance(thread, Post):
         thread = thread.thread
         if thread is None:

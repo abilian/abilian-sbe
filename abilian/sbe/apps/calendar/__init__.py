@@ -1,7 +1,5 @@
 # coding=utf-8
-"""
-Calendar module.
-"""
+"""Calendar module."""
 from __future__ import absolute_import
 
 from abilian.sbe.extension import sbe

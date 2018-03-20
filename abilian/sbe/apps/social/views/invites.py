@@ -1,6 +1,4 @@
-"""
-Not used!
-"""
+"""Not used!"""
 
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -16,8 +14,7 @@ from .social import social
 
 
 class Invite(db.Model):
-    """Tracks a pending invitation to join the community.
-    """
+    """Tracks a pending invitation to join the community."""
 
     __tablename__ = 'invitation'
 
