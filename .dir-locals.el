@@ -2,10 +2,7 @@
 ;;; See Info node `(emacs) Directory Variables' for more information.
 
 ((python-mode
-  (py-continuation-offset . 4)
+  (py-indent-offset . 4)
+  (py-continuation-offset . 8)
   (py-smart-indentation)
-  (py-indent-offset . 2)
   (flycheck-pylintrc . "pylintrc")))
-
-
-
