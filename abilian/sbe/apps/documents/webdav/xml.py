@@ -11,7 +11,6 @@ E = ElementMaker(namespace="DAV:")
 
 
 class Propfind(object):
-
     def __init__(self, xml=""):
         self.mode = ""
         self.prop_names = []
@@ -32,7 +31,6 @@ class Propfind(object):
 
 
 class MultiStatus(object):
-
     def __init__(self):
         self.responses = []
 
@@ -51,7 +49,6 @@ class MultiStatus(object):
 
 
 class Response(object):
-
     def __init__(self, href, obj, property_list):
         self.href = href
         self.property_list = property_list
@@ -72,4 +69,7 @@ class Response(object):
                     props.append(E.resourcetype())
 
         return E.response(
-            E.href(self.href), E.propstat(props), E.status("HTTP/1.1 200 OK"))
+            E.href(self.href),
+            E.propstat(props),
+            E.status("HTTP/1.1 200 OK"),
+        )

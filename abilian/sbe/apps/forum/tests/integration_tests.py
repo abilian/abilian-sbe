@@ -24,7 +24,6 @@ from ..tasks import build_reply_email_address, extract_email_destination
 
 
 class IndexingTestCase(CommunityIndexingTestCase):
-
     def test_thread_indexed(self):
         thread = Thread(title='Community 1', community=self.community)
         self.session.add(thread)
@@ -33,7 +32,7 @@ class IndexingTestCase(CommunityIndexingTestCase):
         self.session.commit()
 
         svc = self.svc
-        obj_types = (Thread.entity_type,)
+        obj_types = (Thread.entity_type, )
         with self.login(self.user_no_community):
             res = svc.search('community', object_types=obj_types)
             assert len(res) == 0
@@ -58,13 +57,14 @@ class NoLoginViewTest(CommunityBaseTestCase):
 
     def test(self):
         response = self.client.get(
-            url_for("forum.index", community_id=self.community.slug))
+            url_for("forum.index", community_id=self.community.slug),
+        )
         assert response.status_code == 200
 
 
 class ViewTestCase(CommunityBaseTestCase):
     no_login = False
-    SERVICES = ('security',)
+    SERVICES = ('security', )
 
     def test_posts_ordering(self):
         thread = Thread(community=self.community, title='test ordering')
@@ -91,7 +91,10 @@ class ViewTestCase(CommunityBaseTestCase):
 
         # create a new user, add him/her to the current community as a MANAGER
         self.user = User(
-            email='user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com',
+            password='azerty',
+            can_login=True,
+        )
         self.session.add(self.user)
         self.community.set_membership(self.user, MANAGER)
         self.session.commit()
@@ -116,7 +119,8 @@ class ViewTestCase(CommunityBaseTestCase):
                 "forum.thread",
                 thread_id=threadid,
                 community_id=self.community.slug,
-                title=title)
+                title=title,
+            )
             response = self.client.get(url)
             assert response.status_code == 200
             assert content in response.data.decode("utf-8")
@@ -137,7 +141,8 @@ class ViewTestCase(CommunityBaseTestCase):
                 "forum.thread",
                 thread_id=threadid,
                 community_id=self.community.slug,
-                title=title)
+                title=title,
+            )
             response = self.client.get(url)
             assert response.status_code == 200
             assert content in response.data.decode("utf-8")
@@ -154,7 +159,10 @@ class ViewTestCase(CommunityBaseTestCase):
         assert self.community.type == 'informative'
         # create a new user, add him/her to the current community
         self.user = User(
-            email='user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com',
+            password='azerty',
+            can_login=True,
+        )
         self.session.add(self.user)
         self.community.set_membership(self.user, MEMBER)
         self.session.commit()
@@ -193,7 +201,6 @@ class ViewTestCase(CommunityBaseTestCase):
 
 
 class CommandsTest(TestCase):
-
     @patch('fileinput.input')
     @patch('abilian.sbe.apps.forum.commands.process_email')
     def test_parse_forum_email(self, mock_process_email, mock_email):
@@ -225,7 +232,6 @@ class CommandsTest(TestCase):
 
 
 class TasksTest(BaseTestCase):
-
     def test_build_reply_email_address(self):
         expected_reply_address = 'test+P-fr-3-4-5a6f41c0e7d916b6f15992d7207e47b2@testcase.app.tld'
         self.app.config['MAIL_ADDRESS_TAG_CHAR'] = '+'
@@ -236,9 +242,15 @@ class TasksTest(BaseTestCase):
         member.id = 4
         headers = [('Accept-Language', 'fr')]
         with self.app.test_request_context(
-                '/build_reply_email_address', headers=headers):
-            replyto = build_reply_email_address('test', post, member,
-                                                'testcase.app.tld')
+            '/build_reply_email_address',
+            headers=headers,
+        ):
+            replyto = build_reply_email_address(
+                'test',
+                post,
+                member,
+                'testcase.app.tld',
+            )
         assert expected_reply_address in replyto
 
     def test_extract_mail_destination(self):

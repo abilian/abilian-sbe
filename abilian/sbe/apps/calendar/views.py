@@ -19,7 +19,11 @@ from .forms import EventForm
 from .models import Event
 
 blueprint = Blueprint(
-    "calendar", __name__, url_prefix="/calendar", template_folder="templates")
+    "calendar",
+    __name__,
+    url_prefix="/calendar",
+    template_folder="templates",
+)
 route = blueprint.route
 
 
@@ -84,13 +88,21 @@ class EventView(BaseEventView, views.ObjectView):
 
 event_view = EventView.as_view('event')
 views.default_view(
-    blueprint, Event, 'event_id', kw_func=default_view_kw)(event_view)
+    blueprint,
+    Event,
+    'event_id',
+    kw_func=default_view_kw,
+)(event_view)
 route('/<int:event_id>/')(event_view)
 
 
 class EventCreateView(BaseEventView, views.ObjectCreate):
     POST_BUTTON = ButtonAction(
-        'form', 'create', btn_class='primary', title=_l('Post this event'))
+        'form',
+        'create',
+        btn_class='primary',
+        title=_l('Post this event'),
+    )
 
     title = _l("New event")
 
@@ -106,13 +118,20 @@ class EventCreateView(BaseEventView, views.ObjectCreate):
         return self.obj.community
 
 
-event_create_view = EventCreateView.as_view('new_event', view_endpoint='.event')
+event_create_view = EventCreateView.as_view(
+    'new_event',
+    view_endpoint='.event',
+)
 route('/new_event/')(event_create_view)
 
 
 class EventEditView(BaseEventView, views.ObjectEdit):
     POST_BUTTON = ButtonAction(
-        'form', 'create', btn_class='primary', title=_l('Post this event'))
+        'form',
+        'create',
+        btn_class='primary',
+        title=_l('Post this event'),
+    )
 
     title = _l("Edit event")
 

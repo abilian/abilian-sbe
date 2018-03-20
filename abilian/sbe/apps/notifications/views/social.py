@@ -56,13 +56,17 @@ def unsubscribe_sbe(token):
 
     if request.method == 'GET':
         return render_template_i18n(
-            "notifications/confirm-unsubscribe.html", token=token)
+            "notifications/confirm-unsubscribe.html",
+            token=token,
+        )
 
     elif request.method == 'POST':
         preferences = app.services['preferences']
         preferences.set_preferences(user, **{'sbe:notifications:daily': False})
         db.session.commit()
         return render_template_i18n(
-            "notifications/unsubscribed.html", token=token)
+            "notifications/unsubscribed.html",
+            token=token,
+        )
     else:
         raise MethodNotAllowed()

@@ -8,7 +8,6 @@ XML_HEADER = "<?xml version='1.0' encoding='UTF-8'?>\n"
 
 
 class Feed(object):
-
     def __init__(self, object, collection):
         self.object = object
         self.collection = collection
@@ -18,13 +17,12 @@ class Feed(object):
             'ROOT': ROOT,
             'object': self.object,
             'collection': self.collection,
-            'to_xml': to_xml
+            'to_xml': to_xml,
         }
         return render_template("cmis/feed.xml", **ctx)
 
 
 class Entry(object):
-
     def __init__(self, obj):
         self.obj = obj
 
@@ -34,7 +32,7 @@ class Entry(object):
             'folder': self.obj,
             'document': self.obj,
             'options': options,
-            'to_xml': to_xml
+            'to_xml': to_xml,
         }
 
         if self.obj.sbe_type == 'cmis:folder':

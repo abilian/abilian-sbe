@@ -36,7 +36,6 @@ def test_empty_multistatus():
 
 
 def test_multistatus():
-
     class Obj(object):
         pass
 

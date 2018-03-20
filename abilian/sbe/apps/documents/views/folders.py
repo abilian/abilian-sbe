@@ -94,13 +94,17 @@ def change_view_style(folder_id):
             url_for(
                 ".folder_view",
                 folder_id=folder_id,
-                community_id=folder.community.slug))
+                community_id=folder.community.slug,
+            ),
+        )
     else:
         return redirect(
             url_for(
                 ".folder_view",
                 folder_id=folder_id,
-                community_id=folder.community.slug))
+                community_id=folder.community.slug,
+            ),
+        )
 
 
 @route("/folder/<int:folder_id>/json")
@@ -112,13 +116,20 @@ def folder_json(folder_id):
     result = {}
     has_permission = security.has_permission
     result['current_folder_selectable'] = has_permission(
-        g.user, WRITE, folder, inherit=True)
+        g.user,
+        WRITE,
+        folder,
+        inherit=True,
+    )
     folders = result['folders'] = []
     bc = result['breadcrumbs'] = []
     subfolders = sorted(
-        (f for f in folder.subfolders
-         if has_permission(g.user, READ, f, inherit=True)),
-        key=lambda f: f.title)
+        (
+            f for f in folder.subfolders
+            if has_permission(g.user, READ, f, inherit=True)
+        ),
+        key=lambda f: f.title,
+    )
 
     parent = folder
 
@@ -131,7 +142,10 @@ def folder_json(folder_id):
             'id':
             parent.id,
             'url':
-            folder_url(folder_id=parent.id, community_id=parent.community.slug),
+            folder_url(
+                folder_id=parent.id,
+                community_id=parent.community.slug,
+            ),
             'title':
             parent.title,
         }
@@ -150,7 +164,10 @@ def folder_json(folder_id):
             'id':
             folder.id,
             'url':
-            folder_url(folder_id=folder.id, community_id=folder.community.slug),
+            folder_url(
+                folder_id=folder.id,
+                community_id=folder.community.slug,
+            ),
             'title':
             folder.title,
         }
@@ -197,8 +214,7 @@ def permissions(folder_id):
     if folder.inherit_security:
         inherited_roles_assignments = folder.get_inherited_roles_assignments()
         users_and_inherited_roles = [
-            (user, role, False)
-            for user, role in inherited_roles_assignments
+            (user, role, False) for user, role in inherited_roles_assignments
             if isinstance(user, User)
         ]
         groups_and_inherited_roles = [
@@ -210,11 +226,14 @@ def permissions(folder_id):
     all_groups = query.all()
 
     class EntryPresenter(object):
-        _USER_FMT = ('<a href="{{ url_for("social.user", user_id=user.id) }}">'
-                     '{{ user.name }}</a>')
+        _USER_FMT = (
+            '<a href="{{ url_for("social.user", user_id=user.id) }}">'
+            '{{ user.name }}</a>'
+        )
         _GROUP_FMT = (
             '<a href="{{ url_for("social.group_home", group_id=group.id)'
-            ' }}">{{ group.name }}</a>')
+            ' }}">{{ group.name }}</a>'
+        )
 
         def __init__(self, e):
             render = render_template_string
@@ -224,7 +243,8 @@ def permissions(folder_id):
                 '<img src="{{ user_photo_url(e.manager, size=16) }}" alt="" />'
                 '<a href="{{ url_for("social.user", user_id=e.manager_id) }}">'
                 '{{ e.manager.name }}</a>',
-                e=e)
+                e=e,
+            )
 
             if e.op == e.SET_INHERIT:
                 msg = _('On {date}, {manager} has activated inheritance')
@@ -232,10 +252,13 @@ def permissions(folder_id):
                 msg = _('On {date}, {manager} has deactivated inheritance')
             elif e.op == e.GRANT:
                 msg = _(
-                    'On {date}, {manager} has given role "{role}" to {principal}')
+                    'On {date}, {manager} has given role "{role}" to {principal}',
+                )
             elif e.op == e.REVOKE:
-                msg = _('On {date}, {manager} has revoked role "{role}" from '
-                        '{principal}')
+                msg = _(
+                    'On {date}, {manager} has revoked role "{role}" from '
+                    '{principal}',
+                )
             else:
                 raise Exception("Unknown audit entry type %s" % e.op)
 
@@ -250,7 +273,9 @@ def permissions(folder_id):
                     date=self.date,
                     manager=self.manager,
                     role=self.entry.role,
-                    principal=principal))
+                    principal=principal,
+                ),
+            )
 
     audit_entries = [EntryPresenter(e) for e in security.entries_for(folder)]
 
@@ -278,16 +303,25 @@ def permissions_update(folder_id):
     if action in ("activate_inheritance", "deactivate_inheritance"):
         inherit_security = (action == "activate_inheritance")
 
-        if not (inherit_security or
-                has_permission(g.user, 'manage', folder, inherit=False)):
+        if not (
+            inherit_security
+            or has_permission(g.user, 'manage', folder, inherit=False)
+        ):
             # don't let user shoot himself in the foot
-            flash(_('You must have the "manager" local role on this folder in '
-                    'order to deactivate inheritance.'), 'error')
+            flash(
+                _(
+                    'You must have the "manager" local role on this folder in '
+                    'order to deactivate inheritance.',
+                ),
+                'error',
+            )
             return redirect(
                 url_for(
                     ".permissions",
                     folder_id=folder_id,
-                    community_id=folder.community.slug))
+                    community_id=folder.community.slug,
+                ),
+            )
 
         security.set_inherit_security(folder, inherit_security)
         db.session.add(folder)
@@ -297,7 +331,9 @@ def permissions_update(folder_id):
             url_for(
                 ".permissions",
                 folder_id=folder_id,
-                community_id=folder.community.slug))
+                community_id=folder.community.slug,
+            ),
+        )
 
     elif action == "add-user-role":
         role = request.form.get("role").lower()
@@ -311,7 +347,9 @@ def permissions_update(folder_id):
             url_for(
                 ".permissions",
                 folder_id=folder_id,
-                community_id=folder.community.slug))
+                community_id=folder.community.slug,
+            ),
+        )
 
     elif action == "add-group-role":
         role = request.form.get("role").lower()
@@ -325,7 +363,9 @@ def permissions_update(folder_id):
             url_for(
                 ".permissions",
                 folder_id=folder_id,
-                community_id=folder.community.slug))
+                community_id=folder.community.slug,
+            ),
+        )
 
     else:
         action, args = request.form.items()[0]
@@ -340,20 +380,29 @@ def permissions_update(folder_id):
             transaction = db.session.begin_nested()
             security.ungrant_role(user, role, folder)
 
-            if (user == g.user and role == 'manager' and
-                    not has_permission(g.user, 'manage', folder, inherit=True)):
+            if (
+                user == g.user and role == 'manager'
+                and not has_permission(g.user, 'manage', folder, inherit=True)
+            ):
 
                 transaction.rollback()
-                flash(_('Cannot remove "manager" local role for yourself: you '
+                flash(
+                    _(
+                        'Cannot remove "manager" local role for yourself: you '
                         'don\'t have "manager" role (either by security inheritance '
-                        'or by group membership)'),
-                      'error')
+                        'or by group membership)',
+                    ),
+                    'error',
+                )
             else:
                 reindex_tree(folder)
                 transaction.commit()
-                flash(_("Role {role} for user {user} removed on folder {folder}"
-                        ).format(role=role, user=user.name, folder=folder.name),
-                      "success")
+                flash(
+                    _(
+                        "Role {role} for user {user} removed on folder {folder}",
+                    ).format(role=role, user=user.name, folder=folder.name),
+                    "success",
+                )
         elif action == 'delete-group-role':
             group = Group.query.get(object_id)
             # remove role in a subtransaction, to prevent manager shoot himself in the
@@ -361,17 +410,26 @@ def permissions_update(folder_id):
             transaction = db.session.begin_nested()
             security.ungrant_role(group, role, folder)
 
-            if (role == 'manager' and
-                    not has_permission(g.user, 'manage', folder, inherit=True)):
+            if (
+                role == 'manager'
+                and not has_permission(g.user, 'manage', folder, inherit=True)
+            ):
                 transaction.rollback()
-                flash(_('Cannot remove "manager" local role for group "{group}": you'
+                flash(
+                    _(
+                        'Cannot remove "manager" local role for group "{group}": you'
                         ' don\'t have "manager" role by security inheritance or by '
-                        'local role').format(group=group.name),
-                      'error')
+                        'local role',
+                    ).format(group=group.name),
+                    'error',
+                )
             else:
-                flash(_("Role {role} for group {group} removed on folder {folder}"
-                        ).format(role=role, group=group.name, folder=folder.name),
-                      "success")
+                flash(
+                    _(
+                        "Role {role} for group {group} removed on folder {folder}",
+                    ).format(role=role, group=group.name, folder=folder.name),
+                    "success",
+                )
                 reindex_tree(folder)
                 transaction.commit()
 
@@ -380,7 +438,9 @@ def permissions_update(folder_id):
             url_for(
                 ".permissions",
                 folder_id=folder_id,
-                community_id=folder.community.slug))
+                community_id=folder.community.slug,
+            ),
+        )
 
 
 @route("/folder/<int:folder_id>/permissions_export")
@@ -415,8 +475,10 @@ def permissions_export(folder_id):
     ws.remove_splits = True
     ws.horz_split_pos = 1
 
-    header_style = easyxf('font: bold true;'
-                          'alignment: horizontal center, vertical center;')
+    header_style = easyxf(
+        'font: bold true;'
+        'alignment: horizontal center, vertical center;',
+    )
     for c, val in enumerate((c[0] for c in cols)):
         ws.write(0, c, val, header_style)
 
@@ -470,8 +532,10 @@ def iter_permissions(folder, user):
 
     community = folder.path
     local_roles = frozenset(folder.get_local_roles_assignments())
-    inherited_roles = frozenset((folder.get_inherited_roles_assignments()
-                                 if folder.inherit_security else []))
+    inherited_roles = frozenset((
+        folder.get_inherited_roles_assignments()
+        if folder.inherit_security else []
+    ))
 
     result = {}
     for principal, role in (local_roles | inherited_roles):
@@ -502,11 +566,21 @@ def iter_permissions(folder, user):
         local = data['local']
         inherit = data['inherit']
 
-        yield (has_access, identifier, first_name, last_name, role, local,
-               inherit, community)
+        yield (
+            has_access,
+            identifier,
+            first_name,
+            last_name,
+            role,
+            local,
+            inherit,
+            community,
+        )
 
-    subfolders = (f for f in folder.subfolders
-                  if security.has_permission(user, "manage", folder))
+    subfolders = (
+        f for f in folder.subfolders
+        if security.has_permission(user, "manage", folder)
+    )
 
     for subfolder in subfolders:
         for permission in iter_permissions(subfolder, user):
@@ -606,8 +680,9 @@ def explore_archive(fd, uncompress=False):
                         filename = filename.decode('cp437')
 
                 if any(
-                        pattern.match(filename) is not None
-                        for pattern in ARCHIVE_IGNORE_FILES):
+                    pattern.match(filename) is not None
+                    for pattern in ARCHIVE_IGNORE_FILES
+                ):
                     continue
 
                 filepath = filename.split('/')
@@ -631,7 +706,9 @@ def upload_new(folder):
 
     for upload_fd in fds:
         for filepath, fd in explore_archive(
-                upload_fd, uncompress=uncompress_files):
+            upload_fd,
+            uncompress=uncompress_files,
+        ):
             folder = base_folder
             parts = []
             # traverse to final directory, create intermediate if necessary. Folders
@@ -659,9 +736,13 @@ def upload_new(folder):
             created_count += 1
 
     flash(
-        _n("One new document successfully uploaded",
-           "%(num)d new document successfully uploaded",
-           num=created_count), "success")
+        _n(
+            "One new document successfully uploaded",
+            "%(num)d new document successfully uploaded",
+            num=created_count,
+        ),
+        "success",
+    )
 
     session.commit()
     return redirect(url_for(folder))
@@ -687,9 +768,14 @@ def download_multiple(folder):
     # if using upstream send file: just create a temps file.
     # if app is streaming itself: use NamedTemporaryFile so that file is removed
     # on close()
-    temp_factory = (tempfile.mktemp if current_app.use_x_sendfile else
-                    tempfile.NamedTemporaryFile)
-    zip_fn = temp_factory(prefix='tmp-' + current_app.name + '-', suffix='.zip')
+    temp_factory = (
+        tempfile.mktemp
+        if current_app.use_x_sendfile else tempfile.NamedTemporaryFile
+    )
+    zip_fn = temp_factory(
+        prefix='tmp-' + current_app.name + '-',
+        suffix='.zip',
+    )
     with ZipFile(zip_fn, "w") as zipfile:
         for doc in docs:
             zipfile.writestr(doc.title, doc.content or b"")
@@ -707,7 +793,8 @@ def download_multiple(folder):
         zip_fn,
         mimetype="application/zip",
         as_attachment=True,
-        attachment_filename=quote(folder.title.encode("utf8") + b".zip"))
+        attachment_filename=quote(folder.title.encode("utf8") + b".zip"),
+    )
     resp.headers.add('Content-Length', str(size))
     return resp
 
@@ -721,24 +808,35 @@ def delete_multiple(folder):
         app = current_app._get_current_object()
         community = g.community._model
         activity.send(
-            app, actor=g.user, verb="delete", object=obj, target=community)
+            app,
+            actor=g.user,
+            verb="delete",
+            object=obj,
+            target=community,
+        )
         repository.delete_object(obj)
 
     if docs + folders:
         db.session.commit()
         if docs and folders:
-            msg = _("%(file_num)d files and %(folder_num)d folders sucessfully "
-                    "deleted.", file_num=len(docs), folder_num=len(folders))
+            msg = _(
+                "%(file_num)d files and %(folder_num)d folders sucessfully "
+                "deleted.",
+                file_num=len(docs),
+                folder_num=len(folders),
+            )
         elif docs and not folders:
             msg = _n(
                 "1 file sucessfully deleted.",
                 "%(num)d files sucessfully deleted.",
-                num=len(docs))
+                num=len(docs),
+            )
         else:
             msg = _n(
                 "1 folder sucessfully deleted.",
                 "%(num)d folders sucessfully deleted.",
-                num=len(folders))
+                num=len(folders),
+            )
 
         flash(msg, "success")
     else:
@@ -760,27 +858,42 @@ def move_multiple(folder):
     try:
         target_folder_id = int(request.form.get('target-folder'))
     except ValueError:
-        flash(_('Move elements: no destination folder selected. Aborted.'),
-              'error')
+        flash(
+            _('Move elements: no destination folder selected. Aborted.'),
+            'error',
+        )
         return redirect(current_folder_url)
 
     target_folder = repository.get_folder_by_id(target_folder_id)
 
     if folder == target_folder:
-        flash(_('Move elements: source and destination folder are identical,'
-                ' nothing done.'), 'error')
+        flash(
+            _(
+                'Move elements: source and destination folder are identical,'
+                ' nothing done.',
+            ),
+            'error',
+        )
         return redirect(current_folder_url)
 
     if not security.has_permission(g.user, 'write', folder, inherit=True):
         # this should not happen: this is just defensive programming
-        flash(_('You are not allowed to move elements from this folder'), 'error')
+        flash(
+            _('You are not allowed to move elements from this folder'), 'error'
+        )
         return redirect(current_folder_url)
 
     if not security.has_permission(
-            g.user, 'write', target_folder, inherit=True):
-        flash(_('You are not allowed to write in folder "{folder}"'
-                ).format(folder=target_folder.title),
-              'error')
+        g.user,
+        'write',
+        target_folder,
+        inherit=True,
+    ):
+        flash(
+            _('You are not allowed to write in folder "{folder}"',
+              ).format(folder=target_folder.title),
+            'error',
+        )
         return redirect(current_folder_url)
 
     for item in itertools.chain(folders, docs):
@@ -792,8 +905,13 @@ def move_multiple(folder):
     f = target_folder
     while f:
         if f in folders:
-            flash(_('Move elements: destination folder is included in moved '
-                    'elements. Moved nothing.'), 'error')
+            flash(
+                _(
+                    'Move elements: destination folder is included in moved '
+                    'elements. Moved nothing.',
+                ),
+                'error',
+            )
             return redirect(url_for(folder))
         f = f.parent
 
@@ -808,24 +926,31 @@ def move_multiple(folder):
     if exist_in_dest:
         # items existing in destination: cancel operation
         db.session.rollback()
-        msg = _('Move elements: canceled, some elements exists in destination '
-                'folder: {elements}')
+        msg = _(
+            'Move elements: canceled, some elements exists in destination '
+            'folder: {elements}',
+        )
         elements = ', '.join('"{}"'.format(i.title) for i in exist_in_dest)
         flash(msg.format(elements=elements), 'error')
         return redirect(current_folder_url)
 
     db.session.commit()
 
-    msg_f = (_n('1 folder', '{count} folders', count_f)
-             if count_f
-             else _('0 folder')).format(count=count_f)
+    msg_f = (
+        _n('1 folder', '{count} folders', count_f)
+        if count_f else _('0 folder')
+    ).format(count=count_f)
 
-    msg_d = (_n('1 document', '{count} documents', count_d)
-             if count_d
-             else _('0 document')).format(count=count_d)
+    msg_d = (
+        _n('1 document', '{count} documents', count_d)
+        if count_d else _('0 document')
+    ).format(count=count_d)
 
     msg = _('{folders} and {documents} moved to {target}').format(
-        folders=msg_f, documents=msg_d, target=target_folder.title)
+        folders=msg_f,
+        documents=msg_d,
+        target=target_folder.title,
+    )
     flash(msg, 'success')
 
     return redirect(url_for(folder))
@@ -875,8 +1000,10 @@ def check_valid_name():
         help_text = _('An element named "{name}" is already present in folder')
     elif action in ('folder-edit', 'document-edit'):
         parent = obj.parent
-        help_text = _('Cannot rename: "{name}" is already present in parent '
-                      'folder')
+        help_text = _(
+            'Cannot rename: "{name}" is already present in parent '
+            'folder',
+        )
     else:
         raise InternalServerError()
 
@@ -906,10 +1033,14 @@ def descendants_view(folder_id):
     index_service = get_service('indexing')
 
     # yapf: disable
-    filters = wq.And([wq.Term('community_id', folder.community.id),
-                      wq.Term('parent_ids', root_path_ids),
-                      wq.Or([wq.Term('object_type', Folder.entity_type),
-                             wq.Term('object_type', Document.entity_type)])])
+    filters = wq.And([
+        wq.Term('community_id', folder.community.id),
+        wq.Term('parent_ids', root_path_ids),
+        wq.Or([
+            wq.Term('object_type', Folder.entity_type),
+            wq.Term('object_type', Document.entity_type),
+        ]),
+    ])
     # yapf: enable
 
     results = index_service.search('', filter=filters, limit=None)
@@ -929,7 +1060,8 @@ def descendants_view(folder_id):
         children.sort(
             key=lambda hit: (
                 hit['object_type'] != Folder.entity_type,
-                hit['name'].lower())
+                hit['name'].lower(),
+            ),
         )
 
     descendants = []

@@ -16,7 +16,6 @@ from ..models import Event
 
 
 class Test(TestCase):
-
     def test_create_event(self):
         start = datetime.now()
         event = Event(name="Test thread", start=start)
@@ -24,18 +23,21 @@ class Test(TestCase):
 
 
 class IndexingTestCase(CommunityIndexingTestCase):
-
     @mark.skip
     def test_event_indexed(self):
         start = datetime.now()
-        event1 = Event(name="Test event", community=self.community, start=start)
+        event1 = Event(
+            name="Test event",
+            community=self.community,
+            start=start,
+        )
         event2 = Event(name="Test other event", community=self.c2, start=start)
         self.session.add(event1)
         self.session.add(event2)
         self.session.commit()
 
         svc = self.svc
-        obj_types = (Event.entity_type,)
+        obj_types = (Event.entity_type, )
         with self.login(self.user_no_community):
             res = svc.search('event', object_types=obj_types)
             assert len(res) == 0
@@ -61,7 +63,8 @@ class NoLoginViewTest(CommunityBaseTestCase):
     @mark.skip
     def test(self):
         response = self.client.get(
-            url_for("calendar.index", community_id=self.community.slug))
+            url_for("calendar.index", community_id=self.community.slug),
+        )
         assert response.status_code == 200
 
 

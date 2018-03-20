@@ -14,8 +14,8 @@ DEBUG_TB_PROFILER_ENABLED = True
 LOGGING_CONFIG_FILE = 'logging.yml'
 
 SQLALCHEMY_DATABASE_URI = "sqlite:///INSTANCE_FOLDER/data.db"
-#SQLALCHEMY_DATABASE_URI = postgres://user@localhost:5432/abilian_sbe
-#SQLALCHEMY_ECHO = True
+# SQLALCHEMY_DATABASE_URI = postgres://user@localhost:5432/abilian_sbe
+# SQLALCHEMY_ECHO = True
 
 # run tasks locally, no async
 CELERY_ALWAYS_EAGER = True

@@ -25,11 +25,11 @@ from abilian.services.indexing.adapter import SAAdapter
 
 
 class ThreadClosedError(RuntimeError):
-
     def __init__(self, thread):
         super(ThreadClosedError, self).__init__(
             'The thread {!r} is closed. No modification allowed on its posts: '
-            'creation, edition, deletion'.format(thread),)
+            'creation, edition, deletion'.format(thread),
+        )
         self.thread = thread
 
 
@@ -49,11 +49,17 @@ class Thread(Entity):
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref('threads', cascade="all, delete-orphan"))
+        backref=backref('threads', cascade="all, delete-orphan"),
+    )
 
     #: The thread title (aka subject)
     _title = Column(
-        'title', Unicode(255), nullable=False, default="", info=SEARCHABLE)
+        'title',
+        Unicode(255),
+        nullable=False,
+        default="",
+        info=SEARCHABLE,
+    )
 
     last_post_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
@@ -131,7 +137,10 @@ class Post(Entity):
     #: The thread this post belongs to
     thread_id = Column(ForeignKey(Thread.id), nullable=False)
     thread = relationship(
-        Thread, foreign_keys=thread_id, back_populates='posts')
+        Thread,
+        foreign_keys=thread_id,
+        back_populates='posts',
+    )
 
     #: The post this post is a reply to, if any (currently not used)
     parent_post_id = Column(ForeignKey("forum_post.id"), nullable=True)
@@ -167,7 +176,8 @@ class ThreadIndexAdapter(SAAdapter):
     def get_document(self, obj):
         kw = super(ThreadIndexAdapter, self).get_document(obj)
         kw['text'] = ' '.join(
-            chain((kw['text'],), [p.body_html for p in obj.posts]))
+            chain((kw['text'], ), [p.body_html for p in obj.posts]),
+        )
         return kw
 
 
@@ -224,4 +234,6 @@ class PostAttachment(BaseContent, CmisObject):
             'attachments',
             lazy='select',
             order_by='PostAttachment.name',
-            cascade='all, delete-orphan'))
+            cascade='all, delete-orphan',
+        ),
+    )

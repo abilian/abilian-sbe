@@ -32,7 +32,10 @@ def int_or_none(val):
 
 class WikiPageForm(Form):
     title = StringField(
-        label=_l("Title"), filters=(strip,), validators=[data_required()])
+        label=_l("Title"),
+        filters=(strip, ),
+        validators=[data_required()],
+    )
     body_src = TextAreaField(
         label=_l("Body"),
         filters=(strip, clean_up),
@@ -41,15 +44,19 @@ class WikiPageForm(Form):
     )
 
     message = StringField(label=_l("Commit message"))
-    page_id = HiddenField(filters=(int_or_none,), validators=[flaghidden()])
+    page_id = HiddenField(filters=(int_or_none, ), validators=[flaghidden()])
     last_revision_id = HiddenField(
-        filters=(int_or_none,), validators=[flaghidden()])
+        filters=(int_or_none, ),
+        validators=[flaghidden()],
+    )
 
     def validate_title(self, field):
         title = field.data
         if title != field.object_data and page_exists(title):
             raise ValidationError(
-                _("A page with this name already exists. Please use another name.")
+                _(
+                    "A page with this name already exists. Please use another name."
+                ),
             )
 
     def validate_last_revision_id(self, field):
@@ -66,8 +73,10 @@ class WikiPageForm(Form):
 def page_exists(title):
     title = title.strip()
     return WikiPage.query \
-        .filter(WikiPage.community_id == g.community.id,
-                WikiPage.title == title) \
+        .filter(
+            WikiPage.community_id == g.community.id,
+            WikiPage.title == title,
+        ) \
         .count() > 0
 
 

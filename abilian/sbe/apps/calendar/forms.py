@@ -62,20 +62,24 @@ for attr in ALLOWED_TAGS:
 
 class EventForm(Form):
     title = StringField(
-        label=_l("Title"), filters=(strip,), validators=[required()])
+        label=_l("Title"),
+        filters=(strip, ),
+        validators=[required()],
+    )
 
     start = DateTimeField(_l("Start"), validators=[required()])
     end = DateTimeField(_l("End"), validators=[required()])
 
-    location = TextAreaField(label=_l("Location"), filters=(strip,))
+    location = TextAreaField(label=_l("Location"), filters=(strip, ))
 
-    url = URLField(label=_l("URL"), filters=(strip,))
+    url = URLField(label=_l("URL"), filters=(strip, ))
 
     description = TextAreaField(
         label=_l("Description"),
         widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
-        filters=(strip,),
-        validators=[required()])
+        filters=(strip, ),
+        validators=[required()],
+    )
 
     def validate_description(self, field):
         field.data = bleach.clean(
@@ -83,7 +87,8 @@ class EventForm(Form):
             tags=ALLOWED_TAGS,
             attributes=ALLOWED_ATTRIBUTES,
             styles=ALLOWED_STYLES,
-            strip=True)
+            strip=True,
+        )
 
     def validate_end(self, field):
         if self.start.data > self.end.data:

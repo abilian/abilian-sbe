@@ -18,7 +18,12 @@ _COMMUNITY_CONTENT_FIELDNAME = 'is_community_content'
 _COMMUNITY_CONTENT_FIELD = wf.BOOLEAN()
 
 _COMMUNITY_ID_FIELD = wf.NUMERIC(
-    numtype=int, bits=64, signed=False, stored=True, unique=False)
+    numtype=int,
+    bits=64,
+    signed=False,
+    stored=True,
+    unique=False,
+)
 _COMMUNITY_SLUG_FIELD = wf.ID(stored=True)
 
 _FIELDS = [
@@ -40,7 +45,10 @@ def init_app(app):
                 if schema[fieldname] is not field:
                     logger.warning(
                         'Field "%s" already in schema %r, replacing with '
-                        'expected fieldtype instance', fieldname, schema)
+                        'expected fieldtype instance',
+                        fieldname,
+                        schema,
+                    )
                     del schema._fields[fieldname]
                 else:
                     continue
@@ -64,7 +72,7 @@ def filter_user_communities():
         if communities:
             communities = wq.And([
                 wq.Term(_COMMUNITY_CONTENT_FIELDNAME, True),
-                wq.Or(communities)
+                wq.Or(communities),
             ])
             filter_q = wq.Or([filter_q, communities])
 

@@ -16,7 +16,6 @@ CMIS_NS = "http://docs.oasis-open.org/ns/cmis/core/200908/"
 
 
 class Entry(object):
-
     def __init__(self, xml=None):
         self.properties = {}
         self.links = []

@@ -42,9 +42,9 @@ def test_default_view_kw():
     # test exceptions are handled if passed an object with 'community' attribute
     # and no community_id in kwargs. and ValueError is properly raised
     if six.PY2:
-        dummy = type(b'Dummy', (object,), {b'community': None})()
+        dummy = type(b'Dummy', (object, ), {b'community': None})()
     else:
-        dummy = type('Dummy', (object,), {'community': None})()
+        dummy = type('Dummy', (object, ), {'community': None})()
 
     with pytest.raises(ValueError) as exc_info:
         views.default_view_kw({}, dummy, 'dummy', 1)
@@ -52,7 +52,7 @@ def test_default_view_kw():
     if six.PY2:
         assert exc_info.value.message == 'Cannot find community_id value'
     else:
-        assert exc_info.value.args == ('Cannot find community_id value',)
+        assert exc_info.value.args == ('Cannot find community_id value', )
 
 
 def test_default_url(app, community):
@@ -116,7 +116,10 @@ def test_membership(community, db):
     assert memberships[0].role is MEMBER
 
     when_set.assert_called_once_with(
-        community, is_new=True, membership=memberships[0])
+        community,
+        is_new=True,
+        membership=memberships[0],
+    )
     assert not when_removed.called
     when_set.reset_mock()
 
@@ -138,7 +141,10 @@ def test_membership(community, db):
     assert community.get_role(user) == "manager"
 
     when_set.assert_called_once_with(
-        community, is_new=False, membership=memberships[0])
+        community,
+        is_new=False,
+        membership=memberships[0],
+    )
     assert not when_removed.called
     when_set.reset_mock()
 
@@ -170,7 +176,6 @@ def test_folder_roles(community, db, app):
 
 
 def test_community_content_decorator(community, db):
-
     @community_content
     class CommunityContent(Entity):
         community_id = CommunityIdColumn()
@@ -211,10 +216,11 @@ def login(user, remember=False, force=False):
     # self._login_tests_sanity_check()
     success = login_user(user, remember=remember, force=force)
     if not success:
-        raise ValueError('User is not active, cannot login; or use force=True',)
+        raise ValueError(
+            'User is not active, cannot login; or use force=True',
+        )
 
     class LoginContext(object):
-
         def __enter__(self):
             return None
 
@@ -235,7 +241,7 @@ def test_community_indexed(app, db):
     security_service = app.services['security']
     security_service.start()
 
-    obj_types = (Community.entity_type,)
+    obj_types = (Community.entity_type, )
 
     user_no_community = User(email='no_community@example.com')
     db.session.add(user_no_community)
@@ -285,7 +291,7 @@ def test_default_view_kw_with_hit(app, db, community):
     db.session.add(user)
     community.set_membership(user, READER)
 
-    obj_types = (Community.entity_type,)
+    obj_types = (Community.entity_type, )
 
     with app.test_request_context():
         with login(user):

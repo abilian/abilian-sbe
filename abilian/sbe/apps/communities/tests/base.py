@@ -30,7 +30,10 @@ class CommunityIndexingTestCase(CommunityBaseTestCase):
         self.svc = self.app.services['indexing']
 
         self.user = User(
-            email='user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com',
+            password='azerty',
+            can_login=True,
+        )
         self.session.add(self.user)
         self.community.set_membership(self.user, READER)
 
@@ -38,11 +41,17 @@ class CommunityIndexingTestCase(CommunityBaseTestCase):
         self.session.add(self.c2)
 
         self.user_c2 = User(
-            email='user_2@example.com', password='azerty', can_login=True)
+            email='user_2@example.com',
+            password='azerty',
+            can_login=True,
+        )
         self.session.add(self.user_c2)
         self.c2.set_membership(self.user_c2, READER)
 
         self.user_no_community = User(
-            email='no_community@example.com', password='azerty', can_login=True)
+            email='no_community@example.com',
+            password='azerty',
+            can_login=True,
+        )
         self.session.add(self.user_no_community)
         self.session.commit()

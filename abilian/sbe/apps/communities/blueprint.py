@@ -67,7 +67,10 @@ def pull_community(endpoint, values):
     g.nav['active'] = 'section:communities'
     g.breadcrumb.append(
         BreadcrumbItem(
-            label=_l('Communities'), url=Endpoint('communities.index')))
+            label=_l('Communities'),
+            url=Endpoint('communities.index'),
+        ),
+    )
 
     try:
         slug = values.pop('community_id')
@@ -75,7 +78,10 @@ def pull_community(endpoint, values):
         if community:
             g.community = CommunityPresenter(community)
             wall_url = Endpoint('wall.index', community_id=community.slug)
-            breadcrumb_item = BreadcrumbItem(label=community.name, url=wall_url)
+            breadcrumb_item = BreadcrumbItem(
+                label=community.name,
+                url=wall_url,
+            )
             g.breadcrumb.append(breadcrumb_item)
         else:
             raise NotFound()

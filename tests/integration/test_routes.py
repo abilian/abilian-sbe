@@ -49,7 +49,9 @@ class TestViews(BaseTestCase):
             try:
                 response = self.client.get(url)
                 assert response.status_code in (200, 302), \
-                    "Bad link: {} (status={})".format(url, response.status_code)
-            except:
+                    "Bad link: {} (status={})".format(
+                        url, response.status_code,
+                )
+            except BaseException:
                 print("Problem with url: {}".format(url))
                 raise

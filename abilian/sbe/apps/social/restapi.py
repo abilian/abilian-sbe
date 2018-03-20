@@ -136,7 +136,9 @@ def follow(user_id):
 
 # [DELETE] /api/users/USER_ID/followers/CONTACT_USER_ID	Unfollow a User
 @restapi.route(
-    "/users/<int:user_id>/followers/<int:contact_user_id>", methods=['DELETE'])
+    "/users/<int:user_id>/followers/<int:contact_user_id>",
+    methods=['DELETE'],
+)
 @login_required
 def unfollow(user_id, contact_user_id):
     user = User.query.get(user_id)
@@ -269,7 +271,9 @@ def like_comment(comment_id):
 
 # [DELETE] /api/messages/MESSAGE_ID/likes/LIKES_ID	Un-liking a Message
 @restapi.route(
-    "/messages/<int:message_id>/likes/<int:like_id>", methods=['DELETE'])
+    "/messages/<int:message_id>/likes/<int:like_id>",
+    methods=['DELETE'],
+)
 @login_required
 def unlike_message(message_id, like_id):
     pass
@@ -277,7 +281,9 @@ def unlike_message(message_id, like_id):
 
 # [DELETE] /api/comments/COMMENT_ID/likes/LIKES_ID
 @restapi.route(
-    "/comments/<int:comment_id>/likes/<int:like_id>", methods=['DELETE'])
+    "/comments/<int:comment_id>/likes/<int:like_id>",
+    methods=['DELETE'],
+)
 @login_required
 def unlike_comment(comment_id, like_id):
     pass

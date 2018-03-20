@@ -52,9 +52,14 @@ class AbilianSBE(object):
 
         # sbe static assets
         app.add_static_url(
-            'abilian/sbe', STATIC_DIR, endpoint='abilian_sbe_static')
+            'abilian/sbe',
+            STATIC_DIR,
+            endpoint='abilian_sbe_static',
+        )
         app.extensions['webassets'].append_path(
-            STATIC_DIR, app.static_url_path + '/abilian/sbe')
+            STATIC_DIR,
+            app.static_url_path + '/abilian/sbe',
+        )
 
         app.register_asset('js', *JS)
         app.register_asset('css', LESSCSS_FILE)

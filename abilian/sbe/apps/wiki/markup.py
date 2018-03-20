@@ -13,14 +13,16 @@ __all__ = ['convert']
 
 
 class UrlBuilder(object):
-
     def __init__(self, page):
         self.page = page
 
     def build(self, label, base, end):
         label = label.strip()
         return url_for(
-            ".page", community_id=self.page.community.slug, title=label)
+            ".page",
+            community_id=self.page.community.slug,
+            title=label,
+        )
 
 
 def convert(page, text):
@@ -34,7 +36,6 @@ def convert(page, text):
 
 
 class SBEWikiLinkExtension(WikiLinkExtension):
-
     def extendMarkdown(self, md, md_globals):
         self.md = md
 
@@ -46,7 +47,6 @@ class SBEWikiLinkExtension(WikiLinkExtension):
 
 
 class SBEWikiLinks(WikiLinks):
-
     def handleMatch(self, m):
         from .forms import page_exists
         if m.group(2).strip():

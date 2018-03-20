@@ -31,7 +31,6 @@ __all__ = ['webdav']
 
 # TODO: real logging
 class Logger(object):
-
     def debug(self, msg):
         print(msg)
 
@@ -101,7 +100,7 @@ def options(path):
         'Content-Length': '0',
         'DAV': '1,2',
         'MS-Author-Via': 'DAV',
-        'Allow': OPTIONS
+        'Allow': OPTIONS,
     }
     print("Returning", headers)
     return "", HTTP_OK, headers
@@ -117,7 +116,7 @@ def get(path):
     file_name = obj.file_name.encode('utf8')
     headers = {
         'Content-Type': obj.content_type,
-        'Content-Disposition': 'attachment;filename=%s' % file_name
+        'Content-Disposition': 'attachment;filename=%s' % file_name,
     }
     return obj.content, HTTP_OK, headers
 
@@ -236,7 +235,11 @@ def propfind(path):
 
     if depth == "1" and obj.is_folder:
         for child in obj.children:
-            m.add_response_for(request.url + "/" + child.name, child, DAV_PROPS)
+            m.add_response_for(
+                request.url + "/" + child.name,
+                child,
+                DAV_PROPS,
+            )
 
     print(m.to_string())
 
@@ -275,11 +278,18 @@ def lock(path):
     </D:lockdiscovery>
 </D:prop>''' % token
 
-    hlist = [('Content-Type', 'text/xml'), ('Lock-Token',
-                                            '<urn:uuid:%s>' % token)]
+    hlist = [
+        ('Content-Type', 'text/xml'),
+        (
+            'Lock-Token',
+            '<urn:uuid:%s>' % token,
+        ),
+    ]
 
     return Response(
-        xml, headers=Headers.linked(hlist))  # , status ='423 Locked'
+        xml,
+        headers=Headers.linked(hlist),
+    )  # , status ='423 Locked'
     """
     public Response lock(@Context UriInfo uriInfo) throws Exception {
         String token = null;

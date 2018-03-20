@@ -19,7 +19,11 @@ MAX_LAST_USERS = 15
 MAX_MESSAGES = 15
 
 social = Blueprint(
-    "social", __name__, url_prefix='/social', template_folder='../templates')
+    "social",
+    __name__,
+    url_prefix='/social',
+    template_folder='../templates',
+)
 route = social.route
 
 

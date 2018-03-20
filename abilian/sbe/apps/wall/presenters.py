@@ -39,7 +39,9 @@ MESSAGES = {
     ('leave', Community): _l('has left the community {object}.'),
 }
 
-OBJ_TEMPLATE = Template('<a href="{{ object_url|safe }}">{{ object_name }}</a>')
+OBJ_TEMPLATE = Template(
+    '<a href="{{ object_url|safe }}">{{ object_name }}</a>',
+)
 
 POST_BODY_TEMPLATE = '''
   <span class="body">"<a href="{{ object_url |safe }}">{{ body }}</a>"
@@ -88,7 +90,6 @@ DOCUMENT_BODY_TEMPLATE = '''
 
 
 class ActivityEntryPresenter(BasePresenter):
-
     @property
     def object_url(self):
         return url_for(self._model.object)
@@ -104,7 +105,10 @@ class ActivityEntryPresenter(BasePresenter):
             ctx['verb'] = entry.verb
 
             ctx['object_name'] = entry.object.name or getattr(
-                entry.object, 'title', "???")
+                entry.object,
+                'title',
+                "???",
+            )
             ctx['object_url'] = url_for(entry.object)
             ctx['object_type'] = object_class_localized
             ctx['object'] = OBJ_TEMPLATE.render(**ctx)
@@ -114,7 +118,8 @@ class ActivityEntryPresenter(BasePresenter):
                 ctx['target_url'] = url_for(entry.target)
                 ctx['target'] = OBJ_TEMPLATE.render(
                     object_name=ctx['target_name'],
-                    object_url=ctx['target_url'])
+                    object_url=ctx['target_url'],
+                )
 
             msg = MESSAGES.get((entry.verb, entry.object.__class__))
             if msg:
@@ -125,8 +130,10 @@ class ActivityEntryPresenter(BasePresenter):
                     msg += "."
 
             elif entry.verb == 'post':
-                msg = _('has posted an object of type {object_type} '
-                        'called "{object}"').format(**ctx)
+                msg = _(
+                    'has posted an object of type {object_type} '
+                    'called "{object}"',
+                ).format(**ctx)
 
                 if entry.target and not ignore_community:
                     msg += " " + _('in the community {target}.').format(**ctx)
@@ -143,8 +150,8 @@ class ActivityEntryPresenter(BasePresenter):
                 msg = _('has updated {object_type} {object}.').format(**ctx)
 
             else:
-                msg = _('has done action "{verb}" on object "{object}".').format(
-                    **ctx)
+                msg = _('has done action "{verb}" on object "{object}".'
+                        ).format(**ctx)
 
             return Markup(msg)
 
@@ -173,7 +180,8 @@ def get_body_thread(object):
         POST_BODY_TEMPLATE,
         object_url=url_for(object),
         body=body,
-        post=object.posts[0])
+        post=object.posts[0],
+    )
     return Markup(body)
 
 
@@ -185,7 +193,11 @@ def get_body_post(object):
     if len(body) > 400:
         body = body[0:400] + "…"
     body = render_template_string(
-        POST_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object)
+        POST_BODY_TEMPLATE,
+        object_url=url_for(object),
+        body=body,
+        post=object,
+    )
     return Markup(body)
 
 
@@ -200,5 +212,6 @@ def get_body_document(object):
         DOCUMENT_BODY_TEMPLATE,
         object_url=url_for(object),
         body=body,
-        post=object)
+        post=object,
+    )
     return Markup(body)

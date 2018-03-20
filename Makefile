@@ -89,17 +89,17 @@ vagrant-tests:
 #
 # Linting & formatting
 #
-lint: lint-js lint-python lint-less lint-doc
+lint: lint-js lint-py lint-less lint-doc
 
 lint-js:
 	@echo "--> Linting JavaScript files"
-	npm run eslint
+	./node_modules/.bin/eslint abilian/sbe/static/js
 
 lint-less:
 	@echo "--> Linting Less files"
-	npm run stylelint
+	./node_modules/.bin/stylelint abilian/sbe/static/less/**/*.less
 
-lint-python:
+lint-py:
 	@echo "--> Linting Python files"
 	@make flake8
 	@make lint-py3k
@@ -121,14 +121,21 @@ lint-doc:
 format: format-py format-js
 
 format-py:
-	isort -a  "from __future__ import absolute_import, print_function, unicode_literals"
-		-rc abilian demo tests *.py
-	-yapf --style google -r -i abilian demo tests *.py
+	#-add-trailing-comma \
+	#	`find abilian -name '*.py'` \
+	#	`find tests -name '*.py'` \
+	#	demo/*.py *.py
+	-yapf -r -i abilian demo tests *.py
+	# autopep8 -j3 -r --in-place -a --ignore E711 abilian demo tests *.py
 	isort -rc abilian demo tests *.py
 
 format-js:
 	./node_modules/.bin/prettier --trailing-comma es5 --write \
 		./abilian/sbe/static/js/**.js
+
+futurize-py-headers:
+	isort -a  "from __future__ import absolute_import, print_function, unicode_literals"
+		-rc abilian demo tests *.py
 
 #
 # running

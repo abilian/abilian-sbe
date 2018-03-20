@@ -1,9 +1,17 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 DAV_PROPS = [
-    'creationdate', 'displayname', 'getcontentlanguage', 'getcontentlength',
-    'getcontenttype', 'getetag', 'getlastmodified', 'lockdiscovery',
-    'resourcetype', 'source', 'supportedlock'
+    'creationdate',
+    'displayname',
+    'getcontentlanguage',
+    'getcontentlength',
+    'getcontenttype',
+    'getetag',
+    'getlastmodified',
+    'lockdiscovery',
+    'resourcetype',
+    'source',
+    'supportedlock',
 ]
 
 # DAV level 1

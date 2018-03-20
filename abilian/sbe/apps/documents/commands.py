@@ -10,7 +10,9 @@ from . import tasks
 from .models import Document
 
 manager = Manager(
-    description='SBE documents actions', help='SBE documents actions')
+    description='SBE documents actions',
+    help='SBE documents actions',
+)
 
 
 @manager.command
@@ -20,9 +22,11 @@ def antivirus():
 
     documents = Document.query \
         .filter(Document.content_blob != None) \
-        .options(sa.orm.noload('creator'),
-                 sa.orm.noload('owner'),
-                 sa.orm.joinedload('content_blob'))
+        .options(
+            sa.orm.noload('creator'),
+            sa.orm.noload('owner'),
+            sa.orm.joinedload('content_blob'),
+        )
 
     total = 0
     count = 0
@@ -33,5 +37,9 @@ def antivirus():
             tasks.antivirus_scan.delay(d.id)
             count += 1
 
-    print('{count}/{total} documents scheduled'.format(
-        count=count, total=total))
+    print(
+        '{count}/{total} documents scheduled'.format(
+            count=count,
+            total=total,
+        )
+    )

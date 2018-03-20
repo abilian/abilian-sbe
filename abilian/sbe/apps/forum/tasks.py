@@ -44,7 +44,7 @@ logger = get_task_logger(__name__)
 def init_app(app):
     global check_maildir
     if app.config['INCOMING_MAIL_USE_MAILDIR']:
-        make_task = periodic_task(run_every=crontab(minute='*',),)
+        make_task = periodic_task(run_every=crontab(minute='*', ), )
         check_maildir = make_task(check_maildir)
 
 
@@ -60,8 +60,10 @@ def send_post_by_email(post_id):
 
         thread = post.thread
         community = thread.community
-        logger.info("Sending new post by email to members of community %r",
-                    community.name)
+        logger.info(
+            "Sending new post by email to members of community %r",
+            community.name,
+        )
 
         CHUNK_SIZE = 20
         members_id = [
@@ -104,8 +106,10 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
     successfully_sent = []
     thread = post.thread
     community = thread.community
-    user_filter = (User.id.in_(members_id)
-                   if len(members_id) > 1 else User.id == members_id[0])
+    user_filter = (
+        User.id.in_(members_id)
+        if len(members_id) > 1 else User.id == members_id[0]
+    )
     users = User.query.filter(user_filter).all()
 
     for user in users:
@@ -125,7 +129,9 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
             # 5 minutes * (2** retry count)
             countdown = 300 * 2**batch_send_post_to_users.request.retries
             batch_send_post_to_users.retry(
-                [post_id, list(failed)], countdown=countdown)
+                [post_id, list(failed)],
+                countdown=countdown,
+            )
         else:
             batch_send_post_to_users.apply_async([post_id, list(failed)])
 
@@ -152,7 +158,8 @@ def build_local_part(name, uid):
             # even without digest, it's too long
             raise ValueError(
                 'Cannot build reply address: local part exceeds 64 '
-                'characters')
+                'characters',
+            )
         local_part = local_part[:64]
 
     return local_part
@@ -219,12 +226,21 @@ def send_post_to_user(community, post, member):
     sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
     SBE_FORUM_REPLY_BY_MAIL = config.get('SBE_FORUM_REPLY_BY_MAIL', False)
     SERVER_NAME = config.get('SERVER_NAME', 'example.com')
-    list_id = '"{} forum" <forum.{}.{}>'.format(community.name, community.slug,
-                                                SERVER_NAME)
+    list_id = '"{} forum" <forum.{}.{}>'.format(
+        community.name,
+        community.slug,
+        SERVER_NAME,
+    )
     forum_url = url_for(
-        'forum.index', community_id=community.slug, _external=True)
+        'forum.index',
+        community_id=community.slug,
+        _external=True,
+    )
     forum_archive = url_for(
-        'forum.archives', community_id=community.slug, _external=True)
+        'forum.archives',
+        community_id=community.slug,
+        _external=True,
+    )
 
     extra_headers = {
         'List-Id': list_id,
@@ -243,13 +259,15 @@ def send_post_to_user(community, post, member):
             sender=sender,
             recipients=[recipient],
             reply_to=replyto,
-            extra_headers=extra_headers)
+            extra_headers=extra_headers,
+        )
     else:
         msg = Message(
             subject,
             sender=sender,
             recipients=[recipient],
-            extra_headers=extra_headers)
+            extra_headers=extra_headers,
+        )
 
     ctx = {
         'community': community,
@@ -267,7 +285,8 @@ def send_post_to_user(community, post, member):
     except BaseException:
         logger.error(
             "Send mail to user failed",
-            exc_info=True)  # log to sentry if enabled
+            exc_info=True,
+        )  # log to sentry if enabled
 
 
 def extract_content(payload, marker):
@@ -283,7 +302,8 @@ def validate_html(payload):
         tags=ALLOWED_TAGS,
         attributes=ALLOWED_ATTRIBUTES,
         styles=ALLOWED_STYLES,
-        strip=True).strip()
+        strip=True,
+    ).strip()
 
 
 def add_paragraph(newpost):
@@ -303,7 +323,8 @@ def clean_html(newpost):
         r"(<blockquote.*?<p>.*?</p>.*?</blockquote>)",
         '',
         newpost,
-        flags=re.MULTILINE | re.DOTALL)
+        flags=re.MULTILINE | re.DOTALL,
+    )
 
     # this cleans auto generated reponse text (<br>timedate <a email /a><br>)
     # we reverse the string because re.sub replaces
@@ -313,7 +334,8 @@ def clean_html(newpost):
         r"(>rb<.*?>a.*?=ferh\sa<.*?>rb<)",
         '',
         clean[::-1],
-        flags=re.MULTILINE | re.DOTALL)
+        flags=re.MULTILINE | re.DOTALL,
+    )
     clean = clean[::-1]
 
     return clean
@@ -409,7 +431,8 @@ def process_email(message):
         logger.error(
             'Recipient %r cannot be converted to locale/thread_id/user.id',
             to_address,
-            exc_info=True)
+            exc_info=True,
+        )
         return False
 
     # Translate marker with locale from email address
@@ -425,7 +448,9 @@ def process_email(message):
         return False
 
     # Persist post
-    with current_app.test_request_context('/process_email', headers=rq_headers):
+    with current_app.test_request_context(
+        '/process_email', headers=rq_headers
+    ):
         g.user = User.query.get(user_id)
         thread = Thread.query.get(thread_id)
         community = thread.community
@@ -436,7 +461,12 @@ def process_email(message):
         obj_meta['origin'] = 'email'
         obj_meta['send_by_email'] = True
         activity.send(
-            app, actor=g.user, verb='post', object=post, target=community)
+            app,
+            actor=g.user,
+            verb='post',
+            object=post,
+            target=community,
+        )
 
         for desc in attachments:
             attachment = PostAttachment(name=desc['filename'])

@@ -55,20 +55,26 @@ class Membership(db.Model):
     user = relationship(
         User,
         lazy='joined',
-        backref=backref('communautes_membership', lazy='select'))
+        backref=backref('communautes_membership', lazy='select'),
+    )
 
     community_id = Column(
-        ForeignKey('community.id'), index=True, nullable=False)
+        ForeignKey('community.id'),
+        index=True,
+        nullable=False,
+    )
     community = relationship('Community', lazy='joined')
 
     role = Column(RoleType())  # should be either 'member' or 'manager'
 
-    __table_args__ = (UniqueConstraint('user_id', 'community_id'),)
+    __table_args__ = (UniqueConstraint('user_id', 'community_id'), )
 
     def __repr__(self):
         return '<Membership user={}, community={}, role={}>'.format(
-            repr(self.user), repr(self.community),
-            str(self.role)).encode('utf-8')
+            repr(self.user),
+            repr(self.community),
+            str(self.role),
+        ).encode('utf-8')
 
 
 def community_content(cls):
@@ -83,7 +89,7 @@ def community_content(cls):
 
     cls.community_slug = property(community_slug)
     index_to = cls.__indexation_args__.setdefault('index_to', ())
-    index_to += (('community_slug', ('community_slug',)),)
+    index_to += (('community_slug', ('community_slug', )), )
     cls.__indexation_args__['index_to'] = index_to
 
     def _indexable_roles_and_users(self):
@@ -110,7 +116,7 @@ class Community(Entity):
     __indexation_args__ = {}  # type: Dict[str, Any]
     __indexation_args__.update(Entity.__indexation_args__)
     index_to = __indexation_args__.setdefault('index_to', ())
-    index_to += (('id', ('id', 'community_id')),)
+    index_to += (('id', ('id', 'community_id')), )
     __indexation_args__['index_to'] = index_to
     del index_to
 
@@ -118,7 +124,11 @@ class Community(Entity):
 
     # : A public description.
     description = Column(
-        Unicode(500), default="", nullable=False, info=SEARCHABLE)
+        Unicode(500),
+        default="",
+        nullable=False,
+        info=SEARCHABLE,
+    )
 
     #: An image or logo for this community.
     image_id = Column(ForeignKey(Blob.id), index=True)
@@ -128,13 +138,15 @@ class Community(Entity):
     folder_id = Column(
         Integer,
         ForeignKey(Folder.id, use_alter=True, name='fk_community_root_folder'),
-        unique=True)
+        unique=True,
+    )
     folder = relation(
         Folder,
         single_parent=True,  # required for delete-orphan
         primaryjoin=(folder_id == Folder.id),
         cascade='all, delete-orphan',
-        backref=backref('_community', lazy='select', uselist=False))
+        backref=backref('_community', lazy='select', uselist=False),
+    )
 
     #: The group this community is linked to, if any. Memberships are then
     #: reflected
@@ -149,19 +161,32 @@ class Community(Entity):
         User,
         secondary=Membership.__table__,
         viewonly=True,
-        backref=backref('communities', lazy='select', viewonly=True))
+        backref=backref('communities', lazy='select', viewonly=True),
+    )
 
     #: Number of members in this community.
     membership_count = Column(
-        Integer, default=0, nullable=False, info=NOT_AUDITABLE)
+        Integer,
+        default=0,
+        nullable=False,
+        info=NOT_AUDITABLE,
+    )
 
     #: Number of documents in this community.
     document_count = Column(
-        Integer, default=0, nullable=False, info=NOT_AUDITABLE)
+        Integer,
+        default=0,
+        nullable=False,
+        info=NOT_AUDITABLE,
+    )
 
     #: Last time something happened in this community
     last_active_at = Column(
-        DateTime, default=datetime.utcnow, nullable=False, info=NOT_AUDITABLE)
+        DateTime,
+        default=datetime.utcnow,
+        nullable=False,
+        info=NOT_AUDITABLE,
+    )
 
     # Various features for this community:
 
@@ -200,8 +225,11 @@ class Community(Entity):
                 # during creation, we may have to provide a temporary name for
                 # subfolder, we don't want empty names on folders since they must be
                 # unique among siblings
-                name = '{}_{}-{}'.format(self.__class__.__name__, str(self.id),
-                                         time.asctime())
+                name = '{}_{}-{}'.format(
+                    self.__class__.__name__,
+                    str(self.id),
+                    time.asctime(),
+                )
             self.folder = repository.root_folder.create_subfolder(name)
             # if not self.group:
             #   self.group = Group(name=self.name)
@@ -243,8 +271,10 @@ class Community(Entity):
         is_new = True
         M = Membership
         membership = session.query(M) \
-            .filter(and_(M.user_id == user.id,
-                         M.community_id == self.id)) \
+            .filter(and_(
+                M.user_id == user.id,
+                M.community_id == self.id,
+            )) \
             .first()
 
         if not membership:
@@ -263,8 +293,12 @@ class Community(Entity):
             .filter(and_(M.user_id == user.id, M.community_id == self.id)) \
             .first()
         if not membership:
-            raise KeyError("User {} is not a member of community {}".format(
-                user, self))
+            raise KeyError(
+                "User {} is not a member of community {}".format(
+                    user,
+                    self,
+                )
+            )
 
         db.session.delete(membership)
         self.membership_count -= 1
@@ -296,8 +330,10 @@ class Community(Entity):
         M = Membership
         membership = current_app.db.session() \
             .query(M.role) \
-            .filter(and_(M.community_id == self.id,
-                         M.user_id == user.id)) \
+            .filter(and_(
+                M.community_id == self.id,
+                M.user_id == user.id,
+            )) \
             .first()
 
         return membership.role if membership else None
@@ -331,7 +367,9 @@ def CommunityIdColumn():
     return Column(
         ForeignKey(Community.id),
         nullable=False,
-        info=SEARCHABLE | dict(index_to=(('community_id', ('community_id',)),)))
+        info=SEARCHABLE
+        | dict(index_to=(('community_id', ('community_id', )), ), ),
+    )
 
 
 # Handlers to keep community/group members in sync
@@ -348,8 +386,13 @@ def _membership_added(sender, membership, is_new):
         return
 
     if sender.group and membership.user not in sender.group.members:
-        logger.debug('_membership_added(%r, %r, %r) user: %r', sender,
-                     membership, is_new, membership.user)
+        logger.debug(
+            '_membership_added(%r, %r, %r) user: %r',
+            sender,
+            membership,
+            is_new,
+            membership.user,
+        )
         setattr(membership.user, _PROCESSED_ATTR, OP_APPEND)
         sender.group.members.add(membership.user)
 
@@ -360,8 +403,12 @@ def membership_removed(sender, membership):
         return
 
     if sender.group and membership.user in sender.group.members:
-        logger.debug('_membership_removed(%r, %r) user: %r', sender, membership,
-                     membership.user)
+        logger.debug(
+            '_membership_removed(%r, %r) user: %r',
+            sender,
+            membership,
+            membership.user,
+        )
         setattr(membership.user, _PROCESSED_ATTR, OP_REMOVE)
         sender.group.members.discard(membership.user)
 
@@ -373,8 +420,12 @@ def _on_member_change(community, user, initiator):
     if not group:
         return
 
-    logger.debug('_on_member_change(%r, %r, op=%r)', community, user,
-                 initiator.op)
+    logger.debug(
+        '_on_member_change(%r, %r, op=%r)',
+        community,
+        user,
+        initiator.op,
+    )
 
     if getattr(user, _PROCESSED_ATTR, False) is initiator.op:
         return
@@ -395,18 +446,30 @@ def _on_linked_group_change(community, value, oldvalue, initiator):
     if value == oldvalue:
         return
 
-    logger.debug('_on_linked_group_change(%r, %r, %r)', community, value,
-                 oldvalue)
+    logger.debug(
+        '_on_linked_group_change(%r, %r, %r)',
+        community,
+        value,
+        oldvalue,
+    )
 
     if oldvalue is not None and oldvalue.members:
-        logger.debug('_on_linked_group_change(%r, %r, %r): oldvalue clear()',
-                     community, value, oldvalue)
+        logger.debug(
+            '_on_linked_group_change(%r, %r, %r): oldvalue clear()',
+            community,
+            value,
+            oldvalue,
+        )
         oldvalue.members.clear()
 
     members = set(community.members)
     if value is not None and value.members != members:
-        logger.debug('_on_linked_group_change(%r, %r, %r): set value.members',
-                     community, value, oldvalue)
+        logger.debug(
+            '_on_linked_group_change(%r, %r, %r): set value.members',
+            community,
+            value,
+            oldvalue,
+        )
         value.members = members
 
 
@@ -419,8 +482,10 @@ def _safe_get_community(group):
         try:
             return session.query(Community) \
                 .filter(Community.group == group) \
-                .options(sa.orm.joinedload(Community.group),
-                         sa.orm.joinedload(Community.members)) \
+                .options(
+                    sa.orm.joinedload(Community.group),
+                    sa.orm.joinedload(Community.members),
+            ) \
                 .one()
         except sa.orm.exc.NoResultFound:
             return None
@@ -440,11 +505,16 @@ def _on_group_member_change(group, user, initiator):
 
     is_present = user in community.members
     setattr(user, _PROCESSED_ATTR, op)
-    logger.debug('_on_group_member_change(%r, %r, op=%r) community: %r', group,
-                 user, initiator.op, community)
+    logger.debug(
+        '_on_group_member_change(%r, %r, op=%r) community: %r',
+        group,
+        user,
+        initiator.op,
+        community,
+    )
 
-    if ((op is OP_APPEND and is_present) or
-        (op is OP_REMOVE and not is_present)):
+    if ((op is OP_APPEND and is_present)
+        or (op is OP_REMOVE and not is_present)):
         return
 
     if op is OP_APPEND:
@@ -464,8 +534,13 @@ def _on_group_members_replace(group, value, oldvalue, initiator):
         return
 
     members = set(community.members)
-    logger.debug('_on_group_members_replace(%r, %r, %r) community: %r', group,
-                 value, oldvalue, community)
+    logger.debug(
+        '_on_group_members_replace(%r, %r, %r) community: %r',
+        group,
+        value,
+        oldvalue,
+        community,
+    )
 
     for u in members - value:
         if getattr(u, _PROCESSED_ATTR, False) is OP_REMOVE:

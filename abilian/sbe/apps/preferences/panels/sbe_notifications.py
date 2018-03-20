@@ -19,8 +19,11 @@ from abilian.web.forms import Form, widgets
 
 class SbeNotificationsForm(Form):
     daily = BooleanField(
-        label=_("Receive by email a daily digest of activities in your communities"),
-        widget=widgets.BooleanWidget(on_off_mode=True))
+        label=_(
+            "Receive by email a daily digest of activities in your communities"
+        ),
+        widget=widgets.BooleanWidget(on_off_mode=True),
+    )
 
 
 class SbeNotificationsPanel(PreferencePanel):
@@ -69,4 +72,6 @@ class SbeNotificationsPanel(PreferencePanel):
             return redirect(url_for(".sbe_notifications"))
         else:
             return render_template(
-                "preferences/sbe_notifications.html", form=form)
+                "preferences/sbe_notifications.html",
+                form=form,
+            )

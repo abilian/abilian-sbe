@@ -48,11 +48,14 @@ logger = logging.getLogger(__package__)
 __all__ = ['db', 'Folder', 'Document', 'BaseContent', 'icon_for']
 
 #: A Whoosh analyzer that folds accents and case.
-accent_folder = (RegexTokenizer() | LowercaseFilter() |
-                 CharsetFilter(accent_map))
+accent_folder = (
+    RegexTokenizer() | LowercaseFilter() | CharsetFilter(accent_map)
+)
 
-ICONS_FOLDER = pkg_resources.resource_filename('abilian.sbe',
-                                               'static/fileicons')
+ICONS_FOLDER = pkg_resources.resource_filename(
+    'abilian.sbe',
+    'static/fileicons',
+)
 
 
 def icon_url(filename):
@@ -81,9 +84,9 @@ class CmisObject(Entity, InheritSecurity):
 
     index_to = Entity.__indexation_args__.setdefault('index_to', ())
     index_to += (
-        ('community.id', ('community_id',)),
+        ('community.id', ('community_id', )),
         #
-        ('community.slug', ('community_slug',)),
+        ('community.slug', ('community_slug', )),
         #
     )
     __indexation_args__['index_to'] = index_to
@@ -94,12 +97,13 @@ class CmisObject(Entity, InheritSecurity):
         UnicodeText,
         nullable=False,
         default="",
-        info=SEARCHABLE | dict(index_to=('description', 'text')))
+        info=SEARCHABLE | dict(index_to=('description', 'text')),
+    )
 
     _parent_id = Column(Integer, ForeignKey('cmisobject.id'), nullable=True)
 
     # no duplicate name in same folder
-    __table_args__ = (UniqueConstraint('_parent_id', 'title'),)
+    __table_args__ = (UniqueConstraint('_parent_id', 'title'), )
 
     # Set in concrete classes
     sbe_type = None  # type: str
@@ -141,8 +145,14 @@ class CmisObject(Entity, InheritSecurity):
         state = vars(self)
         for k, v in state.items():
             if not k.startswith("_") and k not in [
-                    'uid', 'id', 'parent', 'title', 'name', 'path',
-                    'subfolders', 'documents'
+                'uid',
+                'id',
+                'parent',
+                'title',
+                'name',
+                'path',
+                'subfolders',
+                'documents',
             ]:
                 setattr(new_obj, k, v)
         if self.parent:
@@ -197,9 +207,10 @@ class PathAndSecurityIndexable(object):
     """
     __indexation_args__ = dict(
         index_to=(
-            ('_indexable_parent_ids', ('parent_ids',)),
-            ('_indexable_roles_and_users', ('allowed_roles_and_users',)),
-        ),)
+            ('_indexable_parent_ids', ('parent_ids', )),
+            ('_indexable_roles_and_users', ('allowed_roles_and_users', )),
+        ),
+    )
 
     def _iter_to_root(self, skip_self=False):
         obj = self if not skip_self else self.parent
@@ -245,8 +256,13 @@ class PathAndSecurityIndexable(object):
             # find users who can access 'obj' because of their group memberships
             # 1. extends groups in obj_allowed with their actual member list
             extended_allowed = set(
-                itertools.chain(*(p.members if isinstance(p, Group) else (p,)
-                                  for p in obj_allowed)))
+                itertools.chain(
+                    *(
+                        p.members if isinstance(p, Group) else (p, )
+                        for p in obj_allowed
+                    )
+                ),
+            )
 
             # 2. remaining_users are users explicitly listed in parents but not on
             # obj. Are they in a group?
@@ -255,9 +271,9 @@ class PathAndSecurityIndexable(object):
 
             # remaining groups: find if some users are eligible
             remaining_groups_members = set(
-                itertools.chain(*(p.members
-                                  for p in remaining
-                                  if isinstance(p, Group))))
+                itertools.
+                chain(*(p.members for p in remaining if isinstance(p, Group))),
+            )
             allowed |= remaining_groups_members - extended_allowed
 
         # admin role is always granted access
@@ -275,7 +291,9 @@ class Folder(CmisObject, PathAndSecurityIndexable):
     index_to = ()
     index_to += CmisObject.__indexation_args__.setdefault('index_to', ())
     index_to += PathAndSecurityIndexable.__indexation_args__.setdefault(
-        'index_to', ())
+        'index_to',
+        (),
+    )
     __indexation_args__['index_to'] = index_to
     del index_to
 
@@ -285,12 +303,15 @@ class Folder(CmisObject, PathAndSecurityIndexable):
     parent = relationship(
         "Folder",
         primaryjoin=(
-            lambda: foreign(CmisObject._parent_id) == remote(Folder.id)),
+            lambda: foreign(CmisObject._parent_id) == remote(Folder.id)
+        ),
         backref=backref(
             'subfolders',
             lazy="joined",
             order_by='Folder.title',
-            cascade='all, delete-orphan'))
+            cascade='all, delete-orphan',
+        ),
+    )
 
     @property
     def icon(self):
@@ -347,8 +368,13 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
     def __repr__(self):
         return "<%s.%s id=%r name=%r path=%r at 0x%x>" % (
-            self.__class__.__module__, self.__class__.__name__, self.id,
-            self.title, self.path, id(self))
+            self.__class__.__module__,
+            self.__class__.__name__,
+            self.id,
+            self.title,
+            self.path,
+            id(self),
+        )
 
     #
     # Security related methods
@@ -356,12 +382,20 @@ class Folder(CmisObject, PathAndSecurityIndexable):
     @property
     def filtered_children(self):
         return security.filter_with_permission(
-            g.user, "read", self.children, inherit=True)
+            g.user,
+            "read",
+            self.children,
+            inherit=True,
+        )
 
     @property
     def filtered_subfolders(self):
         return security.filter_with_permission(
-            g.user, "read", self.subfolders, inherit=True)
+            g.user,
+            "read",
+            self.subfolders,
+            inherit=True,
+        )
 
     def get_local_roles_assignments(self):
         local_roles_assignments = security.get_role_assignements(self)
@@ -375,8 +409,10 @@ class Folder(CmisObject, PathAndSecurityIndexable):
             return []
 
         roles = self.parent.get_local_roles_assignments()
-        inherited_roles = (self.parent.get_inherited_roles_assignments()
-                           if self.parent.inherit_security else [])
+        inherited_roles = (
+            self.parent.get_inherited_roles_assignments()
+            if self.parent.inherit_security else []
+        )
 
         assignments = set(itertools.chain(roles, inherited_roles))
 
@@ -396,20 +432,25 @@ class Folder(CmisObject, PathAndSecurityIndexable):
 
     def members(self):
         local_roles = self.get_local_roles_assignments()
-        inherited_roles = (self.get_inherited_roles_assignments()
-                           if self.inherit_security else [])
+        inherited_roles = (
+            self.get_inherited_roles_assignments()
+            if self.inherit_security else []
+        )
 
         def _iter_users(roles):
             for principal, user in roles:
                 if isinstance(principal, User):
                     yield principal
                 else:
-                    for user in itertools.chain(principal.members,
-                                                principal.admins):
+                    for user in itertools.chain(
+                        principal.members,
+                        principal.admins,
+                    ):
                         yield user
 
         members = set(
-            _iter_users(itertools.chain(local_roles, inherited_roles)))
+            _iter_users(itertools.chain(local_roles, inherited_roles)),
+        )
         members = sorted(members, key=lambda u: (u.last_name, u.first_name))
         return members
 
@@ -421,7 +462,10 @@ class BaseContent(CmisObject):
 
     _content_id = Column(Integer, db.ForeignKey(Blob.id))
     content_blob = relationship(
-        Blob, cascade='all, delete', foreign_keys=[_content_id])
+        Blob,
+        cascade='all, delete',
+        foreign_keys=[_content_id],
+    )
 
     #: md5 digest (BTW: not sure they should be part of the public API).
     content_digest = Column(Text)
@@ -434,7 +478,9 @@ class BaseContent(CmisObject):
         server_default=sa.text('0'),
         info=dict(
             searchable=True,
-            index_to=(('content_length', wf.NUMERIC(stored=True)),)))
+            index_to=(('content_length', wf.NUMERIC(stored=True)), ),
+        ),
+    )
 
     #: MIME type of the content stream.
     # TODO: normalize mime type?
@@ -442,7 +488,10 @@ class BaseContent(CmisObject):
         Text,
         default="application/octet-stream",
         info=dict(
-            searchable=True, index_to=(('content_type', wf.ID(stored=True)),)))
+            searchable=True,
+            index_to=(('content_type', wf.ID(stored=True)), ),
+        ),
+    )
 
     @property
     def content(self):
@@ -476,18 +525,27 @@ class BaseContent(CmisObject):
         content name so that 'xxx.pdf' is not flagged as binary/octet-stream for
         example
         """
-        if content_type not in (None, '', 'application/octet-stream',
-                                'binary/octet-stream', 'application/binary',
-                                'multipart/octet-stream'):
+        if content_type not in (
+            None,
+            '',
+            'application/octet-stream',
+            'binary/octet-stream',
+            'application/binary',
+            'multipart/octet-stream',
+        ):
             return content_type
 
         # missing or generic content type: try to find something more useful to be
         # able to do preview/indexing/...
         if self.title:
             guessed_content_type = mimetypes.guess_type(
-                self.title, strict=False)[0]
-            if (guessed_content_type and guessed_content_type !=
-                    'application/vnd.ms-office.activeX'):
+                self.title,
+                strict=False,
+            )[0]
+            if (
+                guessed_content_type
+                and guessed_content_type != 'application/vnd.ms-office.activeX'
+            ):
                 # mimetypes got an update: "random.bin" would be guessed as
                 # 'application/vnd.ms-office.activeX'... not so useful in a document
                 # repository
@@ -511,8 +569,10 @@ class Document(BaseContent, PathAndSecurityIndexable):
     index_to = tuple()
     index_to += BaseContent.__indexation_args__.setdefault('index_to', ())
     index_to += PathAndSecurityIndexable.__indexation_args__.setdefault(
-        'index_to', ())
-    index_to += (('text', ('text',)),)
+        'index_to',
+        (),
+    )
+    index_to += (('text', ('text', )), )
     __indexation_args__['index_to'] = index_to
     del index_to
 
@@ -526,7 +586,9 @@ class Document(BaseContent, PathAndSecurityIndexable):
             'documents',
             lazy="joined",
             order_by='Document.title',
-            cascade='all, delete-orphan'))
+            cascade='all, delete-orphan',
+        ),
+    )
 
     PREVIEW_SIZE = 700
 
@@ -538,8 +600,12 @@ class Document(BaseContent, PathAndSecurityIndexable):
         if size is None:
             size = self.PREVIEW_SIZE
 
-        return converter.has_image(self.content_digest, self.content_type,
-                                   index, size)
+        return converter.has_image(
+            self.content_digest,
+            self.content_type,
+            index,
+            size,
+        )
 
     @property
     def digest(self):
@@ -548,18 +614,34 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     _text_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
     text_blob = relationship(
-        Blob, cascade='all, delete', foreign_keys=[_text_id])
+        Blob,
+        cascade='all, delete',
+        foreign_keys=[_text_id],
+    )
 
     _pdf_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
-    pdf_blob = relationship(Blob, cascade='all, delete', foreign_keys=[_pdf_id])
+    pdf_blob = relationship(
+        Blob,
+        cascade='all, delete',
+        foreign_keys=[_pdf_id],
+    )
 
     _preview_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
     preview_blob = relationship(
-        Blob, cascade='all, delete', foreign_keys=[_preview_id])
+        Blob,
+        cascade='all, delete',
+        foreign_keys=[_preview_id],
+    )
 
     language = Column(
         Text,
-        info=dict(searchable=True, index_to=[('language', wf.ID(stored=True))]))
+        info=dict(
+            searchable=True,
+            index_to=[
+                ('language', wf.ID(stored=True)),
+            ],
+        ),
+    )
     size = Column(Integer)
     page_num = Column(Integer, default=1)
 
@@ -610,8 +692,9 @@ class Document(BaseContent, PathAndSecurityIndexable):
         """True if antivirus doesn't need to be run.
         """
         required = current_app.config['ANTIVIRUS_CHECK_REQUIRED']
-        return required and (not self.antivirus_scanned or
-                             self.antivirus_status is None)
+        return required and (
+            not self.antivirus_scanned or self.antivirus_status is None
+        )
 
     @property
     def antivirus_ok(self):
@@ -651,8 +734,10 @@ class Document(BaseContent, PathAndSecurityIndexable):
     # `text` is an Unicode value.
     @property
     def text(self):
-        return (self.text_blob.value.decode("utf8")
-                if self.text_blob is not None else '')
+        return (
+            self.text_blob.value.decode("utf8")
+            if self.text_blob is not None else ''
+        )
 
     @text.setter
     def text(self, value):
@@ -734,7 +819,8 @@ class Document(BaseContent, PathAndSecurityIndexable):
         lock = self.lock
         if lock and not lock.is_owner(user=user):
             raise RuntimeError(
-                'This document is already locked by another user')
+                'This document is already locked by another user',
+            )
 
         meta = self.meta.setdefault('abilian.sbe.documents', {})
         lock = Lock.new()
@@ -765,22 +851,24 @@ def _get_documents_queue():
 
 def async_conversion(document):
     _get_documents_queue().append(
-        (document, document.content_blob.meta.get('antivirus_task_id')),)
+        (document, document.content_blob.meta.get('antivirus_task_id')),
+    )
 
 
 def _trigger_conversion_tasks(session):
     if (
-            # this commit is not from the application session
-            session is not db.session()
-            # inside a sub-transaction: not yet written in DB
-            or session.transaction.nested):
+        # this commit is not from the application session
+        session is not db.session()
+        # inside a sub-transaction: not yet written in DB
+        or session.transaction.nested
+    ):
         return
 
     document_queue = _get_documents_queue()
     while document_queue:
         doc, task_id = document_queue.pop()
         if doc.id:
-            tasks.process_document.apply_async((doc.id,), task_id=task_id)
+            tasks.process_document.apply_async((doc.id, ), task_id=task_id)
 
 
 def setup_listener():

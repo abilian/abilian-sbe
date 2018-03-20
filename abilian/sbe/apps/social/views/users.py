@@ -31,8 +31,10 @@ from .social import social
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_USER_MUGSHOT = pkgutil.get_data('abilian.sbe',
-                                        'static/images/silhouette_unknown.png')
+DEFAULT_USER_MUGSHOT = pkgutil.get_data(
+    'abilian.sbe',
+    'static/images/silhouette_unknown.png',
+)
 
 
 def make_tabs(user):
@@ -42,14 +44,18 @@ def make_tabs(user):
             label=_('Profile'),
             link=url_for(
                 user,
-                tab='profile')),
+                tab='profile',
+            ),
+        ),
         # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
         dict(
             id='documents',
             label=_('Documents'),
             link=url_for(
                 user,
-                tab='documents')),
+                tab='documents',
+            ),
+        ),
         dict(id='images', label=_('Images'), link=url_for(user, tab='images')),
         dict(id='audit', label=_('Audit'), link=url_for(user, tab='audit')),
     ]
@@ -63,7 +69,8 @@ def users():
         query = query.replace("%", " ")
         q = or_(
             User.first_name.like("%" + query + "%"),
-            User.last_name.like("%" + query + "%"))
+            User.last_name.like("%" + query + "%"),
+        )
         users = User.query.filter(q).limit(100).all()
     else:
         users = User.query.limit(100).all()
@@ -92,7 +99,8 @@ def users_dt_json():
         # TODO: gérer les accents
         filter = or_(
             func.lower(User.first_name).like("%" + search + "%"),
-            func.lower(User.last_name).like("%" + search + "%"))
+            func.lower(User.last_name).like("%" + search + "%"),
+        )
         query = query.filter(filter) \
             .reset_joinpoint()
 
@@ -127,9 +135,12 @@ def users_dt_json():
 
         cell0 = (
             '<a href="{url}"><img src="{src}" width="{size}" height="{size}">'
-            '</a>'.format(url=user_url, src=mugshot, size=MUGSHOT_SIZE))
-        cell1 = ('<div class="info"><a href="{user_url}">{name}</a> '
-                 '</div>'.format(**locals()))
+            '</a>'.format(url=user_url, src=mugshot, size=MUGSHOT_SIZE)
+        )
+        cell1 = (
+            '<div class="info"><a href="{user_url}">{name}</a> '
+            '</div>'.format(**locals())
+        )
         cell2 = age(user.created_at)
         cell3 = age(user.last_active)
 
@@ -251,8 +262,10 @@ def users_json():
         raise InternalServerError()
 
     query = User.query \
-        .filter(or_(func.lower(User.first_name).like(q + "%"),
-                    func.lower(User.last_name).like(q + "%"))) \
+        .filter(or_(
+            func.lower(User.first_name).like(q + "%"),
+            func.lower(User.last_name).like(q + "%"),
+        )) \
         .order_by(func.lower(User.last_name))
 
     with_membership = request.args.get('with_membership')
@@ -260,9 +273,13 @@ def users_json():
         # provide membership info for a community
         with_membership = int(with_membership)
         query = query \
-            .outerjoin(Membership,
-                       and_(Membership.user.expression,
-                            Membership.community_id == with_membership)) \
+            .outerjoin(
+                Membership,
+                and_(
+                    Membership.user.expression,
+                    Membership.community_id == with_membership,
+                ),
+            ) \
             .filter(User.can_login == True) \
             .add_columns(Membership.role)
 
@@ -270,10 +287,14 @@ def users_json():
     if exclude_community is not None:
         exclude_community = int(exclude_community)
         exclude = ~Membership.query \
-            .filter(Membership.user.expression,
-                    Membership.community_id == exclude_community) \
-            .options(sa.orm.noload('user'),
-                     sa.orm.noload('community')) \
+            .filter(
+                Membership.user.expression,
+                Membership.community_id == exclude_community,
+            ) \
+            .options(
+                sa.orm.noload('user'),
+                sa.orm.noload('community'),
+            ) \
             .exists()
         query = query.filter(exclude)
 

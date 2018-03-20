@@ -33,7 +33,10 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             response = self.client.get(url)
             assert response.status_code == 302
             expected_url = url_for(
-                "wall.index", community_id=self.community.slug, _external=True)
+                "wall.index",
+                community_id=self.community.slug,
+                _external=True,
+            )
             assert response.headers['Location'] == expected_url
 
     def test_community_settings(self):
@@ -73,7 +76,9 @@ class CommunityWebTestCase(BaseIndexingTestCase):
     def test_members(self):
         with self.client_login(self.user.email, 'azerty'):
             url = url_for(
-                "communities.members", community_id=self.community.slug)
+                "communities.members",
+                community_id=self.community.slug,
+            )
             response = self.client.get(url)
             assert response.status_code == 200
 
@@ -117,14 +122,16 @@ class CommunityWebTestCase(BaseIndexingTestCase):
                 'delete',
                 'user':
                 self.user_c2.id,
-                'membership':
-                [m.id for m in community.memberships if m.user == self.user_c2
+                'membership': [
+                    m.id for m in community.memberships
+                    if m.user == self.user_c2
                 ][0],
             }
             response = self.client.post(url, data=data)
             assert response.status_code == 302
             assert response.headers['Location'] == \
                 'http://localhost/communities/{}/members'.format(
-                self.community.slug)
+                self.community.slug,
+            )
 
             assert self.user_c2 not in community.members

@@ -34,22 +34,26 @@ def csv_file():
 def test_wizard_read_csv(csv_file):
     wizard_read = wizard_read_csv(csv_file)
 
-    assert wizard_read == [{
-        'first_name': 'userone',
-        'last_name': 'userone',
-        'role': 'manager',
-        'email': 'user_1@example.com'
-    }, {
-        'first_name': 'usertwo',
-        'last_name': 'usertwo',
-        'role': 'member',
-        'email': 'user_2@example.com'
-    }, {
-        'first_name': 'userseven',
-        'last_name': 'userseven',
-        'role': 'member',
-        'email': 'user_7@example.com'
-    }]
+    assert wizard_read == [
+        {
+            'first_name': 'userone',
+            'last_name': 'userone',
+            'role': 'manager',
+            'email': 'user_1@example.com',
+        },
+        {
+            'first_name': 'usertwo',
+            'last_name': 'usertwo',
+            'role': 'member',
+            'email': 'user_2@example.com',
+        },
+        {
+            'first_name': 'userseven',
+            'last_name': 'userseven',
+            'role': 'member',
+            'email': 'user_7@example.com',
+        },
+    ]
 
 
 def test_wizard_extract_data(db, csv_file):
@@ -92,33 +96,41 @@ def test_wizard_extract_data(db, csv_file):
         return x['email']
 
     assert sorted(
-        accounts_list, key=sorter) == sorted(
-            [{
+        accounts_list,
+        key=sorter,
+    ) == sorted(
+        [
+            {
                 'status': 'existing',
                 'first_name': None,
                 'last_name': None,
                 'role': 'member',
-                'email': 'user_2@example.com'
-            }, {
+                'email': 'user_2@example.com',
+            },
+            {
                 'status': 'existing',
                 'first_name': None,
                 'last_name': None,
                 'role': 'member',
-                'email': 'user_3@example.com'
-            }, {
+                'email': 'user_3@example.com',
+            },
+            {
                 'status': 'new',
                 'first_name': '',
                 'last_name': '',
                 'role': 'member',
-                'email': 'user_5@example.com'
-            }, {
+                'email': 'user_5@example.com',
+            },
+            {
                 'status': 'new',
                 'first_name': '',
                 'last_name': '',
                 'role': 'member',
-                'email': 'user_4@example.com'
-            }],
-            key=sorter)
+                'email': 'user_4@example.com',
+            },
+        ],
+        key=sorter,
+    )
 
     # check wizard function in case of csv file
     existing_accounts_objects, existing_members_objects, accounts_list \
@@ -130,22 +142,28 @@ def test_wizard_extract_data(db, csv_file):
             "user_2@example.com": "member",
             "user_7@example.com": "member",
         },
-        "account_objects": [user2]
+        "account_objects": [user2],
     }
     assert existing_members_objects == [user1]
     assert sorted(
-        accounts_list, key=sorter) == sorted(
-            [{
+        accounts_list,
+        key=sorter,
+    ) == sorted(
+        [
+            {
                 'status': 'existing',
                 'first_name': None,
                 'last_name': None,
                 'role': 'member',
-                'email': 'user_2@example.com'
-            }, {
+                'email': 'user_2@example.com',
+            },
+            {
                 'status': 'new',
                 'first_name': 'userseven',
                 'last_name': 'userseven',
                 'role': 'member',
-                'email': 'user_7@example.com'
-            }],
-            key=sorter)
+                'email': 'user_7@example.com',
+            },
+        ],
+        key=sorter,
+    )

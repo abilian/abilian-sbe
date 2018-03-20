@@ -12,7 +12,6 @@ from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 
 class ForumAction(Action):
-
     def is_current(self):
         return request.path == self.url()
 
@@ -37,7 +36,6 @@ class ForumAction(Action):
 
 
 class ThreadAction(ForumAction):
-
     def pre_condition(self, context):
         thread = actions.context.get('object')
         return not not thread
@@ -80,22 +78,32 @@ _close_template_action = '''
 _actions = (
     ForumAction('forum:global', 'index', _l('Recent conversations')),
     ForumAction(
-        'forum:global', 'index/<string:filter>', _l('Top'), url='#filter'),
+        'forum:global',
+        'index/<string:filter>',
+        _l('Top'),
+        url='#filter',
+    ),
     ForumAction('forum:global', 'archives', _l('Archives')),
     ForumAction(
         'forum:global',
         'attachments',
         _l('Attachments'),
-        condition=is_in_thread),
+        condition=is_in_thread,
+    ),
     ForumAction(
-        'forum:global', 'new_thread', _l('New conversation'), icon='plus'),
+        'forum:global',
+        'new_thread',
+        _l('New conversation'),
+        icon='plus',
+    ),
     ForumModalAction(
         'forum:thread',
         'delete',
         _l('Delete'),
         condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
         url='#modal-delete',
-        icon='trash'),
+        icon='trash',
+    ),
     #
     ThreadAction(
         'forum:thread',
@@ -104,7 +112,8 @@ _actions = (
         url='close',
         template_string=_close_template_action,
         condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
-        icon=FAIcon('lock')),
+        icon=FAIcon('lock'),
+    ),
     ThreadAction(
         'forum:thread',
         'reopen',
@@ -112,13 +121,15 @@ _actions = (
         url='close',
         template_string=_close_template_action,
         condition=lambda ctx: is_admin(ctx) and is_closed(ctx),
-        icon=FAIcon('unlock')),
+        icon=FAIcon('unlock'),
+    ),
     ThreadAction(
         'forum:thread',
         'attachments',
         _l('Attachments'),
         url='attachments',
-        icon='file'),
+        icon='file',
+    ),
 )
 
 

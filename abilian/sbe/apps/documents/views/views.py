@@ -17,7 +17,11 @@ from ..actions import register_actions
 __all__ = ['blueprint']
 
 blueprint = Blueprint(
-    "documents", __name__, url_prefix="/docs", template_folder="../templates")
+    "documents",
+    __name__,
+    url_prefix="/docs",
+    template_folder="../templates",
+)
 route = blueprint.route
 blueprint.record_once(register_actions)
 
@@ -30,4 +34,6 @@ def init_document_values(endpoint, values):
     g.breadcrumb.append(
         BreadcrumbItem(
             label=_l('Documents'),
-            url=Endpoint('documents.index', community_id=g.community.slug)))
+            url=Endpoint('documents.index', community_id=g.community.slug),
+        ),
+    )

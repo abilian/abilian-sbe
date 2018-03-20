@@ -18,7 +18,6 @@ __all__ = ['Message', 'PrivateMessage']
 
 
 class MessageQuery(Query):
-
     def by_creator(self, user):
         return self.filter(Message.creator_id == user.id)
 
@@ -32,18 +31,27 @@ class Message(Entity):
     __indexable__ = False
     __editable__ = ['content']
     __exportable__ = __editable__ + [
-        'id', 'created_at', 'updated_at', 'creator_id', 'owner_id'
+        'id',
+        'created_at',
+        'updated_at',
+        'creator_id',
+        'owner_id',
     ]
 
     #: The content for this message.
-    content = Column(UnicodeText(), info=SEARCHABLE | dict(index_to=('text',)))
+    content = Column(
+        UnicodeText(), info=SEARCHABLE | dict(index_to=('text', ))
+    )
 
     #: Nullable: if null, then message is public.
     group_id = Column(Integer, ForeignKey(Group.id))
 
     #: The group this message has been posted to.
     group = relationship(
-        'Group', primaryjoin=(group_id == Group.id), lazy='joined')
+        'Group',
+        primaryjoin=(group_id == Group.id),
+        lazy='joined',
+    )
 
     query = db.session.query_property(MessageQuery)
 
@@ -68,10 +76,14 @@ class PrivateMessage(Entity):
     __indexable__ = False
     __editable__ = ['content', 'recipient_id']
     __exportable__ = __editable__ + [
-        'id', 'created_at', 'updated_at', 'creator_id', 'owner_id'
+        'id',
+        'created_at',
+        'updated_at',
+        'creator_id',
+        'owner_id',
     ]
 
-    content = Column(UnicodeText, info=SEARCHABLE | dict(index_to=('text',)))
+    content = Column(UnicodeText, info=SEARCHABLE | dict(index_to=('text', )))
     recipient_id = Column(Integer, ForeignKey(User.id), nullable=False)
 
 
@@ -81,8 +93,12 @@ class Like(Entity):
     __indexable__ = False
     __editable__ = ['content', 'message_id']
     __exportable__ = __editable__ + [
-        'id', 'created_at', 'updated_at', 'creator_id', 'owner_id'
+        'id',
+        'created_at',
+        'updated_at',
+        'creator_id',
+        'owner_id',
     ]
 
-    content = Column(UnicodeText, info=SEARCHABLE | dict(index_to=('text',)))
+    content = Column(UnicodeText, info=SEARCHABLE | dict(index_to=('text', )))
     message_id = Column(Integer, ForeignKey(Message.id), nullable=False)

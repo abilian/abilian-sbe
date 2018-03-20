@@ -31,8 +31,11 @@ def _group_choices():
     m_prop = Group.members.property
     membership = m_prop.secondary
     query = Group.query.session.query(
-        Group.id, Group.name, Community.name.label('community'),
-        sa.sql.func.count(membership.c.user_id).label('members_count'))
+        Group.id,
+        Group.name,
+        Community.name.label('community'),
+        sa.sql.func.count(membership.c.user_id).label('members_count'),
+    )
     query = query.outerjoin(m_prop.secondary, m_prop.primaryjoin) \
         .outerjoin(Community, Community.group.property.primaryjoin) \
         .group_by(Group.id, Group.name, Community.name) \
@@ -54,30 +57,45 @@ class CommunityForm(Form):
     description = TextAreaField(
         label=_l("Description"),
         validators=[data_required(), length(max=500)],
-        widget=TextArea(resizeable="vertical"))
+        widget=TextArea(resizeable="vertical"),
+    )
 
     linked_group = Select2Field(
         label=_l('Linked to group'),
         description=_l(
-            'Manages a group of users through this community members.'),
-        choices=_group_choices)
+            'Manages a group of users through this community members.',
+        ),
+        choices=_group_choices,
+    )
 
     image = FileField(
         label=_l('Image'),
         widget=ImageInput(width=65, height=65),
-        validators=[optional()])
+        validators=[optional()],
+    )
 
-    type = Select2Field(label=_("Type"), validators=[data_required()],
-                        filters=(strip,),
-                        choices=[(_l('informative'), 'informative'),
-                                 (_l('participative'), 'participative')])
+    type = Select2Field(
+        label=_("Type"),
+        validators=[data_required()],
+        filters=(strip, ),
+        choices=[
+            (_l('informative'), 'informative'),
+            (_l('participative'), 'participative'),
+        ],
+    )
 
     has_documents = BooleanField(
-        label=_l("Has documents"), widget=BooleanWidget(on_off_mode=True))
+        label=_l("Has documents"),
+        widget=BooleanWidget(on_off_mode=True),
+    )
     has_wiki = BooleanField(
-        label=_l("Has a wiki"), widget=BooleanWidget(on_off_mode=True))
+        label=_l("Has a wiki"),
+        widget=BooleanWidget(on_off_mode=True),
+    )
     has_forum = BooleanField(
-        label=_l("Has a forum"), widget=BooleanWidget(on_off_mode=True))
+        label=_l("Has a forum"),
+        widget=BooleanWidget(on_off_mode=True),
+    )
 
     def validate_name(self, field):
         name = field.data = field.data.strip()
@@ -88,7 +106,8 @@ class CommunityForm(Form):
                 # name changed: check for duplicates
                 if Community.query.filter(Community.name == name).count() > 0:
                     raise ValidationError(
-                        _("A community with this name already exists"))
+                        _("A community with this name already exists"),
+                    )
 
     def validate_description(self, field):
         field.data = field.data.strip()
@@ -106,13 +125,15 @@ class CommunityForm(Form):
 
         if not valid:
             raise ValidationError(
-                _('Only PNG or JPG image files are accepted'))
+                _('Only PNG or JPG image files are accepted'),
+            )
 
         img_type = imghdr.what('ignored', data.read())
 
         if img_type not in ('png', 'jpeg'):
             raise ValidationError(
-                _('Only PNG or JPG image files are accepted'))
+                _('Only PNG or JPG image files are accepted'),
+            )
 
         data.seek(0)
         try:

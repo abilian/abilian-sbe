@@ -24,7 +24,11 @@ from .presenters import ActivityEntryPresenter
 from .util import get_recent_entries
 
 wall = Blueprint(
-    "wall", __name__, url_prefix="/wall", template_folder="templates")
+    "wall",
+    __name__,
+    url_prefix="/wall",
+    template_folder="templates",
+)
 route = wall.route
 
 
@@ -61,7 +65,6 @@ def files():
 
 
 class Attachment(object):
-
     def __init__(self, url, name, owner, date, content_length, content_type):
         self.url = url
         self.name = name
@@ -95,9 +98,14 @@ def get_attachments_from_forum(community):
     for post in posts_with_attachments:
         for att in post.attachments:
             url = current_app.default_view.url_for(att)
-            attachment = Attachment(url, att.name, text_type(att.owner),
-                                    att.created_at, att.content_length,
-                                    att.content_type)
+            attachment = Attachment(
+                url,
+                att.name,
+                text_type(att.owner),
+                att.created_at,
+                att.content_length,
+                att.content_type,
+            )
             attachments.append(attachment)
 
     return attachments
@@ -108,18 +116,27 @@ def get_attachments_from_dms(community):
     index_service = get_service('indexing')
     filters = wq.And([
         wq.Term('community_id', community.id),
-        wq.Term('object_type', Document.entity_type)
+        wq.Term('object_type', Document.entity_type),
     ])
     sortedby = whoosh.sorting.FieldFacet('created_at', reverse=True)
     documents = index_service.search(
-        '', filter=filters, sortedby=sortedby, limit=50)
+        '',
+        filter=filters,
+        sortedby=sortedby,
+        limit=50,
+    )
 
     attachments = []
     for doc in documents:
         url = url_for(doc)
-        attachment = Attachment(url, doc['name'], doc['owner_name'],
-                                doc['created_at'], doc.get('content_length'),
-                                doc.get('content_type', ''))
+        attachment = Attachment(
+            url,
+            doc['name'],
+            doc['owner_name'],
+            doc['created_at'],
+            doc.get('content_length'),
+            doc.get('content_type', ''),
+        )
         attachments.append(attachment)
 
     return attachments

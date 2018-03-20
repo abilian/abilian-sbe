@@ -61,12 +61,15 @@ def inject_email(filename='-'):
                 message,
                 extra={
                     'stack': True,
-                })
+                },
+            )
     else:
         logger.error(
-            'no email was parsed from stdin', extra={
+            'no email was parsed from stdin',
+            extra={
                 'stack': True,
-            })
+            },
+        )
 
 
 @manager.command

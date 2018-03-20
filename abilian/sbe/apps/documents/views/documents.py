@@ -169,8 +169,12 @@ def document_download(doc_id, attach=None):
     if attach is None:
         attach = request.args.get('attach')
 
-    if (attach or not match(doc.content_type,
-                            ("text/plain", "application/pdf", "image/*"))):
+    if (
+        attach or not match(
+            doc.content_type,
+            ("text/plain", "application/pdf", "image/*"),
+        )
+    ):
         # Note: we omit text/html for security reasons.
         quoted_filename = quote(doc.title.encode('utf8'))
         response.headers['content-disposition'] \
@@ -216,7 +220,8 @@ def checkin_checkout(doc_id):
 
 def preview_missing_image():
     response = redirect(
-        url_for('abilian_sbe_static', filename='images/preview_missing.png'))
+        url_for('abilian_sbe_static', filename='images/preview_missing.png'),
+    )
     response.headers['Cache-Control'] = 'no-cache'
     return response
 
@@ -237,8 +242,9 @@ def document_preview_image(doc_id):
         size = MAX_PREVIEW_SIZE
 
     # compute image if size != standard document size
-    get_image = (converter.get_image
-                 if size == doc.preview_size else converter.to_image)
+    get_image = (
+        converter.get_image if size == doc.preview_size else converter.to_image
+    )
 
     content_type = "image/jpeg"
 
@@ -252,8 +258,13 @@ def document_preview_image(doc_id):
     else:
         page = int(request.args.get("page", 0))
         try:
-            image = get_image(doc.digest, doc.content, doc.content_type, page,
-                              size)
+            image = get_image(
+                doc.digest,
+                doc.content,
+                doc.content_type,
+                page,
+                size,
+            )
         except BaseException:
             # TODO: use generic "conversion failed" image
             image = ""
@@ -305,7 +316,8 @@ def document_send(doc_id):
         sender_name=sender_name,
         message=user_msg,
         document_url=url_for(doc),
-        filename=doc.title)
+        filename=doc.title,
+    )
 
     filename = doc.title
     msg.attach(filename, doc.content_type, doc.content)
@@ -327,14 +339,18 @@ def document_preview(doc_id):
             url_for(
                 ".document_view_pdf",
                 community_id=g.community.slug,
-                doc_id=doc.id))
+                doc_id=doc.id,
+            ),
+        )
 
     else:
         return redirect(
             url_for(
                 ".document_download",
                 community_id=g.community.slug,
-                doc_id=doc.id))
+                doc_id=doc.id,
+            ),
+        )
 
 
 @route("/doc/<int:doc_id>/view_pdf")
@@ -346,7 +362,11 @@ def document_view_pdf(doc_id):
     return render_template(
         "documents/view_pdf.html",
         pdf_url=url_for(
-            ".document_download", community_id=g.community.slug, doc_id=doc.id))
+            ".document_download",
+            community_id=g.community.slug,
+            doc_id=doc.id,
+        ),
+    )
 
 
 #

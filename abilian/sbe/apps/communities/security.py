@@ -15,7 +15,6 @@ from abilian.services.security import MANAGE
 
 
 def require_admin(func):
-
     @wraps(func)
     def decorated_view(*args, **kwargs):
         security = get_service('security')
@@ -28,7 +27,6 @@ def require_admin(func):
 
 
 def require_manage(func):
-
     @wraps(func)
     def decorated_view(*args, **kwargs):
         community = getattr(g, 'community')
@@ -44,7 +42,6 @@ def require_manage(func):
 
 
 def require_access(func):
-
     @wraps(func)
     def decorated_view(*args, **kwargs):
         check_access()

@@ -15,7 +15,6 @@ from abilian.web import url_for
 
 
 class TestNotificationViews(BaseTestCase):
-
     def get_setup_config(self):
         cfg = super(TestNotificationViews, self).get_setup_config()
         # "unsubscribe" url must be accessible without csrf, so user can post even
@@ -28,14 +27,18 @@ class TestNotificationViews(BaseTestCase):
     def setUp(self):
         super(TestNotificationViews, self).setUp()
         self.user = User(
-            email='user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com',
+            password='azerty',
+            can_login=True,
+        )
         self.session.add(self.user)
         self.session.flush()
 
     def test_unsubscribe(self):
         preferences = self.app.services['preferences']
-        preferences.set_preferences(self.user,
-                                    **{'sbe:notifications:daily': True})
+        preferences.set_preferences(
+            self.user, **{'sbe:notifications:daily': True}
+        )
         token = generate_unsubscribe_token(self.user)
         url = url_for('notifications.unsubscribe_sbe', token=token)
 
@@ -51,11 +54,13 @@ class TestNotificationViews(BaseTestCase):
 
 
 class NotificationTestCase(CommunityBaseTestCase):
-
     def setUp(self):
         super(NotificationTestCase, self).setUp()
         self.user = User(
-            email='user_1@example.com', password='azerty', can_login=True)
+            email='user_1@example.com',
+            password='azerty',
+            can_login=True,
+        )
         self.session.add(self.user)
         self.community.set_membership(self.user, WRITER)
         self.session.flush()

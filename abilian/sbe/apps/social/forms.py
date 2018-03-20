@@ -28,13 +28,15 @@ class UserProfileViewForm(UserProfileForm):
         view_widget=abilian_widgets.ListWidget(),
         query_factory=lambda: Community.query.all(),
         multiple=True,
-        validators=[optional()])
+        validators=[optional()],
+    )
 
 
 class GroupForm(Form):
     name = StringField(
         _l("Name"),
-        filters=(strip,),
-        validators=[required(message=_l("Name is required."))])
+        filters=(strip, ),
+        validators=[required(message=_l("Name is required."))],
+    )
 
     description = TextAreaField(_l("Description"))

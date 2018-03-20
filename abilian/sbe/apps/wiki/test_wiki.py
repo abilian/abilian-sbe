@@ -53,14 +53,12 @@ def test_wikilink_extension():
 
 
 class WikiBaseTestCase(CommunityBaseTestCase):
-
     def setUp(self):
         super(WikiBaseTestCase, self).setUp()
         g.user = User.query.all()[0]
 
 
 class TestModels(WikiBaseTestCase):
-
     def test_create_page(self):
         page = WikiPage(title="Some page", body_src='abc')
         assert page.title == 'Some page'
@@ -97,7 +95,6 @@ class TestModels(WikiBaseTestCase):
 
 
 class TestIndexing(CommunityIndexingTestCase):
-
     def setUp(self):
         super(TestIndexing, self).setUp()
         g.user = User.query.all()[0]
@@ -110,7 +107,7 @@ class TestIndexing(CommunityIndexingTestCase):
         self.session.commit()
 
         svc = self.svc
-        obj_types = (WikiPage.entity_type,)
+        obj_types = (WikiPage.entity_type, )
         with self.login(self.user_no_community):
             res = svc.search('community', object_types=obj_types)
             assert len(res) == 0
@@ -131,15 +128,19 @@ class TestIndexing(CommunityIndexingTestCase):
 
 
 class TestsViews(WikiBaseTestCase):
-
     def test_home(self):
         response = self.client.get(
-            url_for("wiki.index", community_id=self.community.slug))
+            url_for("wiki.index", community_id=self.community.slug),
+        )
         assert response.status_code == 302
 
         response = self.client.get(
             url_for(
-                "wiki.page", title='Home', community_id=self.community.slug))
+                "wiki.page",
+                title='Home',
+                community_id=self.community.slug,
+            ),
+        )
         assert response.status_code == 200
 
     def test_create_page_initial_form(self):
@@ -166,31 +167,44 @@ class TestsViews(WikiBaseTestCase):
         assert response.status_code == 302
 
         url = url_for(
-            "wiki.page", community_id=self.community.slug, title=title)
+            "wiki.page",
+            community_id=self.community.slug,
+            title=title,
+        )
         response = self.client.get(url)
         assert response.status_code == 200
         assert body in response.get_data(as_text=True)
 
         # edit
         url = url_for(
-            "wiki.page_edit", community_id=self.community.slug, title=title)
+            "wiki.page_edit",
+            community_id=self.community.slug,
+            title=title,
+        )
         response = self.client.get(url)
         assert response.status_code == 200
 
         # Slightly hackish way to get the page_id
         line = first(
             l for l in response.get_data(as_text=True).split("\n")
-            if 'name="page_id"' in l)
+            if 'name="page_id"' in l
+        )
         m = re.search('value="(.*?)"', line)
         page_id = int(m.group(1))
 
         url = url_for(
-            "wiki.page_changes", community_id=self.community.slug, title=title)
+            "wiki.page_changes",
+            community_id=self.community.slug,
+            title=title,
+        )
         response = self.client.get(url)
         assert response.status_code == 200
 
         url = url_for(
-            "wiki.page_source", community_id=self.community.slug, title=title)
+            "wiki.page_source",
+            community_id=self.community.slug,
+            title=title,
+        )
         response = self.client.get(url)
         assert response.status_code == 200
 
@@ -205,6 +219,7 @@ class TestsViews(WikiBaseTestCase):
             rev0="on",
             rev1="on",
             community_id=self.community.slug,
-            title=title)
+            title=title,
+        )
         response = self.client.get(url)
         assert response.status_code == 200

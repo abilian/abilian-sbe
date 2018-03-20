@@ -32,7 +32,7 @@ DEFAULT_DIGEST_SCHEDULE = {
     'schedule': crontab(
         hour=10,
         minute=0,
-    )
+    ),
 }
 
 
@@ -63,7 +63,9 @@ def send_daily_social_digest():
             send_daily_social_digest_to(user)
         except BaseException:
             current_app.logger.error(
-                'Error sending daily social digest', exc_info=True)
+                'Error sending daily social digest',
+                exc_info=True,
+            )
 
 
 def send_daily_social_digest_to(user):
@@ -111,11 +113,18 @@ def make_message(user):
         AE = ActivityEntry
         activities = AE.query \
             .order_by(AE.happened_at.asc()) \
-            .filter(and_(AE.happened_at > happened_after,
-                         or_(and_(AE.target_type == community.object_type,
-                                  AE.target_id == community.id),
-                             and_(AE.object_type == community.object_type,
-                                  AE.object_id == community.id), ))) \
+            .filter(and_(
+                AE.happened_at > happened_after,
+                or_(
+                    and_(
+                        AE.target_type == community.object_type,
+                        AE.target_id == community.id,
+                    ),
+                    and_(
+                        AE.object_type == community.object_type,
+                        AE.object_id == community.id,
+                    ), ),
+            )) \
             .all()
 
         # fill the internal digest lists with infos
@@ -136,7 +145,8 @@ def make_message(user):
         'notifications.unsubscribe_sbe',
         token=token,
         _external=True,
-        _scheme=config['PREFERRED_URL_SCHEME'])
+        _scheme=config['PREFERRED_URL_SCHEME'],
+    )
     extra_headers = dict(base_extra_headers)
     extra_headers['List-Unsubscribe'] = '<{}>'.format(unsubscribe_url)
 
@@ -144,16 +154,19 @@ def make_message(user):
         subject,
         sender=sender,
         recipients=[recipient],
-        extra_headers=extra_headers)
+        extra_headers=extra_headers,
+    )
     ctx = {
         'digests': digests,
         'token': token,
-        'unsubscribe_url': unsubscribe_url
+        'unsubscribe_url': unsubscribe_url,
     }
-    msg.body = render_template_i18n("notifications/daily-social-digest.txt",
-                                    **ctx)
-    msg.html = render_template_i18n("notifications/daily-social-digest.html",
-                                    **ctx)
+    msg.body = render_template_i18n(
+        "notifications/daily-social-digest.txt", **ctx
+    )
+    msg.html = render_template_i18n(
+        "notifications/daily-social-digest.html", **ctx
+    )
     return msg
 
 
@@ -167,7 +180,6 @@ def generate_unsubscribe_token(user):
 
 
 class CommunityDigest(object):
-
     def __init__(self, community):
         self.community = community
 
@@ -181,10 +193,12 @@ class CommunityDigest(object):
         self.updated_wiki_pages = {}
 
     def is_empty(self):
-        return (not self.new_members and not self.new_documents and
-                not self.updated_documents and not self.new_conversations and
-                not self.updated_conversations and not self.new_wiki_pages and
-                not self.updated_wiki_pages)
+        return (
+            not self.new_members and not self.new_documents
+            and not self.updated_documents and not self.new_conversations
+            and not self.updated_conversations and not self.new_wiki_pages
+            and not self.updated_wiki_pages
+        )
 
     def update_from_activity(self, activity, user):
         actor = activity.actor
@@ -216,7 +230,7 @@ class CommunityDigest(object):
                     # Asc(A.happened_at)
                     self.updated_conversations[obj.thread] = {
                         'actors': [actor],
-                        'post': obj
+                        'post': obj,
                     }
                     # Mark this post's Thread as seen to avoid duplicates
                     self.seen_entities.add(obj.thread.id)
@@ -224,7 +238,8 @@ class CommunityDigest(object):
                     # this post's Thread has already been seen in another Activity
                     # exclude it to avoid duplicates but save the Post's actor
                     self.updated_conversations[obj.thread]['actors'].append(
-                        actor)
+                        actor,
+                    )
 
         elif activity.verb == 'update':
             if obj is None:

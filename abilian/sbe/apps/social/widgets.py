@@ -7,7 +7,6 @@ from flask import Markup, render_template
 
 
 class UserPhotoInputWidget(object):
-
     def __call__(self, field, **kwargs):
         kwargs.setdefault('id', field.id)
         user_id = None
@@ -21,4 +20,6 @@ class UserPhotoInputWidget(object):
                 'social/widget_user_photo.html',
                 field=field,
                 attrs=kwargs,
-                user_id=user_id))
+                user_id=user_id,
+            ),
+        )

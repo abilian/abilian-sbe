@@ -21,8 +21,10 @@ from abilian.web.views import default_view
 from .social import social
 
 DEFAULT_GROUP_MUGSHOT = \
-    (Path(__file__).parent / ".." / ".." / ".." /
-     "static" / "images" / "frog.jpg").open('rb').read()
+    (
+        Path(__file__).parent / ".." / ".." / ".." /
+        "static" / "images" / "frog.jpg"
+    ).open('rb').read()
 
 
 @social.route("/groups/")
@@ -68,7 +70,8 @@ def group_json(group_id):
             u for u in members if any(
                 term.startswith(q)
                 for name in (u.first_name.lower(), u.last_name.lower())
-                for term in name.split())
+                for term in name.split()
+            )
         ]
 
     result = {'results': [{'id': obj.id, 'text': obj.name} for obj in members]}

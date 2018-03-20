@@ -61,18 +61,23 @@ for attr in ALLOWED_TAGS:
 # when Threadform is displayed
 _TITLE_FIELD = StringField(
     label=_l("Title"),
-    filters=(strip,),
-    validators=[required(), Length(max=150)])
+    filters=(strip, ),
+    validators=[required(), Length(max=150)],
+)
 
 
 class BasePostForm(Form):
     message = TextAreaField(
         label=_l("Message"),
         widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
-        filters=(strip,),
-        validators=[required()])
+        filters=(strip, ),
+        validators=[required()],
+    )
     attachments = FileField(
-        label=_l('Attachments'), multiple=True, validators=[optional()])
+        label=_l('Attachments'),
+        multiple=True,
+        validators=[optional()],
+    )
 
     def validate_message(self, field):
         field.data = bleach.clean(
@@ -80,7 +85,8 @@ class BasePostForm(Form):
             tags=ALLOWED_TAGS,
             attributes=ALLOWED_ATTRIBUTES,
             styles=ALLOWED_STYLES,
-            strip=True)
+            strip=True,
+        )
 
 
 class PostForm(BasePostForm):
@@ -95,5 +101,6 @@ class PostEditForm(BasePostForm):
     reason = StringField(
         label=_l('Reason'),
         description=_l('Description of your edit'),
-        filters=(strip,),
-        validators=(optional(),))
+        filters=(strip, ),
+        validators=(optional(), ),
+    )

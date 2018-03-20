@@ -49,7 +49,6 @@ class BaseTests(CommunityBaseTestCase):
 
 
 class TestBlobs(BaseTests):
-
     def test_document(self):
         root = Folder(title="root")
         doc = Document(parent=root, title="test")
@@ -130,7 +129,6 @@ class TestBlobs(BaseTests):
 
 
 class IndexingTestCase(CommunityIndexingTestCase):
-
     def test_folder_indexed(self):
         folder = Folder(title='Folder 1', parent=self.community.folder)
         self.session.add(folder)
@@ -139,7 +137,7 @@ class IndexingTestCase(CommunityIndexingTestCase):
         self.session.commit()
 
         svc = self.svc
-        obj_types = (Folder.entity_type,)
+        obj_types = (Folder.entity_type, )
         with self.login(self.user_no_community):
             res = svc.search('folder', object_types=obj_types)
             assert len(res) == 0
@@ -160,7 +158,6 @@ class IndexingTestCase(CommunityIndexingTestCase):
 
 
 class TestViews(CommunityIndexingTestCase, BaseTests):
-
     def setUp(self):
         super(TestViews, self).setUp()
         self.community.type = 'participative'
@@ -174,7 +171,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             g.community = CommunityPresenter(self.community)
             name = 'document'
             fs = FileStorage(
-                BytesIO(b'content'), filename=name, content_type='text/plain')
+                BytesIO(b'content'),
+                filename=name,
+                content_type='text/plain',
+            )
             doc = view_util.create_document(self.folder, fs)
             self.session.flush()
             assert doc.parent == self.folder
@@ -182,7 +182,10 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
             # test upload with same name: should be renamed
             fs = FileStorage(
-                BytesIO(b'content'), filename=name, content_type='text/plain')
+                BytesIO(b'content'),
+                filename=name,
+                content_type='text/plain',
+            )
             doc2 = view_util.create_document(self.folder, fs)
             self.session.flush()
             assert doc2.parent == self.folder
@@ -195,17 +198,20 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
     def test_home(self):
         with self.client_login(self.user.email, password='azerty'):
             response = self.get(
-                url_for('documents.index', community_id=self.community.slug))
+                url_for('documents.index', community_id=self.community.slug),
+            )
             assert response.status_code == 302
             expected = 'http://localhost/communities/{}/docs/folder/{}' \
                        ''.format(self.community.slug, self.folder.id)
             assert response.headers['Location'] == expected
 
-    def _test_upload(self,
-                     title,
-                     content_type,
-                     test_preview=True,
-                     assert_preview_available=True):
+    def _test_upload(
+        self,
+        title,
+        content_type,
+        test_preview=True,
+        assert_preview_available=True,
+    ):
         data = {
             'file': (self.open_file(title), title, content_type),
             'action': 'upload',
@@ -215,7 +221,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         url = url_for(
             "documents.folder_post",
             community_id=self.community.slug,
-            folder_id=folder.id)
+            folder_id=folder.id,
+        )
         response = self.client.post(url, data=data)
         assert response.status_code == 302
 
@@ -225,14 +232,16 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         url = url_for(
             "documents.document_view",
             community_id=self.community.slug,
-            doc_id=doc.id)
+            doc_id=doc.id,
+        )
         response = self.get(url)
         assert response.status_code == 200
 
         url = url_for(
             "documents.document_download",
             community_id=self.community.slug,
-            doc_id=doc.id)
+            doc_id=doc.id,
+        )
         response = self.get(url)
         assert response.status_code == 200
         assert response.headers['Content-Type'] == content_type
@@ -245,7 +254,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 "documents.document_preview_image",
                 community_id=self.community.slug,
                 doc_id=doc.id,
-                size=500)
+                size=500,
+            )
             response = self.get(url)
             if assert_preview_available:
                 assert response.status_code == 200
@@ -258,14 +268,16 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         url = url_for(
             "documents.document_delete",
             community_id=self.community.slug,
-            doc_id=doc.id)
+            doc_id=doc.id,
+        )
         response = self.client.post(url)
         assert response.status_code == 302
 
         url = url_for(
             "documents.document_view",
             community_id=self.community.slug,
-            doc_id=doc.id)
+            doc_id=doc.id,
+        )
         response = self.get(url)
         assert response.status_code == 404
 
@@ -291,10 +303,13 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             self._test_upload(
                 NAME,
                 "application/octet-stream",
-                assert_preview_available=False)
+                assert_preview_available=False,
+            )
 
     @pytest.mark.skipif(
-        sys.version_info >= (3, 0), reason="Doesn't work yet on Py3k")
+        sys.version_info >= (3, 0),
+        reason="Doesn't work yet on Py3k",
+    )
     def test_explore_archive(self):
         fd = self.open_file('content.zip')
         result = [('/'.join(path), f) for path, f in explore_archive(fd)]
@@ -321,13 +336,17 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
         folder = self.community.folder
         files = []
         files.append((BytesIO(b'A document'), 'existing-doc', 'text/plain'))
-        files.append((self.open_file('content.zip'), 'content.zip',
-                      'application/zip'))
+        files.append((
+            self.open_file('content.zip'),
+            'content.zip',
+            'application/zip',
+        ))
         data = {'file': files, 'action': 'upload', 'uncompress_files': True}
         url = url_for(
             "documents.folder_post",
             community_id=self.community.slug,
-            folder_id=folder.id)
+            folder_id=folder.id,
+        )
         with self.client_login(self.user.email, password='azerty'):
             response = self.client.post(url, data=data)
 
@@ -349,7 +368,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
-                folder_id=folder.id)
+                folder_id=folder.id,
+            )
             response = self.client.post(url, data=data)
             assert response.status_code == 302
 
@@ -361,7 +381,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
-                folder_id=folder.id)
+                folder_id=folder.id,
+            )
             response = self.client.post(url, data=data)
             assert response.status_code == 200
             assert response.content_type == 'application/zip'
@@ -379,7 +400,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
-                folder_id=folder.id)
+                folder_id=folder.id,
+            )
             response = self.client.post(url, data=data)
             assert response.status_code == 302
 
@@ -394,7 +416,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
-                folder_id=my_folder.id)
+                folder_id=my_folder.id,
+            )
             response = self.client.post(url, data=data)
             assert response.status_code == 302
 
@@ -405,7 +428,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
             url = url_for(
                 "documents.folder_post",
                 community_id=self.community.slug,
-                folder_id=folder.id)
+                folder_id=folder.id,
+            )
             response = self.client.post(url, data=data)
             assert response.status_code == 200
             assert response.content_type == 'application/zip'
@@ -428,7 +452,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 url = url_for(
                     "documents.folder_post",
                     community_id=self.community.slug,
-                    folder_id=folder.id)
+                    folder_id=folder.id,
+                )
                 self.client.post(url, data=data)
 
             ascii_doc = folder.children[0]
@@ -438,7 +463,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 return url_for(
                     'documents.document_send',
                     community_id=self.community.slug,
-                    doc_id=doc_id)
+                    doc_id=doc_id,
+                )
 
             # mail ascii filename
             with mail.record_messages() as outbox:
@@ -448,7 +474,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                     data={
                         'recipient': 'dest@example.com',
                         'message': 'Voilà un fichier',
-                    })
+                    },
+                )
                 assert response.status_code == 302
                 assert len(outbox) == 1
 
@@ -470,7 +497,8 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                     data={
                         'recipient': 'dest@example.com',
                         'message': 'Voilà un fichier',
-                    })
+                    },
+                )
                 assert response.status_code == 302
                 assert len(outbox) == 1
 
@@ -486,9 +514,7 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
 
 
 class TestPathIndexable(unittest.TestCase):
-
     class MockPath(PathAndSecurityIndexable):
-
         def __init__(self, id, parent=None):
             self.id = id
             self.parent = parent
@@ -503,7 +529,9 @@ class TestPathIndexable(unittest.TestCase):
     def test_iter_to_root(self):
         assert [o.id for o in self.obj._iter_to_root()] == [3, 2, 1, 0]
         assert [o.id for o in self.obj._iter_to_root(skip_self=True)] == [
-            2, 1, 0
+            2,
+            1,
+            0,
         ]
 
     def test_indexable_parent_ids(self):

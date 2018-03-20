@@ -40,7 +40,9 @@ def reindex_tree(obj):
     # as an added bonus, "obj" will also be in query results, thus will be added
     # in "to_update" without needing to do it apart.
     entity_ids_q = sa.union(
-        sa.select([descendants.c.id]), sa.select([sa.bindparam('ancestor_id')]))
+        sa.select([descendants.c.id]),
+        sa.select([sa.bindparam('ancestor_id')]),
+    )
     query = session.query(Entity) \
         .filter(Entity.id.in_(entity_ids_q)) \
         .options(sa.orm.noload('*')) \

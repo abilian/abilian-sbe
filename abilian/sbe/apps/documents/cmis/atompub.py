@@ -34,7 +34,6 @@ route = atompub.route
 # Dummy for now
 #
 class Logger(object):
-
     def debug(self, msg):
         print(msg)
 
@@ -50,7 +49,6 @@ def log_result(result):
 
 
 def produces(*mimetypes):
-
     def decorator(f):
         return f
 
@@ -58,7 +56,6 @@ def produces(*mimetypes):
 
 
 def consumes(mimetype):
-
     def decorator(f):
         return f
 
@@ -76,9 +73,7 @@ def consumes(mimetype):
 
 # NOT WORKING
 def render(template, status=200, mimetype=None):
-
     def decorator(f):
-
         def g(*args, **kw):
             print(f, args, kw)
             result = f(*args, **kw)
@@ -149,8 +144,11 @@ def authenticate():
 # @atompub.errorhandler(401)
 def custom_401(error):
     print("custom_401")
-    return Response('Authentication required', 401,
-                    {'WWWAuthenticate': 'Basic realm="Login Required"'})
+    return Response(
+        'Authentication required',
+        401,
+        {'WWWAuthenticate': 'Basic realm="Login Required"'},
+    )
 
 
 @atompub.errorhandler(NoResultFound)

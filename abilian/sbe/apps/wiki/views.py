@@ -37,7 +37,11 @@ from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
 wiki = Blueprint(
-    "wiki", __name__, url_prefix="/wiki", template_folder="templates")
+    "wiki",
+    __name__,
+    url_prefix="/wiki",
+    template_folder="templates",
+)
 route = wiki.route
 
 
@@ -57,7 +61,8 @@ def init_wiki_values(endpoint, values):
 @route('/')
 def index():
     return redirect(
-        url_for(".page", title='Home', community_id=g.community.slug))
+        url_for(".page", title='Home', community_id=g.community.slug),
+    )
 
 
 def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
@@ -105,10 +110,15 @@ class BasePageView(object):
                 if title == 'Home':
                     self.obj = create_home_page()
                 else:
-                    flash(_("This page doesn't exit. You must create it first."),
-                          "warning")
+                    flash(
+                        _("This page doesn't exit. You must create it first."),
+                        "warning",
+                    )
                     url = url_for(
-                        ".page_new", title=title, community_id=g.community.slug)
+                        ".page_new",
+                        title=title,
+                        community_id=g.community.slug,
+                    )
                     self.redirect(url)
             actions.context['object'] = self.obj
         return args, kwargs
@@ -120,7 +130,8 @@ class BasePageView(object):
         return url_for(
             self.view_endpoint,
             community_id=g.community.slug,
-            title=self.obj.title)
+            title=self.obj.title,
+        )
 
 
 class PageView(BasePageView, ObjectView):
@@ -128,7 +139,11 @@ class PageView(BasePageView, ObjectView):
     view_endpoint = '.page'
     decorators = [
         default_view(
-            wiki, WikiPage, id_attr=None, kw_func=wiki_page_default_view_kw)
+            wiki,
+            WikiPage,
+            id_attr=None,
+            kw_func=wiki_page_default_view_kw,
+        ),
     ]
 
     def init_object(self, args, kwargs):
@@ -139,7 +154,10 @@ class PageView(BasePageView, ObjectView):
                 self.obj = create_home_page()
             else:
                 url = url_for(
-                    ".page_edit", title=title, community_id=g.community.slug)
+                    ".page_edit",
+                    title=title,
+                    community_id=g.community.slug,
+                )
                 return redirect(url)
 
         actions.context['object'] = self.obj
@@ -192,8 +210,10 @@ class PageEdit(BasePageView, ObjectEdit):
         last_revision_id = self.form.last_revision_id.data
         if last_revision_id:
             self.last_revision = WikiPageRevision.query \
-                .filter(WikiPageRevision.page == self.obj,
-                        WikiPageRevision.id == last_revision_id) \
+                .filter(
+                    WikiPageRevision.page == self.obj,
+                    WikiPageRevision.id == last_revision_id,
+                ) \
                 .first()
         return args, kwargs
 
@@ -222,8 +242,10 @@ class PageEdit(BasePageView, ObjectEdit):
             self.form.last_revision_id.data = current.id  # update edited revision
             self.redirect_if_no_change()  # same edition? don't bother
 
-            if (self.last_revision.body_src == current.body_src and
-                    self.form.validate()):
+            if (
+                self.last_revision.body_src == current.body_src
+                and self.form.validate()
+            ):
                 # only title change? cannot show diff: save if valid
                 return self.form_valid()
             else:
@@ -232,12 +254,14 @@ class PageEdit(BasePageView, ObjectEdit):
                 edited_diff = [
                     l for l in difflib.ndiff(
                         self.last_revision.body_src.splitlines(True),
-                        edited_src.splitlines(True)) if not l[0] == '?'
+                        edited_src.splitlines(True),
+                    ) if not l[0] == '?'
                 ]
                 current_diff = [
                     l for l in difflib.ndiff(
                         self.last_revision.body_src.splitlines(True),
-                        current.body_src.splitlines(True)) if not l[0] == '?'
+                        current.body_src.splitlines(True),
+                    ) if not l[0] == '?'
                 ]
                 ctx = {
                     'current': current,
@@ -246,8 +270,11 @@ class PageEdit(BasePageView, ObjectEdit):
                 }
                 field.errors.append(
                     Markup(
-                        render_template('wiki/edit_conflict_error.html',
-                                        **ctx)))
+                        render_template(
+                            'wiki/edit_conflict_error.html', **ctx
+                        ),
+                    ),
+                )
 
         return None
 
@@ -282,7 +309,8 @@ def page_source():
         page = get_page_by_title(title)
     except NoResultFound:
         return redirect(
-            url_for(".page_edit", title=title, community_id=g.community.slug))
+            url_for(".page_edit", title=title, community_id=g.community.slug),
+        )
 
     actions.context['object'] = page
     return render_template('wiki/source.html', page=page)
@@ -309,7 +337,8 @@ def page_compare():
         page = get_page_by_title(title)
     except NoResultFound:
         return redirect(
-            url_for(".page_edit", title=title, community_id=g.community.slug))
+            url_for(".page_edit", title=title, community_id=g.community.slug),
+        )
     revisions = page.revisions
     revisions = sorted(revisions, key=lambda x: x.number)
     revs_to_compare = []
@@ -319,7 +348,10 @@ def page_compare():
     if len(revs_to_compare) != 2:
         flash(_("You must check exactly 2 revisions."), "error")
         url = url_for(
-            ".page_changes", title=title, community_id=g.community.slug)
+            ".page_changes",
+            title=title,
+            community_id=g.community.slug,
+        )
         return redirect(url)
 
     revs_to_compare.sort()
@@ -359,7 +391,12 @@ def page_delete():
     app = current_app._get_current_object()
     community = g.community._model
     activity.send(
-        app, actor=g.user, verb="delete", object=page, target=community)
+        app,
+        actor=g.user,
+        verb="delete",
+        object=page,
+        target=community,
+    )
 
     db.session.commit()
     flash(_("Page %(title)s deleted.", title=title))
@@ -382,8 +419,11 @@ def attachment_download():
     response = make_response(attachment.content)
     response.headers['content-length'] = attachment.content_length
     response.headers['content-type'] = attachment.content_type
-    content_disposition = ('attachment;filename="{}"'.format(
-        quote(attachment.name.encode('utf8'))))
+    content_disposition = (
+        'attachment;filename="{}"'.format(
+            quote(attachment.name.encode('utf8')),
+        )
+    )
     response.headers['content-disposition'] = content_disposition
     return response
 
@@ -418,10 +458,14 @@ def attachment_upload():
     if saved_count:
         db.session.commit()
         flash(
-            _n("One new document successfully uploaded",
-               "%(num)d new documents successfully uploaded",
-               count=saved_count,
-               num=len(files)), "success")
+            _n(
+                "One new document successfully uploaded",
+                "%(num)d new documents successfully uploaded",
+                count=saved_count,
+                num=len(files),
+            ),
+            "success",
+        )
     else:
         flash(_('No file uploaded.'))
 
@@ -482,8 +526,10 @@ def wiki_export():
 def get_page_by_title(title):
     title = title.strip()
     page = WikiPage.query \
-        .filter(WikiPage.community_id == g.community.id,
-                WikiPage.title == title) \
+        .filter(
+            WikiPage.community_id == g.community.id,
+            WikiPage.title == title,
+        ) \
         .one()
     return page
 

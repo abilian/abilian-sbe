@@ -35,16 +35,18 @@ class WikiPage(Entity):
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref("wiki", cascade="all, delete-orphan"))
+        backref=backref("wiki", cascade="all, delete-orphan"),
+    )
 
     #: The body, using some markup language (Markdown for now)
     body_src = Column(
         UnicodeText,
         default="",
         nullable=False,
-        info=SEARCHABLE | dict(index_to=('text',)))
+        info=SEARCHABLE | dict(index_to=('text', )),
+    )
 
-    __table_args__ = (UniqueConstraint('title', 'community_id'),)
+    __table_args__ = (UniqueConstraint('title', 'community_id'), )
 
     def __init__(self, title="", body_src="", message="", *args, **kwargs):
         Entity.__init__(self, *args, **kwargs)
@@ -106,7 +108,7 @@ def _wiki_sync_name_title(entity, new_value, old_value, initiator):
 
 class WikiPageRevision(db.Model):
     __tablename__ = 'wiki_page_revision'
-    __table_args__ = (UniqueConstraint('page_id', 'number'),)
+    __table_args__ = (UniqueConstraint('page_id', 'number'), )
 
     # : Some primary key just in case
     id = Column(Integer, primary_key=True)
@@ -146,4 +148,6 @@ class WikiPageAttachment(BaseContent):
             'attachments',
             lazy='select',
             order_by='WikiPageAttachment.name',
-            cascade='all, delete-orphan'))
+            cascade='all, delete-orphan',
+        ),
+    )

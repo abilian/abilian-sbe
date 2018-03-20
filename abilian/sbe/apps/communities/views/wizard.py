@@ -38,7 +38,8 @@ def wizard_extract_data(emails, is_csv=False):
     emails = [email.strip() for email in emails]
 
     already_member_emails = [
-        member.email for member in g.community.members if member.email in emails
+        member.email for member in g.community.members
+        if member.email in emails
     ]
     not_member_emails = set(emails) - set(already_member_emails)
 
@@ -50,10 +51,13 @@ def wizard_extract_data(emails, is_csv=False):
     existing_accounts_objects = User.query \
         .filter(User.email.in_(not_member_emails)) \
         .all()
-    existing_account_emails = [user.email for user in existing_accounts_objects]
+    existing_account_emails = [
+        user.email for user in existing_accounts_objects
+    ]
 
     emails_without_account = set(not_member_emails) - set(
-        existing_account_emails)
+        existing_account_emails,
+    )
 
     accounts_list = []
     for user in existing_accounts_objects:
@@ -61,8 +65,8 @@ def wizard_extract_data(emails, is_csv=False):
         account["email"] = user.email
         account["first_name"] = user.first_name
         account["last_name"] = user.last_name
-        account["role"] = existing_account_csv_roles[
-            user.email] if is_csv else "member"
+        account["role"] = existing_account_csv_roles[user.email
+                                                     ] if is_csv else "member"
         account["status"] = "existing"
         accounts_list.append(account)
 
@@ -73,7 +77,7 @@ def wizard_extract_data(emails, is_csv=False):
         ]
         existing_accounts_objects = {
             "account_objects": existing_accounts_objects,
-            "csv_roles": existing_account_csv_roles
+            "csv_roles": existing_account_csv_roles,
         }
 
         for csv_account in emails_without_account:
@@ -141,9 +145,11 @@ def wizard_data_insertion():
     """
     Insert new members data into the community via emails or CSV file.
     """
-    g.breadcrumb.append(BreadcrumbItem(
-        label=_('Members'),
-        url=Endpoint('communities.members', community_id=g.community.slug)),
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            label=_('Members'),
+            url=Endpoint('communities.members', community_id=g.community.slug),
+        ),
     )
 
     return render_template("community/wizard_add_emails.html")
@@ -159,16 +165,19 @@ def wizard_check_data():
     if request.method == "GET":
         return redirect(url_for(".members", community_id=g.community.slug))
 
-    g.breadcrumb.append(BreadcrumbItem(
-        label=_('Members'),
-        url=Endpoint('communities.members', community_id=g.community.slug)),
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            label=_('Members'),
+            url=Endpoint('communities.members', community_id=g.community.slug),
+        ),
     )
 
     is_csv = False
     if request.form.get("wizard-emails"):
         wizard_emails = request.form.get("wizard-emails").split(",")
         existing_accounts_object, existing_members_objects, final_email_list = wizard_extract_data(
-            wizard_emails)
+            wizard_emails,
+        )
         final_email_list_json = json.dumps(final_email_list)
     else:
         is_csv = True
@@ -176,13 +185,19 @@ def wizard_check_data():
         if not accounts_data:
             flash(
                 _("To add new members, please follow the CSV file model."),
-                'warning')
+                'warning',
+            )
             return redirect(
                 url_for(
-                    ".wizard_data_insertion", community_id=g.community.slug))
+                    ".wizard_data_insertion",
+                    community_id=g.community.slug,
+                ),
+            )
 
         existing_accounts, existing_members_objects, final_email_list = wizard_extract_data(
-            accounts_data, is_csv=True)
+            accounts_data,
+            is_csv=True,
+        )
         existing_accounts_object = existing_accounts["account_objects"]
         existing_accounts_csv_roles = existing_accounts["csv_roles"]
         final_email_list_json = json.dumps(final_email_list)
@@ -190,13 +205,14 @@ def wizard_check_data():
     if not final_email_list:
         flash(_("No new members were found"), 'warning')
         return redirect(
-            url_for(".wizard_data_insertion", community_id=g.community.slug))
+            url_for(".wizard_data_insertion", community_id=g.community.slug),
+        )
 
     ctx = {
         'existing_accounts_object': existing_accounts_object,
         'csv_roles': existing_accounts_csv_roles if is_csv else False,
         'wizard_emails': final_email_list_json,
-        'existing_members_objects': existing_members_objects
+        'existing_members_objects': existing_members_objects,
     }
     return render_template("community/wizard_check_members.html", **ctx)
 
@@ -211,9 +227,11 @@ def wizard_new_accounts():
     if request.method == "GET":
         return redirect(url_for(".members", community_id=g.community.slug))
 
-    g.breadcrumb.append(BreadcrumbItem(
-        label=_('Members'),
-        url=Endpoint('communities.members', community_id=g.community.slug))
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            label=_('Members'),
+            url=Endpoint('communities.members', community_id=g.community.slug),
+        ),
     )
 
     wizard_emails = request.form.get("wizard-emails")
@@ -278,7 +296,8 @@ def wizard_saving():
                 email=email,
                 last_name=last_name,
                 first_name=first_name,
-                can_login=True)
+                can_login=True,
+            )
             db.session.add(user)
 
             community.set_membership(user, role)

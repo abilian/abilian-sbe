@@ -62,7 +62,8 @@ communities = Blueprint(
     "communities",
     __name__,
     set_community_id_prefix=False,
-    template_folder='../templates')
+    template_folder='../templates',
+)
 route = communities.route
 add_url = communities.add_url_rule
 communities.record_once(register_actions)
@@ -70,7 +71,6 @@ communities.record_once(register_actions)
 
 @communities.record_once
 def register_context_processors(state):
-
     @state.app.context_processor
     def communities_context_processor():
         # helper to get an url for community image
@@ -84,7 +84,6 @@ def tab(tab_name):
     """
 
     def decorator(f):
-
         @wraps(f)
         def set_current_tab(*args, **kwargs):
             g.current_tab = tab_name
@@ -114,8 +113,9 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
         # override with the slug value.
         if obj:
             if isinstance(obj, (Hit, dict)):
-                community_id = obj.get('slug'
-                                       if is_community else 'community_slug')
+                community_id = obj.get(
+                    'slug' if is_community else 'community_slug',
+                )
             elif is_community:
                 community_id = obj.slug
             elif community_id is None and hasattr(obj, 'community'):
@@ -160,7 +160,11 @@ def index():
 
 @route("/<string:community_id>/")
 @views.default_view(
-    communities, Community, 'community_id', kw_func=default_view_kw)
+    communities,
+    Community,
+    'community_id',
+    kw_func=default_view_kw,
+)
 def community():
     return redirect(url_for("wall.index", community_id=g.community.slug))
 
@@ -220,10 +224,14 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
     decorators = views.ObjectEdit.decorators + (require_admin, tab('settings'))
 
     def breadcrumb(self):
-        return BreadcrumbItem(label=_('Settings'),
-                              icon='cog',
-                              url=Endpoint('communities.settings',
-                                           community_id=g.community.slug))
+        return BreadcrumbItem(
+            label=_('Settings'),
+            icon='cog',
+            url=Endpoint(
+                'communities.settings',
+                community_id=g.community.slug,
+            ),
+        )
 
     def before_populate_obj(self):
         form = self.form
@@ -253,12 +261,14 @@ add_url(
     view_func=CommunityEdit.as_view(
         'settings',
         view_endpoint='.community',
-        message_success=_l("Community settings saved successfully.")))
+        message_success=_l("Community settings saved successfully."),
+    ),
+)
 
 
 class CommunityCreate(views.ObjectCreate, CommunityEdit):
     title = _l("Create community")
-    decorators = views.ObjectCreate.decorators + (require_admin,)
+    decorators = views.ObjectCreate.decorators + (require_admin, )
     template = views.ObjectCreate.template
     base_template = views.ObjectCreate.base_template
 
@@ -271,7 +281,8 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
 
 add_url(
     '/new',
-    view_func=CommunityCreate.as_view('new', view_endpoint='.community'))
+    view_func=CommunityCreate.as_view('new', view_endpoint='.community'),
+)
 
 
 class CommunityDelete(BaseCommunityView, views.ObjectDelete):
@@ -282,13 +293,21 @@ add_url(
     "/<string:community_id>/destroy",
     methods=['POST'],
     view_func=CommunityDelete.as_view(
-        'delete', message_success=_l("Community destroyed.")))
+        'delete',
+        message_success=_l("Community destroyed."),
+    ),
+)
 
 # Community Image
 _DEFAULT_IMAGE = Path(__file__).parent / 'data' / 'community.png'
 _DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open('rb').read()).hexdigest()
-route('/_default_image')(image_views.StaticImageView.as_view(
-    'community_default_image', set_expire=True, image=_DEFAULT_IMAGE))
+route('/_default_image')(
+    image_views.StaticImageView.as_view(
+        'community_default_image',
+        set_expire=True,
+        image=_DEFAULT_IMAGE,
+    )
+)
 
 
 class CommunityImageView(image_views.BlobView):
@@ -326,13 +345,19 @@ def _members_query():
     memberships = User.query \
         .options(sa.orm.undefer('photo')) \
         .join(Membership) \
-        .outerjoin(ActivityEntry,
-                   sa.sql.and_(ActivityEntry.actor_id == User.id,
-                               ActivityEntry.target_id == Membership.community_id)) \
+        .outerjoin(
+            ActivityEntry,
+            sa.sql.and_(
+                ActivityEntry.actor_id == User.id,
+                ActivityEntry.target_id == Membership.community_id,
+            ),
+        ) \
         .filter(Membership.community == g.community, User.can_login == True) \
-        .add_columns(Membership.id,
-                     Membership.role,
-                     last_activity_date) \
+        .add_columns(
+            Membership.id,
+            Membership.role,
+            last_activity_date,
+        ) \
         .group_by(User, Membership.id, Membership.role) \
         .order_by(User.last_name.asc(), User.first_name.asc())
 
@@ -342,12 +367,16 @@ def _members_query():
 @route("/<string:community_id>/members")
 @tab('members')
 def members():
-    g.breadcrumb.append(BreadcrumbItem(
-        label=_('Members'),
-        url=Endpoint('communities.members', community_id=g.community.slug))
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            label=_('Members'),
+            url=Endpoint('communities.members', community_id=g.community.slug),
+        ),
     )
     memberships = _members_query().all()
-    community_threads_users = [thread.creator for thread in g.community.threads]
+    community_threads_users = [
+        thread.creator for thread in g.community.threads
+    ]
     threads_count = Counter(community_threads_users)
 
     ctx = {
@@ -414,7 +443,10 @@ MEMBERS_EXPORT_ATTRS = ['User', 'User.email', 'last_activity_date', 'role']
 
 HEADER_FONT = openpyxl.styles.Font(bold=True)
 HEADER_ALIGN = openpyxl.styles.Alignment(
-    horizontal='center', vertical='top', wrapText=True)
+    horizontal='center',
+    vertical='top',
+    wrapText=True,
+)
 XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 
 
@@ -487,9 +519,13 @@ def members_excel_export():
 
     response = current_app.response_class(fd, mimetype=XLSX_MIME)
 
-    filename = '{}-members-{}.xlsx'.format(community.slug,
-                                           strftime("%d:%m:%Y-%H:%M:%S",
-                                                    gmtime()))
+    filename = '{}-members-{}.xlsx'.format(
+        community.slug,
+        strftime(
+            "%d:%m:%Y-%H:%M:%S",
+            gmtime(),
+        ),
+    )
     response.headers['content-disposition'] = \
         'attachment;filename="{}"'.format(filename)
 
@@ -518,5 +554,6 @@ def doc(doc_id):
     location = url_for(
         "documents.document_view",
         community_id=target_community.slug,
-        doc_id=doc.id)
+        doc_id=doc.id,
+    )
     return redirect(location)

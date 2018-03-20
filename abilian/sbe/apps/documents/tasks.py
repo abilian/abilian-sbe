@@ -84,14 +84,20 @@ def preview_document(document_id):
             return
 
         try:
-            converter.to_image(document.content_digest, document.content,
-                               document.content_type, 0, document.preview_size)
+            converter.to_image(
+                document.content_digest,
+                document.content,
+                document.content_type,
+                0,
+                document.preview_size,
+            )
         except ConversionError as e:
             logger.info(
                 'Preview failed: %s',
                 str(e),
                 exc_info=True,
-                extra={'stack': True})
+                extra={'stack': True},
+            )
 
 
 @shared_task
@@ -116,29 +122,40 @@ def convert_document_content(document_id):
                 doc.pdf = b""
             except ConversionError as e:
                 doc.pdf = b""
-                logger.info("Conversion to PDF failed for document %s: %s",
-                            doc.name, e, **error_kwargs)
+                logger.info(
+                    "Conversion to PDF failed for document %s: %s", doc.name,
+                    e, **error_kwargs
+                )
 
         try:
-            doc.text = converter.to_text(doc.content_digest, doc.content,
-                                         doc.content_type)
+            doc.text = converter.to_text(
+                doc.content_digest,
+                doc.content,
+                doc.content_type,
+            )
         except ConversionError as e:
             doc.text = ""
-            logger.info("Conversion to text failed for document %s: %s",
-                        doc.name, e, **error_kwargs)
+            logger.info(
+                "Conversion to text failed for document %s: %s", doc.name, e,
+                **error_kwargs
+            )
 
         doc.extra_metadata = {}
         try:
             doc.extra_metadata = converter.get_metadata(*conversion_args)
         except ConversionError as e:
-            logger.warning("Metadata extraction failed on document %s: %s",
-                           doc.name, e, **error_kwargs)
+            logger.warning(
+                "Metadata extraction failed on document %s: %s", doc.name, e,
+                **error_kwargs
+            )
         except UnicodeDecodeError as e:
-            logger.error("Unicode issue on document %s: %s", doc.name, e,
-                         **error_kwargs)
+            logger.error(
+                "Unicode issue on document %s: %s", doc.name, e, **error_kwargs
+            )
         except Exception as e:
-            logger.error("Other issue on document %s: %s", doc.name, e,
-                         **error_kwargs)
+            logger.error(
+                "Other issue on document %s: %s", doc.name, e, **error_kwargs
+            )
 
         if doc.text:
             import langid

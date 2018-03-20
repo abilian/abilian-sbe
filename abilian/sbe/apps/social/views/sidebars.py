@@ -19,7 +19,6 @@ from .social import social
 
 
 class Sidebars(object):
-
     @property
     def latest_visitors(self):
         return User.query.filter(User.last_active != None) \

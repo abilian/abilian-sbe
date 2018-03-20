@@ -13,8 +13,10 @@ TOKEN_SERIALIZER_NAME = "unsubscribe_sbe"
 
 def register_plugin(app):
     cfg = app.config.setdefault('ABILIAN_SBE', {})
-    cfg.setdefault('DAILY_SOCIAL_DIGEST_SUBJECT',
-                   'Des nouvelles de vos communautés')
+    cfg.setdefault(
+        'DAILY_SOCIAL_DIGEST_SUBJECT',
+        'Des nouvelles de vos communautés',
+    )
     sbe.init_app(app)
 
     # TODO: Slightly confusing. Reorg?

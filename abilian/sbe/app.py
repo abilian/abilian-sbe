@@ -134,8 +134,10 @@ def setup_sbe_app():
     bin_dir = Path(sys.prefix) / 'bin'
 
     if not bin_dir.exists() or not bin_dir.is_dir():
-        logger.error("%s doesn't exists or is not a directory. Aborting",
-                     bin_dir)
+        logger.error(
+            "%s doesn't exists or is not a directory. Aborting",
+            bin_dir,
+        )
         return 1
 
     script_file = bin_dir / 'abilian_sbe'
@@ -165,7 +167,7 @@ def setup_sbe_app():
 
 
 def command_entry_point():
-    command_manager.run(commands={'setup_sbe_app': Command(setup_sbe_app)},)
+    command_manager.run(commands={'setup_sbe_app': Command(setup_sbe_app)}, )
 
 
 if __name__ == '__main__':

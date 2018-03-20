@@ -64,7 +64,8 @@ def splinter_driver_kwargs():
     return dict(
         desired_capabilities={
             'phantomjs.page.settings.resourceTimeout': '30000',  # 30s
-        },)
+        },
+    )
 
 
 @pytest.fixture(scope='module')

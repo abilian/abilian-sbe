@@ -23,7 +23,8 @@ def test_user():
         first_name="John",
         last_name="Test User",
         email="test@example.com",
-        password="toto")
+        password="toto",
+    )
     check_editable(user)
 
     assert "John Test User" == user.name
@@ -39,13 +40,15 @@ def test_user_follow():
         first_name="John",
         last_name="Test User 1",
         email="test1@example.com",
-        password="toto")
+        password="toto",
+    )
     user2 = User(
         id=2,
         first_name="Joe",
         last_name="Test User 2",
         email="test2@example.com",
-        password="toto")
+        password="toto",
+    )
 
     assert len(user1.followers) == 0
     assert len(user1.followees) == 0
@@ -76,7 +79,8 @@ def test_group():
         first_name="John",
         last_name="Test User",
         email="test@example.com",
-        password="toto")
+        password="toto",
+    )
     group = Group(name="Group 1")
 
     user.join(group)
@@ -104,7 +108,8 @@ def test_status_update():
         first_name="John",
         last_name="Test User",
         email="test@example.com",
-        password="toto")
+        password="toto",
+    )
     # self.assertEquals(len(user.messages), 0)
 
     message = Message()
