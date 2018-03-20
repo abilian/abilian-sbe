@@ -121,13 +121,14 @@ lint-doc:
 format: format-py format-js
 
 format-py:
-	isort -a  "from __future__ import absolute_import, print_function, unicode_literals" -rc \
-		abilian demo tests *.py
+	isort -a  "from __future__ import absolute_import, print_function, unicode_literals"
+		-rc abilian demo tests *.py
 	-yapf --style google -r -i abilian demo tests *.py
 	isort -rc abilian demo tests *.py
 
 format-js:
-	prettier --trailing-comma es5 --write ./abilian/sbe/static/js/**.js
+	./node_modules/.bin/prettier --trailing-comma es5 --write \
+		./abilian/sbe/static/js/**.js
 
 #
 # running
@@ -152,7 +153,7 @@ clean:
 	find . -name .DS_Store -delete
 	find . -name __pycache__ -delete
 	find . -type d -empty -delete
-	rm -rf .mypy_cache
+	rm -rf .mypy_cache .cache .eggs .pytest_cache
 	rm -rf instance/cache instance/tmp instance/webassets instance/whoosh
 	rm -f migration.log
 	rm -rf build dist
