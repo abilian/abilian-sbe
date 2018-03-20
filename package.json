@@ -2,15 +2,12 @@
   "name": "abilian-sbe-front",
   "version": "0.0.0",
   "private": true,
-  "scripts": {
-    "stylelint": "stylelint abilian/sbe/static/less/**/*.less",
-    "eslint": "eslint abilian/sbe/static/js"
-  },
   "engines": {
     "node": ">= 4.0.0",
     "npm": ">= 3.0.0"
   },
   "devDependencies": {
+    "@types/requirejs": "^2.1.31",
     "eslint": "^4.14.0",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-html": "^4.0.2",
@@ -19,6 +16,7 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-requirejs": "^3.1.1",
     "eslint-plugin-standard": "^3.0.1",
+    "prettier": "^1.11.1",
     "stylelint": "^8.4.0",
     "stylelint-config-standard": "^17.0.0"
   },
