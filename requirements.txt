@@ -17,7 +17,7 @@ cffi==1.11.5              # via bcrypt
 chardet==3.0.4
 clamd==1.0.2              # via abilian-core
 click==6.7                # via flask
-closure==20171112         # via abilian-core
+closure==20180204         # via abilian-core
 cssmin==0.2.0             # via abilian-core
 decorator==4.2.1          # via validators
 et-xmlfile==1.0.1         # via openpyxl
@@ -52,7 +52,7 @@ pathlib==1.0.1            # via abilian-core
 pillow==5.0.0             # via abilian-core
 pycparser==2.18           # via cffi
 pygeoip==0.3.2            # via abilian-core
-python-dateutil==2.7.0    # via abilian-core, pandas
+python-dateutil==2.7.2    # via abilian-core, pandas
 python-deprecated==1.1.0  # via abilian-core
 python-editor==1.0.3      # via alembic
 python-magic==0.4.15      # via abilian-core
