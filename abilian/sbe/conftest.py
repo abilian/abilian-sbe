@@ -52,8 +52,8 @@ def cleanup_db(db):
     """Drop all the tables, in a way that doesn't raise integrity errors."""
 
     # Need to run this sequence twice for some reason
-    for i in range(0, 2):
-        delete_tables(db)
+    delete_tables(db)
+    delete_tables(db)
     # Just in case ?
     db.drop_all()
 
