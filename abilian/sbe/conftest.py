@@ -12,8 +12,21 @@ from __future__ import absolute_import, division, print_function, \
 from pytest import fixture
 
 from abilian.conftest import TestConfig
+
 from abilian.sbe.app import create_app
 from abilian.services import get_service
+
+
+# Change to True to enable errors on warnings
+if True:
+    import warnings
+    # Do not remove !
+    import pandas
+    from sqlalchemy.exc import SADeprecationWarning
+    warnings.simplefilter("ignore", SADeprecationWarning)
+    warnings.simplefilter("ignore", FutureWarning)
+    warnings.simplefilter("ignore", DeprecationWarning)
+    # warnings.simplefilter("error")
 
 
 @fixture
