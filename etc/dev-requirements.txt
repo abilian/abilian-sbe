@@ -44,6 +44,8 @@ flake8
 flake8-tidy-imports
 flake8-truveris
 flake8-mutable
+# Needs Python 3
+# flake8-bugbear
 # pep8-naming
 pylint
 pre-commit
