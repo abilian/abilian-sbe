@@ -16,6 +16,7 @@ import socket
 import tempfile
 
 import pytest
+from six import text_type
 from werkzeug.serving import select_ip_version
 
 from abilian.sbe.app import Application
@@ -97,7 +98,7 @@ def app(request, instance_path, app_port):
     try:
         process.start()
     except Exception as e:
-        pytest.fail(e.message)
+        pytest.fail(text_type(e))
 
     def finalizer():
         if process:

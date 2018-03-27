@@ -38,7 +38,7 @@ def init_app(app):
     indexing.register_search_filter(filter_user_communities)
     indexing.register_value_provider(mark_non_community_content)
 
-    for name, schema in indexing.schemas.items():
+    for _name, schema in indexing.schemas.items():
         for fieldname, field in _FIELDS:
             if fieldname in schema:
                 if schema[fieldname] is not field:
