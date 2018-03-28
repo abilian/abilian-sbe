@@ -87,9 +87,9 @@ vagrant-tests:
 	#vagrant ssh -c 'cp -a /vagrant src && cd src && tox'
 
 #
-# Linting & formatting
+# Linting
 #
-lint: lint-js lint-py lint-less lint-doc
+lint: lint-js lint-py lint-less lint-doc lint-other
 
 lint-js:
 	@echo "--> Linting JavaScript files"
@@ -118,6 +118,13 @@ lint-doc:
 	@echo "--> Linting .rst files"
 	rst-lint *.rst
 
+lint-other:
+	@echo "--> Linting .travis.yml"
+	travis lint
+
+#
+# Formatting
+#
 format: format-py format-js
 
 format-py:

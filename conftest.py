@@ -31,6 +31,7 @@ if True:
 
 @fixture
 def app():
+    """Return an App configured with config=TestConfig."""
     return create_app(config=TestConfig)
 
 
