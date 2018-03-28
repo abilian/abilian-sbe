@@ -120,7 +120,7 @@ lint-doc:
 
 lint-other:
 	@echo "--> Linting .travis.yml"
-	travis lint
+	travis lint --no-interactive
 
 #
 # Formatting
