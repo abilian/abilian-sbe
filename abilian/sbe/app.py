@@ -98,7 +98,7 @@ _BASE_SERVER_ACTIVATE = BaseWSGIServer.server_activate
 def _on_http_server_activate(self, *args, **kwargs):
     """This function is used as to monkey patch BaseWSGIServer.server_activate
     during `setup_sbe_demo`."""
-    _BASE_SERVER_ACTIVATE(self, *args, **kwargs)
+    _BASE_SERVER_ACTIVATE(self)
     # now we are listening to socket
     host, port = self.server_address
     if host == '0.0.0.0':
