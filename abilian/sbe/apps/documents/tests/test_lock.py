@@ -12,8 +12,6 @@ from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents import lock
 from abilian.sbe.apps.documents.lock import Lock
 
-pytest_plugins = ['abilian.conftest']
-
 
 def test_lock():
     date = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)

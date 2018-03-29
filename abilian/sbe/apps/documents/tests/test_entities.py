@@ -7,8 +7,6 @@ from pytest import fixture
 from abilian.sbe.app import create_app
 from abilian.sbe.apps.documents.models import Document, Folder, icon_for
 
-pytest_plugins = ['abilian.conftest']
-
 
 @fixture
 def app(config):

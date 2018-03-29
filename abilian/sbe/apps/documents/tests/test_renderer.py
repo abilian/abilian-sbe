@@ -7,8 +7,6 @@ from abilian.sbe.app import create_app
 from ..cmis.renderer import Feed, to_xml
 from ..models import Document, Folder
 
-pytest_plugins = ['abilian.conftest']
-
 
 @fixture
 def app(config):

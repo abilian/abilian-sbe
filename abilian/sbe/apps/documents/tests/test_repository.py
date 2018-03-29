@@ -11,8 +11,6 @@ from sqlalchemy.exc import IntegrityError
 from ..models import Document, Folder
 from ..repository import Repository
 
-pytest_plugins = ['abilian.conftest']
-
 
 @fixture
 def repository(app):
