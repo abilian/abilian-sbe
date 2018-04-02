@@ -7,12 +7,12 @@ from __future__ import absolute_import, division, print_function, \
 import pytest
 import six
 import sqlalchemy as sa
+from abilian.core.entities import Entity
+from abilian.core.models.subjects import User
 from flask_login import login_user, logout_user
 from mock import mock
 from pytest import fixture
 
-from abilian.core.entities import Entity
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents.models import Folder
 
 from .. import signals, views

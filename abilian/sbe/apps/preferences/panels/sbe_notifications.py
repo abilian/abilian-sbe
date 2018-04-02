@@ -3,16 +3,15 @@
 (social netowking) app."""
 from __future__ import absolute_import, print_function, unicode_literals
 
-from flask import current_app as app
-from flask import flash, redirect, render_template, request, url_for
-from werkzeug.exceptions import InternalServerError
-from wtforms import BooleanField
-
 from abilian.core.extensions import db
 from abilian.i18n import _, _l
 from abilian.services.preferences.panel import PreferencePanel
 from abilian.web import csrf
 from abilian.web.forms import Form, widgets
+from flask import current_app as app
+from flask import flash, redirect, render_template, request, url_for
+from werkzeug.exceptions import InternalServerError
+from wtforms import BooleanField
 
 
 class SbeNotificationsForm(Form):

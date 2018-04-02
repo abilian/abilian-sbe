@@ -7,6 +7,13 @@ from datetime import date, datetime, timedelta
 from itertools import groupby
 
 import sqlalchemy as sa
+from abilian.core.util import utc_dt
+from abilian.i18n import _, _l
+from abilian.services.viewtracker import viewtracker
+from abilian.web import url_for, views
+from abilian.web.action import ButtonAction, Endpoint
+from abilian.web.nav import BreadcrumbItem
+from abilian.web.views import default_view
 from flask import current_app, flash, g, make_response, render_template, \
     request
 from flask_babel import format_date
@@ -16,14 +23,7 @@ from six.moves.urllib.parse import quote
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
 
-from abilian.core.util import utc_dt
-from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.security import is_manager
-from abilian.services.viewtracker import viewtracker
-from abilian.web import url_for, views
-from abilian.web.action import ButtonAction, Endpoint
-from abilian.web.nav import BreadcrumbItem
-from abilian.web.views import default_view
 
 from ..communities.blueprint import Blueprint
 from ..communities.common import activity_time_format, object_viewers
@@ -499,14 +499,12 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         self.obj.body_html = self.message_body
         obj_meta = self.obj.meta.setdefault('abilian.sbe.forum', {})
         history = obj_meta.setdefault('history', [])
-        history.append(
-            dict(
-                user_id=current_user.id,
-                user=text_type(current_user),
-                date=utc_dt(datetime.utcnow()).isoformat(),
-                reason=self.form.reason.data,
-            ),
-        )
+        history.append({
+            'user_id': current_user.id,
+            'user': text_type(current_user),
+            'date': utc_dt(datetime.utcnow()).isoformat(),
+            'reason': self.form.reason.data
+        }, )
         self.obj.meta['abilian.sbe.forum'] = obj_meta  # trigger change for SA
 
         attachments_to_remove = []

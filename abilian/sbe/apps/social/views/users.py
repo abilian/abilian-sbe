@@ -7,23 +7,23 @@ import pkgutil
 from cgi import escape
 
 import sqlalchemy as sa
+from abilian.core.extensions import db
+from abilian.core.models.subjects import User
+from abilian.i18n import _, _l
+from abilian.services import get_service
+from abilian.web import url_for
+from abilian.web.filters import age
+from abilian.web.views import ObjectEdit, default_view
+from abilian.web.views.images import user_photo_url
 from flask import Response, flash, g, jsonify, redirect, render_template, \
     request
 from six import text_type
 from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError
 
-from abilian.core.extensions import db
-from abilian.core.models.subjects import User
-from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.models import Membership
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.views import get_recent_entries
-from abilian.services import get_service
-from abilian.web import url_for
-from abilian.web.filters import age
-from abilian.web.views import ObjectEdit, default_view
-from abilian.web.views.images import user_photo_url
 
 from ..forms import UserProfileForm, UserProfileViewForm
 from .social import social
@@ -38,25 +38,33 @@ DEFAULT_USER_MUGSHOT = pkgutil.get_data(
 
 def make_tabs(user):
     return [
-        dict(
-            id='profile',
-            label=_('Profile'),
-            link=url_for(
+        {
+            'id': 'profile',
+            'label': _('Profile'),
+            'link': url_for(
                 user,
                 tab='profile',
-            ),
-        ),
+            )
+        },
         # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
-        dict(
-            id='documents',
-            label=_('Documents'),
-            link=url_for(
+        {
+            'id': 'documents',
+            'label': _('Documents'),
+            'link': url_for(
                 user,
                 tab='documents',
-            ),
-        ),
-        dict(id='images', label=_('Images'), link=url_for(user, tab='images')),
-        dict(id='audit', label=_('Audit'), link=url_for(user, tab='audit')),
+            )
+        },
+        {
+            'id': 'images',
+            'label': _('Images'),
+            'link': url_for(user, tab='images')
+        },
+        {
+            'id': 'audit',
+            'label': _('Audit'),
+            'link': url_for(user, tab='audit')
+        },
     ]
 
 
@@ -73,7 +81,7 @@ def users():
         users = User.query.filter(q).limit(100).all()
     else:
         users = User.query.limit(100).all()
-    ctx = dict(users=users)
+    ctx = {'users': users}
     return render_template("social/users.html", **ctx)
 
 

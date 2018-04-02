@@ -3,10 +3,9 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import sqlalchemy as sa
-from flask import current_app
-
 from abilian.core.entities import Entity
 from abilian.services import get_service
+from flask import current_app
 
 from .models import CmisObject
 

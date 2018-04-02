@@ -2,10 +2,10 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
-from flask import Blueprint, redirect, render_template, url_for
-
 from abilian.core.extensions import db
 from abilian.core.util import get_params
+from flask import Blueprint, redirect, render_template, url_for
+
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.util import get_recent_entries
 

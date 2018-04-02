@@ -6,9 +6,11 @@ require(["jquery", "jquery.dataTables"], function($) {
   function sortFolderFirstCmp(x, y) {
     if (x === y) {
       return 0;
-    } else if (x === FOLDER_TYPE) {
+    }
+    if (x === FOLDER_TYPE) {
       return -1;
-    } else if (y === FOLDER_TYPE) {
+    }
+    if (y === FOLDER_TYPE) {
       return 1;
     }
     return 0;

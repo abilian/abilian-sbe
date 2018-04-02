@@ -6,11 +6,6 @@ import csv
 import json
 from os.path import splitext
 
-from flask import current_app, flash, g, redirect, render_template, request, \
-    url_for
-from six import PY2
-from validate_email import validate_email
-
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 from abilian.core.signals import activity
@@ -19,6 +14,10 @@ from abilian.services.auth.views import send_reset_password_instructions
 from abilian.web import csrf
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
+from flask import current_app, flash, g, redirect, render_template, request, \
+    url_for
+from six import PY2
+from validate_email import validate_email
 
 from .views import route, tab
 

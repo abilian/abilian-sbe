@@ -1,10 +1,10 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
+from abilian.core.extensions import db
 from flask import Blueprint, Response, make_response, render_template, request
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound, Unauthorized
 
-from abilian.core.extensions import db
 from abilian.sbe.apps.documents.repository import repository
 
 from .parser import Entry

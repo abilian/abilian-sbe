@@ -1,7 +1,8 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-from abilian.sbe.testing import BaseTestCase
 from abilian.web import url_for
+
+from abilian.sbe.testing import BaseTestCase
 
 
 class TestViews(BaseTestCase):

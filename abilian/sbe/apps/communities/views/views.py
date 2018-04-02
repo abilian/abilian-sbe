@@ -16,6 +16,17 @@ from time import gmtime, strftime
 import openpyxl
 import pytz
 import sqlalchemy as sa
+from abilian.core.extensions import db
+from abilian.core.models.subjects import Group, User
+from abilian.core.signals import activity
+from abilian.core.util import utc_dt
+from abilian.i18n import _, _l
+from abilian.services.activity import ActivityEntry
+from abilian.services.security import Role
+from abilian.web import csrf, views
+from abilian.web.action import Endpoint
+from abilian.web.nav import BreadcrumbItem
+from abilian.web.views import images as image_views
 from flask import current_app, flash, g, jsonify, redirect, render_template, \
     request, session, url_for
 from flask_login import current_user, login_required
@@ -24,19 +35,8 @@ from six import text_type
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from whoosh.searching import Hit
 
-from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, User
-from abilian.core.signals import activity
-from abilian.core.util import utc_dt
-from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.models import Document
-from abilian.services.activity import ActivityEntry
-from abilian.services.security import Role
-from abilian.web import csrf, views
-from abilian.web.action import Endpoint
-from abilian.web.nav import BreadcrumbItem
-from abilian.web.views import images as image_views
 
 from ..actions import register_actions
 from ..blueprint import Blueprint
@@ -73,7 +73,7 @@ def register_context_processors(state):
     @state.app.context_processor
     def communities_context_processor():
         # helper to get an url for community image
-        return dict(community_image_url=image_url)
+        return {'community_image_url': image_url}
 
 
 def tab(tab_name):
@@ -149,7 +149,7 @@ def index():
         # Filter with permissions
         query = query.join(Membership).filter(Membership.user == current_user)
 
-    ctx = dict(my_communities=query.all(), sort_order=sort_order)
+    ctx = {'my_communities': query.all(), 'sort_order': sort_order}
     return render_template("community/home.html", **ctx)
 
 

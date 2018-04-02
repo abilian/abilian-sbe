@@ -2,13 +2,12 @@
 """"""
 from __future__ import absolute_import, print_function, unicode_literals
 
-from flask import Blueprint as BaseBlueprint
-from flask import g
-from werkzeug.exceptions import NotFound
-
 from abilian.i18n import _l
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
+from flask import Blueprint as BaseBlueprint
+from flask import g
+from werkzeug.exceptions import NotFound
 
 from . import security
 from .models import Community

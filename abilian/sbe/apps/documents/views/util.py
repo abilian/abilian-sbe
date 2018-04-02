@@ -2,14 +2,13 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
+from abilian.core.signals import activity
+from abilian.services.security import MANAGE, WRITE, Admin, security
+from abilian.web import url_for
 from flask import current_app, flash, g, request
 from flask_babel import gettext as _
 from six import text_type
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
-
-from abilian.core.signals import activity
-from abilian.services.security import MANAGE, WRITE, Admin, security
-from abilian.web import url_for
 
 from ..repository import repository
 
@@ -21,10 +20,10 @@ def breadcrumbs_for(object):
     if object is None:
         return []
 
-    bc = [dict(label=object.title)]
+    bc = [{'label': object.title}]
     parent = object.parent
     while parent and not parent.is_root_folder:
-        bc = [dict(label=parent.title, path=url_for(parent))] + bc
+        bc = [{'label': parent.title, 'path': url_for(parent)}] + bc
         parent = parent.parent
 
     return bc

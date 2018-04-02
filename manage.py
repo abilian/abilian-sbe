@@ -7,9 +7,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import logging
 
+from abilian.core.commands import setup_abilian_commands
 from flask_script import Manager
 
-from abilian.core.commands import setup_abilian_commands
 from abilian.sbe.app import Application
 
 

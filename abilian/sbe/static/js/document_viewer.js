@@ -53,7 +53,8 @@ define("SBEDocumentViewerSetup", ["Abilian", "jquery"], function(Abilian, $) {
       if (code === 39) {
         loadNext();
         return false;
-      } else if (code === 37) {
+      }
+      if (code === 37) {
         loadPrev();
         return false;
       }

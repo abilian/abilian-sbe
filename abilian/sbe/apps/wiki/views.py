@@ -7,17 +7,6 @@ import difflib
 from pathlib import Path
 
 import sqlalchemy as sa
-from flask import current_app, flash, g, make_response, redirect, \
-    render_template, request
-from flask_login import current_user
-from markdown import markdown
-from markupsafe import Markup
-from six import text_type
-from six.moves.urllib.parse import quote
-from sqlalchemy.orm.exc import NoResultFound
-from werkzeug.exceptions import NotFound
-from whoosh.searching import Hit
-
 from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.i18n import _, _l, _n
@@ -28,6 +17,16 @@ from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
 from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
     default_view
+from flask import current_app, flash, g, make_response, redirect, \
+    render_template, request
+from flask_login import current_user
+from markdown import markdown
+from markupsafe import Markup
+from six import text_type
+from six.moves.urllib.parse import quote
+from sqlalchemy.orm.exc import NoResultFound
+from werkzeug.exceptions import NotFound
+from whoosh.searching import Hit
 
 from ..communities.blueprint import Blueprint
 from ..communities.common import object_viewers

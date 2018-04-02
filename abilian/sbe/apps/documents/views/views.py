@@ -2,13 +2,13 @@
 """Document management blueprint."""
 from __future__ import absolute_import, print_function, unicode_literals
 
-from flask import g
-
 from abilian.i18n import _l
-from abilian.sbe.apps.communities.blueprint import Blueprint
-from abilian.sbe.apps.communities.security import is_manager
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
+from flask import g
+
+from abilian.sbe.apps.communities.blueprint import Blueprint
+from abilian.sbe.apps.communities.security import is_manager
 
 from ..actions import register_actions
 

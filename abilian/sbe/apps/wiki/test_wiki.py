@@ -3,6 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
+from abilian.core.models.subjects import User
 from flask import g, url_for
 from markdown import Markdown
 from mock import MagicMock, patch
@@ -10,7 +11,6 @@ from six import text_type
 from six.moves.urllib.parse import quote_plus
 from toolz import first
 
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
     CommunityIndexingTestCase
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
@@ -162,7 +162,7 @@ class TestsViews(WikiBaseTestCase):
         title = 'Some page'
         body = "LuuP3jai"
         url = url_for("wiki.page_new", community_id=self.community.slug)
-        data = dict(title=title, body_src=body, __action="create")
+        data = {'title': title, 'body_src': body, '__action': "create"}
         response = self.client.post(url, data=data)
         assert response.status_code == 302
 
@@ -209,7 +209,7 @@ class TestsViews(WikiBaseTestCase):
         assert response.status_code == 200
 
         url = url_for("wiki.page_edit", community_id=self.community.slug)
-        data = dict(title=title, page_id=page_id, body_src="abc def")
+        data = {'title': title, 'page_id': page_id, 'body_src': "abc def"}
         data['__action'] = 'edit'
         response = self.client.post(url, data=data)
         assert response.status_code == 302

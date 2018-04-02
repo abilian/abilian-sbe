@@ -6,18 +6,17 @@ import imghdr
 
 import PIL
 import sqlalchemy as sa
+from abilian.core.models.subjects import Group
+from abilian.web.forms import Form
+from abilian.web.forms.fields import FileField, Select2Field
+from abilian.web.forms.validators import length
+from abilian.web.forms.widgets import BooleanWidget, ImageInput, TextArea
 from flask import request
 from flask_babel import gettext as _
 from flask_babel import lazy_gettext as _l
 from six import text_type
 from wtforms.fields import BooleanField, StringField, TextAreaField
 from wtforms.validators import ValidationError, data_required, optional
-
-from abilian.core.models.subjects import Group
-from abilian.web.forms import Form
-from abilian.web.forms.fields import FileField, Select2Field
-from abilian.web.forms.validators import length
-from abilian.web.forms.widgets import BooleanWidget, ImageInput, TextArea
 
 from .models import Community
 

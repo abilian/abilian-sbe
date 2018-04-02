@@ -5,12 +5,12 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
 
+from abilian.i18n import _l
+from abilian.services.viewtracker import viewtracker
 from flask import g
 from flask_babel import format_date
 
-from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import is_manager
-from abilian.services.viewtracker import viewtracker
 
 
 def object_viewers(entity):

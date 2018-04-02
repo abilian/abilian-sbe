@@ -5,18 +5,18 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 
 import bleach
+from abilian.core.util import BasePresenter
+from abilian.i18n import _, _l
+from abilian.web.util import url_for
 from flask import render_template_string
 from jinja2 import Markup, Template
 from singledispatch import singledispatch
 
-from abilian.core.util import BasePresenter
-from abilian.i18n import _, _l
 from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.wiki.models import WikiPage
-from abilian.web.util import url_for
 
 logger = logging.getLogger(__name__)
 

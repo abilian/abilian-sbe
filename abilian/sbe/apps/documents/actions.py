@@ -4,13 +4,13 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from typing import Any, Dict
 
+from abilian.i18n import _l
+from abilian.services.security import MANAGE, WRITE, security
+from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 from flask import g
 from flask import url_for as url_for_orig
 
-from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import is_manager
-from abilian.services.security import MANAGE, WRITE, security
-from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 from .repository import repository
 

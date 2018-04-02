@@ -7,6 +7,9 @@ from itertools import groupby, islice
 
 import whoosh
 import whoosh.query as wq
+from abilian.services import get_service
+from abilian.web import url_for
+from abilian.web.action import actions
 from flask import current_app, g, render_template
 from flask_babel import format_date
 from six import text_type
@@ -15,9 +18,6 @@ from sqlalchemy.orm import joinedload
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.documents.models import Document, icon_for
 from abilian.sbe.apps.forum.models import Thread
-from abilian.services import get_service
-from abilian.web import url_for
-from abilian.web.action import actions
 
 from .presenters import ActivityEntryPresenter
 from .util import get_recent_entries

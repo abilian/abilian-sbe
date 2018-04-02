@@ -7,12 +7,11 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import json
 
-from flask import Blueprint, g, make_response, request
-from flask_login import login_required
-
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.util import get_params
+from flask import Blueprint, g, make_response, request
+from flask_login import login_required
 
 from .models import Message
 

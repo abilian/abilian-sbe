@@ -6,11 +6,11 @@ from __future__ import absolute_import, division, print_function, \
 from datetime import datetime, timedelta
 from unittest import TestCase
 
+from abilian.core.models.subjects import User
 from flask import url_for
 from mock import Mock, patch
 from six import text_type
 
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
     CommunityIndexingTestCase
@@ -102,7 +102,7 @@ class ViewTestCase(CommunityBaseTestCase):
             title = "Brand new thread"
             content = "shiny thread message"
             url = url_for("forum.new_thread", community_id=self.community.slug)
-            data = dict(title=title, message=content)
+            data = {'title': title, 'message': content}
             data['__action'] = "create"
             data['send_by_email'] = "y"
             response = self.client.post(url, data=data)
@@ -168,7 +168,7 @@ class ViewTestCase(CommunityBaseTestCase):
         title = "Brand new thread"
         content = "shiny thread message"
         url = url_for("forum.new_thread", community_id=self.community.slug)
-        data = dict(title=title, message=content)
+        data = {'title': title, 'message': content}
         data['__action'] = "create"
 
         mail = self.app.extensions['mail']

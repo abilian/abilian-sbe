@@ -3,14 +3,13 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
+from abilian.core.entities import SEARCHABLE, Entity
+from abilian.core.extensions import db
+from abilian.core.models.subjects import Group, User
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.query import Query
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, UnicodeText
-
-from abilian.core.entities import SEARCHABLE, Entity
-from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, User
 
 __all__ = ['Message', 'PrivateMessage']
 
@@ -37,9 +36,7 @@ class Message(Entity):
     ]
 
     #: The content for this message.
-    content = Column(
-        UnicodeText(), info=SEARCHABLE | dict(index_to=('text', ))
-    )
+    content = Column(UnicodeText(), info=SEARCHABLE | {'index_to': ('text', )})
 
     #: Nullable: if null, then message is public.
     group_id = Column(Integer, ForeignKey(Group.id))
@@ -80,7 +77,7 @@ class PrivateMessage(Entity):
         'owner_id',
     ]
 
-    content = Column(UnicodeText, info=SEARCHABLE | dict(index_to=('text', )))
+    content = Column(UnicodeText, info=SEARCHABLE | {'index_to': ('text', )})
     recipient_id = Column(Integer, ForeignKey(User.id), nullable=False)
 
 
@@ -97,5 +94,5 @@ class Like(Entity):
         'owner_id',
     ]
 
-    content = Column(UnicodeText, info=SEARCHABLE | dict(index_to=('text', )))
+    content = Column(UnicodeText, info=SEARCHABLE | {'index_to': ('text', )})
     message_id = Column(Integer, ForeignKey(Message.id), nullable=False)

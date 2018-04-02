@@ -4,16 +4,16 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import sqlalchemy as sa
+from abilian.core.extensions import db
+from abilian.services import get_service
+from abilian.services.activity import ActivityEntry
+from abilian.services.security import READ, Admin
 from flask import g
 from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 
-from abilian.core.extensions import db
 from abilian.sbe.apps.communities.models import Membership
 from abilian.sbe.apps.documents.models import Document, Folder
-from abilian.services import get_service
-from abilian.services.activity import ActivityEntry
-from abilian.services.security import READ, Admin
 
 
 def get_recent_entries(num=20, user=None, community=None):

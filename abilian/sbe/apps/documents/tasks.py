@@ -5,11 +5,10 @@ from __future__ import absolute_import, print_function, unicode_literals
 import logging
 from contextlib import contextmanager
 
-from celery import shared_task
-
 from abilian.core.extensions import db
 from abilian.services import converter, get_service
 from abilian.services.conversion import ConversionError, HandlerNotFound
+from celery import shared_task
 
 logger = logging.getLogger(__package__)
 
@@ -102,7 +101,7 @@ def convert_document_content(document_id):
             # deleted after task queued, but before task run
             return
 
-        error_kwargs = dict(exc_info=True, extra={'stack': True})
+        error_kwargs = {'exc_info': True, 'extra': {'stack': True}}
 
         conversion_args = (doc.content_digest, doc.content, doc.content_type)
 

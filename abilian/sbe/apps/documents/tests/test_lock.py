@@ -5,10 +5,10 @@ from __future__ import absolute_import, print_function, unicode_literals
 from datetime import datetime, timedelta
 
 import mock
+from abilian.core.models.subjects import User
 from flask_login import login_user
 from pytz import UTC
 
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents import lock
 from abilian.sbe.apps.documents.lock import Lock
 
@@ -18,11 +18,11 @@ def test_lock():
     l = Lock(user_id=3, user='Joe Smith', date=date)
 
     d = l.as_dict()
-    assert d == dict(
-        user_id=3,
-        user='Joe Smith',
-        date='2015-10-22T14:58:42+00:00',
-    )
+    assert d == {
+        'user_id': 3,
+        'user': 'Joe Smith',
+        'date': '2015-10-22T14:58:42+00:00'
+    }
     l = Lock.from_dict(d)
     assert l.user_id == 3
     assert l.user == 'Joe Smith'

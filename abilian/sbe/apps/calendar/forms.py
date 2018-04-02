@@ -3,15 +3,14 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import bleach
-from wtforms import StringField, TextAreaField, ValidationError
-from wtforms.fields.html5 import URLField
-
 from abilian.i18n import _l
 from abilian.web.forms import Form
 from abilian.web.forms.fields import DateTimeField
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import required
 from abilian.web.forms.widgets import RichTextWidget
+from wtforms import StringField, TextAreaField, ValidationError
+from wtforms.fields.html5 import URLField
 
 ALLOWED_TAGS = [
     'a',

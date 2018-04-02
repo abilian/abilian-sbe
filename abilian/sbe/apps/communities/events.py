@@ -3,9 +3,9 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+from abilian.core.signals import activity
 from blinker import ANY
 
-from abilian.core.signals import activity
 from abilian.sbe.apps.documents.models import Document
 
 from .models import Community

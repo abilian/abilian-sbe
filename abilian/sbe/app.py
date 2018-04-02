@@ -14,16 +14,15 @@ import sys
 from pathlib import Path
 
 import jinja2
-from flask import current_app
-from flask_script import Command, Manager
-from werkzeug.serving import BaseWSGIServer
-
 from abilian.app import Application as BaseApplication
 from abilian.core.celery import FlaskCelery as BaseCelery
 from abilian.core.celery import FlaskLoader as CeleryBaseLoader
 from abilian.core.commands import setup_abilian_commands
 from abilian.core.extensions import db
 from abilian.services import converter
+from flask import current_app
+from flask_script import Command, Manager
+from werkzeug.serving import BaseWSGIServer
 
 from .apps.documents.repository import repository
 from .extension import sbe

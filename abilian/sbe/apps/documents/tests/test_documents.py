@@ -12,6 +12,7 @@ from zipfile import ZipFile
 
 import flask_mail
 import pytest
+from abilian.web.util import url_for
 from flask import g, get_flashed_messages
 from toolz import first
 from werkzeug.datastructures import FileStorage
@@ -20,7 +21,6 @@ from abilian.sbe.apps.communities.models import WRITER
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
     CommunityIndexingTestCase
-from abilian.web.util import url_for
 
 from ..models import Document, Folder, PathAndSecurityIndexable, db
 from ..views import util as view_util

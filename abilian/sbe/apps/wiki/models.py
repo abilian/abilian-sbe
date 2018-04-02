@@ -4,6 +4,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
 
+from abilian.core.entities import SEARCHABLE, Entity, db
+from abilian.core.models.subjects import User
 from flask import g
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Unicode, \
     UnicodeText, UniqueConstraint
@@ -11,8 +13,6 @@ from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 
-from abilian.core.entities import SEARCHABLE, Entity, db
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent
@@ -42,7 +42,7 @@ class WikiPage(Entity):
         UnicodeText,
         default="",
         nullable=False,
-        info=SEARCHABLE | dict(index_to=('text', )),
+        info=SEARCHABLE | {'index_to': ('text', )},
     )
 
     __table_args__ = (UniqueConstraint('title', 'community_id'), )

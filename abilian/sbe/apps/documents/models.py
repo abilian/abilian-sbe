@@ -16,6 +16,15 @@ from typing import Any, Dict, Union
 import pkg_resources
 import sqlalchemy as sa
 import whoosh.fields as wf
+from abilian.core.entities import Entity, db
+from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
+from abilian.core.models.blob import Blob
+from abilian.core.models.subjects import Group, User
+from abilian.core.util import md5
+from abilian.services.conversion import converter
+from abilian.services.indexing import indexable_role
+from abilian.services.security import Admin, Anonymous, InheritSecurity, \
+    security
 from flask import current_app, g, json, url_for
 from flask_login import current_user
 from six import text_type
@@ -29,22 +38,12 @@ from toolz import first
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
 
-from abilian.core.entities import Entity, db
-from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
-from abilian.core.models.blob import Blob
-from abilian.core.models.subjects import Group, User
-from abilian.core.util import md5
-from abilian.services.conversion import converter
-from abilian.services.indexing import indexable_role
-from abilian.services.security import Admin, Anonymous, InheritSecurity, \
-    security
-
 from . import tasks
 from .lock import Lock
 
 logger = logging.getLogger(__package__)
 
-__all__ = ['db', 'Folder', 'Document', 'BaseContent', 'icon_for']
+__all__ = ['db', 'Folder', 'Document', 'BaseContent', 'icon_for', 'icon_url']
 
 #: A Whoosh analyzer that folds accents and case.
 accent_folder = (
@@ -95,7 +94,7 @@ class CmisObject(Entity, InheritSecurity):
         UnicodeText,
         nullable=False,
         default="",
-        info=SEARCHABLE | dict(index_to=('description', 'text')),
+        info=SEARCHABLE | {'index_to': ('description', 'text')},
     )
 
     _parent_id = Column(Integer, ForeignKey('cmisobject.id'), nullable=True)
@@ -202,12 +201,12 @@ def _cmis_sync_name_title(entity, new_value, old_value, initiator):
 
 class PathAndSecurityIndexable(object):
     """Mixin for folder and documents indexation."""
-    __indexation_args__ = dict(
-        index_to=(
+    __indexation_args__ = {
+        'index_to': (
             ('_indexable_parent_ids', ('parent_ids', )),
             ('_indexable_roles_and_users', ('allowed_roles_and_users', )),
-        ),
-    )
+        )
+    }
 
     def _iter_to_root(self, skip_self=False):
         obj = self if not skip_self else self.parent
@@ -469,10 +468,10 @@ class BaseContent(CmisObject):
         default=0,
         nullable=False,
         server_default=sa.text('0'),
-        info=dict(
-            searchable=True,
-            index_to=(('content_length', wf.NUMERIC(stored=True)), ),
-        ),
+        info={
+            'searchable': True,
+            'index_to': (('content_length', wf.NUMERIC(stored=True)), )
+        },
     )
 
     #: MIME type of the content stream.
@@ -480,10 +479,10 @@ class BaseContent(CmisObject):
     content_type = Column(
         Text,
         default="application/octet-stream",
-        info=dict(
-            searchable=True,
-            index_to=(('content_type', wf.ID(stored=True)), ),
-        ),
+        info={
+            'searchable': True,
+            'index_to': (('content_type', wf.ID(stored=True)), )
+        },
     )
 
     @property
@@ -558,7 +557,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     __indexable__ = True
     __indexation_args__ = {}
     __indexation_args__.update(BaseContent.__indexation_args__)
-    index_to = tuple()
+    index_to = ()
     index_to += BaseContent.__indexation_args__.setdefault('index_to', ())
     index_to += PathAndSecurityIndexable.__indexation_args__.setdefault(
         'index_to',
@@ -568,7 +567,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     __indexation_args__['index_to'] = index_to
     del index_to
 
-    _indexable_roles_and_users = PathAndSecurityIndexable.\
+    _indexable_roles_and_users = PathAndSecurityIndexable. \
         _indexable_roles_and_users
 
     parent = relationship(
@@ -627,19 +626,19 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     language = Column(
         Text,
-        info=dict(
-            searchable=True,
-            index_to=[
+        info={
+            'searchable': True,
+            'index_to': [
                 ('language', wf.ID(stored=True)),
-            ],
-        ),
+            ]
+        },
     )
     size = Column(Integer)
     page_num = Column(Integer, default=1)
 
     # FIXME: use Entity.meta instead
     #: Stores extra metadata as a JSON column
-    extra_metadata_json = Column(UnicodeText, info=dict(auditable=False))
+    extra_metadata_json = Column(UnicodeText, info={'auditable': False})
 
     sbe_type = 'cmis:document'
 

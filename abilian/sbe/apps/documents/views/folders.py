@@ -16,6 +16,15 @@ from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
 import whoosh.query as wq
+from abilian.core.extensions import db
+from abilian.core.models.subjects import Group, User
+from abilian.core.signals import activity
+from abilian.i18n import _, _n
+from abilian.services import get_service
+from abilian.services.security import READ, WRITE, Role, security
+from abilian.web import csrf, http, url_for
+from abilian.web.action import actions
+from abilian.web.views import default_view
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
     redirect, render_template, render_template_string, request, send_file, \
     session
@@ -25,20 +34,12 @@ from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
 
-from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, User
-from abilian.core.signals import activity
-from abilian.i18n import _, _n
 from abilian.sbe.apps.communities.views import default_view_kw
-from abilian.services import get_service
-from abilian.services.security import READ, WRITE, Role, security
-from abilian.web import csrf, http, url_for
-from abilian.web.action import actions
-from abilian.web.views import default_view
+from abilian.sbe.apps.documents.models import Document, Folder, icon_for, \
+    icon_url
+from abilian.sbe.apps.documents.repository import repository
+from abilian.sbe.apps.documents.search import reindex_tree
 
-from ..models import Document, Folder, icon_for, icon_url
-from ..repository import repository
-from ..search import reindex_tree
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
     check_write_access, create_document, edit_object, get_document, \
     get_folder, get_new_filename, get_selected_objects

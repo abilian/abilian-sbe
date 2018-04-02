@@ -7,7 +7,6 @@ import uuid
 from pathlib import Path
 
 import pkg_resources
-
 from abilian.core.util import fqcn
 
 logger = logging.getLogger(__name__)
@@ -71,4 +70,4 @@ sbe = AbilianSBE()
 
 
 def inject_template_utils():
-    return dict(uuid=uuid.uuid1)
+    return {'uuid': uuid.uuid1}

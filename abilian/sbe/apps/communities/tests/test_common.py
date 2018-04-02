@@ -5,10 +5,10 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime, timedelta
 
-import pytest
-
 import abilian.i18n
+import pytest
 from abilian.core.signals import activity
+
 from abilian.sbe.app import create_app
 from abilian.sbe.apps.communities.common import activity_time_format
 

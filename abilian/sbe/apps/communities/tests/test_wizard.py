@@ -5,9 +5,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 from tempfile import NamedTemporaryFile
 
 import pytest
+from abilian.core.models.subjects import User
 from flask import g
 
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import READER, Community
 from abilian.sbe.apps.communities.views.wizard import wizard_extract_data, \
     wizard_read_csv

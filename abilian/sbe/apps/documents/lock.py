@@ -5,11 +5,10 @@ from __future__ import absolute_import, print_function, unicode_literals
 from datetime import datetime, timedelta
 
 import dateutil.parser
+from abilian.core.util import utcnow
 from flask import current_app
 from flask_login import current_user
 from six import raise_from, text_type
-
-from abilian.core.util import utcnow
 
 DEFAULT_LIFETIME = 3600
 
@@ -37,11 +36,11 @@ class Lock(object):
 
     def as_dict(self):
         """Return a dict suitable for serialization to JSON."""
-        return dict(
-            user_id=self.user_id,
-            user=self.user,
-            date=self.date.isoformat(),
-        )
+        return {
+            'user_id': self.user_id,
+            'user': self.user,
+            'date': self.date.isoformat()
+        }
 
     @staticmethod
     def from_dict(d):

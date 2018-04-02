@@ -2,15 +2,14 @@
 """Forms for the Wiki module."""
 from __future__ import absolute_import, print_function, unicode_literals
 
-from flask import g
-from wtforms import HiddenField, StringField, TextAreaField
-from wtforms.validators import ValidationError, data_required
-
 from abilian.i18n import _, _l
 from abilian.web.forms import Form
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import flaghidden
 from abilian.web.forms.widgets import TextArea
+from flask import g
+from wtforms import HiddenField, StringField, TextAreaField
+from wtforms.validators import ValidationError, data_required
 
 from .models import WikiPage
 

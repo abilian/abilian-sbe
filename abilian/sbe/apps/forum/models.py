@@ -10,17 +10,17 @@ from collections import Counter
 from datetime import datetime
 from itertools import chain
 
+from abilian.core.entities import SEARCHABLE, Entity
+from abilian.services.indexing.adapter import SAAdapter
 from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
 from sqlalchemy.types import DateTime
 
-from abilian.core.entities import SEARCHABLE, Entity
 from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent, CmisObject
-from abilian.services.indexing.adapter import SAAdapter
 
 
 class ThreadClosedError(RuntimeError):

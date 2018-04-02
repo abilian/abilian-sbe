@@ -2,13 +2,12 @@
 
 from __future__ import absolute_import, print_function, unicode_literals
 
+from abilian.core.extensions import db, mail
 from flask import flash, g, redirect, render_template, request, url_for
 from flask_babel import gettext as _
 from flask_mail import Message as Email
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Text
-
-from abilian.core.extensions import db, mail
 
 from .social import social
 
@@ -53,7 +52,7 @@ def invite_post():
                 "Yaka",
             )
             msg = Email(subject, recipients=[email], sender=g.user.email)
-            params = dict(org_name="Yaka")
+            params = {'org_name': "Yaka"}
             msg.body = render_template('social/mail/invite.txt', **params)
             conn.send(msg)
 

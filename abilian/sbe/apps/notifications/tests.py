@@ -2,15 +2,15 @@
 """"""
 from __future__ import absolute_import, print_function, unicode_literals
 
+from abilian.core.models.subjects import User
+from abilian.web import url_for
 from flask import render_template
 
-from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import WRITER
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase
 from abilian.sbe.apps.notifications.tasks.social import CommunityDigest, \
     generate_unsubscribe_token
 from abilian.sbe.testing import BaseTestCase
-from abilian.web import url_for
 
 
 class TestNotificationViews(BaseTestCase):

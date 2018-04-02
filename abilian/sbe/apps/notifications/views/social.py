@@ -2,17 +2,17 @@
 """First cut at a notification system."""
 from __future__ import absolute_import, print_function, unicode_literals
 
+from abilian.core.extensions import csrf, db
+from abilian.core.models.subjects import User
+from abilian.i18n import render_template_i18n
+from abilian.services.auth.views import get_token_status
 from flask import current_app as app
 from flask import request
 from flask_login import current_user
 from werkzeug.exceptions import MethodNotAllowed
 
-from abilian.core.extensions import csrf, db
-from abilian.core.models.subjects import User
-from abilian.i18n import render_template_i18n
 from abilian.sbe.apps.communities.security import require_admin
 from abilian.sbe.apps.notifications import TOKEN_SERIALIZER_NAME
-from abilian.services.auth.views import get_token_status
 
 from . import notifications
 from ..tasks.social import make_message, send_daily_social_digest_to
