@@ -1077,7 +1077,7 @@ def descendants_view(folder_id):
 
     visit(root_path_ids, 0)
 
-    owners = dict()
+    owners = {}
     owners_query = User.query \
         .filter(User.id.in_(owner_ids)) \
         .add_column(sa.sql.func.concat('user:', User.id).label('key'))

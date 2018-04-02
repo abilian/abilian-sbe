@@ -8,12 +8,14 @@ import pytest
 from pytest import fixture
 from sqlalchemy.exc import IntegrityError
 
-from ..models import Document, Folder
-from ..repository import Repository
+from abilian.sbe.app import Application
+from abilian.sbe.apps.documents.models import Document, Folder
+from abilian.sbe.apps.documents.repository import Repository
 
 
 @fixture
 def repository(app):
+    # type: (Application) -> Repository
     repository = Repository()
     repository.init_app(app)
     return repository
