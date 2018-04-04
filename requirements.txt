@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.7
+abilian-core==0.10.8
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.3              # via flask-babel
@@ -50,7 +50,7 @@ numpy==1.14.2             # via langid, pandas
 openpyxl==2.5.1
 pandas==0.22.0            # via abilian-core
 pathlib==1.0.1            # via abilian-core
-pillow==5.0.0             # via abilian-core
+pillow==5.1.0             # via abilian-core
 pycparser==2.18           # via cffi
 pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.7.2    # via abilian-core, pandas
@@ -63,11 +63,11 @@ raven==6.6.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 singledispatch==3.4.0.3
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, singledispatch, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
-sqlalchemy-utils==0.33.1  # via wtforms-alchemy
-sqlalchemy==1.2.5
+sqlalchemy-utils==0.33.2  # via wtforms-alchemy
+sqlalchemy==1.2.6
 sqlparse==0.2.4           # via abilian-core
 toolz==0.9.0
-tqdm==4.19.9              # via abilian-core
+tqdm==4.20.0              # via abilian-core
 typing==3.6.4             # via abilian-core
 validate-email==1.3
 validators==0.12.1        # via wtforms-components
