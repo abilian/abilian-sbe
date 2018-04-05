@@ -5,7 +5,6 @@ TODO: remove when refactoring done.
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-from datetime import datetime, timedelta
 from unittest import TestCase
 
 from abilian.core.models.subjects import User
@@ -18,7 +17,6 @@ from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase
 from abilian.sbe.apps.forum.tests.util import get_string_from_file
 
 from ..commands import inject_email
-from ..models import Post, Thread
 
 
 class NoLoginViewTest(CommunityBaseTestCase):

@@ -17,13 +17,31 @@ from six import text_type
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase
 from abilian.sbe.apps.forum.tests.util import get_string_from_file
-from abilian.sbe.testing import BaseTestCase
 
 from ..commands import inject_email
 from ..models import Post, Thread
 from ..tasks import build_reply_email_address, extract_email_destination
 
 pytest_plugins = ['abilian.sbe.apps.communities.tests.fixtures']
+
+
+def test_posts_ordering(db, community1):
+    thread = Thread(community=community1, title='test ordering')
+    db.session.add(thread)
+    t1 = datetime(2014, 6, 20, 15, 0, 0)
+    p1 = Post(thread=thread, body_html='post 1', created_at=t1)
+    t2 = datetime(2014, 6, 20, 15, 1, 0)
+    p2 = Post(thread=thread, body_html='post 2', created_at=t2)
+    db.session.flush()
+    p1_id, p2_id = p1.id, p2.id
+    assert [p.id for p in thread.posts] == [p1_id, p2_id]
+
+    # set post1 created after post2
+    t1 = t1 + timedelta(minutes=2)
+    p1.created_at = t1
+    db.session.flush()
+    db.session.expire(thread)  # force thread.posts refreshed from DB
+    assert [p.id for p in thread.posts] == [p2_id, p1_id]
 
 
 def test_thread_indexed(app, db, community1, community2, req_ctx):

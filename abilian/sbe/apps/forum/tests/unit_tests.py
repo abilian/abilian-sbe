@@ -1,8 +1,6 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
-from datetime import datetime, timedelta
-
 import pytest
 from pytest import raises
 
@@ -21,25 +19,6 @@ def test_create_post():
     thread.title = 'new title'
     assert thread.name == 'new title'
     assert post.name == 'new title'
-
-
-def test_posts_ordering(db, community1):
-    thread = Thread(community=community1, title='test ordering')
-    db.session.add(thread)
-    t1 = datetime(2014, 6, 20, 15, 0, 0)
-    p1 = Post(thread=thread, body_html='post 1', created_at=t1)
-    t2 = datetime(2014, 6, 20, 15, 1, 0)
-    p2 = Post(thread=thread, body_html='post 2', created_at=t2)
-    db.session.flush()
-    p1_id, p2_id = p1.id, p2.id
-    assert [p.id for p in thread.posts] == [p1_id, p2_id]
-
-    # set post1 created after post2
-    t1 = t1 + timedelta(minutes=2)
-    p1.created_at = t1
-    db.session.flush()
-    db.session.expire(thread)  # force thread.posts refreshed from DB
-    assert [p.id for p in thread.posts] == [p2_id, p1_id]
 
 
 def test_closed_property():
