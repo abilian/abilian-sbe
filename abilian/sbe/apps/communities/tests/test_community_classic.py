@@ -1,11 +1,12 @@
 # coding=utf-8
-""""""
+"""
+TODO: remove once the pytest-based tests all pass.
+"""
 from __future__ import absolute_import, print_function, unicode_literals
 
 from abilian.services.security import Admin
 from flask import url_for
 
-from .. import views
 from ..models import Community
 from .base import CommunityIndexingTestCase as BaseIndexingTestCase
 

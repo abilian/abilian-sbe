@@ -21,10 +21,10 @@ from ..models import MEMBER, READER, Community, CommunityIdColumn, \
 
 
 @fixture
-def community(db):
+def community(db_session):
     community = Community(name="My Community")
-    db.session.add(community)
-    db.session.commit()
+    db_session.add(community)
+    db_session.commit()
     return community
 
 

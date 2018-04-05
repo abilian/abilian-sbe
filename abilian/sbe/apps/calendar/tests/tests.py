@@ -14,11 +14,10 @@ from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
 from ..models import Event
 
 
-class Test(TestCase):
-    def test_create_event(self):
-        start = datetime.now()
-        event = Event(name="Test thread", start=start)
-        assert event  # TODO
+def test_create_event():
+    start = datetime.now()
+    event = Event(name="Test thread", start=start)
+    assert event  # TODO
 
 
 class IndexingTestCase(CommunityIndexingTestCase):
