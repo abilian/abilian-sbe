@@ -9,7 +9,7 @@ from flask.testing import FlaskClient
 from flask_login import current_user
 from pytest import fixture, mark
 
-from ..models import Community, READER
+from ..models import READER, Community
 
 
 @fixture
@@ -24,7 +24,6 @@ def login(client, user):
     # type: (FlaskClient, User) -> LoginContext
 
     class LoginContext(object):
-
         def __init__(self):
             with client.session_transaction() as session:
                 session['user_id'] = user.id
@@ -156,7 +155,9 @@ def test_community_settings(app, client, community1):
         }
         response = client.post(url, data=data)
         assert response.status_code == 302
-        expected_url = 'http://localhost/communities/{}/'.format(community1.slug)
+        expected_url = 'http://localhost/communities/{}/'.format(
+            community1.slug
+        )
         assert response.headers['Location'] == expected_url
 
         community = Community.query.get(community1.id)
@@ -195,9 +196,7 @@ def test_members(app, client, db, community1, community2):
         assert response.status_code == 302
         assert response.headers['Location'] == 'http://localhost' + url
 
-        membership = [
-            m for m in community1.memberships if m.user == user2
-        ][0]
+        membership = [m for m in community1.memberships if m.user == user2][0]
         assert membership.role == 'member'
 
         data['action'] = 'set-user-role'
@@ -217,16 +216,16 @@ def test_members(app, client, db, community1, community2):
         # test delete
         data = {
             'action':
-                'delete',
+            'delete',
             'user':
-                user2.id,
-            'membership': [
-                m.id for m in community1.memberships
-                if m.user == user2
-            ][0],
+            user2.id,
+            'membership':
+            [m.id for m in community1.memberships if m.user == user2][0],
         }
         response = client.post(url, data=data)
-        expected_url = 'http://localhost/communities/{}/members'.format(community1.slug, )
+        expected_url = 'http://localhost/communities/{}/members'.format(
+            community1.slug,
+        )
         assert response.status_code == 302
         assert response.headers['Location'] == expected_url
 
