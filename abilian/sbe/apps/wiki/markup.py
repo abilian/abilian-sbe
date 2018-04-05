@@ -10,7 +10,7 @@ from flask import url_for
 from markdown.extensions.wikilinks import WikiLinkExtension, WikiLinks
 from markdown.util import etree
 
-__all__ = ['convert']
+__all__ = ('convert', 'SBEWikiLinkExtension')
 
 
 class UrlBuilder(object):

@@ -1,26 +1,21 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
-from pytest import fixture
-
-from abilian.sbe.app import create_app
+from pytest import mark
 
 from ..cmis.renderer import Feed, to_xml
 from ..models import Document, Folder
 
 
-@fixture
-def app(config):
-    return create_app(config=config)
-
-
-def test_folder_renderer(app_context):
+@mark.usefixtures("app_context")
+def test_folder_renderer():
     folder = Folder(name="tototiti")
     result = to_xml(folder)
     assert "tototiti" in result
     assert "cmis:folder" in result
 
 
-def test_document_renderer(app_context):
+@mark.usefixtures("app_context")
+def test_document_renderer():
     document = Document(name="tototiti")
     result = to_xml(document)
     assert "tototiti" in result
@@ -31,7 +26,8 @@ def test_document_renderer(app_context):
     assert "<?xml" not in result
 
 
-def test_feed_renderer(app_context):
+@mark.usefixtures("app_context")
+def test_feed_renderer():
     folder = Folder(title="Toto Titi")
     document = Document(title="tatatutu")
     feed = Feed(folder, [document])

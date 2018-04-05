@@ -43,7 +43,10 @@ from .lock import Lock
 
 logger = logging.getLogger(__package__)
 
-__all__ = ['db', 'Folder', 'Document', 'BaseContent', 'icon_for', 'icon_url']
+__all__ = (
+    'db', 'Folder', 'Document', 'BaseContent', 'PathAndSecurityIndexable',
+    'icon_for', 'icon_url'
+)
 
 #: A Whoosh analyzer that folds accents and case.
 accent_folder = (
