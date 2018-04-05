@@ -2,80 +2,13 @@
 """"""
 from __future__ import absolute_import, print_function, unicode_literals
 
-from abilian.core.models.subjects import User
 from abilian.services.security import Admin
+from abilian.testing.util import login
 from flask import url_for
-from flask.testing import FlaskClient
 from flask_login import current_user
-from pytest import fixture, mark
+from pytest import mark
 
-from ..models import READER, Community
-
-
-@fixture
-def community(db_session):
-    community = Community(name="My Community")
-    db_session.add(community)
-    db_session.flush()
-    return community
-
-
-def login(client, user):
-    # type: (FlaskClient, User) -> LoginContext
-
-    class LoginContext(object):
-        def __init__(self):
-            with client.session_transaction() as session:
-                session['user_id'] = user.id
-
-        def __enter__(self):
-            return None
-
-        def __exit__(self, type, value, traceback):
-            logout(client)
-
-    return LoginContext()
-
-
-def logout(client):
-    with client.session_transaction() as session:
-        del session['user_id']
-
-
-@fixture
-def community1(db):
-    community = Community(name="My Community")
-    db.session.add(community)
-
-    user = User(
-        email='user_1@example.com',
-        password='azerty',
-        can_login=True,
-    )
-    db.session.add(user)
-    community.set_membership(user, READER)
-    community.test_user = user
-
-    db.session.flush()
-    return community
-
-
-@fixture
-def community2(db):
-    community = Community(name="Another Community")
-    db.session.add(community)
-
-    user = User(
-        email='user_2@example.com',
-        password='azerty',
-        can_login=True,
-    )
-    db.session.add(user)
-    community.set_membership(user, READER)
-    community.test_user = user
-
-    db.session.flush()
-    return community
+from ..models import Community
 
 
 def test_index(app, client, community1):

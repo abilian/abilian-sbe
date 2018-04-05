@@ -8,12 +8,12 @@ from unittest import TestCase
 
 from abilian.core.models.subjects import User
 from flask import url_for
+from flask_login import login_user
 from mock import Mock, patch
 from six import text_type
 
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
-from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
-    CommunityIndexingTestCase
+from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase
 from abilian.sbe.apps.forum.tests.util import get_string_from_file
 from abilian.sbe.testing import BaseTestCase
 
@@ -21,32 +21,36 @@ from ..commands import inject_email
 from ..models import Post, Thread
 from ..tasks import build_reply_email_address, extract_email_destination
 
+pytest_plugins = ['abilian.sbe.apps.communities.tests.fixtures']
 
-class IndexingTestCase(CommunityIndexingTestCase):
-    def test_thread_indexed(self):
-        thread = Thread(title='Community 1', community=self.community)
-        self.session.add(thread)
-        thread_other = Thread(title='Community 2: other', community=self.c2)
-        self.session.add(thread_other)
-        self.session.commit()
 
-        svc = self.svc
-        obj_types = (Thread.entity_type, )
-        with self.login(self.user_no_community):
-            res = svc.search('community', object_types=obj_types)
-            assert len(res) == 0
+def test_thread_indexed(app, db, community1, community2, req_ctx):
+    index_svc = app.services['indexing']
+    index_svc.start()
+    security_svc = app.services['security']
+    security_svc.start()
 
-        with self.login(self.user):
-            res = svc.search('community', object_types=obj_types)
-            assert len(res) == 1
-            hit = res[0]
-            assert hit['object_key'] == thread.object_key
+    thread1 = Thread(title='Community 1', community=community1)
+    db.session.add(thread1)
 
-        with self.login(self.user_c2):
-            res = svc.search('community', object_types=obj_types)
-            assert len(res) == 1
-            hit = res[0]
-            assert hit['object_key'] == thread_other.object_key
+    thread2 = Thread(title='Community 2: other', community=community2)
+    db.session.add(thread2)
+    db.session.commit()
+
+    index_svc = app.services['indexing']
+    obj_types = (Thread.entity_type, )
+
+    login_user(community1.test_user)
+    res = index_svc.search('community', object_types=obj_types)
+    assert len(res) == 1
+    hit = res[0]
+    assert hit['object_key'] == thread1.object_key
+
+    login_user(community2.test_user)
+    res = index_svc.search('community', object_types=obj_types)
+    assert len(res) == 1
+    hit = res[0]
+    assert hit['object_key'] == thread2.object_key
 
 
 class NoLoginViewTest(CommunityBaseTestCase):

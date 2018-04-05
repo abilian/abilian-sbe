@@ -102,22 +102,25 @@ def test_private_message():
     check_editable(pm)
 
 
-def test_status_update():
-    user = User(
-        first_name="John",
-        last_name="Test User",
-        email="test@example.com",
-        password="toto",
-    )
-    # self.assertEquals(len(user.messages), 0)
-
-    message = Message()
-    message.author = user
-    check_editable(message)
-
-    # self.assertEquals(len(user.messages), 1)
-    # self.assertEquals(user.messages[0], message)
-    # self.assertEquals(message.author_id, user.uid)
+# TODO: implement status updates (aka messages)
+# def test_status_update(db):
+#     user = User(
+#         first_name="John",
+#         last_name="Test User",
+#         email="test@example.com",
+#         password="toto",
+#     )
+#     db.session.commit()
+#     assert len(user.messages) == 0
+#
+#     message = Message()
+#     message.author = user
+#     check_editable(message)
+#
+#     db.session.commit()
+#     assert len(user.messages) == 1
+#     assert user.messages[0] == message
+#     assert message.author_id == user.uid
 
 
 def test_tags():
