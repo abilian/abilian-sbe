@@ -1,5 +1,7 @@
 # coding=utf-8
-""""""
+"""
+TODO: remove when refactoring done.
+"""
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
@@ -8,49 +10,15 @@ from unittest import TestCase
 
 from abilian.core.models.subjects import User
 from flask import url_for
-from flask_login import login_user
-from mock import Mock, patch
+from mock import patch
 from six import text_type
 
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase
 from abilian.sbe.apps.forum.tests.util import get_string_from_file
-from abilian.sbe.testing import BaseTestCase
 
 from ..commands import inject_email
 from ..models import Post, Thread
-from ..tasks import build_reply_email_address, extract_email_destination
-
-pytest_plugins = ['abilian.sbe.apps.communities.tests.fixtures']
-
-
-def test_thread_indexed(app, db, community1, community2, req_ctx):
-    index_svc = app.services['indexing']
-    index_svc.start()
-    security_svc = app.services['security']
-    security_svc.start()
-
-    thread1 = Thread(title='Community 1', community=community1)
-    db.session.add(thread1)
-
-    thread2 = Thread(title='Community 2: other', community=community2)
-    db.session.add(thread2)
-    db.session.commit()
-
-    index_svc = app.services['indexing']
-    obj_types = (Thread.entity_type, )
-
-    login_user(community1.test_user)
-    res = index_svc.search('community', object_types=obj_types)
-    assert len(res) == 1
-    hit = res[0]
-    assert hit['object_key'] == thread1.object_key
-
-    login_user(community2.test_user)
-    res = index_svc.search('community', object_types=obj_types)
-    assert len(res) == 1
-    hit = res[0]
-    assert hit['object_key'] == thread2.object_key
 
 
 class NoLoginViewTest(CommunityBaseTestCase):
@@ -66,24 +34,6 @@ class NoLoginViewTest(CommunityBaseTestCase):
 class ViewTestCase(CommunityBaseTestCase):
     no_login = False
     SERVICES = ('security', )
-
-    def test_posts_ordering(self):
-        thread = Thread(community=self.community, title='test ordering')
-        self.session.add(thread)
-        t1 = datetime(2014, 6, 20, 15, 0, 0)
-        p1 = Post(thread=thread, body_html='post 1', created_at=t1)
-        t2 = datetime(2014, 6, 20, 15, 1, 0)
-        p2 = Post(thread=thread, body_html='post 2', created_at=t2)
-        self.session.flush()
-        p1_id, p2_id = p1.id, p2.id
-        assert [p.id for p in thread.posts] == [p1_id, p2_id]
-
-        # set post1 created after post2
-        t1 = t1 + timedelta(minutes=2)
-        p1.created_at = t1
-        self.session.flush()
-        self.session.expire(thread)  # force thread.posts refreshed from DB
-        assert [p.id for p in thread.posts] == [p2_id, p1_id]
 
     def test_create_thread_and_post(self):
         # activate email reply
@@ -229,35 +179,3 @@ class CommandsTest(TestCase):
         inject_email()
         assert mock_email.called
         assert not mock_process_email.delay.called
-
-
-class TasksTest(BaseTestCase):
-    def test_build_reply_email_address(self):
-        expected_reply_address = 'test+P-fr-3-4-5a6f41c0e7d916b6f15992d7207e47b2@testcase.app.tld'
-        self.app.config['MAIL_ADDRESS_TAG_CHAR'] = '+'
-        post = Mock()
-        post.id = 2
-        post.thread_id = 3
-        member = Mock()
-        member.id = 4
-        headers = [('Accept-Language', 'fr')]
-        with self.app.test_request_context(
-            '/build_reply_email_address',
-            headers=headers,
-        ):
-            replyto = build_reply_email_address(
-                'test',
-                post,
-                member,
-                'testcase.app.tld',
-            )
-        assert expected_reply_address in replyto
-
-    def test_extract_mail_destination(self):
-        self.app.config['MAIL_ADDRESS_TAG_CHAR'] = '+'
-        self.app.config['MAIL_SENDER'] = 'test@testcase.app.tld'
-        test_address = 'test+test+P-fr-3-4-5a6f41c0e7d916b6f15992d7207e47b2@testcase.app.tld'
-        infos = extract_email_destination(test_address)
-        assert 'fr' in infos[0]  # locale
-        assert '3' in infos[1]  # thread_id
-        assert '4' in infos[2]  # post.id

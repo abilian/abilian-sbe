@@ -197,7 +197,7 @@ def extract_email_destination(address):
     values = uid.split('-')
     header = values.pop(0)
     assert header == 'P'
-    return values
+    return tuple(values)
 
 
 def has_subtag(address):
