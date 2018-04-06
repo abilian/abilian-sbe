@@ -9,6 +9,7 @@ import six
 import sqlalchemy as sa
 from abilian.core.entities import Entity
 from abilian.core.models.subjects import User
+from abilian.testing.util import login
 from flask_login import login_user, logout_user
 from mock import mock
 from pytest import fixture
@@ -198,39 +199,6 @@ def test_community_content_decorator(community, db):
 
 
 ##########################################################################
-
-
-def login(user, remember=False, force=False):
-    """Perform user login for `user`, so that code needing a logged-in user can
-    work.
-
-    This method can also be used as a context manager, so that logout is
-    performed automatically::
-
-        with login(user):
-            assert ...
-
-    .. seealso:: :meth:`logout`
-    """
-    # self._login_tests_sanity_check()
-    success = login_user(user, remember=remember, force=force)
-    if not success:
-        raise ValueError(
-            'User is not active, cannot login; or use force=True',
-        )
-
-    class LoginContext(object):
-        def __enter__(self):
-            return None
-
-        def __exit__(self, type, value, traceback):
-            logout()
-
-    return LoginContext()
-
-
-def logout():
-    logout_user()
 
 
 def test_community_indexed(app, db):

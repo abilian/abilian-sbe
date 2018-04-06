@@ -3,7 +3,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import re
 
-from abilian.testing.util import login
+from abilian.testing.util import client_login
 from flask import g, url_for
 from pytest import mark
 from toolz import first
@@ -43,7 +43,7 @@ def test_create_page(client, community1, req_ctx):
     community = community1
     user = community.test_user
 
-    with login(client, user):
+    with client_login(client, user):
         title = 'Some page name'
         url = url_for("wiki.page_new", community_id=community.slug)
         url += '?title=Some+page+name'

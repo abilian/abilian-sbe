@@ -20,8 +20,10 @@ class TestIndexing(CommunityIndexingTestCase):
     def test_wiki_indexed(self):
         page = WikiPage(title='Community 1', community=self.community)
         self.session.add(page)
+
         page_other = WikiPage(title='Community 2: other', community=self.c2)
         self.session.add(page_other)
+
         self.session.commit()
 
         svc = self.svc

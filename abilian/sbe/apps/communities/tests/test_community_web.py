@@ -3,7 +3,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 from abilian.services.security import Admin
-from abilian.testing.util import login
+from abilian.testing.util import client_login
 from flask import url_for
 from flask_login import current_user
 from pytest import mark
@@ -16,7 +16,7 @@ def test_index(app, client, community1):
     security_service.start()
 
     user = community1.test_user
-    with login(client, user):
+    with client_login(client, user):
         response = client.get(url_for("communities.index"))
         print(current_user)
         assert response.status_code == 200
@@ -29,7 +29,7 @@ def test_community_home(app, client, community1, community2):
     url = app.default_view.url_for(community1)
 
     user1 = community1.test_user
-    with login(client, user1):
+    with client_login(client, user1):
         response = client.get(url)
         print(current_user)
         assert response.status_code == 302
@@ -41,7 +41,7 @@ def test_community_home(app, client, community1, community2):
         assert response.headers['Location'] == expected_url
 
     user2 = community2.test_user
-    with login(client, user2):
+    with client_login(client, user2):
         response = client.get(url)
         print(current_user)
         # assert response.headers['Location'] == ""
@@ -54,7 +54,7 @@ def test_new(app, client, community1):
 
     user = community1.test_user
 
-    with login(client, user):
+    with client_login(client, user):
         response = client.get(url_for("communities.new"))
         assert response.status_code == 403
 
@@ -71,7 +71,7 @@ def test_community_settings(app, client, community1):
     url = url_for('communities.settings', community_id=community1.slug)
     user = community1.test_user
 
-    with login(client, user):
+    with client_login(client, user):
         response = client.get(url)
         assert response.status_code == 403
 
@@ -105,7 +105,7 @@ def test_members(app, client, db, community1, community2):
     user1 = community1.test_user
     user2 = community2.test_user
 
-    with login(client, user1):
+    with client_login(client, user1):
         url = url_for(
             "communities.members",
             community_id=community1.slug,

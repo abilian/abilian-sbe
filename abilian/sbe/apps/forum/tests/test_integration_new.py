@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from unittest import TestCase
 
 from abilian.core.models.subjects import User
-from abilian.testing.util import login
+from abilian.testing.util import client_login
 from flask import url_for
 from flask_login import login_user
 from mock import Mock, patch
@@ -98,7 +98,7 @@ def test_create_thread_informative(app, db, client, community1, req_ctx):
     data['__action'] = "create"
 
     mail = app.extensions['mail']
-    with login(client, user):
+    with client_login(client, user):
         with mail.record_messages() as outbox:
             data['send_by_email'] = "y"  # actually should not be in html form
             response = client.post(url, data=data)
