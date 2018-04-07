@@ -694,7 +694,7 @@ def explore_archive(fd, uncompress=False):
 
 def upload_new(folder):
     check_write_access(folder)
-    session = current_app.db.session()
+    session = db.session()
     base_folder = folder
     uncompress_files = 'uncompress_files' in request.form
     fds = request.files.getlist('file')

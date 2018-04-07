@@ -448,7 +448,7 @@ XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 def members_excel_export():
     community = g.community
     attributes = [attrgetter(a) for a in MEMBERS_EXPORT_ATTRS]
-    BaseModel = current_app.db.Model
+    BaseModel = db.Model
     wb = openpyxl.Workbook()
 
     if wb.worksheets:

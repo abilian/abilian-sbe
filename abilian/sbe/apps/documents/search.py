@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import sqlalchemy as sa
 from abilian.core.entities import Entity
+from abilian.core.extensions import db
 from abilian.services import get_service
 from flask import current_app
 
@@ -28,7 +29,7 @@ def reindex_tree(obj):
     CA = sa.orm.aliased(CmisObject)
     d_ids = sa.select([CA.id, CA._parent_id])
     descendants = descendants.union_all(d_ids.where(CA._parent_id == da.c.id))
-    session = sa.orm.object_session(obj) or current_app.db.session()
+    session = sa.orm.object_session(obj) or db.session()
 
     # including ancestor_id in entity_ids_q will garantee at least 1 value for the
     # "IN" predicate; otherwise when using sqlite (as during tests...)

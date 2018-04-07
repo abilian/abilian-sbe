@@ -322,7 +322,7 @@ class Community(Entity):
     def get_role(self, user):
         """Returns the given user's role in this community."""
         M = Membership
-        membership = current_app.db.session() \
+        membership = db.session() \
             .query(M.role) \
             .filter(and_(
                 M.community_id == self.id,
