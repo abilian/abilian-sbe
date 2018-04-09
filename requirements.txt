@@ -67,7 +67,7 @@ sqlalchemy-utils==0.33.2  # via wtforms-alchemy
 sqlalchemy==1.2.6
 sqlparse==0.2.4           # via abilian-core
 toolz==0.9.0
-tqdm==4.20.0              # via abilian-core
+tqdm==4.21.0              # via abilian-core
 typing==3.6.4             # via abilian-core
 validate-email==1.3
 validators==0.12.1        # via wtforms-components
