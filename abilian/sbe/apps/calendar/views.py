@@ -44,8 +44,8 @@ def index():
 @route('/archives/')
 def archives():
     events = Event.query \
-        .order_by(Event.start.desc()) \
         .filter(Event.end <= datetime.now()) \
+        .order_by(Event.start.desc()) \
         .all()
 
     def get_month(event):
@@ -53,7 +53,7 @@ def archives():
         month = event.start.month
         return date(year, month, 1)
 
-    groups = sorted(groupby(get_month, events).items())
+    groups = sorted(groupby(get_month, events).items(), reverse=True)
     ctx = {'groups': groups}
     return render_template('calendar/archives.html', **ctx)
 
