@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.10
+abilian-core==0.10.11
 alembic==0.8.10           # via abilian-core, flask-migrate
 amqp==2.2.2               # via kombu
 babel==2.5.3              # via flask-babel
@@ -37,7 +37,7 @@ html5lib==1.0.1           # via bleach
 infinity==1.4             # via intervals
 intervals==0.8.1          # via wtforms-components
 itsdangerous==0.24        # via flask, flask-debugtoolbar
-jdcal==1.3                # via openpyxl
+jdcal==1.4                # via openpyxl
 jinja2==2.10              # via abilian-core, flask, flask-babel
 jsmin==2.2.2              # via abilian-core
 kombu==4.1.0              # via celery
@@ -50,7 +50,7 @@ numpy==1.14.2             # via langid, pandas
 openpyxl==2.5.2
 pandas==0.22.0            # via abilian-core
 pathlib==1.0.1            # via abilian-core
-pillow==5.0.0
+pillow==5.0               # via abilian-core
 pycparser==2.18           # via cffi
 pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.7.2    # via abilian-core, pandas

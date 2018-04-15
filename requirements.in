@@ -23,6 +23,3 @@ toolz
 
 # Needed for Python 2.7 only
 singledispatch
-
-# Pinned for now
-pillow==5.0
