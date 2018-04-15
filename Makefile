@@ -203,14 +203,13 @@ release:
 	cd /tmp/abilian-sbe ; python setup.py sdist upload
 
 update-deps:
-	pip install pip==9.0.3
+	pip install -U pip pip-tools setuptools wheel
 	pip-compile -U > /dev/null
 	pip-compile > /dev/null
 	git --no-pager diff requirements.txt
-	pip install -U pip
 
 sync-deps:
-	pip install -U pip setuptools wheel
+	pip install -U pip pip-tools setuptools wheel
 	pip install -r requirements.txt
 	pip install -r etc/dev-requirements.txt
 	pip install -e .

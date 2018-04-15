@@ -20,7 +20,7 @@ click==6.7                # via flask
 closure==20180204         # via abilian-core
 contextlib2==0.5.5        # via raven
 cssmin==0.2.0             # via abilian-core
-decorator==4.2.1          # via validators
+decorator==4.3.0          # via validators
 et-xmlfile==1.0.1         # via openpyxl
 flask-assets==0.12        # via abilian-core
 flask-babel==0.11.2       # via abilian-core
