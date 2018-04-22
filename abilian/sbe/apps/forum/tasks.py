@@ -179,7 +179,7 @@ def build_reply_email_address(name, post, member, domain):
 
 
 def extract_email_destination(address):
-    # type: (Text) -> List[Text]
+    # type: (Text) -> Tuple[Text, ...]
     """Return the values encoded in the email address.
 
     :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
@@ -342,16 +342,20 @@ def decode_payload(part):
     if isinstance(payload, text_type):
         return payload
 
+    # Please the typechecker (and make things a bit clearer)
+    assert isinstance(payload, bytes)
+    payload_bytes = payload  # type: bytes
+
     charset = part.get_content_charset()
     if charset is not None:
         try:
-            payload_str = payload.decode(charset)
+            payload_str = payload_bytes.decode(charset)
         except UnicodeDecodeError:
-            payload_str = payload.decode('raw-unicode-escape')
+            payload_str = payload_bytes.decode('raw-unicode-escape')
     else:
         # What about other encodings? -> using chardet
-        found = chardet.detect(payload)
-        payload_str = payload.decode(found['encoding'])
+        found = chardet.detect(payload_bytes)
+        payload_str = payload_bytes.decode(found['encoding'])
 
     return payload_str
 
@@ -409,6 +413,8 @@ def process_email(message):
     app = current_app._get_current_object()
     # Extract post destination from To: field, (community/forum/thread/member)
     to_address = message['To']
+
+    assert isinstance(to_address, text_type)
 
     if not (has_subtag(to_address)):
         logger.info('Email %r has no subtag, skipping...', to_address)
