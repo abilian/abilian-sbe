@@ -93,11 +93,11 @@ lint: lint-js lint-py lint-less lint-doc lint-other
 
 lint-js:
 	@echo "--> Linting JavaScript files"
-	./node_modules/.bin/eslint abilian/sbe/static/js
+	yarn run eslint abilian/sbe/static/js
 
 lint-less:
 	@echo "--> Linting Less files"
-	./node_modules/.bin/stylelint abilian/sbe/static/less/**/*.less
+	yarn run stylelint abilian/sbe/static/less/**/*.less
 
 lint-py:
 	@echo "--> Linting Python files"
