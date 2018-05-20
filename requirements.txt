@@ -47,7 +47,7 @@ markdown==2.6.11
 markupsafe==1.0           # via abilian-core, jinja2, mako
 numpy==1.14.3             # via langid, pandas
 openpyxl==2.5.3
-pandas==0.22.0            # via abilian-core
+pandas==0.23.0            # via abilian-core
 pathlib==1.0.1            # via abilian-core
 pillow==5.0               # via abilian-core
 pycparser==2.18           # via cffi
