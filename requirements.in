@@ -8,7 +8,7 @@ abilian-core>=0.9
 validate_email
 
 # Language and charset detection
-langid>=1.1,<1.2
+langid>=1.1
 chardet
 
 # Markdown support for Wiki
