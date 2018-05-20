@@ -102,7 +102,7 @@ lint-less:
 lint-py:
 	@echo "--> Linting Python files"
 	@make flake8
-	@make lint-py3k
+	# @make lint-py3k
 	@make lint-mypy
 
 flake8:
