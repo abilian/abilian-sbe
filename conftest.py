@@ -10,7 +10,7 @@ from pytest import fixture
 
 from abilian.sbe.app import create_app
 
-pytest_plugins = ['abilian.testing.fixtures']
+pytest_plugins = ["abilian.testing.fixtures"]
 
 
 @fixture

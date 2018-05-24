@@ -14,10 +14,10 @@ from abilian.sbe.app import Application
 
 
 def create_app():
-    return Application(name='myapp')
+    return Application(name="myapp")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     logging.basicConfig()
     logging.getLogger().setLevel(logging.INFO)
     manager = Manager(create_app)

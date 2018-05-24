@@ -22,10 +22,10 @@ from werkzeug.serving import select_ip_version
 from abilian.sbe.app import Application
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def app_port(request):
     port = 30000
-    hostname = '127.0.0.1'
+    hostname = "127.0.0.1"
 
     address_family = select_ip_version(hostname, port)
     test_socket = socket.socket(address_family, socket.SOCK_STREAM)
@@ -46,34 +46,34 @@ def app_port(request):
     return port
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def app_root(app_port):
     return "http://localhost:{}".format(app_port)
 
 
 # We're using phantomjs as our default browser.
-@pytest.fixture(scope='session')  # pragma: no cover
+@pytest.fixture(scope="session")  # pragma: no cover
 def splinter_webdriver(request):
-    return 'phantomjs'
+    return "phantomjs"
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def splinter_driver_kwargs():
     """Webdriver kwargs."""
     # set resourceTimeout in the hope it will help jenkins kill phantomjs after
     # tests
     return {
-        'desired_capabilities': {
-            'phantomjs.page.settings.resourceTimeout': '30000',  # 30s
+        "desired_capabilities": {
+            "phantomjs.page.settings.resourceTimeout": "30000"  # 30s
         }
     }
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def instance_path(request):
     """Creates a temporary directory for instance data.
     """
-    tmp_dir = tempfile.mkdtemp(prefix='tmp-pytest-', suffix='-abilian-sbe')
+    tmp_dir = tempfile.mkdtemp(prefix="tmp-pytest-", suffix="-abilian-sbe")
 
     def clear():
         shutil.rmtree(tmp_dir)
@@ -82,7 +82,7 @@ def instance_path(request):
     return tmp_dir
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def app(request, instance_path, app_port):
     app = Application(instance_path=instance_path)
 

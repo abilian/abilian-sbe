@@ -8,15 +8,15 @@ import time
 from six.moves.urllib.parse import urlopen
 
 # Some random number
-BIND = '0.0.0.0'
+BIND = "0.0.0.0"
 PORT = 4034
 HOME = "http://{}:{}/".format(BIND, PORT)
 
-subprocess.call(['./bin/pip', 'install', 'gunicorn'])
+subprocess.call(["./bin/pip", "install", "gunicorn"])
 
-p = subprocess.Popen(
-    ["./bin/gunicorn", 'wsgi:app', '-b', '{}:{}'.format(BIND, PORT)],
-)
+p = subprocess.Popen([
+    "./bin/gunicorn", "wsgi:app", "-b", "{}:{}".format(BIND, PORT)
+])
 
 try:
     # Just in case

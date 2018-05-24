@@ -11,16 +11,16 @@ class TestViews(BaseTestCase):
     def test_all_registered_urls(self):
 
         SKIP = frozenset([
-            'admin.audit_search_users',
-            'search.search_main',
-            'search.live',
-            'notifications.debug_social',
-            'social.groups_json',
-            'social.groups_new',
-            'social.users_json',
-            'social.users_dt_json',
-            'communities.community_default_image',
-            'images.user_default',
+            "admin.audit_search_users",
+            "search.search_main",
+            "search.live",
+            "notifications.debug_social",
+            "social.groups_json",
+            "social.groups_new",
+            "social.users_json",
+            "social.users_dt_json",
+            "communities.community_default_image",
+            "images.user_default",
         ])
 
         rules = sorted(self.app.url_map.iter_rules(), key=lambda x: x.endpoint)
@@ -42,16 +42,18 @@ class TestViews(BaseTestCase):
 
             url = url_for(rule.endpoint)
 
-            if '/ajax/' in url:
+            if "/ajax/" in url:
                 continue
 
             print(rule.endpoint, url)
 
             try:
                 response = self.client.get(url)
-                assert response.status_code in (200, 302), \
-                    "Bad link: {} (status={})".format(
-                        url, response.status_code,
+                assert response.status_code in (
+                    200,
+                    302,
+                ), "Bad link: {} (status={})".format(
+                    url, response.status_code
                 )
             except BaseException:
                 print("Problem with url: {}".format(url))
