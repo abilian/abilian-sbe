@@ -53,9 +53,8 @@ def wizard_extract_data(emails, is_csv=False):
         user.email for user in existing_accounts_objects
     ]
 
-    emails_without_account = set(not_member_emails) - set(
-        existing_account_emails,
-    )
+    emails_without_account = set(not_member_emails
+                                 ) - set(existing_account_emails, )
 
     accounts_list = []
     for user in existing_accounts_objects:

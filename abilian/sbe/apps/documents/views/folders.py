@@ -887,8 +887,9 @@ def move_multiple(folder):
         inherit=True,
     ):
         flash(
-            _('You are not allowed to write in folder "{folder}"',
-              ).format(folder=target_folder.title),
+            _('You are not allowed to write in folder "{folder}"', ).format(
+                folder=target_folder.title
+            ),
             'error',
         )
         return redirect(current_folder_url)
