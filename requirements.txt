@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.13
+abilian-core==0.10.14
 alembic==0.9.9            # via abilian-core, flask-migrate
 amqp==2.3.2               # via kombu
 babel==2.6.0              # via flask-babel
