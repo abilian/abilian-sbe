@@ -23,33 +23,29 @@ class IndexingTestCase(CommunityIndexingTestCase):
     @mark.skip
     def test_event_indexed(self):
         start = datetime.now()
-        event1 = Event(
-            name="Test event",
-            community=self.community,
-            start=start,
-        )
+        event1 = Event(name="Test event", community=self.community, start=start)
         event2 = Event(name="Test other event", community=self.c2, start=start)
         self.session.add(event1)
         self.session.add(event2)
         self.session.commit()
 
         svc = self.svc
-        obj_types = (Event.entity_type, )
+        obj_types = (Event.entity_type,)
         with self.login(self.user_no_community):
-            res = svc.search('event', object_types=obj_types)
+            res = svc.search("event", object_types=obj_types)
             assert len(res) == 0
 
         with self.login(self.user):
-            res = svc.search('event', object_types=obj_types)
+            res = svc.search("event", object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
-            assert hit['object_key'] == event1.object_key
+            assert hit["object_key"] == event1.object_key
 
         with self.login(self.user_c2):
-            res = svc.search('event', object_types=obj_types)
+            res = svc.search("event", object_types=obj_types)
             assert len(res) == 1
             hit = res[0]
-            assert hit['object_key'] == event2.object_key
+            assert hit["object_key"] == event2.object_key
 
 
 class NoLoginViewTest(CommunityBaseTestCase):
@@ -58,6 +54,6 @@ class NoLoginViewTest(CommunityBaseTestCase):
     @mark.skip
     def test(self):
         response = self.client.get(
-            url_for("calendar.index", community_id=self.community.slug),
+            url_for("calendar.index", community_id=self.community.slug)
         )
         assert response.status_code == 200

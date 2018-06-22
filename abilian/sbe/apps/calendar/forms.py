@@ -13,42 +13,40 @@ from wtforms import StringField, TextAreaField, ValidationError
 from wtforms.fields.html5 import URLField
 
 ALLOWED_TAGS = [
-    'a',
-    'abbr',
-    'acronym',
-    'b',
-    'blockquote',
-    'br',
-    'code',
-    'em',
-    'i',
-    'li',
-    'ol',
-    'strong',
-    'ul',
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
-    'p',
-    'u',
-    'img',
+    "a",
+    "abbr",
+    "acronym",
+    "b",
+    "blockquote",
+    "br",
+    "code",
+    "em",
+    "i",
+    "li",
+    "ol",
+    "strong",
+    "ul",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "p",
+    "u",
+    "img",
 ]
 
 ALLOWED_ATTRIBUTES = {
-    '*': ['title'],
-    'p': ['style'],
-    'a': ['href', 'title'],
-    'abbr': ['title'],
-    'acronym': ['title'],
-    'img': ['src', 'alt', 'title'],
+    "*": ["title"],
+    "p": ["style"],
+    "a": ["href", "title"],
+    "abbr": ["title"],
+    "acronym": ["title"],
+    "img": ["src", "alt", "title"],
 }
 
-ALLOWED_STYLES = [
-    'text-align',
-]
+ALLOWED_STYLES = ["text-align"]
 
 WIDGET_ALLOWED = {}
 for attr in ALLOWED_TAGS:
@@ -59,23 +57,19 @@ for attr in ALLOWED_TAGS:
 
 
 class EventForm(Form):
-    title = StringField(
-        label=_l("Title"),
-        filters=(strip, ),
-        validators=[required()],
-    )
+    title = StringField(label=_l("Title"), filters=(strip,), validators=[required()])
 
     start = DateTimeField(_l("Start"), validators=[required()])
     end = DateTimeField(_l("End"), validators=[required()])
 
-    location = TextAreaField(label=_l("Location"), filters=(strip, ))
+    location = TextAreaField(label=_l("Location"), filters=(strip,))
 
-    url = URLField(label=_l("URL"), filters=(strip, ))
+    url = URLField(label=_l("URL"), filters=(strip,))
 
     description = TextAreaField(
         label=_l("Description"),
         widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
-        filters=(strip, ),
+        filters=(strip,),
         validators=[required()],
     )
 
@@ -93,5 +87,5 @@ class EventForm(Form):
             raise ValidationError(_l("End date/time must be after start"))
 
 
-EventForm.start.kwargs['raw_data'] = [" | 09:00"]
-EventForm.end.kwargs['raw_data'] = [" | 18:00"]
+EventForm.start.kwargs["raw_data"] = [" | 09:00"]
+EventForm.end.kwargs["raw_data"] = [" | 18:00"]

@@ -13,14 +13,14 @@ from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
 
 @community_content
 class Event(Entity):
-    __tablename__ = 'sbe_event'
+    __tablename__ = "sbe_event"
 
     community_id = CommunityIdColumn()
     #: The community this event belongs to
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref('events', cascade="all, delete-orphan"),
+        backref=backref("events", cascade="all, delete-orphan"),
     )
 
     title = Column(Unicode, nullable=False, default="", info=SEARCHABLE)

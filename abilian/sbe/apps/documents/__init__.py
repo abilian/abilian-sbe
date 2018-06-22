@@ -18,7 +18,7 @@ def register_plugin(app):
     setup_listener()
 
     # set default lock lifetime
-    app.config.setdefault('SBE_LOCK_LIFETIME', lock.DEFAULT_LIFETIME)
+    app.config.setdefault("SBE_LOCK_LIFETIME", lock.DEFAULT_LIFETIME)
 
     if app.script_manager:
-        app.script_manager.add_command('documents', manager)
+        app.script_manager.add_command("documents", manager)

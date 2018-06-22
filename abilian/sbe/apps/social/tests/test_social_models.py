@@ -12,7 +12,7 @@ from ..models import Message, PrivateMessage
 
 
 def check_editable(object):
-    if hasattr(object, '__editable__'):
+    if hasattr(object, "__editable__"):
         for k in object.__editable__:
             assert hasattr(object, k)
 
@@ -125,7 +125,7 @@ def test_private_message():
 
 def test_tags():
     m = Message(content="abc #123 #cde #voilà_l_été #789")
-    assert m.tags == ['123', 'cde', 'voilà_l_été', '789']
+    assert m.tags == ["123", "cde", "voilà_l_été", "789"]
 
 
 def test_get_all_entity_classes():

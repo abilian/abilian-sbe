@@ -13,17 +13,17 @@ from .tasks import check_maildir, process_email
 
 logger = logging.getLogger(__name__)
 
-manager = Manager(description='SBE forum commands', help='SBE forum commands')
+manager = Manager(description="SBE forum commands", help="SBE forum commands")
 
 
 @manager.option(
-    '-f',
-    '--filename',
-    help='email filename; defaults to standard input',
-    default='-',
+    "-f",
+    "--filename",
+    help="email filename; defaults to standard input",
+    default="-",
     required=False,
 )
-def inject_email(filename='-'):
+def inject_email(filename="-"):
     """Read one email from stdin, parse it, forward it in a celery task to be
     persisted."""
 
@@ -37,10 +37,10 @@ def inject_email(filename='-'):
         for line in fileinput.input(filename):
             parser.feed(line)
     except KeyboardInterrupt:
-        logger.info('Aborted by user, exiting.')
+        logger.info("Aborted by user, exiting.")
         sys.exit(1)
     except BaseException:
-        logger.error('Error during email parsing', exc_info=True)
+        logger.error("Error during email parsing", exc_info=True)
         sys.exit(1)
     finally:
         # close the parser to generate a email.message
@@ -53,22 +53,15 @@ def inject_email(filename='-'):
             process_email.delay(message)
         else:
             logger.error(
-                'email has defects, message content:\n'
-                '------ START -------\n'
-                '%s'
-                '\n------ END -------\n',
+                "email has defects, message content:\n"
+                "------ START -------\n"
+                "%s"
+                "\n------ END -------\n",
                 message,
-                extra={
-                    'stack': True,
-                },
+                extra={"stack": True},
             )
     else:
-        logger.error(
-            'no email was parsed from stdin',
-            extra={
-                'stack': True,
-            },
-        )
+        logger.error("no email was parsed from stdin", extra={"stack": True})
 
 
 @manager.command

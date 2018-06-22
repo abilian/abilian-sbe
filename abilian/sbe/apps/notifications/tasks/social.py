@@ -25,13 +25,10 @@ from abilian.sbe.apps.wiki.models import WikiPage
 
 from .. import TOKEN_SERIALIZER_NAME
 
-DIGEST_TASK_NAME = __name__ + '.send_daily_social_digest_task'
+DIGEST_TASK_NAME = __name__ + ".send_daily_social_digest_task"
 DEFAULT_DIGEST_SCHEDULE = {
-    'task': DIGEST_TASK_NAME,
-    'schedule': crontab(
-        hour=10,
-        minute=0,
-    ),
+    "task": DIGEST_TASK_NAME,
+    "schedule": crontab(hour=10, minute=0),
 }
 
 
@@ -39,19 +36,19 @@ DEFAULT_DIGEST_SCHEDULE = {
 @shared_task(expires=85800)
 def send_daily_social_digest_task():
     # a request_context is required when rendering templates
-    with current_app.test_request_context('/send_daily_social_updates'):
+    with current_app.test_request_context("/send_daily_social_updates"):
         config = current_app.config
-        if not config.get('PRODUCTION') or config.get("DEMO"):
+        if not config.get("PRODUCTION") or config.get("DEMO"):
             return
         send_daily_social_digest()
 
 
 def send_daily_social_digest():
     for user in User.query.filter(User.can_login == True).all():
-        preferences = get_service('preferences')
+        preferences = get_service("preferences")
         prefs = preferences.get_preferences(user)
 
-        if not prefs.get('sbe:notifications:daily', False):
+        if not prefs.get("sbe:notifications:daily", False):
             continue
 
         # Defensive programming.
@@ -61,10 +58,7 @@ def send_daily_social_digest():
         try:
             send_daily_social_digest_to(user)
         except BaseException:
-            current_app.logger.error(
-                'Error sending daily social digest',
-                exc_info=True,
-            )
+            current_app.logger.error("Error sending daily social digest", exc_info=True)
 
 
 def send_daily_social_digest_to(user):
@@ -72,7 +66,7 @@ def send_daily_social_digest_to(user):
 
     Return 1 if mail sent, 0 otherwise.
     """
-    mail = current_app.extensions['mail']
+    mail = current_app.extensions["mail"]
 
     message = make_message(user)
     if message:
@@ -84,22 +78,21 @@ def send_daily_social_digest_to(user):
 
 def make_message(user):
     config = current_app.config
-    sbe_config = config['ABILIAN_SBE']
-    sender = config.get('BULK_MAIL_SENDER', config['MAIL_SENDER'])
+    sbe_config = config["ABILIAN_SBE"]
+    sender = config.get("BULK_MAIL_SENDER", config["MAIL_SENDER"])
     recipient = user.email
-    subject = sbe_config['DAILY_SOCIAL_DIGEST_SUBJECT']
+    subject = sbe_config["DAILY_SOCIAL_DIGEST_SUBJECT"]
     digests = []
     happened_after = datetime.utcnow() - timedelta(days=1)
     list_id = '"{} daily digest" <daily.digest.{}>'.format(
-        config['SITE_NAME'],
-        config.get('SERVER_NAME', 'example.com'),
+        config["SITE_NAME"], config.get("SERVER_NAME", "example.com")
     )
     base_extra_headers = {
-        'List-Id': list_id,
-        'List-Post': 'NO',
-        'Auto-Submitted': 'auto-generated',
-        'X-Auto-Response-Suppress': 'All',
-        'Precedence': 'bulk',
+        "List-Id": list_id,
+        "List-Post": "NO",
+        "Auto-Submitted": "auto-generated",
+        "X-Auto-Response-Suppress": "All",
+        "Precedence": "bulk",
     }
 
     for membership in user.communautes_membership:
@@ -110,21 +103,25 @@ def make_message(user):
         # create an empty digest
         digest = CommunityDigest(community)
         AE = ActivityEntry
-        activities = AE.query \
-            .order_by(AE.happened_at.asc()) \
-            .filter(and_(
-                AE.happened_at > happened_after,
-                or_(
-                    and_(
-                        AE.target_type == community.object_type,
-                        AE.target_id == community.id,
+        activities = (
+            AE.query.order_by(AE.happened_at.asc())
+            .filter(
+                and_(
+                    AE.happened_at > happened_after,
+                    or_(
+                        and_(
+                            AE.target_type == community.object_type,
+                            AE.target_id == community.id,
+                        ),
+                        and_(
+                            AE.object_type == community.object_type,
+                            AE.object_id == community.id,
+                        ),
                     ),
-                    and_(
-                        AE.object_type == community.object_type,
-                        AE.object_id == community.id,
-                    ), ),
-            )) \
+                )
+            )
             .all()
+        )
 
         # fill the internal digest lists with infos
         # seen_entities, new_members, new_documents, updated_documents ...
@@ -141,31 +138,20 @@ def make_message(user):
 
     token = generate_unsubscribe_token(user)
     unsubscribe_url = url_for(
-        'notifications.unsubscribe_sbe',
+        "notifications.unsubscribe_sbe",
         token=token,
         _external=True,
-        _scheme=config['PREFERRED_URL_SCHEME'],
+        _scheme=config["PREFERRED_URL_SCHEME"],
     )
     extra_headers = dict(base_extra_headers)
-    extra_headers['List-Unsubscribe'] = '<{}>'.format(unsubscribe_url)
+    extra_headers["List-Unsubscribe"] = "<{}>".format(unsubscribe_url)
 
     msg = Message(
-        subject,
-        sender=sender,
-        recipients=[recipient],
-        extra_headers=extra_headers,
+        subject, sender=sender, recipients=[recipient], extra_headers=extra_headers
     )
-    ctx = {
-        'digests': digests,
-        'token': token,
-        'unsubscribe_url': unsubscribe_url,
-    }
-    msg.body = render_template_i18n(
-        "notifications/daily-social-digest.txt", **ctx
-    )
-    msg.html = render_template_i18n(
-        "notifications/daily-social-digest.html", **ctx
-    )
+    ctx = {"digests": digests, "token": token, "unsubscribe_url": unsubscribe_url}
+    msg.body = render_template_i18n("notifications/daily-social-digest.txt", **ctx)
+    msg.html = render_template_i18n("notifications/daily-social-digest.html", **ctx)
     return msg
 
 
@@ -193,9 +179,12 @@ class CommunityDigest(object):
 
     def is_empty(self):
         return (
-            not self.new_members and not self.new_documents
-            and not self.updated_documents and not self.new_conversations
-            and not self.updated_conversations and not self.new_wiki_pages
+            not self.new_members
+            and not self.new_documents
+            and not self.updated_documents
+            and not self.new_conversations
+            and not self.updated_conversations
+            and not self.new_wiki_pages
             and not self.updated_wiki_pages
         )
 
@@ -206,10 +195,10 @@ class CommunityDigest(object):
         # TODO ?
         # target = activity.target
 
-        if activity.verb == 'join':
+        if activity.verb == "join":
             self.new_members.append(actor)
 
-        elif activity.verb == 'post':
+        elif activity.verb == "post":
             if obj is None:
                 return
             if obj.id in self.seen_entities:
@@ -228,19 +217,17 @@ class CommunityDigest(object):
                     # oldest post because Activities are ordered_by
                     # Asc(A.happened_at)
                     self.updated_conversations[obj.thread] = {
-                        'actors': [actor],
-                        'post': obj,
+                        "actors": [actor],
+                        "post": obj,
                     }
                     # Mark this post's Thread as seen to avoid duplicates
                     self.seen_entities.add(obj.thread.id)
                 elif obj.thread not in self.new_conversations:
                     # this post's Thread has already been seen in another Activity
                     # exclude it to avoid duplicates but save the Post's actor
-                    self.updated_conversations[obj.thread]['actors'].append(
-                        actor,
-                    )
+                    self.updated_conversations[obj.thread]["actors"].append(actor)
 
-        elif activity.verb == 'update':
+        elif activity.verb == "update":
             if obj is None:
                 return
             # special case for Wikipage, we want to know each updater

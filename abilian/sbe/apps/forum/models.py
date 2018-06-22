@@ -26,8 +26,8 @@ from abilian.sbe.apps.documents.models import BaseContent, CmisObject
 class ThreadClosedError(RuntimeError):
     def __init__(self, thread):
         super(ThreadClosedError, self).__init__(
-            'The thread {!r} is closed. No modification allowed on its posts: '
-            'creation, edition, deletion'.format(thread),
+            "The thread {!r} is closed. No modification allowed on its posts: "
+            "creation, edition, deletion".format(thread)
         )
         self.thread = thread
 
@@ -41,24 +41,19 @@ class Thread(Entity):
 
     (= Thread in SIOC, Message in ICOM 1.0).
     """
-    __tablename__ = 'forum_thread'
+
+    __tablename__ = "forum_thread"
 
     community_id = CommunityIdColumn()
     #: The community this thread belongs to
     community = relationship(
         Community,
         primaryjoin=(community_id == Community.id),
-        backref=backref('threads', cascade="all, delete-orphan"),
+        backref=backref("threads", cascade="all, delete-orphan"),
     )
 
     #: The thread title (aka subject)
-    _title = Column(
-        'title',
-        Unicode(255),
-        nullable=False,
-        default="",
-        info=SEARCHABLE,
-    )
+    _title = Column("title", Unicode(255), nullable=False, default="", info=SEARCHABLE)
 
     last_post_at = Column(DateTime, default=datetime.utcnow, nullable=True)
 
@@ -86,28 +81,28 @@ class Thread(Entity):
             self.name = title
 
     posts = relationship(
-        'Post',
-        primaryjoin='Thread.id == Post.thread_id',
-        order_by='Post.created_at',
+        "Post",
+        primaryjoin="Thread.id == Post.thread_id",
+        order_by="Post.created_at",
         cascade="all, delete-orphan",
-        back_populates='thread',
+        back_populates="thread",
     )
 
     @property
     def closed(self):
         """True if this thread doesn't accept more posts."""
-        return self.meta.get('abilian.sbe.forum', {}).get('closed', False)
+        return self.meta.get("abilian.sbe.forum", {}).get("closed", False)
 
     @closed.setter
     def closed(self, value):
-        self.meta.setdefault('abilian.sbe.forum', {})['closed'] = bool(value)
+        self.meta.setdefault("abilian.sbe.forum", {})["closed"] = bool(value)
         self.meta.changed()
 
     def create_post(self, **kw):
         if self.closed:
             raise ThreadClosedError(self)
 
-        kw['name'] = self.name
+        kw["name"] = self.name
         post = Post(**kw)
         post.thread = self
         return post
@@ -130,16 +125,13 @@ class Post(Entity):
 
     (= Post in DiscussionMessage in ICOM 1.0).
     """
-    __tablename__ = 'forum_post'
+
+    __tablename__ = "forum_post"
     __indexable__ = False  # content is indexed at thread level
 
     #: The thread this post belongs to
     thread_id = Column(ForeignKey(Thread.id), nullable=False)
-    thread = relationship(
-        Thread,
-        foreign_keys=thread_id,
-        back_populates='posts',
-    )
+    thread = relationship(Thread, foreign_keys=thread_id, back_populates="posts")
 
     #: The post this post is a reply to, if any (currently not used)
     parent_post_id = Column(ForeignKey("forum_post.id"), nullable=True)
@@ -161,7 +153,7 @@ class Post(Entity):
 
     @property
     def history(self):
-        return self.meta.get('abilian.sbe.forum', {}).get('history', [])
+        return self.meta.get("abilian.sbe.forum", {}).get("history", [])
 
 
 class ThreadIndexAdapter(SAAdapter):
@@ -173,9 +165,7 @@ class ThreadIndexAdapter(SAAdapter):
 
     def get_document(self, obj):
         kw = super(ThreadIndexAdapter, self).get_document(obj)
-        kw['text'] = ' '.join(
-            chain((kw['text'], ), [p.body_html for p in obj.posts]),
-        )
+        kw["text"] = " ".join(chain((kw["text"],), [p.body_html for p in obj.posts]))
         return kw
 
 
@@ -200,9 +190,9 @@ def _thread_change_sync_name(post, new_thread, old_thread, initiator):
     return new_thread
 
 
-@listens_for(Thread.posts, 'append')
-@listens_for(Thread.posts, 'remove')
-@listens_for(Thread.posts, 'set')
+@listens_for(Thread.posts, "append")
+@listens_for(Thread.posts, "remove")
+@listens_for(Thread.posts, "set")
 def _guard_closed_thread_collection(thread, value, *args):
     """Prevent add/remove/replace posts on a closed thread."""
     if isinstance(thread, Post):
@@ -218,17 +208,17 @@ def _guard_closed_thread_collection(thread, value, *args):
 
 class PostAttachment(BaseContent, CmisObject):
     __tablename__ = None  # type: str
-    __mapper_args__ = {'polymorphic_identity': 'forum_post_attachment'}
-    sbe_type = 'forum_post:attachment'
+    __mapper_args__ = {"polymorphic_identity": "forum_post_attachment"}
+    sbe_type = "forum_post:attachment"
 
     _post_id = Column(Integer, ForeignKey(Post.id), nullable=True)
     post = relationship(
         Post,
         primaryjoin=(_post_id == Post.id),
         backref=backref(
-            'attachments',
-            lazy='select',
-            order_by='PostAttachment.name',
-            cascade='all, delete-orphan',
+            "attachments",
+            lazy="select",
+            order_by="PostAttachment.name",
+            cascade="all, delete-orphan",
         ),
     )

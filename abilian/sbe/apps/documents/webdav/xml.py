@@ -21,7 +21,7 @@ class Propfind(object):
         root = objectify.fromstring(xml)
 
         child = root.getchildren()[0]
-        self.mode = child.tag[len("{DAV:}"):]
+        self.mode = child.tag[len("{DAV:}") :]
 
         if self.mode == "prop":
             for prop in child.getchildren():
@@ -56,18 +56,16 @@ class Response(object):
         obj = self.obj
         props = E.prop()
         for property_name in self.property_list:
-            if property_name == 'creationdate':
+            if property_name == "creationdate":
                 props.append(E.creationdate("1997-12-01T17:42:21-08:00"))
-            elif property_name == 'displayname':
+            elif property_name == "displayname":
                 props.append(E.displayname(obj.name))
-            elif property_name == 'resourcetype':
+            elif property_name == "resourcetype":
                 if obj.is_folder:
                     props.append(E.resourcetype(E.collection()))
                 else:
                     props.append(E.resourcetype())
 
         return E.response(
-            E.href(self.href),
-            E.propstat(props),
-            E.status("HTTP/1.1 200 OK"),
+            E.href(self.href), E.propstat(props), E.status("HTTP/1.1 200 OK")
         )

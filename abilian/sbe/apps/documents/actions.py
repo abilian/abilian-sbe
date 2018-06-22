@@ -24,14 +24,14 @@ class CmisContentAction(Action):
     permission = None  # type: str
 
     def __init__(self, *args, **kwargs):
-        if 'permission' in kwargs:
-            self.permission = kwargs.pop('permission')
+        if "permission" in kwargs:
+            self.permission = kwargs.pop("permission")
 
         Action.__init__(self, *args, **kwargs)
 
     def pre_condition(self, ctx):
         # type: (Dict[str, Any]) -> bool
-        obj = ctx['object']
+        obj = ctx["object"]
         ok = obj.sbe_type == self.sbe_type
 
         if ok and self.permission is not None:
@@ -46,7 +46,8 @@ class CmisContentAction(Action):
 
 class BaseFolderAction(CmisContentAction):
     """Apply to all folders, including root folder."""
-    sbe_type = 'cmis:folder'
+
+    sbe_type = "cmis:folder"
 
 
 class FolderButtonAction(BaseFolderAction):
@@ -54,53 +55,51 @@ class FolderButtonAction(BaseFolderAction):
     _std_template_string = (
         '<button class="btn {{ action.css_class }}" name="action" '
         'value="{{ action.name }}" title="{{ action.title }}">'
-        '{{ action.icon }}</button>'
+        "{{ action.icon }}</button>"
     )
 
     _modal_template_string = (
         '<a class="btn {{ action.css_class }}" href="{{ url }}" '
         'data-toggle="modal" role="button" title="{{ action.title }}">'
-        '{{ action.icon }}</a>'
+        "{{ action.icon }}</a>"
     )
 
     def __init__(self, *args, **kwargs):
         self.modal = False
 
-        if 'modal' in kwargs:
-            self.modal = kwargs.pop('modal')
+        if "modal" in kwargs:
+            self.modal = kwargs.pop("modal")
 
-        css_class = kwargs.pop('css_class', 'btn-default')
-        self.CSS_CLASS = self.CSS_CLASS + ' ' + css_class
+        css_class = kwargs.pop("css_class", "btn-default")
+        self.CSS_CLASS = self.CSS_CLASS + " " + css_class
 
         BaseFolderAction.__init__(self, *args, **kwargs)
 
     @property
     def template_string(self):
-        return (
-            self._modal_template_string
-            if self.modal else self._std_template_string
-        )
+        return self._modal_template_string if self.modal else self._std_template_string
 
 
 class FolderAction(BaseFolderAction):
     """Apply to all folders except root folder."""
-    sbe_type = 'cmis:folder'
+
+    sbe_type = "cmis:folder"
 
     def pre_condition(self, ctx):
         return (
             super(FolderAction, self).pre_condition(ctx)
-            and ctx['object'] is not repository.root_folder
+            and ctx["object"] is not repository.root_folder
         )
 
 
 class FolderPermisionsAction(BaseFolderAction):
     """Apply to all folders except root folder."""
-    sbe_type = 'cmis:folder'
+
+    sbe_type = "cmis:folder"
 
     def pre_condition(self, ctx):
         return (
-            super(BaseFolderAction, self).pre_condition(ctx)
-            and ctx['object'].depth > 1
+            super(BaseFolderAction, self).pre_condition(ctx) and ctx["object"].depth > 1
         )
 
 
@@ -109,7 +108,7 @@ class FolderModalAction(ModalActionMixin, FolderAction):
 
 
 class DocumentAction(CmisContentAction):
-    sbe_type = 'cmis:document'
+    sbe_type = "cmis:document"
 
 
 class DocumentModalAction(ModalActionMixin, DocumentAction):
@@ -120,10 +119,10 @@ class RootFolderAction(CmisContentAction):
     """Apply only for root folder."""
 
     def pre_condition(self, ctx):
-        return ctx['object'] is repository.root_folder
+        return ctx["object"] is repository.root_folder
 
 
-_checkin_template_action = '''
+_checkin_template_action = """
 <form method="POST" action="{{ url }}" encoding="multipart/form-data" target="_new">
   {{ csrf.field() }}
   <button type="submit" class="btn btn-link" name="action"
@@ -133,9 +132,9 @@ _checkin_template_action = '''
     {{ action.title }}
   </button>
 </form>
-'''
+"""
 
-_lock_template_action = '''
+_lock_template_action = """
 <form method="POST" action="{{ url }}" encoding="multipart/form-data">
   {{ csrf.field() }}
   <button type="submit" class="btn btn-link" name="action"
@@ -144,153 +143,145 @@ _lock_template_action = '''
     {{ action.title }}
   </button>
 </form>
-'''
+"""
 
 _actions = (
     # Folder listing action buttons ##########
     FolderButtonAction(
-        'documents:folder-listing',
-        'download',
-        _l('Download'),
-        icon='download',
+        "documents:folder-listing", "download", _l("Download"), icon="download"
     ),
     FolderButtonAction(
-        'documents:folder-listing',
-        'move-files',
-        _l('Move to another folder'),
-        icon='move',
-        url='#modal-move-files',
+        "documents:folder-listing",
+        "move-files",
+        _l("Move to another folder"),
+        icon="move",
+        url="#modal-move-files",
         modal=True,
         permission=WRITE,
     ),
     FolderButtonAction(
-        'documents:folder-listing',
-        'delete',
-        _l('Delete'),
+        "documents:folder-listing",
+        "delete",
+        _l("Delete"),
         permission=WRITE,
-        icon='trash',
-        css_class='btn-danger',
+        icon="trash",
+        css_class="btn-danger",
     ),
     FolderButtonAction(
-        'documents:folder-listing',
-        'change-owner',
-        _l('Change owner'),
-        icon='user',
-        url='#modal-change-owner',
+        "documents:folder-listing",
+        "change-owner",
+        _l("Change owner"),
+        icon="user",
+        url="#modal-change-owner",
         modal=True,
         permission=MANAGE,
     ),
     # Folder left bar actions ##########
     # view
     RootFolderAction(
-        'documents:content',
-        'view',
-        _l('List content'),
-        icon='list',
+        "documents:content",
+        "view",
+        _l("List content"),
+        icon="list",
         condition=(lambda ctx: security.has_role(g.user, "admin")),
-        url=lambda ctx: url_for(".folder_view", folder_id=ctx['object'].id),
+        url=lambda ctx: url_for(".folder_view", folder_id=ctx["object"].id),
     ),
     # view
     FolderAction(
-        'documents:content',
-        'view',
-        _l('List content'),
-        icon='list',
-        url=lambda ctx: url_for(".folder_view", folder_id=ctx['object'].id),
+        "documents:content",
+        "view",
+        _l("List content"),
+        icon="list",
+        url=lambda ctx: url_for(".folder_view", folder_id=ctx["object"].id),
     ),
     # Descendants
     FolderAction(
-        'documents:content',
-        'descendants',
-        _l('View descendants'),
-        icon=FAIcon('code-fork fa-rotate-90'),
-        url=lambda ctx: url_for(
-            ".descendants_view",
-            folder_id=ctx['object'].id,
-        ),
+        "documents:content",
+        "descendants",
+        _l("View descendants"),
+        icon=FAIcon("code-fork fa-rotate-90"),
+        url=lambda ctx: url_for(".descendants_view", folder_id=ctx["object"].id),
     ),
     # upload
     FolderModalAction(
-        'documents:content',
-        'upload_files',
-        _l('Upload file(s)'),
-        icon='upload',
-        url='#modal-upload-files',
+        "documents:content",
+        "upload_files",
+        _l("Upload file(s)"),
+        icon="upload",
+        url="#modal-upload-files",
         permission=WRITE,
     ),
     # edit
     FolderModalAction(
-        'documents:content',
-        'edit',
-        _l('Edit properties'),
-        icon='pencil',
-        url='#modal-edit',
+        "documents:content",
+        "edit",
+        _l("Edit properties"),
+        icon="pencil",
+        url="#modal-edit",
         permission=WRITE,
     ),
     # new folder
     FolderModalAction(
-        'documents:content',
-        'new_folder',
-        _l('New folder'),
-        icon='plus',
-        url='#modal-new-folder',
+        "documents:content",
+        "new_folder",
+        _l("New folder"),
+        icon="plus",
+        url="#modal-new-folder",
         permission=WRITE,
     ),
-
     # # members
     # FolderAction(
     #   'documents:content', 'members', _l('Members'), icon='user',
     #   url=lambda ctx: url_for(".members", folder_id=ctx['object'].id)),
-
     # permissions
     FolderPermisionsAction(
-        'documents:content',
-        'permissions',
-        _l('Permissions'),
-        icon='lock',
-        url=lambda ctx: url_for(".permissions", folder_id=ctx['object'].id),
+        "documents:content",
+        "permissions",
+        _l("Permissions"),
+        icon="lock",
+        url=lambda ctx: url_for(".permissions", folder_id=ctx["object"].id),
         permission=MANAGE,
     ),
-
     # Document actions ##########
     # View / preview in browser
     DocumentAction(
-        'documents:content',
-        'preview',
-        _l('View in browser'),
-        icon='eye-open',
-        url=lambda ctx: url_for('.document_preview', doc_id=ctx['object'].id),
+        "documents:content",
+        "preview",
+        _l("View in browser"),
+        icon="eye-open",
+        url=lambda ctx: url_for(".document_preview", doc_id=ctx["object"].id),
         condition=(
-            lambda ctx: ctx['object'].antivirus_ok and ctx['object'].content_type in (
-                'text/html', 'text/plain', 'application/pdf')
+            lambda ctx: ctx["object"].antivirus_ok
+            and ctx["object"].content_type
+            in ("text/html", "text/plain", "application/pdf")
         ),
     ),
     # viewers
     DocumentModalAction(
-        'documents:content',
-        'document_viewers',
-        _l('Viewers list'),
-        icon='user',
+        "documents:content",
+        "document_viewers",
+        _l("Viewers list"),
+        icon="user",
         condition=lambda ctx: is_manager(context=ctx),
-        url=lambda ctx: url_for(".document_viewers", doc_id=ctx['object'].id),
+        url=lambda ctx: url_for(".document_viewers", doc_id=ctx["object"].id),
     ),
     # edit
     DocumentModalAction(
-        'documents:content',
-        'edit',
-        _l('Edit properties'),
-        icon='pencil',
-        url='#modal-edit',
+        "documents:content",
+        "edit",
+        _l("Edit properties"),
+        icon="pencil",
+        url="#modal-edit",
         permission=WRITE,
     ),
     # Checkin / Checkout
     DocumentAction(
-        'documents:content',
-        'checkout',
-        _l('Checkout (Download for edit)'),
-        icon='download',
-        url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
-        condition=lambda ctx: ctx['object'].lock is None,
+        "documents:content",
+        "checkout",
+        _l("Checkout (Download for edit)"),
+        icon="download",
+        url=lambda ctx: url_for(".checkin_checkout", doc_id=ctx["object"].id),
+        condition=lambda ctx: ctx["object"].lock is None,
         template_string=_checkin_template_action,
     ),
     # DocumentAction(
@@ -301,53 +292,52 @@ _actions = (
     #   template_string=_lock_template_action,
     # ),
     DocumentAction(
-        'documents:content',
-        'unlock',
-        _l('Unlock'),
-        icon=FAIcon('unlock'),
-        url=lambda ctx: url_for('.checkin_checkout', doc_id=ctx['object'].id),
-        condition=lambda ctx: ctx['object'].lock is not None,
+        "documents:content",
+        "unlock",
+        _l("Unlock"),
+        icon=FAIcon("unlock"),
+        url=lambda ctx: url_for(".checkin_checkout", doc_id=ctx["object"].id),
+        condition=lambda ctx: ctx["object"].lock is not None,
         template_string=_lock_template_action,
     ),
     # upload-new / checkin
     DocumentModalAction(
-        'documents:content',
-        'upload',
-        _l('Upload new version'),
-        icon='upload',
-        url='#modal-upload-new-version',
+        "documents:content",
+        "upload",
+        _l("Upload new version"),
+        icon="upload",
+        url="#modal-upload-new-version",
         # either not locked, either user is owner
-        condition=lambda ctx: not ctx['object'].lock or ctx['object'].lock.is_owner(
-        ),
+        condition=lambda ctx: not ctx["object"].lock or ctx["object"].lock.is_owner(),
         permission=WRITE,
     ),
     # send by email
     DocumentModalAction(
-        'documents:content',
-        'send_by_email',
-        _l('Send by email'),
-        icon='envelope',
-        url='#modal-send-by-email',
-        condition=lambda ctx: ctx['object'].antivirus_ok,
+        "documents:content",
+        "send_by_email",
+        _l("Send by email"),
+        icon="envelope",
+        url="#modal-send-by-email",
+        condition=lambda ctx: ctx["object"].antivirus_ok,
         permission=WRITE,
     ),
     # delete
     DocumentModalAction(
-        'documents:content',
-        'delete',
-        _l('Delete'),
-        icon='trash',
-        url='#modal-delete',
+        "documents:content",
+        "delete",
+        _l("Delete"),
+        icon="trash",
+        url="#modal-delete",
         permission=WRITE,
     ),
     # refresh preview
     DocumentAction(
-        'documents:content',
-        'refresh_preview',
-        _l('Refresh preview'),
-        icon='refresh',
-        url=lambda ctx: url_for('.refresh_preview', doc_id=ctx['object'].id),
-        condition=lambda ctx: ctx['object'].antivirus_ok,
+        "documents:content",
+        "refresh_preview",
+        _l("Refresh preview"),
+        icon="refresh",
+        url=lambda ctx: url_for(".refresh_preview", doc_id=ctx["object"].id),
+        condition=lambda ctx: ctx["object"].antivirus_ok,
         permission=MANAGE,
     ),
 )

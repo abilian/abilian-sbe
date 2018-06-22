@@ -1,1 +1,1 @@
-pytest_plugins = ['abilian.sbe.apps.communities.tests.fixtures']
+pytest_plugins = ["abilian.sbe.apps.communities.tests.fixtures"]

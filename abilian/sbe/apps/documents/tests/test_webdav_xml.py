@@ -10,21 +10,21 @@ from ..webdav.xml import MultiStatus, Propfind
 
 
 def test_propfind_sample1():
-    xml = (Path(__file__).parent / 'data' / 'propfind1.xml').open('rb').read()
+    xml = (Path(__file__).parent / "data" / "propfind1.xml").open("rb").read()
     propfind = Propfind(xml)
-    assert propfind.mode == 'prop'
+    assert propfind.mode == "prop"
 
 
 def test_propfind_sample2():
-    xml = (Path(__file__).parent / 'data' / 'propfind2.xml').open('rb').read()
+    xml = (Path(__file__).parent / "data" / "propfind2.xml").open("rb").read()
     propfind = Propfind(xml)
-    assert propfind.mode == 'prop'
+    assert propfind.mode == "prop"
 
 
 def test_propfind_sample3():
-    xml = (Path(__file__).parent / 'data' / 'propfind3.xml').open('rb').read()
+    xml = (Path(__file__).parent / "data" / "propfind3.xml").open("rb").read()
     propfind = Propfind(xml)
-    assert propfind.mode == 'allprop'
+    assert propfind.mode == "allprop"
 
 
 def test_empty_multistatus():

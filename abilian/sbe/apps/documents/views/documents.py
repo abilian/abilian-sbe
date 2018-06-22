@@ -41,7 +41,7 @@ MAX_PREVIEW_SIZE = 1000
 __all__ = ()
 
 
-@default_view(blueprint, Document, id_attr='doc_id', kw_func=default_view_kw)
+@default_view(blueprint, Document, id_attr="doc_id", kw_func=default_view_kw)
 @route("/doc/<int:doc_id>")
 def document_view(doc_id):
     doc = get_document(doc_id)
@@ -50,7 +50,7 @@ def document_view(doc_id):
     db.session.commit()
 
     bc = breadcrumbs_for(doc)
-    actions.context['object'] = doc
+    actions.context["object"] = doc
 
     if doc.content_type.startswith("image/"):
         add_to_recent_items(doc, "image")
@@ -62,12 +62,12 @@ def document_view(doc_id):
     viewtracker.record_hit(entity=doc, user=current_user)
 
     ctx = {
-        'doc': doc,
-        'audit_entries': audit_entries,
-        'breadcrumbs': bc,
-        'folder': doc.parent,
-        'has_preview': has_preview,
-        'viewers': object_viewers(doc),
+        "doc": doc,
+        "audit_entries": audit_entries,
+        "breadcrumbs": bc,
+        "folder": doc.parent,
+        "has_preview": has_preview,
+        "viewers": object_viewers(doc),
     }
     return render_template("documents/document.html", **ctx)
 
@@ -75,8 +75,8 @@ def document_view(doc_id):
 #
 # Actions on documents
 #
-@route("/doc/<int:doc_id>/", methods=['POST'])
-@route("/doc/<int:doc_id>/<int:folder_id>/", methods=['POST'])
+@route("/doc/<int:doc_id>/", methods=["POST"])
+@route("/doc/<int:doc_id>/<int:folder_id>/", methods=["POST"])
 @csrf.protect
 def document_edit(doc_id, folder_id=None):
     doc = get_document(doc_id)
@@ -97,7 +97,7 @@ def document_edit(doc_id, folder_id=None):
         return redirect(url_for(doc))
 
 
-@route("/doc/<int:doc_id>/viewers", methods=['GET'])
+@route("/doc/<int:doc_id>/viewers", methods=["GET"])
 def document_viewers(doc_id):
     doc = get_document(doc_id)
     check_read_access(doc)
@@ -105,7 +105,7 @@ def document_viewers(doc_id):
     # db.session.commit()
 
     bc = breadcrumbs_for(doc)
-    actions.context['object'] = doc
+    actions.context["object"] = doc
     """if doc.content_type.startswith("image/"):
         add_to_recent_items(doc, "image")
     else:
@@ -115,17 +115,17 @@ def document_viewers(doc_id):
     audit_entries = audit_service.entries_for(doc)
 
     ctx = {
-        'doc': doc,
-        'audit_entries': audit_entries,
-        'breadcrumbs': bc,
-        'folder': doc.parent,
-        'has_preview': has_preview,
-        'viewers': object_viewers(doc),
+        "doc": doc,
+        "audit_entries": audit_entries,
+        "breadcrumbs": bc,
+        "folder": doc.parent,
+        "has_preview": has_preview,
+        "viewers": object_viewers(doc),
     }
     return render_template("documents/document_viewers.html", **ctx)
 
 
-@route("/doc/<int:doc_id>/delete", methods=['POST'])
+@route("/doc/<int:doc_id>/delete", methods=["POST"])
 @csrf.protect
 def document_delete(doc_id):
     doc = get_document(doc_id)
@@ -139,13 +139,13 @@ def document_delete(doc_id):
     return redirect(url_for(parent_folder))
 
 
-@route("/doc/<int:doc_id>/upload", methods=['POST'])
+@route("/doc/<int:doc_id>/upload", methods=["POST"])
 @csrf.protect
 def document_upload(doc_id):
     doc = get_document(doc_id)
     check_write_access(doc)
 
-    fd = request.files['file']
+    fd = request.files["file"]
     doc.set_content(fd.read(), fd.content_type)
     del doc.lock
 
@@ -162,37 +162,35 @@ def document_download(doc_id, attach=None):
     doc = get_document(doc_id)
 
     response = make_response(doc.content)
-    response.headers['content-length'] = doc.content_length
-    response.headers['content-type'] = doc.content_type
+    response.headers["content-length"] = doc.content_length
+    response.headers["content-type"] = doc.content_type
 
     if attach is None:
-        attach = request.args.get('attach')
+        attach = request.args.get("attach")
 
-    if (
-        attach or not match(
-            doc.content_type,
-            ("text/plain", "application/pdf", "image/*"),
-        )
+    if attach or not match(
+        doc.content_type, ("text/plain", "application/pdf", "image/*")
     ):
         # Note: we omit text/html for security reasons.
-        quoted_filename = quote(doc.title.encode('utf8'))
-        response.headers['content-disposition'] \
-            = 'attachment;filename="{}"'.format(quoted_filename)
+        quoted_filename = quote(doc.title.encode("utf8"))
+        response.headers["content-disposition"] = 'attachment;filename="{}"'.format(
+            quoted_filename
+        )
 
     return response
 
 
-@route('/doc/<int:doc_id>/checkin_checkout', methods=['POST'])
+@route("/doc/<int:doc_id>/checkin_checkout", methods=["POST"])
 def checkin_checkout(doc_id):
     doc = get_document(doc_id)
-    action = request.form.get('action')
+    action = request.form.get("action")
 
-    if action not in ('checkout', 'lock', 'unlock'):
-        raise BadRequest('Unknown action: %r' % action)
+    if action not in ("checkout", "lock", "unlock"):
+        raise BadRequest("Unknown action: %r" % action)
 
     session = sa.orm.object_session(doc)
 
-    if action in ('lock', 'checkout'):
+    if action in ("lock", "checkout"):
         doc.lock = current_user
         d = doc.updated_at
         # prevent change of last modification date
@@ -201,12 +199,12 @@ def checkin_checkout(doc_id):
         doc.updated_at = d
         session.commit()
 
-        if action == 'lock':
+        if action == "lock":
             return redirect(url_for(doc))
-        elif action == 'checkout':
+        elif action == "checkout":
             return document_download(doc_id, attach=True)
 
-    if action == 'unlock':
+    if action == "unlock":
         del doc.lock
         d = doc.updated_at
         # prevent change of last modification date
@@ -219,9 +217,9 @@ def checkin_checkout(doc_id):
 
 def preview_missing_image():
     response = redirect(
-        url_for('abilian_sbe_static', filename='images/preview_missing.png'),
+        url_for("abilian_sbe_static", filename="images/preview_missing.png")
     )
-    response.headers['Cache-Control'] = 'no-cache'
+    response.headers["Cache-Control"] = "no-cache"
     return response
 
 
@@ -241,13 +239,11 @@ def document_preview_image(doc_id):
         size = MAX_PREVIEW_SIZE
 
     # compute image if size != standard document size
-    get_image = (
-        converter.get_image if size == doc.preview_size else converter.to_image
-    )
+    get_image = converter.get_image if size == doc.preview_size else converter.to_image
 
     content_type = "image/jpeg"
 
-    if doc.content_type.startswith('image/svg'):
+    if doc.content_type.startswith("image/svg"):
         image = doc.content
         content_type = doc.content_type
     elif doc.content_type.startswith("image/"):
@@ -257,13 +253,7 @@ def document_preview_image(doc_id):
     else:
         page = int(request.args.get("page", 0))
         try:
-            image = get_image(
-                doc.digest,
-                doc.content,
-                doc.content_type,
-                page,
-                size,
-            )
+            image = get_image(doc.digest, doc.content, doc.content_type, page, size)
         except BaseException:
             # TODO: use generic "conversion failed" image
             image = ""
@@ -272,7 +262,7 @@ def document_preview_image(doc_id):
         return preview_missing_image()
 
     response = make_response(image)
-    response.headers['content-type'] = content_type
+    response.headers["content-type"] = content_type
     return response
 
 
@@ -294,23 +284,22 @@ def refresh_preview(doc_id):
     return redirect(url_for(doc))
 
 
-@route("/doc/<int:doc_id>/send", methods=['POST'])
+@route("/doc/<int:doc_id>/send", methods=["POST"])
 @csrf.protect
 def document_send(doc_id):
     doc = get_document(doc_id)
 
     recipient = request.form.get("recipient")
-    user_msg = request.form.get('message')
+    user_msg = request.form.get("message")
 
-    site_name = '[{}] '.format(current_app.config['SITE_NAME'])
+    site_name = "[{}] ".format(current_app.config["SITE_NAME"])
     sender_name = g.user.name
-    subject = site_name + \
-        _('{sender} sent you a file').format(sender=sender_name)
+    subject = site_name + _("{sender} sent you a file").format(sender=sender_name)
     msg = Message(subject)
     msg.sender = g.user.email
     msg.recipients = [recipient]
     msg.body = render_template_i18n(
-        'documents/mail_file_sent.txt',
+        "documents/mail_file_sent.txt",
         sender_name=sender_name,
         message=user_msg,
         document_url=url_for(doc),
@@ -334,20 +323,12 @@ def document_preview(doc_id):
 
     if doc.content_type == "application/pdf":
         return redirect(
-            url_for(
-                ".document_view_pdf",
-                community_id=g.community.slug,
-                doc_id=doc.id,
-            ),
+            url_for(".document_view_pdf", community_id=g.community.slug, doc_id=doc.id)
         )
 
     else:
         return redirect(
-            url_for(
-                ".document_download",
-                community_id=g.community.slug,
-                doc_id=doc.id,
-            ),
+            url_for(".document_download", community_id=g.community.slug, doc_id=doc.id)
         )
 
 
@@ -360,9 +341,7 @@ def document_view_pdf(doc_id):
     return render_template(
         "documents/view_pdf.html",
         pdf_url=url_for(
-            ".document_download",
-            community_id=g.community.slug,
-            doc_id=doc.id,
+            ".document_download", community_id=g.community.slug, doc_id=doc.id
         ),
     )
 

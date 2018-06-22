@@ -78,7 +78,7 @@ def render(template, status=200, mimetype=None):
             print(f, args, kw)
             result = f(*args, **kw)
             rendered = render_template(template, **result)
-            headers = {'Content-Type': mimetype}
+            headers = {"Content-Type": mimetype}
             response = make_response(rendered, status, headers)
             print(response)
             return response
@@ -88,16 +88,16 @@ def render(template, status=200, mimetype=None):
     return decorator
 
 
-BOOLEAN_OPTIONS = ['includeAllowableActions', 'includeACL', 'includePolicyIds']
+BOOLEAN_OPTIONS = ["includeAllowableActions", "includeACL", "includePolicyIds"]
 
 
 def get_options(args):
     d = {}
     for k in BOOLEAN_OPTIONS:
-        v = args.get(k, 'false').strip()
-        if v == 'true':
+        v = args.get(k, "false").strip()
+        if v == "true":
             v = True
-        elif v in ('false', ''):
+        elif v in ("false", ""):
             v = False
         else:
             raise Exception("Unexpected parameter value for %s: %s" % (k, v))
@@ -137,7 +137,7 @@ def authenticate():
     username = request.authorization.username
     password = request.authorization.password
 
-    if (username, password) != ('admin', 'admin'):
+    if (username, password) != ("admin", "admin"):
         raise Unauthorized()
 
 
@@ -145,9 +145,9 @@ def authenticate():
 def custom_401(error):
     print("custom_401")
     return Response(
-        'Authentication required',
+        "Authentication required",
         401,
-        {'WWWAuthenticate': 'Basic realm="Login Required"'},
+        {"WWWAuthenticate": 'Basic realm="Login Required"'},
     )
 
 
@@ -167,7 +167,7 @@ def getRepositoryInfo():
     log.debug("repositoryInfo called")
 
     root_folder = repository.root_folder
-    ctx = {'ROOT': ROOT, 'root_folder': root_folder}
+    ctx = {"ROOT": ROOT, "root_folder": root_folder}
 
     result = render_template("cmis/service.xml", **ctx)
     response = Response(result, mimetype=MIME_TYPE_ATOM_SERVICE)
@@ -186,7 +186,7 @@ def getTypeChildren():
     return Response(result, mimetype=MIME_TYPE_ATOM_FEED)
 
 
-@route("/types", methods=['POST'])
+@route("/types", methods=["POST"])
 def createType():
     log.debug("createType called")
     raise NotImplementedError()
@@ -197,8 +197,8 @@ def createType():
 #
 @route("/entry")
 def getObject():
-    id = request.args.get('id')
-    path = request.args.get('path')
+    id = request.args.get("id")
+    path = request.args.get("path")
 
     log.debug("getObject called on id=%s, path=%s" % (id, path))
     log.debug("URL: " + request.url)
@@ -219,11 +219,11 @@ def getObject():
     return Response(result, mimetype=MIME_TYPE_ATOM_ENTRY)
 
 
-@route("/entry", methods=['PUT'])
+@route("/entry", methods=["PUT"])
 def updateProperties():
-    id = request.args.get('id')
+    id = request.args.get("id")
     if not id:
-        path = request.args.get('path')
+        path = request.args.get("path")
     else:
         path = ""
     log.debug("updateProperties called on id=%s, path=%s" % (id, path))
@@ -233,11 +233,11 @@ def updateProperties():
     return Response(to_xml(object), mimetype=MIME_TYPE_ATOM_ENTRY)
 
 
-@route("/entry", methods=['DELETE'])
+@route("/entry", methods=["DELETE"])
 def deleteObject():
-    id = request.args.get('id')
+    id = request.args.get("id")
     if not id:
-        path = request.args.get('path')
+        path = request.args.get("path")
     else:
         path = ""
     log.debug("deleteObject called on id=%s, path=%s" % (id, path))
@@ -265,7 +265,7 @@ def deleteObject():
 #
 @route("/content")
 def getContentStream():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("getContentStream called on " + id)
 
     document = get_document(id)
@@ -273,9 +273,9 @@ def getContentStream():
 
 
 # setContentStream + appendContentStream
-@route("/content", methods=['PUT'])
+@route("/content", methods=["PUT"])
 def setContentStream():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("setContentStream called on " + id)
 
     document = get_document(id)
@@ -291,9 +291,9 @@ def setContentStream():
         return ("", 204, {})
 
 
-@route("/content", methods=['DELETE'])
+@route("/content", methods=["DELETE"])
 def deleteContentStream():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("deleteContentStream called on " + id)
 
     document = get_document(id)
@@ -308,11 +308,11 @@ def deleteContentStream():
 #
 @route("/allowableactions")
 def getAllowableActions():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("getAllowableActions called on " + id)
 
     object = get_object(id)
-    args = {'ROOT': ROOT, 'object': object}
+    args = {"ROOT": ROOT, "object": object}
     result = render_template("cmis/allowableactions.xml", **args)
     return Response(result, mimetype=MIME_TYPE_CMIS_ALLOWABLE_ACTIONS)
 
@@ -322,16 +322,16 @@ def getAllowableActions():
 #
 @route("/type")
 def getTypeDefinition():
-    type_id = request.args.get('id')
+    type_id = request.args.get("id")
     log.debug("getTypeDefinition called on " + type_id)
 
-    if type_id == 'cmis:document':
+    if type_id == "cmis:document":
         result = render_template("cmis/type-document.xml", ROOT=ROOT)
-    elif type_id == 'cmis:folder':
+    elif type_id == "cmis:folder":
         result = render_template("cmis/type-folder.xml", ROOT=ROOT)
-    elif type_id == 'cmis:relationship':
+    elif type_id == "cmis:relationship":
         result = render_template("cmis/type-relationship.xml", ROOT=ROOT)
-    elif type_id == 'cmis:policy':
+    elif type_id == "cmis:policy":
         result = render_template("cmis/type-policy.xml", ROOT=ROOT)
     else:
         raise NotImplementedError()
@@ -339,12 +339,12 @@ def getTypeDefinition():
     return Response(result, mimetype=MIME_TYPE_ATOM_ENTRY)
 
 
-@route("/type", methods=['POST'])
+@route("/type", methods=["POST"])
 def updateType():
     raise NotImplementedError()
 
 
-@route("/type", methods=['DELETE'])
+@route("/type", methods=["DELETE"])
 def deleteType():
     raise NotImplementedError()
 
@@ -356,21 +356,21 @@ def deleteType():
 #
 @route("/children")
 def getChildren():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("getChildren called on " + id)
     log.debug("URL: " + request.url)
 
     folder = get_folder(id)
 
-    args = {'ROOT': ROOT, 'folder': folder, 'to_xml': to_xml}
+    args = {"ROOT": ROOT, "folder": folder, "to_xml": to_xml}
     result = render_template("cmis/children.xml", **args)
     log_result(result)
     return Response(result, mimetype=MIME_TYPE_ATOM_ENTRY)
 
 
-@route("/children", methods=['POST'])
+@route("/children", methods=["POST"])
 def createObject():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("createObject called on " + id)
     log.debug("URL: " + request.url)
 
@@ -383,11 +383,11 @@ def createObject():
     name = entry.name
     type = entry.type
 
-    if type == 'cmis:folder':
+    if type == "cmis:folder":
         new_object = folder.create_subfolder(name)
         db.session.commit()
 
-    elif type == 'cmis:document':
+    elif type == "cmis:document":
         new_object = folder.create_document(name)
         if entry.content:
             new_object.content = entry.content
@@ -424,7 +424,7 @@ def createObject():
 @route("/parents")
 def getObjectParents():
     """Object Parents Feed (GET)."""
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("getObjectParents called on " + id)
 
     object = get_object(id)
@@ -446,15 +446,15 @@ def getContentChanges():
 # Folder Descendants Feed (GET, DELETE)
 @route("/descendants")
 def getDescendants():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("getObjectParents called on " + id)
     raise NotImplementedError()
 
 
-@route("/descendants", methods=['DELETE'])
-@route("/foldertree", methods=['DELETE'])
+@route("/descendants", methods=["DELETE"])
+@route("/foldertree", methods=["DELETE"])
 def deleteTree():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("deleteTree called on " + id)
 
     object = get_object(id)
@@ -467,7 +467,7 @@ def deleteTree():
 # Folder Tree Feed (GET, DELETE: see above)
 @route("/foldertree")
 def getFolderTree():
-    id = request.args.get('id')
+    id = request.args.get("id")
     log.debug("getFolderTree called on " + id)
     raise NotImplementedError()
 
@@ -480,7 +480,7 @@ def getAllVersions():
 # Type Descendants Feed (GET)
 @route("/typedesc")
 def getTypeDescendants():
-    type_id = request.args.get('typeId')
+    type_id = request.args.get("typeId")
     log.debug("getTypeDescendants called on " + type_id)
 
     feed = Feed({}, [])
@@ -491,8 +491,8 @@ def getTypeDescendants():
 #
 # Query Collection
 #
-@route("/query", methods=['POST'])
+@route("/query", methods=["POST"])
 def query():
-    q = request.form.get('q')
+    q = request.form.get("q")
     log.debug("query called: " + q)
     raise NotImplementedError()

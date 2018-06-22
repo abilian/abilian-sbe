@@ -34,44 +34,37 @@ from ..communities.views import default_view_kw as community_dv_kw
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
-wiki = Blueprint(
-    "wiki",
-    __name__,
-    url_prefix="/wiki",
-    template_folder="templates",
-)
+wiki = Blueprint("wiki", __name__, url_prefix="/wiki", template_folder="templates")
 route = wiki.route
 
 
 @wiki.url_value_preprocessor
 def init_wiki_values(endpoint, values):
-    g.current_tab = 'wiki'
+    g.current_tab = "wiki"
 
-    endpoint = Endpoint('wiki.index', community_id=g.community.slug)
-    g.breadcrumb.append(BreadcrumbItem(label=_l('Wiki'), url=endpoint))
+    endpoint = Endpoint("wiki.index", community_id=g.community.slug)
+    g.breadcrumb.append(BreadcrumbItem(label=_l("Wiki"), url=endpoint))
 
-    title = request.args.get('title', '').strip()
-    if title and title != 'Home':
-        url = Endpoint('wiki.page', community_id=g.community.slug, title=title)
+    title = request.args.get("title", "").strip()
+    if title and title != "Home":
+        url = Endpoint("wiki.page", community_id=g.community.slug, title=title)
         g.breadcrumb.append(BreadcrumbItem(label=title, url=url))
 
 
-@route('/')
+@route("/")
 def index():
-    return redirect(
-        url_for(".page", title='Home', community_id=g.community.slug),
-    )
+    return redirect(url_for(".page", title="Home", community_id=g.community.slug))
 
 
 def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
     kw = community_dv_kw(kw, obj, obj_type, obj_id, **kwargs)
-    title = kwargs.get('title')
+    title = kwargs.get("title")
     if title is None:
         if isinstance(obj, (Hit, dict)):
-            title = obj.get('name')
+            title = obj.get("name")
         else:
             title = obj.title
-        kw['title'] = title
+        kw["title"] = title
     return kw
 
 
@@ -80,13 +73,13 @@ def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
 #
 class BasePageView(object):
     Model = WikiPage
-    pk = 'title'
+    pk = "title"
     Form = WikiPageForm
-    base_template = 'wiki/_base.html'
+    base_template = "wiki/_base.html"
 
     @property
     def is_home_page(self):
-        return self.obj is not None and self.obj.title == 'Home'
+        return self.obj is not None and self.obj.title == "Home"
 
     @property
     def template_kwargs(self):
@@ -96,17 +89,17 @@ class BasePageView(object):
         `form` cannot be overriden.
         """
         kw = super(BasePageView, self).template_kwargs
-        kw['page'] = self.obj
-        kw['viewers'] = object_viewers(self.obj)
+        kw["page"] = self.obj
+        kw["viewers"] = object_viewers(self.obj)
         return kw
 
     def init_object(self, args, kwargs):
-        title = kwargs['title'] = request.args['title'].strip()
+        title = kwargs["title"] = request.args["title"].strip()
         if title:
             try:
                 self.obj = get_page_by_title(title)
             except NoResultFound:
-                if title == 'Home':
+                if title == "Home":
                     self.obj = create_home_page()
                 else:
                     flash(
@@ -114,12 +107,10 @@ class BasePageView(object):
                         "warning",
                     )
                     url = url_for(
-                        ".page_new",
-                        title=title,
-                        community_id=g.community.slug,
+                        ".page_new", title=title, community_id=g.community.slug
                     )
                     self.redirect(url)
-            actions.context['object'] = self.obj
+            actions.context["object"] = self.obj
         return args, kwargs
 
     def index_url(self):
@@ -127,52 +118,41 @@ class BasePageView(object):
 
     def view_url(self):
         return url_for(
-            self.view_endpoint,
-            community_id=g.community.slug,
-            title=self.obj.title,
+            self.view_endpoint, community_id=g.community.slug, title=self.obj.title
         )
 
 
 class PageView(BasePageView, ObjectView):
-    template = 'wiki/page.html'
-    view_endpoint = '.page'
+    template = "wiki/page.html"
+    view_endpoint = ".page"
     decorators = [
-        default_view(
-            wiki,
-            WikiPage,
-            id_attr=None,
-            kw_func=wiki_page_default_view_kw,
-        ),
+        default_view(wiki, WikiPage, id_attr=None, kw_func=wiki_page_default_view_kw)
     ]
 
     def init_object(self, args, kwargs):
         args, kwargs = BasePageView.init_object(self, args, kwargs)
         if not self.obj:
-            title = kwargs['title']
-            if title == 'Home':
+            title = kwargs["title"]
+            if title == "Home":
                 self.obj = create_home_page()
             else:
-                url = url_for(
-                    ".page_edit",
-                    title=title,
-                    community_id=g.community.slug,
-                )
+                url = url_for(".page_edit", title=title, community_id=g.community.slug)
                 return redirect(url)
 
-        actions.context['object'] = self.obj
+        actions.context["object"] = self.obj
         viewtracker.record_hit(entity=self.obj, user=current_user)
         return args, kwargs
 
 
-route('/page/')(PageView.as_view('page'))
+route("/page/")(PageView.as_view("page"))
 
 
 class PageViewers(PageView):
 
-    template = 'wiki/page_readers.html'
+    template = "wiki/page_readers.html"
 
 
-route('/viewers')(PageViewers.as_view('page_viewers'))
+route("/viewers")(PageViewers.as_view("page_viewers"))
 
 
 class PageEdit(BasePageView, ObjectEdit):
@@ -182,38 +162,36 @@ class PageEdit(BasePageView, ObjectEdit):
     _message_success = _l("Wiki page successfully edited.")
 
     def init_object(self, args, kwargs):
-        if request.method != 'POST':
+        if request.method != "POST":
             return super(PageEdit, self).init_object(args, kwargs)
 
-        page_id = request.form.get('page_id') or None
+        page_id = request.form.get("page_id") or None
         if page_id is not None:
             page_id = int(page_id)
             self.obj = WikiPage.query.get_or_404(page_id)
-            actions.context['object'] = self.obj
+            actions.context["object"] = self.obj
 
         return args, kwargs
 
     def get_form_kwargs(self):
         kwargs = ObjectEdit.get_form_kwargs(self)
-        kwargs['page_id'] = kwargs['last_revision_id'] = None
+        kwargs["page_id"] = kwargs["last_revision_id"] = None
         if self.obj is not None and self.obj.id:
             # if no 'id', then it's a new object (PageCreate). We shouldn't call
             # obj.last_revision, since it will issue a flush (thus creating obj and
             # the 1st revision, resulting in an "edit conflict")
-            kwargs['page_id'] = self.obj.id
-            kwargs['last_revision_id'] = self.obj.last_revision.id
+            kwargs["page_id"] = self.obj.id
+            kwargs["last_revision_id"] = self.obj.last_revision.id
         return kwargs
 
     def prepare_args(self, args, kwargs):
         super(PageEdit, self).prepare_args(args, kwargs)
         last_revision_id = self.form.last_revision_id.data
         if last_revision_id:
-            self.last_revision = WikiPageRevision.query \
-                .filter(
-                    WikiPageRevision.page == self.obj,
-                    WikiPageRevision.id == last_revision_id,
-                ) \
-                .first()
+            self.last_revision = WikiPageRevision.query.filter(
+                WikiPageRevision.page == self.obj,
+                WikiPageRevision.id == last_revision_id,
+            ).first()
         return args, kwargs
 
     def before_populate_obj(self):
@@ -232,7 +210,7 @@ class PageEdit(BasePageView, ObjectEdit):
         return self.obj.community
 
     def form_invalid(self):
-        is_conflict = self.form.errors.pop('last_revision_id', None)
+        is_conflict = self.form.errors.pop("last_revision_id", None)
         if not self.form.errors and is_conflict is not None:
             # no other error on form, just edit conflict: show new text
             self.form.last_revision_id.errors = []
@@ -241,44 +219,41 @@ class PageEdit(BasePageView, ObjectEdit):
             self.form.last_revision_id.data = current.id  # update edited revision
             self.redirect_if_no_change()  # same edition? don't bother
 
-            if (
-                self.last_revision.body_src == current.body_src
-                and self.form.validate()
-            ):
+            if self.last_revision.body_src == current.body_src and self.form.validate():
                 # only title change? cannot show diff: save if valid
                 return self.form_valid()
             else:
                 edited_src = field.data
                 field.data = current.body_src
                 edited_diff = [
-                    l for l in difflib.ndiff(
+                    l
+                    for l in difflib.ndiff(
                         self.last_revision.body_src.splitlines(True),
                         edited_src.splitlines(True),
-                    ) if not l[0] == '?'
+                    )
+                    if not l[0] == "?"
                 ]
                 current_diff = [
-                    l for l in difflib.ndiff(
+                    l
+                    for l in difflib.ndiff(
                         self.last_revision.body_src.splitlines(True),
                         current.body_src.splitlines(True),
-                    ) if not l[0] == '?'
+                    )
+                    if not l[0] == "?"
                 ]
                 ctx = {
-                    'current': current,
-                    'current_diff': current_diff,
-                    'edited_diff': edited_diff,
+                    "current": current,
+                    "current_diff": current_diff,
+                    "edited_diff": edited_diff,
                 }
                 field.errors.append(
-                    Markup(
-                        render_template(
-                            'wiki/edit_conflict_error.html', **ctx
-                        ),
-                    ),
+                    Markup(render_template("wiki/edit_conflict_error.html", **ctx))
                 )
 
         return None
 
 
-route('/edit')(PageEdit.as_view('page_edit', view_endpoint='.page'))
+route("/edit")(PageEdit.as_view("page_edit", view_endpoint=".page"))
 
 
 class PageCreate(PageEdit, ObjectCreate):
@@ -298,26 +273,26 @@ class PageCreate(PageEdit, ObjectCreate):
         return args, kwargs
 
 
-route('/new')(PageCreate.as_view('page_new', view_endpoint='.page'))
+route("/new")(PageCreate.as_view("page_new", view_endpoint=".page"))
 
 
-@route('/source/')
+@route("/source/")
 def page_source():
-    title = request.args['title'].strip()
+    title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
     except NoResultFound:
         return redirect(
-            url_for(".page_edit", title=title, community_id=g.community.slug),
+            url_for(".page_edit", title=title, community_id=g.community.slug)
         )
 
-    actions.context['object'] = page
-    return render_template('wiki/source.html', page=page)
+    actions.context["object"] = page
+    return render_template("wiki/source.html", page=page)
 
 
-@route('/changes/')
+@route("/changes/")
 def page_changes():
-    title = request.args['title'].strip()
+    title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
     except NoResultFound:
@@ -325,18 +300,18 @@ def page_changes():
         return redirect(url)
     revisions = page.revisions
     revisions = sorted(revisions, key=lambda x: -x.number)
-    actions.context['object'] = page
-    return render_template('wiki/changes.html', page=page, revisions=revisions)
+    actions.context["object"] = page
+    return render_template("wiki/changes.html", page=page, revisions=revisions)
 
 
-@route('/compare/')
+@route("/compare/")
 def page_compare():
-    title = request.args['title'].strip()
+    title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
     except NoResultFound:
         return redirect(
-            url_for(".page_edit", title=title, community_id=g.community.slug),
+            url_for(".page_edit", title=title, community_id=g.community.slug)
         )
     revisions = page.revisions
     revisions = sorted(revisions, key=lambda x: x.number)
@@ -346,11 +321,7 @@ def page_compare():
             revs_to_compare.append(int(arg[3:]))
     if len(revs_to_compare) != 2:
         flash(_("You must check exactly 2 revisions."), "error")
-        url = url_for(
-            ".page_changes",
-            title=title,
-            community_id=g.community.slug,
-        )
+        url = url_for(".page_changes", title=title, community_id=g.community.slug)
         return redirect(url)
 
     revs_to_compare.sort()
@@ -366,19 +337,14 @@ def page_compare():
     diff = differ.compare(from_lines, to_lines)
     diff = [line for line in diff if not line.startswith("?")]
 
-    actions.context['object'] = page
-    ctx = {
-        'page': page,
-        'diff': diff,
-        'rev1': from_rev,
-        'rev2': to_rev,
-    }
-    return render_template('wiki/compare.html', **ctx)
+    actions.context["object"] = page
+    ctx = {"page": page, "diff": diff, "rev1": from_rev, "rev2": to_rev}
+    return render_template("wiki/compare.html", **ctx)
 
 
-@route('/delete/', methods=["POST"])
+@route("/delete/", methods=["POST"])
 def page_delete():
-    title = request.form['title'].strip()
+    title = request.form["title"].strip()
     try:
         page = get_page_by_title(title)
     except NoResultFound:
@@ -389,23 +355,17 @@ def page_delete():
 
     app = current_app._get_current_object()
     community = g.community._model
-    activity.send(
-        app,
-        actor=g.user,
-        verb="delete",
-        object=page,
-        target=community,
-    )
+    activity.send(app, actor=g.user, verb="delete", object=page, target=community)
 
     db.session.commit()
     flash(_("Page %(title)s deleted.", title=title))
     return redirect(url_for(".index", community_id=g.community.slug))
 
 
-@route('/attachments')
+@route("/attachments")
 def attachment_download():
-    title = request.args['title'].strip()
-    attachment_id = int(request.args['attachment'])
+    title = request.args["title"].strip()
+    attachment_id = int(request.args["attachment"])
     try:
         page = get_page_by_title(title)
     except NoResultFound:
@@ -416,33 +376,31 @@ def attachment_download():
     assert attachment.wikipage is page
 
     response = make_response(attachment.content)
-    response.headers['content-length'] = attachment.content_length
-    response.headers['content-type'] = attachment.content_type
-    content_disposition = (
-        'attachment;filename="{}"'.format(
-            quote(attachment.name.encode('utf8')),
-        )
+    response.headers["content-length"] = attachment.content_length
+    response.headers["content-type"] = attachment.content_type
+    content_disposition = 'attachment;filename="{}"'.format(
+        quote(attachment.name.encode("utf8"))
     )
-    response.headers['content-disposition'] = content_disposition
+    response.headers["content-disposition"] = content_disposition
     return response
 
 
-@route('/attachments', methods=['POST'])
+@route("/attachments", methods=["POST"])
 @csrf.protect
 def attachment_upload():
-    title = request.args['title'].strip()
+    title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
     except NoResultFound:
         raise NotFound()
 
-    files = request.files.getlist('attachments')
+    files = request.files.getlist("attachments")
     saved_count = 0
 
     for f in files:
         name = f.filename
         if not isinstance(name, text_type):
-            name = text_type(f.filename, encoding='utf-8', errors='ignore')
+            name = text_type(f.filename, encoding="utf-8", errors="ignore")
 
         # FIXME: do something instead of just skipping the attachement
         if not name:
@@ -466,16 +424,16 @@ def attachment_upload():
             "success",
         )
     else:
-        flash(_('No file uploaded.'))
+        flash(_("No file uploaded."))
 
     return redirect(url_for(page))
 
 
-@route('/attachments/delete', methods=['POST'])
+@route("/attachments/delete", methods=["POST"])
 @csrf.protect
 def attachment_delete():
-    title = request.args['title'].strip()
-    attachment_id = int(request.args['attachment'])
+    title = request.args["title"].strip()
+    attachment_id = int(request.args["attachment"])
     try:
         page = get_page_by_title(title)
     except NoResultFound:
@@ -485,7 +443,7 @@ def attachment_delete():
     assert attachment is not None
     assert attachment.wikipage is page
 
-    if request.form.get('action') == 'delete':
+    if request.form.get("action") == "delete":
         name = attachment.name
         db.session.delete(attachment)
         db.session.commit()
@@ -497,23 +455,24 @@ def attachment_delete():
 #
 # Wiki-level (prefixed by 'wiki_')
 #
-@route('/pages')
+@route("/pages")
 def wiki_pages():
-    pages = WikiPage.query \
-        .filter(WikiPage.community_id == g.community.id) \
-        .order_by(WikiPage.title) \
+    pages = (
+        WikiPage.query.filter(WikiPage.community_id == g.community.id)
+        .order_by(WikiPage.title)
         .all()
-    return render_template('wiki/all_pages.html', pages=pages)
+    )
+    return render_template("wiki/all_pages.html", pages=pages)
 
 
-@route('/help')
+@route("/help")
 def wiki_help():
     src = open(Path(__file__).parent / "data" / "help.txt").read()
     body = Markup(markdown(src))
-    return render_template('wiki/help.html', body=body)
+    return render_template("wiki/help.html", body=body)
 
 
-@route('/export')
+@route("/export")
 def wiki_export():
     # TODO
     return "Not done yet"
@@ -524,18 +483,15 @@ def wiki_export():
 #
 def get_page_by_title(title):
     title = title.strip()
-    page = WikiPage.query \
-        .filter(
-            WikiPage.community_id == g.community.id,
-            WikiPage.title == title,
-        ) \
-        .one()
+    page = WikiPage.query.filter(
+        WikiPage.community_id == g.community.id, WikiPage.title == title
+    ).one()
     return page
 
 
 def create_home_page():
-    path = Path(__file__).parent / 'data' / 'default_page.txt'
-    default_src = path.open('rt').read()
+    path = Path(__file__).parent / "data" / "default_page.txt"
+    default_src = path.open("rt").read()
     page = WikiPage(title="Home", body_src=default_src)
     page.community_id = g.community.id
     db.session.add(page)

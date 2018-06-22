@@ -17,16 +17,14 @@ def object_viewers(entity):
     if is_manager():
         views = viewtracker.get_views(entity=entity)
         community_members_id = [
-            user.id for user in g.community.members
-            if user.id != entity.creator.id
+            user.id for user in g.community.members if user.id != entity.creator.id
         ]
         viewers = []
         for view in views:
             if view.user_id in set(community_members_id):
-                viewers.append({
-                    'user': view.user,
-                    'viewed_at': view.hits[-1].viewed_at,
-                })
+                viewers.append(
+                    {"user": view.user, "viewed_at": view.hits[-1].viewed_at}
+                )
         return viewers
 
 
@@ -38,8 +36,12 @@ def activity_time_format(time, now=None):
         now = datetime.utcnow()
     time_delta = now - time
     month_abbreviation = format_date(time, "MMM")
-    days, hours, minutes, seconds = time_delta.days, time_delta.seconds // 3600, \
-        time_delta.seconds // 60, time_delta.seconds
+    days, hours, minutes, seconds = (
+        time_delta.days,
+        time_delta.seconds // 3600,
+        time_delta.seconds // 60,
+        time_delta.seconds,
+    )
 
     if days == 0 and hours == 0 and minutes == 0:
         return "{}{}".format(seconds, _l("s"))

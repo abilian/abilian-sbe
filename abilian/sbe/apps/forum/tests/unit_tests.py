@@ -14,15 +14,15 @@ def test_create_post():
     thread = Thread(title="Test thread")
     post = thread.create_post()
     assert post in thread.posts
-    assert post.name == 'Test thread'
+    assert post.name == "Test thread"
 
-    thread.title = 'new title'
-    assert thread.name == 'new title'
-    assert post.name == 'new title'
+    thread.title = "new title"
+    assert thread.name == "new title"
+    assert post.name == "new title"
 
 
 def test_closed_property():
-    thread = Thread(title='Test Thread')
+    thread = Thread(title="Test Thread")
     assert thread.closed is False
     thread.closed = True
     assert thread.closed is True
@@ -30,18 +30,18 @@ def test_closed_property():
     assert thread.closed is False
     thread.closed = 1
     assert thread.closed is True
-    assert thread.meta['abilian.sbe.forum']['closed'] is True
+    assert thread.meta["abilian.sbe.forum"]["closed"] is True
 
 
 def test_thread_closed_guard():
-    thread = Thread(title='Test Thread')
+    thread = Thread(title="Test Thread")
     thread.create_post()
     thread.closed = True
 
     with pytest.raises(ThreadClosedError):
         thread.create_post()
 
-    p = Post(body_html='ok')
+    p = Post(body_html="ok")
 
     with pytest.raises(ThreadClosedError):
         p.thread = thread
@@ -71,9 +71,9 @@ def test_thread_closed_guard():
 
 
 def test_change_thread_copy_name():
-    thread = Thread(title='thread 1')
-    thread2 = Thread(title='thread 2')
-    post = Post(thread=thread, body_html='post content')
+    thread = Thread(title="thread 1")
+    thread2 = Thread(title="thread 2")
+    post = Post(thread=thread, body_html="post content")
     assert post.name == thread.name
 
     post.thread = thread2
@@ -83,21 +83,21 @@ def test_change_thread_copy_name():
 def test_task_process_email():
     """Test the process_email function."""
 
-    marker = '_____Write above this line to post_____'
+    marker = "_____Write above this line to post_____"
 
-    message = get_email_message_from_file('reply.email')
+    message = get_email_message_from_file("reply.email")
     newpost = process(message, marker)[0]
     assert newpost
 
-    message = get_email_message_from_file('reply_nocharset_specified.email')
+    message = get_email_message_from_file("reply_nocharset_specified.email")
     newpost = process(message, marker)[0]
     assert newpost
 
-    message = get_email_message_from_file('reply_no_marker.email')
+    message = get_email_message_from_file("reply_no_marker.email")
     with raises(LookupError):
         process(message, marker)
 
     # dubious check
-    message = get_email_message_from_file('reply_no_textpart.email')
+    message = get_email_message_from_file("reply_no_textpart.email")
     with raises(LookupError):
         process(message, marker)

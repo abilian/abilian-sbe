@@ -12,7 +12,9 @@ def register_plugin(app):
     from . import events  # noqa
 
     from .views import communities
+
     app.register_blueprint(communities)
 
     from . import search
+
     search.init_app(app)

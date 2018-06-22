@@ -21,7 +21,7 @@ from .xml import MultiStatus, Propfind
 webdav = Blueprint("webdav", __name__, url_prefix="/webdav")
 route = webdav.route
 
-__all__ = ['webdav']
+__all__ = ["webdav"]
 
 #
 # Utils
@@ -40,17 +40,17 @@ log = Logger()
 # XXX: temporary debug info.
 @webdav.before_request
 def log_request():
-    litmus_msg = request.headers.get('X-Litmus')
+    litmus_msg = request.headers.get("X-Litmus")
     if litmus_msg:
-        print('')
-        print(78 * '#')
+        print("")
+        print(78 * "#")
         print(litmus_msg)
-        print('{} on {}'.format(request.method, request.path))
+        print("{} on {}".format(request.method, request.path))
 
 
 @webdav.before_request
 def only_admin():
-    security = get_service('security')
+    security = get_service("security")
 
     if not security.has_role(current_user, "admin"):
         raise Forbidden()
@@ -58,7 +58,7 @@ def only_admin():
 
 @webdav.after_request
 def log_response(response):
-    print('Response: {}'.format(response))
+    print("Response: {}".format(response))
     return response
 
 
@@ -91,36 +91,36 @@ def create_root_folder():
 #
 # HTTP endpoints
 #
-@route('/', methods=['OPTIONS'], defaults={'path': '/'})
-@route('/<path:path>', methods=['OPTIONS'])
+@route("/", methods=["OPTIONS"], defaults={"path": "/"})
+@route("/<path:path>", methods=["OPTIONS"])
 def options(path):
     headers = {
-        'Content-Type': 'text/plain',
-        'Content-Length': '0',
-        'DAV': '1,2',
-        'MS-Author-Via': 'DAV',
-        'Allow': OPTIONS,
+        "Content-Type": "text/plain",
+        "Content-Length": "0",
+        "DAV": "1,2",
+        "MS-Author-Via": "DAV",
+        "Allow": OPTIONS,
     }
     print("Returning", headers)
     return "", HTTP_OK, headers
 
 
-@route('/', defaults={'path': '/'})
-@route('/<path:path>')
+@route("/", defaults={"path": "/"})
+@route("/<path:path>")
 def get(path):
     path = normpath(path)
 
     obj = get_object(path)
 
-    file_name = obj.file_name.encode('utf8')
+    file_name = obj.file_name.encode("utf8")
     headers = {
-        'Content-Type': obj.content_type,
-        'Content-Disposition': 'attachment;filename=%s' % file_name,
+        "Content-Type": obj.content_type,
+        "Content-Disposition": "attachment;filename=%s" % file_name,
     }
     return obj.content, HTTP_OK, headers
 
 
-@route('/<path:path>', methods=['MKCOL'])
+@route("/<path:path>", methods=["MKCOL"])
 def mkcol(path):
     path = normpath(path)
     parent_path, name = split_path(path)
@@ -141,7 +141,7 @@ def mkcol(path):
     return "", HTTP_CREATED, {}
 
 
-@route('/<path:path>', methods=['PUT'])
+@route("/<path:path>", methods=["PUT"])
 def put(path):
     path = normpath(path)
     parent_path, name = split_path(path)
@@ -166,7 +166,7 @@ def put(path):
     return "", status, {}
 
 
-@route('/<path:path>', methods=['DELETE'])
+@route("/<path:path>", methods=["DELETE"])
 def delete(path):
     path = normpath(path)
 
@@ -177,13 +177,13 @@ def delete(path):
     return "", HTTP_NO_CONTENT, {}
 
 
-@route("/<path:path>", methods=['COPY', 'MOVE'])
+@route("/<path:path>", methods=["COPY", "MOVE"])
 def copy_or_move(path):
     path = normpath(path)
-    dest = request.headers.get('destination')
-    dest_path = normpath(dest[len(request.url_root + "webdav"):])
+    dest = request.headers.get("destination")
+    dest_path = normpath(dest[len(request.url_root + "webdav") :])
     dest_parent_path, dest_name = split_path(dest_path)
-    overwrite = request.headers.get('overwrite')
+    overwrite = request.headers.get("overwrite")
 
     orig_obj = get_object(path)
 
@@ -201,7 +201,7 @@ def copy_or_move(path):
     if dest_folder is None:
         return "", HTTP_CONFLICT, {}
 
-    if request.method == 'COPY':
+    if request.method == "COPY":
         repository.copy_object(orig_obj, dest_folder, dest_name)
     else:
         if dest_folder == orig_obj.parent:
@@ -213,11 +213,11 @@ def copy_or_move(path):
     return "", status, {}
 
 
-@route('/', defaults={'path': '/'}, methods=['PROPFIND'])
-@route('/<path:path>', methods=['PROPFIND'])
+@route("/", defaults={"path": "/"}, methods=["PROPFIND"])
+@route("/<path:path>", methods=["PROPFIND"])
 def propfind(path):
     path = normpath(path)
-    depth = request.headers.get('depth', "1")
+    depth = request.headers.get("depth", "1")
 
     print(request.headers)
     print(request.data)
@@ -234,19 +234,15 @@ def propfind(path):
 
     if depth == "1" and obj.is_folder:
         for child in obj.children:
-            m.add_response_for(
-                request.url + "/" + child.name,
-                child,
-                DAV_PROPS,
-            )
+            m.add_response_for(request.url + "/" + child.name, child, DAV_PROPS)
 
     print(m.to_string())
 
-    headers = {'Content-Type': 'text/xml'}
+    headers = {"Content-Type": "text/xml"}
     return m.to_string(), HTTP_MULTI_STATUS, headers
 
 
-@route('/<path:path>', methods=['LOCK'])
+@route("/<path:path>", methods=["LOCK"])
 def lock(path):
     path = normpath(path)
     obj = get_object(path)
@@ -261,7 +257,8 @@ def lock(path):
 
     token = repository.lock(obj)
 
-    xml = '''<?xml version="1.0" encoding="utf-8" ?>
+    xml = (
+        """<?xml version="1.0" encoding="utf-8" ?>
 <D:prop xmlns:D="DAV:">
     <D:lockdiscovery>
         <D:activelock>
@@ -275,20 +272,13 @@ def lock(path):
             </D:locktoken>
         </D:activelock>
     </D:lockdiscovery>
-</D:prop>''' % token
+</D:prop>"""
+        % token
+    )
 
-    hlist = [
-        ('Content-Type', 'text/xml'),
-        (
-            'Lock-Token',
-            '<urn:uuid:%s>' % token,
-        ),
-    ]
+    hlist = [("Content-Type", "text/xml"), ("Lock-Token", "<urn:uuid:%s>" % token)]
 
-    return Response(
-        xml,
-        headers=Headers.linked(hlist),
-    )  # , status ='423 Locked'
+    return Response(xml, headers=Headers.linked(hlist))  # , status ='423 Locked'
     """
     public Response lock(@Context UriInfo uriInfo) throws Exception {
         String token = null;
@@ -321,7 +311,7 @@ def lock(path):
   """
 
 
-@route('/<path:path>', methods=['UNLOCK'])
+@route("/<path:path>", methods=["UNLOCK"])
 def unlock(path):
     path = normpath(path)
     obj = get_object(path)

@@ -13,28 +13,24 @@ from .models import Membership
 
 logger = logging.getLogger(__name__)
 
-_COMMUNITY_CONTENT_FIELDNAME = 'is_community_content'
+_COMMUNITY_CONTENT_FIELDNAME = "is_community_content"
 _COMMUNITY_CONTENT_FIELD = wf.BOOLEAN()
 
 _COMMUNITY_ID_FIELD = wf.NUMERIC(
-    numtype=int,
-    bits=64,
-    signed=False,
-    stored=True,
-    unique=False,
+    numtype=int, bits=64, signed=False, stored=True, unique=False
 )
 _COMMUNITY_SLUG_FIELD = wf.ID(stored=True)
 
 _FIELDS = [
     (_COMMUNITY_CONTENT_FIELDNAME, _COMMUNITY_CONTENT_FIELD),
-    ('community_id', _COMMUNITY_ID_FIELD),
-    ('community_slug', _COMMUNITY_SLUG_FIELD),
+    ("community_id", _COMMUNITY_ID_FIELD),
+    ("community_slug", _COMMUNITY_SLUG_FIELD),
 ]
 
 
 def init_app(app):
     """Add community fields to indexing service schema."""
-    indexing = app.services['indexing']
+    indexing = app.services["indexing"]
     indexing.register_search_filter(filter_user_communities)
     indexing.register_value_provider(mark_non_community_content)
 
@@ -44,7 +40,7 @@ def init_app(app):
                 if schema[fieldname] is not field:
                     logger.warning(
                         'Field "%s" already in schema %r, replacing with '
-                        'expected fieldtype instance',
+                        "expected fieldtype instance",
                         fieldname,
                         schema,
                     )
@@ -62,17 +58,17 @@ def filter_user_communities():
     filter_q = wq.Term(_COMMUNITY_CONTENT_FIELDNAME, False)
 
     if not current_user.is_anonymous:
-        ids = Membership.query \
-            .filter(Membership.user == current_user) \
-            .order_by(Membership.community_id.asc()) \
+        ids = (
+            Membership.query.filter(Membership.user == current_user)
+            .order_by(Membership.community_id.asc())
             .values(Membership.community_id)
-        communities = [wq.Term('community_id', i[0]) for i in ids]
+        )
+        communities = [wq.Term("community_id", i[0]) for i in ids]
 
         if communities:
-            communities = wq.And([
-                wq.Term(_COMMUNITY_CONTENT_FIELDNAME, True),
-                wq.Or(communities),
-            ])
+            communities = wq.And(
+                [wq.Term(_COMMUNITY_CONTENT_FIELDNAME, True), wq.Or(communities)]
+            )
             filter_q = wq.Or([filter_q, communities])
 
     return filter_q
@@ -80,7 +76,8 @@ def filter_user_communities():
 
 def mark_non_community_content(document, obj):
     if _COMMUNITY_CONTENT_FIELDNAME not in document:
-        document[_COMMUNITY_CONTENT_FIELDNAME] = \
-            getattr(obj, _COMMUNITY_CONTENT_FIELDNAME, False)
+        document[_COMMUNITY_CONTENT_FIELDNAME] = getattr(
+            obj, _COMMUNITY_CONTENT_FIELDNAME, False
+        )
 
     return document

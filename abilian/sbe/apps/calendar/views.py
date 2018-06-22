@@ -16,20 +16,14 @@ from .forms import EventForm
 from .models import Event
 
 blueprint = Blueprint(
-    "calendar",
-    __name__,
-    url_prefix="/calendar",
-    template_folder="templates",
+    "calendar", __name__, url_prefix="/calendar", template_folder="templates"
 )
 route = blueprint.route
 
 
-@route('/')
+@route("/")
 def index():
-    events = Event.query \
-        .filter(Event.end > datetime.now()) \
-        .order_by(Event.start) \
-        .all()
+    events = Event.query.filter(Event.end > datetime.now()).order_by(Event.start).all()
 
     def get_month(event):
         year = event.start.year
@@ -37,16 +31,17 @@ def index():
         return date(year, month, 1)
 
     groups = sorted(groupby(get_month, events).items())
-    ctx = {'groups': groups}
-    return render_template('calendar/index.html', **ctx)
+    ctx = {"groups": groups}
+    return render_template("calendar/index.html", **ctx)
 
 
-@route('/archives/')
+@route("/archives/")
 def archives():
-    events = Event.query \
-        .filter(Event.end <= datetime.now()) \
-        .order_by(Event.start.desc()) \
+    events = (
+        Event.query.filter(Event.end <= datetime.now())
+        .order_by(Event.start.desc())
         .all()
+    )
 
     def get_month(event):
         year = event.start.year
@@ -54,15 +49,15 @@ def archives():
         return date(year, month, 1)
 
     groups = sorted(groupby(get_month, events).items(), reverse=True)
-    ctx = {'groups': groups}
-    return render_template('calendar/archives.html', **ctx)
+    ctx = {"groups": groups}
+    return render_template("calendar/archives.html", **ctx)
 
 
 class BaseEventView(object):
     Model = Event
     Form = EventForm
-    pk = 'event_id'
-    base_template = 'community/_base.html'
+    pk = "event_id"
+    base_template = "community/_base.html"
 
     def index_url(self):
         return url_for(".index", community_id=g.community.slug)
@@ -72,33 +67,25 @@ class BaseEventView(object):
 
 
 class EventView(BaseEventView, views.ObjectView):
-    methods = ['GET', 'HEAD']
+    methods = ["GET", "HEAD"]
     Form = EventForm
-    template = 'calendar/event.html'
+    template = "calendar/event.html"
 
     @property
     def template_kwargs(self):
         kw = super(EventView, self).template_kwargs
-        kw['event'] = self.obj
+        kw["event"] = self.obj
         return kw
 
 
-event_view = EventView.as_view('event')
-views.default_view(
-    blueprint,
-    Event,
-    'event_id',
-    kw_func=default_view_kw,
-)(event_view)
-route('/<int:event_id>/')(event_view)
+event_view = EventView.as_view("event")
+views.default_view(blueprint, Event, "event_id", kw_func=default_view_kw)(event_view)
+route("/<int:event_id>/")(event_view)
 
 
 class EventCreateView(BaseEventView, views.ObjectCreate):
     POST_BUTTON = ButtonAction(
-        'form',
-        'create',
-        btn_class='primary',
-        title=_l('Post this event'),
+        "form", "create", btn_class="primary", title=_l("Post this event")
     )
 
     title = _l("New event")
@@ -115,23 +102,17 @@ class EventCreateView(BaseEventView, views.ObjectCreate):
         return self.obj.community
 
 
-event_create_view = EventCreateView.as_view(
-    'new_event',
-    view_endpoint='.event',
-)
-route('/new_event/')(event_create_view)
+event_create_view = EventCreateView.as_view("new_event", view_endpoint=".event")
+route("/new_event/")(event_create_view)
 
 
 class EventEditView(BaseEventView, views.ObjectEdit):
     POST_BUTTON = ButtonAction(
-        'form',
-        'create',
-        btn_class='primary',
-        title=_l('Post this event'),
+        "form", "create", btn_class="primary", title=_l("Post this event")
     )
 
     title = _l("Edit event")
 
 
-event_edit_view = EventEditView.as_view('event_edit', view_endpoint='.event')
-route('/<int:event_id>/edit')(event_edit_view)
+event_edit_view = EventEditView.as_view("event_edit", view_endpoint=".event")
+route("/<int:event_id>/edit")(event_edit_view)

@@ -29,7 +29,7 @@ from .extension import sbe
 
 # Used for side effects, do not remove
 
-__all__ = ['create_app', 'db']
+__all__ = ["create_app", "db"]
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ setup_abilian_commands(command_manager)
 
 # loader to be used by celery workers
 class CeleryLoader(CeleryBaseLoader):
-    flask_app_factory = 'abilian.sbe.app.create_app'
+    flask_app_factory = "abilian.sbe.app.create_app"
 
 
 celery = BaseCelery(loader=CeleryLoader)
@@ -68,9 +68,9 @@ class Application(BaseApplication):
 
     script_manager = command_manager
 
-    def __init__(self, name='abilian_sbe', config=None, **kwargs):
+    def __init__(self, name="abilian_sbe", config=None, **kwargs):
         BaseApplication.__init__(self, name, config=config, **kwargs)
-        loader = jinja2.PackageLoader('abilian.sbe', 'templates')
+        loader = jinja2.PackageLoader("abilian.sbe", "templates")
         self.register_jinja_loaders(loader)
 
     def init_extensions(self):
@@ -81,7 +81,7 @@ class Application(BaseApplication):
 
 
 # SBE demo app bootstrap stuff
-_SBE_DEMO_SCRIPT = '''\
+_SBE_DEMO_SCRIPT = """\
 #!{BIN_DIR}/python
 from __future__ import absolute_import
 
@@ -89,7 +89,7 @@ import sys
 from abilian.sbe.app import command_entry_point
 
 sys.exit(command_entry_point())
-'''
+"""
 
 _BASE_SERVER_ACTIVATE = BaseWSGIServer.server_activate
 
@@ -100,10 +100,10 @@ def _on_http_server_activate(self, *args, **kwargs):
     _BASE_SERVER_ACTIVATE(self)
     # now we are listening to socket
     host, port = self.server_address
-    if host == '0.0.0.0':
+    if host == "0.0.0.0":
         # chrome is not ok with 0.0.0.0
-        host = 'localhost'
-    url = 'http://{host}:{port}/setup'.format(host=host, port=port)
+        host = "localhost"
+    url = "http://{host}:{port}/setup".format(host=host, port=port)
 
     if sys.platform == "win32":
         os.startfile(url)
@@ -119,51 +119,48 @@ def setup_sbe_app():
     Will create `abilian_sbe` script, run a local server and open
     browser on app's setup wizard.
     """
-    logger = logging.getLogger('sbe_demo')
+    logger = logging.getLogger("sbe_demo")
     logger.setLevel(logging.INFO)
 
-    if 'VIRTUAL_ENV' not in os.environ:
-        logger.error('Not in a virtualenv! Aborting.')
+    if "VIRTUAL_ENV" not in os.environ:
+        logger.error("Not in a virtualenv! Aborting.")
         return 1
 
-    bin_dir = Path(sys.prefix) / 'bin'
+    bin_dir = Path(sys.prefix) / "bin"
 
     if not bin_dir.exists() or not bin_dir.is_dir():
-        logger.error(
-            "%s doesn't exists or is not a directory. Aborting",
-            bin_dir,
-        )
+        logger.error("%s doesn't exists or is not a directory. Aborting", bin_dir)
         return 1
 
-    script_file = bin_dir / 'abilian_sbe'
+    script_file = bin_dir / "abilian_sbe"
     if script_file.exists():
-        logger.info('%s already exists. Skipping creation.', script_file)
+        logger.info("%s already exists. Skipping creation.", script_file)
     else:
-        with script_file.open('w') as out:
+        with script_file.open("w") as out:
             logger.info('Create script: "%s".', script_file)
             content = _SBE_DEMO_SCRIPT.format(BIN_DIR=bin_dir)
             out.write(content)
         script_file.chmod(0o755)  # 0755: -rwxr-xr-x
 
-    current_app.config['PRODUCTION'] = True
-    current_app.config['DEBUG'] = False
-    current_app.config['ASSETS_DEBUG'] = False
-    current_app.config['SITE_NAME'] = 'Abilian SBE'
-    current_app.config['MAIL_SENDER'] = 'abilian-sbe-app@example.com'
+    current_app.config["PRODUCTION"] = True
+    current_app.config["DEBUG"] = False
+    current_app.config["ASSETS_DEBUG"] = False
+    current_app.config["SITE_NAME"] = "Abilian SBE"
+    current_app.config["MAIL_SENDER"] = "abilian-sbe-app@example.com"
 
-    logger.info('Prepare CSS & JS files')
-    command_manager.handle('abilian_sbe', ['assets', 'build'])
+    logger.info("Prepare CSS & JS files")
+    command_manager.handle("abilian_sbe", ["assets", "build"])
     # disabled init config: only if not running setupwizard
     # command_manager.handle('abilian_sbe', ['config', 'init'])
 
     # patch server used to launch browser here immediately after socket opened
     BaseWSGIServer.server_activate = _on_http_server_activate
-    return command_manager.handle('abilian_sbe', ['run', '--hide-config'])
+    return command_manager.handle("abilian_sbe", ["run", "--hide-config"])
 
 
 def command_entry_point():
-    command_manager.run(commands={'setup_sbe_app': Command(setup_sbe_app)}, )
+    command_manager.run(commands={"setup_sbe_app": Command(setup_sbe_app)})
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     command_entry_point()

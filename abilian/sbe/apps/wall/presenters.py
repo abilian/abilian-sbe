@@ -22,27 +22,25 @@ logger = logging.getLogger(__name__)
 
 # Poor man's pattern matching.
 MESSAGES = {
-    ('post', Thread): _l('has started conversation "{object}"'),
-    ('post', Post): _l('has participated in conversation "{object}"'),
-    ('post', Document): _l('has published document "{object}"'),
-    ('post', WikiPage): _l('has created wiki page "{object}"'),
-    ('post', Event): _l('has published event "{object}"'),
-    ('post', Community): _l('has created communauté "{object}"'),
+    ("post", Thread): _l('has started conversation "{object}"'),
+    ("post", Post): _l('has participated in conversation "{object}"'),
+    ("post", Document): _l('has published document "{object}"'),
+    ("post", WikiPage): _l('has created wiki page "{object}"'),
+    ("post", Event): _l('has published event "{object}"'),
+    ("post", Community): _l('has created communauté "{object}"'),
     #
-    ('update', Document): _l('has updated document "{object}"'),
-    ('update', WikiPage): _l('has updated wiki page "{object}"'),
-    ('update', Community): _l('has updated community "{object}"'),
+    ("update", Document): _l('has updated document "{object}"'),
+    ("update", WikiPage): _l('has updated wiki page "{object}"'),
+    ("update", Community): _l('has updated community "{object}"'),
     #
-    ('join', Community): _l('has joined the community {object}.'),
+    ("join", Community): _l("has joined the community {object}."),
     #
-    ('leave', Community): _l('has left the community {object}.'),
+    ("leave", Community): _l("has left the community {object}."),
 }
 
-OBJ_TEMPLATE = Template(
-    '<a href="{{ object_url|safe }}">{{ object_name }}</a>',
-)
+OBJ_TEMPLATE = Template('<a href="{{ object_url|safe }}">{{ object_name }}</a>')
 
-POST_BODY_TEMPLATE = '''
+POST_BODY_TEMPLATE = """
   <span class="body">"<a href="{{ object_url |safe }}">{{ body }}</a>"
   {%- if post.attachments %}
   <div id="attachments">
@@ -61,9 +59,9 @@ POST_BODY_TEMPLATE = '''
   </div>
   {%- endif %}
   </span>
-'''
+"""
 
-DOCUMENT_BODY_TEMPLATE = '''
+DOCUMENT_BODY_TEMPLATE = """
 <div class="body">
   <div>
     <img src="{{ obj.icon }}" style="vertical-align: middle;" alt=""/>
@@ -85,7 +83,7 @@ DOCUMENT_BODY_TEMPLATE = '''
   {%- endif %}
   </div>
 </div>
-'''
+"""
 
 
 class ActivityEntryPresenter(BasePresenter):
@@ -97,65 +95,60 @@ class ActivityEntryPresenter(BasePresenter):
         try:
             # another quick&dirty approach for now. FIXME later.
             entry = self._model
-            object_class = entry.object_type.split('.')[-1]
+            object_class = entry.object_type.split(".")[-1]
             object_class_localized = _(object_class)
 
             ctx = {}
-            ctx['verb'] = entry.verb
+            ctx["verb"] = entry.verb
 
-            ctx['object_name'] = entry.object.name or getattr(
-                entry.object,
-                'title',
-                "???",
+            ctx["object_name"] = entry.object.name or getattr(
+                entry.object, "title", "???"
             )
-            ctx['object_url'] = url_for(entry.object)
-            ctx['object_type'] = object_class_localized
-            ctx['object'] = OBJ_TEMPLATE.render(**ctx)
+            ctx["object_url"] = url_for(entry.object)
+            ctx["object_type"] = object_class_localized
+            ctx["object"] = OBJ_TEMPLATE.render(**ctx)
 
             if entry.target:
-                ctx['target_name'] = entry.target.name
-                ctx['target_url'] = url_for(entry.target)
-                ctx['target'] = OBJ_TEMPLATE.render(
-                    object_name=ctx['target_name'],
-                    object_url=ctx['target_url'],
+                ctx["target_name"] = entry.target.name
+                ctx["target_url"] = url_for(entry.target)
+                ctx["target"] = OBJ_TEMPLATE.render(
+                    object_name=ctx["target_name"], object_url=ctx["target_url"]
                 )
 
             msg = MESSAGES.get((entry.verb, entry.object.__class__))
             if msg:
                 msg = msg.format(**ctx)
                 if entry.target and not ignore_community:
-                    msg += " " + _('in the community {target}.').format(**ctx)
+                    msg += " " + _("in the community {target}.").format(**ctx)
                 else:
                     msg += "."
 
-            elif entry.verb == 'post':
+            elif entry.verb == "post":
                 msg = _(
-                    'has posted an object of type {object_type} '
-                    'called "{object}"',
+                    "has posted an object of type {object_type} " 'called "{object}"'
                 ).format(**ctx)
 
                 if entry.target and not ignore_community:
-                    msg += " " + _('in the community {target}.').format(**ctx)
+                    msg += " " + _("in the community {target}.").format(**ctx)
                 else:
                     msg += "."
 
-            elif entry.verb == 'join':
-                msg = _('has joined the community {object}.').format(**ctx)
+            elif entry.verb == "join":
+                msg = _("has joined the community {object}.").format(**ctx)
 
-            elif entry.verb == 'leave':
-                msg = _('has left the community {object}.').format(**ctx)
+            elif entry.verb == "leave":
+                msg = _("has left the community {object}.").format(**ctx)
 
-            elif entry.verb == 'update':
-                msg = _('has updated {object_type} {object}.').format(**ctx)
+            elif entry.verb == "update":
+                msg = _("has updated {object_type} {object}.").format(**ctx)
 
             else:
-                msg = _('has done action "{verb}" on object "{object}".'
-                        ).format(**ctx)
+                msg = _('has done action "{verb}" on object "{object}".').format(**ctx)
 
             return Markup(msg)
 
         except BaseException:
-            logger.exception('Exception while presenting activity message')
+            logger.exception("Exception while presenting activity message")
             raise
 
     @property
@@ -176,10 +169,7 @@ def get_body_thread(object):
     if len(body) > 400:
         body = body[0:400] + "…"
     body = render_template_string(
-        POST_BODY_TEMPLATE,
-        object_url=url_for(object),
-        body=body,
-        post=object.posts[0],
+        POST_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object.posts[0]
     )
     return Markup(body)
 
@@ -192,10 +182,7 @@ def get_body_post(object):
     if len(body) > 400:
         body = body[0:400] + "…"
     body = render_template_string(
-        POST_BODY_TEMPLATE,
-        object_url=url_for(object),
-        body=body,
-        post=object,
+        POST_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object
     )
     return Markup(body)
 
@@ -208,9 +195,6 @@ def get_body_document(object):
     if len(body) > 400:
         body = body[0:400] + "…"
     body = render_template_string(
-        DOCUMENT_BODY_TEMPLATE,
-        object_url=url_for(object),
-        body=body,
-        post=object,
+        DOCUMENT_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object
     )
     return Markup(body)

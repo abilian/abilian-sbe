@@ -19,22 +19,21 @@ from werkzeug.exceptions import InternalServerError, NotFound
 
 from .social import social
 
-DEFAULT_GROUP_MUGSHOT = \
-    (
-        Path(__file__).parent / ".." / ".." / ".." /
-        "static" / "images" / "frog.jpg"
-    ).open('rb').read()
+DEFAULT_GROUP_MUGSHOT = (
+    (Path(__file__).parent / ".." / ".." / ".." / "static" / "images" / "frog.jpg")
+    .open("rb")
+    .read()
+)
 
 
 @social.route("/groups/")
 def groups():
     tab = request.args.get("tab", "all_groups")
-    if tab == 'all_groups':
+    if tab == "all_groups":
         groups = Group.query.order_by(Group.name).all()
         if not security.has_role(g.user, "admin"):
             groups = [
-                group for group in groups
-                if group.public or g.user in group.members
+                group for group in groups if group.public or g.user in group.members
             ]
     else:
         groups = g.user.groups
@@ -44,78 +43,75 @@ def groups():
 
 
 def is_admin(group):
-    security = get_service('security')
+    security = get_service("security")
     is_admin = g.user in group.admins
-    if not is_admin and 'security' in current_app.extensions:
-        is_admin = security.has_role(g.user, 'admin')
+    if not is_admin and "security" in current_app.extensions:
+        is_admin = security.has_role(g.user, "admin")
 
     return is_admin
 
 
 @social.route("/groups/<int:group_id>")
-@default_view(social, Group, 'group_id')
+@default_view(social, Group, "group_id")
 def group_home(group_id):
     group = Group.query.get(group_id)
-    ctx = {'group': group, 'is_admin': is_admin(group)}
+    ctx = {"group": group, "is_admin": is_admin(group)}
     return render_template("social/group.html", **ctx)
 
 
 @social.route("/groups/<int:group_id>/json")
 def group_json(group_id):
     members = Group.query.get(group_id).members
-    q = request.args.get("q", '').lower()
+    q = request.args.get("q", "").lower()
     if q:
         members = [
-            u for u in members if any(
+            u
+            for u in members
+            if any(
                 term.startswith(q)
                 for name in (u.first_name.lower(), u.last_name.lower())
                 for term in name.split()
             )
         ]
 
-    result = {'results': [{'id': obj.id, 'text': obj.name} for obj in members]}
+    result = {"results": [{"id": obj.id, "text": obj.name} for obj in members]}
     return jsonify(result)
 
 
-@social.route("/groups/<int:group_id>", methods=['POST'])
+@social.route("/groups/<int:group_id>", methods=["POST"])
 @csrf.protect
 def group_post(group_id):
     group = Group.query.get(group_id)
-    action = request.form.get('action')
-    return_url = request.form.get('return_url')
+    action = request.form.get("action")
+    return_url = request.form.get("return_url")
 
-    membership_actions = frozenset((
-        'add',
-        'remove',
-        'add-admin',
-        'remove-admin',
-    ))
+    membership_actions = frozenset(("add", "remove", "add-admin", "remove-admin"))
 
-    if action not in ('join', 'leave'):
+    if action not in ("join", "leave"):
         assert is_admin(group)
 
-    if action == 'join':
+    if action == "join":
         g.user.join(group)
-    elif action == 'leave':
+    elif action == "leave":
         g.user.leave(group)
     elif action in membership_actions:
-        user_id = request.form.get('user', '').strip()
+        user_id = request.form.get("user", "").strip()
         try:
             user_id = int(user_id)
         except BaseException:
-            flash(_('Error: No user selected'), 'error')
+            flash(_("Error: No user selected"), "error")
             return redirect(url_for(".group_home", group_id=group_id))
 
         user = User.query.get(user_id)
 
-        if action == 'add':
+        if action == "add":
             user.join(group)
-        elif action == 'remove':
+        elif action == "remove":
             user.leave(group)
-        elif action == 'add-admin':
+        elif action == "add-admin":
             if user not in group.admins:
                 group.admins.append(user)
-        elif action == 'remove-admin':
+        elif action == "remove-admin":
             if user in group.admins:
                 group.admins.remove(user)
     else:
@@ -139,7 +135,7 @@ def groups_new():
     # return render_template("social/groups-new.html", **e)
 
 
-@social.route("/groups/new", methods=['POST'])
+@social.route("/groups/new", methods=["POST"])
 def groups_new_post():
     # TODO later
     return
@@ -163,7 +159,7 @@ def groups_new_post():
 @social.route("/groups/<int:group_id>/mugshot")
 def group_mugshot(group_id):
     # TODO: duplicated code (with user_mugshot). Extract common method.
-    size = int(request.args.get('s', 55))
+    size = int(request.args.get("s", 55))
     if size > 500:
         raise ValueError("Error, size = %d" % size)
     group = Group.query.get(group_id)
@@ -180,8 +176,8 @@ def group_mugshot(group_id):
         data = resize(data, size, size, mode=CROP)
 
     response = make_response(data)
-    response.headers['content-type'] = 'image/jpeg'
-    response.headers.add('Cache-Control', 'public, max-age=600')
+    response.headers["content-type"] = "image/jpeg"
+    response.headers.add("Cache-Control", "public, max-age=600")
     return response
 
 
@@ -200,5 +196,5 @@ def groups_json():
     query = query.order_by(func.lower(Group.name))
     all = query.all()
 
-    result = {'results': [{'id': obj.id, 'text': obj.name} for obj in all]}
+    result = {"results": [{"id": obj.id, "text": obj.name} for obj in all]}
     return jsonify(result)

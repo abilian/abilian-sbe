@@ -15,24 +15,24 @@ from flask_login import login_required
 
 from .models import Message
 
-__all__ = ['restapi']
+__all__ = ["restapi"]
 
-restapi = Blueprint('restapi', __name__, url_prefix="/api")
+restapi = Blueprint("restapi", __name__, url_prefix="/api")
 
 # Util
 
 
 def make_json_response(obj, response_code=200):
     if isinstance(obj, list):
-        obj = [x.to_dict() if hasattr(x, 'to_dict') else x for x in obj]
+        obj = [x.to_dict() if hasattr(x, "to_dict") else x for x in obj]
 
-    if hasattr(obj, 'to_json'):
+    if hasattr(obj, "to_json"):
         response = make_response(obj.to_json(), response_code)
-    elif hasattr(obj, 'to_dict'):
+    elif hasattr(obj, "to_dict"):
         response = make_response(json.dumps(obj.to_dict()), response_code)
     else:
         response = make_response(json.dumps(obj), response_code)
-    response.mimetype = 'application/json'
+    response.mimetype = "application/json"
     return response
 
 
@@ -42,7 +42,7 @@ def make_json_response(obj, response_code=200):
 
 
 # [POST] /api/users/USER_ID	Create User Profile
-@restapi.route("/users", methods=['POST'])
+@restapi.route("/users", methods=["POST"])
 @login_required
 def create_user():
     d = get_params(User.__editable__)
@@ -80,7 +80,7 @@ def user_stream(user_id):
 
 
 # [PUT] /api/users/USER_ID	Update User Profile
-@restapi.route("/users/<int:user_id>", methods=['PUT'])
+@restapi.route("/users/<int:user_id>", methods=["PUT"])
 @login_required
 def update_user(user_id):
     user = User.query.get(user_id)
@@ -91,7 +91,7 @@ def update_user(user_id):
 
 
 # [DELETE] /api/users/USER_ID	Deactivate a User
-@restapi.route("/users/<int:user_id>", methods=['DELETE'])
+@restapi.route("/users/<int:user_id>", methods=["DELETE"])
 @login_required
 def delete_user(user_id):
     user = User.query.get(user_id)
@@ -124,7 +124,7 @@ def get_followees(user_id):
 
 
 # [POST] /api/users/USER_ID/followers	Follow a User
-@restapi.route("/users/<int:user_id>/followers", methods=['POST'])
+@restapi.route("/users/<int:user_id>/followers", methods=["POST"])
 @login_required
 def follow(user_id):
     user = User.query.get(user_id)
@@ -135,8 +135,7 @@ def follow(user_id):
 
 # [DELETE] /api/users/USER_ID/followers/CONTACT_USER_ID	Unfollow a User
 @restapi.route(
-    "/users/<int:user_id>/followers/<int:contact_user_id>",
-    methods=['DELETE'],
+    "/users/<int:user_id>/followers/<int:contact_user_id>", methods=["DELETE"]
 )
 @login_required
 def unfollow(user_id, contact_user_id):
@@ -179,7 +178,7 @@ def get_group_members(group_id):
 
 
 # [POST] /api/groups	Create a Group
-@restapi.route("/groups", methods=['POST'])
+@restapi.route("/groups", methods=["POST"])
 @login_required
 def create_group():
     d = get_params(Group.__editable__)
@@ -201,7 +200,7 @@ def create_group():
 
 
 # [POST] /api/messages	Creating New Messages
-@restapi.route("/messages", methods=['POST'])
+@restapi.route("/messages", methods=["POST"])
 @login_required
 def create_message():
     d = get_params(Message.__editable__)
@@ -228,7 +227,7 @@ def get_message(message_id):
 
 
 # [PUT] /api/messages/MESSAGE_ID	Updating Existing Messages
-@restapi.route("/messages/<int:message_id>", methods=['PUT'])
+@restapi.route("/messages/<int:message_id>", methods=["PUT"])
 @login_required
 def update_message(message_id):
     message = Message.query.get(message_id)
@@ -239,7 +238,7 @@ def update_message(message_id):
 
 
 # [DELETE] /api/messages/MESSAGE_ID	Destroy an existing message
-@restapi.route("/messages/<int:message_id>", methods=['DELETE'])
+@restapi.route("/messages/<int:message_id>", methods=["DELETE"])
 @login_required
 def delete_message(message_id):
     message = Message.query.get(message_id)
@@ -255,34 +254,28 @@ def delete_message(message_id):
 
 
 # [POST] /api/messages/MESSAGE_ID/likes	Liking a Message
-@restapi.route("/messages/<int:message_id>/likes", methods=['POST'])
+@restapi.route("/messages/<int:message_id>/likes", methods=["POST"])
 @login_required
 def like_message(message_id):
     pass
 
 
 # [POST] /api/comments/COMMENT_ID/likes/LIKES_ID	Liking a Comment
-@restapi.route("/comments/<int:comment_id>/likes", methods=['POST'])
+@restapi.route("/comments/<int:comment_id>/likes", methods=["POST"])
 @login_required
 def like_comment(comment_id):
     pass
 
 
 # [DELETE] /api/messages/MESSAGE_ID/likes/LIKES_ID	Un-liking a Message
-@restapi.route(
-    "/messages/<int:message_id>/likes/<int:like_id>",
-    methods=['DELETE'],
-)
+@restapi.route("/messages/<int:message_id>/likes/<int:like_id>", methods=["DELETE"])
 @login_required
 def unlike_message(message_id, like_id):
     pass
 
 
 # [DELETE] /api/comments/COMMENT_ID/likes/LIKES_ID
-@restapi.route(
-    "/comments/<int:comment_id>/likes/<int:like_id>",
-    methods=['DELETE'],
-)
+@restapi.route("/comments/<int:comment_id>/likes/<int:like_id>", methods=["DELETE"])
 @login_required
 def unlike_comment(comment_id, like_id):
     pass

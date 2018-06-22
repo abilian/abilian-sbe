@@ -20,10 +20,10 @@ def breadcrumbs_for(object):
     if object is None:
         return []
 
-    bc = [{'label': object.title}]
+    bc = [{"label": object.title}]
     parent = object.parent
     while parent and not parent.is_root_folder:
-        bc = [{'label': parent.title, 'path': url_for(parent)}] + bc
+        bc = [{"label": parent.title, "path": url_for(parent)}] + bc
         parent = parent.parent
 
     return bc
@@ -63,20 +63,21 @@ def get_new_filename(folder, name):
     renamed = name in existing
 
     if renamed:
-        name = name.rsplit('.', 1)
-        ext = '.{}'.format(name[1]) if len(name) > 1 else ''
+        name = name.rsplit(".", 1)
+        ext = ".{}".format(name[1]) if len(name) > 1 else ""
         name = name[0]
-        prefix = '{}-'.format(name)
+        prefix = "{}-".format(name)
         prefix_len = len(prefix)
         # find all numbered suffixes from name-1.ext, name-5.ext,...
         suffixes = (
-            n[prefix_len:].rsplit('.', 1)[0] for n in existing
+            n[prefix_len:].rsplit(".", 1)[0]
+            for n in existing
             if n.startswith(prefix) and n.endswith(ext)
         )
-        suffixes = [int(val) for val in suffixes if re.match(r'^\d+$', val)]
+        suffixes = [int(val) for val in suffixes if re.match(r"^\d+$", val)]
 
         index = max(0, 0, *suffixes) + 1  # 0, 0: in case suffixes is empty
-        name = '{}-{}{}'.format(name, index, ext)
+        name = "{}-{}{}".format(name, index, ext)
 
     return name
 
@@ -87,7 +88,7 @@ def create_document(folder, fs):
     if isinstance(fs.filename, text_type):
         name = fs.filename
     else:
-        name = text_type(fs.filename, errors='ignore')
+        name = text_type(fs.filename, errors="ignore")
 
     if not name:
         flash(_("Document name can't be empty."), "error")
@@ -101,9 +102,10 @@ def create_document(folder, fs):
     if original_name != name:
         # set message after document has been successfully created!
         flash(
-            _('"{original}" already present in folder, '
-              'renamed "{name}"', ).format(original=original_name, name=name),
-            'info',
+            _('"{original}" already present in folder, ' 'renamed "{name}"').format(
+                original=original_name, name=name
+            ),
+            "info",
         )
 
     # Some unwrapping before posting event
@@ -135,12 +137,10 @@ def get_selected_objects(folder):
     selected_ids = request.form.getlist("object-selected")
 
     doc_ids = [
-        int(x.split(":")[-1]) for x in selected_ids
-        if x.startswith("cmis:document")
+        int(x.split(":")[-1]) for x in selected_ids if x.startswith("cmis:document")
     ]
     folder_ids = [
-        int(x.split(":")[-1]) for x in selected_ids
-        if x.startswith("cmis:folder")
+        int(x.split(":")[-1]) for x in selected_ids if x.startswith("cmis:folder")
     ]
 
     docs = list(map(get_document, doc_ids))
@@ -186,9 +186,8 @@ def check_write_access(obj):
     if security.has_role(g.user, Admin):
         return
 
-    if (
-        repository.has_access(g.user, obj)
-        and repository.has_permission(g.user, WRITE, obj)
+    if repository.has_access(g.user, obj) and repository.has_permission(
+        g.user, WRITE, obj
     ):
         return
     raise Forbidden()
@@ -209,9 +208,8 @@ def check_manage_access(obj):
         return
     if security.has_role(g.user, Admin):
         return
-    if (
-        repository.has_access(g.user, obj)
-        and repository.has_permission(g.user, MANAGE, obj)
+    if repository.has_access(g.user, obj) and repository.has_permission(
+        g.user, MANAGE, obj
     ):
         return
     raise Forbidden()

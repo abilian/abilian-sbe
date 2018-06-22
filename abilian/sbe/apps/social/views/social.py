@@ -11,16 +11,13 @@ from abilian.sbe.apps.wall.util import get_recent_entries
 
 from ..models import Message
 
-__all__ = ['social']
+__all__ = ["social"]
 
 MAX_LAST_USERS = 15
 MAX_MESSAGES = 15
 
 social = Blueprint(
-    "social",
-    __name__,
-    url_prefix='/social',
-    template_folder='../templates',
+    "social", __name__, url_prefix="/social", template_folder="../templates"
 )
 route = social.route
 
@@ -30,7 +27,7 @@ def home():
     ctx = {}
     entries = get_recent_entries(num=50)
     entries = ActivityEntryPresenter.wrap_collection(entries)
-    ctx['activity_entries'] = entries
+    ctx["activity_entries"] = entries
 
     return render_template("social/home.html", **ctx)
 
@@ -40,11 +37,11 @@ def stream(stream_name):
     pass
 
 
-@route("/", methods=['POST'])
+@route("/", methods=["POST"])
 def share():
     # TODO: better error control / feedback
     d = get_params(Message.__editable__)
-    if not d.get('content'):
+    if not d.get("content"):
         return redirect(url_for(".home"))
 
     message = Message(**d)

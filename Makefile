@@ -132,8 +132,9 @@ format-py:
 	#	`find abilian -name '*.py'` \
 	#	`find tests -name '*.py'` \
 	#	demo/*.py *.py
-	-yapf -r -i abilian demo tests *.py
+	# -yapf -r -i abilian demo tests *.py
 	# autopep8 -j3 -r --in-place -a --ignore E711 abilian demo tests *.py
+	black abilian
 	isort -rc abilian demo tests *.py
 
 format-js:

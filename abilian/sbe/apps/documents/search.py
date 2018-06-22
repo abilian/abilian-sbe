@@ -18,13 +18,15 @@ def reindex_tree(obj):
     """
     assert isinstance(obj, CmisObject)
 
-    index_service = get_service('indexing')
+    index_service = get_service("indexing")
     if not index_service.running:
         return
 
-    descendants = sa.select([CmisObject.id, CmisObject._parent_id]) \
-        .where(CmisObject._parent_id == sa.bindparam('ancestor_id')) \
-        .cte(name='descendants', recursive=True)
+    descendants = (
+        sa.select([CmisObject.id, CmisObject._parent_id])
+        .where(CmisObject._parent_id == sa.bindparam("ancestor_id"))
+        .cte(name="descendants", recursive=True)
+    )
     da = descendants.alias()
     CA = sa.orm.aliased(CmisObject)
     d_ids = sa.select([CA.id, CA._parent_id])
@@ -38,16 +40,17 @@ def reindex_tree(obj):
     # as an added bonus, "obj" will also be in query results, thus will be added
     # in "to_update" without needing to do it apart.
     entity_ids_q = sa.union(
-        sa.select([descendants.c.id]),
-        sa.select([sa.bindparam('ancestor_id')]),
+        sa.select([descendants.c.id]), sa.select([sa.bindparam("ancestor_id")])
     )
-    query = session.query(Entity) \
-        .filter(Entity.id.in_(entity_ids_q)) \
-        .options(sa.orm.noload('*')) \
+    query = (
+        session.query(Entity)
+        .filter(Entity.id.in_(entity_ids_q))
+        .options(sa.orm.noload("*"))
         .params(ancestor_id=obj.id)
+    )
 
     to_update = index_service.app_state.to_update
-    key = 'changed'
+    key = "changed"
 
     for item in query.yield_per(1000):
         to_update.append((key, item))

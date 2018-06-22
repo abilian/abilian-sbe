@@ -20,25 +20,26 @@ class Blueprint(BaseBlueprint):
     It sets g.community and perform access verification for the
     traversed community.
     """
-    _BASE_URL_PREFIX = '/communities'
-    _ROUTE_PARAM = '<string:community_id>'
+
+    _BASE_URL_PREFIX = "/communities"
+    _ROUTE_PARAM = "<string:community_id>"
 
     def __init__(self, *args, **kwargs):
-        url_prefix = kwargs.get('url_prefix', '')
+        url_prefix = kwargs.get("url_prefix", "")
 
-        if kwargs.pop('set_community_id_prefix', True):
-            if (not url_prefix) or url_prefix[0] != '/':
-                url_prefix = '/' + url_prefix
+        if kwargs.pop("set_community_id_prefix", True):
+            if (not url_prefix) or url_prefix[0] != "/":
+                url_prefix = "/" + url_prefix
             url_prefix = self._ROUTE_PARAM + url_prefix
 
         if not url_prefix.startswith(self._BASE_URL_PREFIX):
-            if (not url_prefix) or url_prefix[0] != '/':
-                url_prefix = '/' + url_prefix
+            if (not url_prefix) or url_prefix[0] != "/":
+                url_prefix = "/" + url_prefix
             url_prefix = self._BASE_URL_PREFIX + url_prefix
 
-        if url_prefix[-1] == '/':
+        if url_prefix[-1] == "/":
             url_prefix = url_prefix[:-1]
-        kwargs['url_prefix'] = url_prefix
+        kwargs["url_prefix"] = url_prefix
 
         BaseBlueprint.__init__(self, *args, **kwargs)
         self.url_value_preprocessor(pull_community)
@@ -47,7 +48,7 @@ class Blueprint(BaseBlueprint):
 
 
 def check_access():
-    if hasattr(g, 'community'):
+    if hasattr(g, "community"):
         # communities.index is not inside a community, for example
         security.check_access(g.community)
 
@@ -59,24 +60,18 @@ def init_current_tab(endpoint, values):
 
 def pull_community(endpoint, values):
     """url_value_preprocessor function."""
-    g.nav['active'] = 'section:communities'
+    g.nav["active"] = "section:communities"
     g.breadcrumb.append(
-        BreadcrumbItem(
-            label=_l('Communities'),
-            url=Endpoint('communities.index'),
-        ),
+        BreadcrumbItem(label=_l("Communities"), url=Endpoint("communities.index"))
     )
 
     try:
-        slug = values.pop('community_id')
+        slug = values.pop("community_id")
         community = Community.query.filter(Community.slug == slug).first()
         if community:
             g.community = CommunityPresenter(community)
-            wall_url = Endpoint('wall.index', community_id=community.slug)
-            breadcrumb_item = BreadcrumbItem(
-                label=community.name,
-                url=wall_url,
-            )
+            wall_url = Endpoint("wall.index", community_id=community.slug)
+            breadcrumb_item = BreadcrumbItem(label=community.name, url=wall_url)
             g.breadcrumb.append(breadcrumb_item)
         else:
             raise NotFound()

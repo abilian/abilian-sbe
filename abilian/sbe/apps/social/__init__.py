@@ -11,4 +11,5 @@ def register_plugin(app):
     # TODO: better config variable choice?
     if app.config.get("SOCIAL_REST_API"):
         from .restapi import restapi
+
         app.register_blueprint(restapi)

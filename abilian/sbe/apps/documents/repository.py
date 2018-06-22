@@ -22,7 +22,7 @@ class Repository(object):
 
     def init_app(self, app):
         self.app = app
-        app.extensions['content_repository'] = self
+        app.extensions["content_repository"] = self
 
     @property
     def root_folder(self):
@@ -31,7 +31,7 @@ class Repository(object):
             return folder
 
         # Should only happen during tests
-        folder = Folder(title='root')
+        folder = Folder(title="root")
         return folder
 
     def get_object(self, id=None, path=None):
@@ -128,7 +128,7 @@ class Repository(object):
             raise Exception("Can't delete root folder.")
 
         session = sa.orm.object_session(obj)
-        setattr(obj, '__path_before_delete', obj.path)  # for audit log.
+        setattr(obj, "__path_before_delete", obj.path)  # for audit log.
         parent = obj.parent
         collection = parent.subfolders if obj.is_folder else parent.documents
         session.delete(obj)

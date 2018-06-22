@@ -11,42 +11,40 @@ from abilian.web.forms.validators import Length, optional, required
 from wtforms import BooleanField, StringField, TextAreaField
 
 ALLOWED_TAGS = [
-    'a',
-    'abbr',
-    'acronym',
-    'b',
-    'blockquote',
-    'br',
-    'code',
-    'em',
-    'i',
-    'li',
-    'ol',
-    'strong',
-    'ul',
-    'h1',
-    'h2',
-    'h3',
-    'h4',
-    'h5',
-    'h6',
-    'p',
-    'u',
-    'img',
+    "a",
+    "abbr",
+    "acronym",
+    "b",
+    "blockquote",
+    "br",
+    "code",
+    "em",
+    "i",
+    "li",
+    "ol",
+    "strong",
+    "ul",
+    "h1",
+    "h2",
+    "h3",
+    "h4",
+    "h5",
+    "h6",
+    "p",
+    "u",
+    "img",
 ]
 
 ALLOWED_ATTRIBUTES = {
-    '*': ['title'],
-    'p': ['style'],
-    'a': ['href', 'title'],
-    'abbr': ['title'],
-    'acronym': ['title'],
-    'img': ['src', 'alt', 'title'],
+    "*": ["title"],
+    "p": ["style"],
+    "a": ["href", "title"],
+    "abbr": ["title"],
+    "acronym": ["title"],
+    "img": ["src", "alt", "title"],
 }
 
-ALLOWED_STYLES = [
-    'text-align',
-]
+ALLOWED_STYLES = ["text-align"]
 
 WIDGET_ALLOWED = {}
 for attr in ALLOWED_TAGS:
@@ -58,9 +56,7 @@ for attr in ALLOWED_TAGS:
 # instantiate this one before PostForm fields, so that it is listed first
 # when Threadform is displayed
 _TITLE_FIELD = StringField(
-    label=_l("Title"),
-    filters=(strip, ),
-    validators=[required(), Length(max=150)],
+    label=_l("Title"), filters=(strip,), validators=[required(), Length(max=150)]
 )
 
 
@@ -68,13 +64,11 @@ class BasePostForm(Form):
     message = TextAreaField(
         label=_l("Message"),
         widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
-        filters=(strip, ),
+        filters=(strip,),
         validators=[required()],
     )
     attachments = FileField(
-        label=_l('Attachments'),
-        multiple=True,
-        validators=[optional()],
+        label=_l("Attachments"), multiple=True, validators=[optional()]
     )
 
     def validate_message(self, field):
@@ -97,8 +91,8 @@ class ThreadForm(PostForm):
 
 class PostEditForm(BasePostForm):
     reason = StringField(
-        label=_l('Reason'),
-        description=_l('Description of your edit'),
-        filters=(strip, ),
-        validators=(optional(), ),
+        label=_l("Reason"),
+        description=_l("Description of your edit"),
+        filters=(strip,),
+        validators=(optional(),),
     )

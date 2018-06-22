@@ -50,11 +50,11 @@ def process_document(document_id):
 
 
 def _run_antivirus(document):
-    antivirus = get_service('antivirus')
+    antivirus = get_service("antivirus")
     if antivirus and antivirus.running:
         is_clean = antivirus.scan(document.content_blob)
-        if 'antivirus_task' in document.content_blob.meta:
-            del document.content_blob.meta['antivirus_task']
+        if "antivirus_task" in document.content_blob.meta:
+            del document.content_blob.meta["antivirus_task"]
         return is_clean
     return None
 
@@ -86,10 +86,7 @@ def preview_document(document_id):
             )
         except ConversionError as e:
             logger.info(
-                'Preview failed: %s',
-                str(e),
-                exc_info=True,
-                extra={'stack': True},
+                "Preview failed: %s", str(e), exc_info=True, extra={"stack": True}
             )
 
 
@@ -101,7 +98,7 @@ def convert_document_content(document_id):
             # deleted after task queued, but before task run
             return
 
-        error_kwargs = {'exc_info': True, 'extra': {'stack': True}}
+        error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
         conversion_args = (doc.content_digest, doc.content, doc.content_type)
 
@@ -115,20 +112,22 @@ def convert_document_content(document_id):
             except ConversionError as e:
                 doc.pdf = b""
                 logger.info(
-                    "Conversion to PDF failed for document %s: %s", doc.name,
-                    e, **error_kwargs
+                    "Conversion to PDF failed for document %s: %s",
+                    doc.name,
+                    e,
+                    **error_kwargs
                 )
 
         try:
             doc.text = converter.to_text(
-                doc.content_digest,
-                doc.content,
-                doc.content_type,
+                doc.content_digest, doc.content, doc.content_type
             )
         except ConversionError as e:
             doc.text = ""
             logger.info(
-                "Conversion to text failed for document %s: %s", doc.name, e,
+                "Conversion to text failed for document %s: %s",
+                doc.name,
+                e,
                 **error_kwargs
             )
 
@@ -137,7 +136,9 @@ def convert_document_content(document_id):
             doc.extra_metadata = converter.get_metadata(*conversion_args)
         except ConversionError as e:
             logger.warning(
-                "Metadata extraction failed on document %s: %s", doc.name, e,
+                "Metadata extraction failed on document %s: %s",
+                doc.name,
+                e,
                 **error_kwargs
             )
         except UnicodeDecodeError as e:
@@ -145,12 +146,11 @@ def convert_document_content(document_id):
                 "Unicode issue on document %s: %s", doc.name, e, **error_kwargs
             )
         except Exception as e:
-            logger.error(
-                "Other issue on document %s: %s", doc.name, e, **error_kwargs
-            )
+            logger.error("Other issue on document %s: %s", doc.name, e, **error_kwargs)
 
         if doc.text:
             import langid
+
             doc.language = langid.classify(doc.text)[0]
 
         doc.page_num = doc.extra_metadata.get("PDF:Pages", 1)

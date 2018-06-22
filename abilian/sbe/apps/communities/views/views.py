@@ -44,7 +44,7 @@ from ..forms import CommunityForm
 from ..models import Community, Membership
 from ..security import require_admin, require_manage
 
-__all__ = ['communities']
+__all__ = ["communities"]
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ communities = Blueprint(
     "communities",
     __name__,
     set_community_id_prefix=False,
-    template_folder='../templates',
+    template_folder="../templates",
 )
 route = communities.route
 add_url = communities.add_url_rule
@@ -73,7 +73,7 @@ def register_context_processors(state):
     @state.app.context_processor
     def communities_context_processor():
         # helper to get an url for community image
-        return {'community_image_url': image_url}
+        return {"community_image_url": image_url}
 
 
 def tab(tab_name):
@@ -101,28 +101,26 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
         ...
     """
     is_community = obj_type == Community.entity_type
-    community_id = kw.get('community_id')
+    community_id = kw.get("community_id")
 
     if is_community or community_id is None:
         # when it's a community, default_view sets community_id to 'id', we want to
         # override with the slug value.
         if obj:
             if isinstance(obj, (Hit, dict)):
-                community_id = obj.get(
-                    'slug' if is_community else 'community_slug',
-                )
+                community_id = obj.get("slug" if is_community else "community_slug")
             elif is_community:
                 community_id = obj.slug
-            elif community_id is None and hasattr(obj, 'community'):
+            elif community_id is None and hasattr(obj, "community"):
                 try:
                     community_id = obj.community.slug
                 except AttributeError:
                     pass
 
     if community_id is not None:
-        kw['community_id'] = community_id
+        kw["community_id"] = community_id
     else:
-        raise ValueError('Cannot find community_id value')
+        raise ValueError("Cannot find community_id value")
 
     return kw
 
@@ -134,32 +132,27 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
 @login_required
 def index():
     query = Community.query
-    sort_order = request.args.get('sort', '').strip()
+    sort_order = request.args.get("sort", "").strip()
     if not sort_order:
-        sort_order = session.get('sort_communities_order', 'alpha')
+        sort_order = session.get("sort_communities_order", "alpha")
 
-    if sort_order == 'activity':
+    if sort_order == "activity":
         query = query.order_by(Community.last_active_at.desc())
     else:
         query = query.order_by(Community.name)
 
-    session['sort_communities_order'] = sort_order
+    session["sort_communities_order"] = sort_order
 
-    if not current_user.has_role('admin'):
+    if not current_user.has_role("admin"):
         # Filter with permissions
         query = query.join(Membership).filter(Membership.user == current_user)
 
-    ctx = {'my_communities': query.all(), 'sort_order': sort_order}
+    ctx = {"my_communities": query.all(), "sort_order": sort_order}
     return render_template("community/home.html", **ctx)
 
 
 @route("/<string:community_id>/")
-@views.default_view(
-    communities,
-    Community,
-    'community_id',
-    kw_func=default_view_kw,
-)
+@views.default_view(communities, Community, "community_id", kw_func=default_view_kw)
 def community():
     return redirect(url_for("wall.index", community_id=g.community.slug))
 
@@ -174,23 +167,25 @@ def list_json2():
     if not q or len(q) < 2:
         raise BadRequest()
 
-    query = db.session.query(Community.id, Community.name) \
-        .filter(Community.name.ilike("%" + q + "%")) \
-        .distinct() \
-        .order_by(Community.name) \
+    query = (
+        db.session.query(Community.id, Community.name)
+        .filter(Community.name.ilike("%" + q + "%"))
+        .distinct()
+        .order_by(Community.name)
         .limit(50)
+    )
     query_result = query.all()
 
-    result = {'results': [{'id': r[0], 'text': r[1]} for r in query_result]}
+    result = {"results": [{"id": r[0], "text": r[1]} for r in query_result]}
     return jsonify(result)
 
 
 # edit views
 class BaseCommunityView(object):
     Model = Community
-    pk = 'community_id'
+    pk = "community_id"
     Form = CommunityForm
-    base_template = 'community/_base.html'
+    base_template = "community/_base.html"
     decorators = [require_admin]
 
     def init_object(self, args, kwargs):
@@ -204,26 +199,23 @@ class BaseCommunityView(object):
         kwargs = super(BaseCommunityView, self).get_form_kwargs()
 
         image = self.obj.image
-        if image and 'community' in g:
-            setattr(image, 'url', image_url(self.obj, s=500))
-            kwargs['image'] = image
+        if image and "community" in g:
+            setattr(image, "url", image_url(self.obj, s=500))
+            kwargs["image"] = image
 
         return kwargs
 
 
 class CommunityEdit(BaseCommunityView, views.ObjectEdit):
-    template = 'community/edit.html'
+    template = "community/edit.html"
     title = _l("Edit community")
-    decorators = views.ObjectEdit.decorators + (require_admin, tab('settings'))
+    decorators = views.ObjectEdit.decorators + (require_admin, tab("settings"))
 
     def breadcrumb(self):
         return BreadcrumbItem(
-            label=_('Settings'),
-            icon='cog',
-            url=Endpoint(
-                'communities.settings',
-                community_id=g.community.slug,
-            ),
+            label=_("Settings"),
+            icon="cog",
+            url=Endpoint("communities.settings", community_id=g.community.slug),
         )
 
     def before_populate_obj(self):
@@ -252,8 +244,8 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
 add_url(
     "/<string:community_id>/settings",
     view_func=CommunityEdit.as_view(
-        'settings',
-        view_endpoint='.community',
+        "settings",
+        view_endpoint=".community",
         message_success=_l("Community settings saved successfully."),
     ),
 )
@@ -261,21 +253,18 @@ add_url(
 
 class CommunityCreate(views.ObjectCreate, CommunityEdit):
     title = _l("Create community")
-    decorators = views.ObjectCreate.decorators + (require_admin, )
+    decorators = views.ObjectCreate.decorators + (require_admin,)
     template = views.ObjectCreate.template
     base_template = views.ObjectCreate.base_template
 
     def breadcrumb(self):
-        return BreadcrumbItem(label=_('Create new community'))
+        return BreadcrumbItem(label=_("Create new community"))
 
     def message_success(self):
         return _("Community %(name)s created successfully", name=self.obj.name)
 
 
-add_url(
-    '/new',
-    view_func=CommunityCreate.as_view('new', view_endpoint='.community'),
-)
+add_url("/new", view_func=CommunityCreate.as_view("new", view_endpoint=".community"))
 
 
 class CommunityDelete(BaseCommunityView, views.ObjectDelete):
@@ -284,27 +273,24 @@ class CommunityDelete(BaseCommunityView, views.ObjectDelete):
 
 add_url(
     "/<string:community_id>/destroy",
-    methods=['POST'],
+    methods=["POST"],
     view_func=CommunityDelete.as_view(
-        'delete',
-        message_success=_l("Community destroyed."),
+        "delete", message_success=_l("Community destroyed.")
     ),
 )
 
 # Community Image
-_DEFAULT_IMAGE = Path(__file__).parent / 'data' / 'community.png'
-_DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open('rb').read()).hexdigest()
-route('/_default_image')(
+_DEFAULT_IMAGE = Path(__file__).parent / "data" / "community.png"
+_DEFAULT_IMAGE_MD5 = hashlib.md5(_DEFAULT_IMAGE.open("rb").read()).hexdigest()
+route("/_default_image")(
     image_views.StaticImageView.as_view(
-        'community_default_image',
-        set_expire=True,
-        image=_DEFAULT_IMAGE,
+        "community_default_image", set_expire=True, image=_DEFAULT_IMAGE
     )
 )
 
 
 class CommunityImageView(image_views.BlobView):
-    id_arg = 'blob_id'
+    id_arg = "blob_id"
 
     def prepare_args(self, args, kwargs):
         community = g.community
@@ -316,67 +302,63 @@ class CommunityImageView(image_views.BlobView):
         return super(CommunityImageView, self).prepare_args(args, kwargs)
 
 
-image = CommunityImageView.as_view('image', max_size=500, set_expire=True)
+image = CommunityImageView.as_view("image", max_size=500, set_expire=True)
 route("/<string:community_id>/image")(image)
 
 
 def image_url(community, **kwargs):
     """Return proper URL for image url."""
     if not community or not community.image:
-        kwargs['md5'] = _DEFAULT_IMAGE_MD5
-        return url_for('communities.community_default_image', **kwargs)
+        kwargs["md5"] = _DEFAULT_IMAGE_MD5
+        return url_for("communities.community_default_image", **kwargs)
 
-    kwargs['community_id'] = community.slug
-    kwargs['md5'] = community.image.md5
-    return url_for('communities.image', **kwargs)
+    kwargs["community_id"] = community.slug
+    kwargs["md5"] = community.image.md5
+    return url_for("communities.image", **kwargs)
 
 
 def _members_query():
     """Helper used in members views."""
-    last_activity_date = sa.sql.functions.max(ActivityEntry.happened_at) \
-        .label('last_activity_date')
-    memberships = User.query \
-        .options(sa.orm.undefer('photo')) \
-        .join(Membership) \
+    last_activity_date = sa.sql.functions.max(ActivityEntry.happened_at).label(
+        "last_activity_date"
+    )
+    memberships = (
+        User.query.options(sa.orm.undefer("photo"))
+        .join(Membership)
         .outerjoin(
             ActivityEntry,
             sa.sql.and_(
                 ActivityEntry.actor_id == User.id,
                 ActivityEntry.target_id == Membership.community_id,
             ),
-        ) \
-        .filter(Membership.community == g.community, User.can_login == True) \
-        .add_columns(
-            Membership.id,
-            Membership.role,
-            last_activity_date,
-        ) \
-        .group_by(User, Membership.id, Membership.role) \
+        )
+        .filter(Membership.community == g.community, User.can_login == True)
+        .add_columns(Membership.id, Membership.role, last_activity_date)
+        .group_by(User, Membership.id, Membership.role)
         .order_by(User.last_name.asc(), User.first_name.asc())
+    )
 
     return memberships
 
 
 @route("/<string:community_id>/members")
-@tab('members')
+@tab("members")
 def members():
     g.breadcrumb.append(
         BreadcrumbItem(
-            label=_('Members'),
-            url=Endpoint('communities.members', community_id=g.community.slug),
-        ),
+            label=_("Members"),
+            url=Endpoint("communities.members", community_id=g.community.slug),
+        )
     )
     memberships = _members_query().all()
-    community_threads_users = [
-        thread.creator for thread in g.community.threads
-    ]
+    community_threads_users = [thread.creator for thread in g.community.threads]
     threads_count = Counter(community_threads_users)
 
     ctx = {
-        'seconds_since_epoch': seconds_since_epoch,
-        'is_manager': is_manager(user=current_user),
-        'memberships': memberships,
-        'threads_count': threads_count,
+        "seconds_since_epoch": seconds_since_epoch,
+        "is_manager": is_manager(user=current_user),
+        "memberships": memberships,
+        "threads_count": threads_count,
     }
     return render_template("community/members.html", **ctx)
 
@@ -390,25 +372,25 @@ def members_post():
 
     user_id = request.form.get("user")
     if not user_id:
-        flash(_("You must provide a user."), 'error')
+        flash(_("You must provide a user."), "error")
         return redirect(url_for(".members", community_id=community.slug))
     user_id = int(user_id)
     user = User.query.get(user_id)
 
-    if action in ('add-user-role', 'set-user-role'):
+    if action in ("add-user-role", "set-user-role"):
         role = request.form.get("role").lower()
 
         community.set_membership(user, role)
 
-        if action == 'add-user-role':
+        if action == "add-user-role":
             app = current_app._get_current_object()
             activity.send(app, actor=user, verb="join", object=community)
 
         db.session.commit()
-        return redirect(url_for('.members', community_id=community.slug))
+        return redirect(url_for(".members", community_id=community.slug))
 
-    elif action == 'delete':
-        membership_id = int(request.form['membership'])
+    elif action == "delete":
+        membership_id = int(request.form["membership"])
         membership = Membership.query.get(membership_id)
         if membership.user_id != user_id:
             raise InternalServerError()
@@ -422,29 +404,27 @@ def members_post():
         return redirect(url_for(".members", community_id=community.slug))
 
     else:
-        raise BadRequest('Unknown action: {}'.format(repr(action)))
+        raise BadRequest("Unknown action: {}".format(repr(action)))
 
 
 MEMBERS_EXPORT_HEADERS = [
-    _l('Name'),
-    _l('email'),
-    _l('Last activity in this community'),
-    _l('Role'),
+    _l("Name"),
+    _l("email"),
+    _l("Last activity in this community"),
+    _l("Role"),
 ]
 
-MEMBERS_EXPORT_ATTRS = ['User', 'User.email', 'last_activity_date', 'role']
+MEMBERS_EXPORT_ATTRS = ["User", "User.email", "last_activity_date", "role"]
 
 HEADER_FONT = openpyxl.styles.Font(bold=True)
 HEADER_ALIGN = openpyxl.styles.Alignment(
-    horizontal='center',
-    vertical='top',
-    wrapText=True,
+    horizontal="center", vertical="top", wrapText=True
 )
-XLSX_MIME = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 
 
 @route("/<string:community_id>/members/excel")
-@tab('members')
+@tab("members")
 def members_excel_export():
     community = g.community
     attributes = [attrgetter(a) for a in MEMBERS_EXPORT_ATTRS]
@@ -454,11 +434,11 @@ def members_excel_export():
     if wb.worksheets:
         wb.remove_sheet(wb.active)
 
-    ws_title = _('%(community)s members', community=community.name)
+    ws_title = _("%(community)s members", community=community.name)
     ws_title = ws_title.strip()
     if len(ws_title) > 31:
         # sheet title cannot exceed 31 char. max length
-        ws_title = ws_title[:30] + '…'
+        ws_title = ws_title[:30] + "…"
     ws = wb.create_sheet(title=ws_title)
     row = 0
     cells = []
@@ -492,7 +472,7 @@ def members_excel_export():
 
             # estimate width
             value = text_type(cell.value)
-            width = max(len(l) for l in value.split('\n')) + 1
+            width = max(len(l) for l in value.split("\n")) + 1
             cols_width[col] = max(width, cols_width[col])
 
         ws.append(cells)
@@ -512,15 +492,12 @@ def members_excel_export():
 
     response = current_app.response_class(fd, mimetype=XLSX_MIME)
 
-    filename = '{}-members-{}.xlsx'.format(
-        community.slug,
-        strftime(
-            "%d:%m:%Y-%H:%M:%S",
-            gmtime(),
-        ),
+    filename = "{}-members-{}.xlsx".format(
+        community.slug, strftime("%d:%m:%Y-%H:%M:%S", gmtime())
     )
-    response.headers['content-disposition'] = \
-        'attachment;filename="{}"'.format(filename)
+    response.headers["content-disposition"] = 'attachment;filename="{}"'.format(
+        filename
+    )
 
     return response
 
@@ -541,12 +518,8 @@ def doc(doc_id):
         if parent.is_root_folder:
             break
         folder = parent
-    target_community = Community.query \
-        .filter(Community.folder_id == folder.id) \
-        .one()
+    target_community = Community.query.filter(Community.folder_id == folder.id).one()
     location = url_for(
-        "documents.document_view",
-        community_id=target_community.slug,
-        doc_id=doc.id,
+        "documents.document_view", community_id=target_community.slug, doc_id=doc.id
     )
     return redirect(location)

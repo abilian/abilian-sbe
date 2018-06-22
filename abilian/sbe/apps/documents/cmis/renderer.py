@@ -14,10 +14,10 @@ class Feed(object):
 
     def to_xml(self, **options):
         ctx = {
-            'ROOT': ROOT,
-            'object': self.object,
-            'collection': self.collection,
-            'to_xml': to_xml,
+            "ROOT": ROOT,
+            "object": self.object,
+            "collection": self.collection,
+            "to_xml": to_xml,
         }
         return render_template("cmis/feed.xml", **ctx)
 
@@ -28,21 +28,21 @@ class Entry(object):
 
     def to_xml(self, **options):
         ctx = {
-            'ROOT': ROOT,
-            'folder': self.obj,
-            'document': self.obj,
-            'options': options,
-            'to_xml': to_xml,
+            "ROOT": ROOT,
+            "folder": self.obj,
+            "document": self.obj,
+            "options": options,
+            "to_xml": to_xml,
         }
 
-        if self.obj.sbe_type == 'cmis:folder':
+        if self.obj.sbe_type == "cmis:folder":
             result = render_template("cmis/folder.xml", **ctx)
-        elif self.obj.sbe_type == 'cmis:document':
+        elif self.obj.sbe_type == "cmis:document":
             result = render_template("cmis/document.xml", **ctx)
         else:
             raise Exception("Unknown base object type: %s" % self.obj.sbe_type)
 
-        if 'no_xml_header' not in options:
+        if "no_xml_header" not in options:
             result = XML_HEADER + result
 
         return result

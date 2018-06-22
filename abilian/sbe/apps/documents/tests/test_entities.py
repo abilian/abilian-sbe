@@ -14,23 +14,23 @@ def app(config):
 
 
 def check_editable(object):
-    if hasattr(object, '__editable__'):
+    if hasattr(object, "__editable__"):
         for k in object.__editable__:
             assert hasattr(object, k)
 
 
 def test_title_prevails():
-    f = Folder(name='name', title='title')
-    assert f.title == 'title'
-    assert f.name == 'title'
+    f = Folder(name="name", title="title")
+    assert f.title == "title"
+    assert f.name == "title"
 
-    f = Folder(name='name', title=None)
-    assert f.title == 'name'
-    assert f.name == 'name'
+    f = Folder(name="name", title=None)
+    assert f.title == "name"
+    assert f.name == "name"
 
-    f = Folder(name='name')
-    assert f.title == 'name'
-    assert f.name == 'name'
+    f = Folder(name="name")
+    assert f.title == "name"
+    assert f.name == "name"
 
 
 def test_folder_editables():

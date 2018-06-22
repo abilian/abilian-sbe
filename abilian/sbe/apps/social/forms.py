@@ -23,8 +23,8 @@ class UserProfileForm(ModelForm):
 
 class UserProfileViewForm(UserProfileForm):
     communautes = QuerySelect2Field(
-        'Communautés d\'appartenance',
-        get_label='name',
+        "Communautés d'appartenance",
+        get_label="name",
         view_widget=abilian_widgets.ListWidget(),
         query_factory=lambda: Community.query.all(),
         multiple=True,
@@ -35,7 +35,7 @@ class UserProfileViewForm(UserProfileForm):
 class GroupForm(Form):
     name = StringField(
         _l("Name"),
-        filters=(strip, ),
+        filters=(strip,),
         validators=[required(message=_l("Name is required."))],
     )
 

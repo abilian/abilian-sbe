@@ -19,15 +19,15 @@ from abilian.sbe.apps.documents.models import BaseContent
 
 from . import markup
 
-__all__ = ['WikiPage']
+__all__ = ["WikiPage"]
 
 
 @community_content
 class WikiPage(Entity):
-    __tablename__ = 'wiki_page'
+    __tablename__ = "wiki_page"
 
     # : The title for this page
-    _title = Column('title', Unicode(200), nullable=False, index=True)
+    _title = Column("title", Unicode(200), nullable=False, index=True)
 
     community_id = CommunityIdColumn()
     #: The community this page belongs to
@@ -42,10 +42,10 @@ class WikiPage(Entity):
         UnicodeText,
         default="",
         nullable=False,
-        info=SEARCHABLE | {'index_to': ('text', )},
+        info=SEARCHABLE | {"index_to": ("text",)},
     )
 
-    __table_args__ = (UniqueConstraint('title', 'community_id'), )
+    __table_args__ = (UniqueConstraint("title", "community_id"),)
 
     def __init__(self, title="", body_src="", message="", *args, **kwargs):
         Entity.__init__(self, *args, **kwargs)
@@ -79,10 +79,11 @@ class WikiPage(Entity):
 
     @property
     def last_revision(self):
-        return WikiPageRevision.query \
-            .filter(WikiPageRevision.page == self) \
-            .order_by(WikiPageRevision.number.desc()) \
+        return (
+            WikiPageRevision.query.filter(WikiPageRevision.page == self)
+            .order_by(WikiPageRevision.number.desc())
             .first()
+        )
 
     @property
     def body_html(self):
@@ -107,8 +108,8 @@ def _wiki_sync_name_title(entity, new_value, old_value, initiator):
 
 
 class WikiPageRevision(db.Model):
-    __tablename__ = 'wiki_page_revision'
-    __table_args__ = (UniqueConstraint('page_id', 'number'), )
+    __tablename__ = "wiki_page_revision"
+    __table_args__ = (UniqueConstraint("page_id", "number"),)
 
     # : Some primary key just in case
     id = Column(Integer, primary_key=True)
@@ -117,7 +118,7 @@ class WikiPageRevision(db.Model):
     created_at = Column(DateTime, default=datetime.utcnow)
 
     #: The page this revision belongs to
-    page = relationship(WikiPage, backref='revisions')
+    page = relationship(WikiPage, backref="revisions")
     page_id = Column(ForeignKey(WikiPage.id))
 
     #: The revision number
@@ -137,17 +138,17 @@ class WikiPageRevision(db.Model):
 class WikiPageAttachment(BaseContent):
     __tablename__ = None  # type: str
     __indexable__ = False
-    __mapper_args__ = {'polymorphic_identity': 'wikipage_attachment'}
-    sbe_type = 'wikipage:attachment'
+    __mapper_args__ = {"polymorphic_identity": "wikipage_attachment"}
+    sbe_type = "wikipage:attachment"
 
     _wikipage_id = Column(Integer, ForeignKey(WikiPage.id), nullable=True)
     wikipage = relationship(
         WikiPage,
         primaryjoin=(_wikipage_id == WikiPage.id),
         backref=backref(
-            'attachments',
-            lazy='select',
-            order_by='WikiPageAttachment.name',
-            cascade='all, delete-orphan',
+            "attachments",
+            lazy="select",
+            order_by="WikiPageAttachment.name",
+            cascade="all, delete-orphan",
         ),
     )

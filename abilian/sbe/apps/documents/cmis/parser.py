@@ -24,24 +24,24 @@ class Entry(object):
 
     def parse(self, xml):
         root = objectify.fromstring(xml)
-        object = root['{%s}object' % CMISRA_NS]
-        properties = object['{%s}properties' % CMIS_NS]
+        object = root["{%s}object" % CMISRA_NS]
+        properties = object["{%s}properties" % CMIS_NS]
         for element in properties.iterchildren():
             property = Property(element)
             self.properties[property.property_definition_id] = property
 
-        content_element = getattr(root, '{%s}content' % CMISRA_NS, None)
+        content_element = getattr(root, "{%s}content" % CMISRA_NS, None)
         if content_element is not None:
             self.content_type = content_element.mediatype.text
             self.content = base64.b64decode(content_element.base64.text)
 
     @property
     def name(self):
-        return self.properties['cmis:name'].value
+        return self.properties["cmis:name"].value
 
     @property
     def type(self):
-        return self.properties['cmis:objectTypeId'].value
+        return self.properties["cmis:objectTypeId"].value
 
 
 class Property(object):
@@ -72,11 +72,11 @@ class Property(object):
 
     def parse(self, element):
         tag = element.tag
-        self.type = tag[tag.index("}") + 1 + len("property"):].lower()
-        self.property_definition_id = element.attrib['propertyDefinitionId']
-        self.local_name = element.attrib.get('localName')
-        self.display_name = element.attrib.get('displayName')
-        self.query_name = element.attrib.get('queryName')
+        self.type = tag[tag.index("}") + 1 + len("property") :].lower()
+        self.property_definition_id = element.attrib["propertyDefinitionId"]
+        self.local_name = element.attrib.get("localName")
+        self.display_name = element.attrib.get("displayName")
+        self.query_name = element.attrib.get("queryName")
 
         value_elem = getattr(element, "{%s}value" % CMIS_NS)
         if value_elem:
@@ -85,9 +85,9 @@ class Property(object):
             self.value = value = None
 
         if value:
-            if self.type in ('id', 'string'):
+            if self.type in ("id", "string"):
                 self.value = value
-            elif self.type == 'datetime':
+            elif self.type == "datetime":
                 # FIXME
                 self.value = datetime(value)
             else:

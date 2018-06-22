@@ -8,7 +8,7 @@ from flask import url_for as url_for_orig
 from flask_babel import lazy_gettext as _l
 from flask_login import current_user
 
-__all__ = ['register_actions']
+__all__ = ["register_actions"]
 
 
 def url_for(endpoint, **kw):
@@ -18,7 +18,7 @@ def url_for(endpoint, **kw):
 class CommunityEndpoint(Endpoint):
     def get_kwargs(self):
         kwargs = super(CommunityEndpoint, self).get_kwargs()
-        kwargs['community_id'] = g.community.slug
+        kwargs["community_id"] = g.community.slug
         return kwargs
 
 
@@ -43,49 +43,46 @@ class CommunityTabAction(Action):
 _actions = (
     # Navigation
     NavItem(
-        'section',
-        'communities',
-        title=_l('Communities'),
-        url=lambda context: url_for_orig('communities.index'),
+        "section",
+        "communities",
+        title=_l("Communities"),
+        url=lambda context: url_for_orig("communities.index"),
         condition=lambda ctx: current_user.is_authenticated,
     ),
     # Tabs
-    CommunityTabAction('communities:tabs', 'wall', _l('Activities')),
+    CommunityTabAction("communities:tabs", "wall", _l("Activities")),
     CommunityTabAction(
-        'communities:tabs',
-        'documents',
-        _l('Documents'),
+        "communities:tabs",
+        "documents",
+        _l("Documents"),
         condition=lambda ctx: g.community.has_documents,
     ),
     CommunityTabAction(
-        'communities:tabs',
-        'wiki',
-        _l('Wiki'),
+        "communities:tabs",
+        "wiki",
+        _l("Wiki"),
         condition=lambda ctx: g.community.has_wiki,
     ),
     CommunityTabAction(
-        'communities:tabs',
-        'forum',
-        _l('Conversations'),
+        "communities:tabs",
+        "forum",
+        _l("Conversations"),
         condition=lambda ctx: g.community.has_forum,
     ),
     CommunityTabAction(
-        'communities:tabs',
-        'calendar',
-        _l('Calendar'),
+        "communities:tabs",
+        "calendar",
+        _l("Calendar"),
         condition=lambda ctx: g.community.has_calendar,
     ),
     CommunityTabAction(
-        'communities:tabs',
-        'members',
-        _l('Members'),
-        endpoint="communities.members",
+        "communities:tabs", "members", _l("Members"), endpoint="communities.members"
     ),
     CommunityTabAction(
-        'communities:tabs',
-        'settings',
-        _l('Settings'),
-        icon='cog',
+        "communities:tabs",
+        "settings",
+        _l("Settings"),
+        icon="cog",
         condition=lambda ctx: current_user.has_role("admin"),
         endpoint="communities.settings",
     ),

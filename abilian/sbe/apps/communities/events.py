@@ -22,7 +22,7 @@ def update_community(sender, verb, actor, object, target=None):
         community.touch()
 
         if isinstance(object, Document):
-            if verb == 'post':
+            if verb == "post":
                 community.document_count += 1
-            elif verb == 'delete':
+            elif verb == "delete":
                 community.document_count -= 1

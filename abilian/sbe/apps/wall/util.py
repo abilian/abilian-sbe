@@ -27,9 +27,7 @@ def get_recent_entries(num=20, user=None, community=None):
     query = AE.query.options(sa.orm.joinedload(AE.object))
 
     if community:
-        query = query.filter(
-            sa.or_(AE.target == g.community, AE.object == g.community),
-        )
+        query = query.filter(sa.or_(AE.target == g.community, AE.object == g.community))
     if user:
         query = query.filter(AE.actor == user)
 
@@ -39,9 +37,9 @@ def get_recent_entries(num=20, user=None, community=None):
     # 'in_' operator cannot be used with relationships, only foreign keys values
     if not community and not current_user.has_role(Admin):
         M = Membership
-        community_ids = M.query \
-            .filter(M.user_id == current_user.id) \
-            .values(M.community_id)
+        community_ids = M.query.filter(M.user_id == current_user.id).values(
+            M.community_id
+        )
 
         # convert generator to list: we'll need it twice during query filtering
         community_ids = list(community_ids)
@@ -49,10 +47,7 @@ def get_recent_entries(num=20, user=None, community=None):
             return []
 
         query = query.filter(
-            sa.or_(
-                AE.target_id.in_(community_ids),
-                AE.object_id.in_(community_ids),
-            ),
+            sa.or_(AE.target_id.in_(community_ids), AE.object_id.in_(community_ids))
         )
 
     query = query.order_by(AE.happened_at.desc()).limit(1000)
@@ -60,7 +55,7 @@ def get_recent_entries(num=20, user=None, community=None):
     limit = min(num * 2, 100)
     entries = []
     deleted = False
-    security = get_service('security')
+    security = get_service("security")
     has_permission = security.has_permission
 
     for entry in query.yield_per(limit):
@@ -73,14 +68,8 @@ def get_recent_entries(num=20, user=None, community=None):
             deleted = True
             continue
 
-        if (
-            isinstance(entry.object, (Folder, Document))
-            and not has_permission(
-                current_user,
-                READ,
-                obj=entry.object,
-                inherit=True,
-            )
+        if isinstance(entry.object, (Folder, Document)) and not has_permission(
+            current_user, READ, obj=entry.object, inherit=True
         ):
             continue
 

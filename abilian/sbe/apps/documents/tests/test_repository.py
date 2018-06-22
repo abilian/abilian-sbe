@@ -41,8 +41,8 @@ def test_create_doc(root, session):
 def test_create_folder(root, session):
     folder = root.create_subfolder("folder")
     session.flush()
-    assert folder.title == 'folder'
-    assert folder.name == 'folder'
+    assert folder.title == "folder"
+    assert folder.name == "folder"
     assert folder.path == "/folder"
     assert len(root.children) == 1
     assert len(folder.children) == 0
@@ -110,15 +110,15 @@ def test_rename(root, repository):
     doc = folder.create_document("doc")
 
     repository.rename_object(doc, "doc1")
-    assert doc.title == 'doc1'
-    assert doc.name == 'doc1'
-    assert doc.path == '/folder/doc1'
+    assert doc.title == "doc1"
+    assert doc.name == "doc1"
+    assert doc.path == "/folder/doc1"
 
     repository.rename_object(folder, "folder1")
-    assert folder.title == 'folder1'
-    assert folder.name == 'folder1'
-    assert folder.path == '/folder1'
-    assert doc.path == '/folder1/doc1'
+    assert folder.title == "folder1"
+    assert folder.name == "folder1"
+    assert folder.path == "/folder1"
+    assert doc.path == "/folder1/doc1"
 
 
 def test_delete(root, repository, session):
@@ -146,7 +146,7 @@ def test_delete(root, repository, session):
 
     # test delete tree
     folder = root.create_subfolder("folder")
-    sub = folder.create_subfolder('subfolder')  # noqa
+    sub = folder.create_subfolder("subfolder")  # noqa
     doc = folder.create_document("doc")  # noqa
     session.flush()
 
@@ -157,7 +157,7 @@ def test_delete(root, repository, session):
 
 
 def test_no_duplicate_name(root, session):
-    root.create_subfolder('folder_1')
-    root.create_subfolder('folder_1')
+    root.create_subfolder("folder_1")
+    root.create_subfolder("folder_1")
     with pytest.raises(IntegrityError):
         session.flush()

@@ -18,13 +18,11 @@ def new_community_member(community, membership, is_new, **kwargs):
 
     role = membership.role
     user = membership.user
-    local_role = Writer if community.type == 'participative' else Reader
+    local_role = Writer if community.type == "participative" else Reader
     if role == Manager:
         local_role = Manager
 
-    current_roles = set(
-        security.get_roles(user, community.folder, no_group_roles=True),
-    )
+    current_roles = set(security.get_roles(user, community.folder, no_group_roles=True))
     current_roles &= VALID_ROLES  # ensure we don't remove roles not managed
     # by us
 
@@ -43,13 +41,7 @@ def remove_community_member(community, membership, **kwargs):
         return
 
     user = membership.user
-    roles = set(
-        security.get_roles(
-            user,
-            community.folder,
-            no_group_roles=True,
-        ),
-    )
+    roles = set(security.get_roles(user, community.folder, no_group_roles=True))
     roles &= VALID_ROLES  # ensure we don't remove roles not managed by us
     for role in roles:
         security.ungrant_role(user, role, community.folder)

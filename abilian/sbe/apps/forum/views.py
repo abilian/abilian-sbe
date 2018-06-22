@@ -35,32 +35,27 @@ from .tasks import send_post_by_email
 # TODO: move to config
 MAX_THREADS = 30
 
-forum = Blueprint(
-    "forum",
-    __name__,
-    url_prefix="/forum",
-    template_folder="templates",
-)
+forum = Blueprint("forum", __name__, url_prefix="/forum", template_folder="templates")
 route = forum.route
 
 
 def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
     """kwargs for Post default view."""
     kw = default_view_kw(kw, obj.thread, obj_type, obj_id, **kwargs)
-    kw['thread_id'] = obj.thread_id
-    kw['_anchor'] = 'post_{:d}'.format(obj.id)
+    kw["thread_id"] = obj.thread_id
+    kw["_anchor"] = "post_{:d}".format(obj.id)
     return kw
 
 
 @forum.url_value_preprocessor
 def init_forum_values(endpoint, values):
-    g.current_tab = 'forum'
+    g.current_tab = "forum"
 
     g.breadcrumb.append(
         BreadcrumbItem(
-            label=_l('Conversations'),
-            url=Endpoint('forum.index', community_id=g.community.slug),
-        ),
+            label=_l("Conversations"),
+            url=Endpoint("forum.index", community_id=g.community.slug),
+        )
     )
 
 
@@ -68,7 +63,8 @@ def get_nb_viewers(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
         threads = [
-            thread.entity for thread in views
+            thread.entity
+            for thread in views
             if thread.user in g.community.members
             and thread.user != thread.entity.creator
         ]
@@ -88,9 +84,9 @@ def get_viewed_posts(entities):
         entity = view.entity
         if entity in entities:
             cutoff = related_hits[-1].viewed_at
-            nb_viewed_posts[entity] = len([
-                post for post in entity.posts if post.created_at > cutoff
-            ], )
+            nb_viewed_posts[entity] = len(
+                [post for post in entity.posts if post.created_at > cutoff]
+            )
 
     never_viewed = set(entities) - {view.entity for view in views}
     for entity in never_viewed:
@@ -103,8 +99,9 @@ def get_viewed_times(entities):
     if entities:
         views = viewtracker.get_views(entities=entities)
         views = [
-            view for view in views if view.user != view.entity.creator
-            and view.user in g.community.members
+            view
+            for view in views
+            if view.user != view.entity.creator and view.user in g.community.members
         ]
 
         all_hits = viewtracker.get_hits(views=views)
@@ -121,12 +118,12 @@ def get_viewed_times(entities):
         return entity_viewed_times
 
 
-@route('/')
-@route('/<string:filter>')
+@route("/")
+@route("/<string:filter>")
 def index(filter=None):
-    query = Thread.query \
-        .filter(Thread.community_id == g.community.id) \
-        .order_by(Thread.last_post_at.desc())
+    query = Thread.query.filter(Thread.community_id == g.community.id).order_by(
+        Thread.last_post_at.desc()
+    )
 
     threads = query.all()
     has_more = False
@@ -136,22 +133,20 @@ def index(filter=None):
         thread.nb_views = nb_viewed_times.get(thread, 0)
 
     dt = None
-    if filter == 'today':
+    if filter == "today":
         dt = timedelta(days=1)
-    elif filter == 'week':
+    elif filter == "week":
         dt = timedelta(days=7)
-    elif filter == 'month':
+    elif filter == "month":
         dt = timedelta(days=31)
-    elif filter == 'year':
+    elif filter == "year":
         dt = timedelta(days=365)
     elif filter:
         raise BadRequest()
 
     if dt:
         cutoff_date = datetime.utcnow() - dt
-        threads = [
-            thread for thread in threads if thread.created_at > cutoff_date
-        ]
+        threads = [thread for thread in threads if thread.created_at > cutoff_date]
 
     if dt:
         threads = sorted(threads, key=lambda thread: -thread.nb_views)
@@ -184,66 +179,63 @@ def group_monthly(entities_list):
         return "%s %s" % (month, year)
 
     grouped_entities = groupby(entities_list, grouper)
-    grouped_entities = [(format_month(year, month), list(entities))
-                        for (year, month), entities in grouped_entities]
+    grouped_entities = [
+        (format_month(year, month), list(entities))
+        for (year, month), entities in grouped_entities
+    ]
     return grouped_entities
 
 
-@route('/archives/')
+@route("/archives/")
 def archives():
-    all_threads = Thread.query \
-        .filter(Thread.community_id == g.community.id) \
-        .order_by(Thread.created_at.desc()).all()
-
-    grouped_threads = group_monthly(all_threads)
-    return render_template(
-        'forum/archives.html',
-        grouped_threads=grouped_threads,
+    all_threads = (
+        Thread.query.filter(Thread.community_id == g.community.id)
+        .order_by(Thread.created_at.desc())
+        .all()
     )
 
+    grouped_threads = group_monthly(all_threads)
+    return render_template("forum/archives.html", grouped_threads=grouped_threads)
 
-@route('/attachments/')
+
+@route("/attachments/")
 def attachments():
-    all_threads = Thread.query \
-        .filter(Thread.community_id == g.community.id) \
-        .options(joinedload('posts')) \
-        .options(joinedload('posts.attachments')) \
-        .order_by(Thread.created_at.desc()).all()
+    all_threads = (
+        Thread.query.filter(Thread.community_id == g.community.id)
+        .options(joinedload("posts"))
+        .options(joinedload("posts.attachments"))
+        .order_by(Thread.created_at.desc())
+        .all()
+    )
 
     posts_with_attachments = []
     for thread in all_threads:
         for post in thread.posts:
-            if getattr(post, 'attachments', None):
+            if getattr(post, "attachments", None):
                 posts_with_attachments.append(post)
     posts_with_attachments.sort(key=lambda post: post.created_at)
     posts_with_attachments.reverse()
 
     grouped_posts = group_monthly(posts_with_attachments)
-    return render_template(
-        'forum/attachments.html',
-        grouped_posts=grouped_posts,
-    )
+    return render_template("forum/attachments.html", grouped_posts=grouped_posts)
 
 
 class BaseThreadView(object):
     Model = Thread
     Form = ThreadForm
-    pk = 'thread_id'
-    base_template = 'community/_base.html'
+    pk = "thread_id"
+    base_template = "community/_base.html"
 
     def can_send_by_mail(self):
-        return (
-            g.community.type == 'participative'
-            or is_manager(user=current_user)
-        )
+        return g.community.type == "participative" or is_manager(user=current_user)
 
     def prepare_args(self, args, kwargs):
         args, kwargs = super(BaseThreadView, self).prepare_args(args, kwargs)
         self.send_by_email = False
 
-        if not self.can_send_by_mail() and 'send_by_email' in self.form:
+        if not self.can_send_by_mail() and "send_by_email" in self.form:
             # remove from html form and avoid validation errors
-            del self.form['send_by_email']
+            del self.form["send_by_email"]
 
         return args, kwargs
 
@@ -255,45 +247,39 @@ class BaseThreadView(object):
 
 
 class ThreadView(BaseThreadView, views.ObjectView):
-    methods = ['GET', 'HEAD']
+    methods = ["GET", "HEAD"]
     Form = PostForm
-    template = 'forum/thread.html'
+    template = "forum/thread.html"
 
     @property
     def template_kwargs(self):
         kw = super(ThreadView, self).template_kwargs
-        kw['thread'] = self.obj
-        kw['is_closed'] = self.obj.closed
-        kw['is_manager'] = is_manager(user=current_user)
-        kw['viewers'] = object_viewers(self.obj)
-        kw['views'] = get_viewed_times([self.obj])
-        kw['participants'] = {post.creator for post in self.obj.posts}
-        kw['activity_time_format'] = activity_time_format
+        kw["thread"] = self.obj
+        kw["is_closed"] = self.obj.closed
+        kw["is_manager"] = is_manager(user=current_user)
+        kw["viewers"] = object_viewers(self.obj)
+        kw["views"] = get_viewed_times([self.obj])
+        kw["participants"] = {post.creator for post in self.obj.posts}
+        kw["activity_time_format"] = activity_time_format
         viewtracker.record_hit(entity=self.obj, user=current_user)
         return kw
 
 
-thread_view = ThreadView.as_view('thread')
+thread_view = ThreadView.as_view("thread")
 default_view(forum, Post, None, kw_func=post_kw_view_func)(thread_view)
-default_view(forum, Thread, 'thread_id', kw_func=default_view_kw)(thread_view)
+default_view(forum, Thread, "thread_id", kw_func=default_view_kw)(thread_view)
 
-route('/<int:thread_id>/')(thread_view)
-route('/<int:thread_id>/attachments')(
-    ThreadView.as_view(
-        'thread_attachments',
-        template='forum/thread_attachments.html',
-    )
+route("/<int:thread_id>/")(thread_view)
+route("/<int:thread_id>/attachments")(
+    ThreadView.as_view("thread_attachments", template="forum/thread_attachments.html")
 )
 
 
 class ThreadCreate(BaseThreadView, views.ObjectCreate):
-    base_template = 'community/_forumbase.html'
-    template = 'forum/thread_create.html'
+    base_template = "community/_forumbase.html"
+    template = "forum/thread_create.html"
     POST_BUTTON = ButtonAction(
-        'form',
-        'create',
-        btn_class='primary',
-        title=_l('Post this message'),
+        "form", "create", btn_class="primary", title=_l("Post this message")
     )
 
     title = _("New conversation")
@@ -304,38 +290,38 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
         return args, kwargs
 
     def before_populate_obj(self):
-        del self.form['attachments']
+        del self.form["attachments"]
         self.message_body = self.form.message.data
-        del self.form['message']
+        del self.form["message"]
 
-        if 'send_by_email' in self.form:
+        if "send_by_email" in self.form:
             self.send_by_email = (
                 self.can_send_by_mail() and self.form.send_by_email.data
             )
-            del self.form['send_by_email']
+            del self.form["send_by_email"]
 
     def after_populate_obj(self):
         if self.thread.community is None:
             self.thread.community = g.community._model
 
         self.post = self.thread.create_post(body_html=self.message_body)
-        obj_meta = self.post.meta.setdefault('abilian.sbe.forum', {})
-        obj_meta['origin'] = 'web'
-        obj_meta['send_by_email'] = self.send_by_email
+        obj_meta = self.post.meta.setdefault("abilian.sbe.forum", {})
+        obj_meta["origin"] = "web"
+        obj_meta["send_by_email"] = self.send_by_email
         session = sa.orm.object_session(self.thread)
-        uploads = current_app.extensions['uploads']
+        uploads = current_app.extensions["uploads"]
 
-        for handle in request.form.getlist('attachments'):
+        for handle in request.form.getlist("attachments"):
             fileobj = uploads.get_file(current_user, handle)
             if fileobj is None:
                 continue
 
             meta = uploads.get_metadata(current_user, handle)
-            name = meta.get('filename', handle)
-            mimetype = meta.get('mimetype')
+            name = meta.get("filename", handle)
+            mimetype = meta.get("mimetype")
 
             if not isinstance(name, text_type):
-                name = text_type(name, encoding='utf-8', errors='ignore')
+                name = text_type(name, encoding="utf-8", errors="ignore")
 
             if not name:
                 continue
@@ -343,15 +329,15 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
             attachment = PostAttachment(name=name)
             attachment.post = self.post
 
-            with fileobj.open('rb') as f:
+            with fileobj.open("rb") as f:
                 attachment.set_content(f.read(), mimetype)
             session.add(attachment)
 
     def commit_success(self):
         if self.send_by_email:
             task = send_post_by_email.delay(self.post.id)
-            meta = self.post.meta.setdefault('abilian.sbe.forum', {})
-            meta['send_post_by_email_task'] = task.id
+            meta = self.post.meta.setdefault("abilian.sbe.forum", {})
+            meta["send_post_by_email_task"] = task.id
             self.post.meta.changed()
             session = sa.orm.object_session(self.post)
             session.commit()
@@ -364,17 +350,13 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
         return [self.POST_BUTTON, views.object.CANCEL_BUTTON]
 
 
-route('/new_thread/')(
-    ThreadCreate.as_view(
-        'new_thread',
-        view_endpoint='.thread',
-    )
-)
+route("/new_thread/")(ThreadCreate.as_view("new_thread", view_endpoint=".thread"))
 
 
 class ThreadPostCreate(ThreadCreate):
     """Add a new post to a thread."""
-    methods = ['POST']
+
+    methods = ["POST"]
     Form = PostForm
     Model = Post
 
@@ -384,10 +366,9 @@ class ThreadPostCreate(ThreadCreate):
         args, kwargs = super(ThreadPostCreate, self).init_object(args, kwargs)
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
-        Thread.query.filter(Thread.id == thread_id).update({
-            Thread.last_post_at:
-            datetime.utcnow(),
-        })
+        Thread.query.filter(Thread.id == thread_id).update(
+            {Thread.last_post_at: datetime.utcnow()}
+        )
         return args, kwargs
 
     def after_populate_obj(self):
@@ -399,53 +380,47 @@ class ThreadPostCreate(ThreadCreate):
 
 class ThreadViewers(ThreadView):
 
-    template = 'forum/thread_viewers.html'
+    template = "forum/thread_viewers.html"
 
 
-route('/<int:thread_id>/')(
-    ThreadPostCreate.as_view(
-        'thread_post',
-        view_endpoint='.thread',
-    )
+route("/<int:thread_id>/")(
+    ThreadPostCreate.as_view("thread_post", view_endpoint=".thread")
 )
 
-route('/<int:thread_id>/viewers')(ThreadViewers.as_view('thread_viewers'))
+route("/<int:thread_id>/viewers")(ThreadViewers.as_view("thread_viewers"))
 
 
 class ThreadDelete(BaseThreadView, views.ObjectDelete):
-    methods = ['POST']
+    methods = ["POST"]
     _message_success = _('Thread "{title}" deleted.')
 
     def message_success(self):
         return text_type(self._message_success).format(title=self.obj.title)
 
 
-route('/<int:thread_id>/delete')(ThreadDelete.as_view('thread_delete'))
+route("/<int:thread_id>/delete")(ThreadDelete.as_view("thread_delete"))
 
 
 class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
     """Close / Re-open a thread."""
-    methods = ['POST']
-    _VALID_ACTIONS = {'close', 'reopen'}
-    CLOSED_MSG = _l(
-        'The thread is now closed for edition and new '
-        'contributions.',
-    )
+
+    methods = ["POST"]
+    _VALID_ACTIONS = {"close", "reopen"}
+    CLOSED_MSG = _l("The thread is now closed for edition and new " "contributions.")
     REOPENED_MSG = _l(
-        'The thread is now re-opened for edition and new '
-        'contributions.',
+        "The thread is now re-opened for edition and new " "contributions."
     )
 
     def prepare_args(self, args, kwargs):
         args, kwargs = super(ThreadCloseView, self).prepare_args(args, kwargs)
-        action = kwargs['action'] = request.form.get('action')
+        action = kwargs["action"] = request.form.get("action")
         if action not in self._VALID_ACTIONS:
-            raise BadRequest('Unknown action: {!r}'.format(action))
+            raise BadRequest("Unknown action: {!r}".format(action))
 
         return args, kwargs
 
     def post(self, action=None):
-        is_closed = (action == 'close')
+        is_closed = action == "close"
         self.obj.closed = is_closed
         sa.orm.object_session(self.obj).commit()
 
@@ -454,13 +429,13 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
         return self.redirect(url_for(self.obj))
 
 
-route('/<int:thread_id>/close')(ThreadCloseView.as_view('thread_close'))
+route("/<int:thread_id>/close")(ThreadCloseView.as_view("thread_close"))
 
 
 class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
     Form = PostEditForm
     Model = Post
-    pk = 'object_id'
+    pk = "object_id"
 
     def can_send_by_mail(self):
         # post edit: don't notify every time
@@ -470,42 +445,43 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         # we DO want to skip ThreadCreate.init_object. hence super is not based on
         # ThreadPostCreate
         args, kwargs = super(ThreadPostEdit, self).init_object(args, kwargs)
-        thread_id = kwargs.pop('thread_id', None)
+        thread_id = kwargs.pop("thread_id", None)
         self.thread = self.obj.thread
         assert thread_id == self.thread.id
         return args, kwargs
 
     def get_form_kwargs(self):
         kwargs = super(ThreadPostEdit, self).get_form_kwargs()
-        kwargs['message'] = self.obj.body_html
+        kwargs["message"] = self.obj.body_html
         return kwargs
 
     def before_populate_obj(self):
         self.message_body = self.form.message.data
-        del self.form['message']
+        del self.form["message"]
         self.reason = self.form.reason.data
 
         self.send_by_email = False
-        if 'send_by_email' in self.form:
-            del self.form['send_by_email']
+        if "send_by_email" in self.form:
+            del self.form["send_by_email"]
 
-        self.attachments_to_remove = self.form['attachments'
-                                               ].delete_files_index
-        del self.form['attachments']
+        self.attachments_to_remove = self.form["attachments"].delete_files_index
+        del self.form["attachments"]
 
     def after_populate_obj(self):
         session = sa.orm.object_session(self.obj)
-        uploads = current_app.extensions['uploads']
+        uploads = current_app.extensions["uploads"]
         self.obj.body_html = self.message_body
-        obj_meta = self.obj.meta.setdefault('abilian.sbe.forum', {})
-        history = obj_meta.setdefault('history', [])
-        history.append({
-            'user_id': current_user.id,
-            'user': text_type(current_user),
-            'date': utc_dt(datetime.utcnow()).isoformat(),
-            'reason': self.form.reason.data
-        }, )
-        self.obj.meta['abilian.sbe.forum'] = obj_meta  # trigger change for SA
+        obj_meta = self.obj.meta.setdefault("abilian.sbe.forum", {})
+        history = obj_meta.setdefault("history", [])
+        history.append(
+            {
+                "user_id": current_user.id,
+                "user": text_type(current_user),
+                "date": utc_dt(datetime.utcnow()).isoformat(),
+                "reason": self.form.reason.data,
+            }
+        )
+        self.obj.meta["abilian.sbe.forum"] = obj_meta  # trigger change for SA
 
         attachments_to_remove = []
         for idx in self.attachments_to_remove:
@@ -522,66 +498,58 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         for att in attachments_to_remove:
             session.delete(att)
 
-        for handle in request.form.getlist('attachments'):
+        for handle in request.form.getlist("attachments"):
             fileobj = uploads.get_file(current_user, handle)
             if fileobj is None:
                 continue
 
             meta = uploads.get_metadata(current_user, handle)
-            name = meta.get('filename', handle)
-            mimetype = meta.get('mimetype')
+            name = meta.get("filename", handle)
+            mimetype = meta.get("mimetype")
 
             if not isinstance(name, text_type):
-                name = text_type(name, encoding='utf-8', errors='ignore')
+                name = text_type(name, encoding="utf-8", errors="ignore")
 
             if not name:
                 continue
 
             attachment = PostAttachment(name=name, post=self.obj)
 
-            with fileobj.open('rb') as f:
+            with fileobj.open("rb") as f:
                 attachment.set_content(f.read(), mimetype)
             session.add(attachment)
 
 
-route('/<int:thread_id>/<int:object_id>/edit')(
-    ThreadPostEdit.as_view('post_edit'),
-)
+route("/<int:thread_id>/<int:object_id>/edit")(ThreadPostEdit.as_view("post_edit"))
 
 
 def attachment_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
     post = obj.post
     kw = default_view_kw(kw, post.thread, obj_type, obj_id, **kwargs)
-    kw['thread_id'] = post.thread_id
-    kw['post_id'] = post.id
+    kw["thread_id"] = post.thread_id
+    kw["post_id"] = post.id
     return kw
 
 
-@route('/<int:thread_id>/posts/<int:post_id>/attachment/<int:attachment_id>')
-@default_view(
-    forum,
-    PostAttachment,
-    'attachment_id',
-    kw_func=attachment_kw_view_func,
-)
+@route("/<int:thread_id>/posts/<int:post_id>/attachment/<int:attachment_id>")
+@default_view(forum, PostAttachment, "attachment_id", kw_func=attachment_kw_view_func)
 def attachment_download(thread_id, post_id, attachment_id):
     thread = Thread.query.get(thread_id)
     post = Post.query.get(post_id)
     attachment = PostAttachment.query.get(attachment_id)
 
     if (
-        not (thread and post and attachment) or post.thread is not thread
+        not (thread and post and attachment)
+        or post.thread is not thread
         or attachment.post is not post
     ):
         raise NotFound()
 
     response = make_response(attachment.content)
-    response.headers['content-length'] = attachment.content_length
-    response.headers['content-type'] = attachment.content_type
-    content_disposition = (
-        'attachment;filename="{}"'.format(
-            quote(attachment.name.encode('utf8')),
-        )
+    response.headers["content-length"] = attachment.content_length
+    response.headers["content-type"] = attachment.content_type
+    content_disposition = 'attachment;filename="{}"'.format(
+        quote(attachment.name.encode("utf8"))
     )
-    response.headers['content-disposition'] = content_disposition
+    response.headers["content-disposition"] = content_disposition
     return response

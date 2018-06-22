@@ -31,40 +31,21 @@ from .social import social
 logger = logging.getLogger(__name__)
 
 DEFAULT_USER_MUGSHOT = pkgutil.get_data(
-    'abilian.sbe',
-    'static/images/silhouette_unknown.png',
+    "abilian.sbe", "static/images/silhouette_unknown.png"
 )
 
 
 def make_tabs(user):
     return [
-        {
-            'id': 'profile',
-            'label': _('Profile'),
-            'link': url_for(
-                user,
-                tab='profile',
-            )
-        },
+        {"id": "profile", "label": _("Profile"), "link": url_for(user, tab="profile")},
         # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
         {
-            'id': 'documents',
-            'label': _('Documents'),
-            'link': url_for(
-                user,
-                tab='documents',
-            )
+            "id": "documents",
+            "label": _("Documents"),
+            "link": url_for(user, tab="documents"),
         },
-        {
-            'id': 'images',
-            'label': _('Images'),
-            'link': url_for(user, tab='images')
-        },
-        {
-            'id': 'audit',
-            'label': _('Audit'),
-            'link': url_for(user, tab='audit')
-        },
+        {"id": "images", "label": _("Images"), "link": url_for(user, tab="images")},
+        {"id": "audit", "label": _("Audit"), "link": url_for(user, tab="audit")},
     ]
 
 
@@ -81,7 +62,7 @@ def users():
         users = User.query.filter(q).limit(100).all()
     else:
         users = User.query.limit(100).all()
-    ctx = {'users': users}
+    ctx = {"users": users}
     return render_template("social/users.html", **ctx)
 
 
@@ -111,8 +92,7 @@ def users_dt_json():
             func.lower(User.first_name).like("%" + search + "%"),
             func.lower(User.last_name).like("%" + search + "%"),
         )
-        query = query.filter(filter) \
-            .reset_joinpoint()
+        query = query.filter(filter).reset_joinpoint()
 
     count = query.count()
     SORT_COLS = {
@@ -123,12 +103,12 @@ def users_dt_json():
     columns = list(SORT_COLS.get(sort_col, []))
     columns.extend([func.lower(User.last_name), func.lower(User.first_name)])
 
-    direction = asc if sort_dir == 'asc' else desc
+    direction = asc if sort_dir == "asc" else desc
     order_by = [direction(column) for column in columns]
 
     # sqlite does not support 'NULLS FIRST|LAST' in ORDER BY clauses
     engine = query.session.get_bind(User.__mapper__)
-    if engine.name != 'sqlite':
+    if engine.name != "sqlite":
         order_by[0] = nullslast(order_by[0])
 
     query = query.order_by(*order_by)
@@ -145,16 +125,15 @@ def users_dt_json():
 
         cell0 = (
             '<a href="{url}"><img src="{src}" width="{size}" height="{size}">'
-            '</a>'.format(url=user_url, src=mugshot, size=MUGSHOT_SIZE)
+            "</a>".format(url=user_url, src=mugshot, size=MUGSHOT_SIZE)
         )
-        cell1 = (
-            '<div class="info"><a href="{user_url}">{name}</a> '
-            '</div>'.format(**locals())
+        cell1 = '<div class="info"><a href="{user_url}">{name}</a> ' "</div>".format(
+            **locals()
         )
         cell2 = age(user.created_at)
         cell3 = age(user.last_active)
 
-        cell4 = ''  # TODO: follow / unfollow?
+        cell4 = ""  # TODO: follow / unfollow?
         data.append([cell0, cell1, cell2, cell3])
 
     result = {
@@ -167,16 +146,16 @@ def users_dt_json():
 
 
 @social.route("/users/<int:user_id>")
-@default_view(social, User, 'user_id')
+@default_view(social, User, "user_id")
 def user(user_id):
-    security = get_service('security')
+    security = get_service("security")
     user = User.query.get(user_id)
 
     # FIXME: use user profiles
     view_form = UserProfileViewForm(obj=user)
 
     communities = [m.community for m in user.communautes_membership]
-    if g.user != user and (not security.has_role(g.user, 'manager')):
+    if g.user != user and (not security.has_role(g.user, "manager")):
         # filter visible communautes (ticket 165)
         communities = [c for c in communities if c.has_member(g.user)]
 
@@ -187,31 +166,31 @@ def user(user_id):
     entries = get_recent_entries(user=user)
     entries = ActivityEntryPresenter.wrap_collection(entries)
     ctx = {
-        'user': user,
-        'contact': contact,
-        'view_form': view_form,
-        'can_edit': can_edit(user),
-        'tabs': make_tabs(user),
-        'activity_entries': entries,
+        "user": user,
+        "contact": contact,
+        "view_form": view_form,
+        "can_edit": can_edit(user),
+        "tabs": make_tabs(user),
+        "activity_entries": entries,
     }
     return render_template("social/user.html", **ctx)
 
 
 def can_edit(user):
-    security = get_service('security')
+    security = get_service("security")
     if not security:
         return True
 
     # TODO: introduce a "self" role?
-    return (user == g.user) or security.has_role(g.user, 'admin')
+    return (user == g.user) or security.has_role(g.user, "admin")
 
 
 class UserProfileEdit(ObjectEdit):
 
     Model = User
     Form = UserProfileForm
-    pk = 'user_id'
-    _message_success = _l('Profile edited')
+    pk = "user_id"
+    _message_success = _l("Profile edited")
 
     def init_object(self, args, kwargs):
         args, kwargs = super(UserProfileEdit, self).init_object(args, kwargs)
@@ -219,7 +198,7 @@ class UserProfileEdit(ObjectEdit):
         return args, kwargs
 
     def view_url(self):
-        return url_for('.user', user_id=self.user.id)
+        return url_for(".user", user_id=self.user.id)
 
     def edit(self):
         if not can_edit(self.user):
@@ -229,26 +208,26 @@ class UserProfileEdit(ObjectEdit):
     def handle_commit_exception(self, exc):
         db.session.rollback()
         if isinstance(exc, sa.exc.IntegrityError):
-            log_msg = 'Error saving user profile'
+            log_msg = "Error saving user profile"
         else:
-            log_msg = 'Unexpected error while saving user profile'
-        logger.error(log_msg, exc_info=True, extra={'stack': True})
-        flash(_('Error occured'), "error")
+            log_msg = "Unexpected error while saving user profile"
+        logger.error(log_msg, exc_info=True, extra={"stack": True})
+        flash(_("Error occured"), "error")
         return self.redirect_to_view()
 
 
-social.route("/users/<int:user_id>/edit")(UserProfileEdit.as_view('user_edit'))
+social.route("/users/<int:user_id>/edit")(UserProfileEdit.as_view("user_edit"))
 
 
-@social.route("/users/<int:user_id>", methods=['POST'])
+@social.route("/users/<int:user_id>", methods=["POST"])
 def user_post(user_id):
     user = User.query.get(user_id)
-    action = request.form.get('action')
-    return_url = request.form.get('return_url')
+    action = request.form.get("action")
+    return_url = request.form.get("return_url")
 
-    if action == 'follow':
+    if action == "follow":
         g.user.follow(user)
-    elif action == 'unfollow':
+    elif action == "unfollow":
         g.user.unfollow(user)
     else:
         raise Exception("Should not happen")
@@ -271,41 +250,39 @@ def users_json():
     if not q or len(q) < 2:
         raise InternalServerError()
 
-    query = User.query \
-        .filter(or_(
+    query = User.query.filter(
+        or_(
             func.lower(User.first_name).like(q + "%"),
             func.lower(User.last_name).like(q + "%"),
-        )) \
-        .order_by(func.lower(User.last_name))
+        )
+    ).order_by(func.lower(User.last_name))
 
-    with_membership = request.args.get('with_membership')
+    with_membership = request.args.get("with_membership")
     if with_membership is not None:
         # provide membership info for a community
         with_membership = int(with_membership)
-        query = query \
-            .outerjoin(
+        query = (
+            query.outerjoin(
                 Membership,
                 and_(
                     Membership.user.expression,
                     Membership.community_id == with_membership,
                 ),
-            ) \
-            .filter(User.can_login == True) \
+            )
+            .filter(User.can_login == True)
             .add_columns(Membership.role)
+        )
 
-    exclude_community = request.args.get('exclude_community')
+    exclude_community = request.args.get("exclude_community")
     if exclude_community is not None:
         exclude_community = int(exclude_community)
-        exclude = ~Membership.query \
-            .filter(
-                Membership.user.expression,
-                Membership.community_id == exclude_community,
-            ) \
-            .options(
-                sa.orm.noload('user'),
-                sa.orm.noload('community'),
-            ) \
+        exclude = (
+            ~Membership.query.filter(
+                Membership.user.expression, Membership.community_id == exclude_community
+            )
+            .options(sa.orm.noload("user"), sa.orm.noload("community"))
             .exists()
+        )
         query = query.filter(exclude)
 
     results = []
@@ -318,12 +295,12 @@ def users_json():
             role = text_type(role)
 
         item = {
-            'id': user.id,
-            'text': '{} ({})'.format(user.name, user.email),
-            'name': user.name,
-            'email': user.email,
-            'role': role,
+            "id": user.id,
+            "text": "{} ({})".format(user.name, user.email),
+            "name": user.name,
+            "email": user.email,
+            "role": role,
         }
         results.append(item)
 
-    return jsonify({'results': results})
+    return jsonify({"results": results})

@@ -29,7 +29,7 @@ def debug_social():
 
     Also displays the email in the browser as a result.
     """
-    email = request.args.get('email')
+    email = request.args.get("email")
     if email:
         user = User.query.filter(User.email == email).one()
     else:
@@ -45,26 +45,22 @@ def debug_social():
         return "No message sent."
 
 
-@route("/unsubscribe_sbe/<token>/", methods=['GET', 'POST'])
+@route("/unsubscribe_sbe/<token>/", methods=["GET", "POST"])
 @csrf.exempt
 def unsubscribe_sbe(token):
     expired, invalid, user = get_token_status(token, TOKEN_SERIALIZER_NAME)
     if expired or invalid:
         return render_template_i18n("notifications/invalid-token.html")
 
-    if request.method == 'GET':
+    if request.method == "GET":
         return render_template_i18n(
-            "notifications/confirm-unsubscribe.html",
-            token=token,
+            "notifications/confirm-unsubscribe.html", token=token
         )
 
-    elif request.method == 'POST':
-        preferences = app.services['preferences']
-        preferences.set_preferences(user, **{'sbe:notifications:daily': False})
+    elif request.method == "POST":
+        preferences = app.services["preferences"]
+        preferences.set_preferences(user, **{"sbe:notifications:daily": False})
         db.session.commit()
-        return render_template_i18n(
-            "notifications/unsubscribed.html",
-            token=token,
-        )
+        return render_template_i18n("notifications/unsubscribed.html", token=token)
     else:
         raise MethodNotAllowed()

@@ -31,20 +31,22 @@ def _group_choices():
     query = Group.query.session.query(
         Group.id,
         Group.name,
-        Community.name.label('community'),
-        sa.sql.func.count(membership.c.user_id).label('members_count'),
+        Community.name.label("community"),
+        sa.sql.func.count(membership.c.user_id).label("members_count"),
     )
-    query = query.outerjoin(m_prop.secondary, m_prop.primaryjoin) \
-        .outerjoin(Community, Community.group.property.primaryjoin) \
-        .group_by(Group.id, Group.name, Community.name) \
-        .order_by(sa.sql.func.lower(Group.name)) \
+    query = (
+        query.outerjoin(m_prop.secondary, m_prop.primaryjoin)
+        .outerjoin(Community, Community.group.property.primaryjoin)
+        .group_by(Group.id, Group.name, Community.name)
+        .order_by(sa.sql.func.lower(Group.name))
         .autoflush(False)
-    choices = [('', '')]
+    )
+    choices = [("", "")]
 
     for g in query:
-        label = '{} ({:d} membres)'.format(g.name, g.members_count)
+        label = "{} ({:d} membres)".format(g.name, g.members_count)
         if g.community:
-            label += ' — Communauté: {}'.format(g.community)
+            label += " — Communauté: {}".format(g.community)
         choices.append((text_type(g.id), label))
 
     return choices
@@ -59,15 +61,13 @@ class CommunityForm(Form):
     )
 
     linked_group = Select2Field(
-        label=_l('Linked to group'),
-        description=_l(
-            'Manages a group of users through this community members.',
-        ),
+        label=_l("Linked to group"),
+        description=_l("Manages a group of users through this community members."),
         choices=_group_choices,
     )
 
     image = FileField(
-        label=_l('Image'),
+        label=_l("Image"),
         widget=ImageInput(width=65, height=65),
         validators=[optional()],
     )
@@ -75,24 +75,21 @@ class CommunityForm(Form):
     type = Select2Field(
         label=_("Type"),
         validators=[data_required()],
-        filters=(strip, ),
+        filters=(strip,),
         choices=[
-            (_l('informative'), 'informative'),
-            (_l('participative'), 'participative'),
+            (_l("informative"), "informative"),
+            (_l("participative"), "participative"),
         ],
     )
 
     has_documents = BooleanField(
-        label=_l("Has documents"),
-        widget=BooleanWidget(on_off_mode=True),
+        label=_l("Has documents"), widget=BooleanWidget(on_off_mode=True)
     )
     has_wiki = BooleanField(
-        label=_l("Has a wiki"),
-        widget=BooleanWidget(on_off_mode=True),
+        label=_l("Has a wiki"), widget=BooleanWidget(on_off_mode=True)
     )
     has_forum = BooleanField(
-        label=_l("Has a forum"),
-        widget=BooleanWidget(on_off_mode=True),
+        label=_l("Has a forum"), widget=BooleanWidget(on_off_mode=True)
     )
 
     def validate_name(self, field):
@@ -104,7 +101,7 @@ class CommunityForm(Form):
                 # name changed: check for duplicates
                 if Community.query.filter(Community.name == name).count() > 0:
                     raise ValidationError(
-                        _("A community with this name already exists"),
+                        _("A community with this name already exists")
                     )
 
     def validate_description(self, field):
@@ -113,25 +110,21 @@ class CommunityForm(Form):
     # FIXME: code duplicated from the user edit form (UserProfileForm).
     # Needs to be refactored.
     def validate_image(self, field):
-        data = request.form.get('image')
+        data = request.form.get("image")
         if not data:
             return
 
         data = field.data
         filename = data.filename
-        valid = any(map(filename.lower().endswith, ('.png', '.jpg', '.jpeg')))
+        valid = any(map(filename.lower().endswith, (".png", ".jpg", ".jpeg")))
 
         if not valid:
-            raise ValidationError(
-                _('Only PNG or JPG image files are accepted'),
-            )
+            raise ValidationError(_("Only PNG or JPG image files are accepted"))
 
-        img_type = imghdr.what('ignored', data.read())
+        img_type = imghdr.what("ignored", data.read())
 
-        if img_type not in ('png', 'jpeg'):
-            raise ValidationError(
-                _('Only PNG or JPG image files are accepted'),
-            )
+        if img_type not in ("png", "jpeg"):
+            raise ValidationError(_("Only PNG or JPG image files are accepted"))
 
         data.seek(0)
         try:
@@ -139,7 +132,7 @@ class CommunityForm(Form):
             im = PIL.Image.open(data)
             im.load()
         except BaseException:
-            raise ValidationError(_('Could not decode image file'))
+            raise ValidationError(_("Could not decode image file"))
 
         data.seek(0)
         field.data = data

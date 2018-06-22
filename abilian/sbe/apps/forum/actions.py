@@ -36,22 +36,22 @@ class ForumAction(Action):
 
 class ThreadAction(ForumAction):
     def pre_condition(self, context):
-        thread = actions.context.get('object')
+        thread = actions.context.get("object")
         return not not thread
 
 
 def is_admin(context):
-    security = get_service('security')
-    return security.has_role(current_user, Admin, object=context.get('object'))
+    security = get_service("security")
+    return security.has_role(current_user, Admin, object=context.get("object"))
 
 
 def is_in_thread(context):
-    thread = context.get('object')
+    thread = context.get("object")
     return not thread
 
 
 def is_closed(context):
-    thread = context.get('object')
+    thread = context.get("object")
     return thread.closed
 
 
@@ -63,7 +63,7 @@ class ForumModalAction(ModalActionMixin, ThreadAction):
     pass
 
 
-_close_template_action = '''
+_close_template_action = """
 <form method="POST" action="{{ url }}" encoding="multipart/form-data">
   {{ csrf.field() }}
   <button type="submit" class="btn btn-link" name="action"
@@ -72,62 +72,45 @@ _close_template_action = '''
     {{ action.title }}
   </button>
 </form>
-'''
+"""
 
 _actions = (
-    ForumAction('forum:global', 'index', _l('Recent conversations')),
+    ForumAction("forum:global", "index", _l("Recent conversations")),
+    ForumAction("forum:global", "index/<string:filter>", _l("Top"), url="#filter"),
+    ForumAction("forum:global", "archives", _l("Archives")),
     ForumAction(
-        'forum:global',
-        'index/<string:filter>',
-        _l('Top'),
-        url='#filter',
+        "forum:global", "attachments", _l("Attachments"), condition=is_in_thread
     ),
-    ForumAction('forum:global', 'archives', _l('Archives')),
-    ForumAction(
-        'forum:global',
-        'attachments',
-        _l('Attachments'),
-        condition=is_in_thread,
-    ),
-    ForumAction(
-        'forum:global',
-        'new_thread',
-        _l('New conversation'),
-        icon='plus',
-    ),
+    ForumAction("forum:global", "new_thread", _l("New conversation"), icon="plus"),
     ForumModalAction(
-        'forum:thread',
-        'delete',
-        _l('Delete'),
+        "forum:thread",
+        "delete",
+        _l("Delete"),
         condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
-        url='#modal-delete',
-        icon='trash',
+        url="#modal-delete",
+        icon="trash",
     ),
     #
     ThreadAction(
-        'forum:thread',
-        'close',
-        _l('Close thread'),
-        url='close',
+        "forum:thread",
+        "close",
+        _l("Close thread"),
+        url="close",
         template_string=_close_template_action,
         condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
-        icon=FAIcon('lock'),
+        icon=FAIcon("lock"),
     ),
     ThreadAction(
-        'forum:thread',
-        'reopen',
-        _l('Re-open thread'),
-        url='close',
+        "forum:thread",
+        "reopen",
+        _l("Re-open thread"),
+        url="close",
         template_string=_close_template_action,
         condition=lambda ctx: is_admin(ctx) and is_closed(ctx),
-        icon=FAIcon('unlock'),
+        icon=FAIcon("unlock"),
     ),
     ThreadAction(
-        'forum:thread',
-        'attachments',
-        _l('Attachments'),
-        url='attachments',
-        icon='file',
+        "forum:thread", "attachments", _l("Attachments"), url="attachments", icon="file"
     ),
 )
 

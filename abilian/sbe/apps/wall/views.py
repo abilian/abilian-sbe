@@ -22,32 +22,27 @@ from abilian.sbe.apps.forum.models import Thread
 from .presenters import ActivityEntryPresenter
 from .util import get_recent_entries
 
-wall = Blueprint(
-    "wall",
-    __name__,
-    url_prefix="/wall",
-    template_folder="templates",
-)
+wall = Blueprint("wall", __name__, url_prefix="/wall", template_folder="templates")
 route = wall.route
 
 
 @wall.url_value_preprocessor
 def set_current_tab(endpoint, values):
-    g.current_tab = 'wall'
+    g.current_tab = "wall"
 
 
-@route('/')
+@route("/")
 def index():
-    actions.context['object'] = g.community._model
+    actions.context["object"] = g.community._model
     entries = get_recent_entries(20, community=g.community)
     entries = ActivityEntryPresenter.wrap_collection(entries)
     return render_template("wall/index.html", entries=entries)
 
 
-@route('/files')
+@route("/files")
 def files():
     community = g.community._model
-    actions.context['object'] = community
+    actions.context["object"] = community
 
     all_files = []
     if community.has_forum:
@@ -78,16 +73,18 @@ class Attachment(object):
 
 
 def get_attachments_from_forum(community):
-    all_threads = Thread.query \
-        .filter(Thread.community_id == community.id) \
-        .options(joinedload('posts')) \
-        .options(joinedload('posts.attachments')) \
-        .order_by(Thread.created_at.desc()).all()
+    all_threads = (
+        Thread.query.filter(Thread.community_id == community.id)
+        .options(joinedload("posts"))
+        .options(joinedload("posts.attachments"))
+        .order_by(Thread.created_at.desc())
+        .all()
+    )
 
     posts_with_attachments = []
     for thread in all_threads:
         for post in thread.posts:
-            if getattr(post, 'attachments', None):
+            if getattr(post, "attachments", None):
                 posts_with_attachments.append(post)
 
     posts_with_attachments.sort(key=lambda post: post.created_at)
@@ -112,29 +109,26 @@ def get_attachments_from_forum(community):
 
 # FIXME: significant performance issues here, needs major refactoring
 def get_attachments_from_dms(community):
-    index_service = get_service('indexing')
-    filters = wq.And([
-        wq.Term('community_id', community.id),
-        wq.Term('object_type', Document.entity_type),
-    ])
-    sortedby = whoosh.sorting.FieldFacet('created_at', reverse=True)
-    documents = index_service.search(
-        '',
-        filter=filters,
-        sortedby=sortedby,
-        limit=50,
+    index_service = get_service("indexing")
+    filters = wq.And(
+        [
+            wq.Term("community_id", community.id),
+            wq.Term("object_type", Document.entity_type),
+        ]
     )
+    sortedby = whoosh.sorting.FieldFacet("created_at", reverse=True)
+    documents = index_service.search("", filter=filters, sortedby=sortedby, limit=50)
 
     attachments = []
     for doc in documents:
         url = url_for(doc)
         attachment = Attachment(
             url,
-            doc['name'],
-            doc['owner_name'],
-            doc['created_at'],
-            doc.get('content_length'),
-            doc.get('content_type', ''),
+            doc["name"],
+            doc["owner_name"],
+            doc["created_at"],
+            doc.get("content_length"),
+            doc.get("content_type", ""),
         )
         attachments.append(attachment)
 
@@ -153,6 +147,7 @@ def group_monthly(objects):
         return "%s %s" % (month, year)
 
     grouped = groupby(objects, grouper)
-    grouped = [(format_month(year, month), list(objs))
-               for (year, month), objs in grouped]
+    grouped = [
+        (format_month(year, month), list(objs)) for (year, month), objs in grouped
+    ]
     return grouped

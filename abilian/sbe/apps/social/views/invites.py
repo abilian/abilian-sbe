@@ -15,7 +15,7 @@ from .social import social
 class Invite(db.Model):
     """Tracks a pending invitation to join the community."""
 
-    __tablename__ = 'invitation'
+    __tablename__ = "invitation"
 
     email = Column(Text, nullable=False)
 
@@ -27,10 +27,10 @@ def invite():
     return render_template("social/invite.html")
 
 
-@social.route("/invite", methods=['POST'])
+@social.route("/invite", methods=["POST"])
 def invite_post():
     action = request.form.get("action", "cancel")
-    if action == 'cancel':
+    if action == "cancel":
         flash(_("Action aborted"), "info")
         return redirect(url_for(".home"))
 
@@ -52,8 +52,8 @@ def invite_post():
                 "Yaka",
             )
             msg = Email(subject, recipients=[email], sender=g.user.email)
-            params = {'org_name': "Yaka"}
-            msg.body = render_template('social/mail/invite.txt', **params)
+            params = {"org_name": "Yaka"}
+            msg.body = render_template("social/mail/invite.txt", **params)
             conn.send(msg)
 
     flash(_("Invitation sent"), "info")

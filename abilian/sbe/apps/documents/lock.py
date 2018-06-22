@@ -23,10 +23,7 @@ class Lock(object):
             try:
                 date = dateutil.parser.parse(date)
             except Exception as e:
-                raise_from(
-                    ValueError('Error parsing date: {!r}'.format(date)),
-                    e,
-                )
+                raise_from(ValueError("Error parsing date: {!r}".format(date)), e)
 
         self.date = date
 
@@ -37,9 +34,9 @@ class Lock(object):
     def as_dict(self):
         """Return a dict suitable for serialization to JSON."""
         return {
-            'user_id': self.user_id,
-            'user': self.user,
-            'date': self.date.isoformat()
+            "user_id": self.user_id,
+            "user": self.user,
+            "date": self.date.isoformat(),
         }
 
     @staticmethod
@@ -49,7 +46,7 @@ class Lock(object):
 
     @property
     def lifetime(self):
-        return current_app.config.get('SBE_LOCK_LIFETIME', DEFAULT_LIFETIME)
+        return current_app.config.get("SBE_LOCK_LIFETIME", DEFAULT_LIFETIME)
 
     @property
     def expired(self):
