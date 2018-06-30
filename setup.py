@@ -40,8 +40,7 @@ setuptools.setup(
     license="LGPL",
     author="Abilian SAS",
     author_email="contact@abilian.com",
-    description=
-    "Social Business platform, including: document management, wiki, "
+    description="Social Business platform, including: document management, wiki, "
     "forum, enterprise social networking, and more",
     long_description=LONG_DESCRIPTION,
     packages=["abilian.sbe"],
@@ -49,10 +48,7 @@ setuptools.setup(
     platforms="any",
     setup_requires=["babel", "setuptools-git", "setuptools_scm>=1.5.5"],
     install_requires=install_requires,
-    extras_require={
-        "tests": dev_requires,
-        "dev": dev_requires
-    },
+    extras_require={"tests": dev_requires, "dev": dev_requires},
     # dependency_links=dependency_links,
     include_package_data=True,
     classifiers=[
@@ -64,9 +60,5 @@ setuptools.setup(
         "Programming Language :: Python",
         "Framework :: Flask",
     ],
-    cmdclass={
-        "build": build,
-        "sdist": sdist,
-        "develop": develop
-    },
+    cmdclass={"build": build, "sdist": sdist, "develop": develop},
 )

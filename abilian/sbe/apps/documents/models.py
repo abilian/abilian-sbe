@@ -70,7 +70,7 @@ def icon_exists(filename):
 #
 # Domain classes
 #
-class CmisObject(Entity, InheritSecurity):
+class CmisObject(InheritSecurity, Entity):
     """(Abstract) Base class for CMIS objects."""
 
     # normally set by communities.models.community_content,
@@ -271,7 +271,7 @@ class PathAndSecurityIndexable(object):
         return " ".join(indexable_role(p) for p in allowed)
 
 
-class Folder(CmisObject, PathAndSecurityIndexable):
+class Folder(PathAndSecurityIndexable, CmisObject):
     __tablename__ = None  # type: str
     sbe_type = "cmis:folder"
 

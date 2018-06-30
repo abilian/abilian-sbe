@@ -128,20 +128,14 @@ lint-other:
 format: format-py format-js
 
 format-py:
-	#-add-trailing-comma \
-	#	`find abilian -name '*.py'` \
-	#	`find tests -name '*.py'` \
-	#	demo/*.py *.py
-	# -yapf -r -i abilian demo tests *.py
-	# autopep8 -j3 -r --in-place -a --ignore E711 abilian demo tests *.py
-	black abilian
+	black abilian demo tests *.py
 	isort -rc abilian demo tests *.py
 
 format-js:
 	./node_modules/.bin/prettier --trailing-comma es5 --write \
 		./abilian/sbe/static/js/**.js
 
-futurize-py-headers:
+futurize:
 	isort -a  "from __future__ import absolute_import, print_function, unicode_literals"
 		-rc abilian demo tests *.py
 
