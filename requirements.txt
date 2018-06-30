@@ -5,7 +5,7 @@
 #    pip-compile --output-file requirements.txt requirements.in
 #
 abilian-core==0.10.14
-alembic==0.9.9            # via abilian-core, flask-migrate
+alembic==0.9.10           # via abilian-core, flask-migrate
 amqp==2.3.2               # via kombu
 babel==2.6.0              # via flask-babel
 bcrypt==3.1.4             # via abilian-core
@@ -41,7 +41,7 @@ jinja2==2.10              # via abilian-core, flask, flask-babel
 jsmin==2.2.2              # via abilian-core
 kombu==4.2.1              # via celery
 langid==1.1.6
-lxml==4.2.2               # via abilian-core
+lxml==4.2.3               # via abilian-core
 mako==1.0.7               # via alembic
 markdown==2.6.11
 markupsafe==1.0           # via abilian-core, jinja2, mako
@@ -56,14 +56,14 @@ python-dateutil==2.7.3    # via abilian-core, alembic, pandas
 python-deprecated==1.1.0  # via abilian-core
 python-editor==1.0.3      # via alembic
 python-magic==0.4.15      # via abilian-core
-pytz==2018.4              # via babel, celery, pandas
+pytz==2018.5              # via babel, celery, pandas
 pyyaml==3.12              # via abilian-core
 raven==6.9.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 singledispatch==3.4.0.3
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, singledispatch, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
 sqlalchemy-utils==0.33.3  # via wtforms-alchemy
-sqlalchemy==1.2.8
+sqlalchemy==1.2.9
 sqlparse==0.2.4           # via abilian-core
 toolz==0.9.0
 tqdm==4.23.4              # via abilian-core
