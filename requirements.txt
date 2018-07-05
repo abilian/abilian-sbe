@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.14
+abilian-core==0.10.15
 alembic==0.9.10           # via abilian-core, flask-migrate
 amqp==2.3.2               # via kombu
 babel==2.6.0              # via flask-babel
@@ -37,7 +37,7 @@ infinity==1.4             # via intervals
 intervals==0.8.1          # via wtforms-components
 itsdangerous==0.24        # via flask, flask-debugtoolbar
 jdcal==1.4                # via openpyxl
-jinja2==2.10              # via abilian-core, flask, flask-babel
+jinja2==2.10              # via flask, flask-babel
 jsmin==2.2.2              # via abilian-core
 kombu==4.2.1              # via celery
 langid==1.1.6
@@ -49,7 +49,7 @@ numpy==1.14.5             # via langid, pandas
 openpyxl==2.5.4
 pandas==0.23.1            # via abilian-core
 pathlib==1.0.1            # via abilian-core
-pillow==5.0               # via abilian-core
+pillow==5.2.0             # via abilian-core
 pycparser==2.18           # via cffi
 pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.7.3    # via abilian-core, alembic, pandas
@@ -63,7 +63,7 @@ redis==2.10.6             # via abilian-core
 singledispatch==3.4.0.3
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, singledispatch, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
 sqlalchemy-utils==0.33.3  # via wtforms-alchemy
-sqlalchemy==1.2.9
+sqlalchemy==1.2.9         # via abilian-core, alembic, flask-sqlalchemy, sqlalchemy-utils, wtforms-alchemy, wtforms-sqlalchemy
 sqlparse==0.2.4           # via abilian-core
 toolz==0.9.0
 tqdm==4.23.4              # via abilian-core

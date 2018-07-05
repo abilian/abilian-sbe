@@ -57,7 +57,7 @@ def test_default_view_kw():
 
 def test_default_url(app, community):
     url = app.default_view.url_for(community)
-    assert url.endswith("/localhost/communities/my-community/")
+    assert url.endswith("/communities/my-community/")
 
 
 def test_can_recreate_with_same_name(community, db):

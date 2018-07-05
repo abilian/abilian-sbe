@@ -1,6 +1,3 @@
-# Tests fail w/ 1.0.14
-SQLAlchemy>=1.1
-
 # Temp
 wtforms<2.2
 
