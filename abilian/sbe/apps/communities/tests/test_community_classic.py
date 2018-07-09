@@ -5,6 +5,7 @@ TODO: remove once the pytest-based tests all pass.
 from __future__ import absolute_import, print_function, unicode_literals
 
 from abilian.services.security import Admin
+from abilian.testing.util import path_from_url
 from flask import url_for
 from hyperlink import URL
 
@@ -57,8 +58,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             response = self.client.post(url, data=data)
             assert response.status_code == 302
 
-            path = URL.from_text(response.headers["Location"]).path
-            assert path == ("communities", self.community.slug, "")
+            path = path_from_url(response.location)
+            assert path == "/communities/" + self.community.slug + "/"
 
             community = Community.query.get(self.community.id)
             assert community.name == "edited community"
@@ -91,8 +92,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             }
             response = self.client.post(url, data=data)
             assert response.status_code == 302
-            path = URL.from_text(response.headers["Location"]).path
-            assert "/" + "/".join(path) == url
+            path = path_from_url(response.location)
+            assert path == url
 
             membership = [
                 m for m in self.community.memberships if m.user == self.user_c2
@@ -103,8 +104,8 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             data["role"] = "manager"
             response = self.client.post(url, data=data)
             assert response.status_code == 302
-            path = URL.from_text(response.headers["Location"]).path
-            assert "/" + "/".join(path) == url
+            path = path_from_url(response.location)
+            assert path == url
 
             self.session.expire(membership)
             assert membership.role == "manager"
@@ -124,7 +125,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             }
             response = self.client.post(url, data=data)
             assert response.status_code == 302
-            path = URL.from_text(response.headers["Location"]).path
-            assert path == ("communities", format(self.community.slug), "members")
+            path = path_from_url(response.location)
+            assert path == "/communities/" + self.community.slug + "/members"
 
             assert self.user_c2 not in community.members
