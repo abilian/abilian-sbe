@@ -10,9 +10,9 @@ import sqlalchemy as sa
 from abilian.core.entities import Entity
 from abilian.core.models.subjects import User
 from abilian.testing.util import login
-from flask_login import login_user, logout_user
 from mock import mock
 from pytest import fixture
+from sqlalchemy import orm
 
 from abilian.sbe.apps.documents.models import Folder
 

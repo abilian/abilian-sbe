@@ -132,7 +132,7 @@ format-py:
 	isort -rc abilian demo tests *.py
 
 format-js:
-	./node_modules/.bin/prettier --trailing-comma es5 --write \
+	yarn run prettier --trailing-comma es5 --write \
 		./abilian/sbe/static/js/**.js
 
 futurize:

@@ -11,6 +11,7 @@ from abilian.services.activity import ActivityEntry
 from abilian.services.security import READ, Admin
 from flask import g
 from flask_login import current_user
+from sqlalchemy import orm
 from werkzeug.exceptions import Forbidden
 
 from abilian.sbe.apps.communities.models import Membership

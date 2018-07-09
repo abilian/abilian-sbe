@@ -78,10 +78,13 @@ def document_view(doc_id):
 @route("/doc/<int:doc_id>/", methods=["POST"])
 @route("/doc/<int:doc_id>/<int:folder_id>/", methods=["POST"])
 @csrf.protect
+# TODO: URL doesn't seem right
 def document_edit(doc_id, folder_id=None):
     doc = get_document(doc_id)
     if folder_id:
         folder = get_folder(folder_id)
+    else:
+        folder = None
     check_write_access(doc)
 
     changed = edit_object(doc)
@@ -91,7 +94,8 @@ def document_edit(doc_id, folder_id=None):
         flash(_("Document properties successfully edited."), "success")
     else:
         flash(_("You didn't change any property."), "success")
-    if folder_id:
+
+    if folder:
         return redirect(url_for(folder))
     else:
         return redirect(url_for(doc))

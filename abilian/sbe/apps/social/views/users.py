@@ -7,6 +7,8 @@ import pkgutil
 from cgi import escape
 
 import sqlalchemy as sa
+import sqlalchemy.exc
+import sqlalchemy.orm
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 from abilian.i18n import _, _l
