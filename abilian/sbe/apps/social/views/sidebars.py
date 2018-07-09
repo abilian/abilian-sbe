@@ -1,3 +1,4 @@
+# coding=utf-8
 """Provides content for sidebars, accessible via the 'g' object.
 
 TODO: make it smarter (direct access from 'g' using lazy objects?) and

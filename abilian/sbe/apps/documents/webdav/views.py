@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import absolute_import, print_function, unicode_literals
 
 import os.path
@@ -279,36 +280,33 @@ def lock(path):
     hlist = [("Content-Type", "text/xml"), ("Lock-Token", "<urn:uuid:%s>" % token)]
 
     return Response(xml, headers=Headers.linked(hlist))  # , status ='423 Locked'
-    """
-    public Response lock(@Context UriInfo uriInfo) throws Exception {
-        String token = null;
-        Prop prop = null;
-        if (backend.isLocked(doc.getRef())) {
-            if (!backend.canUnlock(doc.getRef())) {
-                return Response.status(423).build();
-            } else {
-                token = backend.getCheckoutUser(doc.getRef());
-                prop = new Prop(getLockDiscovery(doc, uriInfo));
-                return Response.ok().entity(prop).header("Lock-Token",
-                        "urn:uuid:" + token).build();
-            }
-        }
-
-        token = backend.lock(doc.getRef());
-        if (READONLY_TOKEN.equals(token)) {
-            return Response.status(423).build();
-        } else if (StringUtils.isEmpty(token)) {
-            return Response.status(400).build();
-        }
-
-        prop = new Prop(getLockDiscovery(doc, uriInfo));
-
-        backend.saveChanges();
-        return Response.ok().entity(prop).header("Lock-Token",
-                "urn:uuid:" + token).build();
-    }
-
-  """
+    # public Response lock(@Context UriInfo uriInfo) throws Exception {
+    #     String token = null;
+    #     Prop prop = null;
+    #     if (backend.isLocked(doc.getRef())) {
+    #         if (!backend.canUnlock(doc.getRef())) {
+    #             return Response.status(423).build();
+    #         } else {
+    #             token = backend.getCheckoutUser(doc.getRef());
+    #             prop = new Prop(getLockDiscovery(doc, uriInfo));
+    #             return Response.ok().entity(prop).header("Lock-Token",
+    #                     "urn:uuid:" + token).build();
+    #         }
+    #     }
+    #
+    #     token = backend.lock(doc.getRef());
+    #     if (READONLY_TOKEN.equals(token)) {
+    #         return Response.status(423).build();
+    #     } else if (StringUtils.isEmpty(token)) {
+    #         return Response.status(400).build();
+    #     }
+    #
+    #     prop = new Prop(getLockDiscovery(doc, uriInfo));
+    #
+    #     backend.saveChanges();
+    #     return Response.ok().entity(prop).header("Lock-Token",
+    #             "urn:uuid:" + token).build();
+    # }
 
 
 @route("/<path:path>", methods=["UNLOCK"])
@@ -325,19 +323,16 @@ def unlock(path):
             return "", HTTP_NO_CONTENT, {}
 
     return "", HTTP_NO_CONTENT, {}
-    """
-        if (backend.isLocked(doc.getRef())) {
-            if (!backend.canUnlock(doc.getRef())) {
-                return Response.status(423).build();
-            } else {
-                backend.unlock(doc.getRef());
-                backend.saveChanges();
-                return Response.status(HTTP_NO_CONTENT).build();
-            }
-        } else {
-            // TODO: return an error
-            return Response.status(HTTP_NO_CONTENT).build();
-        }
-
-
-  """
+    #     if (backend.isLocked(doc.getRef())) {
+    #         if (!backend.canUnlock(doc.getRef())) {
+    #             return Response.status(423).build();
+    #         } else {
+    #             backend.unlock(doc.getRef());
+    #             backend.saveChanges();
+    #             return Response.status(HTTP_NO_CONTENT).build();
+    #         }
+    #     } else {
+    #         // TODO: return an error
+    #         return Response.status(HTTP_NO_CONTENT).build();
+    #     }
+    #

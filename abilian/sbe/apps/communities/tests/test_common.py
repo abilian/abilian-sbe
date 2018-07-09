@@ -1,3 +1,4 @@
+# coding=utf-8
 # Note: this test suite is using pytest instead of the unittest-based scaffolding
 # provided by SBE. Hopefully one day all of SBE will follow.
 

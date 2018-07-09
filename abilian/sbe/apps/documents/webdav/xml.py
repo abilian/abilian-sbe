@@ -1,3 +1,4 @@
+# coding=utf-8
 """Parses and produces XML documents specified by the standard."""
 
 from __future__ import absolute_import, print_function, unicode_literals

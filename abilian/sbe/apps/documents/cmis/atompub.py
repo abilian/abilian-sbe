@@ -1,3 +1,4 @@
+# coding=utf-8
 from __future__ import absolute_import, print_function, unicode_literals
 
 from abilian.core.extensions import db
@@ -347,8 +348,7 @@ def updateType():
 @route("/type", methods=["DELETE"])
 def deleteType():
     raise NotImplementedError()
-
-    return ("", 204, {})
+    # return ("", 204, {})
 
 
 #
@@ -400,7 +400,6 @@ def createObject():
     result = to_xml(new_object)
     log_result(result)
     return Response(result, status=201, mimetype=MIME_TYPE_ATOM_ENTRY)
-    """
     # TODO:
     # URI newloc = null;
     # try {
@@ -415,7 +414,6 @@ def createObject():
 
     # // XXX: .type() is here because of a bug in resteasy
     # return Response.created(newloc).entity(output).type(MIME_TYPE_ATOM_ENTRY).build();
-    """
 
 
 #
