@@ -35,7 +35,7 @@ class CommunityWebTestCase(BaseIndexingTestCase):
             expected_url = url_for(
                 "wall.index", community_id=self.community.slug, _external=True
             )
-            assert response.headers["Location"] == expected_url
+            assert response.location == expected_url
 
     def test_community_settings(self):
         url = url_for("communities.settings", community_id=self.community.slug)

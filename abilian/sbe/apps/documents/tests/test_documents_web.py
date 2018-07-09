@@ -12,6 +12,7 @@ from zipfile import ZipFile
 
 import flask_mail
 import pytest
+from abilian.testing.util import path_from_url
 from abilian.web.util import url_for
 from flask import g, get_flashed_messages
 from toolz import first
@@ -91,10 +92,11 @@ class TestViews(CommunityIndexingTestCase, BaseTests):
                 url_for("documents.index", community_id=self.community.slug)
             )
             assert response.status_code == 302
-            expected = "http://localhost/communities/{}/docs/folder/{}" "".format(
+            path = path_from_url(response.location)
+            expected = "/communities/{}/docs/folder/{}".format(
                 self.community.slug, self.folder.id
             )
-            assert response.headers["Location"] == expected
+            assert path == expected
 
     def _test_upload(
         self, title, content_type, test_preview=True, assert_preview_available=True

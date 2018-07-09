@@ -36,7 +36,7 @@ def test_community_home(app, client, community1, community2):
         expected_url = url_for(
             "wall.index", community_id=community1.slug, _external=True
         )
-        assert response.headers["Location"] == expected_url
+        assert response.location == expected_url
 
     user2 = community2.test_user
     with client_login(client, user2):
@@ -87,7 +87,7 @@ def test_community_settings(app, client, community1):
         response = client.post(url, data=data)
         assert response.status_code == 302
         expected_url = "http://localhost/communities/{}/".format(community1.slug)
-        assert response.headers["Location"] == expected_url
+        assert response.location == expected_url
 
         community = Community.query.get(community1.id)
         assert community.name == "edited community"
@@ -116,7 +116,7 @@ def test_members(app, client, db, community1, community2):
         data = {"action": "add-user-role", "user": user2.id, "role": "member"}
         response = client.post(url, data=data)
         assert response.status_code == 302
-        assert response.headers["Location"] == "http://localhost" + url
+        assert response.location == "http://localhost" + url
 
         membership = [m for m in community1.memberships if m.user == user2][0]
         assert membership.role == "member"
@@ -125,7 +125,7 @@ def test_members(app, client, db, community1, community2):
         data["role"] = "manager"
         response = client.post(url, data=data)
         assert response.status_code == 302
-        assert response.headers["Location"] == "http://localhost" + url
+        assert response.location == "http://localhost" + url
 
         db.session.expire(membership)
         assert membership.role == "manager"
@@ -144,6 +144,6 @@ def test_members(app, client, db, community1, community2):
         response = client.post(url, data=data)
         expected_url = "http://localhost/communities/{}/members".format(community1.slug)
         assert response.status_code == 302
-        assert response.headers["Location"] == expected_url
+        assert response.location == expected_url
 
         assert user2 not in community.members
