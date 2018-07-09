@@ -21,7 +21,7 @@
       {%- endif %}
     </p>
   {%- endfor %}
-  {%- for key, (appended, removed) in changes.collections.iteritems() %}
+  {%- for key, (appended, removed) in changes.collections.items() %}
     <p>
       <b>{{ key }}</b>:
       {%- if appended %}
