@@ -18,7 +18,6 @@ def test_index(app, client, community1):
     user = community1.test_user
     with client_login(client, user):
         response = client.get(url_for("communities.index"))
-        print(current_user)
         assert response.status_code == 200
 
 
@@ -31,7 +30,6 @@ def test_community_home(app, client, community1, community2):
     user1 = community1.test_user
     with client_login(client, user1):
         response = client.get(url)
-        print(current_user)
         assert response.status_code == 302
         expected_url = url_for(
             "wall.index", community_id=community1.slug, _external=True
@@ -41,8 +39,6 @@ def test_community_home(app, client, community1, community2):
     user2 = community2.test_user
     with client_login(client, user2):
         response = client.get(url)
-        print(current_user)
-        # assert response.headers['Location'] == ""
         assert response.status_code == 403
 
 

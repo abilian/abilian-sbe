@@ -205,6 +205,7 @@ update-deps:
 
 sync-deps:
 	pip install -U pip pip-tools setuptools wheel
-	pip install -r requirements.txt
+	pip-sync
+	# pip install -r requirements.txt
 	pip install -r etc/dev-requirements.txt
 	pip install -e .
