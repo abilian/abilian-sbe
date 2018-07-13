@@ -7,7 +7,6 @@ cache: pip
 python:
   - "2.7"
   - "3.6"
-  - "3.6-dev"
   # - "3.7-dev" (Needs a 3.7 compatible Pandas first)
 
 env:
