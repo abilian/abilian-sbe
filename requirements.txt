@@ -4,7 +4,7 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.19
+abilian-core==0.10.20
 alembic==1.0.0            # via abilian-core, flask-migrate
 amqp==2.3.2               # via kombu
 babel==2.6.0              # via flask-babel
@@ -12,7 +12,7 @@ bcrypt==3.1.4             # via abilian-core
 billiard==3.5.0.4         # via celery
 bleach==2.1.3             # via abilian-core
 blinker==1.4              # via flask-debugtoolbar, flask-mail
-celery==4.2.0             # via abilian-core
+celery==4.2.1             # via abilian-core
 cffi==1.11.5              # via bcrypt
 chardet==3.0.4
 clamd==1.0.2              # via abilian-core
