@@ -84,8 +84,12 @@ def group_post(group_id):
     group = Group.query.get(group_id)
     action = request.form.get("action")
     return_url = request.form.get("return_url")
+    user_id = request.form.get("user", "").strip()
 
     membership_actions = frozenset(("add", "remove", "add-admin", "remove-admin"))
+
+    if action not in {"join", "leave"}.union(membership_actions):
+        raise ValueError("Unknown action: {}".format(action))
 
     if action not in ("join", "leave"):
         assert is_admin(group)
@@ -94,11 +98,11 @@ def group_post(group_id):
         g.user.join(group)
     elif action == "leave":
         g.user.leave(group)
+
     elif action in membership_actions:
-        user_id = request.form.get("user", "").strip()
         try:
             user_id = int(user_id)
-        except BaseException:
+        except ValueError:
             flash(_("Error: No user selected"), "error")
             return redirect(url_for(".group_home", group_id=group_id))
 
@@ -114,15 +118,14 @@ def group_post(group_id):
         elif action == "remove-admin":
             if user in group.admins:
                 group.admins.remove(user)
-    else:
-        raise Exception("Should not happen")
+
     db.session.commit()
 
-    if return_url:
-        # TODO: security check
-        return redirect(return_url)
-    else:
-        return redirect(url_for(".group_home", group_id=group_id))
+    if not return_url:
+        return_url = url_for(".group_home", group_id=group_id)
+
+    # TODO: security check
+    return redirect(return_url)
 
 
 @social.route("/groups/new")

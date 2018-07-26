@@ -98,59 +98,65 @@ def convert_document_content(document_id):
             # deleted after task queued, but before task run
             return
 
-        error_kwargs = {"exc_info": True, "extra": {"stack": True}}
+        convert_to_pdf(doc)
+        convert_to_text(doc)
+        extract_metadata(doc)
 
-        conversion_args = (doc.content_digest, doc.content, doc.content_type)
 
-        if doc.content_type == "application/pdf":
-            doc.pdf = doc.content
-        else:
-            try:
-                doc.pdf = converter.to_pdf(*conversion_args)
-            except HandlerNotFound as e:
-                doc.pdf = b""
-            except ConversionError as e:
-                doc.pdf = b""
-                logger.info(
-                    "Conversion to PDF failed for document %s: %s",
-                    doc.name,
-                    e,
-                    **error_kwargs
-                )
+def convert_to_pdf(doc):
+    error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
+    if doc.content_type == "application/pdf":
+        doc.pdf = doc.content
+    else:
         try:
-            doc.text = converter.to_text(
+            doc.pdf = converter.to_pdf(
                 doc.content_digest, doc.content, doc.content_type
             )
+        except HandlerNotFound as e:
+            doc.pdf = b""
         except ConversionError as e:
-            doc.text = ""
+            doc.pdf = b""
             logger.info(
-                "Conversion to text failed for document %s: %s",
+                "Conversion to PDF failed for document %s: %s",
                 doc.name,
                 e,
                 **error_kwargs
             )
 
-        doc.extra_metadata = {}
-        try:
-            doc.extra_metadata = converter.get_metadata(*conversion_args)
-        except ConversionError as e:
-            logger.warning(
-                "Metadata extraction failed on document %s: %s",
-                doc.name,
-                e,
-                **error_kwargs
-            )
-        except UnicodeDecodeError as e:
-            logger.error(
-                "Unicode issue on document %s: %s", doc.name, e, **error_kwargs
-            )
-        except Exception as e:
-            logger.error("Other issue on document %s: %s", doc.name, e, **error_kwargs)
 
-        if doc.text:
-            import langid
+def convert_to_text(doc):
+    error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
-            doc.language = langid.classify(doc.text)[0]
+    try:
+        doc.text = converter.to_text(doc.content_digest, doc.content, doc.content_type)
+    except ConversionError as e:
+        doc.text = ""
+        logger.info(
+            "Conversion to text failed for document %s: %s", doc.name, e, **error_kwargs
+        )
 
-        doc.page_num = doc.extra_metadata.get("PDF:Pages", 1)
+
+def extract_metadata(doc):
+    error_kwargs = {"exc_info": True, "extra": {"stack": True}}
+
+    doc.extra_metadata = {}
+    try:
+        doc.extra_metadata = converter.get_metadata(
+            doc.content_digest, doc.content, doc.content_type
+        )
+    except ConversionError as e:
+        logger.warning(
+            "Metadata extraction failed on document %s: %s", doc.name, e, **error_kwargs
+        )
+    except UnicodeDecodeError as e:
+        logger.error("Unicode issue on document %s: %s", doc.name, e, **error_kwargs)
+    except Exception as e:
+        logger.error("Other issue on document %s: %s", doc.name, e, **error_kwargs)
+
+    if doc.text:
+        import langid
+
+        doc.language = langid.classify(doc.text)[0]
+
+    doc.page_num = doc.extra_metadata.get("PDF:Pages", 1)

@@ -140,7 +140,8 @@ def setup_sbe_app():
             logger.info('Create script: "%s".', script_file)
             content = _SBE_DEMO_SCRIPT.format(BIN_DIR=bin_dir)
             out.write(content)
-        script_file.chmod(0o755)  # 0755: -rwxr-xr-x
+        # 0755: -rwxr-xr-x
+        script_file.chmod(0o755)
 
     current_app.config["PRODUCTION"] = True
     current_app.config["DEBUG"] = False

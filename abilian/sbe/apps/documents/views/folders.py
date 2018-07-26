@@ -507,8 +507,8 @@ def iter_permissions(folder, user):
         is_user = isinstance(principal, User)
         item_key = [is_user]  # type: List[Any]
         if is_user:
-            last_name = principal.last_name if principal.last_name else ""
-            first_name = principal.first_name if principal.first_name else ""
+            last_name = principal.last_name or ""
+            first_name = principal.first_name or ""
             item_key.append(last_name.lower())
             item_key.append(first_name.lower())
         else:
@@ -788,6 +788,8 @@ def delete_multiple(folder):
 
 def move_multiple(folder):
     folders, docs = get_selected_objects(folder)
+    objects = folder + docs
+
     count_f = len(folders)
     count_d = len(docs)
     current_folder_url = url_for(folder)
@@ -828,7 +830,7 @@ def move_multiple(folder):
         )
         return redirect(current_folder_url)
 
-    for item in itertools.chain(folders, docs):
+    for item in objects:
         # FIXME: maybe too brutal
         check_write_access(item)
 
@@ -847,14 +849,7 @@ def move_multiple(folder):
             return redirect(url_for(folder))
         f = f.parent
 
-    exist_in_dest = []
-    for item in itertools.chain(folders, docs):
-        try:
-            with db.session.begin_nested():
-                item.parent = target_folder
-        except sa.exc.IntegrityError:
-            exist_in_dest.append(item)
-
+    exist_in_dest = objects_which_exist_in_dest(objects, target_folder)
     if exist_in_dest:
         # items existing in destination: cancel operation
         db.session.rollback()
@@ -882,6 +877,17 @@ def move_multiple(folder):
     flash(msg, "success")
 
     return redirect(url_for(folder))
+
+
+def objects_which_exist_in_dest(objects, dest):
+    exist_in_dest = []
+    for item in objects:
+        try:
+            with db.session.begin_nested():
+                item.parent = dest
+        except sa.exc.IntegrityError:
+            exist_in_dest.append(item)
+    return exist_in_dest
 
 
 def create_subfolder(folder):
