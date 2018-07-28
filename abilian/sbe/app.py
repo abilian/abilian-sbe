@@ -29,7 +29,7 @@ from .extension import sbe
 
 # Used for side effects, do not remove
 
-__all__ = ["create_app", "db"]
+__all__ = ["create_app", "Application"]
 
 logger = logging.getLogger(__name__)
 

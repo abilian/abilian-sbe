@@ -963,7 +963,6 @@ def descendants_view(folder_id):
     root_path_ids = folder._indexable_parent_ids + "/{}".format(folder.id)
     index_service = get_service("indexing")
 
-    # yapf: disable
     filters = wq.And([
         wq.Term('community_id', folder.community.id),
         wq.Term('parent_ids', root_path_ids),
@@ -972,7 +971,6 @@ def descendants_view(folder_id):
             wq.Term('object_type', Document.entity_type),
         ]),
     ])
-    # yapf: enable
 
     results = index_service.search("", filter=filters, limit=None)
     by_path = {}
