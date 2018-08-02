@@ -16,7 +16,7 @@ from abilian.core.celery import periodic_task
 from abilian.core.extensions import db, mail
 from abilian.core.models.subjects import User
 from abilian.core.signals import activity
-from abilian.core.util import md5
+from abilian.core.util import md5, unwrap
 from abilian.i18n import _l, render_template_i18n
 from abilian.web import url_for
 from celery import shared_task
@@ -392,7 +392,7 @@ def process_email(message):
     Processing chain extract community thread post member from reply_to
     persist post in db.
     """
-    app = current_app._get_current_object()
+    app = unwrap(current_app)
     # Extract post destination from To: field, (community/forum/thread/member)
     to_address = message["To"]
 

@@ -9,6 +9,7 @@ from pathlib import Path
 import sqlalchemy as sa
 from abilian.core.extensions import db
 from abilian.core.signals import activity
+from abilian.core.util import unwrap
 from abilian.i18n import _, _l, _n
 from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf
@@ -353,7 +354,7 @@ def page_delete():
 
     db.session.delete(page)
 
-    app = current_app._get_current_object()
+    app = unwrap(current_app)
     community = g.community._model
     activity.send(app, actor=g.user, verb="delete", object=page, target=community)
 

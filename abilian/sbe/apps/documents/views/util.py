@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function, unicode_literals
 import re
 
 from abilian.core.signals import activity
+from abilian.core.util import unwrap
 from abilian.services.security import MANAGE, WRITE, Admin, security
 from abilian.web import url_for
 from flask import current_app, flash, g, request
@@ -110,7 +111,7 @@ def create_document(folder, fs):
         )
 
     # Some unwrapping before posting event
-    app = current_app._get_current_object()
+    app = unwrap(current_app)
     community = g.community._model
     activity.send(app, actor=g.user, verb="post", object=doc, target=community)
 

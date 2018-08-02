@@ -8,6 +8,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm
 from abilian.core.extensions import db, mail
 from abilian.core.signals import activity
+from abilian.core.util import unwrap
 from abilian.i18n import _, render_template_i18n
 from abilian.services import audit_service
 from abilian.services.conversion import converter
@@ -153,7 +154,7 @@ def document_upload(doc_id):
     doc.set_content(fd.read(), fd.content_type)
     del doc.lock
 
-    self = current_app._get_current_object()
+    self = unwrap(current_app)
     activity.send(self, actor=g.user, verb="update", object=doc)
     db.session.commit()
     flash(_("New version successfully uploaded"), "success")
@@ -376,7 +377,7 @@ def document_view_pdf(doc_id):
 #     tags = request.form.get("tags")
 #
 #     doc.tags = tags
-#     self = current_app._get_current_object()
+#     self = unwrap(current_app)
 #     activity.send(self, actor=g.user, verb="tag", object=doc)
 #
 #     db.session.commit()

@@ -19,6 +19,7 @@ import whoosh.query as wq
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
+from abilian.core.util import unwrap
 from abilian.i18n import _, _n
 from abilian.services import get_service
 from abilian.services.security import READ, WRITE, Role, security
@@ -753,7 +754,7 @@ def delete_multiple(folder):
     folders, docs = get_selected_objects(folder)
 
     for obj in docs + folders:
-        app = current_app._get_current_object()
+        app = unwrap(current_app)
         community = g.community._model
         activity.send(app, actor=g.user, verb="delete", object=obj, target=community)
         repository.delete_object(obj)

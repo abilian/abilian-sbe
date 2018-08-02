@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
-from abilian.core.util import utc_dt
+from abilian.core.util import utc_dt, unwrap
 from abilian.i18n import _, _l
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
@@ -384,7 +384,7 @@ def members_post():
         community.set_membership(user, role)
 
         if action == "add-user-role":
-            app = current_app._get_current_object()
+            app = unwrap(current_app)
             activity.send(app, actor=user, verb="join", object=community)
 
         db.session.commit()
@@ -398,7 +398,7 @@ def members_post():
 
         community.remove_membership(user)
 
-        app = current_app._get_current_object()
+        app = unwrap(current_app)
         activity.send(app, actor=user, verb="leave", object=community)
 
         db.session.commit()

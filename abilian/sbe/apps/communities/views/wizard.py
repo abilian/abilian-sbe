@@ -9,6 +9,7 @@ from os.path import splitext
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 from abilian.core.signals import activity
+from abilian.core.util import unwrap
 from abilian.i18n import _
 from abilian.services.auth.views import send_reset_password_instructions
 from abilian.web import csrf
@@ -255,7 +256,7 @@ def wizard_saving():
             user = User.query.filter(User.email == email).first()
             community.set_membership(user, role)
 
-            app = current_app._get_current_object()
+            app = unwrap(current_app)
             activity.send(app, actor=user, verb="join", object=community)
 
             db.session.commit()
@@ -273,7 +274,7 @@ def wizard_saving():
             db.session.add(user)
 
             community.set_membership(user, role)
-            app = current_app._get_current_object()
+            app = unwrap(current_app)
             activity.send(app, actor=user, verb="join", object=community)
             db.session.commit()
 
