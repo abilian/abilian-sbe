@@ -488,7 +488,7 @@ def iter_permissions(folder, user):
     """Iterator returning permissions settings on folder and its subfolders
     tree."""
     if not security.has_permission(user, "manage", folder, inherit=True):
-        raise StopIteration
+        return
 
     community = folder.path
     local_roles = frozenset(folder.get_local_roles_assignments())
@@ -620,7 +620,7 @@ def explore_archive(fd, uncompress=False):
     """
     if not uncompress:
         yield [], fd
-        raise StopIteration
+        return
 
     if is_zipfile(fd):
         with ZipFile(fd, "r") as archive:
