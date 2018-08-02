@@ -17,6 +17,7 @@ ModelForm = model_form_factory(Form)
 
 
 # FIXME
+# type: ignore
 class UserProfileForm(ModelForm):
     pass
 
