@@ -26,8 +26,8 @@ from six.moves.urllib.parse import quote
 from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.sbe.apps.communities.views import default_view_kw
+from abilian.sbe.apps.communities.common import object_viewers
 
-from ...communities.common import object_viewers
 from ..models import Document
 from ..repository import repository
 from ..tasks import convert_document_content, preview_document
