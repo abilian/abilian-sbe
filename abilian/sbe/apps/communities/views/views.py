@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
-from abilian.core.util import utc_dt, unwrap
+from abilian.core.util import unwrap, utc_dt
 from abilian.i18n import _, _l
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role

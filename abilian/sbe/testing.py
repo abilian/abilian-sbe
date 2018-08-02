@@ -1,7 +1,8 @@
 # coding=utf-8
 from __future__ import absolute_import, print_function, unicode_literals
 
-from abilian.testing import TestConfig, BaseTestCase as BaseBaseTestCase
+from abilian.testing import BaseTestCase as BaseBaseTestCase
+from abilian.testing import TestConfig
 
 from .app import Application
 
