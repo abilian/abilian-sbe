@@ -40,6 +40,7 @@ from abilian.sbe.apps.documents.models import Document, Folder, icon_for, \
     icon_url
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.documents.search import reindex_tree
+
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
     check_write_access, create_document, edit_object, get_document, \
     get_folder, get_new_filename, get_selected_objects
@@ -621,38 +622,37 @@ def explore_archive(fd, uncompress=False):
         yield [], fd
         return
 
-    if is_zipfile(fd):
-
-        # XXX: workaround https://bugs.python.org/issue26175 in Python 3.7
-        # TODO: Remove when it's fixed
-        fd.seekable = lambda: True
-
-        with ZipFile(fd, "r") as archive:
-            for zipinfo in archive.infolist():
-                filename = zipinfo.filename
-                if isinstance(filename, bytes):
-                    # not unicode: try to convert from utf-8 (OSX case: unicode flag not
-                    # set), then legacy cp437
-                    # http://stackoverflow.com/questions/13261347/correctly-decoding-zip-entry-file-names-cp437-utf-8-or
-                    try:
-                        filename = filename.decode("utf-8")
-                    except UnicodeDecodeError:
-                        filename = filename.decode("cp437")
-
-                if any(
-                    pattern.match(filename) is not None
-                    for pattern in ARCHIVE_IGNORE_FILES
-                ):
-                    continue
-
-                filepath = filename.split("/")
-                filename = filepath.pop()
-                zip_fd = archive.open(zipinfo, "r")
-                setattr(zip_fd, "filename", filename)
-                setattr(zip_fd, "content_type", None)
-                yield filepath, zip_fd
-    else:
+    if not is_zipfile(fd):
         yield [], fd
+        return
+
+    # XXX: workaround https://bugs.python.org/issue26175 in Python 3.7
+    # TODO: Remove when it's fixed
+    fd.seekable = lambda: True
+
+    with ZipFile(fd, "r") as archive:
+        for zipinfo in archive.infolist():
+            filename = zipinfo.filename
+            if isinstance(filename, bytes):
+                # not unicode: try to convert from utf-8 (OSX case: unicode flag not
+                # set), then legacy cp437
+                # http://stackoverflow.com/questions/13261347/correctly-decoding-zip-entry-file-names-cp437-utf-8-or
+                try:
+                    filename = filename.decode("utf-8")
+                except UnicodeDecodeError:
+                    filename = filename.decode("cp437")
+
+            if any(
+                pattern.match(filename) is not None for pattern in ARCHIVE_IGNORE_FILES
+            ):
+                continue
+
+            filepath = filename.split("/")
+            filename = filepath.pop()
+            zip_fd = archive.open(zipinfo, "r")
+            setattr(zip_fd, "filename", filename)
+            setattr(zip_fd, "content_type", None)
+            yield filepath, zip_fd
 
 
 def upload_new(folder):
