@@ -10,7 +10,7 @@ import re
 import tempfile
 from datetime import datetime
 from functools import partial
-from io import StringIO, BytesIO
+from io import StringIO
 from typing import Any, List
 from zipfile import ZipFile, is_zipfile
 
@@ -40,7 +40,6 @@ from abilian.sbe.apps.documents.models import Document, Folder, icon_for, \
     icon_url
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.documents.search import reindex_tree
-
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
     check_write_access, create_document, edit_object, get_document, \
     get_folder, get_new_filename, get_selected_objects
@@ -623,6 +622,11 @@ def explore_archive(fd, uncompress=False):
         return
 
     if is_zipfile(fd):
+
+        # XXX: workaround https://bugs.python.org/issue26175 in Python 3.7
+        # TODO: Remove when it's fixed
+        fd.seekable = lambda: True
+
         with ZipFile(fd, "r") as archive:
             for zipinfo in archive.infolist():
                 filename = zipinfo.filename
@@ -661,12 +665,7 @@ def upload_new(folder):
     path_cache = {}  # mapping folder path in zip: folder instance
 
     for upload_fd in fds:
-        # XXX: workaround https://bugs.python.org/issue26175 in Python 3.7
-        # TODO: Remove when it's fixed
-        temp_fd = BytesIO(upload_fd.read())
-        temp_fd.filename = upload_fd.filename
-        temp_fd.content_type = upload_fd.content_type
-        for filepath, fd in explore_archive(temp_fd, uncompress=uncompress_files):
+        for filepath, fd in explore_archive(upload_fd, uncompress=uncompress_files):
             folder = base_folder
             parts = []
             # traverse to final directory, create intermediate if necessary. Folders
