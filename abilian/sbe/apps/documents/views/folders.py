@@ -36,11 +36,10 @@ from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
 
 from abilian.sbe.apps.communities.views import default_view_kw
-from ..models import Document, Folder, icon_for, \
-    icon_url
+
+from ..models import Document, Folder, icon_for, icon_url
 from ..repository import repository
 from ..search import reindex_tree
-
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
     check_write_access, create_document, edit_object, get_document, \
     get_folder, get_new_filename, get_selected_objects
