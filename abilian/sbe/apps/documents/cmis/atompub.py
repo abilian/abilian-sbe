@@ -208,15 +208,15 @@ def getObject():
     log.debug("Options: %s" % options)
 
     if id:
-        object = repository.get_object_by_id(id)
+        obj = repository.get_object_by_id(id)
     elif path:
-        object = repository.get_object_by_path(path)
+        obj = repository.get_object_by_path(path)
     else:
         raise NotFound("You must supply either an id or a path.")
-    if not object:
+    if not obj:
         raise NotFound("Object not found")
 
-    result = to_xml(object, **options)
+    result = to_xml(obj, **options)
     return Response(result, mimetype=MIME_TYPE_ATOM_ENTRY)
 
 
@@ -230,8 +230,8 @@ def updateProperties():
     log.debug("updateProperties called on id=%s, path=%s" % (id, path))
     log.debug("URL: " + request.url)
 
-    object = get_object(id)
-    return Response(to_xml(object), mimetype=MIME_TYPE_ATOM_ENTRY)
+    obj = get_object(id)
+    return Response(to_xml(obj), mimetype=MIME_TYPE_ATOM_ENTRY)
 
 
 @route("/entry", methods=["DELETE"])
@@ -244,14 +244,14 @@ def deleteObject():
     log.debug("deleteObject called on id=%s, path=%s" % (id, path))
     log.debug("URL: " + request.url)
 
-    object = get_object(id)
+    obj = get_object(id)
 
     # TODO: remove
-    parent = object.parent
+    parent = obj.parent
     if parent:
         child_count_0 = len(parent.children)
 
-    db.session.delete(object)
+    db.session.delete(obj)
     db.session.commit()
 
     if parent:
@@ -312,8 +312,8 @@ def getAllowableActions():
     id = request.args.get("id")
     log.debug("getAllowableActions called on " + id)
 
-    object = get_object(id)
-    args = {"ROOT": ROOT, "object": object}
+    obj = get_object(id)
+    args = {"ROOT": ROOT, "object": obj}
     result = render_template("cmis/allowableactions.xml", **args)
     return Response(result, mimetype=MIME_TYPE_CMIS_ALLOWABLE_ACTIONS)
 
@@ -425,11 +425,11 @@ def getObjectParents():
     id = request.args.get("id")
     log.debug("getObjectParents called on " + id)
 
-    object = get_object(id)
-    if object.parent:
-        feed = Feed(object, [object.parent])
+    obj = get_object(id)
+    if obj.parent:
+        feed = Feed(obj, [obj.parent])
     else:
-        feed = Feed(object, [])
+        feed = Feed(obj, [])
     result = feed.to_xml()
     return Response(result, mimetype=MIME_TYPE_ATOM_FEED)
 
@@ -455,8 +455,8 @@ def deleteTree():
     id = request.args.get("id")
     log.debug("deleteTree called on " + id)
 
-    object = get_object(id)
-    db.session.delete(object)
+    obj = get_object(id)
+    db.session.delete(obj)
     db.session.commit()
 
     return ("", 204, {})

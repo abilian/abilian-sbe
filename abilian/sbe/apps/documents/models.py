@@ -44,7 +44,7 @@ from .lock import Lock
 logger = logging.getLogger(__package__)
 
 __all__ = (
-    "db",
+    "CmisObject",
     "Folder",
     "Document",
     "BaseContent",
