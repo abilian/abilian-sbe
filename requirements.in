@@ -1,5 +1,6 @@
 # Temp
 wtforms<2.2
+sqlalchemy<=1.2.10
 
 # Abilian Core
 abilian-core>=0.9
