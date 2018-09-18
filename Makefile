@@ -162,7 +162,7 @@ clean:
 	find . -name .DS_Store -delete
 	find . -name __pycache__ -delete
 	find . -type d -empty -delete
-	rm -rf .mypy_cache .cache .eggs .pytest_cache
+	rm -rf .mypy_cache .cache .eggs .pytest_cache .pyre
 	rm -rf instance/cache instance/tmp instance/webassets instance/whoosh
 	rm -f migration.log
 	rm -rf build dist
