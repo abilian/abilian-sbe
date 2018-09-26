@@ -16,7 +16,7 @@ celery==4.2.1             # via abilian-core
 cffi==1.11.5              # via bcrypt
 chardet==3.0.4
 clamd==1.0.2              # via abilian-core
-click==6.7                # via flask
+click==7.0                # via flask
 closure==20180204         # via abilian-core
 cssmin==0.2.0             # via abilian-core
 decorator==4.3.0          # via validators
@@ -47,12 +47,12 @@ lxml==4.2.5               # via abilian-core
 mako==1.0.7               # via alembic
 markdown==2.6.11
 markupsafe==1.0           # via abilian-core, jinja2, mako
-numpy==1.15.1             # via langid, pandas
-openpyxl==2.5.7
+numpy==1.15.2             # via langid, pandas
+openpyxl==2.5.8
 pandas==0.23.4            # via abilian-core
 pathlib==1.0.1            # via abilian-core
 pillow==5.2.0             # via abilian-core
-pycparser==2.18           # via cffi
+pycparser==2.19           # via cffi
 pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.7.3    # via abilian-core, alembic, pandas
 python-deprecated==1.1.0  # via abilian-core
@@ -64,7 +64,7 @@ raven==6.9.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 singledispatch==3.4.0.3
 six==1.11.0               # via abilian-core, bcrypt, bleach, html5lib, python-dateutil, singledispatch, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
-sqlalchemy-utils==0.33.4  # via wtforms-alchemy
+sqlalchemy-utils==0.33.5  # via wtforms-alchemy
 sqlalchemy==1.2.10
 sqlparse==0.2.4           # via abilian-core
 toolz==0.9.0
