@@ -36,7 +36,8 @@ from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf
 
 from abilian.sbe.apps.communities.views import default_view_kw
-from abilian.sbe.apps.documents.models import Document, Folder, icon_for, icon_url
+from abilian.sbe.apps.documents.models import Document, Folder, icon_for, \
+    icon_url
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.documents.search import reindex_tree
 
