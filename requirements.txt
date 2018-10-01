@@ -51,7 +51,7 @@ numpy==1.15.2             # via langid, pandas
 openpyxl==2.5.8
 pandas==0.23.4            # via abilian-core
 pathlib==1.0.1            # via abilian-core
-pillow==5.2.0             # via abilian-core
+pillow==5.3.0             # via abilian-core
 pycparser==2.19           # via cffi
 pygeoip==0.3.2            # via abilian-core
 python-dateutil==2.7.3    # via abilian-core, alembic, pandas
