@@ -28,7 +28,7 @@ from abilian.web.action import actions
 from abilian.web.views import default_view
 from flask import Markup, current_app, flash, g, jsonify, make_response, \
     redirect, render_template, render_template_string, request, send_file, \
-    session
+    session, Response
 from six import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
@@ -792,6 +792,7 @@ def delete_multiple(folder):
 
 
 def move_multiple(folder):
+    # type: (Folder) -> Response
     folders, docs = get_selected_objects(folder)
     objects = folder + docs
 

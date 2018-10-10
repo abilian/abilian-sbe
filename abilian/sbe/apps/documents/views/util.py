@@ -2,6 +2,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import re
+from typing import Tuple, List
 
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
@@ -12,6 +13,7 @@ from flask_babel import gettext as _
 from six import text_type
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
+from abilian.sbe.apps.documents.models import Folder, Document
 from ..repository import repository
 
 
@@ -134,6 +136,7 @@ def edit_object(obj):
 
 
 def get_selected_objects(folder):
+    # type: (Folder) -> Tuple[List[Folder], List[Document]]
     """Returns a tuple, (folders, docs), of folders and docs in the specified
     folder that have been selected from the UI."""
     selected_ids = request.form.getlist("object-selected")

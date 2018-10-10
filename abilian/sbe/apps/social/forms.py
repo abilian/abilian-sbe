@@ -16,8 +16,6 @@ from abilian.sbe.apps.communities.models import Community
 ModelForm = model_form_factory(Form)
 
 
-# FIXME
-# type: ignore
 class UserProfileForm(ModelForm):
     pass
 
