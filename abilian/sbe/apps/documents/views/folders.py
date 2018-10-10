@@ -794,7 +794,7 @@ def delete_multiple(folder):
 def move_multiple(folder):
     # type: (Folder) -> Response
     folders, docs = get_selected_objects(folder)
-    objects = folder + docs
+    objects = folders + docs
 
     count_f = len(folders)
     count_d = len(docs)
