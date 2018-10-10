@@ -26,9 +26,9 @@ from abilian.services.security import READ, WRITE, Role, security
 from abilian.web import csrf, http, url_for
 from abilian.web.action import actions
 from abilian.web.views import default_view
-from flask import Markup, current_app, flash, g, jsonify, make_response, \
-    redirect, render_template, render_template_string, request, send_file, \
-    session, Response
+from flask import Markup, Response, current_app, flash, g, jsonify, \
+    make_response, redirect, render_template, render_template_string, \
+    request, send_file, session
 from six import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func

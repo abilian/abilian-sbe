@@ -2,7 +2,7 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 import re
-from typing import Tuple, List
+from typing import List, Tuple
 
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
@@ -13,7 +13,8 @@ from flask_babel import gettext as _
 from six import text_type
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
-from abilian.sbe.apps.documents.models import Folder, Document
+from abilian.sbe.apps.documents.models import Document, Folder
+
 from ..repository import repository
 
 
