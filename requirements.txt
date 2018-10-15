@@ -4,13 +4,13 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.24
+abilian-core==0.10.25
 alembic==1.0.0            # via abilian-core, flask-migrate
 amqp==2.3.2               # via kombu
 babel==2.6.0              # via flask-babel
 bcrypt==3.1.4             # via abilian-core
 billiard==3.5.0.4         # via celery
-bleach==3.0.1             # via abilian-core
+bleach==3.0.2             # via abilian-core
 blinker==1.4              # via flask-debugtoolbar, flask-mail
 celery==4.2.1             # via abilian-core
 cffi==1.11.5              # via bcrypt
@@ -63,7 +63,7 @@ raven==6.9.0              # via abilian-core
 redis==2.10.6             # via abilian-core
 singledispatch==3.4.0.3
 six==1.11.0               # via abilian-core, bcrypt, bleach, python-dateutil, singledispatch, sqlalchemy-utils, validators, wtforms-alchemy, wtforms-components
-sqlalchemy-utils==0.33.5  # via wtforms-alchemy
+sqlalchemy-utils==0.33.6  # via wtforms-alchemy
 sqlalchemy==1.2.10
 sqlparse==0.2.4           # via abilian-core
 toolz==0.9.0
