@@ -22,7 +22,7 @@ cssmin==0.2.0             # via abilian-core
 decorator==4.3.0          # via validators
 et-xmlfile==1.0.1         # via openpyxl
 flask-assets==0.12        # via abilian-core
-flask-babel==0.11.2       # via abilian-core
+flask-babel==0.12.2       # via abilian-core
 flask-debugtoolbar==0.10.1  # via abilian-core
 flask-login==0.4.1        # via abilian-core
 flask-mail==0.9.1         # via abilian-core
@@ -36,7 +36,7 @@ hyperlink==18.0.0         # via abilian-core
 idna==2.7                 # via hyperlink
 infinity==1.4             # via intervals
 intervals==0.8.1          # via wtforms-components
-itsdangerous==1.0.0       # via flask, flask-debugtoolbar
+itsdangerous==1.1.0       # via flask, flask-debugtoolbar
 jdcal==1.4                # via openpyxl
 jinja2==2.10              # via flask, flask-babel
 jsmin==2.2.2              # via abilian-core
@@ -53,11 +53,11 @@ pathlib==1.0.1            # via abilian-core
 pillow==5.3.0             # via abilian-core
 pycparser==2.19           # via cffi
 pygeoip==0.3.2            # via abilian-core
-python-dateutil==2.7.3    # via abilian-core, alembic, pandas
+python-dateutil==2.7.5    # via abilian-core, alembic, pandas
 python-deprecated==1.1.0  # via abilian-core
 python-editor==1.0.3      # via alembic
 python-magic==0.4.15      # via abilian-core
-pytz==2018.6              # via babel, celery, pandas
+pytz==2018.7              # via babel, celery, pandas
 pyyaml==3.13              # via abilian-core
 raven==6.9.0              # via abilian-core
 redis==2.10.6             # via abilian-core
