@@ -113,7 +113,7 @@ def convert_to_pdf(doc):
             doc.pdf = converter.to_pdf(
                 doc.content_digest, doc.content, doc.content_type
             )
-        except HandlerNotFound as e:
+        except HandlerNotFound:
             doc.pdf = b""
         except ConversionError as e:
             doc.pdf = b""

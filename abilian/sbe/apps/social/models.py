@@ -50,7 +50,7 @@ class Message(Entity):
 
     @property
     def tags(self):
-        return re.findall("#([^\W]+)(?u)", self.content)
+        return re.findall(r"(?u)#([^\W]+)", self.content)
 
 
 # TODO: inheriting from Entity is overkill here
