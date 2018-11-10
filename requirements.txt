@@ -4,8 +4,8 @@
 #
 #    pip-compile --output-file requirements.txt requirements.in
 #
-abilian-core==0.10.25
-alembic==1.0.1            # via abilian-core, flask-migrate
+abilian-core==0.10.26
+alembic==1.0.2            # via abilian-core, flask-migrate
 amqp==2.3.2               # via kombu
 babel==2.6.0              # via flask-babel
 bcrypt==3.1.4             # via abilian-core
@@ -45,8 +45,8 @@ langid==1.1.6
 lxml==4.2.5               # via abilian-core
 mako==1.0.7               # via alembic
 markdown==2.6.11
-markupsafe==1.0           # via abilian-core, jinja2, mako
-numpy==1.15.3             # via langid, pandas
+markupsafe==1.1.0         # via abilian-core, jinja2, mako
+numpy==1.15.4             # via langid, pandas
 openpyxl==2.5.9
 pandas==0.23.4            # via abilian-core
 pathlib==1.0.1            # via abilian-core
