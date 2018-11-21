@@ -20,8 +20,8 @@ addons:
   postgresql: "9.6"
 
 before_install:
-  - apt-get -qq update
-  - apt-get install poppler-utils
+  - sudo apt-get -qq update
+  - sudo apt-get install poppler-utils
   - yarn global add less
   - gem install travis
 
