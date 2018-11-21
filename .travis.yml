@@ -1,5 +1,4 @@
 dist: xenial
-sudo: required
 
 language: python
 cache: pip
@@ -21,18 +20,9 @@ addons:
   postgresql: "9.6"
 
 before_install:
-  - sudo add-apt-repository 'deb http://ubuntu.mirrors.ovh.net/ftp.ubuntu.com/ubuntu/ xenial main'
-  - sudo apt-get -qq update
-  - sudo apt-get install poppler-utils nodejs sqlite3
-  - python -c "import sqlite3; print('SQLITE3:', sqlite3.sqlite_version)"
-
-  - export NPM_CONFIG_PREFIX=~/npm-packages
-  - mkdir "${NPM_CONFIG_PREFIX}"
-  - npm install -g less
-  - export PATH=~/npm-packages/bin:$PATH
-
-  - yarn install
-
+  - apt-get -qq update
+  - apt-get install poppler-utils
+  - yarn global add less
   - gem install travis
 
 # Install Python dependencies
@@ -41,6 +31,7 @@ install:
   - pip install -r requirements.txt -r etc/dev-requirements.txt
   - pip install psycopg2-binary
   - pip check
+  - yarn install
   # TODO: install properly (using pyenv?)
   # - pip3 install mypy
 
