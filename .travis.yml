@@ -13,8 +13,8 @@ env:
     - SQLALCHEMY_DATABASE_URI="sqlite://"
     - SQLALCHEMY_DATABASE_URI="postgres://postgres@localhost/abilian_sbe"
 
-services:
-  - redis-server
+# services:
+#   - redis-server
 
 addons:
   postgresql: "9.6"
@@ -40,7 +40,7 @@ before_script:
 
 # Run tests
 script:
-  - py.test --tb=short -q --cov abilian .
+  - pytest --tb=short -q --cov abilian .
   - make lint
   # There are no docs yet!
   #- sphinx-build -W -b html docs/ docs/_build/
