@@ -16,9 +16,9 @@ from abilian.sbe.apps.documents.lock import Lock
 def test_lock():
     date = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)
     l = Lock(user_id=3, user="Joe Smith", date=date)
-
     d = l.as_dict()
     assert d == {"user_id": 3, "user": "Joe Smith", "date": "2015-10-22T14:58:42+00:00"}
+
     l = Lock.from_dict(d)
     assert l.user_id == 3
     assert l.user == "Joe Smith"

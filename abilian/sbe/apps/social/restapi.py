@@ -58,8 +58,8 @@ def create_user():
 @login_required
 def list_users():
     # l = [ u.to_dict() for u in User.query.all() ]
-    l = list(User.query.all())
-    return make_json_response(l)
+    users = list(User.query.all())
+    return make_json_response(users)
 
 
 # [GET] /api/users/USER_ID	View User Profile
@@ -155,8 +155,8 @@ def unfollow(user_id, contact_user_id):
 @restapi.route("/groups")
 @login_required
 def list_groups():
-    l = list(Group.query.all())
-    return make_json_response(l)
+    groups = list(Group.query.all())
+    return make_json_response(groups)
 
 
 # [GET] /api/groups/GROUP_ID	Show a Single Group
