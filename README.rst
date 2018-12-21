@@ -1,13 +1,13 @@
 About
 =====
 
-Abilian SBE (Social Business Engine) is a platform for developing social business applications, and more specifically collaborative / enterprise 2.0 business applications, such as enterprise social networks (ESN).
+Abilian SBE (Social Business Engine) is a platform for social business applications, and more specifically collaborative / enterprise 2.0 business applications, such as enterprise social networks (ESN).
+
+Abilian SBE revolves around the concept of *communities*, which are collaborative spaces with services such as lightweight document management, discussions, wikis, user timelines, etc.
 
 It is based on the `Abilian Core <http://abilian-core.readthedocs.org/en/latest/>`_ project which provide the basic services, on top of Flask and SQLAlchemy.
 
-Abilian SBE adds the concept of *communities*, which are collaborative spaces with services such as lightweight document management, discussions, wikis, user timelines.
-
-Abilian SBE is currently alpha software and evolving quickly. OTOH, it's already used by several major customers in production, since mid 2013.
+Abilian SBE is used by several major customers in production, since mid 2013.
 
 Screenshots
 -----------
@@ -125,4 +125,3 @@ Links
 - `Documentation <http://docs.abilian.com/>`_
 - `GitHub repository <https://github.com/abilian/abilian-sbe>`_
 - `Corporate support <http://www.abilian.com>`_
-
