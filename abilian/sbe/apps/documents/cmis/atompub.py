@@ -101,7 +101,7 @@ def get_options(args):
         elif v in ("false", ""):
             v = False
         else:
-            raise Exception("Unexpected parameter value for %s: %s" % (k, v))
+            raise Exception("Unexpected parameter value for {}: {}".format(k, v))
         d[k] = v
     return d
 
@@ -201,7 +201,7 @@ def getObject():
     id = request.args.get("id")
     path = request.args.get("path")
 
-    log.debug("getObject called on id=%s, path=%s" % (id, path))
+    log.debug("getObject called on id={}, path={}".format(id, path))
     log.debug("URL: " + request.url)
 
     options = get_options(request.args)
@@ -227,7 +227,7 @@ def updateProperties():
         path = request.args.get("path")
     else:
         path = ""
-    log.debug("updateProperties called on id=%s, path=%s" % (id, path))
+    log.debug("updateProperties called on id={}, path={}".format(id, path))
     log.debug("URL: " + request.url)
 
     obj = get_object(id)
@@ -241,7 +241,7 @@ def deleteObject():
         path = request.args.get("path")
     else:
         path = ""
-    log.debug("deleteObject called on id=%s, path=%s" % (id, path))
+    log.debug("deleteObject called on id={}, path={}".format(id, path))
     log.debug("URL: " + request.url)
 
     obj = get_object(id)

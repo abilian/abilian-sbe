@@ -48,7 +48,7 @@ def invite_post():
 
             # subject = _(u"%s would like to invite you to the %s community")
             # % (g.user.name, "Yaka")
-            subject = "%s would like to invite you to the %s community" % (
+            subject = "{} would like to invite you to the {} community".format(
                 g.user.name,
                 "Yaka",
             )

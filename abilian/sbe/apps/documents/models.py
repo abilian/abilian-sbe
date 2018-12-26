@@ -351,7 +351,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
             return None
 
     def __repr__(self):
-        return "<%s.%s id=%r name=%r path=%r at 0x%x>" % (
+        return "<{}.{} id={!r} name={!r} path={!r} at 0x{:x}>".format(
             self.__class__.__module__,
             self.__class__.__name__,
             self.id,

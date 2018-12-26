@@ -206,7 +206,7 @@ def has_subtag(address):
 
 def send_post_to_user(community, post, member):
     recipient = member.email
-    subject = "[%s] %s" % (community.name, post.title)
+    subject = "[{}] {}".format(community.name, post.title)
     config = current_app.config
     sender = config.get("BULK_MAIL_SENDER", config["MAIL_SENDER"])
     SBE_FORUM_REPLY_BY_MAIL = config.get("SBE_FORUM_REPLY_BY_MAIL", False)

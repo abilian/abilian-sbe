@@ -144,7 +144,7 @@ def group_monthly(objects):
 
     def format_month(year, month):
         month = format_date(date(year, month, 1), "MMMM").capitalize()
-        return "%s %s" % (month, year)
+        return "{} {}".format(month, year)
 
     grouped = groupby(objects, grouper)
     grouped = [

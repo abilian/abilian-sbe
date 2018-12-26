@@ -176,7 +176,7 @@ def group_monthly(entities_list):
 
     def format_month(year, month):
         month = format_date(date(year, month, 1), "MMMM").capitalize()
-        return "%s %s" % (month, year)
+        return "{} {}".format(month, year)
 
     grouped_entities = groupby(entities_list, grouper)
     grouped_entities = [
