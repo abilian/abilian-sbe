@@ -206,7 +206,7 @@ def _guard_closed_thread_collection(thread, value, *args):
     return value
 
 
-class PostAttachment(BaseContent, CmisObject):
+class PostAttachment(BaseContent):
     __tablename__ = None  # type: str
     __mapper_args__ = {"polymorphic_identity": "forum_post_attachment"}
     sbe_type = "forum_post:attachment"
