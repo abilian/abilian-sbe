@@ -49,8 +49,7 @@ def invite_post():
             # subject = _(u"%s would like to invite you to the %s community")
             # % (g.user.name, "Yaka")
             subject = "{} would like to invite you to the {} community".format(
-                g.user.name,
-                "Yaka",
+                g.user.name, "Yaka"
             )
             msg = Email(subject, recipients=[email], sender=g.user.email)
             params = {"org_name": "Yaka"}

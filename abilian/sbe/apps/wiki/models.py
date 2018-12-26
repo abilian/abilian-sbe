@@ -4,7 +4,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 from datetime import datetime
 
-from abilian.core.entities import SEARCHABLE, Entity, db
+from abilian.core.entities import Entity, db
+from abilian.core.models import SEARCHABLE
 from abilian.core.models.subjects import User
 from flask import g
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, Unicode, \

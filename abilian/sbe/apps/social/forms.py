@@ -13,7 +13,7 @@ from wtforms_alchemy import model_form_factory
 
 from abilian.sbe.apps.communities.models import Community
 
-ModelForm = model_form_factory(Form)
+ModelForm = model_form_factory(Form)  # type: Form
 
 
 class UserProfileForm(ModelForm):

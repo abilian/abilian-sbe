@@ -11,7 +11,7 @@ import mimetypes
 import threading
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, Union
 
 import pkg_resources
 import sqlalchemy as sa
@@ -553,9 +553,11 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def preview_size(self):
+        # type: () -> int
         return self.PREVIEW_SIZE
 
     def has_preview(self, size=None, index=0):
+        # type: (Optional[int], int) -> bool
         if size is None:
             size = self.PREVIEW_SIZE
 
@@ -563,6 +565,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @property
     def digest(self):
+        # type: () -> str
         """Alias for content_digest."""
         return self.content_digest
 
