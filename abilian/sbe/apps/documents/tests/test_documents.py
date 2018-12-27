@@ -11,6 +11,7 @@ from abilian.core.models.subjects import User
 from abilian.testing.util import login
 
 from abilian.sbe.apps.documents.views.folders import explore_archive
+
 from ..models import Document, Folder
 
 

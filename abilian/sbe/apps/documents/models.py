@@ -366,13 +366,13 @@ class Folder(PathAndSecurityIndexable, CmisObject):
     @property
     def filtered_children(self):
         return security.filter_with_permission(
-            g.user, "read", self.children, inherit=True
+            current_user, "read", self.children, inherit=True
         )
 
     @property
     def filtered_subfolders(self):
         return security.filter_with_permission(
-            g.user, "read", self.subfolders, inherit=True
+            current_user, "read", self.subfolders, inherit=True
         )
 
     def get_local_roles_assignments(self):

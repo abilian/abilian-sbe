@@ -17,8 +17,8 @@ from abilian.web import url_for
 from abilian.web.filters import age
 from abilian.web.views import ObjectEdit, default_view
 from abilian.web.views.images import user_photo_url
-from flask import Response, flash, g, jsonify, redirect, render_template, \
-    request
+from flask import Response, flash, jsonify, redirect, render_template, request
+from flask_login import current_user
 from six import text_type
 from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError
@@ -157,9 +157,9 @@ def user(user_id):
     view_form = UserProfileViewForm(obj=user)
 
     communities = [m.community for m in user.communautes_membership]
-    if g.user != user and (not security.has_role(g.user, "manager")):
+    if current_user != user and (not security.has_role(current_user, "manager")):
         # filter visible communautes (ticket 165)
-        communities = [c for c in communities if c.has_member(g.user)]
+        communities = [c for c in communities if c.has_member(current_user)]
 
     view_form.communautes._set_data(communities)
 
@@ -184,7 +184,7 @@ def can_edit(user):
         return True
 
     # TODO: introduce a "self" role?
-    return (user == g.user) or security.has_role(g.user, "admin")
+    return (user == current_user) or security.has_role(current_user, "admin")
 
 
 class UserProfileEdit(ObjectEdit):
@@ -228,9 +228,9 @@ def user_post(user_id):
     return_url = request.form.get("return_url")
 
     if action == "follow":
-        g.user.follow(user)
+        current_user.follow(user)
     elif action == "unfollow":
-        g.user.unfollow(user)
+        current_user.unfollow(user)
     else:
         raise Exception("Should not happen")
     db.session.commit()

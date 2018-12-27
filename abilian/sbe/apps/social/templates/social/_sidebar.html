@@ -4,7 +4,7 @@
   <ul class="nav nav-list">
   <ul class="nav nav-list">
     <li><a href="{{ url_for("social.home") }}">{{ _("My feed") }}</a></li>
-    <li><a href="{{ url_for(g.user) }}">{{ _("My profile") }}</a></li>
+    <li><a href="{{ url_for(current_user) }}">{{ _("My profile") }}</a></li>
     <li><a href="{{ url_for("social.users") }}">{{ _("User directory") }}</a></li>
   </ul>
 {% endcall %}

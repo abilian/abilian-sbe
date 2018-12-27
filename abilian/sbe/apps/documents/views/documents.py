@@ -155,7 +155,7 @@ def document_upload(doc_id):
     del doc.lock
 
     self = unwrap(current_app)
-    activity.send(self, actor=g.user, verb="update", object=doc)
+    activity.send(self, actor=current_user, verb="update", object=doc)
     db.session.commit()
     flash(_("New version successfully uploaded"), "success")
     return redirect(url_for(doc))
@@ -298,10 +298,10 @@ def document_send(doc_id):
     user_msg = request.form.get("message")
 
     site_name = "[{}] ".format(current_app.config["SITE_NAME"])
-    sender_name = g.user.name
+    sender_name = current_user.name
     subject = site_name + _("{sender} sent you a file").format(sender=sender_name)
     msg = Message(subject)
-    msg.sender = g.user.email
+    msg.sender = current_user.email
     msg.recipients = [recipient]
     msg.body = render_template_i18n(
         "documents/mail_file_sent.txt",

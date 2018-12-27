@@ -14,6 +14,7 @@ from abilian.web.views import default_view
 from flask import current_app, flash, g, jsonify, make_response, redirect, \
     render_template, request, url_for
 from flask_babel import gettext as _
+from flask_login import current_user
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError, NotFound
 
@@ -31,12 +32,14 @@ def groups():
     tab = request.args.get("tab", "all_groups")
     if tab == "all_groups":
         groups = Group.query.order_by(Group.name).all()
-        if not security.has_role(g.user, "admin"):
+        if not security.has_role(current_user, "admin"):
             groups = [
-                group for group in groups if group.public or g.user in group.members
+                group
+                for group in groups
+                if group.public or current_user in group.members
             ]
     else:
-        groups = g.user.groups
+        groups = current_user.groups
         groups.sort(key=lambda x: x.name)
 
     return render_template("social/groups.html", groups=groups)
@@ -44,9 +47,9 @@ def groups():
 
 def is_admin(group):
     security = get_service("security")
-    is_admin = g.user in group.admins
+    is_admin = current_user in group.admins
     if not is_admin and "security" in current_app.extensions:
-        is_admin = security.has_role(g.user, "admin")
+        is_admin = security.has_role(current_user, "admin")
 
     return is_admin
 
@@ -95,9 +98,9 @@ def group_post(group_id):
         assert is_admin(group)
 
     if action == "join":
-        g.user.join(group)
+        current_user.join(group)
     elif action == "leave":
-        g.user.leave(group)
+        current_user.leave(group)
 
     elif action in membership_actions:
         try:

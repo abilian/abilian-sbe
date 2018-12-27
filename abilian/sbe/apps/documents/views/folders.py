@@ -29,6 +29,7 @@ from abilian.web.views import default_view
 from flask import Markup, Response, current_app, flash, g, jsonify, \
     make_response, redirect, render_template, render_template_string, \
     request, send_file, session
+from flask_login import current_user
 from six import text_type
 from six.moves.urllib.parse import quote
 from sqlalchemy import func
@@ -109,12 +110,16 @@ def folder_json(folder_id):
     result = {}
     has_permission = security.has_permission
     result["current_folder_selectable"] = has_permission(
-        g.user, WRITE, folder, inherit=True
+        current_user, WRITE, folder, inherit=True
     )
     folders = result["folders"] = []
     bc = result["breadcrumbs"] = []
     subfolders = sorted(
-        (f for f in folder.subfolders if has_permission(g.user, READ, f, inherit=True)),
+        (
+            f
+            for f in folder.subfolders
+            if has_permission(current_user, READ, f, inherit=True)
+        ),
         key=lambda f: f.title,
     )
 
@@ -275,7 +280,8 @@ def permissions_update(folder_id):
         inherit_security = action == "activate_inheritance"
 
         if not (
-            inherit_security or has_permission(g.user, "manage", folder, inherit=False)
+            inherit_security
+            or has_permission(current_user, "manage", folder, inherit=False)
         ):
             # don't let user shoot himself in the foot
             flash(
@@ -345,9 +351,9 @@ def permissions_update(folder_id):
             security.ungrant_role(user, role, folder)
 
             if (
-                user == g.user
+                user == current_user
                 and role == "manager"
-                and not has_permission(g.user, "manage", folder, inherit=True)
+                and not has_permission(current_user, "manage", folder, inherit=True)
             ):
 
                 transaction.rollback()
@@ -376,7 +382,7 @@ def permissions_update(folder_id):
             security.ungrant_role(group, role, folder)
 
             if role == "manager" and not has_permission(
-                g.user, "manage", folder, inherit=True
+                current_user, "manage", folder, inherit=True
             ):
                 transaction.rollback()
                 flash(
@@ -444,7 +450,7 @@ def permissions_export(folder_id):
         ws.write(0, c, val, header_style)
 
     # data
-    permissions = iter_permissions(folder, g.user)
+    permissions = iter_permissions(folder, current_user)
     row_offset = 0
     current_community = None
     for r, row in enumerate(permissions, 1):
@@ -760,7 +766,9 @@ def delete_multiple(folder):
     for obj in docs + folders:
         app = unwrap(current_app)
         community = g.community._model
-        activity.send(app, actor=g.user, verb="delete", object=obj, target=community)
+        activity.send(
+            app, actor=current_user, verb="delete", object=obj, target=community
+        )
         repository.delete_object(obj)
 
     if docs + folders:
@@ -822,12 +830,12 @@ def move_multiple(folder):
         )
         return redirect(current_folder_url)
 
-    if not security.has_permission(g.user, "write", folder, inherit=True):
+    if not security.has_permission(current_user, "write", folder, inherit=True):
         # this should not happen: this is just defensive programming
         flash(_("You are not allowed to move elements from this folder"), "error")
         return redirect(current_folder_url)
 
-    if not security.has_permission(g.user, "write", target_folder, inherit=True):
+    if not security.has_permission(current_user, "write", target_folder, inherit=True):
         flash(
             _('You are not allowed to write in folder "{folder}"').format(
                 folder=target_folder.title

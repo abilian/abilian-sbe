@@ -9,6 +9,7 @@ from abilian.services.security import MANAGE, WRITE, security
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 from flask import g
 from flask import url_for as url_for_orig
+from flask_login import current_user
 
 from abilian.sbe.apps.communities.security import is_manager
 
@@ -41,7 +42,7 @@ class CmisContentAction(Action):
 
     def has_access(self, permission, obj):
         # type: (str, Any) -> bool
-        return repository.has_permission(g.user, permission, obj)
+        return repository.has_permission(current_user, permission, obj)
 
 
 class BaseFolderAction(CmisContentAction):
@@ -183,7 +184,7 @@ _actions = (
         "view",
         _l("List content"),
         icon="list",
-        condition=(lambda ctx: security.has_role(g.user, "admin")),
+        condition=(lambda ctx: security.has_role(current_user, "admin")),
         url=lambda ctx: url_for(".folder_view", folder_id=ctx["object"].id),
     ),
     # view

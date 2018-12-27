@@ -10,6 +10,7 @@ from abilian.services.security import MANAGE, WRITE, Admin, security
 from abilian.web import url_for
 from flask import current_app, flash, g, request
 from flask_babel import gettext as _
+from flask_login import current_user
 from six import text_type
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
@@ -115,7 +116,7 @@ def create_document(folder, fs):
     # Some unwrapping before posting event
     app = unwrap(current_app)
     community = g.community._model
-    activity.send(app, actor=g.user, verb="post", object=doc, target=community)
+    activity.send(app, actor=current_user, verb="post", object=doc, target=community)
 
     return doc
 
@@ -169,9 +170,9 @@ def check_read_access(obj):
         raise NotFound()
     if not security.running:
         return True
-    if security.has_role(g.user, Admin):
+    if security.has_role(current_user, Admin):
         return True
-    if repository.has_access(g.user, obj):
+    if repository.has_access(current_user, obj):
         return True
     raise Forbidden()
 
@@ -188,11 +189,11 @@ def check_write_access(obj):
         raise NotFound()
     if not security.running:
         return
-    if security.has_role(g.user, Admin):
+    if security.has_role(current_user, Admin):
         return
 
-    if repository.has_access(g.user, obj) and repository.has_permission(
-        g.user, WRITE, obj
+    if repository.has_access(current_user, obj) and repository.has_permission(
+        current_user, WRITE, obj
     ):
         return
     raise Forbidden()
@@ -211,10 +212,10 @@ def check_manage_access(obj):
         raise NotFound()
     if not security.running:
         return
-    if security.has_role(g.user, Admin):
+    if security.has_role(current_user, Admin):
         return
-    if repository.has_access(g.user, obj) and repository.has_permission(
-        g.user, MANAGE, obj
+    if repository.has_access(current_user, obj) and repository.has_permission(
+        current_user, MANAGE, obj
     ):
         return
     raise Forbidden()

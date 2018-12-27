@@ -68,7 +68,7 @@ class ViewTestCase(CommunityBaseTestCase):
             )
             response = self.client.get(url)
             assert response.status_code == 200
-            assert content in response.data.decode("utf-8")
+            assert content in response.get_data(as_text=True)
 
             # check the email was sent with the new thread
             assert len(outbox) == 1
@@ -90,7 +90,7 @@ class ViewTestCase(CommunityBaseTestCase):
             )
             response = self.client.get(url)
             assert response.status_code == 200
-            assert content in response.data.decode("utf-8")
+            assert content in response.get_data(as_text=True)
 
             # check the email was sent with the new threadpost
             assert len(outbox) == 1

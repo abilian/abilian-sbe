@@ -80,7 +80,7 @@ def test_community_settings(app, client, community1):
         }
         response = client.post(url, data=data, follow_redirects=True)
         assert response.status_code == 200
-        assert "edited community" in response.data.decode("utf8")
+        assert "edited community" in response.get_data(as_text=True)
 
 
 def test_members(app, client, db, community1, community2):
