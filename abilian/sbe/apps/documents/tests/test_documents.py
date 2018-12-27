@@ -3,11 +3,14 @@
 from __future__ import absolute_import, division, print_function, \
     unicode_literals
 
+import sys
 from pathlib import Path
 
+import pytest
 from abilian.core.models.subjects import User
 from abilian.testing.util import login
 
+from abilian.sbe.apps.documents.views.folders import explore_archive
 from ..models import Document, Folder
 
 
@@ -136,3 +139,21 @@ def test_folder_indexed(app, session, community1, community2):
             hit = res[0]
             assert hit["object_key"] == folder_other.object_key
             assert hit["community_slug"] == community2.slug
+
+
+@pytest.mark.skipif(sys.version_info >= (3, 0), reason="Doesn't work yet on Py3k")
+def test_explore_archive():
+    fd = open_file("content.zip")
+    result = [("/".join(path), f) for path, f in explore_archive(fd)]
+    assert result == [("", fd)]
+
+    fd = open_file("content.zip")
+    archive_content = explore_archive(fd, uncompress=True)
+    result = {"/".join(path) + "/" + f.filename for path, f in archive_content}
+    assert result == {
+        "existing-doc/file.txt",
+        "existing-doc/subfolder_in_renamed/doc.txt",
+        "folder 1/doc.txt",
+        "folder 1/dos cp437: é.txt",
+        "folder 1/osx: utf-8: é.txt",
+    }
