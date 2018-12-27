@@ -16,62 +16,6 @@ class CommunityWebTestCase(BaseIndexingTestCase):
     # FIXME later
     SQLALCHEMY_WARNINGS_AS_ERROR = False
 
-    def test_index(self):
-        with self.client_login(self.user.email, "azerty"):
-            response = self.client.get(url_for("communities.index"))
-            assert response.status_code == 200
-
-    def test_community_home(self):
-        url = self.app.default_view.url_for(self.community)
-        user = self.user.email
-        user_c2 = self.user_c2.email
-        with self.client_login(user_c2, "azerty"):
-            response = self.client.get(url)
-            assert response.status_code == 403
-
-        with self.client_login(user, "azerty"):
-            response = self.client.get(url)
-            assert response.status_code == 302
-            expected_url = url_for(
-                "wall.index", community_id=self.community.slug, _external=True
-            )
-            assert response.location == expected_url
-
-    def test_community_settings(self):
-        url = url_for("communities.settings", community_id=self.community.slug)
-        with self.client_login(self.user.email, "azerty"):
-            response = self.client.get(url)
-            assert response.status_code == 403
-
-            self.app.services["security"].grant_role(self.user, Admin)
-            response = self.client.get(url)
-            assert response.status_code == 200
-
-            data = {
-                "__action": "edit",
-                "name": "edited community",
-                "description": "my community",
-                "linked_group": "",
-                "type": "participative",
-            }
-            response = self.client.post(url, data=data)
-            assert response.status_code == 302
-
-            path = path_from_url(response.location)
-            assert path == "/communities/" + self.community.slug + "/"
-
-            community = Community.query.get(self.community.id)
-            assert community.name == "edited community"
-
-    def test_new(self):
-        with self.client_login(self.user.email, "azerty"):
-            response = self.client.get(url_for("communities.new"))
-            assert response.status_code == 403
-
-            self.app.services["security"].grant_role(self.user, Admin)
-            response = self.client.get(url_for("communities.new"))
-            assert response.status_code == 200
-
     def test_members(self):
         with self.client_login(self.user.email, "azerty"):
             url = url_for("communities.members", community_id=self.community.slug)
