@@ -1,59 +1,79 @@
-# coding=utf-8
 from __future__ import absolute_import, print_function, unicode_literals
 
+import re
+import traceback
+import warnings
+
+from abilian.testing.fixtures import admin_user, login_admin
 from abilian.web import url_for
+from pytest import mark
 
-from abilian.sbe.testing import BaseTestCase
+ENDPOINTS_TO_SKIP = frozenset(
+    [
+        "admin.audit_search_users",
+        "search.search_main",
+        "search.live",
+        "notifications.debug_social",
+        "social.groups_json",
+        "social.groups_new",
+        "social.users_json",
+        "social.users_dt_json",
+        "communities.community_default_image",
+        "images.user_default",
+    ]
+)
+
+PATTERNS_TO_SKIP = [r"^.*\.list_json2$", r"^setup\..*$"]
 
 
-class TestViews(BaseTestCase):
-    no_login = True
+def get_all_rules(app):
+    rules = sorted(app.url_map.iter_rules(), key=lambda x: x.endpoint)
 
-    def test_all_registered_urls(self):
+    for rule in rules:
+        if "GET" not in rule.methods:
+            continue
 
-        SKIP = frozenset(
-            [
-                "admin.audit_search_users",
-                "search.search_main",
-                "search.live",
-                "notifications.debug_social",
-                "social.groups_json",
-                "social.groups_new",
-                "social.users_json",
-                "social.users_dt_json",
-                "communities.community_default_image",
-                "images.user_default",
-            ]
-        )
+        if rule.arguments:
+            continue
 
-        rules = sorted(self.app.url_map.iter_rules(), key=lambda x: x.endpoint)
-        for rule in rules:
+        endpoint = rule.endpoint
+        print(endpoint)
 
-            if "GET" not in rule.methods:
-                continue
+        # Skip several exceptions.
+        if endpoint in ENDPOINTS_TO_SKIP:
+            continue
 
-            if rule.arguments:
-                continue
+        if any(re.match(p, endpoint) for p in PATTERNS_TO_SKIP):
+            continue
 
-            # FIXME. Skip several exceptions.
-            if rule.endpoint in SKIP:
-                continue
+        url = url_for(endpoint)
 
-            # These endpoints expect a parameter ('q') that we don't provide
-            if rule.endpoint.endswith("list_json2"):
-                continue
+        if "/ajax/" in url:
+            continue
 
-            url = url_for(rule.endpoint)
+        yield rule
 
-            if "/ajax/" in url:
-                continue
 
-            print(rule.endpoint, url)
+@mark.usefixtures("req_ctx")
+def test_all_registered_urls(app, db, client):
+    warnings.filterwarnings("ignore")
 
-            try:
-                response = self.client.get(url)
-                err_msg = "Bad link: {} (status={})".format(url, response.status_code)
-                assert response.status_code in (200, 302), err_msg
-            except BaseException:
-                print("Problem with url: {}".format(url))
-                raise
+    rules = get_all_rules(app)
+    user = admin_user(db)
+
+    for rule in rules:
+        login_admin(user, client)
+
+        endpoint = rule.endpoint
+        url = url_for(endpoint)
+        try:
+            response = client.get(url)
+            assert response.status_code in (
+                200,
+                302,
+            ), "Bad link: {} (status={})".format(url, response.status_code)
+        except BaseException:
+            msg = "Problem with endpoint: {} / url: {}".format(endpoint, url)
+            print(msg)
+            traceback.print_exc()
+            raise
