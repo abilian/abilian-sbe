@@ -10,8 +10,6 @@ from pytest import fixture
 from toolz import first
 
 from abilian.sbe.apps.communities.models import READER, Community
-from abilian.sbe.apps.communities.tests.base import CommunityBaseTestCase, \
-    CommunityIndexingTestCase
 from abilian.sbe.apps.wiki import views
 from abilian.sbe.apps.wiki.models import WikiPage
 
