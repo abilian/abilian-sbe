@@ -193,7 +193,7 @@ def test_community_content_decorator(community, db):
 ##########################################################################
 
 
-def test_community_indexed(app, db):
+def test_community_indexed(app, db, req_ctx):
     index_service = app.services["indexing"]
     index_service.start()
 
@@ -221,25 +221,24 @@ def test_community_indexed(app, db):
 
     db.session.commit()
 
-    with app.test_request_context():
-        with login(user_no_community):
-            res = index_service.search("community", object_types=obj_types)
-            assert len(res) == 0
+    with login(user_no_community):
+        res = index_service.search("community", object_types=obj_types)
+        assert len(res) == 0
 
-        with login(user):
-            res = index_service.search("community", object_types=obj_types)
-            assert len(res) == 1
-            hit = res[0]
-            assert hit["object_key"] == community1.object_key
+    with login(user):
+        res = index_service.search("community", object_types=obj_types)
+        assert len(res) == 1
+        hit = res[0]
+        assert hit["object_key"] == community1.object_key
 
-        with login(user_c2):
-            res = index_service.search("community", object_types=obj_types)
-            assert len(res) == 1
-            hit = res[0]
-            assert hit["object_key"] == community2.object_key
+    with login(user_c2):
+        res = index_service.search("community", object_types=obj_types)
+        assert len(res) == 1
+        hit = res[0]
+        assert hit["object_key"] == community2.object_key
 
 
-def test_default_view_kw_with_hit(app, db, community):
+def test_default_view_kw_with_hit(app, db, community, req_ctx):
     index_service = app.services["indexing"]
     index_service.start()
 
@@ -252,8 +251,7 @@ def test_default_view_kw_with_hit(app, db, community):
 
     obj_types = (Community.entity_type,)
 
-    with app.test_request_context():
-        with login(user):
-            hit = index_service.search("community", object_types=obj_types)[0]
-            kw = views.default_view_kw({}, hit, hit["object_type"], hit["id"])
-            assert kw == {"community_id": community.slug}
+    with login(user):
+        hit = index_service.search("community", object_types=obj_types)[0]
+        kw = views.default_view_kw({}, hit, hit["object_type"], hit["id"])
+        assert kw == {"community_id": community.slug}

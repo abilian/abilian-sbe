@@ -100,7 +100,7 @@ def test_antivirus_properties(app, session, req_ctx):
     assert doc.antivirus_ok is True
 
 
-def test_folder_indexed(app, session, community1, community2):
+def test_folder_indexed(app, session, community1, community2, req_ctx):
     index_service = app.services["indexing"]
     index_service.start()
 
@@ -121,25 +121,23 @@ def test_folder_indexed(app, session, community1, community2):
     svc = index_service
     obj_types = (Folder.entity_type,)
 
-    with app.test_request_context():
+    with login(user_no_community):
+        res = svc.search("folder", object_types=obj_types)
+        assert len(res) == 0
 
-        with login(user_no_community):
-            res = svc.search("folder", object_types=obj_types)
-            assert len(res) == 0
+    with login(community1.test_user):
+        res = svc.search("folder", object_types=obj_types)
+        assert len(res) == 1
+        hit = res[0]
+        assert hit["object_key"] == folder.object_key
+        assert hit["community_slug"] == community1.slug
 
-        with login(community1.test_user):
-            res = svc.search("folder", object_types=obj_types)
-            assert len(res) == 1
-            hit = res[0]
-            assert hit["object_key"] == folder.object_key
-            assert hit["community_slug"] == community1.slug
-
-        with login(community2.test_user):
-            res = svc.search("folder", object_types=obj_types)
-            assert len(res) == 1
-            hit = res[0]
-            assert hit["object_key"] == folder_other.object_key
-            assert hit["community_slug"] == community2.slug
+    with login(community2.test_user):
+        res = svc.search("folder", object_types=obj_types)
+        assert len(res) == 1
+        hit = res[0]
+        assert hit["object_key"] == folder_other.object_key
+        assert hit["community_slug"] == community2.slug
 
 
 @pytest.mark.skipif(sys.version_info >= (3, 0), reason="Doesn't work yet on Py3k")
