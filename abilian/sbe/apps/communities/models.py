@@ -228,6 +228,7 @@ class Community(Entity):
         return memberships.all()
 
     def set_membership(self, user, role):
+        # type: (User, Role) -> None
         """Add a member with the given role, or set the role of an existing
         member."""
         assert isinstance(user, User)

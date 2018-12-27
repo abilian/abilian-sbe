@@ -25,7 +25,7 @@ def test_lock():
     assert l.date == date
 
 
-def test_lock2(app, session, test_request_context):
+def test_lock2(app, session, req_ctx):
     user = User(
         email="test@example.com", first_name="Joe", last_name="Smith", can_login=True
     )

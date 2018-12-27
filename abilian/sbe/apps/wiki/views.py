@@ -356,7 +356,7 @@ def page_delete():
 
     app = unwrap(current_app)
     community = g.community._model
-    activity.send(app, actor=g.user, verb="delete", object=page, target=community)
+    activity.send(app, actor=current_user, verb="delete", object=page, target=community)
 
     db.session.commit()
     flash(_("Page %(title)s deleted.", title=title))

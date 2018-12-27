@@ -3,15 +3,15 @@
 from __future__ import absolute_import, print_function, unicode_literals
 
 from abilian.services.security import Admin
+from abilian.services.security.service import SecurityService
 from abilian.testing.util import client_login
 from flask import url_for
-from pytest import mark
 
 from ..models import Community
 
 
-def test_index(app, client, community1):
-    security_service = app.services["security"]
+def test_index(community1, app, db, client, req_ctx):
+    security_service = app.services["security"]  # type: SecurityService
     security_service.start()
 
     user = community1.test_user
@@ -20,13 +20,14 @@ def test_index(app, client, community1):
         assert response.status_code == 200
 
 
-def test_community_home(app, client, community1, community2):
-    security_service = app.services["security"]
+def test_community_home(community1, community2, app, client, req_ctx):
+    security_service = app.services["security"]  # type: SecurityService
     security_service.start()
 
     url = app.default_view.url_for(community1)
 
     user1 = community1.test_user
+
     with client_login(client, user1):
         response = client.get(url)
         assert response.status_code == 302
@@ -41,8 +42,9 @@ def test_community_home(app, client, community1, community2):
         assert response.status_code == 403
 
 
-def test_new(app, client, community1):
-    security_service = app.services["security"]
+def test_new(community1, app, client, db, req_ctx):
+    security_service = app.services["security"]  # type: SecurityService
+    # security_service.use_cache = False
     security_service.start()
 
     user = community1.test_user
@@ -51,13 +53,16 @@ def test_new(app, client, community1):
         response = client.get(url_for("communities.new"))
         assert response.status_code == 403
 
-        app.services["security"].grant_role(user, Admin)
+    security_service.grant_role(user, Admin)
+    db.session.flush()
+
+    with client_login(client, user):
         response = client.get(url_for("communities.new"))
         assert response.status_code == 200
 
 
-def test_community_settings(app, client, community1):
-    security_service = app.services["security"]
+def test_community_settings(app, client, community1, req_ctx):
+    security_service = app.services["security"]  # type: SecurityService
     security_service.start()
 
     url = url_for("communities.settings", community_id=community1.slug)
@@ -83,8 +88,8 @@ def test_community_settings(app, client, community1):
         assert "edited community" in response.get_data(as_text=True)
 
 
-def test_members(app, client, db, community1, community2):
-    security_service = app.services["security"]
+def test_members(app, client, db, community1, community2, req_ctx):
+    security_service = app.services["security"]  # type: SecurityService
     security_service.start()
 
     user1 = community1.test_user
@@ -100,7 +105,7 @@ def test_members(app, client, db, community1, community2):
         response = client.post(url, data=data)
         assert response.status_code == 403
 
-        app.services["security"].grant_role(user1, Admin)
+        security_service.grant_role(user1, Admin)
 
         data = {"action": "add-user-role", "user": user2.id, "role": "member"}
         response = client.post(url, data=data, follow_redirects=True)
@@ -130,5 +135,4 @@ def test_members(app, client, db, community1, community2):
         }
         response = client.post(url, data=data, follow_redirects=True)
         assert response.status_code == 200
-
         assert user2 not in community.members
