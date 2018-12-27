@@ -14,8 +14,7 @@ from six import text_type
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
 from abilian.sbe.apps.documents.models import Document, Folder
-
-from ..repository import repository
+from abilian.sbe.apps.documents.repository import repository
 
 
 #

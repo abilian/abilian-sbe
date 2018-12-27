@@ -698,18 +698,15 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self.title
 
     def __repr__(self):
-        return "<Document id=%r name=%r path=%r content_length=%d at 0x%x>" % (
-            self.id,
-            self.title,
-            self.path,
-            self.content_length,
-            id(self),
+        return "<Document id={!r} name={!r} path={!r} content_length={:d} at 0x{:x}>".format(
+            self.id, self.title, self.path, self.content_length, id(self)
         )
 
     # locking management; used for checkin/checkout - this could be generalized to
     # any entity
     @property
     def lock(self):
+        # type: () -> Optional[Lock]
         """
         :returns: either `None` if no lock or current lock is expired; either the
         current valid :class:`Lock` instance.

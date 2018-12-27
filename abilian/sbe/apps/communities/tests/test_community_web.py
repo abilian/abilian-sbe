@@ -5,7 +5,6 @@ from __future__ import absolute_import, print_function, unicode_literals
 from abilian.services.security import Admin
 from abilian.testing.util import client_login
 from flask import url_for
-from flask_login import current_user
 from pytest import mark
 
 from ..models import Community
