@@ -16,6 +16,7 @@ from time import gmtime, strftime
 import openpyxl
 import pytz
 import sqlalchemy as sa
+import sqlalchemy.sql.functions
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity

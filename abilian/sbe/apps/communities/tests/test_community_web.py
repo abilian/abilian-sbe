@@ -78,12 +78,11 @@ def test_community_settings(app, client, community1):
             "linked_group": "",
             "type": "participative",
         }
-        response = client.post(url, data=data)
+        response = client.post(url, data=data, follow_redirects=True)
         assert response.status_code == 200
         assert "edited community" in response.data.decode("utf8")
 
 
-@mark.skip  # TODO: fix
 def test_members(app, client, db, community1, community2):
     security_service = app.services["security"]
     security_service.start()
@@ -99,23 +98,21 @@ def test_members(app, client, db, community1, community2):
         # test add user
         data = {"action": "add-user-role", "user": user2.id}
         response = client.post(url, data=data)
-        assert response.status_code in (403, 400)
+        assert response.status_code == 403
 
         app.services["security"].grant_role(user1, Admin)
 
         data = {"action": "add-user-role", "user": user2.id, "role": "member"}
-        response = client.post(url, data=data)
-        assert response.status_code == 302
-        assert response.location == "http://localhost" + url
+        response = client.post(url, data=data, follow_redirects=True)
+        assert response.status_code == 200
 
         membership = [m for m in community1.memberships if m.user == user2][0]
         assert membership.role == "member"
 
         data["action"] = "set-user-role"
         data["role"] = "manager"
-        response = client.post(url, data=data)
-        assert response.status_code == 302
-        assert response.location == "http://localhost" + url
+        response = client.post(url, data=data, follow_redirects=True)
+        assert response.status_code == 200
 
         db.session.expire(membership)
         assert membership.role == "manager"
@@ -131,9 +128,7 @@ def test_members(app, client, db, community1, community2):
             "user": user2.id,
             "membership": [m.id for m in community1.memberships if m.user == user2][0],
         }
-        response = client.post(url, data=data)
-        expected_url = "http://localhost/communities/{}/members".format(community1.slug)
-        assert response.status_code == 302
-        assert response.location == expected_url
+        response = client.post(url, data=data, follow_redirects=True)
+        assert response.status_code == 200
 
         assert user2 not in community.members
