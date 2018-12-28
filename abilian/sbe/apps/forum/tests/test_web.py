@@ -14,11 +14,10 @@ from six import text_type
 
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.forum.tests.util import get_string_from_file
+
 from ..commands import inject_email
 from ..models import Post, Thread
 from ..tasks import build_reply_email_address, extract_email_destination
-
-pytest_plugins = ["abilian.sbe.apps.communities.tests.fixtures"]
 
 
 def test_posts_ordering(db, community1):

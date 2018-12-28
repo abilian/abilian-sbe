@@ -11,7 +11,10 @@ from pytest import fixture
 
 from abilian.sbe.app import create_app
 
-pytest_plugins = ["abilian.testing.fixtures"]
+pytest_plugins = [
+    "abilian.testing.fixtures",
+    "abilian.sbe.apps.communities.tests.fixtures",
+]
 
 
 class NoCsrfTestConfig(TestConfig):
@@ -28,6 +31,4 @@ def config():
 @fixture
 def app(config):
     """Return an App configured with config=TestConfig."""
-    assert config.CSRF_ENABLED == False
-    assert config.WTF_CSRF_ENABLED == False
     return create_app(config=config)

@@ -9,8 +9,6 @@ from pytest import mark
 
 from ..models import Event
 
-pytest_plugins = ["abilian.sbe.apps.communities.tests.fixtures"]
-
 
 def test_create_event():
     start = datetime.now()

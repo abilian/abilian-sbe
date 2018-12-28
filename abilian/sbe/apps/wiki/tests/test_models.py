@@ -11,8 +11,6 @@ from six.moves.urllib.parse import quote_plus
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
 from abilian.sbe.apps.wiki.models import WikiPage
 
-pytest_plugins = ["abilian.sbe.apps.communities.tests.fixtures"]
-
 
 def test_wikilink_extension():
     text = "/*€("
