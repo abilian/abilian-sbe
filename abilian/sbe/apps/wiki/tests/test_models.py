@@ -29,7 +29,7 @@ def test_wikilink_extension():
     with patch("abilian.sbe.apps.wiki.forms.page_exists", page_exists_mock):
         result = md.convert(wikilink)
 
-    qtext = quote_plus(text)
+    qtext = text_type(quote_plus(text.encode("utf-8")))
     expected = '<p><a class="wikilink" href="/?title={href}/">{text}</a></p>'
     expected = expected.format(href=qtext, text=text)
     assert expected == result
@@ -39,7 +39,7 @@ def test_wikilink_extension():
     with patch("abilian.sbe.apps.wiki.forms.page_exists", page_exists_mock):
         result = md.convert(wikilink)
 
-    qtext = quote_plus(text)
+    qtext = text_type(quote_plus(text.encode("utf-8")))
     expected = '<p><a class="wikilink new" href="/?title={href}/">{text}</a></p>'
     expected = expected.format(href=qtext, text=text)
     assert expected == result
