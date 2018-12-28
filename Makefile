@@ -89,7 +89,7 @@ vagrant-tests:
 #
 # Linting
 #
-lint: lint-js lint-py lint-less lint-doc lint-other
+lint: lint-js lint-py lint-less lint-doc
 
 lint-js:
 	@echo "--> Linting JavaScript files"
@@ -118,7 +118,7 @@ lint-doc:
 	@echo "--> Linting .rst files"
 	rst-lint *.rst
 
-lint-other:
+lint-travis:
 	@echo "--> Linting .travis.yml"
 	travis lint --no-interactive
 
