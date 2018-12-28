@@ -7,11 +7,10 @@ from abilian.web.forms import Form
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import flaghidden
 from abilian.web.forms.widgets import TextArea
-from flask import g
-from wtforms import HiddenField, StringField, TextAreaField
-from wtforms.validators import ValidationError, data_required
+from wtforms import HiddenField, StringField, TextAreaField, ValidationError
+from wtforms.validators import data_required
 
-from .models import WikiPage
+from .util import page_exists
 
 
 def clean_up(src):
@@ -58,16 +57,6 @@ class WikiPageForm(Form):
 
         if val != current:
             raise ValidationError(_("this page has been edited since"))
-
-
-def page_exists(title):
-    title = title.strip()
-    return (
-        WikiPage.query.filter(
-            WikiPage.community_id == g.community.id, WikiPage.title == title
-        ).count()
-        > 0
-    )
 
 
 # Not used yet

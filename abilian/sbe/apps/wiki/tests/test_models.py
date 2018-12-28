@@ -1,6 +1,7 @@
 # coding=utf-8
 from __future__ import absolute_import, print_function, unicode_literals
 
+import pytest
 from abilian.testing.util import client_login
 from flask_login import current_user
 from markdown import Markdown
@@ -12,37 +13,41 @@ from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
 from abilian.sbe.apps.wiki.models import WikiPage
 
 
-def test_wikilink_extension():
-    text = "/*€("
+@pytest.mark.parametrize("text", ["TOTO", "x 123", "/#$", "/*€("])
+def test_wikilink_extension(text, db, req_ctx):
+    qtext = text_type(quote_plus(text.encode("utf-8")))
     wikilink = "[[" + text + "]]"
 
     def build_url(label, base, end):
+        print("build_url called")
         return "/?title=" + quote_plus(label.encode("utf-8")) + end
 
-    extension = SBEWikiLinkExtension([("build_url", build_url)])
-    ctx = {}
-    ctx["extensions"] = [extension, "markdown.extensions.toc"]
-    ctx["output_format"] = "html5"
+    extension = SBEWikiLinkExtension(build_url=build_url)
+    ctx = {
+        "extensions": [extension, "markdown.extensions.toc"],
+        "output_format": "html5",
+    }
     md = Markdown(**ctx)
 
-    page_exists_mock = MagicMock(return_value=True)
-    with patch("abilian.sbe.apps.wiki.forms.page_exists", page_exists_mock):
-        result = md.convert(wikilink)
+    def check(page_exists):
+        page_exists_mock = MagicMock(return_value=page_exists)
+        with patch("abilian.sbe.apps.wiki.markup.page_exists", page_exists_mock):
+            result = md.convert(wikilink)
 
-    qtext = text_type(quote_plus(text.encode("utf-8")))
-    expected = '<p><a class="wikilink" href="/?title={href}/">{text}</a></p>'
-    expected = expected.format(href=qtext, text=text)
-    assert expected == result
+        if page_exists:
+            expected_tpl = (
+                '<p><a class="wikilink" href="/?title={href}/">{text}</a></p>'
+            )
+        else:
+            expected_tpl = (
+                '<p><a class="wikilink new" href="/?title={href}/">{text}</a></p>'
+            )
 
-    # make sur the class is 'wikilink new' if page exists'
-    page_exists_mock = MagicMock(return_value=False)
-    with patch("abilian.sbe.apps.wiki.forms.page_exists", page_exists_mock):
-        result = md.convert(wikilink)
+        expected = expected_tpl.format(href=qtext, text=text)
+        assert expected == result
 
-    qtext = text_type(quote_plus(text.encode("utf-8")))
-    expected = '<p><a class="wikilink new" href="/?title={href}/">{text}</a></p>'
-    expected = expected.format(href=qtext, text=text)
-    assert expected == result
+    check(True)
+    check(False)
 
 
 def test_new_page(user, client, req_ctx):

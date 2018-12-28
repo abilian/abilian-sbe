@@ -12,7 +12,7 @@ langid>=1.1
 chardet
 
 # Markdown support for Wiki
-markdown<3
+markdown
 
 # needed by folder: export to xls
 xlwt
