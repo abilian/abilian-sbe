@@ -65,7 +65,6 @@ def test_home(client, community1, user1, req_ctx):
 def test_create_page_initial_form(client, community1, user1, req_ctx):
     with client:
         with client_login(client, user1):
-            g.user = user1
             g.community = community1
             view = views.PageCreate()
             view.prepare_args([], {})
@@ -86,9 +85,6 @@ def test_wiki_indexed(
 
     with client:
         with client_login(client, admin_user):
-            # g.user = User.query.all()[0]
-            # g.is_manager = False
-
             page1 = WikiPage(title="Community 1", community=community1)
             db.session.add(page1)
 
@@ -99,12 +95,10 @@ def test_wiki_indexed(
 
         obj_types = (WikiPage.entity_type,)
         with client_login(client, user3):
-            g.user = user3
             res = svc.search("community", object_types=obj_types)
             assert len(res) == 0
 
         with client_login(client, user1):
-            g.user = user1
             res = svc.search("community", object_types=obj_types)
             assert len(res) == 1
 

@@ -16,34 +16,3 @@ class CommunityBaseTestCase(BaseTestCase):
         self.community = Community(name="My Community")
         self.session.add(self.community)
         self.session.flush()
-
-
-class CommunityIndexingTestCase(CommunityBaseTestCase):
-    """Testcase for testing indexing and searching of community content."""
-
-    no_login = False
-    SERVICES = ("security", "indexing")
-
-    def setUp(self):
-        super(CommunityIndexingTestCase, self).setUp()
-
-        self.svc = self.app.services["indexing"]
-
-        self.user = User(email="user_1@example.com", password="azerty", can_login=True)
-        self.session.add(self.user)
-        self.community.set_membership(self.user, READER)
-
-        self.c2 = Community(name="Other community")
-        self.session.add(self.c2)
-
-        self.user_c2 = User(
-            email="user_2@example.com", password="azerty", can_login=True
-        )
-        self.session.add(self.user_c2)
-        self.c2.set_membership(self.user_c2, READER)
-
-        self.user_no_community = User(
-            email="no_community@example.com", password="azerty", can_login=True
-        )
-        self.session.add(self.user_no_community)
-        self.session.commit()

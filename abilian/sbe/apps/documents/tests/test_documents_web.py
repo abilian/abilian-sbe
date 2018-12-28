@@ -52,7 +52,6 @@ def test_util_create(app, client, db, community, req_ctx):
     user = community.test_user
 
     with client_login(client, user):
-        g.user = user
         g.community = CommunityPresenter(community)
         name = "document"
         fs = FileStorage(BytesIO(b"content"), filename=name, content_type="text/plain")

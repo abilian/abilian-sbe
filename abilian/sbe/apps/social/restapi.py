@@ -12,7 +12,7 @@ from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.util import get_params
 from flask import Blueprint, g, make_response, request
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from .models import Message
 
@@ -129,7 +129,7 @@ def get_followees(user_id):
 @login_required
 def follow(user_id):
     user = User.query.get(user_id)
-    g.user.follow(user)
+    current_user.follow(user)
     db.session.commit()
     return make_json_response("", 204)
 
@@ -141,7 +141,7 @@ def follow(user_id):
 @login_required
 def unfollow(user_id, contact_user_id):
     user = User.query.get(user_id)
-    g.user.unfollow(user)
+    current_user.unfollow(user)
     db.session.commit()
     return make_json_response("", 204)
 
@@ -205,7 +205,7 @@ def create_group():
 @login_required
 def create_message():
     d = get_params(Message.__editable__)
-    message = Message(creator_id=g.user.id, **d)
+    message = Message(creator_id=current_user.id, **d)
     db.session.add(message)
     db.session.commit()
     return make_json_response(message, 201)
