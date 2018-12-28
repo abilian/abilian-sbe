@@ -11,7 +11,7 @@ import json
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.util import get_params
-from flask import Blueprint, g, make_response, request
+from flask import Blueprint, make_response, request
 from flask_login import current_user, login_required
 
 from .models import Message

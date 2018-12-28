@@ -25,7 +25,7 @@ from abilian.services.conversion import converter
 from abilian.services.indexing import indexable_role
 from abilian.services.security import Admin, Anonymous, InheritSecurity, \
     security
-from flask import current_app, g, json, url_for
+from flask import current_app, json, url_for
 from flask_login import current_user
 from six import text_type
 from sqlalchemy.event import listen, listens_for

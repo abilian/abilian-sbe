@@ -6,7 +6,6 @@ import sqlalchemy as sa
 from abilian.core.entities import Entity
 from abilian.core.extensions import db
 from abilian.services import get_service
-from flask import current_app
 
 from .models import CmisObject
 

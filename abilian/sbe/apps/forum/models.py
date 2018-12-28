@@ -20,7 +20,7 @@ from sqlalchemy.types import DateTime
 
 from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
-from abilian.sbe.apps.documents.models import BaseContent, CmisObject
+from abilian.sbe.apps.documents.models import BaseContent
 
 
 class ThreadClosedError(RuntimeError):

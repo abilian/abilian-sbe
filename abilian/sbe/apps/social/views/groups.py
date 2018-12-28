@@ -11,7 +11,7 @@ from abilian.services.image import CROP, resize
 from abilian.services.security import security
 from abilian.web import csrf
 from abilian.web.views import default_view
-from flask import current_app, flash, g, jsonify, make_response, redirect, \
+from flask import current_app, flash, jsonify, make_response, redirect, \
     render_template, request, url_for
 from flask_babel import gettext as _
 from flask_login import current_user
