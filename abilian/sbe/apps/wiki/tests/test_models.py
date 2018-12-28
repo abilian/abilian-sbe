@@ -21,7 +21,7 @@ def test_wikilink_extension():
 
     extension = SBEWikiLinkExtension([("build_url", build_url)])
     ctx = {}
-    ctx["extensions"] = [extension, "toc"]
+    ctx["extensions"] = [extension, "markdown.extensions.toc"]
     ctx["output_format"] = "html5"
     md = Markdown(**ctx)
 

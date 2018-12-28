@@ -24,9 +24,9 @@ class UrlBuilder(object):
 
 def convert(page, text):
     build_url = UrlBuilder(page).build
-    extension = SBEWikiLinkExtension([("build_url", build_url)])
+    extension = SBEWikiLinkExtension(build_url=build_url)
     ctx = {}
-    ctx["extensions"] = [extension, "toc"]
+    ctx["extensions"] = [extension, "markdown.extensions.wikilinks"]
     ctx["output_format"] = "html5"
     md = markdown.Markdown(**ctx)
     return md.convert(text)
