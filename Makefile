@@ -103,7 +103,7 @@ lint-py:
 	@echo "--> Linting Python files"
 	@make flake8
 	# @make lint-py3k
-	@make lint-mypy
+	# @make lint-mypy
 
 flake8:
 	flake8 abilian tests
