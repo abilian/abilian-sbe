@@ -103,7 +103,7 @@ lint-py:
 	@echo "--> Linting Python files"
 	@make flake8
 	# @make lint-py3k
-	@make lint-mypy
+	# @make lint-mypy
 
 flake8:
 	flake8 abilian tests
@@ -112,7 +112,7 @@ lint-py3k:
 	pylint --py3k abilian tests
 
 lint-mypy:
-	-mypy abilian
+	mypy abilian
 
 lint-doc:
 	@echo "--> Linting .rst files"

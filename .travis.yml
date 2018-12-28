@@ -1,55 +1,46 @@
 dist: xenial
 
 language: python
-cache: pip
 
-python:
-  - "2.7"
-  - "3.6"
-  - "3.7"
-
-env:
-  matrix:
-    - SQLALCHEMY_DATABASE_URI="sqlite://"
-    - SQLALCHEMY_DATABASE_URI="postgres://postgres@localhost/abilian_sbe"
-
-# services:
-#   - redis-server
+cache:
+  pip: true
+  directories:
+    - node_modules
 
 addons:
   postgresql: "9.6"
 
+matrix:
+  include:
+    - python: 2.7
+      env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
+    - python: 3.6
+      env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
+    - python: 2.7
+      env: SQLALCHEMY_URI=sqlite://
+    - python: 3.6
+      env: SQLALCHEMY_URI=sqlite://
+    - python: 3.6
+      env: TOXENV=lint
+
+# Install OS dependencies
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install poppler-utils
   - yarn global add less
   - gem install travis
 
-# Install Python dependencies
 install:
-  - pip install -U pip>=9.0.3 setuptools wheel
-  - pip install -r requirements.txt -r etc/dev-requirements.txt
-  - pip install psycopg2-binary
-  - yarn install
-  # TODO: install properly (using pyenv?)
-  # - pip3 install mypy
+  - pip install -U pip setuptools wheel tox tox-travis
+  - yarn
 
 # Create DB
 before_script:
-  - createdb -w -U postgres -E utf-8 abilian_sbe
+  - psql -c 'create database abilian;' -U postgres
 
 # Run tests
 script:
-  - pytest --tb=short -q --cov abilian .
-  - make lint
-  # There are no docs yet!
-  #- sphinx-build -W -b html docs/ docs/_build/
-
-# Report coverage
-after_success:
-  - pip install codecov coveralls
-  - coveralls
-  - codecov
+  - tox
 
 notifications:
   slack:
