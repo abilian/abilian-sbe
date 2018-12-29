@@ -11,7 +11,7 @@ INSTANCE_FOLDER=$(shell 												\
 all: test lint
 
 install:
-	pip install -r requirements.txt
+	poetry install
 
 #
 # Environment
@@ -22,11 +22,7 @@ develop: update-env setup-git
 
 update-env:
 	@echo "--> Installing/updating dependencies"
-	pip install -U setuptools
-	pip install -U -r requirements.txt
-	pip install -U -r etc/git-requirements.txt
-	pip install -U -r etc/dev-requirements.txt
-	pip install -e .
+	poetry install
 	yarn
 	@echo ""
 
@@ -47,8 +43,7 @@ ifndef VIRTUAL_ENV
 	@echo "********************************************************************"
 	@exit 1;
 endif
-	pip install -r requirements.txt
-	pip install -e .
+	poetry install
 	@mkdir -pv "$(INSTANCE_FOLDER)"
 	@cp -v "etc/config_dev.py" "$(INSTANCE_FOLDER)/config.py"
 	@cp -v "etc/logging-dev.yml" "$(INSTANCE_FOLDER)/logging.yml"
@@ -199,14 +194,9 @@ release:
 	cd /tmp/abilian-sbe ; twine upload dist/*
 
 update-deps:
-	pip install -U pip pip-tools setuptools wheel
-	pip-compile -U > /dev/null
-	pip-compile > /dev/null
-	git --no-pager diff requirements.txt
+	pip install -U pip setuptools wheel
+	poetry update
 
 sync-deps:
 	pip install -U pip pip-tools setuptools wheel
-	pip-sync
-	# pip install -r requirements.txt
-	pip install -r etc/dev-requirements.txt
-	pip install -e .
+	poetry install
