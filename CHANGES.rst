@@ -1,10 +1,17 @@
 Changelog for Abilian SBE
 =========================
 
+0.4.22 (2018-01-02)
+-------------------
+
+- Use Poetry for packaging
+
+
 0.4.19 (2018-12-26)
 -------------------
 
 - Cleanup small fixes related to updated dependencies.
+
 
 0.4.13 (2018-08-02)
 -------------------

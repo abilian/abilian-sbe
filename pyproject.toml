@@ -1,8 +1,13 @@
 [tool.poetry]
 name = "abilian-sbe"
-version = "0.4.21"
-description = ""
+version = "0.4.22"
+description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
+license = "LGPL"
+readme = "README.rst"
+repository = "https://github.com/abilian/abilian-sbe"
+packages = [{ include = "abilian" }]
+
 
 [tool.poetry.dependencies]
 python = "~2.7 || ^3.6"
