@@ -54,7 +54,6 @@ mock = ">=1.0.1"
 coverage = ">=4.1"
 pytest-cov = "*"
 
-
 # Python clone of Foreman, useful to test Heroku config locally
 honcho = "*"
 
@@ -84,12 +83,9 @@ flake8-pytest = "*"
 flake8-super-call = "*"
 flake8-tidy-imports = "*"
 flake8-mypy = { version = "*", python = "^3.6" }
+flake8-bugbear = { version = "*", python = "^3.6" }
 mastool = "*"
 mccabe = "*"
-
-# Needs Python 3
-# flake8-bugbear
-# pep8-naming
 pylint = "*"
 pre-commit = "*"
 
