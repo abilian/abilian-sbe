@@ -69,5 +69,4 @@ def check_email():
     """Read one email from current user Maildir, parse it, forward it in a
     celery task to be persisted."""
 
-    # FIXME: doesn't appear legit.
-    check_maildir.delay()
+    check_maildir()
