@@ -132,18 +132,17 @@ def batch_send_post_to_users(post_id, members_id, failed_ids=None):
 
 def build_local_part(name, uid):
     """Build local part as 'name-uid-digest', ensuring length < 64."""
-    tag = current_app.config["MAIL_ADDRESS_TAG_CHAR"]
     key = current_app.config["SECRET_KEY"]
     serializer = Serializer(key)
     signature = serializer.dumps(uid)
     digest = md5(signature)
-    local_part = name + tag + uid + "-" + digest
+    local_part = name + "+" + uid + "-" + digest
 
     if len(local_part) > 64:
         if (len(local_part) - len(digest) - 1) > 64:
             # even without digest, it's too long
             raise ValueError(
-                "Cannot build reply address: local part exceeds 64 " "characters"
+                "Cannot build reply address: local part exceeds 64 characters"
             )
         local_part = local_part[:64]
 
@@ -178,8 +177,7 @@ def extract_email_destination(address):
     :return: List() of splitted values
     """
     local_part = address.rsplit("@", 1)[0]
-    tag = current_app.config["MAIL_ADDRESS_TAG_CHAR"]
-    name, ident = local_part.rsplit(tag, 1)
+    name, ident = local_part.rsplit("+", 1)
     uid, digest = ident.rsplit("-", 1)
     signed_local_part = build_local_part(name, uid)
 
@@ -194,53 +192,54 @@ def extract_email_destination(address):
 
 def has_subtag(address):
     # type: (Text) -> bool
-    """Return True if a subtag (defined in the config.py as
-    'MAIL_ADDRESS_TAG_CHAR') was found in the name part of the address.
+    """Return True if a subtag (delimited by '+') was found
+    in the name part of the address.
 
     :param address: email adress
     """
     name = address.rsplit("@", 1)[0]
-    tag = current_app.config["MAIL_ADDRESS_TAG_CHAR"]
-    return tag in name
+    return "+" in name
 
 
 def send_post_to_user(community, post, member):
     recipient = member.email
     subject = "[{}] {}".format(community.name, post.title)
+
     config = current_app.config
-    sender = config.get("BULK_MAIL_SENDER", config["MAIL_SENDER"])
+    SENDER = config.get("BULK_MAIL_SENDER", config["MAIL_SENDER"])
     SBE_FORUM_REPLY_BY_MAIL = config.get("SBE_FORUM_REPLY_BY_MAIL", False)
+    SBE_FORUM_REPLY_ADDRESS = config.get("SBE_FORUM_REPLY_ADDRESS", SENDER)
     SERVER_NAME = config.get("SERVER_NAME", "example.com")
+
     list_id = '"{} forum" <forum.{}.{}>'.format(
         community.name, community.slug, SERVER_NAME
     )
     forum_url = url_for("forum.index", community_id=community.slug, _external=True)
-    forum_archive = url_for(
+    forum_archive_url = url_for(
         "forum.archives", community_id=community.slug, _external=True
     )
-
     extra_headers = {
         "List-Id": list_id,
-        "List-Archive": "<{}>".format(forum_archive),
+        "List-Archive": "<{}>".format(forum_archive_url),
         "List-Post": "<{}>".format(forum_url),
         "X-Auto-Response-Suppress": "All",
         "Auto-Submitted": "auto-generated",
     }
 
-    if SBE_FORUM_REPLY_BY_MAIL and config["MAIL_ADDRESS_TAG_CHAR"] is not None:
-        name = sender.rsplit("@", 1)[0]
-        domain = sender.rsplit("@", 1)[1]
+    if SBE_FORUM_REPLY_BY_MAIL:
+        name = SBE_FORUM_REPLY_ADDRESS.rsplit("@", 1)[0]
+        domain = SBE_FORUM_REPLY_ADDRESS.rsplit("@", 1)[1]
         replyto = build_reply_email_address(name, post, member, domain)
         msg = Message(
             subject,
-            sender=sender,
+            sender=SBE_FORUM_REPLY_ADDRESS,
             recipients=[recipient],
             reply_to=replyto,
             extra_headers=extra_headers,
         )
     else:
         msg = Message(
-            subject, sender=sender, recipients=[recipient], extra_headers=extra_headers
+            subject, sender=SENDER, recipients=[recipient], extra_headers=extra_headers
         )
 
     ctx = {
@@ -257,9 +256,8 @@ def send_post_to_user(community, post, member):
     try:
         mail.send(msg)
     except BaseException:
-        logger.error(
-            "Send mail to user failed", exc_info=True
-        )  # log to sentry if enabled
+        # log to sentry if enabled
+        logger.error("Send mail to user failed", exc_info=True)
 
 
 def extract_content(payload, marker):

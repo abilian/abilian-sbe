@@ -115,8 +115,6 @@ def test_create_thread_informative(app, db, client, community1, req_ctx):
 
 
 def test_build_reply_email_address(app, req_ctx):
-    app.config["MAIL_ADDRESS_TAG_CHAR"] = "+"
-
     post = Mock()
     post.id = 2
     post.thread_id = 3
@@ -130,7 +128,6 @@ def test_build_reply_email_address(app, req_ctx):
 
 
 def test_extract_mail_destination(app, req_ctx):
-    app.config["MAIL_ADDRESS_TAG_CHAR"] = "+"
     # app.config['MAIL_SENDER'] = 'test@testcase.app.tld'
 
     test_address = "test+P-en-3-4-a8f33983311589176c711111dc38d94d@example.com"
@@ -144,7 +141,6 @@ def test_create_thread_and_post(community1, client, app, db, req_ctx):
 
     # activate email reply
     app.config["SBE_FORUM_REPLY_BY_MAIL"] = True
-    app.config["MAIL_ADDRESS_TAG_CHAR"] = "+"
 
     # create a new user, add him/her to the current community as a MANAGER
     community.set_membership(user, MANAGER)

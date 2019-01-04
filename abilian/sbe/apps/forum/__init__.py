@@ -7,7 +7,6 @@ from abilian.sbe.extension import sbe
 
 def register_plugin(app):
     app.config.setdefault("SBE_FORUM_REPLY_BY_MAIL", False)
-    app.config.setdefault("MAIL_ADDRESS_TAG_CHAR", u"+")
     app.config.setdefault("INCOMING_MAIL_USE_MAILDIR", False)
     sbe.init_app(app)
     from .views import forum
