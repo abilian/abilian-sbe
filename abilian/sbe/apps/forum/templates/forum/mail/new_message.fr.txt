@@ -24,6 +24,4 @@ Pièce(s) jointe(s):
 {%- endif %}
 
 
-
-
 Vous recevez ce message car vous êtes membres de la communauté {{ community.name }}.

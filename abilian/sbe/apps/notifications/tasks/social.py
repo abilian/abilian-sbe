@@ -78,10 +78,11 @@ def send_daily_social_digest_to(user):
 
 def make_message(user):
     config = current_app.config
-    sbe_config = config["ABILIAN_SBE"]
     sender = config.get("BULK_MAIL_SENDER", config["MAIL_SENDER"])
-    recipient = user.email
+    sbe_config = config["ABILIAN_SBE"]
     subject = sbe_config["DAILY_SOCIAL_DIGEST_SUBJECT"]
+
+    recipient = user.email
     digests = []
     happened_after = datetime.utcnow() - timedelta(days=1)
     list_id = '"{} daily digest" <daily.digest.{}>'.format(

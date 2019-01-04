@@ -24,10 +24,10 @@
     <ul>
       {%- for attachment in post.attachments %}
         <li>
-      <span class="attachment-item">
-      <a href="{{ url_for(attachment, _external=True) }}">{{ attachment.name }}</a>
-      ({{ attachment.content_length|filesize }})
-      </span>
+          <span class="attachment-item">
+          <a href="{{ url_for(attachment, _external=True) }}">{{ attachment.name }}</a>
+          ({{ attachment.content_length|filesize }})
+          </span>
         </li>
       {%- endfor %}
     </ul>
@@ -38,6 +38,6 @@
 
 <p style="color: dimgray;">
   You received this message because you are a member of the
-  {{ community.name }} community</p>
+  {{ community.name }} community on the {{ config["SITE_NAME"] }} website.</p>
 </body>
 </html>

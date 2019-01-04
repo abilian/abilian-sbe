@@ -23,7 +23,4 @@ Attachment(s):
 {%- endfor %}
 {%- endif %}
 
-
-
-
 You received this message because you are a member of the {{ community.name }} community.
