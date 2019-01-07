@@ -176,6 +176,9 @@ def extract_email_destination(address):
     :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
     :return: List() of splitted values
     """
+    m = re.search("<(.*)>", address)
+    if m:
+        address = m.group(1)
     local_part = address.rsplit("@", 1)[0]
     name, ident = local_part.rsplit("+", 1)
     uid, digest = ident.rsplit("-", 1)

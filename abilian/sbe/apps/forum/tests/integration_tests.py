@@ -134,6 +134,14 @@ def test_extract_mail_destination(app, req_ctx):
     infos = extract_email_destination(test_address)
     assert infos == ("en", "3", "4")
 
+    test_address = "John Q Public <test+P-en-3-4-a8f33983311589176c711111dc38d94d@example.com>"
+    infos = extract_email_destination(test_address)
+    assert infos == ("en", "3", "4")
+
+    test_address = "\"John Q Public\" <test+P-en-3-4-a8f33983311589176c711111dc38d94d@example.com>"
+    infos = extract_email_destination(test_address)
+    assert infos == ("en", "3", "4")
+
 
 def test_create_thread_and_post(community1, client, app, db, req_ctx):
     community = community1
