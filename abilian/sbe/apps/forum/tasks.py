@@ -460,9 +460,11 @@ def check_maildir():
     By default it is run every minute.
     """
     home = expanduser("~")
-    maildirpath = str(Path(home) / "Maildir")
-    src_mdir = mailbox.Maildir(maildirpath, factory=mailbox.MaildirMessage)
+    maildirpath = Path(home) / "Maildir"
+    if not maildirpath.is_dir():
+        raise ValueError("{} must be a directory".format(maildirpath))
 
+    src_mdir = mailbox.Maildir(str(maildirpath))
     src_mdir.lock()  # Useless but recommended if old mbox is used by error
 
     try:
