@@ -4,9 +4,7 @@ import re
 import traceback
 import warnings
 
-from abilian.testing.fixtures import admin_user, login_admin
 from abilian.web import url_for
-from pytest import mark
 
 ENDPOINTS_TO_SKIP = frozenset(
     [
@@ -54,26 +52,26 @@ def get_all_rules(app):
         yield rule
 
 
-@mark.usefixtures("req_ctx")
-def test_all_registered_urls(app, db, client):
+def test_all_registered_urls(app, db, admin_user, client, req_ctx):
     warnings.filterwarnings("ignore")
 
     rules = get_all_rules(app)
-    user = admin_user(db)
+    user = admin_user
 
     for rule in rules:
-        login_admin(user, client)
+        with client.session_transaction() as session:
+            session["user_id"] = user.id
 
-        endpoint = rule.endpoint
-        url = url_for(endpoint)
-        try:
-            response = client.get(url)
-            assert response.status_code in (
-                200,
-                302,
-            ), "Bad link: {} (status={})".format(url, response.status_code)
-        except BaseException:
-            msg = "Problem with endpoint: {} / url: {}".format(endpoint, url)
-            print(msg)
-            traceback.print_exc()
-            raise
+            endpoint = rule.endpoint
+            url = url_for(endpoint)
+            try:
+                response = client.get(url)
+                assert response.status_code in (
+                    200,
+                    302,
+                ), "Bad link: {} (status={})".format(url, response.status_code)
+            except BaseException:
+                msg = "Problem with endpoint: {} / url: {}".format(endpoint, url)
+                print(msg)
+                traceback.print_exc()
+                raise

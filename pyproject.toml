@@ -40,11 +40,9 @@ singledispatch = "*"
 
 [tool.poetry.dev-dependencies]
 # Our favorite test runner with some plugins and CI builder
-pytest = "<4.1"
+pytest = "*"
 pytest-sugar = "*"
 pytest-xdist = "*"
-
-# currently KO
 pytest-randomly = "*"
 
 # Backport of Python 3 mocking library
