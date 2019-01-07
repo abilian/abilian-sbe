@@ -1,9 +1,14 @@
 ## TODO
 
+### Features
+
+- [] Save body of email messages when parsing incoming emails->forum
+
 ### Python 3 migration
 
+- [x] Run `pyupgrade` once all the branches are merged
 - [] Fix all tests (including skipped ones)
-- [] Run `pyupgrade` once all the branches are merged
+- [] Run `pyupgrade --py36` once we drop Python 2 support
 
 
 ### Testing & QA
