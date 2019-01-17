@@ -79,18 +79,11 @@ class CmisObject(InheritSecurity, Entity):
 
     __tablename__ = "cmisobject"
     __indexable__ = False
-    __indexation_args__ = {}  # type: Dict[str, Any]
-    __indexation_args__.update(Entity.__indexation_args__)
-
-    index_to = Entity.__indexation_args__.setdefault("index_to", ())
-    index_to += (
+    __index_to__ = (
         ("community.id", ("community_id",)),
         #
         ("community.slug", ("community_slug",)),
-        #
     )
-    __indexation_args__["index_to"] = index_to
-    del index_to
 
     _title = Column("title", UnicodeText, nullable=False, default="")
     description = Column(
@@ -205,12 +198,10 @@ def _cmis_sync_name_title(entity, new_value, old_value, initiator):
 class PathAndSecurityIndexable(object):
     """Mixin for folder and documents indexation."""
 
-    __indexation_args__ = {
-        "index_to": (
-            ("_indexable_parent_ids", ("parent_ids",)),
-            ("_indexable_roles_and_users", ("allowed_roles_and_users",)),
-        )
-    }
+    __index_to__ = (
+        ("_indexable_parent_ids", ("parent_ids",)),
+        ("_indexable_roles_and_users", ("allowed_roles_and_users",)),
+    )
 
     def _iter_to_root(self, skip_self=False):
         obj = self if not skip_self else self.parent
@@ -276,13 +267,6 @@ class Folder(PathAndSecurityIndexable, CmisObject):
     sbe_type = "cmis:folder"
 
     __indexable__ = True
-    __indexation_args__ = {}
-    __indexation_args__.update(CmisObject.__indexation_args__)
-    index_to = ()
-    index_to += CmisObject.__indexation_args__.setdefault("index_to", ())
-    index_to += PathAndSecurityIndexable.__indexation_args__.setdefault("index_to", ())
-    __indexation_args__["index_to"] = index_to
-    del index_to
 
     _indexable_roles_and_users = PathAndSecurityIndexable._indexable_roles_and_users
 
@@ -527,14 +511,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     __tablename__ = None  # type: str
 
     __indexable__ = True
-    __indexation_args__ = {}
-    __indexation_args__.update(BaseContent.__indexation_args__)
-    index_to = ()
-    index_to += BaseContent.__indexation_args__.setdefault("index_to", ())
-    index_to += PathAndSecurityIndexable.__indexation_args__.setdefault("index_to", ())
-    index_to += (("text", ("text",)),)
-    __indexation_args__["index_to"] = index_to
-    del index_to
+    __index_to__ = (("text", ("text",)),)
 
     _indexable_roles_and_users = PathAndSecurityIndexable._indexable_roles_and_users
 

@@ -186,9 +186,6 @@ def test_community_content_decorator(community, db):
     assert cc.community_slug == "my-community"
     assert cc.slug == "my-content"
 
-    index_to = dict(CommunityContent.__indexation_args__["index_to"])
-    assert "community_slug" in index_to
-
 
 ##########################################################################
 

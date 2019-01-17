@@ -79,9 +79,10 @@ def community_content(cls):
         return self.community and self.community.slug
 
     cls.community_slug = property(community_slug)
-    index_to = cls.__indexation_args__.setdefault("index_to", ())
+
+    index_to = getattr(cls, "__index_to__", ())
     index_to += (("community_slug", ("community_slug",)),)
-    cls.__indexation_args__["index_to"] = index_to
+    cls.__index_to__ = index_to
 
     def _indexable_roles_and_users(self):
         if not self.community:
@@ -104,12 +105,7 @@ def indexable_roles_and_users(community):
 class Community(Entity):
     """Ad-hoc objects that hold properties about a community."""
 
-    __indexation_args__ = {}  # type: Dict[str, Any]
-    __indexation_args__.update(Entity.__indexation_args__)
-    index_to = __indexation_args__.setdefault("index_to", ())
-    index_to += (("id", ("id", "community_id")),)
-    __indexation_args__["index_to"] = index_to
-    del index_to
+    __index_to__ = (("id", ("id", "community_id")),)
 
     is_community_content = True
 
