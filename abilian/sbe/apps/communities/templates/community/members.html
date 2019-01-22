@@ -4,70 +4,73 @@
 {% import "community/members_macros.html" as macros with context %}
 
 {% block memberscontent %}
-<div class="col-md-12">
-  {% call m_box_content(_("Members")) %}
-    {%- if is_manager %}
-      <div style="
+  <div class="col-md-12">
+    {% call m_box_content(_("Members")) %}
+      {%- if is_manager %}
+        <div style="
     position: relative;top: -9px;">
-        <div class="btn-group" role="group" aria-label="..." style="float:right;position: relative;
+          <div class="btn-group" role="group" aria-label="..." style="float:right;position: relative;
 top: 39px;">
-          <a href="{{ url_for('.wizard_data_insertion',community_id=g.community.slug) }}" class="btn btn-default"
-             style="background: ghostwhite;color: gray;"><i class="fa fa-rocket" aria-hidden="true"></i>
-            {{ _("Add members") }}</a>
-          <a class="btn btn-info pull-right"
-             href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
-            <i class="glyphicon glyphicon-download-alt"></i> {{ _('Download list') }}
-          </a>
+            <a href="{{ url_for('.wizard_data_insertion', community_id=g.community.slug) }}"
+                class="btn btn-default"
+               style="background: ghostwhite;color: gray;"><i class="fa fa-rocket" aria-hidden="true"></i>
+              {{ _("Add members") }}</a>
+            <a class="btn btn-info pull-right"
+               href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
+              <i class="glyphicon glyphicon-download-alt"></i> {{ _('Download list') }}
+            </a>
+          </div>
+
+          {{ add_member() }}
         </div>
+      {%- endif %}
 
-        {{ add_member() }}
-      </div>
-    {%- endif %}
+      <p class="clearfix"
+         style="border-bottom: 1px dashed #eeeeee;position: relative;top: 17px;margin-bottom: 32px;"></p>
 
-    <p class="clearfix" style="border-bottom: 1px dashed #eeeeee;position: relative;top: 17px;margin-bottom: 32px;"></p>
+      {% set table_id = uuid() %}
+      <table class="table table-condensed table-striped members-table" id="{{ table_id }}">
+        <thead>
+        {{ macros.thead() }}
+        </thead>
 
-    {% set table_id = uuid() %}
-    <table class="table table-condensed table-striped members-table" id="{{ table_id }}">
-      <thead>
-      {{ macros.thead() }}
-      </thead>
-
-      <tbody>
-      {% for user, m_id, role, last_activity_date in memberships %}
-        <tr>
-          {{ macros.member_row(user, m_id, role, last_activity_date) }}
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-    <script type="application/json">
+        <tbody>
+        {% for user, m_id, role, last_activity_date in memberships %}
+          <tr>
+            {{ macros.member_row(user, m_id, role, last_activity_date) }}
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      <script type="application/json">
        {{ macros.table_config() }}
-    </script>
 
-    {%- deferJS %}
-      <script>
-        'use strict';
-        require(
-            ['Abilian', 'jquery', 'jquery.dataTables'],
-            function (Abilian, $, jqDT) {
-
-              function initMembersTable() {
-                var id = "#{{ table_id }}",
-                    table = $(id),
-                    configNode = table.get(0).nextElementSibling,
-                    config = JSON.parse(configNode.textContent);
-
-                $(id).dataTable(config);
-              }
-
-              Abilian.fn.onAppInit(initMembersTable);
-            }
-        );
       </script>
-    {%- enddeferJS %}
-    <div class="clearfix"></div>
-  {% endcall %}
-</div>
+
+      {%- deferJS %}
+        <script>
+          'use strict';
+          require(
+              ['Abilian', 'jquery', 'jquery.dataTables'],
+              function (Abilian, $, jqDT) {
+
+                function initMembersTable() {
+                  var id = "#{{ table_id }}",
+                      table = $(id),
+                      configNode = table.get(0).nextElementSibling,
+                      config = JSON.parse(configNode.textContent);
+
+                  $(id).dataTable(config);
+                }
+
+                Abilian.fn.onAppInit(initMembersTable);
+              }
+          );
+        </script>
+      {%- enddeferJS %}
+      <div class="clearfix"></div>
+    {% endcall %}
+  </div>
 {% endblock %}
 
 {% block sidebar %}
@@ -155,4 +158,3 @@ top: 39px;">
     </script>
   {%- enddeferJS %}
 {% endmacro %}
-
