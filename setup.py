@@ -6,15 +6,8 @@ from __future__ import absolute_import, print_function, unicode_literals
 from distutils.command.build import build as _build
 
 import setuptools
-from pkg_resources import parse_requirements
 from setuptools.command.develop import develop as _develop
 from setuptools.command.sdist import sdist as _sdist
-
-_install_requires = parse_requirements(open("requirements.in"))
-install_requires = [str(req) for req in _install_requires]
-
-_dev_requires = parse_requirements(open("etc/dev-requirements.txt"))
-dev_requires = [str(req) for req in _dev_requires]
 
 LONG_DESCRIPTION = open("README.rst", "r").read()
 
@@ -35,7 +28,6 @@ class develop(_develop):
 
 setuptools.setup(
     name="abilian-sbe",
-    use_scm_version=True,
     url="https://github.com/abilian/abilian-sbe",
     license="LGPL",
     author="Abilian SAS",
@@ -46,9 +38,7 @@ setuptools.setup(
     packages=["abilian.sbe"],
     zip_safe=False,
     platforms="any",
-    setup_requires=["babel", "setuptools-git", "setuptools_scm>=1.5.5"],
-    install_requires=install_requires,
-    extras_require={"tests": dev_requires, "dev": dev_requires},
+    setup_requires=["babel"],
     # dependency_links=dependency_links,
     include_package_data=True,
     classifiers=[
