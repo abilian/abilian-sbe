@@ -21,9 +21,6 @@
     "stylelint-config-standard": "^17.0.0"
   },
   "stylelint": {
-    "extends": "stylelint-config-standard",
-    "rules": {
-      "selector-list-comma-newline-after": "always-multi-line"
-    }
+    "extends": "stylelint-config-standard"
   }
 }
