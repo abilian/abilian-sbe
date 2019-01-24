@@ -283,7 +283,8 @@ ul.threads {
 }
 
 // The forum's menu
-.forum-menu, .forum-menu-admin {
+.forum-menu,
+.forum-menu-admin {
   position: relative;
   float: left;
   right: 1px;
@@ -348,7 +349,7 @@ ul.threads {
       width: 22%;
     }
 
-    > th:nth-child(n+3) {
+    > th:nth-child(n + 3) {
       text-align: center;
     }
 
@@ -664,7 +665,7 @@ button.forum-btn-active:hover {
     }
   }
 
-  > li:nth-child(n+3) {
+  > li:nth-child(n + 3) {
     text-align: center;
   }
 
@@ -720,11 +721,13 @@ button.forum-btn-active:hover {
 @media only screen and (max-width: 776px) {
   .thread-table {
     > tbody > tr {
-      > th:nth-child(4), td:nth-child(4) {
+      > th:nth-child(4),
+      td:nth-child(4) {
         display: none;
       }
 
-      > th:nth-child(5), td:nth-child(5) {
+      > th:nth-child(5),
+      td:nth-child(5) {
         display: none;
       }
     }
