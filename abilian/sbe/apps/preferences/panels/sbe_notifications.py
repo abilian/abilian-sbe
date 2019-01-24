@@ -10,7 +10,7 @@ from abilian.web import csrf
 from abilian.web.forms import Form, widgets
 from flask import current_app as app
 from flask import flash, redirect, render_template, request, url_for
-from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import Forbidden
 from wtforms import BooleanField
 
 
@@ -31,7 +31,7 @@ class SbeNotificationsPanel(PreferencePanel):
     def get(self):
         # Manual security check, should be done by the framework instead.
         if not self.is_accessible():
-            raise InternalServerError()
+            raise Forbidden()
 
         preferences = app.services["preferences"]
         data = {}
@@ -48,7 +48,7 @@ class SbeNotificationsPanel(PreferencePanel):
     def post(self):
         # Manual security check, should be done by the framework instead.
         if not self.is_accessible():
-            raise InternalServerError()
+            raise Forbidden()
 
         if request.form["_action"] == "cancel":
             return redirect(url_for(".sbe_notifications"))
