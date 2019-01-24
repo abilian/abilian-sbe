@@ -4,7 +4,7 @@ description = "A framework for enterprise applications (CRM, ERP, collaboration.
 name = "abilian-core"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
-version = "0.10.39"
+version = "0.10.40"
 
 [package.dependencies]
 Flask = ">=1.0,<2.0"
@@ -41,8 +41,8 @@ pygeoip = "*"
 python-dateutil = ">=2.4.0,<3.0.0"
 python-deprecated = "*"
 python-magic = "*"
-raven = "*"
 redis = ">=2.10.1,<2.11.0"
+sentry-sdk = "*"
 six = "*"
 sqlparse = "*"
 tqdm = "*"
@@ -219,7 +219,7 @@ kombu = ">=4.2.0,<5.0"
 pytz = ">0.0-dev"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Python package for providing Mozilla's CA Bundle."
 name = "certifi"
 optional = false
@@ -299,9 +299,9 @@ python-versions = "*"
 version = "3.5.1"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "Backports and enhancements for the contextlib module"
-marker = "python_version < \"3.2\""
+marker = "python_version < \"3\""
 name = "contextlib2"
 optional = false
 python-versions = "*"
@@ -1285,19 +1285,6 @@ version = "3.13"
 
 [[package]]
 category = "main"
-description = "Raven is a client for Sentry (https://getsentry.com)"
-name = "raven"
-optional = false
-python-versions = "*"
-version = "6.10.0"
-
-[package.dependencies]
-[package.dependencies.contextlib2]
-python = "<3.2"
-version = "*"
-
-[[package]]
-category = "main"
 description = "Python client for Redis key-value store"
 name = "redis"
 optional = false
@@ -1337,6 +1324,20 @@ name = "scandir"
 optional = false
 python-versions = "*"
 version = "1.9.0"
+
+[[package]]
+category = "main"
+description = "Python client for Sentry (https://getsentry.com)"
+name = "sentry-sdk"
+optional = false
+python-versions = "*"
+version = "0.6.9"
+
+[package.dependencies]
+blinker = ">=1.1"
+certifi = "*"
+flask = ">=0.8"
+urllib3 = "*"
 
 [[package]]
 category = "main"
@@ -1490,7 +1491,7 @@ python-versions = "*"
 version = "3.6.6"
 
 [[package]]
-category = "dev"
+category = "main"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
 name = "urllib3"
 optional = false
@@ -1646,7 +1647,7 @@ content-hash = "ac5de234d6efe09d605941790003d99cb5fc1f0a25ae90aeee6eb0b0756e3447
 python-versions = "~2.7 || ^3.6"
 
 [metadata.hashes]
-abilian-core = ["291774fc63ce79d1ba5f1a3b9e8e0e455af91411519869928fecc27b9b22f1d7", "2b3eb5fb982c66193506eac8beaaea803cf88dc5c6f07d8208c5f12091102038"]
+abilian-core = ["00d8d056108a6fbf7b1e10b2dff4a814020ba92e6b44fb8116e649f8b70356bd", "cdc85657dcf769b56b6b0641a43560b90558c8fd588666dfb812cde54e4c2a65"]
 alabaster = ["446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359", "a661d72d58e6ea8a57f7a86e37d86716863ee5e92788398526d58b26a4e4dc02"]
 alembic = ["35660f7e6159288e2be111126be148ef04cbf7306da73c8b8bd4400837bb08e3"]
 amqp = ["9f181e4aef6562e6f9f45660578fc1556150ca06e836ecb9e733e6ea10b48464", "c3d7126bfbc640d076a01f1f4f6e609c0e4348508150c1f61336b0d83c738d2b"]
@@ -1759,11 +1760,11 @@ python-editor = ["a3c066acee22a1c94f63938341d4fb374e3fdd69366ed6603d7b24bed1efc5
 python-magic = ["f2674dcfad52ae6c49d4803fa027809540b130db1dec928cfbb9240316831375", "f3765c0f582d2dfc72c15f3b5a82aecfae9498bd29ca840d72f37d7bd38bfcd5"]
 pytz = ["32b0891edff07e28efe91284ed9c31e123d84bea3fd98e1f72be2508f43ef8d9", "d5f05e487007e29e03409f9398d074e158d920d36eb82eaf66fb1136b0c5374c"]
 pyyaml = ["3d7da3009c0f3e783b2c873687652d83b1bbfd5c88e9813fb7e5b03c0dd3108b", "3ef3092145e9b70e3ddd2c7ad59bdd0252a94dfe3949721633e41344de00a6bf", "40c71b8e076d0550b2e6380bada1f1cd1017b882f7e16f09a65be98e017f211a", "558dd60b890ba8fd982e05941927a3911dc409a63dcb8b634feaa0cda69330d3", "a7c28b45d9f99102fa092bb213aa12e0aaf9a6a1f5e395d36166639c1f96c3a1", "aa7dd4a6a427aed7df6fb7f08a580d68d9b118d90310374716ae90b710280af1", "bc558586e6045763782014934bfaf39d48b8ae85a2713117d16c39864085c613", "d46d7982b62e0729ad0175a9bc7e10a566fc07b224d2c79fafb5e032727eaa04", "d5eef459e30b09f5a098b9cea68bebfeb268697f78d647bd255a085371ac7f3f", "e01d3203230e1786cd91ccfdc8f8454c8069c91bee3962ad93b87a4b2860f537", "e170a9e6fcfd19021dd29845af83bb79236068bf5fd4df3327c1be18182b2531"]
-raven = ["3fa6de6efa2493a7c827472e984ce9b020797d0da16f1db67197bcc23c8fae54", "44a13f87670836e153951af9a3c80405d36b43097db869a36e92809673692ce4"]
 redis = ["8a1900a9f2a0a44ecf6e8b5eb3e967a9909dfed219ad66df094f27f7d6f330fb", "a22ca993cea2962dbb588f9f30d0015ac4afcc45bee27d3978c0dbe9e97c6c0f"]
 requests = ["502a824f31acdacb3a35b6690b5fbf0bc41d63a24a45c4004352b0242707598e", "7bf2a778576d825600030a110f3c0e3e8edc51dfaafe1c146e39a2027784957b"]
 restructuredtext-lint = ["82880a8de8a41bfc84f533744091b1ead8e2ab9ad6c0a3f60f4750ef6c802350"]
 scandir = ["04b8adb105f2ed313a7c2ef0f1cf7aff4871aa7a1883fa4d8c44b5551ab052d6", "1444134990356c81d12f30e4b311379acfbbcd03e0bab591de2696a3b126d58e", "1b5c314e39f596875e5a95dd81af03730b338c277c54a454226978d5ba95dbb6", "346619f72eb0ddc4cf355ceffd225fa52506c92a2ff05318cfabd02a144e7c4e", "44975e209c4827fc18a3486f257154d34ec6eaec0f90fef0cca1caa482db7064", "61859fd7e40b8c71e609c202db5b0c1dbec0d5c7f1449dec2245575bdc866792", "a5e232a0bf188362fa00123cc0bb842d363a292de7126126df5527b6a369586a", "c14701409f311e7a9b7ec8e337f0815baf7ac95776cc78b419a1e6d49889a383", "c7708f29d843fc2764310732e41f0ce27feadde453261859ec0fca7865dfc41b", "c9009c527929f6e25604aec39b0a43c3f831d2947d89d6caaab22f057b7055c8", "f5c71e29b4e2af7ccdc03a020c626ede51da471173b4a6ad1e904f2b2e04b4bd"]
+sentry-sdk = ["78bb79adfe991a770ce2179826f5f216e086bbc4bd4585c543f377180cae3654", "a6cfb0a2316416d100d2732a26c95fb7d534c9dcc16e2682e8d19fcd45f0a2c6"]
 singledispatch = ["5b06af87df13818d14f08a028e42f566640aef80805c3b50c5056b086e3c2b9c", "833b46966687b3de7f438c761ac475213e53b306740f1abfaa86e1d1aae56aa8"]
 six = ["3350809f0555b11f552448330d0b52d5f24c91a322ea4a15ef22629740f3761c", "d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"]
 snowballstemmer = ["919f26a68b2c17a7634da993d91339e288964f93c274f1343e3bbbe2096e1128", "9f3bcd3c401c3e862ec0ebe6d2c069ebc012ce142cce209c098ccb5b09136e89"]
