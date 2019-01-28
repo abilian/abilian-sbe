@@ -64,10 +64,8 @@ def test_all_registered_urls(app, db, admin_user, client, req_ctx):
             url = url_for(endpoint)
             try:
                 response = client.get(url)
-                assert response.status_code in (
-                    200,
-                    302,
-                ), f"Bad link: {url} (status={response.status_code})"
+                err_msg = f"Bad link: {url} (status={response.status_code})"
+                assert response.status_code in (200, 302), err_msg
             except BaseException:
                 msg = f"Problem with endpoint: {endpoint} / url: {url}"
                 print(msg)

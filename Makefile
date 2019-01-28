@@ -134,10 +134,6 @@ format-js:
 	#	--trailing-comma es5 --tab-width 2 \
 	#	./abilian/sbe/static/less/**/*.less
 
-futurize:
-	isort -a  "from __future__ import absolute_import, print_function, unicode_literals"
-		-rc abilian demo tests *.py
-
 #
 # running
 #
@@ -152,9 +148,9 @@ run-uwsgi:
 # Everything else
 #
 boot:
-	./manage.py config init
-	./manage.py initdb
-	./manage.py createadmin admin@example.com admin
+	flask config init
+	flask initdb
+	flask createadmin admin@example.com admin
 
 clean:
 	find . -name "*.pyc" -delete

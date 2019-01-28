@@ -1,11 +1,11 @@
 # coding=utf-8
+from unittest import mock
+from urllib.parse import quote_plus
+
 import pytest
 from abilian.testing.util import client_login
 from flask_login import current_user
 from markdown import Markdown
-from mock import MagicMock, patch
-from six import text_type
-from six.moves.urllib.parse import quote_plus
 
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
 from abilian.sbe.apps.wiki.models import WikiPage
@@ -28,8 +28,8 @@ def test_wikilink_extension(text, db, req_ctx):
     md = Markdown(**ctx)
 
     def check(page_exists):
-        page_exists_mock = MagicMock(return_value=page_exists)
-        with patch("abilian.sbe.apps.wiki.markup.page_exists", page_exists_mock):
+        page_exists_mock = mock.MagicMock(return_value=page_exists)
+        with mock.patch("abilian.sbe.apps.wiki.markup.page_exists", page_exists_mock):
             result = md.convert(wikilink)
 
         if page_exists:

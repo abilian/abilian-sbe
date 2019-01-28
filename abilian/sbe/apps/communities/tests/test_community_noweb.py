@@ -1,13 +1,14 @@
 # coding=utf-8
 """Tests from test_community are currently refactored using pytest in this
 module."""
+from unittest import mock
+
 import pytest
 import six
 import sqlalchemy as sa
 from abilian.core.entities import Entity
 from abilian.core.models.subjects import User
 from abilian.testing.util import login
-from mock import MagicMock
 from pytest import fixture
 from sqlalchemy import orm
 
@@ -89,10 +90,10 @@ def test_membership(community, db):
     assert memberships == []
 
     # setup signals testers with mocks.
-    when_set = MagicMock()
+    when_set = mock.MagicMock()
     when_set.mock_add_spec(["__name__"])  # required for signals
     signals.membership_set.connect(when_set)
-    when_removed = MagicMock()
+    when_removed = mock.MagicMock()
     when_removed.mock_add_spec(["__name__"])
     signals.membership_removed.connect(when_removed)
 

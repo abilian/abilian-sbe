@@ -31,9 +31,6 @@ class CeleryLoader(CeleryBaseLoader):
     flask_app_factory = "abilian.sbe.app.create_app"
 
 
-celery = BaseCelery(loader=CeleryLoader)
-
-
 class Application(BaseApplication):
 
     APP_PLUGINS = BaseApplication.APP_PLUGINS + (

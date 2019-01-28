@@ -2,7 +2,7 @@
 """"""
 from datetime import datetime, timedelta
 
-import mock
+from unittest import mock
 from abilian.core.models.subjects import User
 from flask_login import login_user
 from pytz import UTC

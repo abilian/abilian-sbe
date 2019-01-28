@@ -1,18 +1,16 @@
 # coding=utf-8
 """"""
 from datetime import datetime, timedelta
+from unittest import mock
 
 from abilian.testing.util import client_login
 from flask import url_for
 from flask_login import login_user
-from mock import Mock, patch
-from pytest import mark
-from six import text_type
 
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.forum.tests.util import get_string_from_file
 
-from ..commands import inject_email
+from ..cli import inject_email
 from ..models import Post, Thread
 from ..tasks import build_reply_email_address, extract_email_destination
 
@@ -112,11 +110,11 @@ def test_create_thread_informative(app, db, client, community1, req_ctx):
 
 
 def test_build_reply_email_address(app, req_ctx):
-    post = Mock()
+    post = mock.Mock()
     post.id = 2
     post.thread_id = 3
 
-    member = Mock()
+    member = mock.Mock()
     member.id = 4
 
     result = build_reply_email_address("test", post, member, "example.com")
@@ -203,8 +201,8 @@ def test_create_thread_and_post(community1, client, app, db, req_ctx):
         assert str(outbox[0].subject) == expected
 
 
-@patch("fileinput.input")
-@patch("abilian.sbe.apps.forum.commands.process_email")
+@mock.patch("fileinput.input")
+@mock.patch("abilian.sbe.apps.forum.commands.process_email")
 def test_parse_forum_email(mock_process_email, mock_email):
     """No processing is tested only parsing into a email.message and
     verifying inject_email() logic."""

@@ -14,7 +14,6 @@ import socket
 import tempfile
 
 import pytest
-from six import text_type
 from werkzeug.serving import select_ip_version
 
 from abilian.sbe.app import Application
