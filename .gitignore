@@ -14,6 +14,7 @@ conf
 .travis-solo
 .cache
 .mypy_cache
+.venv
 
 build
 whoosh*
