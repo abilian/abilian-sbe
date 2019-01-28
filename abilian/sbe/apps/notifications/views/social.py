@@ -1,7 +1,5 @@
 # coding=utf-8
 """First cut at a notification system."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.core.extensions import csrf, db
 from abilian.core.models.subjects import User
 from abilian.i18n import render_template_i18n

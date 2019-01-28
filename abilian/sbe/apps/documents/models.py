@@ -3,8 +3,6 @@
 
 TODO: move to an independent service / app.
 """
-from __future__ import absolute_import, print_function, unicode_literals
-
 import itertools
 import logging
 import mimetypes
@@ -195,7 +193,7 @@ def _cmis_sync_name_title(entity, new_value, old_value, initiator):
     return new_value
 
 
-class PathAndSecurityIndexable(object):
+class PathAndSecurityIndexable:
     """Mixin for folder and documents indexation."""
 
     __index_to__ = (
@@ -213,7 +211,7 @@ class PathAndSecurityIndexable(object):
     def _indexable_parent_ids(self):
         """Return a string made of ids separated by a slash: "/1/3/4/5", "5"
         being self.parent.id."""
-        ids = [text_type(obj.id) for obj in self._iter_to_root(skip_self=True)]
+        ids = [str(obj.id) for obj in self._iter_to_root(skip_self=True)]
         return "/" + "/".join(reversed(ids))
 
     @property
@@ -629,7 +627,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     def set_content(self, content, content_type=None):
         # type: (bytes, Any) -> None
-        super(Document, self).set_content(content, content_type)
+        super().set_content(content, content_type)
         async_conversion(self)
 
     @property
@@ -651,7 +649,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     @text.setter
     def text(self, value):
-        assert isinstance(value, text_type)
+        assert isinstance(value, str)
         self.text_blob = Blob()
         self.text_blob.value = value.encode("utf8")
 
@@ -667,7 +665,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     @extra_metadata.setter
     def extra_metadata(self, extra_metadata):
         self._extra_metadata = extra_metadata
-        self.extra_metadata_json = text_type(json.dumps(extra_metadata))
+        self.extra_metadata_json = str(json.dumps(extra_metadata))
 
     # TODO: or use SQLAlchemy alias?
     @property

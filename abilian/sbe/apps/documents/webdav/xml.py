@@ -1,15 +1,13 @@
 # coding=utf-8
 """Parses and produces XML documents specified by the standard."""
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from lxml import etree, objectify
 from lxml.builder import ElementMaker
 
 E = ElementMaker(namespace="DAV:")
 
 
-class Propfind(object):
+class Propfind:
     def __init__(self, xml=""):
         self.mode = ""
         self.prop_names = []
@@ -29,7 +27,7 @@ class Propfind(object):
                 self.prop_names.append(prop.tag)
 
 
-class MultiStatus(object):
+class MultiStatus:
     def __init__(self):
         self.responses = []
 
@@ -47,7 +45,7 @@ class MultiStatus(object):
         return xml
 
 
-class Response(object):
+class Response:
     def __init__(self, href, obj, property_list):
         self.href = href
         self.property_list = property_list

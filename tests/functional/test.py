@@ -8,8 +8,6 @@ Also, we're using pytest-splinter
 (https://github.com/pytest-dev/pytest-splinter) to inject the browser as
 a pytest fixture.
 """
-from __future__ import absolute_import, print_function, unicode_literals
-
 import multiprocessing
 import shutil
 import socket
@@ -48,7 +46,7 @@ def app_port(request):
 
 @pytest.fixture(scope="session")
 def app_root(app_port):
-    return "http://localhost:{}".format(app_port)
+    return f"http://localhost:{app_port}"
 
 
 # We're using phantomjs as our default browser.
@@ -98,7 +96,7 @@ def app(request, instance_path, app_port):
     try:
         process.start()
     except Exception as e:
-        pytest.fail(text_type(e))
+        pytest.fail(str(e))
 
     def finalizer():
         if process:

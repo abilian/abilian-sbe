@@ -1,7 +1,5 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.core.entities import all_entity_classes
 from abilian.core.models.subjects import Group, User
 from six import text_type
@@ -25,7 +23,7 @@ def test_user():
     check_editable(user)
 
     assert "John Test User" == user.name
-    assert "John Test User" == text_type(user)
+    assert "John Test User" == str(user)
     # self.assertEquals(len(user.messages), 0)
 
 

@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import fnmatch
 import itertools
 import logging
@@ -204,7 +202,7 @@ def permissions(folder_id):
     query = query.order_by(func.lower(Group.name))
     all_groups = query.all()
 
-    class EntryPresenter(object):
+    class EntryPresenter:
         _USER_FMT = (
             '<a href="{{ url_for("social.user", user_id=user.id) }}">'
             "{{ user.name }}</a>"
@@ -466,7 +464,7 @@ def permissions_export(folder_id):
 
         for c, value in enumerate(row):
             if isinstance(value, Role):
-                value = text_type(value)
+                value = str(value)
             ws.write(r + row_offset, c, value)
 
         # data grouping exit
@@ -484,8 +482,8 @@ def permissions_export(folder_id):
     response.headers["content-type"] = "application/ms-excel"
     folder_name = folder.title.replace(" ", "_")
     file_date = datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
-    filename = "permissions-{}-{}.xls".format(folder_name, file_date)
-    content_disposition = 'attachment;filename="{}"'.format(filename)
+    filename = f"permissions-{folder_name}-{file_date}.xls"
+    content_disposition = f'attachment;filename="{filename}"'
     response.headers["content-disposition"] = content_disposition
     return response
 
@@ -717,7 +715,7 @@ def download_multiple(folder):
         folders = [folder]
 
     def rel_path(path, content):
-        return "{}/{}".format(path, content.title)
+        return f"{path}/{content.title}"
 
     def zip_folder(zipfile, folder, path=""):
         for doc in folder.documents:
@@ -871,7 +869,7 @@ def move_multiple(folder):
             "Move elements: canceled, some elements exists in destination "
             "folder: {elements}"
         )
-        elements = ", ".join('"{}"'.format(i.title) for i in exist_in_dest)
+        elements = ", ".join(f'"{i.title}"' for i in exist_in_dest)
         flash(msg.format(elements=elements), "error")
         return redirect(current_folder_url)
 
@@ -974,7 +972,7 @@ def descendants_view(folder_id):
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
 
-    root_path_ids = folder._indexable_parent_ids + "/{}".format(folder.id)
+    root_path_ids = folder._indexable_parent_ids + f"/{folder.id}"
     index_service = get_service("indexing")
 
     filters = wq.And(

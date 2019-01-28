@@ -2,8 +2,6 @@
 """Some functions to retrieve activity entries."""
 # TODO: move to the activity service ?
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 import sqlalchemy as sa
 from abilian.core.extensions import db
 from abilian.services import get_service

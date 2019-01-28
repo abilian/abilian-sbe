@@ -1,7 +1,5 @@
 # coding=utf-8
 """Forum views."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from datetime import date, datetime
 
 from abilian.i18n import _l
@@ -53,7 +51,7 @@ def archives():
     return render_template("calendar/archives.html", **ctx)
 
 
-class BaseEventView(object):
+class BaseEventView:
     Model = Event
     Form = EventForm
     pk = "event_id"
@@ -73,7 +71,7 @@ class EventView(BaseEventView, views.ObjectView):
 
     @property
     def template_kwargs(self):
-        kw = super(EventView, self).template_kwargs
+        kw = super().template_kwargs
         kw["event"] = self.obj
         return kw
 

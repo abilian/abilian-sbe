@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import logging
 import uuid
 from pathlib import Path
@@ -25,7 +23,7 @@ JS = (
 )
 
 
-class AbilianSBE(object):
+class AbilianSBE:
     """Base extension required by abilian.sbe.apps."""
 
     def __init__(self, app=None):

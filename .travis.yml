@@ -12,11 +12,11 @@ addons:
 
 matrix:
   include:
-    - python: 2.7
+    - python: 3.7
       env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
     - python: 3.6
       env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
-    - python: 2.7
+    - python: 3.7
       env: SQLALCHEMY_URI=sqlite://
     - python: 3.6
       env: SQLALCHEMY_URI=sqlite://

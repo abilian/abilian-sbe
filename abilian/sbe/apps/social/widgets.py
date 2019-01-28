@@ -1,11 +1,9 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from flask import Markup, render_template
 
 
-class UserPhotoInputWidget(object):
+class UserPhotoInputWidget:
     def __call__(self, field, **kwargs):
         kwargs.setdefault("id", field.id)
         user_id = None

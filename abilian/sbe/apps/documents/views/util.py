@@ -1,6 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function, unicode_literals
-
 import re
 from typing import List, Tuple
 
@@ -71,7 +69,7 @@ def get_new_filename(folder, name):
         name = name.rsplit(".", 1)
         ext = ".{}".format(name[1]) if len(name) > 1 else ""
         name = name[0]
-        prefix = "{}-".format(name)
+        prefix = f"{name}-"
         prefix_len = len(prefix)
         # find all numbered suffixes from name-1.ext, name-5.ext,...
         suffixes = (
@@ -82,7 +80,7 @@ def get_new_filename(folder, name):
         suffixes = [int(val) for val in suffixes if re.match(r"^\d+$", val)]
 
         index = max(0, 0, *suffixes) + 1  # 0, 0: in case suffixes is empty
-        name = "{}-{}{}".format(name, index, ext)
+        name = f"{name}-{index}{ext}"
 
     return name
 
@@ -90,10 +88,10 @@ def get_new_filename(folder, name):
 def create_document(folder, fs):
     check_write_access(folder)
 
-    if isinstance(fs.filename, text_type):
+    if isinstance(fs.filename, str):
         name = fs.filename
     else:
-        name = text_type(fs.filename, errors="ignore")
+        name = str(fs.filename, errors="ignore")
 
     if not name:
         flash(_("Document name can't be empty."), "error")

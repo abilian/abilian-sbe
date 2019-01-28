@@ -2,8 +2,6 @@
 # Note: this test suite is using pytest instead of the unittest-based scaffolding
 # provided by SBE. Hopefully one day all of SBE will follow.
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from datetime import datetime, timedelta
 
 import abilian.i18n

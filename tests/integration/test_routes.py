@@ -1,5 +1,3 @@
-from __future__ import absolute_import, print_function, unicode_literals
-
 import re
 import traceback
 import warnings
@@ -69,9 +67,9 @@ def test_all_registered_urls(app, db, admin_user, client, req_ctx):
                 assert response.status_code in (
                     200,
                     302,
-                ), "Bad link: {} (status={})".format(url, response.status_code)
+                ), f"Bad link: {url} (status={response.status_code})"
             except BaseException:
-                msg = "Problem with endpoint: {} / url: {}".format(endpoint, url)
+                msg = f"Problem with endpoint: {endpoint} / url: {url}"
                 print(msg)
                 traceback.print_exc()
                 raise

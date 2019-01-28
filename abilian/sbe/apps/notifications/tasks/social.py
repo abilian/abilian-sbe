@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from datetime import datetime, timedelta
 
 from abilian.core.models.subjects import User
@@ -145,7 +143,7 @@ def make_message(user):
         _scheme=config["PREFERRED_URL_SCHEME"],
     )
     extra_headers = dict(base_extra_headers)
-    extra_headers["List-Unsubscribe"] = "<{}>".format(unsubscribe_url)
+    extra_headers["List-Unsubscribe"] = f"<{unsubscribe_url}>"
 
     msg = Message(
         subject, sender=sender, recipients=[recipient], extra_headers=extra_headers
@@ -165,7 +163,7 @@ def generate_unsubscribe_token(user):
     return get_serializer(TOKEN_SERIALIZER_NAME).dumps(data)
 
 
-class CommunityDigest(object):
+class CommunityDigest:
     def __init__(self, community):
         self.community = community
 

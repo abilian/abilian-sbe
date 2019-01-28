@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import sqlalchemy as sa
 from flask_script import Manager
 
@@ -30,4 +28,4 @@ def antivirus():
             tasks.antivirus_scan.delay(d.id)
             count += 1
 
-    print("{count}/{total} documents scheduled".format(count=count, total=total))
+    print(f"{count}/{total} documents scheduled")

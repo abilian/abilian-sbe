@@ -1,6 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.web.action import Action, Endpoint, actions
 from abilian.web.nav import NavItem
 from flask import g
@@ -17,7 +15,7 @@ def url_for(endpoint, **kw):
 
 class CommunityEndpoint(Endpoint):
     def get_kwargs(self):
-        kwargs = super(CommunityEndpoint, self).get_kwargs()
+        kwargs = super().get_kwargs()
         kwargs["community_id"] = g.community.slug
         return kwargs
 

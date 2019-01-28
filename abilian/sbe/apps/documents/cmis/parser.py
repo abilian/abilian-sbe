@@ -1,7 +1,5 @@
 # coding=utf-8
 """Parses XML messages and converts them to objects."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import base64
 from datetime import datetime
 
@@ -13,7 +11,7 @@ CMISRA_NS = "http://docs.oasis-open.org/ns/cmis/restatom/200908/"
 CMIS_NS = "http://docs.oasis-open.org/ns/cmis/core/200908/"
 
 
-class Entry(object):
+class Entry:
     def __init__(self, xml=None):
         self.properties = {}
         self.links = []
@@ -45,7 +43,7 @@ class Entry(object):
         return self.properties["cmis:objectTypeId"].value
 
 
-class Property(object):
+class Property:
     """A property MAY hold zero, one, or more typed data value(s). Each
     property MAY be single-valued or multi-valued. A single-valued property
     contains a single data value, whereas a multi-valued property contains an

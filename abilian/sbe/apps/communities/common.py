@@ -1,8 +1,6 @@
 # coding=utf-8
 """Forum views."""
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from datetime import datetime
 
 from abilian.i18n import _l
@@ -56,6 +54,6 @@ def activity_time_format(time, now=None):
         return "{}{}".format(days, _l("d"))
 
     if time.year == now.year:
-        return "{} {}".format(month_abbreviation, time.day)
+        return f"{month_abbreviation} {time.day}"
 
     return "{} {}".format(month_abbreviation, str(time.year))

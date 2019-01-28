@@ -1,7 +1,5 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.web.forms import Form
 from abilian.web.forms import widgets as abilian_widgets
 from abilian.web.forms.fields import QuerySelect2Field

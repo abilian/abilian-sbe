@@ -1,7 +1,5 @@
 # coding=utf-8
 """Social content items: messages aka status updates, private messages, etc."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import re
 
 from abilian.core.entities import SEARCHABLE, Entity

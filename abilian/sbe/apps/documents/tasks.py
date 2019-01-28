@@ -1,7 +1,5 @@
 # coding=utf-8
 """Celery tasks related to document transformation and preview."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import logging
 from contextlib import contextmanager
 

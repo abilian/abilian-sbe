@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import sqlalchemy as sa
 from abilian.services.security import READ, Permission, security
 
@@ -12,7 +10,7 @@ class SecurityException(Exception):
     pass
 
 
-class Repository(object):
+class Repository:
     """A simple document repository, implementing the basic functionalities of
     the CMIS model."""
 

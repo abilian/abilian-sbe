@@ -1,8 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 import difflib
 from pathlib import Path
 
@@ -72,7 +69,7 @@ def wiki_page_default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
 #
 # Page level (all functions prefixed by 'page_').
 #
-class BasePageView(object):
+class BasePageView:
     Model = WikiPage
     pk = "title"
     Form = WikiPageForm
@@ -89,7 +86,7 @@ class BasePageView(object):
         You can override `base_template` for instance. Only `view` and
         `form` cannot be overriden.
         """
-        kw = super(BasePageView, self).template_kwargs
+        kw = super().template_kwargs
         kw["page"] = self.obj
         kw["viewers"] = object_viewers(self.obj)
         return kw
@@ -164,7 +161,7 @@ class PageEdit(BasePageView, ObjectEdit):
 
     def init_object(self, args, kwargs):
         if request.method != "POST":
-            return super(PageEdit, self).init_object(args, kwargs)
+            return super().init_object(args, kwargs)
 
         page_id = request.form.get("page_id") or None
         if page_id is not None:
@@ -186,7 +183,7 @@ class PageEdit(BasePageView, ObjectEdit):
         return kwargs
 
     def prepare_args(self, args, kwargs):
-        super(PageEdit, self).prepare_args(args, kwargs)
+        super().prepare_args(args, kwargs)
         last_revision_id = self.form.last_revision_id.data
         if last_revision_id:
             self.last_revision = WikiPageRevision.query.filter(
@@ -400,8 +397,8 @@ def attachment_upload():
 
     for f in files:
         name = f.filename
-        if not isinstance(name, text_type):
-            name = text_type(f.filename, encoding="utf-8", errors="ignore")
+        if not isinstance(name, str):
+            name = str(f.filename, encoding="utf-8", errors="ignore")
 
         # FIXME: do something instead of just skipping the attachement
         if not name:

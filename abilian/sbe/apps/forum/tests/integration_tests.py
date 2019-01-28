@@ -1,8 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from datetime import datetime, timedelta
 
 from abilian.testing.util import client_login
@@ -203,7 +200,7 @@ def test_create_thread_and_post(community1, client, app, db, req_ctx):
         # check the email was sent with the new threadpost
         assert len(outbox) == 1
         expected = "[My Community] Brand new thread"
-        assert text_type(outbox[0].subject) == expected
+        assert str(outbox[0].subject) == expected
 
 
 @patch("fileinput.input")

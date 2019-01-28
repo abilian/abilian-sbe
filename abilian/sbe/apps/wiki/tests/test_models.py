@@ -1,6 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function, unicode_literals
-
 import pytest
 from abilian.testing.util import client_login
 from flask_login import current_user
@@ -15,7 +13,7 @@ from abilian.sbe.apps.wiki.models import WikiPage
 
 @pytest.mark.parametrize("text", ["TOTO", "x 123", "/#$", "/*€("])
 def test_wikilink_extension(text, db, req_ctx):
-    qtext = text_type(quote_plus(text.encode("utf-8")))
+    qtext = str(quote_plus(text.encode("utf-8")))
     wikilink = "[[" + text + "]]"
 
     def build_url(label, base, end):

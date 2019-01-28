@@ -1,8 +1,6 @@
 # coding=utf-8
 """Not used!"""
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.core.extensions import db, mail
 from flask import flash, redirect, render_template, request, url_for
 from flask_babel import gettext as _

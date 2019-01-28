@@ -1,6 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function, unicode_literals
-
 import os.path
 import uuid
 
@@ -30,7 +28,7 @@ __all__ = ["webdav"]
 
 
 # TODO: real logging
-class Logger(object):
+class Logger:
     def debug(self, msg):
         print(msg)
 
@@ -46,7 +44,7 @@ def log_request():
         print("")
         print(78 * "#")
         print(litmus_msg)
-        print("{} on {}".format(request.method, request.path))
+        print(f"{request.method} on {request.path}")
 
 
 @webdav.before_request
@@ -59,7 +57,7 @@ def only_admin():
 
 @webdav.after_request
 def log_response(response):
-    print("Response: {}".format(response))
+    print(f"Response: {response}")
     return response
 
 

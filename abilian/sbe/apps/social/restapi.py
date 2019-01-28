@@ -4,8 +4,6 @@ NOTE: this code is a legacy from the early days of the application,
 and currently not used.
 """
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 import json
 
 from abilian.core.extensions import db

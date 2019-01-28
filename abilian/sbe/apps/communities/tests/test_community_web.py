@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.services.security import Admin
 from abilian.services.security.service import SecurityService
 from abilian.testing.util import client_login

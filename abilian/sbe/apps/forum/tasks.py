@@ -1,8 +1,5 @@
 # coding=utf-8
 """Celery tasks related to document transformation and preview."""
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 import email
 import mailbox
 import re
@@ -206,7 +203,7 @@ def has_subtag(address):
 
 def send_post_to_user(community, post, member):
     recipient = member.email
-    subject = "[{}] {}".format(community.name, post.title)
+    subject = f"[{community.name}] {post.title}"
 
     config = current_app.config
     SENDER = config.get("BULK_MAIL_SENDER", config["MAIL_SENDER"])
@@ -223,8 +220,8 @@ def send_post_to_user(community, post, member):
     )
     extra_headers = {
         "List-Id": list_id,
-        "List-Archive": "<{}>".format(forum_archive_url),
-        "List-Post": "<{}>".format(forum_url),
+        "List-Archive": f"<{forum_archive_url}>",
+        "List-Post": f"<{forum_url}>",
         "X-Auto-Response-Suppress": "All",
         "Auto-Submitted": "auto-generated",
     }
@@ -320,7 +317,7 @@ def decode_payload(part):
 
     payload = part.get_payload(decode=True)
 
-    if isinstance(payload, text_type):
+    if isinstance(payload, str):
         return payload
 
     # Please the typechecker (and make things a bit clearer)
@@ -379,7 +376,7 @@ def process(message, marker):
         newpost = extract_content(content["plain"], marker[:9])
         newpost = add_paragraph(newpost)
     else:
-        raise LookupError("No marker:{} in email".format(marker))
+        raise LookupError(f"No marker:{marker} in email")
 
     return newpost, attachments
 
@@ -397,7 +394,7 @@ def process_email(message):
     # Extract post destination from To: field, (community/forum/thread/member)
     to_address = message["To"]
 
-    assert isinstance(to_address, text_type)
+    assert isinstance(to_address, str)
 
     if not (has_subtag(to_address)):
         logger.info("Email %r has no subtag, skipping...", to_address)
@@ -419,7 +416,7 @@ def process_email(message):
     # Translate marker with locale from email address
     rq_headers = [("Accept-Language", locale)]
     with app.test_request_context("/process_email", headers=rq_headers):
-        marker = text_type(MAIL_REPLY_MARKER)
+        marker = str(MAIL_REPLY_MARKER)
 
     # Extract text and attachments from message
     try:
@@ -462,7 +459,7 @@ def check_maildir():
     home = expanduser("~")
     maildirpath = Path(home) / "Maildir"
     if not maildirpath.is_dir():
-        raise ValueError("{} must be a directory".format(maildirpath))
+        raise ValueError(f"{maildirpath} must be a directory")
 
     src_mdir = mailbox.Maildir(str(maildirpath))
     src_mdir.lock()  # Useless but recommended if old mbox is used by error

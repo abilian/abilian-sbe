@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from datetime import datetime, timedelta
 
 import dateutil.parser
@@ -13,7 +11,7 @@ from six import raise_from, text_type
 DEFAULT_LIFETIME = 3600
 
 
-class Lock(object):
+class Lock:
     """Represent a lock on a document."""
 
     def __init__(self, user_id, user, date, *args, **kwargs):
@@ -23,13 +21,13 @@ class Lock(object):
             try:
                 date = dateutil.parser.parse(date)
             except Exception as e:
-                raise_from(ValueError("Error parsing date: {!r}".format(date)), e)
+                raise ValueError(f"Error parsing date: {date!r}") from e
 
         self.date = date
 
     @staticmethod
     def new():
-        return Lock(current_user.id, text_type(current_user), utcnow())
+        return Lock(current_user.id, str(current_user), utcnow())
 
     def as_dict(self):
         """Return a dict suitable for serialization to JSON."""

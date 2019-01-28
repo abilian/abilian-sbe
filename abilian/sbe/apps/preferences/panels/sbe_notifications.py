@@ -1,8 +1,6 @@
 # coding=utf-8
 """This panel manages user setting for email reminders related to the SBE
 (social netowking) app."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.core.extensions import db
 from abilian.i18n import _, _l
 from abilian.services.preferences.panel import PreferencePanel
@@ -58,7 +56,7 @@ class SbeNotificationsPanel(PreferencePanel):
             for field_name, field in form._fields.items():
                 if field is form.csrf_token:
                     continue
-                key = "sbe:notifications:{}".format(field_name)
+                key = f"sbe:notifications:{field_name}"
                 value = field.data
                 preferences.set_preferences(**{key: value})
 

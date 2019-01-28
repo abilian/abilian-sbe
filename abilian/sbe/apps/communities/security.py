@@ -1,8 +1,6 @@
 # coding=utf-8
 """Decorators and helpers to check access to communities."""
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from functools import wraps
 
 from abilian.services import get_service

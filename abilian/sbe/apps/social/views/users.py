@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import logging
 import pkgutil
 from cgi import escape
@@ -195,7 +193,7 @@ class UserProfileEdit(ObjectEdit):
     _message_success = _l("Profile edited")
 
     def init_object(self, args, kwargs):
-        args, kwargs = super(UserProfileEdit, self).init_object(args, kwargs)
+        args, kwargs = super().init_object(args, kwargs)
         self.user = self.obj
         return args, kwargs
 
@@ -205,7 +203,7 @@ class UserProfileEdit(ObjectEdit):
     def edit(self):
         if not can_edit(self.user):
             return Response(status=403)
-        return super(UserProfileEdit, self).edit()
+        return super().edit()
 
     def handle_commit_exception(self, exc):
         db.session.rollback()
@@ -294,11 +292,11 @@ def users_json():
             user, role = user
 
         if role is not None:
-            role = text_type(role)
+            role = str(role)
 
         item = {
             "id": user.id,
-            "text": "{} ({})".format(user.name, user.email),
+            "text": f"{user.name} ({user.email})",
             "name": user.name,
             "email": user.email,
             "role": role,

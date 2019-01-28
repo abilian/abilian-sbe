@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import imghdr
 
 import PIL
@@ -44,10 +42,10 @@ def _group_choices():
     choices = [("", "")]
 
     for g in query:
-        label = "{} ({:d} membres)".format(g.name, g.members_count)
+        label = f"{g.name} ({g.members_count:d} membres)"
         if g.community:
-            label += " — Communauté: {}".format(g.community)
-        choices.append((text_type(g.id), label))
+            label += f" — Communauté: {g.community}"
+        choices.append((str(g.id), label))
 
     return choices
 

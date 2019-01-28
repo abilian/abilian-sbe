@@ -5,8 +5,6 @@ TODO: make it smarter (direct access from 'g' using lazy objects?) and
 cacheable.
 """
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from datetime import datetime, timedelta
 
 from abilian.core.models.subjects import User
@@ -18,7 +16,7 @@ from abilian.sbe.apps.communities.models import Community, Membership
 from .social import social
 
 
-class Sidebars(object):
+class Sidebars:
     @property
     def latest_visitors(self):
         return (

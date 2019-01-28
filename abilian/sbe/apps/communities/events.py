@@ -1,8 +1,6 @@
 # coding=utf-8
 """Lightweight integration and denormalisation using events (signals)."""
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.core.signals import activity
 from blinker import ANY
 

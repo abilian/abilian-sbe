@@ -1,8 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 import logging
 import time
 from datetime import datetime
@@ -231,7 +228,7 @@ class Community(Entity):
         role = Role(role)
 
         if role not in VALID_ROLES:
-            raise ValueError("Invalid role: {}".format(role))
+            raise ValueError(f"Invalid role: {role}")
 
         session = sa.orm.object_session(self) or db.session()
         is_new = True
@@ -258,7 +255,7 @@ class Community(Entity):
             and_(M.user_id == user.id, M.community_id == self.id)
         ).first()
         if not membership:
-            raise KeyError("User {} is not a member of community {}".format(user, self))
+            raise KeyError(f"User {user} is not a member of community {self}")
 
         db.session.delete(membership)
         self.membership_count -= 1

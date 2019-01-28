@@ -1,7 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from pathlib import Path
 
 from lxml import etree
@@ -37,7 +34,7 @@ def test_empty_multistatus():
 
 
 def test_multistatus():
-    class Obj(object):
+    class Obj:
         pass
 
     obj = Obj()

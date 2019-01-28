@@ -1,8 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 import hashlib
 import logging
 from collections import Counter
@@ -183,7 +180,7 @@ def list_json2():
 
 
 # edit views
-class BaseCommunityView(object):
+class BaseCommunityView:
     Model = Community
     pk = "community_id"
     Form = CommunityForm
@@ -198,7 +195,7 @@ class BaseCommunityView(object):
         return url_for(self.view_endpoint, community_id=self.obj.slug)
 
     def get_form_kwargs(self):
-        kwargs = super(BaseCommunityView, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
 
         image = self.obj.image
         if image and "community" in g:
@@ -301,7 +298,7 @@ class CommunityImageView(image_views.BlobView):
 
         kwargs[self.id_arg] = community.image.id
         # image = open(join(dirname(__file__), "data", "community.png"), 'rb')
-        return super(CommunityImageView, self).prepare_args(args, kwargs)
+        return super().prepare_args(args, kwargs)
 
 
 image = CommunityImageView.as_view("image", max_size=500, set_expire=True)
@@ -447,7 +444,7 @@ def members_excel_export():
 
     cols_width = []
     for _col, label in enumerate(MEMBERS_EXPORT_HEADERS, 1):
-        value = text_type(label)
+        value = str(label)
         cell = WriteOnlyCell(ws, value=value)
         cell.font = HEADER_FONT
         cell.alignment = HEADER_ALIGN
@@ -467,13 +464,13 @@ def members_excel_export():
                 pass
 
             if isinstance(value, (BaseModel, Role)):
-                value = text_type(value)
+                value = str(value)
 
             cell = WriteOnlyCell(ws, value=value)
             cells.append(value)
 
             # estimate width
-            value = text_type(cell.value)
+            value = str(cell.value)
             width = max(len(l) for l in value.split("\n")) + 1
             cols_width[col] = max(width, cols_width[col])
 

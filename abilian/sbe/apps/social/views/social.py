@@ -1,8 +1,6 @@
 # coding=utf-8
 """The blueprint for this app."""
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.core.extensions import db
 from abilian.core.util import get_params
 from flask import Blueprint, redirect, render_template, url_for

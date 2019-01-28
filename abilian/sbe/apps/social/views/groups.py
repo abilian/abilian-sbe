@@ -1,7 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from pathlib import Path
 
 from abilian.core.extensions import db
@@ -92,7 +89,7 @@ def group_post(group_id):
     membership_actions = frozenset(("add", "remove", "add-admin", "remove-admin"))
 
     if action not in {"join", "leave"}.union(membership_actions):
-        raise ValueError("Unknown action: {}".format(action))
+        raise ValueError(f"Unknown action: {action}")
 
     if action not in ("join", "leave"):
         assert is_admin(group)

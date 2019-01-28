@@ -1,6 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.core.extensions import db
 from flask import Blueprint, Response, make_response, render_template, request
 from sqlalchemy.orm.exc import NoResultFound
@@ -34,7 +32,7 @@ route = atompub.route
 #
 # Dummy for now
 #
-class Logger(object):
+class Logger:
     def debug(self, msg):
         print(msg)
 
@@ -101,7 +99,7 @@ def get_options(args):
         elif v in ("false", ""):
             v = False
         else:
-            raise Exception("Unexpected parameter value for {}: {}".format(k, v))
+            raise Exception(f"Unexpected parameter value for {k}: {v}")
         d[k] = v
     return d
 
@@ -201,7 +199,7 @@ def getObject():
     id = request.args.get("id")
     path = request.args.get("path")
 
-    log.debug("getObject called on id={}, path={}".format(id, path))
+    log.debug(f"getObject called on id={id}, path={path}")
     log.debug("URL: " + request.url)
 
     options = get_options(request.args)
@@ -227,7 +225,7 @@ def updateProperties():
         path = request.args.get("path")
     else:
         path = ""
-    log.debug("updateProperties called on id={}, path={}".format(id, path))
+    log.debug(f"updateProperties called on id={id}, path={path}")
     log.debug("URL: " + request.url)
 
     obj = get_object(id)
@@ -241,7 +239,7 @@ def deleteObject():
         path = request.args.get("path")
     else:
         path = ""
-    log.debug("deleteObject called on id={}, path={}".format(id, path))
+    log.debug(f"deleteObject called on id={id}, path={path}")
     log.debug("URL: " + request.url)
 
     obj = get_object(id)

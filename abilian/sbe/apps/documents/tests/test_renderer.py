@@ -1,6 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function, unicode_literals
-
 from pytest import mark
 
 from ..cmis.renderer import Feed, to_xml

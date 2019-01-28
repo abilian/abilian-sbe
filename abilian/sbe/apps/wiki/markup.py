@@ -3,8 +3,6 @@
 
 Add extensions here (for now).
 """
-from __future__ import absolute_import, print_function, unicode_literals
-
 import markdown
 from flask import url_for
 from markdown.extensions.wikilinks import WikiLinkExtension, \
@@ -16,7 +14,7 @@ from .util import page_exists
 __all__ = ("convert", "SBEWikiLinkExtension")
 
 
-class UrlBuilder(object):
+class UrlBuilder:
     def __init__(self, page):
         self.page = page
 

@@ -1,7 +1,5 @@
 # coding=utf-8
 """Indexing related utilities for Folder, Documents."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 import sqlalchemy as sa
 from abilian.core.entities import Entity
 from abilian.core.extensions import db

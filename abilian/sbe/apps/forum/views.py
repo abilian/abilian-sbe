@@ -1,7 +1,5 @@
 # coding=utf-8
 """Forum views."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from collections import Counter
 from datetime import date, datetime, timedelta
 from itertools import groupby
@@ -43,7 +41,7 @@ def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
     """kwargs for Post default view."""
     kw = default_view_kw(kw, obj.thread, obj_type, obj_id, **kwargs)
     kw["thread_id"] = obj.thread_id
-    kw["_anchor"] = "post_{:d}".format(obj.id)
+    kw["_anchor"] = f"post_{obj.id:d}"
     return kw
 
 
@@ -176,7 +174,7 @@ def group_monthly(entities_list):
 
     def format_month(year, month):
         month = format_date(date(year, month, 1), "MMMM").capitalize()
-        return "{} {}".format(month, year)
+        return f"{month} {year}"
 
     grouped_entities = groupby(entities_list, grouper)
     grouped_entities = [
@@ -220,7 +218,7 @@ def attachments():
     return render_template("forum/attachments.html", grouped_posts=grouped_posts)
 
 
-class BaseThreadView(object):
+class BaseThreadView:
     Model = Thread
     Form = ThreadForm
     pk = "thread_id"
@@ -230,7 +228,7 @@ class BaseThreadView(object):
         return g.community.type == "participative" or is_manager(user=current_user)
 
     def prepare_args(self, args, kwargs):
-        args, kwargs = super(BaseThreadView, self).prepare_args(args, kwargs)
+        args, kwargs = super().prepare_args(args, kwargs)
         self.send_by_email = False
 
         if not self.can_send_by_mail() and "send_by_email" in self.form:
@@ -253,7 +251,7 @@ class ThreadView(BaseThreadView, views.ObjectView):
 
     @property
     def template_kwargs(self):
-        kw = super(ThreadView, self).template_kwargs
+        kw = super().template_kwargs
         kw["thread"] = self.obj
         kw["is_closed"] = self.obj.closed
         kw["is_manager"] = is_manager(user=current_user)
@@ -285,7 +283,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
     title = _("New conversation")
 
     def init_object(self, args, kwargs):
-        args, kwargs = super(ThreadCreate, self).init_object(args, kwargs)
+        args, kwargs = super().init_object(args, kwargs)
         self.thread = self.obj
         return args, kwargs
 
@@ -320,8 +318,8 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
             name = meta.get("filename", handle)
             mimetype = meta.get("mimetype")
 
-            if not isinstance(name, text_type):
-                name = text_type(name, encoding="utf-8", errors="ignore")
+            if not isinstance(name, str):
+                name = str(name, encoding="utf-8", errors="ignore")
 
             if not name:
                 continue
@@ -363,7 +361,7 @@ class ThreadPostCreate(ThreadCreate):
     def init_object(self, args, kwargs):
         # we DO want to skip ThreadCreate.init_object. hence super is not based on
         # ThreadPostCreate
-        args, kwargs = super(ThreadPostCreate, self).init_object(args, kwargs)
+        args, kwargs = super().init_object(args, kwargs)
         thread_id = kwargs.pop(self.pk, None)
         self.thread = Thread.query.get(thread_id)
         Thread.query.filter(Thread.id == thread_id).update(
@@ -372,7 +370,7 @@ class ThreadPostCreate(ThreadCreate):
         return args, kwargs
 
     def after_populate_obj(self):
-        super(ThreadPostCreate, self).after_populate_obj()
+        super().after_populate_obj()
         session = sa.orm.object_session(self.obj)
         session.expunge(self.obj)
         self.obj = self.post
@@ -395,7 +393,7 @@ class ThreadDelete(BaseThreadView, views.ObjectDelete):
     _message_success = _('Thread "{title}" deleted.')
 
     def message_success(self):
-        return text_type(self._message_success).format(title=self.obj.title)
+        return str(self._message_success).format(title=self.obj.title)
 
 
 route("/<int:thread_id>/delete")(ThreadDelete.as_view("thread_delete"))
@@ -412,10 +410,10 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
     )
 
     def prepare_args(self, args, kwargs):
-        args, kwargs = super(ThreadCloseView, self).prepare_args(args, kwargs)
+        args, kwargs = super().prepare_args(args, kwargs)
         action = kwargs["action"] = request.form.get("action")
         if action not in self._VALID_ACTIONS:
-            raise BadRequest("Unknown action: {!r}".format(action))
+            raise BadRequest(f"Unknown action: {action!r}")
 
         return args, kwargs
 
@@ -425,7 +423,7 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
         sa.orm.object_session(self.obj).commit()
 
         msg = self.CLOSED_MSG if is_closed else self.REOPENED_MSG
-        flash(text_type(msg))
+        flash(str(msg))
         return self.redirect(url_for(self.obj))
 
 
@@ -444,14 +442,14 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
     def init_object(self, args, kwargs):
         # we DO want to skip ThreadCreate.init_object. hence super is not based on
         # ThreadPostCreate
-        args, kwargs = super(ThreadPostEdit, self).init_object(args, kwargs)
+        args, kwargs = super().init_object(args, kwargs)
         thread_id = kwargs.pop("thread_id", None)
         self.thread = self.obj.thread
         assert thread_id == self.thread.id
         return args, kwargs
 
     def get_form_kwargs(self):
-        kwargs = super(ThreadPostEdit, self).get_form_kwargs()
+        kwargs = super().get_form_kwargs()
         kwargs["message"] = self.obj.body_html
         return kwargs
 
@@ -476,7 +474,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         history.append(
             {
                 "user_id": current_user.id,
-                "user": text_type(current_user),
+                "user": str(current_user),
                 "date": utc_dt(datetime.utcnow()).isoformat(),
                 "reason": self.form.reason.data,
             }
@@ -507,8 +505,8 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
             name = meta.get("filename", handle)
             mimetype = meta.get("mimetype")
 
-            if not isinstance(name, text_type):
-                name = text_type(name, encoding="utf-8", errors="ignore")
+            if not isinstance(name, str):
+                name = str(name, encoding="utf-8", errors="ignore")
 
             if not name:
                 continue

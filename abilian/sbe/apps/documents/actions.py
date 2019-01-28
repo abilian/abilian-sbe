@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from typing import Any, Dict
 
 from abilian.i18n import _l
@@ -88,8 +86,7 @@ class FolderAction(BaseFolderAction):
 
     def pre_condition(self, ctx):
         return (
-            super(FolderAction, self).pre_condition(ctx)
-            and ctx["object"] is not repository.root_folder
+            super().pre_condition(ctx) and ctx["object"] is not repository.root_folder
         )
 
 

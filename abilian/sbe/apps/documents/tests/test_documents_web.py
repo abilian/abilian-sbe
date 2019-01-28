@@ -1,8 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from io import BytesIO
 from pathlib import Path
 from zipfile import ZipFile
@@ -81,7 +78,7 @@ def test_home(app, client, db, community, req_ctx):
         response = client.get(url_for("documents.index", community_id=community.slug))
         assert response.status_code == 302
         path = path_from_url(response.location)
-        expected = "/communities/{}/docs/folder/{}".format(community.slug, folder.id)
+        expected = f"/communities/{community.slug}/docs/folder/{folder.id}"
         assert path == expected
 
 

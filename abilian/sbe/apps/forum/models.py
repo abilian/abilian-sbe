@@ -4,8 +4,6 @@
 Note: a few features are planned but not implemented yet, and are commented
 out.
 """
-from __future__ import absolute_import, print_function, unicode_literals
-
 from collections import Counter
 from datetime import datetime
 from itertools import chain
@@ -25,7 +23,7 @@ from abilian.sbe.apps.documents.models import BaseContent
 
 class ThreadClosedError(RuntimeError):
     def __init__(self, thread):
-        super(ThreadClosedError, self).__init__(
+        super().__init__(
             "The thread {!r} is closed. No modification allowed on its posts: "
             "creation, edition, deletion".format(thread)
         )
@@ -164,7 +162,7 @@ class ThreadIndexAdapter(SAAdapter):
         return obj_cls is Thread
 
     def get_document(self, obj):
-        kw = super(ThreadIndexAdapter, self).get_document(obj)
+        kw = super().get_document(obj)
         kw["text"] = " ".join(chain((kw["text"],), [p.body_html for p in obj.posts]))
         return kw
 

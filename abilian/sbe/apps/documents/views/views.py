@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Document management blueprint."""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.i18n import _l
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem

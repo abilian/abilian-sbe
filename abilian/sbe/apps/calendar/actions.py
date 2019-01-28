@@ -1,7 +1,5 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.i18n import _l
 from abilian.services import get_service
 from abilian.services.security import Admin

@@ -1,7 +1,5 @@
 # coding=utf-8
 """"""
-from __future__ import absolute_import, print_function, unicode_literals
-
 from datetime import date
 from itertools import groupby, islice
 
@@ -58,7 +56,7 @@ def files():
     return render_template("wall/files.html", grouped_docs=grouped_docs)
 
 
-class Attachment(object):
+class Attachment:
     def __init__(self, url, name, owner, date, content_length, content_type):
         self.url = url
         self.name = name
@@ -97,7 +95,7 @@ def get_attachments_from_forum(community):
             attachment = Attachment(
                 url,
                 att.name,
-                text_type(att.owner),
+                str(att.owner),
                 att.created_at,
                 att.content_length,
                 att.content_type,
@@ -144,7 +142,7 @@ def group_monthly(objects):
 
     def format_month(year, month):
         month = format_date(date(year, month, 1), "MMMM").capitalize()
-        return "{} {}".format(month, year)
+        return f"{month} {year}"
 
     grouped = groupby(objects, grouper)
     grouped = [

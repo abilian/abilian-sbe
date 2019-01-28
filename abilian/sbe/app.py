@@ -4,9 +4,6 @@
 TODO: add more (runtime) flexibility in plugin discovery, selection
 and activation.
 """
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 import logging
 import os
 import subprocess
@@ -102,7 +99,7 @@ def _on_http_server_activate(self, *args, **kwargs):
     if host == "0.0.0.0":
         # chrome is not ok with 0.0.0.0
         host = "localhost"
-    url = "http://{host}:{port}/setup".format(host=host, port=port)
+    url = f"http://{host}:{port}/setup"
 
     if sys.platform == "win32":
         os.startfile(url)

@@ -1,7 +1,5 @@
 # coding=utf-8
 
-from __future__ import absolute_import, print_function, unicode_literals
-
 from abilian.i18n import _l
 from abilian.services import get_service
 from abilian.services.security import Admin
@@ -29,7 +27,7 @@ class ForumAction(Action):
 
     def url(self, context=None):
         if self._url or self.endpoint:
-            return super(ForumAction, self).url(context=context)
+            return super().url(context=context)
 
         return url_for("." + self.name, community_id=g.community.slug)
 

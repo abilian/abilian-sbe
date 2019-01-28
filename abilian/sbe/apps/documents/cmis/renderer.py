@@ -1,6 +1,4 @@
 # coding=utf-8
-from __future__ import absolute_import, print_function, unicode_literals
-
 from flask import render_template
 
 # TEMP
@@ -8,7 +6,7 @@ ROOT = "http://localhost:5000/cmis/atompub"
 XML_HEADER = "<?xml version='1.0' encoding='UTF-8'?>\n"
 
 
-class Feed(object):
+class Feed:
     def __init__(self, object, collection):
         self.object = object
         self.collection = collection
@@ -23,7 +21,7 @@ class Feed(object):
         return render_template("cmis/feed.xml", **ctx)
 
 
-class Entry(object):
+class Entry:
     def __init__(self, obj):
         self.obj = obj
 
