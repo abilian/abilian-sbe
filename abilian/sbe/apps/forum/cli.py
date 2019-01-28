@@ -5,22 +5,23 @@ import logging
 import sys
 from email.parser import FeedParser
 
-from flask_script import Manager
+import click
+from flask.cli import with_appcontext
 
 from .tasks import check_maildir, process_email
 
 logger = logging.getLogger(__name__)
 
-manager = Manager(description="SBE forum commands", help="SBE forum commands")
 
-
-@manager.option(
-    "-f",
-    "--filename",
-    help="email filename; defaults to standard input",
-    default="-",
-    required=False,
-)
+# @manager.option(
+#     "-f",
+#     "--filename",
+#     help="email filename; defaults to standard input",
+#     default="-",
+#     required=False,
+# )
+@click.command()
+@with_appcontext
 def inject_email(filename="-"):
     """Read one email from stdin, parse it, forward it in a celery task to be
     persisted."""
@@ -62,7 +63,8 @@ def inject_email(filename="-"):
         logger.error("no email was parsed from stdin", extra={"stack": True})
 
 
-@manager.command
+@click.command()
+@with_appcontext
 def check_email():
     """Read one email from current user Maildir, parse it, forward it in a
     celery task to be persisted."""

@@ -5,10 +5,9 @@ from __future__ import absolute_import, print_function, unicode_literals
 
 import subprocess
 import time
-
-from six.moves.urllib.parse import urlopen
-
 # Some random number
+from urllib.request import urlopen
+
 BIND = "0.0.0.0"
 PORT = 4034
 HOME = "http://{}:{}/".format(BIND, PORT)

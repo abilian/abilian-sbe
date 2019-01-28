@@ -49,6 +49,7 @@ __all__ = (
     "PathAndSecurityIndexable",
     "icon_for",
     "icon_url",
+    "setup_listener",
 )
 
 #: A Whoosh analyzer that folds accents and case.

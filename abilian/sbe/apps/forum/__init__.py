@@ -12,7 +12,7 @@ def register_plugin(app):
     from .views import forum
     from .actions import register_actions
     from .models import ThreadIndexAdapter
-    from .commands import manager
+    from .cli import check_email, inject_email
     from . import tasks
 
     forum.record_once(register_actions)
@@ -20,5 +20,5 @@ def register_plugin(app):
     app.services["indexing"].adapters_cls.insert(0, ThreadIndexAdapter)
     tasks.init_app(app)
 
-    if app.script_manager:
-        app.script_manager.add_command("forum", manager)
+    app.cli.add_command(check_email)
+    app.cli.add_command(inject_email)

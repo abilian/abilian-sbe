@@ -1,8 +1,6 @@
-# coding=utf-8
-# Run as a WSGI app
+# -*- coding: utf-8 -*-
+"""Create an application instance."""
 
-from __future__ import absolute_import, print_function, unicode_literals
-
-from abilian.sbe.application import create_app
+from abilian.sbe.app import create_app
 
 app = create_app()

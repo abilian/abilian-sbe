@@ -10,7 +10,7 @@ def register_plugin(app):
 
     from .views import blueprint
     from .models import setup_listener
-    from .commands import manager  # pylint: disable=bad-python3-import
+    from .cli import antivirus
     from . import signals  # noqa
     from . import lock
 
@@ -20,5 +20,4 @@ def register_plugin(app):
     # set default lock lifetime
     app.config.setdefault("SBE_LOCK_LIFETIME", lock.DEFAULT_LIFETIME)
 
-    if app.script_manager:
-        app.script_manager.add_command("documents", manager)
+    app.cli.add_command(antivirus)

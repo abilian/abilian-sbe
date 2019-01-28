@@ -1,15 +1,15 @@
 # coding=utf-8
 """"""
+import click
 import sqlalchemy as sa
-from flask_script import Manager
+from flask.cli import with_appcontext
 
 from . import tasks
 from .models import Document
 
-manager = Manager(description="SBE documents actions", help="SBE documents actions")
 
-
-@manager.command
+@click.command()
+@with_appcontext
 def antivirus():
     """Schedule documents to antivirus scan."""
 
