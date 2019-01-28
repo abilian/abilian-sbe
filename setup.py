@@ -39,7 +39,6 @@ setuptools.setup(
     zip_safe=False,
     platforms="any",
     setup_requires=["babel"],
-    # dependency_links=dependency_links,
     include_package_data=True,
     classifiers=[
         "Development Status :: 3 - Alpha",
