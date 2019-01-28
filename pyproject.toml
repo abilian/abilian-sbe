@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abilian-sbe"
-version = "0.4.27"
+version = "0.5.0-beta"
 description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
 license = "LGPL"
@@ -10,7 +10,7 @@ packages = [{ include = "abilian" }]
 
 
 [tool.poetry.dependencies]
-python = "~2.7 || ^3.6"
+python = "^3.6"
 
 # Abilian Core
 abilian-core = ">=0.10"
@@ -35,9 +35,6 @@ openpyxl = "^2.3.0"
 # Better FP library than itertools IMHO.
 toolz = "*"
 
-# Needed for Python 2.7 only
-singledispatch = "*"
-
 [tool.poetry.dev-dependencies]
 # Our favorite test runner with some plugins and CI builder
 pytest = "*"
@@ -45,21 +42,12 @@ pytest-sugar = "*"
 pytest-xdist = "*"
 pytest-randomly = "*"
 
-# Backport of Python 3 mocking library
-mock = ">=1.0.1"
-
 # Coverage
 coverage = ">=4.1"
 pytest-cov = "*"
 
 # Python clone of Foreman, useful to test Heroku config locally
 honcho = "*"
-
-# Higher level API to Selenium than WebDriver,
-# see http://splinter.cobrateam.info/en/latest/index.html
-# Fails on travis + phantomjs issues...
-#splinter>=0.7.0
-#pytest-splinter
 
 # Documentation generator
 Sphinx = "*"
@@ -80,8 +68,8 @@ flake8-mutable = "*"
 flake8-pytest = "*"
 flake8-super-call = "*"
 flake8-tidy-imports = "*"
-flake8-mypy = { version = "*", python = "^3.6" }
-flake8-bugbear = { version = "*", python = "^3.6" }
+flake8-mypy = "*"
+flake8-bugbear = "*"
 mastool = "*"
 mccabe = "*"
 pylint = "*"
