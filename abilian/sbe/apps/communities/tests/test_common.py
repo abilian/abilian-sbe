@@ -13,8 +13,8 @@ from abilian.sbe.apps.communities.common import activity_time_format
 
 
 @pytest.fixture
-def app():
-    app = create_app()
+def app(config):
+    app = create_app(config)
 
     # We need some incantations here to make babel work in the test
     babel = abilian.i18n.babel

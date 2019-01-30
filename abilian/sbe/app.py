@@ -22,8 +22,10 @@ __all__ = ["create_app", "Application"]
 logger = logging.getLogger(__name__)
 
 
-def create_app(config=None):
-    return Application(config=config)
+def create_app(config=None, **kw):
+    app = Application(**kw)
+    app.setup(config)
+    return app
 
 
 # loader to be used by celery workers
@@ -47,8 +49,8 @@ class Application(BaseApplication):
         "abilian.sbe.apps.preferences",
     )
 
-    def __init__(self, name="abilian_sbe", config=None, **kwargs):
-        BaseApplication.__init__(self, name, config=config, **kwargs)
+    def setup(self, config):
+        super().setup(config)
         loader = jinja2.PackageLoader("abilian.sbe", "templates")
         self.register_jinja_loaders(loader)
 

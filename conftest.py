@@ -3,9 +3,6 @@
 
 Reuses fixtures defined in abilian-core.
 """
-from __future__ import absolute_import, division, print_function, \
-    unicode_literals
-
 from abilian.testing.fixtures import TestConfig
 from pytest import fixture
 
