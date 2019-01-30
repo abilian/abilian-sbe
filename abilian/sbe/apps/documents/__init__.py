@@ -1,13 +1,8 @@
 # coding=utf-8
 """Folders / Documents module."""
-from __future__ import absolute_import
-
-from abilian.sbe.extension import sbe
 
 
 def register_plugin(app):
-    sbe.init_app(app)
-
     from .views import blueprint
     from .models import setup_listener
     from .cli import antivirus

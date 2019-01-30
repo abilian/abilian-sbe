@@ -1,8 +1,8 @@
 # coding=utf-8
 """"""
 from datetime import datetime, timedelta
-
 from unittest import mock
+
 from abilian.core.models.subjects import User
 from flask_login import login_user
 from pytz import UTC

@@ -39,18 +39,12 @@ def test_instanciation(db):
 def test_default_view_kw():
     # test exceptions are handled if passed an object with 'community' attribute
     # and no community_id in kwargs. and ValueError is properly raised
-    if six.PY2:
-        dummy = type(b"Dummy", (object,), {b"community": None})()
-    else:
-        dummy = type("Dummy", (object,), {"community": None})()
+    dummy = type("Dummy", (object,), {"community": None})()
 
     with pytest.raises(ValueError) as exc_info:
         views.default_view_kw({}, dummy, "dummy", 1)
 
-    if six.PY2:
-        assert exc_info.value.message == "Cannot find community_id value"
-    else:
-        assert exc_info.value.args == ("Cannot find community_id value",)
+    assert exc_info.value.args == ("Cannot find community_id value",)
 
 
 def test_default_url(app, community):

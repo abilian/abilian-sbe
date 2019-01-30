@@ -1,6 +1,7 @@
 # coding=utf-8
 """"""
 import logging
+from functools import singledispatch
 
 import bleach
 from abilian.core.util import BasePresenter
@@ -8,7 +9,6 @@ from abilian.i18n import _, _l
 from abilian.web.util import url_for
 from flask import render_template_string
 from jinja2 import Markup, Template
-from functools import singledispatch
 
 from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import Community
