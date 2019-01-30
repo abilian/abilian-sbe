@@ -13,7 +13,8 @@ packages = [{ include = "abilian" }]
 python = "^3.6"
 
 # Abilian Core
-abilian-core = ">=0.10"
+# abilian-core = ">=0.10"
+abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "devel" }
 
 # Temp
 wtforms = "<2.2"
