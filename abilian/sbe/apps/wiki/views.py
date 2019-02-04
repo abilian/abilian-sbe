@@ -2,6 +2,7 @@
 """"""
 import difflib
 from pathlib import Path
+from urllib.parse import quote
 
 import sqlalchemy as sa
 from abilian.core.extensions import db
@@ -20,8 +21,6 @@ from flask import current_app, flash, g, make_response, redirect, \
 from flask_login import current_user
 from markdown import markdown
 from markupsafe import Markup
-from six import text_type
-from six.moves.urllib.parse import quote
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound
 from whoosh.searching import Hit
@@ -376,9 +375,8 @@ def attachment_download():
     response = make_response(attachment.content)
     response.headers["content-length"] = attachment.content_length
     response.headers["content-type"] = attachment.content_type
-    content_disposition = 'attachment;filename="{}"'.format(
-        quote(attachment.name.encode("utf8"))
-    )
+    filename = quote(attachment.name.encode("utf8"))
+    content_disposition = f'attachment;filename="{filename}"'
     response.headers["content-disposition"] = content_disposition
     return response
 

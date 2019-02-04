@@ -5,11 +5,9 @@
 def register_plugin(app):
     # Used for side-effect
     from . import events  # noqa
-
     from .views import communities
+    from . import search
 
     app.register_blueprint(communities)
-
-    from . import search
 
     search.init_app(app)

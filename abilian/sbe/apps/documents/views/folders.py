@@ -10,6 +10,7 @@ from datetime import datetime
 from functools import partial
 from io import StringIO
 from typing import Any, List
+from urllib.parse import quote
 from zipfile import ZipFile, is_zipfile
 
 import sqlalchemy as sa
@@ -28,8 +29,6 @@ from flask import Markup, Response, current_app, flash, g, jsonify, \
     make_response, redirect, render_template, render_template_string, \
     request, send_file, session
 from flask_login import current_user
-from six import text_type
-from six.moves.urllib.parse import quote
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError
 from xlwt import Workbook, easyxf

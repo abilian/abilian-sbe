@@ -3,6 +3,7 @@
 from collections import Counter
 from datetime import date, datetime, timedelta
 from itertools import groupby
+from urllib.parse import quote
 
 import sqlalchemy as sa
 from abilian.core.util import utc_dt
@@ -16,8 +17,6 @@ from flask import current_app, flash, g, make_response, render_template, \
     request
 from flask_babel import format_date
 from flask_login import current_user
-from six import text_type
-from six.moves.urllib.parse import quote
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, NotFound
 
@@ -546,8 +545,7 @@ def attachment_download(thread_id, post_id, attachment_id):
     response = make_response(attachment.content)
     response.headers["content-length"] = attachment.content_length
     response.headers["content-type"] = attachment.content_type
-    content_disposition = 'attachment;filename="{}"'.format(
-        quote(attachment.name.encode("utf8"))
-    )
+    filename = quote(attachment.name.encode("utf8"))
+    content_disposition = f'attachment;filename="{filename}"'
     response.headers["content-disposition"] = content_disposition
     return response

@@ -1,6 +1,7 @@
 # coding=utf-8
 """"""
 from datetime import datetime
+from urllib.parse import quote
 
 import sqlalchemy as sa
 import sqlalchemy.orm
@@ -20,7 +21,6 @@ from flask import current_app, flash, g, make_response, redirect, \
     render_template, request
 from flask_login import current_user
 from flask_mail import Message
-from six.moves.urllib.parse import quote
 from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.sbe.apps.communities.common import object_viewers

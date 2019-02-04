@@ -9,7 +9,6 @@ from abilian.web import url_for
 from flask import current_app, flash, g, request
 from flask_babel import gettext as _
 from flask_login import current_user
-from six import text_type
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
 from abilian.sbe.apps.documents.models import Document, Folder
