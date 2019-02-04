@@ -3,7 +3,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version:  abilian-sbe\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2019-01-28 22:21+0100\n"
+"POT-Creation-Date: 2019-02-04 13:24+0100\n"
 "PO-Revision-Date: 2017-11-23 12:13-0500\n"
 "Last-Translator: sf <sf@fermigier.com>\n"
 "Language: tr_TR\n"
@@ -62,7 +62,7 @@ msgid "URL"
 msgstr ""
 
 #: abilian/sbe/apps/calendar/forms.py:68
-#: abilian/sbe/apps/communities/forms.py:56
+#: abilian/sbe/apps/communities/forms.py:55
 #: abilian/sbe/apps/documents/templates/documents/_modals_document_edit.html:30
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_edit.html:27
 #: abilian/sbe/apps/documents/templates/documents/_modals_folder_new.html:25
@@ -123,12 +123,12 @@ msgstr "Aktiviteler"
 msgid "Documents"
 msgstr "Belgeler"
 
-#: abilian/sbe/apps/communities/actions.py:61 abilian/sbe/apps/wiki/views.py:44
+#: abilian/sbe/apps/communities/actions.py:61 abilian/sbe/apps/wiki/views.py:43
 msgid "Wiki"
 msgstr "Viki Sayfası"
 
 #: abilian/sbe/apps/communities/actions.py:67
-#: abilian/sbe/apps/forum/views.py:54
+#: abilian/sbe/apps/forum/views.py:53
 msgid "Conversations"
 msgstr "Sohbetler"
 
@@ -167,7 +167,7 @@ msgstr ""
 msgid "d"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:54
+#: abilian/sbe/apps/communities/forms.py:53
 #: abilian/sbe/apps/communities/templates/community/members_std_macros.html:11
 #: abilian/sbe/apps/communities/templates/community/wizard_users_std_macros.html:11
 #: abilian/sbe/apps/communities/views/views.py:410
@@ -180,56 +180,56 @@ msgstr ""
 msgid "Name"
 msgstr "İsim"
 
-#: abilian/sbe/apps/communities/forms.py:62
+#: abilian/sbe/apps/communities/forms.py:61
 msgid "Linked to group"
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:63
+#: abilian/sbe/apps/communities/forms.py:62
 msgid "Manages a group of users through this community members."
 msgstr ""
 
-#: abilian/sbe/apps/communities/forms.py:68
+#: abilian/sbe/apps/communities/forms.py:67
 msgid "Image"
 msgstr "Görüntü"
 
-#: abilian/sbe/apps/communities/forms.py:74
+#: abilian/sbe/apps/communities/forms.py:73
 msgid "Type"
 msgstr "Tip"
 
-#: abilian/sbe/apps/communities/forms.py:78
+#: abilian/sbe/apps/communities/forms.py:77
 msgid "informative"
 msgstr "bilgilendirici"
 
-#: abilian/sbe/apps/communities/forms.py:79
+#: abilian/sbe/apps/communities/forms.py:78
 msgid "participative"
 msgstr "Katılımcı"
 
-#: abilian/sbe/apps/communities/forms.py:84
+#: abilian/sbe/apps/communities/forms.py:83
 msgid "Has documents"
 msgstr "Belgeleri vardır"
 
-#: abilian/sbe/apps/communities/forms.py:87
+#: abilian/sbe/apps/communities/forms.py:86
 msgid "Has a wiki"
 msgstr "Bir wiki vardır"
 
-#: abilian/sbe/apps/communities/forms.py:90
+#: abilian/sbe/apps/communities/forms.py:89
 msgid "Has a forum"
 msgstr "Bir forum vardır"
 
-#: abilian/sbe/apps/communities/forms.py:102
+#: abilian/sbe/apps/communities/forms.py:101
 msgid "A community with this name already exists"
 msgstr "Bu ada sahip bir topluluk zaten var"
 
-#: abilian/sbe/apps/communities/forms.py:120
-#: abilian/sbe/apps/communities/forms.py:125
+#: abilian/sbe/apps/communities/forms.py:119
+#: abilian/sbe/apps/communities/forms.py:124
 msgid "Only PNG or JPG image files are accepted"
 msgstr "Yalnızca PNG veya JPG resim dosyaları kabul edilir"
 
-#: abilian/sbe/apps/communities/forms.py:133
+#: abilian/sbe/apps/communities/forms.py:132
 msgid "Could not decode image file"
 msgstr "Resim dosyası çözülemedi"
 
-#: abilian/sbe/apps/communities/models.py:39
+#: abilian/sbe/apps/communities/models.py:38
 msgid "role_member"
 msgstr "role_member"
 
@@ -1031,7 +1031,7 @@ msgid "Document properties successfully edited."
 msgstr "Belge başarıyla düzenlenmiş özellikleri."
 
 #: abilian/sbe/apps/documents/views/documents.py:95
-#: abilian/sbe/apps/documents/views/folders.py:602
+#: abilian/sbe/apps/documents/views/folders.py:601
 msgid "You didn't change any property."
 msgstr "Herhangi bir özellik değişmedi."
 
@@ -1051,25 +1051,25 @@ msgstr "{sender} bir dosya gönderdi"
 msgid "Email successfully sent"
 msgstr "E-posta başarıyla gönderildi"
 
-#: abilian/sbe/apps/documents/views/folders.py:227
+#: abilian/sbe/apps/documents/views/folders.py:226
 msgid "On {date}, {manager} has activated inheritance"
 msgstr "{date} üzerinde {manager} devralma harekete geçirdi"
 
-#: abilian/sbe/apps/documents/views/folders.py:229
+#: abilian/sbe/apps/documents/views/folders.py:228
 msgid "On {date}, {manager} has deactivated inheritance"
 msgstr "{date} üzerinde {manager} devralma devre dışı"
 
-#: abilian/sbe/apps/documents/views/folders.py:231
+#: abilian/sbe/apps/documents/views/folders.py:230
 msgid "On {date}, {manager} has given role \"{role}\" to {principal}"
 msgstr "{date} üzerinde {manager} rolü \"{role}\" {principal} için verdi"
 
-#: abilian/sbe/apps/documents/views/folders.py:233
+#: abilian/sbe/apps/documents/views/folders.py:232
 msgid "On {date}, {manager} has revoked role \"{role}\" from {principal}"
 msgstr ""
 "{date} üzerinde {manager} rolü \"{role}\" {principal} üzerinden iptal "
 "etmiş"
 
-#: abilian/sbe/apps/documents/views/folders.py:286
+#: abilian/sbe/apps/documents/views/folders.py:285
 msgid ""
 "You must have the \"manager\" local role on this folder in order to "
 "deactivate inheritance."
@@ -1077,7 +1077,7 @@ msgstr ""
 "Devralmayı devre dışı bırakmak için bu klasörde \"yönetici\" yerel "
 "rolünüz olmalıdır."
 
-#: abilian/sbe/apps/documents/views/folders.py:359
+#: abilian/sbe/apps/documents/views/folders.py:358
 msgid ""
 "Cannot remove \"manager\" local role for yourself: you don't have "
 "\"manager\" role (either by security inheritance or by group membership)"
@@ -1085,11 +1085,11 @@ msgstr ""
 "\"Yönetici\" yerel rolünü kendiniz kaldıramazsınız: \"yönetici\" rolüne "
 "sahip değilsiniz (güvenlik miras veya grup üyeliği yoluyla)"
 
-#: abilian/sbe/apps/documents/views/folders.py:370
+#: abilian/sbe/apps/documents/views/folders.py:369
 msgid "Role {role} for user {user} removed on folder {folder}"
 msgstr "Kullanıcı {user} klasörü {folder} kaldırılması için rol {role}"
 
-#: abilian/sbe/apps/documents/views/folders.py:387
+#: abilian/sbe/apps/documents/views/folders.py:386
 msgid ""
 "Cannot remove \"manager\" local role for group \"{group}\": you don't "
 "have \"manager\" role by security inheritance or by local role"
@@ -1097,76 +1097,76 @@ msgstr ""
 "\"Müdür\" Yerel rol grubu \"{group}\" için kaldıramazsınız: güvenlik "
 "kalıtım veya Yerel rol tarafından \"manager\" rol yok"
 
-#: abilian/sbe/apps/documents/views/folders.py:396
+#: abilian/sbe/apps/documents/views/folders.py:395
 msgid "Role {role} for group {group} removed on folder {folder}"
 msgstr "Grup {group} klasörü {folder} kaldırıldı için rol {role}"
 
-#: abilian/sbe/apps/documents/views/folders.py:589
+#: abilian/sbe/apps/documents/views/folders.py:588
 msgid "Unknown action."
 msgstr "Bilinmeyen eylem."
 
-#: abilian/sbe/apps/documents/views/folders.py:600
+#: abilian/sbe/apps/documents/views/folders.py:599
 msgid "Folder properties successfully edited."
 msgstr "Klasör Özellikleri başarıyla düzenlendi."
 
-#: abilian/sbe/apps/documents/views/folders.py:700
-#: abilian/sbe/apps/wiki/views.py:420
+#: abilian/sbe/apps/documents/views/folders.py:699
+#: abilian/sbe/apps/wiki/views.py:418
 #, python-format
 msgid "One new document successfully uploaded"
 msgid_plural "%(num)d new document successfully uploaded"
 msgstr[0] "Tek bir yeni belge başarıyla karşıya yüklendi"
 msgstr[1] "%(num)d yeni belge başarıyla karşıya yüklendi"
 
-#: abilian/sbe/apps/documents/views/folders.py:778
+#: abilian/sbe/apps/documents/views/folders.py:777
 #, python-format
 msgid "%(file_num)d files and %(folder_num)d folders sucessfully deleted."
 msgstr "%(file_num)d dosya ve %(folder_num)d klasörleri başarıyla silindi."
 
-#: abilian/sbe/apps/documents/views/folders.py:784
+#: abilian/sbe/apps/documents/views/folders.py:783
 #, python-format
 msgid "1 file sucessfully deleted."
 msgid_plural "%(num)d files sucessfully deleted."
 msgstr[0] "1 dosya başarıyla silindi."
 msgstr[1] "%(num)d dosyaları başarıyla silindi."
 
-#: abilian/sbe/apps/documents/views/folders.py:790
+#: abilian/sbe/apps/documents/views/folders.py:789
 #, python-format
 msgid "1 folder sucessfully deleted."
 msgid_plural "%(num)d folders sucessfully deleted."
 msgstr[0] "1 klasörü başarıyla silindi."
 msgstr[1] "%(num)d klasörler başarıyla silindi."
 
-#: abilian/sbe/apps/documents/views/folders.py:795
+#: abilian/sbe/apps/documents/views/folders.py:794
 msgid "No object deleted"
 msgstr "Silinmiş nesne yok"
 
-#: abilian/sbe/apps/documents/views/folders.py:810
+#: abilian/sbe/apps/documents/views/folders.py:809
 msgid "Move elements: no elements selected."
 msgstr "Öğeleri taşımak: Seçili öğe yok."
 
-#: abilian/sbe/apps/documents/views/folders.py:816
+#: abilian/sbe/apps/documents/views/folders.py:815
 msgid "Move elements: no destination folder selected. Aborted."
 msgstr "Öğeleri taşımak: hiçbir hedef klasörü seçiliyken. İptal edildi."
 
-#: abilian/sbe/apps/documents/views/folders.py:823
+#: abilian/sbe/apps/documents/views/folders.py:822
 msgid "Move elements: source and destination folder are identical, nothing done."
 msgstr "Öğeleri taşımak: kaynak ve hedef klasörü aynı, bir şey."
 
-#: abilian/sbe/apps/documents/views/folders.py:833
+#: abilian/sbe/apps/documents/views/folders.py:832
 msgid "You are not allowed to move elements from this folder"
 msgstr "Öğeleri bu klasörden taşımak için izin verilmez"
 
-#: abilian/sbe/apps/documents/views/folders.py:838
+#: abilian/sbe/apps/documents/views/folders.py:837
 msgid "You are not allowed to write in folder \"{folder}\""
 msgstr "\"{folder}\" klasörüne yazmak için izin verilmez"
 
-#: abilian/sbe/apps/documents/views/folders.py:855
+#: abilian/sbe/apps/documents/views/folders.py:854
 msgid ""
 "Move elements: destination folder is included in moved elements. Moved "
 "nothing."
 msgstr "Öğeleri taşı: hedef klasör taşınan öğelerde bulunur. Hiçbir şey taşımadım."
 
-#: abilian/sbe/apps/documents/views/folders.py:868
+#: abilian/sbe/apps/documents/views/folders.py:867
 msgid ""
 "Move elements: canceled, some elements exists in destination folder: "
 "{elements}"
@@ -1174,43 +1174,43 @@ msgstr ""
 "Öğeleri taşımak: iptal, bazı öğeleri hedef klasöre bulunmaktadır: "
 "{elements}"
 
-#: abilian/sbe/apps/documents/views/folders.py:879
+#: abilian/sbe/apps/documents/views/folders.py:878
 msgid "1 folder"
 msgid_plural "{count} folders"
 msgstr[0] "1 klasör"
 msgstr[1] "{count} klasörler"
 
-#: abilian/sbe/apps/documents/views/folders.py:879
+#: abilian/sbe/apps/documents/views/folders.py:878
 msgid "0 folder"
 msgstr "0 klasör"
 
-#: abilian/sbe/apps/documents/views/folders.py:883
+#: abilian/sbe/apps/documents/views/folders.py:882
 msgid "1 document"
 msgid_plural "{count} documents"
 msgstr[0] "1 belge"
 msgstr[1] "{count} belgeleri"
 
-#: abilian/sbe/apps/documents/views/folders.py:883
+#: abilian/sbe/apps/documents/views/folders.py:882
 msgid "0 document"
 msgstr "0 belge"
 
-#: abilian/sbe/apps/documents/views/folders.py:886
+#: abilian/sbe/apps/documents/views/folders.py:885
 msgid "{folders} and {documents} moved to {target}"
 msgstr "{folders} ve {documents} için {target} taşındı"
 
-#: abilian/sbe/apps/documents/views/folders.py:946
+#: abilian/sbe/apps/documents/views/folders.py:945
 msgid "An element named \"{name}\" is already present in folder"
 msgstr "\"{name}\" adlı bir öğesi zaten klasöründe var"
 
-#: abilian/sbe/apps/documents/views/folders.py:949
+#: abilian/sbe/apps/documents/views/folders.py:948
 msgid "Cannot rename: \"{name}\" is already present in parent folder"
 msgstr "Yeniden adlandırılamıyor: \"{name}\" ana klasöründe zaten"
 
-#: abilian/sbe/apps/documents/views/util.py:97
+#: abilian/sbe/apps/documents/views/util.py:96
 msgid "Document name can't be empty."
 msgstr "Belge adı boş olamaz."
 
-#: abilian/sbe/apps/documents/views/util.py:108
+#: abilian/sbe/apps/documents/views/util.py:107
 msgid "\"{original}\" already present in folder, renamed \"{name}\""
 msgstr "\"yeniden{original}\" klasöründe, zaten mevcut \"{name}\""
 
@@ -1231,7 +1231,7 @@ msgstr "Arşivler"
 msgid "Attachments"
 msgstr "Ekler"
 
-#: abilian/sbe/apps/forum/actions.py:82 abilian/sbe/apps/forum/views.py:283
+#: abilian/sbe/apps/forum/actions.py:82 abilian/sbe/apps/forum/views.py:282
 #, fuzzy
 msgid "New conversation"
 msgstr "Yeni bir konuşma başlat"
@@ -1262,19 +1262,19 @@ msgstr ""
 msgid "_____Write above this line to post_____"
 msgstr "___Write post___ için bu çizginin üzerinde"
 
-#: abilian/sbe/apps/forum/views.py:280
+#: abilian/sbe/apps/forum/views.py:279
 msgid "Post this message"
 msgstr "Bu iletiyi postala"
 
-#: abilian/sbe/apps/forum/views.py:393
+#: abilian/sbe/apps/forum/views.py:392
 msgid "Thread \"{title}\" deleted."
 msgstr "\"{title}\" silinmiş iş parçacığı."
 
-#: abilian/sbe/apps/forum/views.py:407
+#: abilian/sbe/apps/forum/views.py:406
 msgid "The thread is now closed for edition and new contributions."
 msgstr ""
 
-#: abilian/sbe/apps/forum/views.py:408
+#: abilian/sbe/apps/forum/views.py:407
 msgid "The thread is now re-opened for edition and new contributions."
 msgstr ""
 
@@ -1698,48 +1698,48 @@ msgstr "Bu ada sahip bir sayfa zaten var. Lütfen başka bir ad kullanın."
 msgid "this page has been edited since"
 msgstr "bu sayfa beri düzenlenmiş"
 
-#: abilian/sbe/apps/wiki/views.py:104
+#: abilian/sbe/apps/wiki/views.py:103
 msgid "This page doesn't exit. You must create it first."
 msgstr "Bu sayfa yok. Önce oluşturmanız gerekir."
 
-#: abilian/sbe/apps/wiki/views.py:158
+#: abilian/sbe/apps/wiki/views.py:157
 msgid "Edit page"
 msgstr "Sayfayı düzenle"
 
-#: abilian/sbe/apps/wiki/views.py:160
+#: abilian/sbe/apps/wiki/views.py:159
 msgid "Wiki page successfully edited."
 msgstr "Wiki sayfası başarıyla düzenlenmiş."
 
-#: abilian/sbe/apps/wiki/views.py:203
+#: abilian/sbe/apps/wiki/views.py:202
 msgid "You didn't make any change to this page."
 msgstr "Bu sayfa için herhangi bir değişiklik olmadı."
 
-#: abilian/sbe/apps/wiki/views.py:258
+#: abilian/sbe/apps/wiki/views.py:257
 msgid "Create page"
 msgstr "Sayfa Oluştur"
 
-#: abilian/sbe/apps/wiki/views.py:259
+#: abilian/sbe/apps/wiki/views.py:258
 msgid "Wiki page successfully created."
 msgstr "Wiki sayfası başarıyla oluşturuldu."
 
-#: abilian/sbe/apps/wiki/views.py:321
+#: abilian/sbe/apps/wiki/views.py:320
 msgid "You must check exactly 2 revisions."
 msgstr "Tam olarak 2 düzeltmeleri kullanıma almanız gerekir."
 
-#: abilian/sbe/apps/wiki/views.py:349
+#: abilian/sbe/apps/wiki/views.py:348
 msgid "This page doesn't exist"
 msgstr "Bu sayfa yok"
 
-#: abilian/sbe/apps/wiki/views.py:359
+#: abilian/sbe/apps/wiki/views.py:358
 #, python-format
 msgid "Page %(title)s deleted."
 msgstr "Sayfa %(title)s silinmiş."
 
-#: abilian/sbe/apps/wiki/views.py:425
+#: abilian/sbe/apps/wiki/views.py:423
 msgid "No file uploaded."
 msgstr "Hiçbir dosya yüklenmedi."
 
-#: abilian/sbe/apps/wiki/views.py:448
+#: abilian/sbe/apps/wiki/views.py:446
 msgid "Attachment \"{name}\" has been deleted"
 msgstr "Eki \"{name}\" silindi"
 
