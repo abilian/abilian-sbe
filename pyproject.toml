@@ -1,12 +1,13 @@
 [tool.poetry]
 name = "abilian-sbe"
-version = "0.5.0-beta"
+version = "0.5.0-dev"
 description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
 license = "LGPL"
 readme = "README.rst"
 repository = "https://github.com/abilian/abilian-sbe"
 packages = [{ include = "abilian" }]
+include = ["abilian/**/*"]
 
 
 [tool.poetry.dependencies]
