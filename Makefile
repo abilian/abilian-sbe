@@ -17,6 +17,7 @@ install:
 # Environment
 #
 develop: update-env setup-git
+	poetry install --develop .
 	pip uninstall -y abilian-core
 	pip install -q -e ../abilian-core
 
