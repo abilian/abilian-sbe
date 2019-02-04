@@ -159,7 +159,7 @@ clean:
 	find . -type d -empty -delete
 	rm -rf .mypy_cache .cache .eggs .pytest_cache .pyre
 	rm -rf instance/cache instance/tmp instance/webassets instance/whoosh
-	rm -f migration.log
+	rm -f migration.log yarn-error.log
 	rm -rf build dist
 	rm -rf data tests/data tests/integration/data
 	rm -rf tmp tests/tmp tests/integration/tmp
@@ -170,6 +170,7 @@ clean:
 	rm -rf static/gen static/.webassets-cache
 	rm -rf htmlcov ghostdriver.log coverage.xml junit*.xml
 	rm -rf tests.functional.test/
+	rm -rf pip-wheel-metadata/
 
 tidy: clean delete-cache
 	rm -rf instance/data
