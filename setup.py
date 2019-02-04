@@ -1,4 +1,4 @@
 #!/usr/bin/env python
 import setuptools
 
-setuptools.setup()
+setuptools.setup(name="abilian-sbe")
