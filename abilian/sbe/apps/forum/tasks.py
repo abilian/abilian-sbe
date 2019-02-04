@@ -461,16 +461,16 @@ def check_maildir():
     if not maildirpath.is_dir():
         raise ValueError(f"{maildirpath} must be a directory")
 
-    src_mdir = mailbox.Maildir(str(maildirpath))
-    src_mdir.lock()  # Useless but recommended if old mbox is used by error
+    incoming_mailbox = mailbox.Maildir(str(maildirpath))
+    incoming_mailbox.lock()  # Useless but recommended if old mbox is used by error
 
     try:
-        for key, message in src_mdir.items():
+        for key, message in incoming_mailbox.items():
             processed = process_email(message)
 
             # delete the message if all went fine
             if processed:
-                del src_mdir[key]
+                del incoming_mailbox[key]
 
     finally:
-        src_mdir.close()  # Flushes all changes to disk then unlocks
+        incoming_mailbox.close()  # Flushes all changes to disk then unlocks
