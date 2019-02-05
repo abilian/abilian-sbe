@@ -14,6 +14,7 @@ Flask-DebugToolbar = ">=0.10"
 Flask-Login = ">=0.4"
 Flask-Mail = ">=0.9.1"
 Flask-Migrate = ">=2.0"
+Flask-Talisman = ">=0.6"
 Flask-WTF = ">=0.12,<0.13"
 MarkupSafe = ">=0.21"
 PyYAML = "*"
@@ -47,7 +48,7 @@ tqdm = "*"
 wtforms-sqlalchemy = "*"
 
 [package.source]
-reference = "c87f3b37488e2be2a296a778b7ec9f2b658ff01a"
+reference = "fab07f25b76f8618116d4279cffff3837cd47552"
 type = "git"
 url = "https://github.com/abilian/abilian-core.git"
 [[package]]
@@ -535,6 +536,17 @@ version = "2.1"
 [package.dependencies]
 Flask = ">=0.10"
 SQLAlchemy = ">=0.7"
+
+[[package]]
+category = "main"
+description = "HTTP security headers for Flask."
+name = "flask-talisman"
+optional = false
+python-versions = "*"
+version = "0.6.0"
+
+[package.dependencies]
+six = ">=1.9.0"
 
 [[package]]
 category = "main"
@@ -1048,7 +1060,7 @@ description = "Extensions to the standard Python datetime module"
 name = "python-dateutil"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
-version = "2.7.5"
+version = "2.8.0"
 
 [package.dependencies]
 six = ">=1.5"
@@ -1132,7 +1144,7 @@ description = "Python client for Sentry (https://getsentry.com)"
 name = "sentry-sdk"
 optional = false
 python-versions = "*"
-version = "0.6.9"
+version = "0.7.0"
 
 [package.dependencies]
 blinker = ">=1.1"
@@ -1470,6 +1482,7 @@ flask-login = ["c815c1ac7b3e35e2081685e389a665f2c74d7e077cb93cecabaea352da4752ec
 flask-mail = ["22e5eb9a940bf407bcf30410ecc3708f3c56cc44b29c34e1726fe85006935f41"]
 flask-migrate = ["0c42c34357b24faac63bc6e7af028c8614235f5210eded53802ced450c5392c2", "8356fa6a02694da34e78da1e38cf91c944b219f4bd4b89493a3b261a305994ab"]
 flask-sqlalchemy = ["c5244de44cc85d2267115624d83faef3f9e8f088756788694f305a5d5ad137c5"]
+flask-talisman = ["5a88c0ee2b0d509610ae74cbd7059d91228ad56ab3e955813428fe8e63a3e195", "85c6688bcbc8de6c37b86bfb60db2da295ee1935c2ed27ca16396792ab45a3ef"]
 flask-wtf = ["99c5d75663d6bfcbf4dd0d71ffcb7313f64ae90e6f89e09ad99080107033e8b6", "bd99316c97ed1d1cb90b8f0c242c86420a891a6a2058f20717e424bf5b0bb80e"]
 honcho = ["af5806bf13e3b20acdcb9ff8c0beb91eee6fe07393c3448dfad89667e6ac7576", "c189402ad2e337777283c6a12d0f4f61dc6dd20c254c9a3a4af5087fc66cea6e"]
 hyperlink = ["98da4218a56b448c7ec7d2655cb339af1f7d751cf541469bb4fc28c4a4245b34", "f01b4ff744f14bc5d0a22a6b9f1525ab7d6312cb0ff967f59414bbac52f0a306"]
@@ -1520,7 +1533,7 @@ pytest-forked = ["260d03fbd38d5ce41a657759e8d19bc7c8cfa6d0dcfa36c0bc9742d33bc307
 pytest-randomly = ["6db5e03d72b54052b9b379dc3cfa4749c19bfe4de161cf3eb24762049f4ce9be", "92ec6745d3ebdd690ecb598648748c9601f16f5afacf83ccef2b50d23e6edb7f"]
 pytest-sugar = ["26cf8289fe10880cbbc130bd77398c4e6a8b936d8393b116a5c16121d95ab283", "fcd87a74b2bce5386d244b49ad60549bfbc4602527797fac167da147983f58ab"]
 pytest-xdist = ["4a201bb3ee60f5dd6bb40c5209d4e491cecc4d5bafd656cfb10f86178786e568", "d03d1ff1b008458ed04fa73e642d840ac69b4107c168e06b71037c62d7813dd4"]
-python-dateutil = ["063df5763652e21de43de7d9e00ccf239f953a832941e37be541614732cdfc93", "88f9287c0174266bb0d8cedd395cfba9c58e87e5ad86b2ce58859bc11be3cf02"]
+python-dateutil = ["7e6584c74aeed623791615e26efd690f29817a27c73085b78e4bad02493df2fb", "c89805f6f4d64db21ed966fda138f8a5ed7a4fdbc1a8ee329ce1b74e3c74da9e"]
 python-deprecated = ["a242b3c1721f97912330b12cd5529abfa5b3876084a6c60a2c683a87d4b0dd6f"]
 python-editor = ["1bf6e860a8ad52a14c3ee1252d5dc25b2030618ed80c022598f00176adc8367d", "51fda6bcc5ddbbb7063b2af7509e43bd84bfc32a4ff71349ec7847713882327b", "5f98b069316ea1c2ed3f67e7f5df6c0d8f10b689964a4a811ff64f0106819ec8", "c3da2053dbab6b29c94e43c486ff67206eafbe7eb52dbec7390b5e2fb05aac77", "ea87e17f6ec459e780e4221f295411462e0d0810858e055fc514684350a2f522"]
 python-magic = ["f2674dcfad52ae6c49d4803fa027809540b130db1dec928cfbb9240316831375", "f3765c0f582d2dfc72c15f3b5a82aecfae9498bd29ca840d72f37d7bd38bfcd5"]
@@ -1529,7 +1542,7 @@ pyyaml = ["3d7da3009c0f3e783b2c873687652d83b1bbfd5c88e9813fb7e5b03c0dd3108b", "3
 redis = ["8a1900a9f2a0a44ecf6e8b5eb3e967a9909dfed219ad66df094f27f7d6f330fb", "a22ca993cea2962dbb588f9f30d0015ac4afcc45bee27d3978c0dbe9e97c6c0f"]
 requests = ["502a824f31acdacb3a35b6690b5fbf0bc41d63a24a45c4004352b0242707598e", "7bf2a778576d825600030a110f3c0e3e8edc51dfaafe1c146e39a2027784957b"]
 restructuredtext-lint = ["82880a8de8a41bfc84f533744091b1ead8e2ab9ad6c0a3f60f4750ef6c802350"]
-sentry-sdk = ["78bb79adfe991a770ce2179826f5f216e086bbc4bd4585c543f377180cae3654", "a6cfb0a2316416d100d2732a26c95fb7d534c9dcc16e2682e8d19fcd45f0a2c6"]
+sentry-sdk = ["073180ac7ebbf1168d86dcc0b684ecb62c0353481d0b606d4c42da63d91de219", "8154c8db60004f2d934b5b561383b1ab0a9c2f4b951e7d9fda9788f055acce3f"]
 six = ["3350809f0555b11f552448330d0b52d5f24c91a322ea4a15ef22629740f3761c", "d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"]
 snowballstemmer = ["919f26a68b2c17a7634da993d91339e288964f93c274f1343e3bbbe2096e1128", "9f3bcd3c401c3e862ec0ebe6d2c069ebc012ce142cce209c098ccb5b09136e89"]
 sphinx = ["b53904fa7cb4b06a39409a492b949193a1b68cc7241a1a8ce9974f86f0d24287", "c1c00fc4f6e8b101a0d037065043460dffc2d507257f2f11acaed71fd2b0c83c"]
