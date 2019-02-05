@@ -16,16 +16,12 @@ install:
 #
 # Environment
 #
-develop: update-env setup-git
+develop: setup-git
+	@echo "--> Installing/updating dependencies"
 	poetry install --develop .
 	pip uninstall -y abilian-core
 	pip install -q -e ../abilian-core
-
-update-env:
-	@echo "--> Installing/updating dependencies"
-	poetry install
 	yarn
-	@echo ""
 
 setup-git:
 	@echo "--> Configuring git and installing hooks"
