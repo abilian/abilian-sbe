@@ -10,7 +10,6 @@ version = "0.11.0-dev"
 Flask = "^1.0"
 Flask-Assets = ">=0.12"
 Flask-Babel = ">=0.11"
-Flask-DebugToolbar = ">=0.10"
 Flask-Login = ">=0.4"
 Flask-Mail = ">=0.9.1"
 Flask-Migrate = ">=2.0"
@@ -48,7 +47,7 @@ tqdm = "*"
 wtforms-sqlalchemy = "*"
 
 [package.source]
-reference = "fab07f25b76f8618116d4279cffff3837cd47552"
+reference = "7de7b6e14eac12bc596d4534b95148c7bac66250"
 type = "git"
 url = "https://github.com/abilian/abilian-core.git"
 [[package]]
@@ -464,7 +463,7 @@ Flask = "*"
 Jinja2 = ">=2.5"
 
 [[package]]
-category = "main"
+category = "dev"
 description = "A toolbar overlay for debugging Flask applications."
 name = "flask-debugtoolbar"
 optional = false
@@ -1431,7 +1430,7 @@ python-versions = ">=2.7"
 version = "0.3.3"
 
 [metadata]
-content-hash = "ea845e086f8eb4444f64e92dd9f61f36906c874ef545f5732fff0d0b3f64c85b"
+content-hash = "363aa86bbb9b67a037e0dd4d5be8cf2c13fbf2e4c6032d3b780062ae5bf8d2b2"
 python-versions = "^3.6"
 
 [metadata.hashes]
