@@ -16,8 +16,6 @@ pytest_plugins = [
 
 class NoCsrfTestConfig(TestConfig):
     WTF_CSRF_ENABLED = False
-    CSRF_ENABLED = False
-    # SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
 
 
 @fixture
