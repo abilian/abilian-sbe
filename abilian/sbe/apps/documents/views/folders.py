@@ -25,12 +25,13 @@ from abilian.services.security import READ, WRITE, Role, security
 from abilian.web import csrf, http, url_for
 from abilian.web.action import actions
 from abilian.web.views import default_view
-from flask import Markup, Response, current_app, flash, g, jsonify, \
+from flask import Markup, current_app, flash, g, jsonify, \
     make_response, redirect, render_template, render_template_string, \
     request, send_file, session
 from flask_login import current_user
 from sqlalchemy import func
 from werkzeug.exceptions import InternalServerError
+from werkzeug.wrappers import Response
 from xlwt import Workbook, easyxf
 
 from abilian.sbe.apps.communities.views import default_view_kw
@@ -796,8 +797,7 @@ def delete_multiple(folder):
     return redirect(url_for(folder))
 
 
-def move_multiple(folder):
-    # type: (Folder) -> Response
+def move_multiple(folder: Folder) -> Response:
     folders, docs = get_selected_objects(folder)
     objects = folders + docs
 
@@ -810,7 +810,7 @@ def move_multiple(folder):
         return redirect(current_folder_url)
 
     try:
-        target_folder_id = int(request.form.get("target-folder"))
+        target_folder_id = int(request.form["target-folder"])
     except ValueError:
         flash(_("Move elements: no destination folder selected. Aborted."), "error")
         return redirect(current_folder_url)
