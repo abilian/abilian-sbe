@@ -268,13 +268,13 @@ def extract_content(payload, marker):
 
 
 def validate_html(payload):
-    return bleach.clean(
-        payload,
-        tags=ALLOWED_TAGS,
-        attributes=ALLOWED_ATTRIBUTES,
-        styles=ALLOWED_STYLES,
-        strip=True,
-    ).strip()
+    args = {
+        "tags": ALLOWED_TAGS,
+        "attributes": ALLOWED_ATTRIBUTES,
+        "styles": ALLOWED_STYLES,
+        "strip": True,
+    }
+    return bleach.clean(payload, **args).strip()
 
 
 def add_paragraph(newpost):
@@ -375,8 +375,15 @@ def process(message, marker):
     elif marker in content["plain"]:
         newpost = extract_content(content["plain"], marker[:9])
         newpost = add_paragraph(newpost)
+    elif content["html"]:
+        newpost = content["html"]
+        newpost = add_paragraph(validate_html(newpost))
+        newpost = clean_html(newpost)
     else:
-        raise LookupError(f"No marker:{marker} in email")
+        newpost = content["plain"]
+        newpost = add_paragraph(newpost)
+    # else:
+    #     raise LookupError(f"No marker:{marker} in email")
 
     return newpost, attachments
 

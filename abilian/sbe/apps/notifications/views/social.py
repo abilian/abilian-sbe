@@ -12,8 +12,8 @@ from werkzeug.exceptions import MethodNotAllowed
 from abilian.sbe.apps.communities.security import require_admin
 from abilian.sbe.apps.notifications import TOKEN_SERIALIZER_NAME
 
-from . import notifications
 from ..tasks.social import make_message, send_daily_social_digest_to
+from . import notifications
 
 __all__ = ()
 
