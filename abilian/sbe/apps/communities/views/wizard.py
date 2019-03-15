@@ -15,7 +15,6 @@ from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
 from flask import current_app, flash, g, redirect, render_template, request, \
     url_for
-from six import PY2
 from validate_email import validate_email
 
 from .views import route, tab
@@ -96,10 +95,7 @@ def wizard_read_csv(csv_file):
     if file_extension != ".csv":
         return []
 
-    if PY2:
-        contents = csv.reader(csv_file, delimiter=b";")
-    else:
-        contents = csv.reader(csv_file, delimiter=";")
+    contents = csv.reader(csv_file, delimiter=";")
 
     new_accounts = []
 
