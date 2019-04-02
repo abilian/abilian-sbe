@@ -81,6 +81,11 @@ mypy-mypyc = "*"
 pre-commit = "*"
 pylint = "*"
 
+# Formatters
+isort = "*"
+black = { version = "*", allows-prereleases = true }
+
+
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
