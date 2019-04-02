@@ -654,8 +654,8 @@ def explore_archive(fd, uncompress=False):
             filepath = filename.split("/")
             filename = filepath.pop()
             zip_fd = archive.open(zipinfo, "r")
-            setattr(zip_fd, "filename", filename)
-            setattr(zip_fd, "content_type", None)
+            zip_fd.filename = filename
+            zip_fd.content_type = None
             yield filepath, zip_fd
 
 

@@ -199,7 +199,7 @@ class BaseCommunityView:
 
         image = self.obj.image
         if image and "community" in g:
-            setattr(image, "url", image_url(self.obj, s=500))
+            image.url = image_url(self.obj, s=500)
             kwargs["image"] = image
 
         return kwargs

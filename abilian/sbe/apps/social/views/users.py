@@ -121,7 +121,7 @@ def users_dt_json():
         # TODO: this should be done on the browser.
         user_url = url_for(".user", user_id=user.id)
         mugshot = user_photo_url(user, size=MUGSHOT_SIZE)
-        name = escape(getattr(user, "name") or "")
+        name = escape(user.name or "")
 
         cell0 = (
             '<a href="{url}"><img src="{src}" width="{size}" height="{size}">'

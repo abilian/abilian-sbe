@@ -126,7 +126,7 @@ class Repository:
             raise Exception("Can't delete root folder.")
 
         session = sa.orm.object_session(obj)
-        setattr(obj, "__path_before_delete", obj.path)  # for audit log.
+        obj.__path_before_delete = obj.path  # for audit log.
         parent = obj.parent
         collection = parent.subfolders if obj.is_folder else parent.documents
         session.delete(obj)
