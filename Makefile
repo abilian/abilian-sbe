@@ -196,5 +196,5 @@ update-deps:
 	poetry update
 
 sync-deps:
-	pip install -U pip pip-tools setuptools wheel
+	pip install -U pip setuptools wheel
 	poetry install
