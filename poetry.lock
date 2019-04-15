@@ -1,13 +1,13 @@
 [[package]]
 category = "main"
-description = ""
+description = "A framework for enterprise applications (CRM, ERP, collaboration...), based on Flask and SQLAlchemy"
 name = "abilian-core"
 optional = false
-python-versions = "^3.6"
-version = "0.11.0-dev"
+python-versions = ">=3.6,<4.0"
+version = "0.11.0"
 
 [package.dependencies]
-Flask = "^1.0"
+Flask = ">=1.0,<2.0"
 Flask-Assets = ">=0.12"
 Flask-Babel = ">=0.11"
 Flask-Login = ">=0.4"
@@ -17,14 +17,14 @@ Flask-Talisman = ">=0.6"
 Flask-WTF = ">=0.12,<0.13"
 MarkupSafe = ">=0.21"
 PyYAML = "*"
-SQLAlchemy = "^1.1"
+SQLAlchemy = ">=1.1,<2.0"
 WTForms-Alchemy = ">=0.12"
 WTForms-Components = ">=0.10"
-Whoosh = "^2.5"
+Whoosh = ">=2.5,<3.0"
 alembic = ">=0.9"
 bcrypt = "*"
 bleach = ">=2"
-celery = "~4"
+celery = ">=4,<5"
 clamd = "*"
 closure = "*"
 cssmin = "*"
@@ -36,20 +36,16 @@ pandas = ">=0.17"
 pathlib = "*"
 pillow = "*"
 pygeoip = "*"
-python-dateutil = "^2.4.0"
+python-dateutil = ">=2.4.0,<3.0.0"
 python-deprecated = "*"
 python-magic = "*"
-redis = "~3"
+redis = ">=3,<4"
 sentry-sdk = "*"
 six = "*"
 sqlparse = "*"
 tqdm = "*"
 wtforms-sqlalchemy = "*"
 
-[package.source]
-reference = "26d77c27f4d3075c2c626123d558dc4744bb7f5e"
-type = "git"
-url = "https://github.com/abilian/abilian-core.git"
 [[package]]
 category = "dev"
 description = "A configurable sidebar-enabled Sphinx theme"
@@ -1507,11 +1503,11 @@ python-versions = ">=2.7"
 version = "0.3.3"
 
 [metadata]
-content-hash = "9d71613f32176f34199dda9470c9a02352d975a84c2291976456447b1e1d1055"
+content-hash = "b6c2e67863facea6d4098997850ccea063c801b9851d086be10471c38702d92a"
 python-versions = "^3.6"
 
 [metadata.hashes]
-abilian-core = []
+abilian-core = ["6007668a73296e4e488a476f22ce1f6699b615d13d37cc46f44b8d9c7141a5f1", "a5d634cb12a4d61e0f5e768b404d4bfa4bb1e7405325e8609d850c5d96c63f2a"]
 alabaster = ["446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359", "a661d72d58e6ea8a57f7a86e37d86716863ee5e92788398526d58b26a4e4dc02"]
 alembic = ["505d41e01dc0c9e6d85c116d0d35dbb0a833dcb490bf483b75abeb06648864e8"]
 amqp = ["043beb485774ca69718a35602089e524f87168268f0d1ae115f28b88d27f92d7", "35a3b5006ca00b21aaeec8ceea07130f07b902dd61bfe42815039835f962f5f1"]
