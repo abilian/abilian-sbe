@@ -1,12 +1,18 @@
 Changelog for Abilian SBE
 =========================
 
-0.4.25 (2018-01-07)
+0.5.0 (2019-04-15)
+-------------------
+
+- Drop Python 2 support and cleanup code accordingly.
+- Various fixes.
+
+0.4.25 (2019-01-07)
 -------------------
 
 - "Reply by email" fixes
 
-0.4.22 (2018-01-02)
+0.4.22 (2019-01-02)
 -------------------
 
 - Use Poetry for packaging

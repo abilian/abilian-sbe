@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abilian-sbe"
-version = "0.5.0-dev"
+version = "0.5.0"
 description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
 license = "LGPL"
