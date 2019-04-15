@@ -185,11 +185,9 @@ update-pot:
 
 
 release:
-	rm -rf /tmp/abilian-sbe
-	git clone . /tmp/abilian-sbe
-	cd /tmp/abilian-sbe ; python setup.py sdist
-	# cd /tmp/abilian-sbe ; twine upload --repository-url https://test.pypi.org/legacy/ dist/*
-	cd /tmp/abilian-sbe ; twine upload dist/*
+	maketag
+	git push --tags
+	poetry publish --build
 
 update-deps:
 	pip install -U pip setuptools wheel
