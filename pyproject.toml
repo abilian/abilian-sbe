@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abilian-sbe"
-version = "0.5.1"
+version = "0.5.2"
 description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
 license = "LGPL"
@@ -77,15 +77,13 @@ flake8-super-call = "*"
 flake8-tidy-imports = "*"
 mastool = "*"
 mccabe = "*"
-mypy-mypyc = "*"
 pre-commit = "*"
-pylint = "*"
 
 # Formatters
 isort = "*"
 black = { version = "*", allows-prereleases = true }
 
 
-[build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+# [build-system]
+# requires = ["poetry>=0.12"]
+# build-backend = "poetry.masonry.api"

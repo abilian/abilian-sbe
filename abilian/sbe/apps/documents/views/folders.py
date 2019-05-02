@@ -431,7 +431,7 @@ def permissions_export(folder_id):
 
     # styling
     # from xlwt doc: width unit is 1/256 of '0' from first font in excel file
-    for c, width in enumerate((c[1] for c in cols)):
+    for c, width in enumerate(c[1] for c in cols):
         if width is not None:
             ws.col(c).width = 256 * width
 
@@ -444,7 +444,7 @@ def permissions_export(folder_id):
     header_style = easyxf(
         "font: bold true;" "alignment: horizontal center, vertical center;"
     )
-    for c, val in enumerate((c[0] for c in cols)):
+    for c, val in enumerate(c[0] for c in cols):
         ws.write(0, c, val, header_style)
 
     # data
@@ -497,7 +497,7 @@ def iter_permissions(folder, user):
     community = folder.path
     local_roles = frozenset(folder.get_local_roles_assignments())
     inherited_roles = frozenset(
-        (folder.get_inherited_roles_assignments() if folder.inherit_security else [])
+        folder.get_inherited_roles_assignments() if folder.inherit_security else []
     )
 
     result = {}
