@@ -77,9 +77,7 @@ flake8-super-call = "*"
 flake8-tidy-imports = "*"
 mastool = "*"
 mccabe = "*"
-mypy-mypyc = "*"
 pre-commit = "*"
-pylint = "*"
 
 # Formatters
 isort = "*"
