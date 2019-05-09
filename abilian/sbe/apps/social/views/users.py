@@ -17,7 +17,6 @@ from abilian.web.views import ObjectEdit, default_view
 from abilian.web.views.images import user_photo_url
 from flask import Response, flash, jsonify, redirect, render_template, request
 from flask_login import current_user
-from six import text_type
 from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError
 

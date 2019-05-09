@@ -10,7 +10,6 @@ from abilian.web import url_for
 from abilian.web.action import actions
 from flask import current_app, g, render_template
 from flask_babel import format_date
-from six import text_type
 from sqlalchemy.orm import joinedload
 
 from abilian.sbe.apps.communities.blueprint import Blueprint

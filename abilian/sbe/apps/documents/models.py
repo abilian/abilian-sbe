@@ -25,7 +25,6 @@ from abilian.services.security import Admin, Anonymous, InheritSecurity, \
     security
 from flask import current_app, json, url_for
 from flask_login import current_user
-from six import text_type
 from sqlalchemy.event import listen, listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, foreign, relationship, remote

@@ -4,7 +4,6 @@ module."""
 from unittest import mock
 
 import pytest
-import six
 import sqlalchemy as sa
 from abilian.core.entities import Entity
 from abilian.core.models.subjects import User

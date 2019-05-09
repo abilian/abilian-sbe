@@ -23,7 +23,6 @@ from flask import current_app, g
 from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
-from six import text_type
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 from .models import Post, PostAttachment, Thread

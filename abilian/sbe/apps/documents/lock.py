@@ -6,7 +6,6 @@ import dateutil.parser
 from abilian.core.util import utcnow
 from flask import current_app
 from flask_login import current_user
-from six import raise_from, text_type
 
 DEFAULT_LIFETIME = 3600
 
