@@ -13,13 +13,6 @@ from .tasks import check_maildir, process_email
 logger = logging.getLogger(__name__)
 
 
-# @manager.option(
-#     "-f",
-#     "--filename",
-#     help="email filename; defaults to standard input",
-#     default="-",
-#     required=False,
-# )
 @click.command()
 @with_appcontext
 def inject_email(filename="-"):

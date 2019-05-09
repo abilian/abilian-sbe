@@ -33,14 +33,13 @@ from sqlalchemy import orm
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from whoosh.searching import Hit
 
-from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.models import Document
 
 from ..actions import register_actions
 from ..blueprint import Blueprint
 from ..forms import CommunityForm
 from ..models import Community, Membership
-from ..security import require_admin, require_manage
+from ..security import is_manager, require_admin, require_manage
 
 __all__ = ["communities"]
 
@@ -210,11 +209,8 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
     decorators = views.ObjectEdit.decorators + (require_admin, tab("settings"))
 
     def breadcrumb(self):
-        return BreadcrumbItem(
-            label=_("Settings"),
-            icon="cog",
-            url=Endpoint("communities.settings", community_id=g.community.slug),
-        )
+        url = Endpoint("communities.settings", community_id=g.community.slug)
+        return BreadcrumbItem(label=_("Settings"), icon="cog", url=url)
 
     def before_populate_obj(self):
         form = self.form
