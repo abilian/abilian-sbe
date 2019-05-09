@@ -14,7 +14,9 @@ include = ["abilian/*", "abilian/**/*"]
 python = "^3.6"
 
 # Abilian Core
-abilian-core = ">=0.11"
+abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
+# abilian-core = ">=0.11"
+
 
 # Temp
 wtforms = "<2.2"
