@@ -47,7 +47,7 @@ tqdm = "*"
 wtforms-sqlalchemy = "*"
 
 [package.source]
-reference = "e08d3047974e4c87a82c515953ee913ee7a1bae0"
+reference = "54aa0fb3d4faf88fa43c9eeb44c87ed9acd1226c"
 type = "git"
 url = "https://github.com/abilian/abilian-core.git"
 [[package]]
@@ -446,7 +446,7 @@ description = "A simple framework for building complex web applications."
 name = "flask"
 optional = false
 python-versions = "*"
-version = "1.0.2"
+version = "1.0.3"
 
 [package.dependencies]
 Jinja2 = ">=2.10"
@@ -534,7 +534,7 @@ description = "SQLAlchemy database migrations for Flask applications using Alemb
 name = "flask-migrate"
 optional = false
 python-versions = "*"
-version = "2.4.0"
+version = "2.5.1"
 
 [package.dependencies]
 Flask = ">=0.9"
@@ -629,7 +629,7 @@ description = "Read metadata from Python packages"
 name = "importlib-metadata"
 optional = false
 python-versions = ">=2.7,!=3.0,!=3.1,!=3.2,!=3.3"
-version = "0.12"
+version = "0.13"
 
 [package.dependencies]
 zipp = ">=0.5"
@@ -1109,14 +1109,14 @@ category = "dev"
 description = "Python HTTP for Humans."
 name = "requests"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
-version = "2.21.0"
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
+version = "2.22.0"
 
 [package.dependencies]
 certifi = ">=2017.4.17"
 chardet = ">=3.0.2,<3.1.0"
 idna = ">=2.5,<2.9"
-urllib3 = ">=1.21.1,<1.25"
+urllib3 = ">=1.21.1,<1.25.0 || >1.25.0,<1.25.1 || >1.25.1,<1.26"
 
 [[package]]
 category = "dev"
@@ -1135,7 +1135,7 @@ description = "Python client for Sentry (https://getsentry.com)"
 name = "sentry-sdk"
 optional = false
 python-versions = "*"
-version = "0.7.14"
+version = "0.8.0"
 
 [package.dependencies]
 blinker = ">=1.1"
@@ -1319,7 +1319,7 @@ description = "HTTP library with thread-safe connection pooling, file post, and 
 name = "urllib3"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, <4"
-version = "1.24.3"
+version = "1.25.2"
 
 [[package]]
 category = "main"
@@ -1335,7 +1335,7 @@ description = "Python Data Validation for Humans™."
 name = "validators"
 optional = false
 python-versions = "*"
-version = "0.12.6"
+version = "0.13.0"
 
 [package.dependencies]
 decorator = ">=3.4.0"
@@ -1464,11 +1464,11 @@ version = "1.3.0"
 
 [[package]]
 category = "dev"
-description = "Pathlib-compatible object wrapper for zip files"
+description = "Backport of pathlib-compatible object wrapper for zip files"
 name = "zipp"
 optional = false
 python-versions = ">=2.7"
-version = "0.5.0"
+version = "0.5.1"
 
 [metadata]
 content-hash = "8beb814eaefd894d0c53daa5eadfa3a20831bb6046c45d9a6586fc359f6026e2"
@@ -1515,14 +1515,14 @@ flake8-mypy = ["47120db63aff631ee1f84bac6fe8e64731dc66da3efc1c51f85e15ade4a3ba18
 flake8-pytest = ["61686128a79e1513db575b2bcac351081d5a293811ddce2d5dfc25e8c762d33e", "b4d6703f7d7b646af1e2660809e795886dd349df11843613dbe6515efa82c0f3"]
 flake8-super-call = ["0486ebfb24e3bf104b1c1d7f823a51ebcefb3a26108b25cb3129a9e8a57ef145", "61cfcd0c8ad78e1cf1f4d1225cb7513666ab9c5a9900a238b2c4abee8ad9a7de"]
 flake8-tidy-imports = ["1c476aabc6e8db26dc75278464a3a392dba0ea80562777c5f13fd5cdf2646154", "b3f5b96affd0f57cacb6621ed28286ce67edaca807757b51227043ebf7b136a1"]
-flask = ["2271c0070dbcb5275fad4a82e29f23ab92682dc45f9dfbc22c02ba9b9322ce48", "a080b744b7e345ccfcbc77954861cb05b3c63786e93f2b3875e0913d44b43f05"]
+flask = ["ad7c6d841e64296b962296c2c2dabc6543752985727af86a975072dea984b6f3", "e7d32475d1de5facaa55e3958bc4ec66d3762076b074296aa50ef8fdc5b9df61"]
 flask-assets = ["6031527b89fb3509d1581d932affa5a79dd348cfffb58d0aef99a43461d47847"]
 flask-babel = ["316ad183e42003f3922957fa643d0a1e8e34a0f0301a88c3a8f605bc37ba5c86"]
 flask-debugtoolbar = ["3d9657bc0c3633ace429e3ff451742bb59d1b7a7b95c9eb23a65ac9be2812959", "ec810083123aae0632eb32ba11e1cb4cdace81e7ce6c5009dd06c5204afbce52"]
 flask-linktester = ["69bc5dc67448129f1a3462665705743475b2e2ff241994b12c86a7103c7c34ff"]
 flask-login = ["c815c1ac7b3e35e2081685e389a665f2c74d7e077cb93cecabaea352da4752ec"]
 flask-mail = ["22e5eb9a940bf407bcf30410ecc3708f3c56cc44b29c34e1726fe85006935f41"]
-flask-migrate = ["a361578cb829681f860e4de5ed2c48886264512f0c16144e404c36ddc95ab49c", "c24d105c5d6cc670de20f8cbfb909e04f4e04b8784d0df070005944de1f21549"]
+flask-migrate = ["a08a92eaf2c5b1a49280bdc9faa1ac1d3538aeb65945adfdd45cc4789499b0d4", "e2217ff18b98df27adbf6cc51eaa5f074c9e22f06074b47ebc7b29d2f545eccc"]
 flask-sqlalchemy = ["c5244de44cc85d2267115624d83faef3f9e8f088756788694f305a5d5ad137c5"]
 flask-talisman = ["5a88c0ee2b0d509610ae74cbd7059d91228ad56ab3e955813428fe8e63a3e195", "85c6688bcbc8de6c37b86bfb60db2da295ee1935c2ed27ca16396792ab45a3ef"]
 flask-wtf = ["99c5d75663d6bfcbf4dd0d71ffcb7313f64ae90e6f89e09ad99080107033e8b6", "bd99316c97ed1d1cb90b8f0c242c86420a891a6a2058f20717e424bf5b0bb80e"]
@@ -1531,7 +1531,7 @@ hyperlink = ["4288e34705da077fada1111a24a0aa08bb1e76699c9ce49876af722441845654",
 identify = ["432c548d6138cb57a3d8f62f079a025a29b8ae34a50dd3b496bbf661818f2bc0", "d4401d60bf1938aa3074a352a5cc9044107edf11a6fedd3a1db172c141619b81"]
 idna = ["c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407", "ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"]
 imagesize = ["3f349de3eb99145973fefb7dbe38554414e5c30abd0c8e4b970a7c9d09f3a1d8", "f3832918bc3c66617f92e35f5d70729187676313caa60c187eb0f28b8fe5e3b5"]
-importlib-metadata = ["2f2e54cbf6b06b16351e4c40a6adb0860cab6cfb95a0c0fcb58bb789c4b450f5", "37bbea81dec44d1ff72d58a1b5c1599a9f3436537f33e9e26f276610064c4830"]
+importlib-metadata = ["0e375a4c177090292988d1c2f997c7c2467d908c1adbed3e08fb511486c85457", "440815529340fb7fdd6a83ebf4258cc2860fb3770d37b52875e37c6f509a4cd6"]
 importlib-resources = ["6e2783b2538bd5a14678284a3962b0660c715e5a0f10243fd5e00a4b5974f50b", "d3279fd0f6f847cced9f7acc19bd3e5df54d34f93a2e7bb5f238f81545787078"]
 infinity = ["dc4aa138d7e366fc00d2e741e32c78a0fecd16b74f8daeb3f7408b459668005c"]
 intervals = ["37921da1407a5e9384e8e1350cfb8500f8d0d69fc43d03d01a4fdc6e7a7c7166"]
@@ -1579,9 +1579,9 @@ python-magic = ["f2674dcfad52ae6c49d4803fa027809540b130db1dec928cfbb924031683137
 pytz = ["303879e36b721603cc54604edcac9d20401bdbe31e1e4fdee5b9f98d5d31dfda", "d747dd3d23d77ef44c6a3526e274af6efeb0a6f1afd5a69ba4d5be4098c8e141"]
 pyyaml = ["1adecc22f88d38052fb787d959f003811ca858b799590a5eaa70e63dca50308c", "436bc774ecf7c103814098159fbb84c2715d25980175292c648f2da143909f95", "460a5a4248763f6f37ea225d19d5c205677d8d525f6a83357ca622ed541830c2", "5a22a9c84653debfbf198d02fe592c176ea548cccce47553f35f466e15cf2fd4", "7a5d3f26b89d688db27822343dfa25c599627bc92093e788956372285c6298ad", "9372b04a02080752d9e6f990179a4ab840227c6e2ce15b95e1278456664cf2ba", "a5dcbebee834eaddf3fa7366316b880ff4062e4bcc9787b78c7fbb4a26ff2dd1", "aee5bab92a176e7cd034e57f46e9df9a9862a71f8f37cad167c6fc74c65f5b4e", "c51f642898c0bacd335fc119da60baae0824f2cde95b0330b56c0553439f0673", "c68ea4d3ba1705da1e0d85da6684ac657912679a649e8868bd850d2c299cce13", "e23d0cc5299223dcc37885dae624f382297717e459ea24053709675a976a3e19"]
 redis = ["6946b5dca72e86103edc8033019cc3814c031232d339d5f4533b02ea85685175", "8ca418d2ddca1b1a850afa1680a7d2fd1f3322739271de4b704e0d4668449273"]
-requests = ["502a824f31acdacb3a35b6690b5fbf0bc41d63a24a45c4004352b0242707598e", "7bf2a778576d825600030a110f3c0e3e8edc51dfaafe1c146e39a2027784957b"]
+requests = ["11e007a8a2aa0323f5a921e9e6a2d7e4e67d9877e85773fba9ba6419025cbeb4", "9cf5292fcd0f598c671cfc1e0d7d1a7f13bb8085e9a590f48c010551dc6c4b31"]
 restructuredtext-lint = ["97b3da356d5b3a8514d8f1f9098febd8b41463bed6a1d9f126cf0a048b6fd908"]
-sentry-sdk = ["5818289868755cfea74e61e532b4b0d11d523901041338d473277db91d4d8173", "b50948bbb553eef11ba650db858e31f5bb7c8d821a9d7338a01d01487d964e8c"]
+sentry-sdk = ["e308129104567cee9f8848ed5098de17cbccc19bd21417c8980d47f80f1409ec", "f5819df450d7b0696be69a0c6d70a09e4890a3844ee8ccb7a461794135bd5965"]
 six = ["3350809f0555b11f552448330d0b52d5f24c91a322ea4a15ef22629740f3761c", "d16a0141ec1a18405cd4ce8b4613101da75da0e9a7aec5bdd4fa804d0e0eba73"]
 snowballstemmer = ["919f26a68b2c17a7634da993d91339e288964f93c274f1343e3bbbe2096e1128", "9f3bcd3c401c3e862ec0ebe6d2c069ebc012ce142cce209c098ccb5b09136e89"]
 sphinx = ["423280646fb37944dd3c85c58fb92a20d745793a9f6c511f59da82fa97cd404b", "de930f42600a4fef993587633984cc5027dedba2464bcf00ddace26b40f8d9ce"]
@@ -1600,9 +1600,9 @@ toml = ["229f81c57791a41d65e399fc06bf0848bab550a9dfd5ed66df18ce5f05e73d5c", "235
 toolz = ["929f0a7ea7f61c178bd951bdae93920515d3fbdbafc8e6caf82d752b9b3b31c9"]
 tqdm = ["0a860bf2683fdbb4812fe539a6c22ea3f1777843ea985cb8c3807db448a0f7ab", "e288416eecd4df19d12407d0c913cbf77aa8009d7fddb18f632aded3bdbdda6b"]
 typed-ast = ["132eae51d6ef3ff4a8c47c393a4ef5ebf0d1aecc96880eb5d6c8ceab7017cc9b", "18141c1484ab8784006c839be8b985cfc82a2e9725837b0ecfa0203f71c4e39d", "2baf617f5bbbfe73fd8846463f5aeafc912b5ee247f410700245d68525ec584a", "3d90063f2cbbe39177e9b4d888e45777012652d6110156845b828908c51ae462", "4304b2218b842d610aa1a1d87e1dc9559597969acc62ce717ee4dfeaa44d7eee", "4983ede548ffc3541bae49a82675996497348e55bafd1554dc4e4a5d6eda541a", "5315f4509c1476718a4825f45a203b82d7fdf2a6f5f0c8f166435975b1c9f7d4", "6cdfb1b49d5345f7c2b90d638822d16ba62dc82f7616e9b4caa10b72f3f16649", "7b325f12635598c604690efd7a0197d0b94b7d7778498e76e0710cd582fd1c7a", "8d3b0e3b8626615826f9a626548057c5275a9733512b137984a68ba1598d3d2f", "8f8631160c79f53081bd23446525db0bc4c5616f78d04021e6e434b286493fd7", "912de10965f3dc89da23936f1cc4ed60764f712e5fa603a09dd904f88c996760", "b010c07b975fe853c65d7bbe9d4ac62f1c69086750a574f6292597763781ba18", "c908c10505904c48081a5415a1e295d8403e353e0c14c42b6d67f8f97fae6616", "c94dd3807c0c0610f7c76f078119f4ea48235a953512752b9175f9f98f5ae2bd", "ce65dee7594a84c466e79d7fb7d3303e7295d16a83c22c7c4037071b059e2c21", "eaa9cfcb221a8a4c2889be6f93da141ac777eb8819f077e1d09fb12d00a09a93", "f3376bc31bad66d46d44b4e6522c5c21976bf9bca4ef5987bb2bf727f4506cbb", "f9202fa138544e13a4ec1a6792c35834250a85958fde1251b6a22e07d1260ae7"]
-urllib3 = ["2393a695cd12afedd0dcb26fe5d50d0cf248e5a66f75dbd89a3d4eb333a61af4", "a637e5fae88995b256e3409dc4d52c2e2e0ba32c42a6365fee8bbd2238de3cfb"]
+urllib3 = ["a53063d8b9210a7bdec15e7b272776b9d42b2fd6816401a0d43006ad2f9902db", "d363e3607d8de0c220d31950a8f38b18d5ba7c0830facd71a1c6b1036b7ce06c"]
 validate-email = ["784719dc5f780be319cdd185dc85dd93afebdb6ebb943811bc4c7c5f9c72aeaf"]
-validators = ["f6aca085caf9e13d5a0fd8ddb3afbea2541c0ca9477b1fb8098c797dd812ff64"]
+validators = ["ea9bf8bf22aa692c205e12830d90b3b93950e5122d22bed9eb2f2fece0bba298"]
 vine = ["133ee6d7a9016f177ddeaf191c1f58421a1dcc6ee9a42c58b34bed40e1d2cd87", "ea4947cc56d1fd6f2095c8d543ee25dad966f78692528e68b4fada11ba3f98af"]
 virtualenv = ["99acaf1e35c7ccf9763db9ba2accbca2f4254d61d1912c5ee364f9cc4a8942a0", "fe51cdbf04e5d8152af06c075404745a7419de27495a83f0d72518ad50be3ce8"]
 wcwidth = ["3df37372226d6e63e1b1e1eda15c594bca98a22d33a23832a90998faa96bc65e", "f4ebe71925af7b40a864553f761ed559b43544f8f71746c2d756c7fe788ade7c"]
@@ -1616,4 +1616,4 @@ wtforms-alchemy = ["c491755380490c5c016f04e62949b22056f915160f54d0d1103c76b944c1
 wtforms-components = ["4a7751fc12dc4e4b2ef5700973296b5368094dcdf85c2808d2faff2c8e8f4caa"]
 wtforms-sqlalchemy = ["60a180a358cfdf59ca823af356f5912b59a39ee64750dd05147c923be476eae5", "d36496b6d17ac6748839b80334fda2d26050e8885c541100e2ff9c83333f9633"]
 xlwt = ["a082260524678ba48a297d922cc385f58278b8aa68741596a87de01a9c628b2e", "c59912717a9b28f1a3c2a98fd60741014b06b043936dcecbc113eaaada156c88"]
-zipp = ["46dfd547d9ccbf8bdc26ecea52818046bb28509f12bb6a0de1cd66ab06e9a9be", "d7ac25f895fb65bff937b381353c14eb1fa23d35f40abd72a5342cd57eb57fd1"]
+zipp = ["8c1019c6aad13642199fbe458275ad6a84907634cc9f0989877ccc4a2840139d", "ca943a7e809cc12257001ccfb99e3563da9af99d52f261725e96dfe0f9275bc3"]
