@@ -545,8 +545,7 @@ def iter_permissions(folder, user):
     )
 
     for subfolder in subfolders:
-        for permission in iter_permissions(subfolder, user):
-            yield permission
+        yield from iter_permissions(subfolder, user)
 
 
 #

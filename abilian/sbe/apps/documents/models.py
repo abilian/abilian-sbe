@@ -402,8 +402,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
                 if isinstance(principal, User):
                     yield principal
                 else:
-                    for user in itertools.chain(principal.members, principal.admins):
-                        yield user
+                    yield from itertools.chain(principal.members, principal.admins)
 
         members = set(_iter_users(itertools.chain(local_roles, inherited_roles)))
         members = sorted(members, key=lambda u: (u.last_name, u.first_name))
