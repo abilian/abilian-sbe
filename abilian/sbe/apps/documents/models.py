@@ -398,7 +398,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
         )
 
         def _iter_users(roles):
-            for principal, user in roles:
+            for principal, _user in roles:
                 if isinstance(principal, User):
                     yield principal
                 else:

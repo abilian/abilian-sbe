@@ -1,4 +1,4 @@
-Core developers:
+Core developers (present and past):
 
 - Stefane Fermigier
 - Bertrand Mathieu
@@ -16,4 +16,3 @@ Translators:
 Pictures:
 
 "Community": http://www.flickr.com/photos/eschipul/ (CC BY)
-
