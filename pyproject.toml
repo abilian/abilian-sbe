@@ -51,6 +51,7 @@ pytest-randomly = "*"
 # Coverage
 coverage = ">=4.1"
 pytest-cov = "*"
+typeguard = "*"
 
 # Python clone of Foreman, useful to test Heroku config locally
 honcho = "*"
