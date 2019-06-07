@@ -78,6 +78,7 @@ flake8-pytest = "*"
 flake8-super-call = "*"
 flake8-tidy-imports = "*"
 mastool = "*"
+pyannotate = "^1.0"
 mccabe = "*"
 pre-commit = "*"
 
