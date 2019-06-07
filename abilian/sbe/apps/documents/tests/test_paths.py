@@ -2,7 +2,7 @@
 """"""
 from itertools import count
 
-from ..models import PathAndSecurityIndexable
+from abilian.sbe.apps.documents.models import PathAndSecurityIndexable
 
 
 def get_obj():
@@ -20,12 +20,12 @@ class MockPath(PathAndSecurityIndexable):
         self.parent = parent
 
 
-def test_iter_to_root():
+def test_iter_to_root() -> None:
     obj = get_obj()
     assert [o.id for o in obj._iter_to_root()] == [3, 2, 1, 0]
     assert [o.id for o in obj._iter_to_root(skip_self=True)] == [2, 1, 0]
 
 
-def test_indexable_parent_ids():
+def test_indexable_parent_ids() -> None:
     obj = get_obj()
     assert obj._indexable_parent_ids == "/0/1/2"

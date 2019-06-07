@@ -1,5 +1,6 @@
 # coding=utf-8
 """Parses and produces XML documents specified by the standard."""
+from typing import List
 
 from lxml import etree, objectify
 from lxml.builder import ElementMaker
@@ -8,15 +9,15 @@ E = ElementMaker(namespace="DAV:")
 
 
 class Propfind:
-    def __init__(self, xml=""):
+    def __init__(self, xml: bytes = b"") -> None:
         self.mode = ""
-        self.prop_names = []
+        self.prop_names: List[str] = []
 
         if not xml:
-            xml = "<D:propfind xmlns:D='DAV:'><D:allprop/></D:propfind>"
+            xml = b"<D:propfind xmlns:D='DAV:'><D:allprop/></D:propfind>"
         self.parse(xml)
 
-    def parse(self, xml):
+    def parse(self, xml: bytes) -> None:
         root = objectify.fromstring(xml)
 
         child = root.getchildren()[0]
@@ -28,14 +29,14 @@ class Propfind:
 
 
 class MultiStatus:
-    def __init__(self):
-        self.responses = []
+    def __init__(self) -> None:
+        self.responses: List[Response] = []
 
     def add_response_for(self, href, obj, property_list):
         response = Response(href, obj, property_list)
         self.responses.append(response)
 
-    def to_string(self):
+    def to_string(self) -> bytes:
         return etree.tostring(self.to_xml(), pretty_print=True)
 
     def to_xml(self):

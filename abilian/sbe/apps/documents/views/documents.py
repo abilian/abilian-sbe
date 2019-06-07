@@ -25,10 +25,11 @@ from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.sbe.apps.communities.common import object_viewers
 from abilian.sbe.apps.communities.views import default_view_kw
+from abilian.sbe.apps.documents.models import Document
+from abilian.sbe.apps.documents.repository import repository
+from abilian.sbe.apps.documents.tasks import convert_document_content, \
+    preview_document
 
-from ..models import Document
-from ..repository import repository
-from ..tasks import convert_document_content, preview_document
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
     check_write_access, edit_object, get_document, get_folder, match
 from .views import blueprint
@@ -42,7 +43,7 @@ __all__ = ()
 
 @default_view(blueprint, Document, id_attr="doc_id", kw_func=default_view_kw)
 @route("/doc/<int:doc_id>")
-def document_view(doc_id):
+def document_view(doc_id: int) -> str:
     doc = get_document(doc_id)
     check_read_access(doc)
     doc.ensure_antivirus_scheduled()

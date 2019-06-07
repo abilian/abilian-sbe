@@ -42,11 +42,11 @@ class Lock:
         return Lock(**d)
 
     @property
-    def lifetime(self):
+    def lifetime(self) -> int:
         return current_app.config.get("SBE_LOCK_LIFETIME", DEFAULT_LIFETIME)
 
     @property
-    def expired(self):
+    def expired(self) -> bool:
         return (utcnow() - self.date) > timedelta(seconds=self.lifetime)
 
     def is_owner(self, user=None):

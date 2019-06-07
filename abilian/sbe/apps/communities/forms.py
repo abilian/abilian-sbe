@@ -18,7 +18,7 @@ from wtforms.validators import ValidationError, data_required, optional
 from .models import Community
 
 
-def strip(s):
+def strip(s: str) -> str:
     return s.strip()
 
 

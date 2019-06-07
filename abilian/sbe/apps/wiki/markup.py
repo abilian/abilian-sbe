@@ -18,7 +18,7 @@ class UrlBuilder:
     def __init__(self, page):
         self.page = page
 
-    def build(self, label, base, end):
+    def build(self, label: str, base: str, end: str) -> str:
         label = label.strip()
         return url_for(".page", community_id=self.page.community.slug, title=label)
 

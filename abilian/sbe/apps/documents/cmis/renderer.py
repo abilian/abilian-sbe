@@ -1,4 +1,6 @@
 # coding=utf-8
+from typing import Any
+
 from flask import render_template
 
 # TEMP
@@ -11,7 +13,7 @@ class Feed:
         self.object = object
         self.collection = collection
 
-    def to_xml(self, **options):
+    def to_xml(self, **options: Any) -> str:
         ctx = {
             "ROOT": ROOT,
             "object": self.object,
@@ -25,7 +27,7 @@ class Entry:
     def __init__(self, obj):
         self.obj = obj
 
-    def to_xml(self, **options):
+    def to_xml(self, **options: Any) -> str:
         ctx = {
             "ROOT": ROOT,
             "folder": self.obj,

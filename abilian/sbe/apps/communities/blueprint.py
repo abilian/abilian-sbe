@@ -1,5 +1,7 @@
 # coding=utf-8
 """"""
+from typing import Any
+
 from abilian.i18n import _l
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
@@ -22,7 +24,7 @@ class Blueprint(BaseBlueprint):
     _BASE_URL_PREFIX = "/communities"
     _ROUTE_PARAM = "<string:community_id>"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: str, **kwargs: Any) -> None:
         url_prefix = kwargs.get("url_prefix", "")
 
         if kwargs.pop("set_community_id_prefix", True):
@@ -45,7 +47,7 @@ class Blueprint(BaseBlueprint):
         self.before_request(check_access)
 
 
-def check_access():
+def check_access() -> None:
     if hasattr(g, "community"):
         # communities.index is not inside a community, for example
         security.check_access(g.community)

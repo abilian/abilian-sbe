@@ -287,7 +287,7 @@ def test_document_send_by_mail(app, community, client, req_ctx):
         ascii_doc = folder.children[0]
         unicode_doc = folder.children[1]
 
-        def get_send_url(doc_id):
+        def get_send_url(doc_id: int) -> str:
             return url_for(
                 "documents.document_send", community_id=community.slug, doc_id=doc_id
             )

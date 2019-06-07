@@ -11,7 +11,7 @@ from abilian.sbe.apps.documents import lock
 from abilian.sbe.apps.documents.lock import Lock
 
 
-def test_lock():
+def test_lock() -> None:
     date = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)
     l = Lock(user_id=3, user="Joe Smith", date=date)
     d = l.as_dict()

@@ -21,10 +21,10 @@ from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError
 
 from abilian.sbe.apps.communities.models import Membership
+from abilian.sbe.apps.social.forms import UserProfileForm, UserProfileViewForm
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.views import get_recent_entries
 
-from ..forms import UserProfileForm, UserProfileViewForm
 from .social import social
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def make_tabs(user):
 
 
 @social.route("/users/")
-def users():
+def users() -> str:
     query = request.args.get("query")
 
     if query:
@@ -146,7 +146,7 @@ def users_dt_json():
 
 @social.route("/users/<int:user_id>")
 @default_view(social, User, "user_id")
-def user(user_id):
+def user(user_id: int) -> str:
     security = get_service("security")
     user = User.query.get(user_id)
 

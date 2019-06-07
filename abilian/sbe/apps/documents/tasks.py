@@ -32,7 +32,7 @@ def get_document(document_id, session=None):
 
 
 @shared_task
-def process_document(document_id):
+def process_document(document_id: int) -> None:
     """Run document processing chain."""
     with get_document(document_id) as (session, document):
         if document is None:
@@ -67,7 +67,7 @@ def antivirus_scan(document_id):
 
 
 @shared_task
-def preview_document(document_id):
+def preview_document(document_id: int) -> None:
     """Compute the document preview images with its default preview size."""
     with get_document(document_id) as (session, document):
         if document is None:
@@ -89,7 +89,7 @@ def preview_document(document_id):
 
 
 @shared_task
-def convert_document_content(document_id):
+def convert_document_content(document_id: int) -> None:
     """Convert document content."""
     with get_document(document_id) as (session, doc):
         if doc is None:

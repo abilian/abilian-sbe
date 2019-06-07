@@ -4,6 +4,7 @@ import logging
 import time
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import sqlalchemy as sa
 from abilian.core.entities import Entity
@@ -71,7 +72,7 @@ def community_content(cls):
     """
     cls.is_community_content = True
 
-    def community_slug(self):
+    def community_slug(self: Any) -> str:
         return self.community and self.community.slug
 
     cls.community_slug = property(community_slug)
@@ -80,7 +81,7 @@ def community_content(cls):
     index_to += (("community_slug", ("community_slug",)),)
     cls.__index_to__ = index_to
 
-    def _indexable_roles_and_users(self):
+    def _indexable_roles_and_users(self: Any) -> str:
         if not self.community:
             return []
         return indexable_roles_and_users(self.community)
@@ -202,11 +203,11 @@ class Community(Entity):
             self.image = Blob(fn.open("rb").read())
 
     @property
-    def has_calendar(self):
+    def has_calendar(self) -> bool:
         config = current_app.config
         return bool(config.get("ENABLE_CALENDAR"))
 
-    def rename(self, name):
+    def rename(self, name: str) -> None:
         self.name = name
         if self.folder:
             # FIXME: use signals
@@ -260,7 +261,7 @@ class Community(Entity):
         self.membership_count -= 1
         signals.membership_removed.send(self, membership=membership)
 
-    def update_roles_on_folder(self):
+    def update_roles_on_folder(self) -> None:
         if self.folder:
             self.ungrant_all_roles_on_folder()
             for membership in self.memberships:
@@ -274,7 +275,7 @@ class Community(Entity):
                     else:
                         security.grant_role(user, READER, self.folder)
 
-    def ungrant_all_roles_on_folder(self):
+    def ungrant_all_roles_on_folder(self) -> None:
         if self.folder:
             role_assignments = security.get_role_assignements(self.folder)
             for principal, role in role_assignments:
@@ -309,11 +310,11 @@ class Community(Entity):
             return True
         return False
 
-    def touch(self):
+    def touch(self) -> None:
         self.last_active_at = datetime.utcnow()
 
     @property
-    def _indexable_roles_and_users(self):
+    def _indexable_roles_and_users(self) -> str:
         return indexable_roles_and_users(self)
 
 

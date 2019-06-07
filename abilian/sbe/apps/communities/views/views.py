@@ -33,13 +33,13 @@ from sqlalchemy import orm
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from whoosh.searching import Hit
 
+from abilian.sbe.apps.communities.actions import register_actions
+from abilian.sbe.apps.communities.blueprint import Blueprint
+from abilian.sbe.apps.communities.forms import CommunityForm
+from abilian.sbe.apps.communities.models import Community, Membership
+from abilian.sbe.apps.communities.security import is_manager, require_admin, \
+    require_manage
 from abilian.sbe.apps.documents.models import Document
-
-from ..actions import register_actions
-from ..blueprint import Blueprint
-from ..forms import CommunityForm
-from ..models import Community, Membership
-from ..security import is_manager, require_admin, require_manage
 
 __all__ = ["communities"]
 
@@ -127,7 +127,7 @@ def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
 #
 @route("/")
 @login_required
-def index():
+def index() -> str:
     query = Community.query
     sort_order = request.args.get("sort", "").strip()
     if not sort_order:
@@ -184,12 +184,13 @@ class BaseCommunityView:
     Form = CommunityForm
     base_template = "community/_base.html"
     decorators = [require_admin]
+    view_endpoint = ""
 
     def init_object(self, args, kwargs):
         self.obj = g.community._model
         return args, kwargs
 
-    def view_url(self):
+    def view_url(self) -> str:
         return url_for(self.view_endpoint, community_id=self.obj.slug)
 
     def get_form_kwargs(self):
@@ -212,7 +213,7 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
         url = Endpoint("communities.settings", community_id=g.community.slug)
         return BreadcrumbItem(label=_("Settings"), icon="cog", url=url)
 
-    def before_populate_obj(self):
+    def before_populate_obj(self) -> None:
         form = self.form
         name = form.name.data
         if name != self.obj.name:
@@ -231,7 +232,7 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
             self.linked_group = Group.query.get(int(self.linked_group))
         del form.linked_group
 
-    def after_populate_obj(self):
+    def after_populate_obj(self) -> None:
         self.obj.group = self.linked_group
 
 
@@ -337,7 +338,7 @@ def _members_query():
 
 @route("/<string:community_id>/members")
 @tab("members")
-def members():
+def members() -> str:
     g.breadcrumb.append(
         BreadcrumbItem(
             label=_("Members"),

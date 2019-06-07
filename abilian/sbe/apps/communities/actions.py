@@ -1,4 +1,6 @@
 # coding=utf-8
+from typing import Any
+
 from abilian.web.action import Action, Endpoint, actions
 from abilian.web.nav import NavItem
 from flask import g
@@ -9,7 +11,7 @@ from flask_login import current_user
 __all__ = ["register_actions"]
 
 
-def url_for(endpoint, **kw):
+def url_for(endpoint: str, **kw: Any) -> str:
     return url_for_orig(endpoint, community_id=g.community.slug, **kw)
 
 
@@ -34,7 +36,7 @@ class CommunityTabAction(Action):
         else:
             return url_for("%s.index" % self.name)
 
-    def is_current(self):
+    def is_current(self) -> bool:
         return g.current_tab == self.name
 
 

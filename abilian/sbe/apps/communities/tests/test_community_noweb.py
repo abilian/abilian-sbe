@@ -35,7 +35,7 @@ def test_instanciation(db):
     # assert isinstance(community.group, Group)
 
 
-def test_default_view_kw():
+def test_default_view_kw() -> None:
     # test exceptions are handled if passed an object with 'community' attribute
     # and no community_id in kwargs. and ValueError is properly raised
     dummy = type("Dummy", (object,), {"community": None})()

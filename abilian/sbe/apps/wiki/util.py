@@ -1,7 +1,7 @@
 from flask import g
 
 
-def page_exists(title):
+def page_exists(title: str) -> bool:
     from abilian.sbe.apps.wiki.models import WikiPage
 
     title = title.strip()

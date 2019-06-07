@@ -57,11 +57,11 @@ accent_folder = RegexTokenizer() | LowercaseFilter() | CharsetFilter(accent_map)
 ICONS_FOLDER = pkg_resources.resource_filename("abilian.sbe", "static/fileicons")
 
 
-def icon_url(filename):
+def icon_url(filename: str) -> str:
     return url_for("abilian_sbe_static", filename="fileicons/" + filename)
 
 
-def icon_exists(filename):
+def icon_exists(filename: str) -> bool:
     return Path(ICONS_FOLDER, filename).is_file()
 
 
@@ -118,11 +118,11 @@ class CmisObject(InheritSecurity, Entity):
     # title is defined has an hybrid property to allow 2 way sync name <->
     # title
     @hybrid_property
-    def title(self):
+    def title(self: str) -> Optional[Any]:
         return self._title
 
     @title.setter
-    def title(self, title):
+    def title(self, title: str) -> None:
         # set title before setting name, so that we don't enter an infinite loop
         # with _cmis_sync_name_title
         self._title = title
@@ -151,14 +151,14 @@ class CmisObject(InheritSecurity, Entity):
         return new_obj
 
     @property
-    def path(self):
+    def path(self) -> str:
         if self.parent:
             return self.parent.path + "/" + self.title
         else:
             return ""
 
     @property
-    def is_folder(self):
+    def is_folder(self) -> bool:
         return self.sbe_type == "cmis:folder"
 
     @property
@@ -166,7 +166,7 @@ class CmisObject(InheritSecurity, Entity):
         return self.sbe_type == "cmis:document"
 
     @property
-    def is_root_folder(self):
+    def is_root_folder(self) -> bool:
         return self._parent_id is None
 
     @property
@@ -208,14 +208,14 @@ class PathAndSecurityIndexable:
             obj = obj.parent
 
     @property
-    def _indexable_parent_ids(self):
+    def _indexable_parent_ids(self) -> str:
         """Return a string made of ids separated by a slash: "/1/3/4/5", "5"
         being self.parent.id."""
         ids = [str(obj.id) for obj in self._iter_to_root(skip_self=True)]
         return "/" + "/".join(reversed(ids))
 
     @property
-    def _indexable_roles_and_users(self):
+    def _indexable_roles_and_users(self) -> str:
         """Returns a string made of type:id elements, like "user:2 group:1
         user:6"."""
         iter_from_root = reversed(list(self._iter_to_root()))
@@ -498,7 +498,7 @@ class BaseContent(CmisObject):
         return content_type
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         return icon_for(self.content_type)
 
 
@@ -565,7 +565,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     sbe_type = "cmis:document"
 
     # antivirus status
-    def ensure_antivirus_scheduled(self):
+    def ensure_antivirus_scheduled(self) -> bool:
         if not self.antivirus_required:
             return True
 
@@ -585,7 +585,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         async_conversion(self)
 
     @property
-    def antivirus_scanned(self):
+    def antivirus_scanned(self) -> bool:
         """True if antivirus task was run, even if antivirus didn't return a
         result."""
         return self.content_blob and "antivirus" in self.content_blob.meta
@@ -600,7 +600,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self.content_blob and self.content_blob.meta.get("antivirus")
 
     @property
-    def antivirus_required(self):
+    def antivirus_required(self) -> bool:
         """True if antivirus doesn't need to be run."""
         required = current_app.config["ANTIVIRUS_CHECK_REQUIRED"]
         return required and (
@@ -608,7 +608,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         )
 
     @property
-    def antivirus_ok(self):
+    def antivirus_ok(self) -> bool:
         """True if user can safely access document content."""
         required = current_app.config["ANTIVIRUS_CHECK_REQUIRED"]
         if required:
@@ -618,7 +618,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     # R/W properties
     @BaseContent.content.setter
-    def content(self, value):
+    def content(self, value: bytes) -> None:
         BaseContent.content.fset(self, value)
         self.content_blob.meta["antivirus_task_id"] = str(uuid.uuid4())
         self.pdf_blob = None
@@ -636,18 +636,18 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self.pdf_blob and self.pdf_blob.value
 
     @pdf.setter
-    def pdf(self, value):
+    def pdf(self, value: bytes) -> None:
         assert isinstance(value, bytes)
         self.pdf_blob = Blob()
         self.pdf_blob.value = value
 
     # `text` is an Unicode value.
     @property
-    def text(self):
+    def text(self) -> str:
         return self.text_blob.value.decode("utf8") if self.text_blob is not None else ""
 
     @text.setter
-    def text(self, value):
+    def text(self, value: str) -> None:
         assert isinstance(value, str)
         self.text_blob = Blob()
         self.text_blob.value = value.encode("utf8")
@@ -668,7 +668,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     # TODO: or use SQLAlchemy alias?
     @property
-    def file_name(self):
+    def file_name(self) -> str:
         return self.title
 
     def __repr__(self):
@@ -730,7 +730,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         self.meta.changed()
 
 
-def icon_for(content_type):
+def icon_for(content_type: str) -> str:
     for extension, mime_type in mimetypes.types_map.items():
         if mime_type == content_type:
             extension = extension[1:]
@@ -773,7 +773,7 @@ def _trigger_conversion_tasks(session):
             tasks.process_document.apply_async((doc.id,), task_id=task_id)
 
 
-def setup_listener():
+def setup_listener() -> None:
     mark_attr = "__abilian_sa_listening"
     if getattr(_trigger_conversion_tasks, mark_attr, False):
         return

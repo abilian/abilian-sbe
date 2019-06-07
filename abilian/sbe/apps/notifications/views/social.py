@@ -45,7 +45,7 @@ def debug_social():
 
 @route("/unsubscribe_sbe/<token>/", methods=["GET", "POST"])
 @csrf.exempt
-def unsubscribe_sbe(token):
+def unsubscribe_sbe(token: str) -> str:
     expired, invalid, user = get_token_status(token, TOKEN_SERIALIZER_NAME)
     if expired or invalid:
         return render_template_i18n("notifications/invalid-token.html")

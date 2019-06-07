@@ -13,7 +13,7 @@ route = blueprint.route
 # Basic navigation
 #
 @route("/")
-def home():
+def home() -> str:
     return render_template("index.html")
 
 

@@ -11,7 +11,7 @@ from wtforms.validators import data_required
 from .util import page_exists
 
 
-def clean_up(src):
+def clean_up(src: str) -> str:
     """Form filter."""
     src = src.replace("\r", "")
     return src

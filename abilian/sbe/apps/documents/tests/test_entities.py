@@ -17,7 +17,7 @@ def check_editable(object):
             assert hasattr(object, k)
 
 
-def test_title_prevails():
+def test_title_prevails() -> None:
     f = Folder(name="name", title="title")
     assert f.title == "title"
     assert f.name == "title"
@@ -31,12 +31,12 @@ def test_title_prevails():
     assert f.name == "name"
 
 
-def test_folder_editables():
+def test_folder_editables() -> None:
     root = Folder(title="/")
     check_editable(root)
 
 
-def test_folder_can_create_documents():
+def test_folder_can_create_documents() -> None:
     root = Folder(title="/")
 
     document = root.create_document("doc")
@@ -49,7 +49,7 @@ def test_folder_can_create_documents():
     assert document.parent == root
 
 
-def test_folder_can_create_subfolders():
+def test_folder_can_create_subfolders() -> None:
     root = Folder(title="/")
 
     subfolder = root.create_subfolder("folder")
@@ -61,7 +61,7 @@ def test_folder_can_create_subfolders():
     assert subfolder.parent == root
 
 
-def test_nested_subobjects():
+def test_nested_subobjects() -> None:
     root = Folder(title="/")
     subfolder = root.create_subfolder("folder1")
     subsubfolder = subfolder.create_subfolder("folder2")
@@ -79,7 +79,7 @@ def test_nested_subobjects():
     assert root.get_object_by_path("/folder1/doc") == document
 
 
-def test_folder_is_clonable():
+def test_folder_is_clonable() -> None:
     root = Folder(title="/")
     clone = root.clone()
 
@@ -87,7 +87,7 @@ def test_folder_is_clonable():
     assert clone.path == root.path
 
 
-def test_document_editables():
+def test_document_editables() -> None:
     doc = Document()
     check_editable(doc)
 

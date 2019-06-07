@@ -1,6 +1,7 @@
 # coding=utf-8
 """"""
 from datetime import datetime
+from typing import Any, Optional
 
 from abilian.core.entities import Entity, db
 from abilian.core.models import SEARCHABLE
@@ -18,7 +19,7 @@ from abilian.sbe.apps.documents.models import BaseContent
 
 from . import markup
 
-__all__ = ["WikiPage"]
+__all__ = ["WikiPage", "WikiPageAttachment", "WikiPageRevision"]
 
 
 @community_content
@@ -54,18 +55,18 @@ class WikiPage(Entity):
     # title is defined has an hybrid property to allow name <-> title sync
     # (2 way)
     @hybrid_property
-    def title(self):
+    def title(self: str) -> Optional[Any]:
         return self._title
 
     @title.setter
-    def title(self, title):
+    def title(self, title: str) -> None:
         # set title before setting name, so that we don't enter an infinite loop
         # with _wiki_sync_name_title
         self._title = title
         if self.name != title:
             self.name = title
 
-    def create_revision(self, body_src, message=""):
+    def create_revision(self, body_src: str, message: str = "") -> None:
         revision = WikiPageRevision()
         if self.revisions:
             revision.number = max(r.number for r in self.revisions) + 1
@@ -85,7 +86,7 @@ class WikiPage(Entity):
         )
 
     @property
-    def body_html(self):
+    def body_html(self) -> str:
         html = markup.convert(self, self.body_src)
         return html
 
