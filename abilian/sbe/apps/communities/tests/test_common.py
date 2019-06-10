@@ -3,17 +3,18 @@
 # provided by SBE. Hopefully one day all of SBE will follow.
 
 from datetime import datetime, timedelta
+from typing import Iterator, Union
 
 import abilian.i18n
 import pytest
 from abilian.core.signals import activity
 
-from abilian.sbe.app import create_app
+from abilian.sbe.app import Application, create_app
 from abilian.sbe.apps.communities.common import activity_time_format
 
 
 @pytest.fixture
-def app(config):
+def app(config: type) -> Iterator[Union[Iterator, Iterator[Application]]]:
     app = create_app(config)
 
     # We need some incantations here to make babel work in the test
@@ -27,7 +28,7 @@ def app(config):
     activity._clear_state()
 
 
-def test_activity_time_format(app):
+def test_activity_time_format(app: Application) -> None:
     # We need the app context because of Babel.
 
     with app.app_context():

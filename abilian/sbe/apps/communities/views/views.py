@@ -9,13 +9,14 @@ from io import BytesIO
 from operator import attrgetter
 from pathlib import Path
 from time import gmtime, strftime
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 import openpyxl
 import pytz
 import sqlalchemy as sa
 import sqlalchemy.sql.functions
 from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, User
+from abilian.core.models.subjects import Group, User, UserQuery
 from abilian.core.signals import activity
 from abilian.core.util import unwrap, utc_dt
 from abilian.i18n import _, _l
@@ -27,28 +28,31 @@ from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import images as image_views
 from flask import current_app, flash, g, jsonify, redirect, render_template, \
     request, session, url_for
+from flask.blueprints import BlueprintSetupState
 from flask_login import current_user, login_required
 from openpyxl.cell import WriteOnlyCell
 from sqlalchemy import orm
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
+from werkzeug.wrappers.response import Response
 from whoosh.searching import Hit
 
 from abilian.sbe.apps.communities.actions import register_actions
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.forms import CommunityForm
 from abilian.sbe.apps.communities.models import Community, Membership
+from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.communities.security import is_manager, require_admin, \
     require_manage
 from abilian.sbe.apps.documents.models import Document
 
-__all__ = ["communities"]
+__all__ = ["communities", "route", "tab"]
 
 logger = logging.getLogger(__name__)
 
 EPOCH = datetime.fromtimestamp(0.0, tz=pytz.utc)
 
 
-def seconds_since_epoch(dt):
+def seconds_since_epoch(dt: Optional[Any]) -> int:
     if not dt:
         return 0
     return int((utc_dt(dt) - EPOCH).total_seconds())
@@ -66,9 +70,9 @@ communities.record_once(register_actions)
 
 
 @communities.record_once
-def register_context_processors(state):
+def register_context_processors(state: BlueprintSetupState) -> None:
     @state.app.context_processor
-    def communities_context_processor():
+    def communities_context_processor() -> Dict[str, Callable]:
         # helper to get an url for community image
         return {"community_image_url": image_url}
 
@@ -79,7 +83,7 @@ def tab(tab_name):
 
     def decorator(f):
         @wraps(f)
-        def set_current_tab(*args, **kwargs):
+        def set_current_tab(*args: Any, **kwargs: Any) -> Union[str, Response]:
             g.current_tab = tab_name
             return f(*args, **kwargs)
 
@@ -88,7 +92,9 @@ def tab(tab_name):
     return decorator
 
 
-def default_view_kw(kw, obj, obj_type, obj_id, **kwargs):
+def default_view_kw(
+    kw: Dict[str, int], obj: Any, obj_type: str, obj_id: int, **kwargs: Any
+) -> Dict[str, Any]:
     """Helper for using :func:`abilian.web.views.default_view` on objects that
     belongs to a community. This function should be used as `kw_func`::
 
@@ -150,7 +156,7 @@ def index() -> str:
 
 @route("/<string:community_id>/")
 @views.default_view(communities, Community, "community_id", kw_func=default_view_kw)
-def community():
+def community() -> Response:
     return redirect(url_for("wall.index", community_id=g.community.slug))
 
 
@@ -186,14 +192,14 @@ class BaseCommunityView:
     decorators = [require_admin]
     view_endpoint = ""
 
-    def init_object(self, args, kwargs):
+    def init_object(self, args: Tuple[()], kwargs: Dict) -> Tuple[Tuple[()], Dict]:
         self.obj = g.community._model
         return args, kwargs
 
     def view_url(self) -> str:
         return url_for(self.view_endpoint, community_id=self.obj.slug)
 
-    def get_form_kwargs(self):
+    def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
 
         image = self.obj.image
@@ -209,7 +215,7 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
     title = _l("Edit community")
     decorators = views.ObjectEdit.decorators + (require_admin, tab("settings"))
 
-    def breadcrumb(self):
+    def breadcrumb(self) -> BreadcrumbItem:
         url = Endpoint("communities.settings", community_id=g.community.slug)
         return BreadcrumbItem(label=_("Settings"), icon="cog", url=url)
 
@@ -252,7 +258,7 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
     template = views.ObjectCreate.template
     base_template = views.ObjectCreate.base_template
 
-    def breadcrumb(self):
+    def breadcrumb(self) -> BreadcrumbItem:
         return BreadcrumbItem(label=_("Create new community"))
 
     def message_success(self):
@@ -301,7 +307,7 @@ image = CommunityImageView.as_view("image", max_size=500, set_expire=True)
 route("/<string:community_id>/image")(image)
 
 
-def image_url(community, **kwargs):
+def image_url(community: Union[Community, CommunityPresenter], **kwargs: Any) -> str:
     """Return proper URL for image url."""
     if not community or not community.image:
         kwargs["md5"] = _DEFAULT_IMAGE_MD5
@@ -312,7 +318,7 @@ def image_url(community, **kwargs):
     return url_for("communities.image", **kwargs)
 
 
-def _members_query():
+def _members_query() -> UserQuery:
     """Helper used in members views."""
     last_activity_date = sa.sql.functions.max(ActivityEntry.happened_at).label(
         "last_activity_date"
@@ -361,7 +367,7 @@ def members() -> str:
 @route("/<string:community_id>/members", methods=["POST"])
 @csrf.protect
 @require_manage
-def members_post():
+def members_post() -> Response:
     community = g.community._model
     action = request.form.get("action")
 
@@ -373,7 +379,7 @@ def members_post():
     user = User.query.get(user_id)
 
     if action in ("add-user-role", "set-user-role"):
-        role = request.form.get("role").lower()
+        role = request.form["role"].lower()
 
         community.set_membership(user, role)
 

@@ -7,10 +7,14 @@ import pytest
 import sqlalchemy as sa
 from abilian.core.entities import Entity
 from abilian.core.models.subjects import User
+from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.testing.util import login
+from flask.ctx import RequestContext
 from pytest import fixture
 from sqlalchemy import orm
+from sqlalchemy.orm import Session
 
+from abilian.sbe.app import Application
 from abilian.sbe.apps.documents.models import Folder
 
 from .. import signals, views
@@ -19,7 +23,7 @@ from ..models import MEMBER, READER, Community, CommunityIdColumn, \
 
 
 @fixture
-def community(db_session):
+def community(db_session: Session) -> Community:
     community = Community(name="My Community")
     db_session.add(community)
     db_session.commit()
@@ -29,7 +33,7 @@ def community(db_session):
 #
 # Actual tests
 #
-def test_instanciation(db):
+def test_instanciation(db: SQLAlchemy) -> None:
     community = Community(name="My Community")
     assert isinstance(community.folder, Folder)
     # assert isinstance(community.group, Group)
@@ -46,12 +50,12 @@ def test_default_view_kw() -> None:
     assert exc_info.value.args == ("Cannot find community_id value",)
 
 
-def test_default_url(app, community):
+def test_default_url(app: Application, community: Community) -> None:
     url = app.default_view.url_for(community)
     assert url.endswith("/communities/my-community/")
 
 
-def test_can_recreate_with_same_name(community, db):
+def test_can_recreate_with_same_name(community: Community, db: SQLAlchemy) -> None:
     name = community.name
 
     db.session.delete(community)
@@ -65,18 +69,18 @@ def test_can_recreate_with_same_name(community, db):
     db.session.commit()
 
 
-def test_rename(community):
+def test_rename(community: Community) -> None:
     NEW_NAME = "My new name"
     community.rename(NEW_NAME)
     assert community.name == NEW_NAME
     assert community.folder.name == NEW_NAME
 
 
-def test_auto_slug(community):
+def test_auto_slug(community: Community) -> None:
     assert community.slug == "my-community"
 
 
-def test_membership(community, db):
+def test_membership(community: Community, db: SQLAlchemy) -> None:
     user = User(email="user@example.com")
 
     memberships = community.memberships
@@ -143,7 +147,7 @@ def test_membership(community, db):
     when_removed.assert_called_once_with(community, membership=membership)
 
 
-def test_folder_roles(community, db, app):
+def test_folder_roles(community: Community, db: SQLAlchemy, app: Application) -> None:
     user = User(email="user@example.com")
     folder = community.folder
     community.set_membership(user, "member")
@@ -158,7 +162,7 @@ def test_folder_roles(community, db, app):
     assert security.get_roles(user, folder) == ["reader"]
 
 
-def test_community_content_decorator(community, db):
+def test_community_content_decorator(community: Community, db: SQLAlchemy) -> None:
     @community_content
     class CommunityContent(Entity):
         community_id = CommunityIdColumn()
@@ -181,7 +185,9 @@ def test_community_content_decorator(community, db):
 ##########################################################################
 
 
-def test_community_indexed(app, db, req_ctx):
+def test_community_indexed(
+    app: Application, db: SQLAlchemy, req_ctx: RequestContext
+) -> None:
     index_service = app.services["indexing"]
     index_service.start()
 
@@ -226,7 +232,9 @@ def test_community_indexed(app, db, req_ctx):
         assert hit["object_key"] == community2.object_key
 
 
-def test_default_view_kw_with_hit(app, db, community, req_ctx):
+def test_default_view_kw_with_hit(
+    app: Application, db: SQLAlchemy, community: Community, req_ctx: RequestContext
+) -> None:
     index_service = app.services["indexing"]
     index_service.start()
 

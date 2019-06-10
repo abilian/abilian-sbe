@@ -2,6 +2,7 @@
 """Forum views."""
 
 from datetime import datetime
+from typing import List, Union
 
 from abilian.i18n import _l
 from abilian.services.viewtracker import viewtracker
@@ -9,9 +10,11 @@ from flask import g
 from flask_babel import format_date
 
 from abilian.sbe.apps.communities.security import is_manager
+from abilian.sbe.apps.documents.models import Document
+from abilian.sbe.apps.wiki.models import WikiPage
 
 
-def object_viewers(entity):
+def object_viewers(entity: Union[Document, WikiPage]) -> List:
     if is_manager():
         views = viewtracker.get_views(entity=entity)
         community_members_id = [
@@ -24,9 +27,10 @@ def object_viewers(entity):
                     {"user": view.user, "viewed_at": view.hits[-1].viewed_at}
                 )
         return viewers
+    return []
 
 
-def activity_time_format(time, now=None):
+def activity_time_format(time: datetime, now: datetime = None) -> str:
     if not time:
         return ""
 

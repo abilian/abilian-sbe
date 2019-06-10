@@ -1,8 +1,9 @@
 # coding=utf-8
 from abilian.core.models.subjects import User
+from abilian.core.sqlalchemy import SQLAlchemy
 from pytest import fixture
 
-from ..models import READER, Community
+from abilian.sbe.apps.communities.models import READER, Community
 
 
 @fixture
@@ -14,7 +15,7 @@ def community(db):
 
 
 @fixture
-def community1(db):
+def community1(db: SQLAlchemy) -> Community:
     community = Community(name="My Community")
     db.session.add(community)
 
@@ -28,7 +29,7 @@ def community1(db):
 
 
 @fixture
-def community2(db):
+def community2(db: SQLAlchemy) -> Community:
     community = Community(name="Another Community")
     db.session.add(community)
 

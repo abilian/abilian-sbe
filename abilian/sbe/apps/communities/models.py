@@ -4,10 +4,10 @@ import logging
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Optional, Union
 
 import sqlalchemy as sa
-from abilian.core.entities import Entity
+from abilian.core.entities import Entity, EntityMeta
 from abilian.core.extensions import db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.blob import Blob
@@ -23,11 +23,13 @@ from abilian.services.security import Writer as WRITER
 from abilian.services.security import security
 from blinker import ANY
 from flask import current_app
-from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, \
-    String, Unicode, UniqueConstraint, and_
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, \
+    Unicode, UniqueConstraint, and_
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import backref, relation, relationship
-from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE
+from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE, Event
+from sqlalchemy.sql.schema import Column
+from werkzeug.local import LocalProxy
 
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.repository import repository
@@ -65,7 +67,7 @@ class Membership(db.Model):
         ).encode("utf-8")
 
 
-def community_content(cls):
+def community_content(cls: type) -> Any:
     """Class decorator to mark models considered as community content.
 
     This is required for proper indexation.
@@ -90,12 +92,13 @@ def community_content(cls):
     return cls
 
 
-def indexable_roles_and_users(community):
+def indexable_roles_and_users(community: "Community") -> str:
     """Mixin to use to replace Entity._indexable_roles_and_users.
 
     Will be removed when communities are upgraded to use standard role
     based access (by setting permissions and using security service).
     """
+    # TODO: remove
     return " ".join(indexable_role(user) for user in community.members)
 
 
@@ -213,7 +216,7 @@ class Community(Entity):
             # FIXME: use signals
             self.folder.name = name
 
-    def get_memberships(self, role=None):
+    def get_memberships(self, role: Optional[str] = None) -> List[Membership]:
         M = Membership
         memberships = M.query.filter(M.community_id == self.id)
         if role:
@@ -249,7 +252,7 @@ class Community(Entity):
 
         signals.membership_set.send(self, membership=membership, is_new=is_new)
 
-    def remove_membership(self, user):
+    def remove_membership(self, user: User) -> None:
         M = Membership
         membership = M.query.filter(
             and_(M.user_id == user.id, M.community_id == self.id)
@@ -281,7 +284,7 @@ class Community(Entity):
             for principal, role in role_assignments:
                 security.ungrant_role(principal, role, self.folder)
 
-    def get_role(self, user):
+    def get_role(self, user: Union[User, LocalProxy]) -> Optional[Role]:
         """Returns the given user's role in this community."""
         M = Membership
         membership = (
@@ -296,7 +299,7 @@ class Community(Entity):
     def has_member(self, user):
         return self.get_role(user) is not None
 
-    def has_permission(self, user, permission):
+    def has_permission(self, user: LocalProxy, permission: Permission) -> bool:
         if not isinstance(permission, Permission):
             assert isinstance(permission, str)
             permission = Permission(permission)
@@ -318,7 +321,7 @@ class Community(Entity):
         return indexable_roles_and_users(self)
 
 
-def CommunityIdColumn():
+def CommunityIdColumn() -> Column:
     return Column(
         ForeignKey(Community.id),
         nullable=False,
@@ -332,7 +335,7 @@ _PROCESSED_ATTR = "__sbe_community_group_sync_processed__"
 
 
 @signals.membership_set.connect_via(ANY)
-def _membership_added(sender, membership, is_new):
+def _membership_added(sender: Community, membership: Membership, is_new: bool) -> None:
     if not is_new:
         return
 
@@ -352,7 +355,7 @@ def _membership_added(sender, membership, is_new):
 
 
 @signals.membership_removed.connect_via(ANY)
-def membership_removed(sender, membership):
+def membership_removed(sender: Community, membership: Membership) -> None:
     if getattr(membership.user, _PROCESSED_ATTR, False) is OP_REMOVE:
         return
 
@@ -388,7 +391,12 @@ def _on_member_change(community, user, initiator):
 
 
 @listens_for(Community.group, "set", active_history=True)
-def _on_linked_group_change(community, value, oldvalue, initiator):
+def _on_linked_group_change(
+    community: Community,
+    value: Optional[Any],
+    oldvalue: Optional[Any],
+    initiator: Event,
+) -> None:
     if value == oldvalue:
         return
 
@@ -414,7 +422,7 @@ def _on_linked_group_change(community, value, oldvalue, initiator):
         value.members = members
 
 
-def _safe_get_community(group):
+def _safe_get_community(group: Group) -> Optional[Any]:
     session = sa.orm.object_session(group)
     if not session:
         return None
@@ -436,7 +444,7 @@ def _safe_get_community(group):
 
 @listens_for(Group.members, "append")
 @listens_for(Group.members, "remove")
-def _on_group_member_change(group, user, initiator):
+def _on_group_member_change(group: Group, user: User, initiator: Event) -> None:
     community = _safe_get_community(group)
 
     if not community:

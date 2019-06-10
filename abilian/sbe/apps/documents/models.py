@@ -583,6 +583,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         # schedule a new task
         self.content_blob.meta["antivirus_task_id"] = str(uuid.uuid4())
         async_conversion(self)
+        return False
 
     @property
     def antivirus_scanned(self) -> bool:
