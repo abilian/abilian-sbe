@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from lxml import objectify
+from lxml.objectify import ObjectifiedElement
 
 ATOM_NS = "http://www.w3.org/2005/Atom"
 APP_NS = "http://www.w3.org/2007/app"
@@ -66,11 +67,11 @@ class Property:
     value(s) held by the property. CMIS specifies the following property-types.
     """
 
-    def __init__(self, element=None):
+    def __init__(self, element: ObjectifiedElement = None) -> None:
         if element is not None:
             self.parse(element)
 
-    def parse(self, element):
+    def parse(self, element: ObjectifiedElement) -> None:
         tag = element.tag
         self.type = tag[tag.index("}") + 1 + len("property") :].lower()
         self.property_definition_id = element.attrib["propertyDefinitionId"]

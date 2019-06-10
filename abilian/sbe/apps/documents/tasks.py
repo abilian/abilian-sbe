@@ -1,24 +1,33 @@
 # coding=utf-8
 """Celery tasks related to document transformation and preview."""
 import logging
+import typing
 from contextlib import contextmanager
+from typing import Any, Iterator, Optional, Tuple, Union
 
 from abilian.core.extensions import db
 from abilian.services import converter, get_service
 from abilian.services.conversion import ConversionError, HandlerNotFound
 from celery import shared_task
+from sqlalchemy.orm import Session
+
+if typing.TYPE_CHECKING:
+    from .models import Document
 
 logger = logging.getLogger(__package__)
 
 
 @contextmanager
-def get_document(document_id, session=None):
+def get_document(
+    document_id: int, session: Optional[Session] = None
+) -> Iterator[Tuple[Session, Optional["Document"]]]:
     """Context manager that yields (session, document)."""
     from .models import Document
 
-    doc_session = session
     if session is None:
         doc_session = db.create_scoped_session()
+    else:
+        doc_session = session
 
     with doc_session.begin_nested():
         query = doc_session.query(Document)
@@ -47,7 +56,7 @@ def process_document(document_id: int) -> None:
     convert_document_content.delay(document_id)
 
 
-def _run_antivirus(document):
+def _run_antivirus(document: "Document") -> Optional[bool]:
     antivirus = get_service("antivirus")
     if antivirus and antivirus.running:
         is_clean = antivirus.scan(document.content_blob)
@@ -101,7 +110,7 @@ def convert_document_content(document_id: int) -> None:
         extract_metadata(doc)
 
 
-def convert_to_pdf(doc):
+def convert_to_pdf(doc: "Document") -> None:
     error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
     if doc.content_type == "application/pdf":
@@ -123,7 +132,7 @@ def convert_to_pdf(doc):
             )
 
 
-def convert_to_text(doc):
+def convert_to_text(doc: "Document") -> None:
     error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
     try:
@@ -135,7 +144,7 @@ def convert_to_text(doc):
         )
 
 
-def extract_metadata(doc):
+def extract_metadata(doc: "Document") -> None:
     error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
     doc.extra_metadata = {}

@@ -1,6 +1,7 @@
 # coding=utf-8
 """"""
 from datetime import datetime
+from typing import Any, Optional
 from urllib.parse import quote
 
 import sqlalchemy as sa
@@ -22,6 +23,7 @@ from flask import current_app, flash, g, make_response, redirect, \
 from flask_login import current_user
 from flask_mail import Message
 from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.wrappers.response import Response
 
 from abilian.sbe.apps.communities.common import object_viewers
 from abilian.sbe.apps.communities.views import default_view_kw
@@ -131,7 +133,7 @@ def document_viewers(doc_id):
 
 @route("/doc/<int:doc_id>/delete", methods=["POST"])
 @csrf.protect
-def document_delete(doc_id):
+def document_delete(doc_id: int) -> Response:
     doc = get_document(doc_id)
     check_write_access(doc)
 
@@ -161,7 +163,7 @@ def document_upload(doc_id):
 
 
 @route("/doc/<int:doc_id>/download")
-def document_download(doc_id, attach=None):
+def document_download(doc_id: int, attach: bool = False) -> Response:
     """Download the file content."""
     doc = get_document(doc_id)
 
@@ -169,8 +171,8 @@ def document_download(doc_id, attach=None):
     response.headers["content-length"] = doc.content_length
     response.headers["content-type"] = doc.content_type
 
-    if attach is None:
-        attach = request.args.get("attach")
+    if not attach:
+        attach = request.args.get("attach", False)
 
     if attach or not match(
         doc.content_type, ("text/plain", "application/pdf", "image/*")
@@ -228,7 +230,7 @@ def preview_missing_image():
 
 
 @route("/doc/<int:doc_id>/preview_image")
-def document_preview_image(doc_id):
+def document_preview_image(doc_id: int) -> Response:
     """Returns a preview (image) for the file given by its id."""
 
     doc = get_document(doc_id)
@@ -290,7 +292,7 @@ def refresh_preview(doc_id):
 
 @route("/doc/<int:doc_id>/send", methods=["POST"])
 @csrf.protect
-def document_send(doc_id):
+def document_send(doc_id: int) -> Response:
     doc = get_document(doc_id)
 
     recipient = request.form.get("recipient")

@@ -1,9 +1,10 @@
 # coding=utf-8
 """Parses and produces XML documents specified by the standard."""
-from typing import List
+from typing import Any, List
 
 from lxml import etree, objectify
 from lxml.builder import ElementMaker
+from lxml.etree import _Element
 
 E = ElementMaker(namespace="DAV:")
 
@@ -32,14 +33,14 @@ class MultiStatus:
     def __init__(self) -> None:
         self.responses: List[Response] = []
 
-    def add_response_for(self, href, obj, property_list):
+    def add_response_for(self, href: str, obj: Any, property_list: List[str]) -> None:
         response = Response(href, obj, property_list)
         self.responses.append(response)
 
     def to_string(self) -> bytes:
         return etree.tostring(self.to_xml(), pretty_print=True)
 
-    def to_xml(self):
+    def to_xml(self) -> _Element:
         xml = E.multistatus()
         for response in self.responses:
             xml.append(response.to_xml())
@@ -47,12 +48,12 @@ class MultiStatus:
 
 
 class Response:
-    def __init__(self, href, obj, property_list):
+    def __init__(self, href: str, obj: Any, property_list: List[str]) -> None:
         self.href = href
         self.property_list = property_list
         self.obj = obj
 
-    def to_xml(self):
+    def to_xml(self) -> _Element:
         obj = self.obj
         props = E.prop()
         for property_name in self.property_list:

@@ -1,23 +1,24 @@
 # coding=utf-8
 """"""
 from itertools import count
+from typing import Optional
 
 from abilian.sbe.apps.documents.models import PathAndSecurityIndexable
 
 
-def get_obj():
-    id_gen = count()
-    obj = MockPath(next(id_gen))
-    obj = MockPath(next(id_gen), parent=obj)
-    obj = MockPath(next(id_gen), parent=obj)
-    obj = MockPath(next(id_gen), parent=obj)
-    return obj
-
-
 class MockPath(PathAndSecurityIndexable):
-    def __init__(self, id, parent=None):
+    def __init__(self, id: int, parent: Optional["MockPath"] = None) -> None:
         self.id = id
         self.parent = parent
+
+
+def get_obj() -> MockPath:
+    id_gen = count()
+    root = MockPath(next(id_gen))
+    level1 = MockPath(next(id_gen), parent=root)
+    level2 = MockPath(next(id_gen), parent=level1)
+    level3 = MockPath(next(id_gen), parent=level2)
+    return level3
 
 
 def test_iter_to_root() -> None:

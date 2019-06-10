@@ -2,25 +2,29 @@
 """"""
 from io import BytesIO
 from pathlib import Path
+from typing import IO, Any, Dict
 from zipfile import ZipFile
 
 import flask_mail
 import pytest
+from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.testing.util import client_login, path_from_url
 from abilian.web.util import url_for
 from flask import g, get_flashed_messages
+from flask.ctx import RequestContext
+from flask.testing import FlaskClient
 from pytest import fixture
 from toolz import first
 from werkzeug.datastructures import FileStorage
 
-from abilian.sbe.apps.communities.models import WRITER
+from abilian.sbe.app import Application
+from abilian.sbe.apps.communities.models import WRITER, Community
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
+from abilian.sbe.apps.documents.models import Folder
+from abilian.sbe.apps.documents.views import util as view_util
 
-from ..models import Folder
-from ..views import util as view_util
 
-
-def open_file(filename):
+def open_file(filename: str) -> IO[bytes]:
     path = Path(__file__).parent / "data" / "dummy_files" / filename
     return path.open("rb")
 
@@ -30,7 +34,7 @@ def uid_from_url(url):
 
 
 @fixture
-def community(community1, db):
+def community(community1: Community, db: SQLAlchemy) -> Community:
     community = community1
     user = community.test_user
     root_folder = Folder(title="root")
@@ -44,7 +48,13 @@ def community(community1, db):
     return community
 
 
-def test_util_create(app, client, db, community, req_ctx):
+def test_util_create(
+    app: Application,
+    client: FlaskClient,
+    db: SQLAlchemy,
+    community: Community,
+    req_ctx: RequestContext,
+) -> None:
     folder = community.folder
     user = community.test_user
 
@@ -70,7 +80,13 @@ def test_util_create(app, client, db, community, req_ctx):
         assert len(messages) == 1
 
 
-def test_home(app, client, db, community, req_ctx):
+def test_home(
+    app: Application,
+    client: FlaskClient,
+    db: SQLAlchemy,
+    community: Community,
+    req_ctx: RequestContext,
+) -> None:
     folder = community.folder
     user = community.test_user
 
@@ -83,13 +99,13 @@ def test_home(app, client, db, community, req_ctx):
 
 
 def _test_upload(
-    community,
-    client,
-    title,
-    content_type,
-    test_preview=True,
-    assert_preview_available=True,
-):
+    community: Community,
+    client: FlaskClient,
+    title: str,
+    content_type: str,
+    test_preview: bool = True,
+    assert_preview_available: bool = True,
+) -> None:
     data = {"file": (open_file(title), title, content_type), "action": "upload"}
 
     folder = community.folder
@@ -143,21 +159,27 @@ def _test_upload(
     assert response.status_code == 404
 
 
-def test_text_upload(client, community, req_ctx):
+def test_text_upload(
+    client: FlaskClient, community: Community, req_ctx: RequestContext
+) -> None:
     name = "wikipedia-fr.txt"
     user = community.test_user
     with client_login(client, user):
         _test_upload(community, client, name, "text/plain", test_preview=False)
 
 
-def test_pdf_upload(client, community, req_ctx):
+def test_pdf_upload(
+    client: FlaskClient, community: Community, req_ctx: RequestContext
+) -> None:
     name = "onepage.pdf"
     user = community.test_user
     with client_login(client, user):
         _test_upload(community, client, name, "application/pdf")
 
 
-def test_image_upload(client, community, req_ctx):
+def test_image_upload(
+    client: FlaskClient, community: Community, req_ctx: RequestContext
+) -> None:
     name = "picture.jpg"
     user = community.test_user
     with client_login(client, user):
@@ -178,15 +200,18 @@ def test_binary_upload(client, community, req_ctx):
         )
 
 
-def test_zip_upload_uncompress(community, db, client, req_ctx):
+def test_zip_upload_uncompress(
+    community: Community, db: SQLAlchemy, client: FlaskClient, req_ctx: RequestContext
+) -> None:
     subfolder = Folder(title="folder 1", parent=community.folder)
     db.session.add(subfolder)
     db.session.flush()
 
     folder = community.folder
-    files = []
-    files.append((BytesIO(b"A document"), "existing-doc", "text/plain"))
-    files.append((open_file("content.zip"), "content.zip", "application/zip"))
+    files = [
+        (BytesIO(b"A document"), "existing-doc", "text/plain"),
+        (open_file("content.zip"), "content.zip", "application/zip"),
+    ]
     data = {"file": files, "action": "upload", "uncompress_files": True}
     url = url_for(
         "documents.folder_post", community_id=community.slug, folder_id=folder.id
@@ -202,7 +227,9 @@ def test_zip_upload_uncompress(community, db, client, req_ctx):
     assert expected == {f.title for f in folder.subfolders}
 
 
-def test_zip(community, client, req_ctx):
+def test_zip(
+    community: Community, client: FlaskClient, req_ctx: RequestContext
+) -> None:
     user = community.test_user
     with client_login(client, user):
         title = "onepage.pdf"
@@ -228,36 +255,38 @@ def test_zip(community, client, req_ctx):
         assert [zipfile.namelist()[0]] == [title]
 
 
-def test_recursive_zip(community, client, req_ctx):
+def test_recursive_zip(
+    community: Community, client: FlaskClient, req_ctx: RequestContext
+) -> None:
     user = community.test_user
     with client_login(client, user):
-        data = {"action": "new", "title": "my folder"}
+        data1 = {"action": "new", "title": "my folder"}
         folder = community.folder
         url = url_for(
             "documents.folder_post", community_id=community.slug, folder_id=folder.id
         )
-        response = client.post(url, data=data)
+        response = client.post(url, data=data1)
         assert response.status_code == 302
 
         my_folder = folder.children[0]
 
         title = "onepage.pdf"
         content_type = "application/pdf"
-        data = {"file": (open_file(title), title, content_type), "action": "upload"}
+        data2 = {"file": (open_file(title), title, content_type), "action": "upload"}
         url = url_for(
             "documents.folder_post", community_id=community.slug, folder_id=my_folder.id
         )
-        response = client.post(url, data=data)
+        response = client.post(url, data=data2)
         assert response.status_code == 302
 
-        data = {
+        data3 = {
             "action": "download",
             "object-selected": ["cmis:folder:%d" % my_folder.id],
         }
         url = url_for(
             "documents.folder_post", community_id=community.slug, folder_id=folder.id
         )
-        response = client.post(url, data=data)
+        response = client.post(url, data=data3)
         assert response.status_code == 200
         assert response.content_type == "application/zip"
 
@@ -265,7 +294,9 @@ def test_recursive_zip(community, client, req_ctx):
         assert zipfile.namelist() == ["my folder/" + title]
 
 
-def test_document_send_by_mail(app, community, client, req_ctx):
+def test_document_send_by_mail(
+    app: Application, community: Community, client: FlaskClient, req_ctx: RequestContext
+) -> None:
     mail = app.extensions["mail"]
     folder = community.folder
     user = community.test_user

@@ -55,7 +55,7 @@ class WikiPage(Entity):
     # title is defined has an hybrid property to allow name <-> title sync
     # (2 way)
     @hybrid_property
-    def title(self: str) -> Optional[Any]:
+    def title(self: str) -> str:
         return self._title
 
     @title.setter

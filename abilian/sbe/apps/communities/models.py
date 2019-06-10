@@ -392,10 +392,7 @@ def _on_member_change(community, user, initiator):
 
 @listens_for(Community.group, "set", active_history=True)
 def _on_linked_group_change(
-    community: Community,
-    value: Optional[Any],
-    oldvalue: Optional[Any],
-    initiator: Event,
+    community: Community, value: Any, oldvalue: Any, initiator: Event
 ) -> None:
     if value == oldvalue:
         return
@@ -422,7 +419,7 @@ def _on_linked_group_change(
         value.members = members
 
 
-def _safe_get_community(group: Group) -> Optional[Any]:
+def _safe_get_community(group: Group) -> Optional[Community]:
     session = sa.orm.object_session(group)
     if not session:
         return None

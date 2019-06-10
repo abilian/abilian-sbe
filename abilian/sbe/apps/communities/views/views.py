@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 EPOCH = datetime.fromtimestamp(0.0, tz=pytz.utc)
 
 
-def seconds_since_epoch(dt: Optional[Any]) -> int:
+def seconds_since_epoch(dt: Optional[datetime]) -> int:
     if not dt:
         return 0
     return int((utc_dt(dt) - EPOCH).total_seconds())

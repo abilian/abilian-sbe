@@ -52,14 +52,14 @@ def require_access(func):
 
 
 def check_access(
-    community: CommunityPresenter = None, user: Optional[Any] = None
+    community: CommunityPresenter = None, user: Optional[User] = None
 ) -> None:
     if not has_access(community, user):
         raise Forbidden()
 
 
 def has_access(
-    community: CommunityPresenter = None, user: Optional[Any] = None
+    community: CommunityPresenter = None, user: Optional[User] = None
 ) -> bool:
     if not user:
         user = current_user

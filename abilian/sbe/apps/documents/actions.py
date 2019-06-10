@@ -7,6 +7,7 @@ from abilian.services.security import MANAGE, WRITE, security
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 from flask import g
 from flask import url_for as url_for_orig
+from flask.blueprints import BlueprintSetupState
 from flask_login import current_user
 
 from abilian.sbe.apps.communities.security import is_manager
@@ -19,8 +20,8 @@ def url_for(endpoint, **kw):
 
 
 class CmisContentAction(Action):
-    sbe_type = None  # type: str
-    permission = None  # type: str
+    sbe_type: str = ""
+    permission: str = ""
 
     def __init__(self, *args, **kwargs):
         if "permission" in kwargs:
@@ -28,8 +29,7 @@ class CmisContentAction(Action):
 
         Action.__init__(self, *args, **kwargs)
 
-    def pre_condition(self, ctx):
-        # type: (Dict[str, Any]) -> bool
+    def pre_condition(self, ctx: Dict[str, Any]) -> bool:
         obj = ctx["object"]
         ok = obj.sbe_type == self.sbe_type
 
@@ -38,8 +38,7 @@ class CmisContentAction(Action):
 
         return ok
 
-    def has_access(self, permission, obj):
-        # type: (str, Any) -> bool
+    def has_access(self, permission: str, obj: Any) -> bool:
         return repository.has_permission(current_user, permission, obj)
 
 
@@ -341,7 +340,7 @@ _actions = (
 )
 
 
-def register_actions(state):
+def register_actions(state: BlueprintSetupState) -> None:
     if not actions.installed(state.app):
         return
 

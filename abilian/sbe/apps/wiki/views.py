@@ -202,7 +202,7 @@ class PageEdit(BasePageView, ObjectEdit):
         self.obj.create_revision(form.body_src.data, form.message.data)
 
     # FIXME: does nothing !
-    def redirect_if_no_change(self) -> Optional[Any]:
+    def redirect_if_no_change(self) -> Optional[Response]:
         form = self.form
         if all(f.data == f.object_data for f in (form.title, form.body_src)):
             flash(_("You didn't make any change to this page."))

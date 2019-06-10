@@ -1,8 +1,10 @@
 # coding=utf-8
 """"""
 from datetime import datetime, timedelta
+from typing import Any, Dict, Optional, Union
 
 import dateutil.parser
+from abilian.core.models.subjects import User
 from abilian.core.util import utcnow
 from flask import current_app
 from flask_login import current_user
@@ -13,7 +15,14 @@ DEFAULT_LIFETIME = 3600
 class Lock:
     """Represent a lock on a document."""
 
-    def __init__(self, user_id, user, date, *args, **kwargs):
+    def __init__(
+        self,
+        user_id: int,
+        user: str,
+        date: Union[datetime, str],
+        *args: Any,
+        **kwargs: Any,
+    ) -> None:
         self.user_id = user_id
         self.user = user
         if not isinstance(date, datetime):
@@ -25,10 +34,10 @@ class Lock:
         self.date = date
 
     @staticmethod
-    def new():
+    def new() -> "Lock":
         return Lock(current_user.id, str(current_user), utcnow())
 
-    def as_dict(self):
+    def as_dict(self) -> Dict[str, Any]:
         """Return a dict suitable for serialization to JSON."""
         return {
             "user_id": self.user_id,
@@ -37,7 +46,7 @@ class Lock:
         }
 
     @staticmethod
-    def from_dict(d):
+    def from_dict(d: Dict[str, Any]) -> "Lock":
         """Deserialize from a `dict` created by :meth:`as_dict`."""
         return Lock(**d)
 
@@ -49,7 +58,7 @@ class Lock:
     def expired(self) -> bool:
         return (utcnow() - self.date) > timedelta(seconds=self.lifetime)
 
-    def is_owner(self, user=None):
+    def is_owner(self, user: Optional[User] = None) -> bool:
         if user is None:
             user = current_user
 

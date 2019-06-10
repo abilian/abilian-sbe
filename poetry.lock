@@ -47,7 +47,7 @@ tqdm = "*"
 wtforms-sqlalchemy = "*"
 
 [package.source]
-reference = "a5b06fdca45ca0354c3e3786f8f625579384ffc8"
+reference = "df46c72e0f134acaa163c87023f28940a7b2672c"
 type = "git"
 url = "https://github.com/abilian/abilian-core.git"
 [[package]]
