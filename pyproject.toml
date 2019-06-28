@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abilian-sbe"
-version = "0.5.2"
+version = "0.5.3"
 description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
 license = "LGPL"
@@ -14,8 +14,8 @@ include = ["abilian/*", "abilian/**/*"]
 python = "^3.6"
 
 # Abilian Core
-abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
-# abilian-core = ">=0.11"
+# abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
+abilian-core = ">=0.11"
 
 
 # Temp
