@@ -1,9 +1,27 @@
 Changelog for Abilian SBE
 =========================
 
+0.5.3 (2019-06-28)
+------------------
+- Modernize (py36) / remove six. [Stefane Fermigier]
+- Runtime typechecker. [Stefane Fermigier]
+- Typing. [Stefane Fermigier]
+- Update dependency on Markdown. [Abdul]
+
+
+v0.5.2 (2019-05-02)
+-------------------
+- Dont' use pylint. [Stefane Fermigier]
+- Modernize (py36) [Stefane Fermigier]
+
+
+v0.5.1 (2019-04-15)
+-------------------
+- Fix botched release. [Stefane Fermigier]
+
+
 0.5.0 (2019-04-15)
 -------------------
-
 - Drop Python 2 support and cleanup code accordingly.
 - Various fixes.
 
