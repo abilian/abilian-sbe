@@ -29,7 +29,7 @@ def set_current_tab(endpoint, values):
 
 
 @route("/")
-def index():
+def index() -> str:
     actions.context["object"] = g.community._model
     entries = get_recent_entries(20, community=g.community)
     entries = ActivityEntryPresenter.wrap_collection(entries)

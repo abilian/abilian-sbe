@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abilian-sbe"
-version = "0.5.2"
+version = "0.5.3"
 description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
 license = "LGPL"
@@ -14,8 +14,8 @@ include = ["abilian/*", "abilian/**/*"]
 python = "^3.6"
 
 # Abilian Core
-abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
-# abilian-core = ">=0.11"
+# abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
+abilian-core = ">=0.11"
 
 
 # Temp
@@ -51,6 +51,7 @@ pytest-randomly = "*"
 # Coverage
 coverage = ">=4.1"
 pytest-cov = "*"
+typeguard = "*"
 
 # Python clone of Foreman, useful to test Heroku config locally
 honcho = "*"
@@ -77,6 +78,8 @@ flake8-pytest = "*"
 flake8-super-call = "*"
 flake8-tidy-imports = "*"
 mastool = "*"
+pyannotate = "^1.0"
+gitchangelog = "^3.0"
 mccabe = "*"
 pre-commit = "*"
 

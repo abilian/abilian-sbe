@@ -1,10 +1,9 @@
-# coding=utf-8
-# Note: this test suite is using pytest instead of the unittest-based scaffolding
-# provided by SBE. Hopefully one day all of SBE will follow.
 from tempfile import NamedTemporaryFile
+from typing import IO
 
 import pytest
 from abilian.core.models.subjects import User
+from abilian.core.sqlalchemy import SQLAlchemy
 from flask import g
 
 from abilian.sbe.apps.communities.models import READER, Community
@@ -13,7 +12,7 @@ from abilian.sbe.apps.communities.views.wizard import wizard_extract_data, \
 
 
 @pytest.fixture
-def csv_file():
+def csv_file() -> IO[str]:
     # create a tmp csv file
     csv = NamedTemporaryFile("w+", suffix=".csv", prefix="tmp_", delete=False)
     csv.write("user_1@example.com;userone;userone;manager\n")
@@ -25,12 +24,11 @@ def csv_file():
     csv.write("example.com;example;userfour;member\n")
 
     csv.seek(0)
-    csv.filename = csv.name
 
     return csv
 
 
-def test_wizard_read_csv(csv_file):
+def test_wizard_read_csv(csv_file: IO[str]) -> None:
     wizard_read = wizard_read_csv(csv_file)
 
     assert wizard_read == [
@@ -55,7 +53,7 @@ def test_wizard_read_csv(csv_file):
     ]
 
 
-def test_wizard_extract_data(db, csv_file):
+def test_wizard_extract_data(db: SQLAlchemy, csv_file: IO[str]) -> None:
     session = db.session
     community = Community(name="Hp")
     g.community = community
@@ -131,7 +129,7 @@ def test_wizard_extract_data(db, csv_file):
 
     # check wizard function in case of csv file
     existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
-        wizard_read_csv(csv_file), is_csv=True
+        csv_data=wizard_read_csv(csv_file)
     )
 
     assert existing_accounts_objects == {

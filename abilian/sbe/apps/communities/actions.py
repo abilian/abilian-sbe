@@ -1,20 +1,23 @@
 # coding=utf-8
+from typing import Any, Dict, Union
+
 from abilian.web.action import Action, Endpoint, actions
 from abilian.web.nav import NavItem
 from flask import g
 from flask import url_for as url_for_orig
+from flask.blueprints import BlueprintSetupState
 from flask_babel import lazy_gettext as _l
 from flask_login import current_user
 
 __all__ = ["register_actions"]
 
 
-def url_for(endpoint, **kw):
+def url_for(endpoint: str, **kw: Any) -> str:
     return url_for_orig(endpoint, community_id=g.community.slug, **kw)
 
 
 class CommunityEndpoint(Endpoint):
-    def get_kwargs(self):
+    def get_kwargs(self) -> Dict[str, str]:
         kwargs = super().get_kwargs()
         kwargs["community_id"] = g.community.slug
         return kwargs
@@ -24,7 +27,7 @@ class CommunityTabAction(Action):
 
     Endpoint = CommunityEndpoint
 
-    def url(self, context=None):
+    def url(self, context: Dict[str, Any] = None) -> Union[CommunityEndpoint, str]:
         if self._url:
             return Action.url(self)
 
@@ -34,7 +37,7 @@ class CommunityTabAction(Action):
         else:
             return url_for("%s.index" % self.name)
 
-    def is_current(self):
+    def is_current(self) -> bool:
         return g.current_tab == self.name
 
 
@@ -87,7 +90,7 @@ _actions = (
 )
 
 
-def register_actions(state):
+def register_actions(state: BlueprintSetupState) -> None:
     if not actions.installed(state.app):
         return
     with state.app.app_context():

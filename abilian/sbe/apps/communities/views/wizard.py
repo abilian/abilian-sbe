@@ -3,6 +3,7 @@
 import csv
 import json
 from os.path import splitext
+from typing import IO, Any, Dict, List, Optional, Sequence, Tuple, Union
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
@@ -16,17 +17,24 @@ from abilian.web.nav import BreadcrumbItem
 from flask import current_app, flash, g, redirect, render_template, request, \
     url_for
 from validate_email import validate_email
+from werkzeug.wrappers import Response
 
 from .views import route, tab
 
 
-def wizard_extract_data(emails, is_csv=False):
+def wizard_extract_data(
+    emails: Sequence[str] = (), csv_data: Sequence[Dict[str, str]] = ()
+) -> Tuple[
+    Union[Dict[str, Any], List[User]], List[User], List[Dict[str, Optional[str]]]
+]:
     """Filter data and extract existing accounts, existing members and new
     emails."""
-    if is_csv:
-        csv_data = emails
+    if csv_data:
         existing_account_csv_roles = {user["email"]: user["role"] for user in csv_data}
-        emails = [user["email"] for user in emails]
+        emails = [user["email"] for user in csv_data]
+        is_csv = True
+    else:
+        is_csv = False
 
     emails = [email.strip() for email in emails]
 
@@ -75,6 +83,7 @@ def wizard_extract_data(emails, is_csv=False):
             account["role"] = csv_account["role"]
             account["status"] = "new"
             accounts_list.append(account)
+
     else:
         for email in emails_without_account:
             account = {}
@@ -88,10 +97,10 @@ def wizard_extract_data(emails, is_csv=False):
     return existing_accounts_objects, existing_members_objects, accounts_list
 
 
-def wizard_read_csv(csv_file):
+def wizard_read_csv(csv_file: IO[str]) -> List[Dict[str, str]]:
     """Read new members data from CSV file."""
 
-    file_extension = splitext(csv_file.filename)[-1]
+    file_extension = splitext(csv_file.name)[-1]
     if file_extension != ".csv":
         return []
 
@@ -140,7 +149,7 @@ def wizard_data_insertion():
 @route("/<string:community_id>/members/wizard/step2", methods=["GET", "POST"])
 @csrf.protect
 @tab("members")
-def wizard_check_data():
+def wizard_check_data() -> Union[Response, str]:
     """Filter and detect existing members, existing accounts and new emails."""
     if request.method == "GET":
         return redirect(url_for(".members", community_id=g.community.slug))
@@ -154,11 +163,12 @@ def wizard_check_data():
 
     is_csv = False
     if request.form.get("wizard-emails"):
-        wizard_emails = request.form.get("wizard-emails").split(",")
+        wizard_emails = request.form["wizard-emails"].split(",")
         existing_accounts_object, existing_members_objects, final_email_list = wizard_extract_data(
             wizard_emails
         )
         final_email_list_json = json.dumps(final_email_list)
+
     else:
         is_csv = True
         accounts_data = wizard_read_csv(request.files["csv_file"])
@@ -169,7 +179,7 @@ def wizard_check_data():
             )
 
         existing_accounts, existing_members_objects, final_email_list = wizard_extract_data(
-            accounts_data, is_csv=True
+            csv_data=accounts_data
         )
         existing_accounts_object = existing_accounts["account_objects"]
         existing_accounts_csv_roles = existing_accounts["csv_roles"]
@@ -193,7 +203,7 @@ def wizard_check_data():
 @route("/<string:community_id>/members/wizard/step3", methods=["GET", "POST"])
 @csrf.protect
 @tab("members")
-def wizard_new_accounts():
+def wizard_new_accounts() -> Union[str, Response]:
     """Complete new emails information."""
     if request.method == "GET":
         return redirect(url_for(".members", community_id=g.community.slug))
@@ -205,7 +215,7 @@ def wizard_new_accounts():
         )
     )
 
-    wizard_emails = request.form.get("wizard-emails")
+    wizard_emails = request.form["wizard-emails"]
     wizard_accounts = json.loads(wizard_emails)
 
     wizard_existing_account = {}
@@ -229,14 +239,14 @@ def wizard_new_accounts():
 
 @route("/<string:community_id>/members/wizard/complete", methods=["POST"])
 @csrf.protect
-def wizard_saving():
+def wizard_saving() -> Response:
     """Automatically add existing accounts to the current community.
 
     Create accounts for new emails, add them to the community and send
     them a password reset email.
     """
     community = g.community._model
-    existing_accounts = request.form.get("existing_account")
+    existing_accounts = request.form["existing_account"]
     existing_accounts = json.loads(existing_accounts)
     new_accounts = request.form.get("new_accounts")
     new_accounts = json.loads(new_accounts)

@@ -1,5 +1,9 @@
 # coding=utf-8
+from typing import Any, List, Union
+
 from flask import render_template
+
+from abilian.sbe.apps.documents.models import Document, Folder
 
 # TEMP
 ROOT = "http://localhost:5000/cmis/atompub"
@@ -7,11 +11,11 @@ XML_HEADER = "<?xml version='1.0' encoding='UTF-8'?>\n"
 
 
 class Feed:
-    def __init__(self, object, collection):
+    def __init__(self, object: Folder, collection: List[Document]) -> None:
         self.object = object
         self.collection = collection
 
-    def to_xml(self, **options):
+    def to_xml(self, **options: Any) -> str:
         ctx = {
             "ROOT": ROOT,
             "object": self.object,
@@ -22,10 +26,10 @@ class Feed:
 
 
 class Entry:
-    def __init__(self, obj):
+    def __init__(self, obj: Union[Document, Folder]) -> None:
         self.obj = obj
 
-    def to_xml(self, **options):
+    def to_xml(self, **options: Any) -> str:
         ctx = {
             "ROOT": ROOT,
             "folder": self.obj,
@@ -47,6 +51,6 @@ class Entry:
         return result
 
 
-def to_xml(obj, **options):
+def to_xml(obj: Union[Document, Folder], **options: Any) -> str:
     entry = Entry(obj)
     return entry.to_xml(**options)

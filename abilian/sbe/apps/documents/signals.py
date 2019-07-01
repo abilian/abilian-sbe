@@ -1,8 +1,11 @@
 # coding=utf-8
 """"""
+from typing import Any
+
 from abilian.services.security import Manager, Reader, Writer, security
 
-from abilian.sbe.apps.communities.models import VALID_ROLES
+from abilian.sbe.apps.communities.models import VALID_ROLES, Community, \
+    Membership
 from abilian.sbe.apps.communities.signals import membership_removed, \
     membership_set
 
@@ -10,7 +13,9 @@ from .search import reindex_tree
 
 
 @membership_set.connect
-def new_community_member(community, membership, is_new, **kwargs):
+def new_community_member(
+    community: Community, membership: Membership, is_new: bool, **kwargs: Any
+) -> None:
     if not community.folder:
         return
 
@@ -34,7 +39,9 @@ def new_community_member(community, membership, is_new, **kwargs):
 
 
 @membership_removed.connect
-def remove_community_member(community, membership, **kwargs):
+def remove_community_member(
+    community: Community, membership: Membership, **kwargs: Any
+) -> None:
     if not community.folder:
         return
 

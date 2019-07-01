@@ -2,6 +2,7 @@
 """"""
 import difflib
 from pathlib import Path
+from typing import Any, Optional, Union
 from urllib.parse import quote
 
 import sqlalchemy as sa
@@ -23,11 +24,14 @@ from markdown import markdown
 from markupsafe import Markup
 from sqlalchemy.orm.exc import NoResultFound
 from werkzeug.exceptions import NotFound
+from werkzeug.wrappers import Response
 from whoosh.searching import Hit
 
-from ..communities.blueprint import Blueprint
-from ..communities.common import object_viewers
-from ..communities.views import default_view_kw as community_dv_kw
+from abilian.sbe.apps.communities.blueprint import Blueprint
+from abilian.sbe.apps.communities.common import object_viewers
+from abilian.sbe.apps.communities.views import \
+    default_view_kw as community_dv_kw
+
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
@@ -73,6 +77,7 @@ class BasePageView:
     pk = "title"
     Form = WikiPageForm
     base_template = "wiki/_base.html"
+    view_endpoint = ""
 
     @property
     def is_home_page(self):
@@ -113,7 +118,7 @@ class BasePageView:
     def index_url(self):
         return url_for(".index", community_id=g.community.slug)
 
-    def view_url(self):
+    def view_url(self) -> str:
         return url_for(
             self.view_endpoint, community_id=g.community.slug, title=self.obj.title
         )
@@ -191,16 +196,18 @@ class PageEdit(BasePageView, ObjectEdit):
             ).first()
         return args, kwargs
 
-    def before_populate_obj(self):
+    def before_populate_obj(self) -> None:
         self.redirect_if_no_change()
         form = self.form
         self.obj.create_revision(form.body_src.data, form.message.data)
 
-    def redirect_if_no_change(self):
+    # FIXME: does nothing !
+    def redirect_if_no_change(self) -> Optional[Response]:
         form = self.form
         if all(f.data == f.object_data for f in (form.title, form.body_src)):
             flash(_("You didn't make any change to this page."))
             return self.redirect(url_for(self.obj))
+        return None
 
     @property
     def activity_target(self):
@@ -274,7 +281,7 @@ route("/new")(PageCreate.as_view("page_new", view_endpoint=".page"))
 
 
 @route("/source/")
-def page_source():
+def page_source() -> Union[str, Response]:
     title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
@@ -288,7 +295,7 @@ def page_source():
 
 
 @route("/changes/")
-def page_changes():
+def page_changes() -> Union[str, Response]:
     title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
@@ -302,7 +309,7 @@ def page_changes():
 
 
 @route("/compare/")
-def page_compare():
+def page_compare() -> Union[str, Response]:
     title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
@@ -332,15 +339,15 @@ def page_compare():
 
     differ = difflib.Differ(charjunk=difflib.IS_CHARACTER_JUNK)
     diff = differ.compare(from_lines, to_lines)
-    diff = [line for line in diff if not line.startswith("?")]
+    diff_lines = [line for line in diff if not line.startswith("?")]
 
     actions.context["object"] = page
-    ctx = {"page": page, "diff": diff, "rev1": from_rev, "rev2": to_rev}
+    ctx = {"page": page, "diff": diff_lines, "rev1": from_rev, "rev2": to_rev}
     return render_template("wiki/compare.html", **ctx)
 
 
 @route("/delete/", methods=["POST"])
-def page_delete():
+def page_delete() -> Response:
     title = request.form["title"].strip()
     try:
         page = get_page_by_title(title)
@@ -360,7 +367,7 @@ def page_delete():
 
 
 @route("/attachments")
-def attachment_download():
+def attachment_download() -> Response:
     title = request.args["title"].strip()
     attachment_id = int(request.args["attachment"])
     try:
@@ -383,7 +390,7 @@ def attachment_download():
 
 @route("/attachments", methods=["POST"])
 @csrf.protect
-def attachment_upload():
+def attachment_upload() -> Response:
     title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)

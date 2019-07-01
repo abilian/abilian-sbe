@@ -5,10 +5,12 @@ from abilian.core.entities import Entity
 from abilian.core.extensions import db
 from abilian.services import get_service
 
+from abilian.sbe.apps.documents.models import Folder
+
 from .models import CmisObject
 
 
-def reindex_tree(obj):
+def reindex_tree(obj: Folder) -> None:
     """Schedule reindexing `obj` and all of its descendants.
 
     Generally needed to update indexed security.

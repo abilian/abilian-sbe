@@ -5,10 +5,9 @@ from abilian.core.extensions import db
 from abilian.core.util import get_params
 from flask import Blueprint, redirect, render_template, url_for
 
+from abilian.sbe.apps.social.models import Message
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.util import get_recent_entries
-
-from ..models import Message
 
 __all__ = ["social"]
 
@@ -22,7 +21,7 @@ route = social.route
 
 
 @route("/")
-def home():
+def home() -> str:
     ctx = {}
     entries = get_recent_entries(num=50)
     entries = ActivityEntryPresenter.wrap_collection(entries)

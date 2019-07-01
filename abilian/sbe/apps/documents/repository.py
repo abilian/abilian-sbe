@@ -1,9 +1,16 @@
 # coding=utf-8
 """"""
+import typing
+from typing import Optional, Union
+
 import sqlalchemy as sa
+from abilian.core.models.subjects import User
 from abilian.services.security import READ, Permission, security
 
 from .models import CmisObject, Document, Folder
+
+if typing.TYPE_CHECKING:
+    from abilian.sbe.app import Application
 
 
 class SecurityException(Exception):
@@ -14,16 +21,16 @@ class Repository:
     """A simple document repository, implementing the basic functionalities of
     the CMIS model."""
 
-    def __init__(self, app=None):
+    def __init__(self, app: Optional["Application"] = None) -> None:
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app):
-        self.app = app
+    def init_app(self, app: "Application") -> None:
+        # self.app = app
         app.extensions["content_repository"] = self
 
     @property
-    def root_folder(self):
+    def root_folder(self) -> Folder:
         folder = Folder.query.filter(Folder.parent == None).first()
         if folder:
             return folder
@@ -32,7 +39,7 @@ class Repository:
         folder = Folder(title="root")
         return folder
 
-    def get_object(self, id=None, path=None):
+    def get_object(self, id: Optional[int] = None, path: Optional[str] = None):
         """Get the CMIS object (document or folder) with either the given `id`
         or the given `path`.
 
@@ -40,48 +47,49 @@ class Repository:
         """
         if id:
             return self.get_object_by_id(id)
-        else:
+        elif path:
             return self.get_object_by_path(path)
+        else:
+            raise ValueError("id or path must be not null.")
 
     #
     # Id based navigation
     #
-    def get_object_by_id(self, id):
+    def get_object_by_id(self, id: int) -> Optional[CmisObject]:
         """Get the CMIS object (document or folder) with the given `id`.
 
         Returns None if the object doesn't exist.
         """
         obj = CmisObject.query.get(id)
-        if obj is not None and not isinstance(obj, CmisObject):
-            return None
+        # if obj is not None and not isinstance(obj, CmisObject):
+        #     return None
         return obj
 
-    def get_folder_by_id(self, id):
+    def get_folder_by_id(self, id: int) -> Optional[Folder]:
         """Get the folder with the given `id`.
 
         Returns None if the folder doesn't exist.
         """
         return Folder.query.get(id)
 
-    def get_document_by_id(self, id):
+    def get_document_by_id(self, id: int) -> Optional[Document]:
         """Get the document with the given `id`.
 
         Returns None if the document doesn't exist.
         """
-        document = Document.query.get(id)
-        return document
+        return Document.query.get(id)
 
     #
     # Path based navigation
     #
-    def get_object_by_path(self, path):
+    def get_object_by_path(self, path: str) -> Optional[CmisObject]:
         """Gets the CMIS object (document or folder) with the given `path`.
 
         Returns None if the object doesn't exist.
         """
         return self.root_folder.get_object_by_path(path)
 
-    def get_folder_by_path(self, path):
+    def get_folder_by_path(self, path: str) -> Optional[Folder]:
         """Gets the folder with the given `path`.
 
         Returns None if the folder doesn't exist.
@@ -92,7 +100,7 @@ class Repository:
         else:
             return obj
 
-    def get_document_by_path(self, path):
+    def get_document_by_path(self, path: str) -> Optional[Document]:
         """Gets the document with the given `path`.
 
         Returns None if the document doesn't exist.
@@ -106,22 +114,32 @@ class Repository:
     #
     # COPY / MOVE support
     #
-    def copy_object(self, obj, dest_folder, dest_title=None):
+    def copy_object(
+        self,
+        obj: Union[Document, Folder],
+        dest_folder: Folder,
+        dest_title: Optional[str] = None,
+    ) -> Union[Document, Folder]:
         new_obj = obj.clone(title=dest_title, parent=dest_folder)
         if obj.is_folder:
             for child in obj.children:
                 self.copy_object(child, new_obj)
         return new_obj
 
-    def move_object(self, obj, dest_folder, dest_title=None):
+    def move_object(
+        self,
+        obj: Union[Document, Folder],
+        dest_folder: Folder,
+        dest_title: Optional[str] = None,
+    ) -> None:
         obj.parent = dest_folder
         if dest_title:
             obj.title = dest_title
 
-    def rename_object(self, obj, title):
+    def rename_object(self, obj: Union[Document, Folder], title: str) -> None:
         obj.title = title
 
-    def delete_object(self, obj):
+    def delete_object(self, obj: Union[Document, Folder]) -> None:
         if obj.is_root_folder:
             raise Exception("Can't delete root folder.")
 
@@ -135,10 +153,10 @@ class Repository:
     #
     # Locking (TODO)
     #
-    def is_locked(self, obj):
+    def is_locked(self, obj) -> bool:
         return False
 
-    def can_unlock(self, obj):
+    def can_unlock(self, obj) -> bool:
         return True
 
     def lock(self, obj):
@@ -150,7 +168,7 @@ class Repository:
     #
     # Security / access rights
     #
-    def has_permission(self, user, permission, obj):
+    def has_permission(self, user: User, permission: Permission, obj) -> bool:
         assert isinstance(permission, Permission)
         return security.has_permission(user, permission, obj, inherit=True)
 

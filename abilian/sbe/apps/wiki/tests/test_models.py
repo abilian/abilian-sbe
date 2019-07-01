@@ -16,7 +16,7 @@ def test_wikilink_extension(text, db, req_ctx):
     qtext = str(quote_plus(text.encode("utf-8")))
     wikilink = "[[" + text + "]]"
 
-    def build_url(label, base, end):
+    def build_url(label: str, base: str, end: str) -> str:
         print("build_url called")
         return "/?title=" + quote_plus(label.encode("utf-8")) + end
 
@@ -27,7 +27,7 @@ def test_wikilink_extension(text, db, req_ctx):
     }
     md = Markdown(**ctx)
 
-    def check(page_exists):
+    def check(page_exists: bool) -> None:
         page_exists_mock = mock.MagicMock(return_value=page_exists)
         with mock.patch("abilian.sbe.apps.wiki.markup.page_exists", page_exists_mock):
             result = md.convert(wikilink)

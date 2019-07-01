@@ -5,10 +5,10 @@ from datetime import datetime
 from flask import url_for
 from pytest import mark
 
-from ..models import Event
+from abilian.sbe.apps.calendar.models import Event
 
 
-def test_create_event():
+def test_create_event() -> None:
     start = datetime.now()
     event = Event(name="Test thread", start=start)
     assert event  # TODO

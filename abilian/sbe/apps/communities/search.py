@@ -1,11 +1,16 @@
 # coding=utf-8
 """"""
 import logging
+from typing import Any, Dict, Union
 
 import whoosh.fields as wf
 import whoosh.query as wq
 from flask import g
 from flask_login import current_user
+from whoosh.query.compound import Or
+from whoosh.query.terms import Term
+
+from abilian.sbe.app import Application
 
 from .models import Membership
 
@@ -26,7 +31,7 @@ _FIELDS = [
 ]
 
 
-def init_app(app):
+def init_app(app: Application) -> None:
     """Add community fields to indexing service schema."""
     indexing = app.services["indexing"]
     indexing.register_search_filter(filter_user_communities)
@@ -49,7 +54,7 @@ def init_app(app):
             schema.add(fieldname, field)
 
 
-def filter_user_communities():
+def filter_user_communities() -> Union[Or, Term]:
     if g.is_manager:
         return None
 
@@ -72,7 +77,7 @@ def filter_user_communities():
     return filter_q
 
 
-def mark_non_community_content(document, obj):
+def mark_non_community_content(document: Dict[str, Any], obj: Any) -> Dict[str, Any]:
     if _COMMUNITY_CONTENT_FIELDNAME not in document:
         document[_COMMUNITY_CONTENT_FIELDNAME] = getattr(
             obj, _COMMUNITY_CONTENT_FIELDNAME, False

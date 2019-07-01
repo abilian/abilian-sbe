@@ -25,7 +25,7 @@ DEFAULT_GROUP_MUGSHOT = (
 
 
 @social.route("/groups/")
-def groups():
+def groups() -> str:
     tab = request.args.get("tab", "all_groups")
     if tab == "all_groups":
         groups = Group.query.order_by(Group.name).all()

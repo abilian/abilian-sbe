@@ -9,7 +9,7 @@ import tempfile
 from datetime import datetime
 from functools import partial
 from io import StringIO
-from typing import Any, List
+from typing import IO, Any, Dict, Iterator, List, Tuple
 from urllib.parse import quote
 from zipfile import ZipFile, is_zipfile
 
@@ -30,6 +30,7 @@ from flask import Markup, current_app, flash, g, jsonify, make_response, \
     session
 from flask_login import current_user
 from sqlalchemy import func
+from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import InternalServerError
 from werkzeug.wrappers import Response
 from xlwt import Workbook, easyxf
@@ -51,7 +52,7 @@ __all__ = ()
 
 
 @route("/")
-def index():
+def index() -> Response:
     folder = g.community.folder
     url = url_for(folder)
     return redirect(url)
@@ -545,8 +546,7 @@ def iter_permissions(folder, user):
     )
 
     for subfolder in subfolders:
-        for permission in iter_permissions(subfolder, user):
-            yield permission
+        yield from iter_permissions(subfolder, user)
 
 
 #
@@ -554,7 +554,7 @@ def iter_permissions(folder, user):
 #
 @route("/folder/<int:folder_id>", methods=["POST"])
 @csrf.protect
-def folder_post(folder_id):
+def folder_post(folder_id: int) -> Response:
     """A POST on a folder can result on several different actions (depending on
     the `action` parameter)."""
     folder = get_folder(folder_id)
@@ -615,7 +615,9 @@ ARCHIVE_IGNORE_FILES = {
 ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate("*/")))
 
 
-def explore_archive(fd, uncompress=False):
+def explore_archive(
+    fd: FileStorage, uncompress: bool = False
+) -> Iterator[Tuple[List[str], IO[bytes]]]:
     """Given an uploaded file descriptor, return it or a list of archive
     content.
 
@@ -659,14 +661,14 @@ def explore_archive(fd, uncompress=False):
             yield filepath, zip_fd
 
 
-def upload_new(folder):
+def upload_new(folder: Folder) -> Response:
     check_write_access(folder)
     session = db.session()
     base_folder = folder
     uncompress_files = "uncompress_files" in request.form
     fds = request.files.getlist("file")
     created_count = 0
-    path_cache = {}  # mapping folder path in zip: folder instance
+    path_cache: Dict[str, Folder] = {}  # mapping folder path in zip -> folder instance
 
     for upload_fd in fds:
         for filepath, fd in explore_archive(upload_fd, uncompress=uncompress_files):
@@ -709,15 +711,15 @@ def upload_new(folder):
     return redirect(url_for(folder))
 
 
-def download_multiple(folder):
+def download_multiple(folder: Folder) -> Response:
     folders, docs = get_selected_objects(folder)
     if not folders:
         folders = [folder]
 
-    def rel_path(path, content):
+    def rel_path(path: str, content: Document) -> str:
         return f"{path}/{content.title}"
 
-    def zip_folder(zipfile, folder, path=""):
+    def zip_folder(zipfile: ZipFile, folder: Folder, path: str = "") -> ZipFile:
         for doc in folder.documents:
             doc_path = rel_path(path, doc)
             zipfile.writestr(doc_path, doc.content or b"")
@@ -901,7 +903,7 @@ def objects_which_exist_in_dest(objects, dest):
     return exist_in_dest
 
 
-def create_subfolder(folder):
+def create_subfolder(folder: Folder) -> Response:
     check_write_access(folder)
 
     title = request.form.get("title", "")

@@ -48,5 +48,5 @@ class Sidebars:
 
 
 @social.before_request
-def inject_sidebars():
+def inject_sidebars() -> None:
     g.sidebars = Sidebars()

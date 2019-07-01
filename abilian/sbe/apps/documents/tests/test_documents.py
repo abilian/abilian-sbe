@@ -2,22 +2,26 @@
 """"""
 import sys
 from pathlib import Path
+from typing import IO
 
 import pytest
 from abilian.core.models.subjects import User
 from abilian.testing.util import login
+from flask.ctx import RequestContext
+from sqlalchemy.orm import Session
 
+from abilian.sbe.app import Application
+from abilian.sbe.apps.communities.models import Community
+from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.documents.views.folders import explore_archive
 
-from ..models import Document, Folder
 
-
-def open_file(filename):
+def open_file(filename: str) -> IO[bytes]:
     path = Path(__file__).parent / "data" / "dummy_files" / filename
     return path.open("rb")
 
 
-def test_document(app, session, req_ctx):
+def test_document(app: Application, session: Session, req_ctx: RequestContext) -> None:
     root = Folder(title="root")
     doc = Document(parent=root, title="test")
     data = open_file("onepage.pdf").read()
@@ -30,7 +34,9 @@ def test_document(app, session, req_ctx):
     doc.ensure_antivirus_scheduled()
 
 
-def test_antivirus_properties(app, session, req_ctx):
+def test_antivirus_properties(
+    app: Application, session: Session, req_ctx: RequestContext
+) -> None:
     root = Folder(title="root")
     doc = Document(parent=root, title="test")
     doc.set_content(b"content", "text/plain")
@@ -97,7 +103,13 @@ def test_antivirus_properties(app, session, req_ctx):
     assert doc.antivirus_ok is True
 
 
-def test_folder_indexed(app, session, community1, community2, req_ctx):
+def test_folder_indexed(
+    app: Application,
+    session: Session,
+    community1: Community,
+    community2: Community,
+    req_ctx: RequestContext,
+) -> None:
     index_service = app.services["indexing"]
     index_service.start()
 

@@ -1,6 +1,7 @@
 # coding=utf-8
 """"""
 import imghdr
+from typing import List, Tuple
 
 import sqlalchemy as sa
 from abilian.core.models.subjects import Group
@@ -12,17 +13,19 @@ from flask import request
 from flask_babel import gettext as _
 from flask_babel import lazy_gettext as _l
 from PIL import Image
-from wtforms.fields import BooleanField, StringField, TextAreaField
+from wtforms.fields import BooleanField
+from wtforms.fields.core import StringField
+from wtforms.fields.simple import TextAreaField
 from wtforms.validators import ValidationError, data_required, optional
 
 from .models import Community
 
 
-def strip(s):
+def strip(s: str) -> str:
     return s.strip()
 
 
-def _group_choices():
+def _group_choices() -> List[Tuple[str, str]]:
     m_prop = Group.members.property
     membership = m_prop.secondary
     query = Group.query.session.query(
@@ -89,7 +92,7 @@ class CommunityForm(Form):
         label=_l("Has a forum"), widget=BooleanWidget(on_off_mode=True)
     )
 
-    def validate_name(self, field):
+    def validate_name(self, field: StringField) -> None:
         name = field.data = field.data.strip()
 
         if name and field.object_data:
@@ -101,7 +104,7 @@ class CommunityForm(Form):
                         _("A community with this name already exists")
                     )
 
-    def validate_description(self, field):
+    def validate_description(self, field: TextAreaField) -> None:
         field.data = field.data.strip()
 
     # FIXME: code duplicated from the user edit form (UserProfileForm).

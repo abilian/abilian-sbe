@@ -9,7 +9,8 @@ import mimetypes
 import threading
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any, Collection, Dict, Iterator, List, Optional, Tuple, \
+    Union
 
 import pkg_resources
 import sqlalchemy as sa
@@ -28,9 +29,11 @@ from flask_login import current_user
 from sqlalchemy.event import listen, listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, foreign, relationship, remote
+from sqlalchemy.orm.attributes import Event
 from sqlalchemy.orm.session import Session
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, Text, UnicodeText
+from sqlalchemy.util.langhelpers import symbol
 from toolz import first
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
@@ -57,11 +60,11 @@ accent_folder = RegexTokenizer() | LowercaseFilter() | CharsetFilter(accent_map)
 ICONS_FOLDER = pkg_resources.resource_filename("abilian.sbe", "static/fileicons")
 
 
-def icon_url(filename):
+def icon_url(filename: str) -> str:
     return url_for("abilian_sbe_static", filename="fileicons/" + filename)
 
 
-def icon_exists(filename):
+def icon_exists(filename: str) -> bool:
     return Path(ICONS_FOLDER, filename).is_file()
 
 
@@ -118,18 +121,20 @@ class CmisObject(InheritSecurity, Entity):
     # title is defined has an hybrid property to allow 2 way sync name <->
     # title
     @hybrid_property
-    def title(self):
+    def title(self: str) -> str:
         return self._title
 
     @title.setter
-    def title(self, title):
+    def title(self, title: str) -> None:
         # set title before setting name, so that we don't enter an infinite loop
         # with _cmis_sync_name_title
         self._title = title
         if self.name != title:
             self.name = title
 
-    def clone(self, title=None, parent=None):
+    def clone(
+        self, title: Optional[str] = None, parent: Optional["Folder"] = None
+    ) -> "CmisObject":
         if not title:
             title = self.title
         new_obj = self.__class__(title=title, name=title, parent=parent)
@@ -151,26 +156,26 @@ class CmisObject(InheritSecurity, Entity):
         return new_obj
 
     @property
-    def path(self):
+    def path(self) -> str:
         if self.parent:
             return self.parent.path + "/" + self.title
         else:
             return ""
 
     @property
-    def is_folder(self):
+    def is_folder(self) -> bool:
         return self.sbe_type == "cmis:folder"
 
     @property
-    def is_document(self):
+    def is_document(self) -> bool:
         return self.sbe_type == "cmis:document"
 
     @property
-    def is_root_folder(self):
+    def is_root_folder(self) -> bool:
         return self._parent_id is None
 
     @property
-    def community(self):
+    def community(self) -> Optional["Community"]:
         if not self.is_folder:
             return self.parent and self.parent.community
 
@@ -181,7 +186,9 @@ class CmisObject(InheritSecurity, Entity):
 
 
 @listens_for(CmisObject.name, "set", propagate=True, active_history=True)
-def _cmis_sync_name_title(entity, new_value, old_value, initiator):
+def _cmis_sync_name_title(
+    entity: CmisObject, new_value: str, old_value: Union[symbol, str], initiator: Event
+) -> str:
     """Synchronize CmisObject name -> title.
 
     CmisObject.title -> name is done via hybrid_property, avoiding
@@ -201,21 +208,23 @@ class PathAndSecurityIndexable:
         ("_indexable_roles_and_users", ("allowed_roles_and_users",)),
     )
 
-    def _iter_to_root(self, skip_self=False):
+    def _iter_to_root(
+        self, skip_self: bool = False
+    ) -> Iterator[Union["Document", "Folder"]]:
         obj = self if not skip_self else self.parent
         while obj:
             yield obj
             obj = obj.parent
 
     @property
-    def _indexable_parent_ids(self):
+    def _indexable_parent_ids(self) -> str:
         """Return a string made of ids separated by a slash: "/1/3/4/5", "5"
         being self.parent.id."""
         ids = [str(obj.id) for obj in self._iter_to_root(skip_self=True)]
         return "/" + "/".join(reversed(ids))
 
     @property
-    def _indexable_roles_and_users(self):
+    def _indexable_roles_and_users(self) -> str:
         """Returns a string made of type:id elements, like "user:2 group:1
         user:6"."""
         iter_from_root = reversed(list(self._iter_to_root()))
@@ -284,39 +293,35 @@ class Folder(PathAndSecurityIndexable, CmisObject):
         return icon_url("folder.png")
 
     @property
-    def children(self):
+    def children(self) -> List[Union["Document", "Folder"]]:
         return self.subfolders + self.documents
 
     @property
-    def document_count(self):
+    def document_count(self) -> int:
         count = len(self.documents)
         for f in self.subfolders:
             count += f.document_count
         return count
 
     @property
-    def depth(self):
-        # type: () -> int
+    def depth(self) -> int:
         if self.parent is None:
             return 0
 
         return self.parent.depth + 1
 
-    def create_subfolder(self, title):
-        # type: (str) -> Folder
+    def create_subfolder(self, title: str) -> "Folder":
         subfolder = Folder(title=title, parent=self)
         assert subfolder in self.children
         return subfolder
 
-    def create_document(self, title):
-        # type: (str) -> Document
+    def create_document(self, title: str) -> "Document":
         doc = Document(title=title, parent=self)
         assert doc.parent == self
         assert doc in self.children
         return doc
 
-    def get_object_by_path(self, path):
-        # type: (str) -> Union[Document, Folder, None]
+    def get_object_by_path(self, path: str) -> Union["Document", "Folder", None]:
         assert path.startswith("/")
         assert "//" not in path
 
@@ -346,13 +351,13 @@ class Folder(PathAndSecurityIndexable, CmisObject):
     # Security related methods
     #
     @property
-    def filtered_children(self):
+    def filtered_children(self) -> List[Union["Folder", "Document"]]:
         return security.filter_with_permission(
             current_user, "read", self.children, inherit=True
         )
 
     @property
-    def filtered_subfolders(self):
+    def filtered_subfolders(self) -> List["Folder"]:
         return security.filter_with_permission(
             current_user, "read", self.subfolders, inherit=True
         )
@@ -391,19 +396,18 @@ class Folder(PathAndSecurityIndexable, CmisObject):
 
         return sorted(assignments, key=key)
 
-    def members(self):
+    def members(self) -> Collection[User]:
         local_roles = self.get_local_roles_assignments()
         inherited_roles = (
             self.get_inherited_roles_assignments() if self.inherit_security else []
         )
 
         def _iter_users(roles):
-            for principal, user in roles:
+            for principal, _user in roles:
                 if isinstance(principal, User):
                     yield principal
                 else:
-                    for user in itertools.chain(principal.members, principal.admins):
-                        yield user
+                    yield from itertools.chain(principal.members, principal.admins)
 
         members = set(_iter_users(itertools.chain(local_roles, inherited_roles)))
         members = sorted(members, key=lambda u: (u.last_name, u.first_name))
@@ -442,20 +446,19 @@ class BaseContent(CmisObject):
     )
 
     @property
-    def content(self):
-        # type: () -> bytes
+    def content(self) -> bytes:
         return self.content_blob.value
 
     @content.setter
-    def content(self, value):
-        # type: (bytes) -> None
+    def content(self, value: bytes) -> None:
         assert isinstance(value, bytes)
         self.content_blob = Blob()
         self.content_blob.value = value
         self.content_length = len(value)
 
-    def set_content(self, content, content_type=None):
-        # type: (bytes, Any) -> None
+    def set_content(self, content: bytes, content_type: str = "") -> None:
+        assert isinstance(content_type, str)
+
         new_digest = md5(content)
         if new_digest == self.content_digest:
             return
@@ -466,15 +469,16 @@ class BaseContent(CmisObject):
         if content_type:
             self.content_type = content_type
 
-    def find_content_type(self, content_type=""):
+    def find_content_type(self, content_type: str = "") -> str:
         """Find possibly more appropriate content_type for this instance.
 
         If `content_type` is a binary one, try to find a better one
         based on content name so that 'xxx.pdf' is not flagged as
         binary/octet-stream for example
         """
+        assert isinstance(content_type, str)
+
         if content_type not in (
-            None,
             "",
             "application/octet-stream",
             "binary/octet-stream",
@@ -499,7 +503,7 @@ class BaseContent(CmisObject):
         return content_type
 
     @property
-    def icon(self):
+    def icon(self) -> str:
         return icon_for(self.content_type)
 
 
@@ -527,8 +531,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     PREVIEW_SIZE = 700
 
     @property
-    def preview_size(self):
-        # type: () -> int
+    def preview_size(self) -> int:
         return self.PREVIEW_SIZE
 
     def has_preview(self, size=None, index=0):
@@ -539,8 +542,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return converter.has_image(self.content_digest, self.content_type, index, size)
 
     @property
-    def digest(self):
-        # type: () -> str
+    def digest(self) -> str:
         """Alias for content_digest."""
         return self.content_digest
 
@@ -566,7 +568,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     sbe_type = "cmis:document"
 
     # antivirus status
-    def ensure_antivirus_scheduled(self):
+    def ensure_antivirus_scheduled(self) -> bool:
         if not self.antivirus_required:
             return True
 
@@ -584,15 +586,16 @@ class Document(BaseContent, PathAndSecurityIndexable):
         # schedule a new task
         self.content_blob.meta["antivirus_task_id"] = str(uuid.uuid4())
         async_conversion(self)
+        return False
 
     @property
-    def antivirus_scanned(self):
+    def antivirus_scanned(self) -> bool:
         """True if antivirus task was run, even if antivirus didn't return a
         result."""
         return self.content_blob and "antivirus" in self.content_blob.meta
 
     @property
-    def antivirus_status(self):
+    def antivirus_status(self) -> Optional[bool]:
         """
         True: antivirus has scanned file: no virus
         False: antivirus has scanned file: virus detected
@@ -601,7 +604,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self.content_blob and self.content_blob.meta.get("antivirus")
 
     @property
-    def antivirus_required(self):
+    def antivirus_required(self) -> bool:
         """True if antivirus doesn't need to be run."""
         required = current_app.config["ANTIVIRUS_CHECK_REQUIRED"]
         return required and (
@@ -609,7 +612,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         )
 
     @property
-    def antivirus_ok(self):
+    def antivirus_ok(self) -> bool:
         """True if user can safely access document content."""
         required = current_app.config["ANTIVIRUS_CHECK_REQUIRED"]
         if required:
@@ -619,14 +622,13 @@ class Document(BaseContent, PathAndSecurityIndexable):
 
     # R/W properties
     @BaseContent.content.setter
-    def content(self, value):
+    def content(self, value: bytes) -> None:
         BaseContent.content.fset(self, value)
         self.content_blob.meta["antivirus_task_id"] = str(uuid.uuid4())
         self.pdf_blob = None
         self.text_blob = None
 
-    def set_content(self, content, content_type=None):
-        # type: (bytes, Any) -> None
+    def set_content(self, content: bytes, content_type: str = "") -> None:
         super().set_content(content, content_type)
         async_conversion(self)
 
@@ -637,24 +639,24 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self.pdf_blob and self.pdf_blob.value
 
     @pdf.setter
-    def pdf(self, value):
+    def pdf(self, value: bytes) -> None:
         assert isinstance(value, bytes)
         self.pdf_blob = Blob()
         self.pdf_blob.value = value
 
     # `text` is an Unicode value.
     @property
-    def text(self):
+    def text(self) -> str:
         return self.text_blob.value.decode("utf8") if self.text_blob is not None else ""
 
     @text.setter
-    def text(self, value):
+    def text(self, value: str) -> None:
         assert isinstance(value, str)
         self.text_blob = Blob()
         self.text_blob.value = value.encode("utf8")
 
     @property
-    def extra_metadata(self):
+    def extra_metadata(self) -> Dict[str, Any]:
         if not hasattr(self, "_extra_metadata"):
             if self._extra_metadata is not None:
                 self._extra_metadata = json.loads(self.extra_metadata_json)
@@ -663,13 +665,13 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self._extra_metadata
 
     @extra_metadata.setter
-    def extra_metadata(self, extra_metadata):
+    def extra_metadata(self, extra_metadata: Dict[str, Any]) -> None:
         self._extra_metadata = extra_metadata
         self.extra_metadata_json = str(json.dumps(extra_metadata))
 
     # TODO: or use SQLAlchemy alias?
     @property
-    def file_name(self):
+    def file_name(self) -> str:
         return self.title
 
     def __repr__(self):
@@ -731,7 +733,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         self.meta.changed()
 
 
-def icon_for(content_type):
+def icon_for(content_type: str) -> str:
     for extension, mime_type in mimetypes.types_map.items():
         if mime_type == content_type:
             extension = extension[1:]
@@ -746,19 +748,19 @@ def icon_for(content_type):
 _async_data = threading.local()
 
 
-def _get_documents_queue():
+def _get_documents_queue() -> List[Tuple[Document, str]]:
     if not hasattr(_async_data, "documents"):
         _async_data.documents = []
     return _async_data.documents
 
 
-def async_conversion(document):
+def async_conversion(document: Document) -> None:
     _get_documents_queue().append(
         (document, document.content_blob.meta.get("antivirus_task_id"))
     )
 
 
-def _trigger_conversion_tasks(session):
+def _trigger_conversion_tasks(session: Session) -> None:
     if (
         # this commit is not from the application session
         session is not db.session()
@@ -774,7 +776,7 @@ def _trigger_conversion_tasks(session):
             tasks.process_document.apply_async((doc.id,), task_id=task_id)
 
 
-def setup_listener():
+def setup_listener() -> None:
     mark_attr = "__abilian_sa_listening"
     if getattr(_trigger_conversion_tasks, mark_attr, False):
         return

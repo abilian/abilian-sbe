@@ -12,6 +12,7 @@ all: test lint
 
 install:
 	poetry install
+	yarn
 
 #
 # Environment
@@ -97,7 +98,7 @@ lint-py:
 	# @make lint-mypy
 
 lint-flake8:
-	flake8 abilian tests
+	-flake8 abilian tests
 
 lint-mypy:
 	mypy abilian

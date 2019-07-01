@@ -2,6 +2,7 @@
 """"""
 import click
 import sqlalchemy as sa
+import sqlalchemy.orm
 from flask.cli import with_appcontext
 
 from . import tasks

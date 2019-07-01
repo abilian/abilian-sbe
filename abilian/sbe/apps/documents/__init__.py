@@ -1,8 +1,12 @@
 # coding=utf-8
 """Folders / Documents module."""
+import typing
+
+if typing.TYPE_CHECKING:
+    from abilian.sbe.app import Application
 
 
-def register_plugin(app):
+def register_plugin(app: "Application") -> None:
     from .views import blueprint
     from .models import setup_listener
     from .cli import antivirus

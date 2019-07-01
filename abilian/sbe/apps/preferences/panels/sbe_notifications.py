@@ -23,10 +23,10 @@ class SbeNotificationsPanel(PreferencePanel):
     id = "sbe_notifications"
     label = _l("Community notifications")
 
-    def is_accessible(self):
+    def is_accessible(self) -> bool:
         return True
 
-    def get(self):
+    def get(self) -> str:
         # Manual security check, should be done by the framework instead.
         if not self.is_accessible():
             raise Forbidden()

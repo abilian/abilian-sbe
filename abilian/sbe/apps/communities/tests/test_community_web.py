@@ -1,14 +1,24 @@
 # coding=utf-8
 """"""
+from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.services.security import Admin
 from abilian.services.security.service import SecurityService
 from abilian.testing.util import client_login
 from flask import url_for
+from flask.ctx import RequestContext
+from flask.testing import FlaskClient
 
-from ..models import Community
+from abilian.sbe.app import Application
+from abilian.sbe.apps.communities.models import Community
 
 
-def test_index(community1, app, db, client, req_ctx):
+def test_index(
+    community1: Community,
+    app: Application,
+    db: SQLAlchemy,
+    client: FlaskClient,
+    req_ctx: RequestContext,
+) -> None:
     security_service = app.services["security"]  # type: SecurityService
     security_service.start()
 
@@ -18,7 +28,13 @@ def test_index(community1, app, db, client, req_ctx):
         assert response.status_code == 200
 
 
-def test_community_home(community1, community2, app, client, req_ctx):
+def test_community_home(
+    community1: Community,
+    community2: Community,
+    app: Application,
+    client: FlaskClient,
+    req_ctx: RequestContext,
+) -> None:
     security_service = app.services["security"]  # type: SecurityService
     security_service.start()
 
@@ -40,7 +56,13 @@ def test_community_home(community1, community2, app, client, req_ctx):
         assert response.status_code == 403
 
 
-def test_new(community1, app, client, db, req_ctx):
+def test_new(
+    community1: Community,
+    app: Application,
+    client: FlaskClient,
+    db: SQLAlchemy,
+    req_ctx: RequestContext,
+) -> None:
     security_service = app.services["security"]  # type: SecurityService
     # security_service.use_cache = False
     security_service.start()
@@ -59,7 +81,12 @@ def test_new(community1, app, client, db, req_ctx):
         assert response.status_code == 200
 
 
-def test_community_settings(app, client, community1, req_ctx):
+def test_community_settings(
+    app: Application,
+    client: FlaskClient,
+    community1: Community,
+    req_ctx: RequestContext,
+) -> None:
     security_service = app.services["security"]  # type: SecurityService
     security_service.start()
 
@@ -86,7 +113,14 @@ def test_community_settings(app, client, community1, req_ctx):
         assert "edited community" in response.get_data(as_text=True)
 
 
-def test_members(app, client, db, community1, community2, req_ctx):
+def test_members(
+    app: Application,
+    client: FlaskClient,
+    db: SQLAlchemy,
+    community1: Community,
+    community2: Community,
+    req_ctx: RequestContext,
+) -> None:
     security_service = app.services["security"]  # type: SecurityService
     security_service.start()
 

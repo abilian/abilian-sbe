@@ -1,6 +1,6 @@
 # coding=utf-8
 import re
-from typing import List, Tuple
+from typing import Dict, List, Tuple, Union
 
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
@@ -9,6 +9,7 @@ from abilian.web import url_for
 from flask import current_app, flash, g, request
 from flask_babel import gettext as _
 from flask_login import current_user
+from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
 from abilian.sbe.apps.documents.models import Document, Folder
@@ -18,12 +19,12 @@ from abilian.sbe.apps.documents.repository import repository
 #
 # Utils
 #
-def breadcrumbs_for(object):
-    if object is None:
+def breadcrumbs_for(obj: Document) -> List[Dict[str, str]]:
+    if obj is None:
         return []
 
-    bc = [{"label": object.title}]
-    parent = object.parent
+    bc = [{"label": obj.title}]
+    parent = obj.parent
     while parent and not parent.is_root_folder:
         bc = [{"label": parent.title, "path": url_for(parent)}] + bc
         parent = parent.parent
@@ -31,7 +32,7 @@ def breadcrumbs_for(object):
     return bc
 
 
-def get_document(id):
+def get_document(id: int) -> Document:
     """Gets a document given its id.
 
     Will raise appropriates errors in case the document doesn't exist
@@ -43,7 +44,7 @@ def get_document(id):
     return doc
 
 
-def get_folder(id):
+def get_folder(id: int) -> Folder:
     """Gets a folder given its id.
 
     Will raise appropriates errors in case the folder doesn't exist
@@ -55,7 +56,7 @@ def get_folder(id):
     return folder
 
 
-def get_new_filename(folder, name):
+def get_new_filename(folder: Folder, name: str) -> str:
     """Given a desired name for a new content in folder, return a name suitable
     for new content.
 
@@ -65,9 +66,9 @@ def get_new_filename(folder, name):
     renamed = name in existing
 
     if renamed:
-        name = name.rsplit(".", 1)
-        ext = ".{}".format(name[1]) if len(name) > 1 else ""
-        name = name[0]
+        components = name.rsplit(".", 1)
+        ext = ".{}".format(components[1]) if len(components) > 1 else ""
+        name = components[0]
         prefix = f"{name}-"
         prefix_len = len(prefix)
         # find all numbered suffixes from name-1.ext, name-5.ext,...
@@ -76,30 +77,30 @@ def get_new_filename(folder, name):
             for n in existing
             if n.startswith(prefix) and n.endswith(ext)
         )
-        suffixes = [int(val) for val in suffixes if re.match(r"^\d+$", val)]
+        int_suffixes = [int(val) for val in suffixes if re.match(r"^\d+$", val)]
 
-        index = max(0, 0, *suffixes) + 1  # 0, 0: in case suffixes is empty
+        index = max(0, 0, *int_suffixes) + 1  # 0, 0: in case suffixes is empty
         name = f"{name}-{index}{ext}"
 
     return name
 
 
-def create_document(folder, fs):
+def create_document(folder: Folder, fs: FileStorage) -> Document:
     check_write_access(folder)
+    assert isinstance(fs.filename, str)
 
-    if isinstance(fs.filename, str):
-        name = fs.filename
-    else:
-        name = str(fs.filename, errors="ignore")
+    name = fs.filename
 
     if not name:
-        flash(_("Document name can't be empty."), "error")
-        return None
+        msg = "Document name can't be empty."
+        flash(_(msg), "error")
+        raise ValueError(msg)
 
     original_name = name
     name = get_new_filename(folder, name)
     doc = folder.create_document(title=name)
-    doc.set_content(fs.read(), fs.content_type)
+    content_type = fs.content_type or ""
+    doc.set_content(fs.read(), content_type)
 
     if original_name != name:
         # set message after document has been successfully created!
@@ -156,7 +157,7 @@ def get_selected_objects(folder):
     return folders, docs
 
 
-def check_read_access(obj):
+def check_read_access(obj: Union[Document, Folder]) -> bool:
     """Checks the current user has appropriate read access on the given object.
 
     Will raise appropriates errors in case the object doesn't exist
@@ -174,7 +175,7 @@ def check_read_access(obj):
     raise Forbidden()
 
 
-def check_write_access(obj):
+def check_write_access(obj: Union[Document, Folder]) -> None:
     """Checks the current user has appropriate write access on the given
     object.
 
@@ -218,7 +219,7 @@ def check_manage_access(obj):
     raise Forbidden()
 
 
-def match(mime_type, patterns):
+def match(mime_type: str, patterns: Tuple[str, str, str]) -> bool:
     if not mime_type:
         mime_type = "application/binary"
     for pat in patterns:
