@@ -737,7 +737,7 @@ def icon_for(content_type: str) -> str:
     for extension, mime_type in mimetypes.types_map.items():
         if mime_type == content_type:
             extension = extension[1:]
-            icon = "%s.png" % extension
+            icon = f"{extension}.png"
             if icon_exists(icon):
                 return icon_url(icon)
 

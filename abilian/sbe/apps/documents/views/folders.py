@@ -235,7 +235,7 @@ def permissions(folder_id):
                     'On {date}, {manager} has revoked role "{role}" from ' "{principal}"
                 )
             else:
-                raise Exception("Unknown audit entry type %s" % e.op)
+                raise Exception(f"Unknown audit entry type {e.op}")
 
             principal = ""
             if self.entry.user:

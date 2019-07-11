@@ -243,7 +243,7 @@ def test_zip(
         assert response.status_code == 302
 
         doc = folder.children[0]
-        data = {"action": "download", "object-selected": ["cmis:document:%d" % doc.id]}
+        data = {"action": "download", "object-selected": [f"cmis:document:{doc.id:d}"]}
         url = url_for(
             "documents.folder_post", community_id=community.slug, folder_id=folder.id
         )
@@ -281,7 +281,7 @@ def test_recursive_zip(
 
         data3 = {
             "action": "download",
-            "object-selected": ["cmis:folder:%d" % my_folder.id],
+            "object-selected": [f"cmis:folder:{my_folder.id:d}"],
         }
         url = url_for(
             "documents.folder_post", community_id=community.slug, folder_id=folder.id

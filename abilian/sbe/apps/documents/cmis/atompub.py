@@ -203,7 +203,7 @@ def getObject():
     log.debug("URL: " + request.url)
 
     options = get_options(request.args)
-    log.debug("Options: %s" % options)
+    log.debug(f"Options: {options}")
 
     if id:
         obj = repository.get_object_by_id(id)
@@ -393,7 +393,7 @@ def createObject():
         db.session.commit()
 
     else:
-        raise Exception("Unknown object type: %s" % type)
+        raise Exception(f"Unknown object type: {type}")
 
     result = to_xml(new_object)
     log_result(result)

@@ -67,7 +67,7 @@ def get_new_filename(folder: Folder, name: str) -> str:
 
     if renamed:
         components = name.rsplit(".", 1)
-        ext = ".{}".format(components[1]) if len(components) > 1 else ""
+        ext = f".{components[1]}" if len(components) > 1 else ""
         name = components[0]
         prefix = f"{name}-"
         prefix_len = len(prefix)

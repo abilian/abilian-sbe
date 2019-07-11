@@ -60,4 +60,4 @@ def activity_time_format(time: datetime, now: datetime = None) -> str:
     if time.year == now.year:
         return f"{month_abbreviation} {time.day}"
 
-    return "{} {}".format(month_abbreviation, str(time.year))
+    return f"{month_abbreviation} {str(time.year)}"

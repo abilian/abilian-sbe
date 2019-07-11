@@ -43,7 +43,7 @@ class Entry:
         elif self.obj.sbe_type == "cmis:document":
             result = render_template("cmis/document.xml", **ctx)
         else:
-            raise Exception("Unknown base object type: %s" % self.obj.sbe_type)
+            raise Exception(f"Unknown base object type: {self.obj.sbe_type}")
 
         if "no_xml_header" not in options:
             result = XML_HEADER + result

@@ -114,7 +114,7 @@ def get(path):
     file_name = obj.file_name.encode("utf8")
     headers = {
         "Content-Type": obj.content_type,
-        "Content-Disposition": "attachment;filename=%s" % file_name,
+        "Content-Disposition": f"attachment;filename={file_name}",
     }
     return obj.content, HTTP_OK, headers
 
@@ -275,7 +275,7 @@ def lock(path):
         % token
     )
 
-    hlist = [("Content-Type", "text/xml"), ("Lock-Token", "<urn:uuid:%s>" % token)]
+    hlist = [("Content-Type", "text/xml"), ("Lock-Token", f"<urn:uuid:{token}>")]
 
     return Response(xml, headers=Headers.linked(hlist))  # , status ='423 Locked'
     # public Response lock(@Context UriInfo uriInfo) throws Exception {

@@ -164,7 +164,7 @@ def group_mugshot(group_id):
     # TODO: duplicated code (with user_mugshot). Extract common method.
     size = int(request.args.get("s", 55))
     if size > 500:
-        raise ValueError("Error, size = %d" % size)
+        raise ValueError(f"Error, size = {size:d}")
     group = Group.query.get(group_id)
 
     if not group:
