@@ -10,11 +10,11 @@ from urllib.request import urlopen
 
 BIND = "0.0.0.0"
 PORT = 4034
-HOME = "http://{}:{}/".format(BIND, PORT)
+HOME = f"http://{BIND}:{PORT}/"
 
 subprocess.call(["./bin/pip", "install", "gunicorn"])
 
-p = subprocess.Popen(["./bin/gunicorn", "wsgi:app", "-b", "{}:{}".format(BIND, PORT)])
+p = subprocess.Popen(["./bin/gunicorn", "wsgi:app", "-b", f"{BIND}:{PORT}"])
 
 try:
     # Just in case
