@@ -511,7 +511,7 @@ def iter_permissions(folder, user):
         """Sorts by name, groups first."""
         principal = item[0][0]
         is_user = isinstance(principal, User)
-        item_key = [is_user]  # type: List[Any]
+        item_key: List[Any] = [is_user]
         if is_user:
             last_name = principal.last_name or ""
             first_name = principal.first_name or ""

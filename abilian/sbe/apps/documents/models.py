@@ -100,7 +100,7 @@ class CmisObject(InheritSecurity, Entity):
     __table_args__ = (UniqueConstraint("_parent_id", "title"),)
 
     # Set in concrete classes
-    sbe_type = None  # type: str
+    sbe_type: str = None
 
     # Convenience default values
     content_length = 0
@@ -270,7 +270,7 @@ class PathAndSecurityIndexable:
 
 
 class Folder(PathAndSecurityIndexable, CmisObject):
-    __tablename__ = None  # type: str
+    __tablename__: str = None
     sbe_type = "cmis:folder"
 
     __indexable__ = True
@@ -417,7 +417,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
 class BaseContent(CmisObject):
     """A base class for cmisobject with an attached file."""
 
-    __tablename__ = None  # type: str
+    __tablename__: str = None
 
     _content_id = Column(Integer, db.ForeignKey(Blob.id))
     content_blob = relationship(Blob, cascade="all, delete", foreign_keys=[_content_id])
@@ -510,7 +510,7 @@ class BaseContent(CmisObject):
 class Document(BaseContent, PathAndSecurityIndexable):
     """A document, in the CMIS sense."""
 
-    __tablename__ = None  # type: str
+    __tablename__: str = None
 
     __indexable__ = True
     __index_to__ = (("text", ("text",)),)
@@ -534,9 +534,8 @@ class Document(BaseContent, PathAndSecurityIndexable):
     def preview_size(self) -> int:
         return self.PREVIEW_SIZE
 
-    def has_preview(self, size=None, index=0):
-        # type: (Optional[int], int) -> bool
-        if size is None:
+    def has_preview(self, size: int = 0, index: int = 0) -> bool:
+        if size == 0:
             size = self.PREVIEW_SIZE
 
         return converter.has_image(self.content_digest, self.content_type, index, size)
@@ -682,8 +681,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     # locking management; used for checkin/checkout - this could be generalized to
     # any entity
     @property
-    def lock(self):
-        # type: () -> Optional[Lock]
+    def lock(self) -> Optional[Lock]:
         """
         :returns: either `None` if no lock or current lock is expired; either the
         current valid :class:`Lock` instance.

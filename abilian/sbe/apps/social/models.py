@@ -1,6 +1,7 @@
 # coding=utf-8
 """Social content items: messages aka status updates, private messages, etc."""
 import re
+from typing import List
 
 from abilian.core.entities import SEARCHABLE, Entity
 from abilian.core.extensions import db
@@ -47,7 +48,7 @@ class Message(Entity):
     query = db.session.query_property(MessageQuery)
 
     @property
-    def tags(self):
+    def tags(self) -> List[str]:
         return re.findall(r"(?u)#([^\W]+)", self.content)
 
 

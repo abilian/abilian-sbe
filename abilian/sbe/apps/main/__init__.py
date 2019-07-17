@@ -6,7 +6,10 @@ in the future.
 """
 
 
-def register_plugin(app):
+from abilian.sbe.app import Application
+
+
+def register_plugin(app: Application) -> None:
     from .main import blueprint
 
     app.register_blueprint(blueprint)

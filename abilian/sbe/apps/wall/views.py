@@ -2,6 +2,7 @@
 """"""
 from datetime import date
 from itertools import groupby, islice
+from typing import Any, Dict
 
 import whoosh
 import whoosh.query as wq
@@ -24,7 +25,7 @@ route = wall.route
 
 
 @wall.url_value_preprocessor
-def set_current_tab(endpoint, values):
+def set_current_tab(endpoint: str, values: Dict[Any, Any]) -> None:
     g.current_tab = "wall"
 
 

@@ -2,7 +2,7 @@
 """"""
 import difflib
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import quote
 
 import sqlalchemy as sa
@@ -10,6 +10,7 @@ from abilian.core.extensions import db
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _l, _n
+from abilian.services.security.models import Permission
 from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
@@ -29,6 +30,8 @@ from whoosh.searching import Hit
 
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.common import object_viewers
+from abilian.sbe.apps.communities.models import Community
+from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.communities.views import \
     default_view_kw as community_dv_kw
 
@@ -40,7 +43,7 @@ route = wiki.route
 
 
 @wiki.url_value_preprocessor
-def init_wiki_values(endpoint, values):
+def init_wiki_values(endpoint: str, values: Dict[Any, Any]) -> None:
     g.current_tab = "wiki"
 
     endpoint = Endpoint("wiki.index", community_id=g.community.slug)
@@ -53,7 +56,7 @@ def init_wiki_values(endpoint, values):
 
 
 @route("/")
-def index():
+def index() -> Response:
     return redirect(url_for(".page", title="Home", community_id=g.community.slug))
 
 
@@ -84,7 +87,7 @@ class BasePageView:
         return self.obj is not None and self.obj.title == "Home"
 
     @property
-    def template_kwargs(self):
+    def template_kwargs(self) -> Dict[str, Union[WikiPageForm, WikiPage]]:
         """Template render arguments.
 
         You can override `base_template` for instance. Only `view` and
@@ -95,7 +98,9 @@ class BasePageView:
         kw["viewers"] = object_viewers(self.obj)
         return kw
 
-    def init_object(self, args, kwargs):
+    def init_object(
+        self, args: Tuple[Any], kwargs: Dict[str, Any]
+    ) -> Tuple[Tuple[Any], Dict[str, Any]]:
         title = kwargs["title"] = request.args["title"].strip()
         if title:
             try:
@@ -131,7 +136,9 @@ class PageView(BasePageView, ObjectView):
         default_view(wiki, WikiPage, id_attr=None, kw_func=wiki_page_default_view_kw)
     ]
 
-    def init_object(self, args, kwargs):
+    def init_object(
+        self, args: Tuple[Any], kwargs: Dict[str, Any]
+    ) -> Tuple[Tuple[Any], Dict[str, Any]]:
         args, kwargs = BasePageView.init_object(self, args, kwargs)
         if not self.obj:
             title = kwargs["title"]
@@ -160,10 +167,12 @@ route("/viewers")(PageViewers.as_view("page_viewers"))
 class PageEdit(BasePageView, ObjectEdit):
     # template = 'wiki/page_edit.html'
     title = _("Edit page")
-    last_revision = None  # type: int
+    last_revision: int = None
     _message_success = _l("Wiki page successfully edited.")
 
-    def init_object(self, args, kwargs):
+    def init_object(
+        self, args: Tuple[Any], kwargs: Dict[str, Any]
+    ) -> Tuple[Tuple, Dict[str, Any]]:
         if request.method != "POST":
             return super().init_object(args, kwargs)
 
@@ -175,7 +184,7 @@ class PageEdit(BasePageView, ObjectEdit):
 
         return args, kwargs
 
-    def get_form_kwargs(self):
+    def get_form_kwargs(self) -> Dict[str, Union[WikiPage, Permission, int]]:
         kwargs = ObjectEdit.get_form_kwargs(self)
         kwargs["page_id"] = kwargs["last_revision_id"] = None
         if self.obj is not None and self.obj.id:
@@ -186,7 +195,9 @@ class PageEdit(BasePageView, ObjectEdit):
             kwargs["last_revision_id"] = self.obj.last_revision.id
         return kwargs
 
-    def prepare_args(self, args, kwargs):
+    def prepare_args(
+        self, args: Tuple[Any], kwargs: Dict[str, Any]
+    ) -> Tuple[Tuple, Dict[str, Any]]:
         super().prepare_args(args, kwargs)
         last_revision_id = self.form.last_revision_id.data
         if last_revision_id:
@@ -210,7 +221,7 @@ class PageEdit(BasePageView, ObjectEdit):
         return None
 
     @property
-    def activity_target(self):
+    def activity_target(self) -> Union[CommunityPresenter, Community]:
         return self.obj.community
 
     def form_invalid(self):
@@ -266,7 +277,9 @@ class PageCreate(PageEdit, ObjectCreate):
 
     get_form_kwargs = ObjectCreate.get_form_kwargs
 
-    def init_object(self, args, kwargs):
+    def init_object(
+        self, args: Tuple[Any], kwargs: Dict[str, Any]
+    ) -> Tuple[Tuple[Any], Dict[str, Any]]:
         args, kwargs = ObjectCreate.init_object(self, args, kwargs)
         self.obj.community = g.community
         session = sa.orm.object_session(self.obj)
@@ -484,7 +497,7 @@ def wiki_export():
 #
 # Util
 #
-def get_page_by_title(title):
+def get_page_by_title(title: str) -> WikiPage:
     title = title.strip()
     page = WikiPage.query.filter(
         WikiPage.community_id == g.community.id, WikiPage.title == title
@@ -492,7 +505,7 @@ def get_page_by_title(title):
     return page
 
 
-def create_home_page():
+def create_home_page() -> WikiPage:
     path = Path(__file__).parent / "data" / "default_page.txt"
     default_src = path.open("rt").read()
     page = WikiPage(title="Home", body_src=default_src)

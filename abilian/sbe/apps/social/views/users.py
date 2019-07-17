@@ -3,6 +3,7 @@
 import logging
 import pkgutil
 from cgi import escape
+from typing import Dict, List
 
 import sqlalchemy as sa
 import sqlalchemy.exc
@@ -34,7 +35,7 @@ DEFAULT_USER_MUGSHOT = pkgutil.get_data(
 )
 
 
-def make_tabs(user):
+def make_tabs(user: User) -> List[Dict[str, str]]:
     return [
         {"id": "profile", "label": _("Profile"), "link": url_for(user, tab="profile")},
         # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
@@ -175,7 +176,7 @@ def user(user_id: int) -> str:
     return render_template("social/user.html", **ctx)
 
 
-def can_edit(user):
+def can_edit(user: User) -> bool:
     security = get_service("security")
     if not security:
         return True

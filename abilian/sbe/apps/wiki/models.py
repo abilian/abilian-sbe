@@ -1,7 +1,7 @@
 # coding=utf-8
 """"""
 from datetime import datetime
-from typing import Any, Optional
+from typing import Union
 
 from abilian.core.entities import Entity, db
 from abilian.core.models import SEARCHABLE
@@ -12,12 +12,12 @@ from sqlalchemy import Column, DateTime, ForeignKey, Integer, Unicode, \
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm.attributes import Event
+from sqlalchemy.util.langhelpers import _symbol
 
 from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 from abilian.sbe.apps.documents.models import BaseContent
-
-from . import markup
 
 __all__ = ["WikiPage", "WikiPageAttachment", "WikiPageRevision"]
 
@@ -78,7 +78,7 @@ class WikiPage(Entity):
         revision.page = self
 
     @property
-    def last_revision(self):
+    def last_revision(self) -> "WikiPageRevision":
         return (
             WikiPageRevision.query.filter(WikiPageRevision.page == self)
             .order_by(WikiPageRevision.number.desc())
@@ -87,6 +87,8 @@ class WikiPage(Entity):
 
     @property
     def body_html(self) -> str:
+        from . import markup
+
         html = markup.convert(self, self.body_src)
         return html
 
@@ -95,7 +97,9 @@ class WikiPage(Entity):
 
 
 @listens_for(WikiPage.name, "set", active_history=True)
-def _wiki_sync_name_title(entity, new_value, old_value, initiator):
+def _wiki_sync_name_title(
+    entity: WikiPage, new_value: str, old_value: Union[_symbol, str], initiator: Event
+) -> str:
     """Synchronize wikipage name -> title.
 
     wikipage.title -> name is done via hybrid_property, avoiding
@@ -136,7 +140,7 @@ class WikiPageRevision(db.Model):
 
 
 class WikiPageAttachment(BaseContent):
-    __tablename__ = None  # type: str
+    __tablename__: str = None
     __indexable__ = False
     __mapper_args__ = {"polymorphic_identity": "wikipage_attachment"}
     sbe_type = "wikipage:attachment"

@@ -5,9 +5,12 @@ Add extensions here (for now).
 """
 import markdown
 from flask import url_for
+from markdown.core import Markdown
 from markdown.extensions.wikilinks import WikiLinkExtension, \
     WikiLinksInlineProcessor
 from markdown.util import etree
+
+from abilian.sbe.apps.wiki.models import WikiPage
 
 from .util import page_exists
 
@@ -15,7 +18,7 @@ __all__ = ("convert", "SBEWikiLinkExtension")
 
 
 class UrlBuilder:
-    def __init__(self, page):
+    def __init__(self, page: WikiPage) -> None:
         self.page = page
 
     def build(self, label: str, base: str, end: str) -> str:
@@ -23,7 +26,7 @@ class UrlBuilder:
         return url_for(".page", community_id=self.page.community.slug, title=label)
 
 
-def convert(page, text):
+def convert(page: WikiPage, text: str) -> str:
     build_url = UrlBuilder(page).build
     extension = SBEWikiLinkExtension(build_url=build_url)
     ctx = {
@@ -35,7 +38,7 @@ def convert(page, text):
 
 
 class SBEWikiLinkExtension(WikiLinkExtension):
-    def extendMarkdown(self, md):
+    def extendMarkdown(self, md: Markdown) -> None:
         # self.md = md
 
         # append to end of inline patterns

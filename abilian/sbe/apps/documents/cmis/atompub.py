@@ -1,4 +1,6 @@
 # coding=utf-8
+from typing import Callable
+
 from abilian.core.extensions import db
 from flask import Blueprint, Response, make_response, render_template, request
 from sqlalchemy.orm.exc import NoResultFound
@@ -12,6 +14,7 @@ from .renderer import Feed, to_xml
 #
 # Constants
 #
+
 
 ROOT = "http://localhost:5000/cmis/atompub"
 
@@ -47,7 +50,7 @@ def log_result(result):
     print(78 * "-")
 
 
-def produces(*mimetypes):
+def produces(*mimetypes) -> Callable:
     def decorator(f):
         return f
 

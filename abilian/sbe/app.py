@@ -44,7 +44,7 @@ class Application(BaseApplication):
         "abilian.sbe.apps.preferences",
     )
 
-    def setup(self, config: Type) -> None:
+    def setup(self, config: Optional[Type]) -> None:
         super().setup(config)
         loader = jinja2.PackageLoader("abilian.sbe", "templates")
         self.register_jinja_loaders(loader)

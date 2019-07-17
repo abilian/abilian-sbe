@@ -16,6 +16,7 @@ from flask_mail import Message
 from sqlalchemy import and_, or_
 from validate_email import validate_email
 
+from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import repository
 from abilian.sbe.apps.forum.models import Post, Thread
@@ -154,7 +155,7 @@ def make_message(user):
     return msg
 
 
-def generate_unsubscribe_token(user):
+def generate_unsubscribe_token(user: User) -> str:
     """Generates a unique unsubscription token for the specified user.
 
     :param user: The user to work with
@@ -164,7 +165,7 @@ def generate_unsubscribe_token(user):
 
 
 class CommunityDigest:
-    def __init__(self, community):
+    def __init__(self, community: Community) -> None:
         self.community = community
 
         self.seen_entities = set()

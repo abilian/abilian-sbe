@@ -24,6 +24,8 @@ from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
 
+from abilian.sbe.app import Application
+
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 from .models import Post, PostAttachment, Thread
 
@@ -34,7 +36,7 @@ MAIL_REPLY_MARKER = _l("_____Write above this line to post_____")
 logger = get_task_logger(__name__)
 
 
-def init_app(app):
+def init_app(app: Application) -> None:
     global check_maildir
     if app.config["INCOMING_MAIL_USE_MAILDIR"]:
         make_task = periodic_task(run_every=crontab(minute="*"))
@@ -145,8 +147,9 @@ def build_local_part(name, uid):
     return local_part
 
 
-def build_reply_email_address(name, post, member, domain):
-    # type: (Text, Post, User, Text) -> Text
+def build_reply_email_address(
+    name: Text, post: Post, member: User, domain: Text
+) -> Text:
     """Build a reply-to email address embedding the locale, thread_id and
     user.id.
 
@@ -165,8 +168,7 @@ def build_reply_email_address(name, post, member, domain):
     return local_part + "@" + domain
 
 
-def extract_email_destination(address):
-    # type: (Text) -> Tuple[Text, ...]
+def extract_email_destination(address: Text) -> Tuple[Text, ...]:
     """Return the values encoded in the email address.
 
     :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
@@ -189,8 +191,7 @@ def extract_email_destination(address):
     return tuple(values)
 
 
-def has_subtag(address):
-    # type: (Text) -> bool
+def has_subtag(address: Text) -> bool:
     """Return True if a subtag (delimited by '+') was found
     in the name part of the address.
 
@@ -284,8 +285,7 @@ def add_paragraph(newpost):
     return newpost
 
 
-def clean_html(newpost):
-    # type: (Text) -> Text
+def clean_html(newpost: Text) -> Text:
     """Clean leftover empty blockquotes."""
 
     clean = re.sub(
@@ -310,8 +310,7 @@ def clean_html(newpost):
     return clean
 
 
-def decode_payload(part):
-    # type: (email.message.Message) -> Text
+def decode_payload(part: email.message.Message) -> Text:
     """Get the payload and decode (base64 & quoted printable)."""
 
     payload = part.get_payload(decode=True)
@@ -321,7 +320,7 @@ def decode_payload(part):
 
     # Please the typechecker (and make things a bit clearer)
     assert isinstance(payload, bytes)
-    payload_bytes = payload  # type: bytes
+    payload_bytes: bytes = payload
 
     charset = part.get_content_charset()
     if charset is not None:
@@ -337,8 +336,7 @@ def decode_payload(part):
     return payload_str
 
 
-def process(message, marker):
-    # type: (email.message.Message, Text) -> Tuple[Text, List[dict]]
+def process(message: email.message.Message, marker: Text) -> Tuple[Text, List[dict]]:
     """Check the message for marker presence and return the text up to it if
     present.
 
@@ -388,8 +386,7 @@ def process(message, marker):
 
 
 @shared_task()
-def process_email(message):
-    # type: (email.message.Message) -> bool
+def process_email(message: email.message.Message) -> bool:
     """Email.Message object from command line script Run message (parsed
     email).
 

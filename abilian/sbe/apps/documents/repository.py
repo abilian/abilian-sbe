@@ -7,7 +7,7 @@ import sqlalchemy as sa
 from abilian.core.models.subjects import User
 from abilian.services.security import READ, Permission, security
 
-from .models import CmisObject, Document, Folder
+from .models import BaseContent, CmisObject, Document, Folder
 
 if typing.TYPE_CHECKING:
     from abilian.sbe.app import Application
@@ -55,7 +55,7 @@ class Repository:
     #
     # Id based navigation
     #
-    def get_object_by_id(self, id: int) -> Optional[CmisObject]:
+    def get_object_by_id(self, id: int) -> Optional[BaseContent]:
         """Get the CMIS object (document or folder) with the given `id`.
 
         Returns None if the object doesn't exist.
@@ -82,7 +82,7 @@ class Repository:
     #
     # Path based navigation
     #
-    def get_object_by_path(self, path: str) -> Optional[CmisObject]:
+    def get_object_by_path(self, path: str) -> Optional[BaseContent]:
         """Gets the CMIS object (document or folder) with the given `path`.
 
         Returns None if the object doesn't exist.
@@ -115,10 +115,7 @@ class Repository:
     # COPY / MOVE support
     #
     def copy_object(
-        self,
-        obj: Union[Document, Folder],
-        dest_folder: Folder,
-        dest_title: Optional[str] = None,
+        self, obj: BaseContent, dest_folder: Folder, dest_title: Optional[str] = None
     ) -> Union[Document, Folder]:
         new_obj = obj.clone(title=dest_title, parent=dest_folder)
         if obj.is_folder:
@@ -127,19 +124,16 @@ class Repository:
         return new_obj
 
     def move_object(
-        self,
-        obj: Union[Document, Folder],
-        dest_folder: Folder,
-        dest_title: Optional[str] = None,
+        self, obj: BaseContent, dest_folder: Folder, dest_title: Optional[str] = None
     ) -> None:
         obj.parent = dest_folder
         if dest_title:
             obj.title = dest_title
 
-    def rename_object(self, obj: Union[Document, Folder], title: str) -> None:
+    def rename_object(self, obj: BaseContent, title: str) -> None:
         obj.title = title
 
-    def delete_object(self, obj: Union[Document, Folder]) -> None:
+    def delete_object(self, obj: BaseContent) -> None:
         if obj.is_root_folder:
             raise Exception("Can't delete root folder.")
 
@@ -168,11 +162,13 @@ class Repository:
     #
     # Security / access rights
     #
-    def has_permission(self, user: User, permission: Permission, obj) -> bool:
+    def has_permission(
+        self, user: User, permission: Permission, obj: BaseContent
+    ) -> bool:
         assert isinstance(permission, Permission)
         return security.has_permission(user, permission, obj, inherit=True)
 
-    def has_access(self, user, obj):
+    def has_access(self, user: User, obj: BaseContent):
         """Checks that user has actual right to reach this object, 'read'
         permission on each of object's parents."""
         current = obj

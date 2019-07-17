@@ -2,21 +2,30 @@
 """Some functions to retrieve activity entries."""
 # TODO: move to the activity service ?
 
+from typing import Any, List, Optional, cast
+
 import sqlalchemy as sa
 from abilian.core.extensions import db
+from abilian.core.models.subjects import User
 from abilian.services import get_service
 from abilian.services.activity import ActivityEntry
-from abilian.services.security import READ, Admin
+from abilian.services.security import READ, Admin, SecurityService
 from flask import g
 from flask_login import current_user
 from sqlalchemy import orm
 from werkzeug.exceptions import Forbidden
 
 from abilian.sbe.apps.communities.models import Membership
+from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.documents.models import Document, Folder
 
 
-def get_recent_entries(num=20, user=None, community=None):
+def get_recent_entries(
+    num: int = 20,
+    user: Optional[User] = None,
+    community: Optional[CommunityPresenter] = None,
+) -> List[Any]:
+
     AE = ActivityEntry
 
     # Check just in case
@@ -53,9 +62,9 @@ def get_recent_entries(num=20, user=None, community=None):
     query = query.order_by(AE.happened_at.desc()).limit(1000)
     # get twice entries as needed, but ceil to 100
     limit = min(num * 2, 100)
-    entries = []
+    entries: List[ActivityEntry] = []
     deleted = False
-    security = get_service("security")
+    security = cast(SecurityService, get_service("security"))
     has_permission = security.has_permission
 
     for entry in query.yield_per(limit):

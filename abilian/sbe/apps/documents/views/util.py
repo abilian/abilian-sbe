@@ -1,6 +1,6 @@
 # coding=utf-8
 import re
-from typing import Dict, List, Tuple, Union
+from typing import Any, Dict, List, Tuple, Union
 
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
@@ -12,7 +12,7 @@ from flask_login import current_user
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
 
-from abilian.sbe.apps.documents.models import Document, Folder
+from abilian.sbe.apps.documents.models import BaseContent, Document, Folder
 from abilian.sbe.apps.documents.repository import repository
 
 
@@ -134,8 +134,7 @@ def edit_object(obj):
     return changed
 
 
-def get_selected_objects(folder):
-    # type: (Folder) -> Tuple[List[Folder], List[Document]]
+def get_selected_objects(folder: Folder) -> Tuple[List[Folder], List[Document]]:
     """Returns a tuple, (folders, docs), of folders and docs in the specified
     folder that have been selected from the UI."""
     selected_ids = request.form.getlist("object-selected")
@@ -157,7 +156,7 @@ def get_selected_objects(folder):
     return folders, docs
 
 
-def check_read_access(obj: Union[Document, Folder]) -> bool:
+def check_read_access(obj: BaseContent) -> bool:
     """Checks the current user has appropriate read access on the given object.
 
     Will raise appropriates errors in case the object doesn't exist
@@ -175,7 +174,7 @@ def check_read_access(obj: Union[Document, Folder]) -> bool:
     raise Forbidden()
 
 
-def check_write_access(obj: Union[Document, Folder]) -> None:
+def check_write_access(obj: BaseContent) -> None:
     """Checks the current user has appropriate write access on the given
     object.
 

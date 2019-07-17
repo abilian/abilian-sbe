@@ -6,6 +6,7 @@ cacheable.
 """
 
 from datetime import datetime, timedelta
+from typing import Any, List
 
 from abilian.core.models.subjects import User
 from flask import g
@@ -18,7 +19,7 @@ from .social import social
 
 class Sidebars:
     @property
-    def latest_visitors(self):
+    def latest_visitors(self) -> List[User]:
         return (
             User.query.filter(User.last_active != None)
             .order_by(User.last_active.desc())
@@ -32,7 +33,7 @@ class Sidebars:
         return User.query.filter(User.last_active > one_minute_ago).count()
 
     @property
-    def my_communities(self):
+    def my_communities(self) -> List[Community]:
         query = Community.query
         query = query.order_by(Community.last_active_at.desc())
         if not current_user.has_role("admin"):

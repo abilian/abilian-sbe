@@ -1,5 +1,7 @@
 # coding=utf-8
 """Forms for the Wiki module."""
+from typing import Any, Optional, Union
+
 from abilian.i18n import _, _l
 from abilian.web.forms import Form
 from abilian.web.forms.filters import strip
@@ -17,7 +19,7 @@ def clean_up(src: str) -> str:
     return src
 
 
-def int_or_none(val):
+def int_or_none(val: Any) -> Optional[int]:
     try:
         return int(val)
     except (TypeError, ValueError):
@@ -39,14 +41,14 @@ class WikiPageForm(Form):
     page_id = HiddenField(filters=(int_or_none,), validators=[flaghidden()])
     last_revision_id = HiddenField(filters=(int_or_none,), validators=[flaghidden()])
 
-    def validate_title(self, field):
+    def validate_title(self, field: StringField) -> None:
         title = field.data
         if title != field.object_data and page_exists(title):
             raise ValidationError(
                 _("A page with this name already exists. Please use another name.")
             )
 
-    def validate_last_revision_id(self, field):
+    def validate_last_revision_id(self, field: HiddenField) -> None:
         val = field.data
         current = field.object_data
 

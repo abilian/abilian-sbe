@@ -2,7 +2,10 @@
 """Forum module."""
 
 
-def register_plugin(app):
+from abilian.sbe.app import Application
+
+
+def register_plugin(app: Application) -> None:
     app.config.setdefault("SBE_FORUM_REPLY_BY_MAIL", False)
     app.config.setdefault("INCOMING_MAIL_USE_MAILDIR", False)
 

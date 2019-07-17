@@ -7,6 +7,7 @@ out.
 from collections import Counter
 from datetime import datetime
 from itertools import chain
+from typing import Any
 
 from abilian.core.entities import SEARCHABLE, Entity
 from abilian.services.indexing.adapter import SAAdapter
@@ -158,7 +159,7 @@ class ThreadIndexAdapter(SAAdapter):
     """Index a thread and its posts."""
 
     @staticmethod
-    def can_adapt(obj_cls):
+    def can_adapt(obj_cls: Any) -> bool:
         return obj_cls is Thread
 
     def get_document(self, obj):
@@ -205,7 +206,7 @@ def _guard_closed_thread_collection(thread, value, *args):
 
 
 class PostAttachment(BaseContent):
-    __tablename__ = None  # type: str
+    __tablename__: str = None
     __mapper_args__ = {"polymorphic_identity": "forum_post_attachment"}
     sbe_type = "forum_post:attachment"
 

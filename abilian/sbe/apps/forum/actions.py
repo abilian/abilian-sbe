@@ -1,10 +1,12 @@
 # coding=utf-8
+from typing import cast
 
 from abilian.i18n import _l
 from abilian.services import get_service
-from abilian.services.security import Admin
+from abilian.services.security import Admin, SecurityService
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 from flask import g, request, url_for
+from flask.blueprints import BlueprintSetupState
 from flask_login import current_user
 
 
@@ -39,7 +41,7 @@ class ThreadAction(ForumAction):
 
 
 def is_admin(context):
-    security = get_service("security")
+    security = cast(SecurityService, get_service("security"))
     return security.has_role(current_user, Admin, object=context.get("object"))
 
 
@@ -113,7 +115,7 @@ _actions = (
 )
 
 
-def register_actions(state):
+def register_actions(state: BlueprintSetupState) -> None:
     if not actions.installed(state.app):
         return
     with state.app.app_context():
