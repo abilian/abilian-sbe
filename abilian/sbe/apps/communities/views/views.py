@@ -77,7 +77,7 @@ def register_context_processors(state: BlueprintSetupState) -> None:
         return {"community_image_url": image_url}
 
 
-def tab(tab_name):
+def tab(tab_name: str) -> Callable:
     """Decorator for view functions to set the current "section" this view
     belongs to."""
 

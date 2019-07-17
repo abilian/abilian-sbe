@@ -27,7 +27,7 @@ def require_admin(func: Callable) -> Callable:
     return decorated_view
 
 
-def require_manage(func):
+def require_manage(func: Callable) -> Callable:
     @wraps(func)
     def decorated_view(*args: Any, **kwargs: Any) -> Response:
         community = g.community

@@ -1,8 +1,9 @@
 # coding=utf-8
 """Lightweight integration and denormalisation using events (signals)."""
 
-from typing import Any, Union
+from typing import Any, Optional, Union
 
+from abilian.core.entities import Entity
 from abilian.core.models.subjects import User
 from abilian.core.signals import activity
 from blinker import ANY
@@ -17,11 +18,7 @@ from .models import Community
 
 @activity.connect_via(ANY)
 def update_community(
-    sender: Any,
-    verb: str,
-    actor: Union[User, LocalProxy],
-    object: Union[Community, Document, WikiPage],
-    target: Union[None, Community, CommunityPresenter] = None,
+    sender: Any, verb: str, actor: User, object: Entity, target: Optional[Entity] = None
 ) -> None:
     if isinstance(object, Community):
         object.touch()

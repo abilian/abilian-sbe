@@ -23,7 +23,7 @@ class CmisContentAction(Action):
     sbe_type: str = ""
     permission: str = ""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         if "permission" in kwargs:
             self.permission = kwargs.pop("permission")
 
@@ -62,7 +62,7 @@ class FolderButtonAction(BaseFolderAction):
         "{{ action.icon }}</a>"
     )
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         self.modal = False
 
         if "modal" in kwargs:
