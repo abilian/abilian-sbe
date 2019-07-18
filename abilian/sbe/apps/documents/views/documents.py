@@ -1,7 +1,6 @@
 # coding=utf-8
 """"""
 from datetime import datetime
-from typing import Any, Optional
 from urllib.parse import quote
 
 import sqlalchemy as sa

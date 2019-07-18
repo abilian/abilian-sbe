@@ -1,6 +1,6 @@
 # coding=utf-8
 """Forms for the Wiki module."""
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from abilian.i18n import _, _l
 from abilian.web.forms import Form

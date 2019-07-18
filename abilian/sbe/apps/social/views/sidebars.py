@@ -6,7 +6,7 @@ cacheable.
 """
 
 from datetime import datetime, timedelta
-from typing import Any, List
+from typing import List
 
 from abilian.core.models.subjects import User
 from flask import g

@@ -1,6 +1,5 @@
 # coding=utf-8
 
-from typing import Any
 
 import pytest
 from pytest import fixture

@@ -1,6 +1,6 @@
 # coding=utf-8
 import re
-from typing import Any, Dict, List, Tuple, Union
+from typing import Dict, List, Tuple
 
 from abilian.core.signals import activity
 from abilian.core.util import unwrap

@@ -2,7 +2,7 @@
 """"""
 import difflib
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, Optional, Tuple, Union
 from urllib.parse import quote
 
 import sqlalchemy as sa

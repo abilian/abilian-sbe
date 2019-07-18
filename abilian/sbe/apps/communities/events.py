@@ -1,7 +1,7 @@
 # coding=utf-8
 """Lightweight integration and denormalisation using events (signals)."""
 
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 from abilian.core.entities import Entity
 from abilian.core.models.subjects import User

@@ -2,7 +2,7 @@
 """"""
 from io import BytesIO
 from pathlib import Path
-from typing import IO, Any, Dict
+from typing import IO
 from zipfile import ZipFile
 
 import flask_mail

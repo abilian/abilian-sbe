@@ -3,7 +3,7 @@
 import logging
 import typing
 from contextlib import contextmanager
-from typing import Any, Iterator, Optional, Tuple, Union
+from typing import Iterator, Optional, Tuple
 
 from abilian.core.extensions import db
 from abilian.services import converter, get_service
