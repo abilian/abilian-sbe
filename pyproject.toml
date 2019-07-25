@@ -87,6 +87,9 @@ pre-commit = "*"
 isort = "*"
 black = { version = "*", allows-prereleases = true }
 
+# Pinned because poetry issue
+docutils = "=0.15"
+
 
 # [build-system]
 # requires = ["poetry>=0.12"]
