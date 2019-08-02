@@ -1,4 +1,3 @@
-# coding=utf-8
 """Entity objects for the Document Management applications.
 
 TODO: move to an independent service / app.
@@ -270,7 +269,7 @@ class PathAndSecurityIndexable:
 
 
 class Folder(PathAndSecurityIndexable, CmisObject):
-    __tablename__: str = None
+    __tablename__: Optional[str] = None
     sbe_type = "cmis:folder"
 
     __indexable__ = True
@@ -417,7 +416,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
 class BaseContent(CmisObject):
     """A base class for cmisobject with an attached file."""
 
-    __tablename__: str = None
+    __tablename__: Optional[str] = None
 
     _content_id = Column(Integer, db.ForeignKey(Blob.id))
     content_blob = relationship(Blob, cascade="all, delete", foreign_keys=[_content_id])
@@ -510,7 +509,7 @@ class BaseContent(CmisObject):
 class Document(BaseContent, PathAndSecurityIndexable):
     """A document, in the CMIS sense."""
 
-    __tablename__: str = None
+    __tablename__: Optional[str] = None
 
     __indexable__ = True
     __index_to__ = (("text", ("text",)),)

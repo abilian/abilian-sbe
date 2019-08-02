@@ -89,7 +89,7 @@ class ActivityEntryPresenter(BasePresenter):
     def object_url(self):
         return url_for(self._model.object)
 
-    def message(self, ignore_community=False):
+    def message(self, ignore_community=False) -> Markup:
         try:
             # another quick&dirty approach for now. FIXME later.
             entry = self._model
@@ -160,8 +160,7 @@ def get_body(object):
 
 
 @get_body.register(Thread)
-def get_body_thread(object):
-    # type: (Thread) -> Markup
+def get_body_thread(object: Thread) -> Markup:
     body = bleach.clean(object.posts[0].body_html, tags=[], strip=True)
     body = Markup(body).unescape()
     if len(body) > 400:
@@ -173,8 +172,7 @@ def get_body_thread(object):
 
 
 @get_body.register(Post)
-def get_body_post(object):
-    # type: (Post) -> Markup
+def get_body_post(object: Post) -> Markup:
     body = bleach.clean(object.body_html, tags=[], strip=True)
     body = Markup(body).unescape()
     if len(body) > 400:
@@ -186,8 +184,7 @@ def get_body_post(object):
 
 
 @get_body.register(Document)
-def get_body_document(object):
-    # type: (Document) -> Markup
+def get_body_document(object: Document) -> Markup:
     body = bleach.clean(object.body_html, tags=[], strip=True)
     body = Markup(body).unescape()
     if len(body) > 400:
