@@ -5,7 +5,7 @@ import mailbox
 import re
 from os.path import expanduser
 from pathlib import Path
-from typing import List, Text, Tuple
+from typing import Any, Dict, List, Text, Tuple
 
 import bleach
 import chardet
@@ -345,7 +345,8 @@ def process(message: email.message.Message, marker: Text) -> Tuple[Text, List[di
     """
     assert isinstance(message, email.message.Message)
     content = {"plain": "", "html": ""}
-    attachments = []
+    attachments: List[Dict[str, Any]] = []
+
     # Iterate all message's parts for text/*
     for part in message.walk():
         content_type = part.get_content_type()
@@ -442,10 +443,16 @@ def process_email(message: email.message.Message) -> bool:
         activity.send(app, actor=g.user, verb="post", object=post, target=community)
 
         for desc in attachments:
-            attachment = PostAttachment(name=desc["filename"])
+            filename = desc["filename"]
+            content_type = desc["content_type"]
+            data = desc["data"]
+            if isinstance(data, str):
+                data = data.encode("utf8")
+            attachment = PostAttachment(name=filename)
             attachment.post = post
-            attachment.set_content(desc["data"], desc["content_type"])
+            attachment.set_content(data, content_type=content_type)
             db.session.add(attachment)
+
         db.session.commit()
 
     # Notify all parties involved
