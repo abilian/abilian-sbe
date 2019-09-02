@@ -1,4 +1,3 @@
-# coding=utf-8
 from email.feedparser import FeedParser
 from pathlib import Path
 

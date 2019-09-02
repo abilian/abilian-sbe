@@ -1,4 +1,3 @@
-# coding=utf-8
 """Main views."""
 
 from flask import Blueprint, render_template

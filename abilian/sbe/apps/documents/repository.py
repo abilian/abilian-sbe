@@ -1,4 +1,3 @@
-# coding=utf-8
 """"""
 import typing
 from typing import Optional, Union

@@ -1,4 +1,3 @@
-# coding=utf-8
 """"""
 from abilian.core.entities import SEARCHABLE, Entity
 from sqlalchemy import Column, DateTime, Unicode

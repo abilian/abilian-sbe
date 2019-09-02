@@ -1,4 +1,3 @@
-# coding=utf-8
 """Notifications."""
 
 from abilian.sbe.app import Application

@@ -1,4 +1,3 @@
-# coding=utf-8
 """This panel manages user setting for email reminders related to the SBE
 (social netowking) app."""
 from abilian.core.extensions import db

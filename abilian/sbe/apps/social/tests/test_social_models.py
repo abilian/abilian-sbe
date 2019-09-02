@@ -1,4 +1,3 @@
-# coding=utf-8
 
 from abilian.core.entities import all_entity_classes
 from abilian.core.models.subjects import Group, User

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Tests from test_community are currently refactored using pytest in this
 module."""
 from unittest import mock

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Parses and produces XML documents specified by the standard."""
 from typing import Any, List
 

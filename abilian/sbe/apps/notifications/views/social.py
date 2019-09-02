@@ -1,4 +1,3 @@
-# coding=utf-8
 """First cut at a notification system."""
 from abilian.core.extensions import csrf, db
 from abilian.core.models.subjects import User

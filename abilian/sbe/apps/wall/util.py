@@ -1,4 +1,3 @@
-# coding=utf-8
 """Some functions to retrieve activity entries."""
 # TODO: move to the activity service ?
 

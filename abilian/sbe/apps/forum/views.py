@@ -1,4 +1,3 @@
-# coding=utf-8
 """Forum views."""
 from collections import Counter
 from datetime import date, datetime, timedelta

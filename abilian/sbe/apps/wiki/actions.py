@@ -1,4 +1,3 @@
-# coding=utf-8
 from typing import Any, Dict, cast
 
 from abilian.services import get_service

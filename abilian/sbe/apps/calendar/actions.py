@@ -1,4 +1,3 @@
-# coding=utf-8
 
 from abilian.i18n import _l
 from abilian.services import get_service

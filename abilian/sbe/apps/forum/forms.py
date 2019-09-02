@@ -1,4 +1,3 @@
-# coding=utf-8
 """"""
 import bleach
 from abilian.i18n import _l

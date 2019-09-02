@@ -1,4 +1,3 @@
-# coding=utf-8
 """Forum views."""
 from datetime import date, datetime
 

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Register extensions as a plugin.
 
 NOTE: panels are currently loaded and registered manually. This may change

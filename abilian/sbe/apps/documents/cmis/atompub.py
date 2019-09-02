@@ -1,4 +1,3 @@
-# coding=utf-8
 from typing import Callable
 
 from abilian.core.extensions import db

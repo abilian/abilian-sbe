@@ -1,4 +1,3 @@
-# coding=utf-8
 """Social content items: messages aka status updates, private messages, etc."""
 import re
 from typing import List

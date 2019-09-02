@@ -1,4 +1,3 @@
-# coding=utf-8
 from abilian.core.models.subjects import User
 from abilian.core.sqlalchemy import SQLAlchemy
 from pytest import fixture

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Communities module."""
 from flask import Flask
 

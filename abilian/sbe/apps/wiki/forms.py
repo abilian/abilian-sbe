@@ -1,4 +1,3 @@
-# coding=utf-8
 """Forms for the Wiki module."""
 from typing import Any, Optional
 

@@ -1,4 +1,3 @@
-# coding=utf-8
 from typing import cast
 
 from abilian.i18n import _l

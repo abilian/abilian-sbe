@@ -1,4 +1,3 @@
-# coding=utf-8
 from abilian.sbe.apps.documents.cmis.parser import Entry
 
 XML_ENTRY = b"""\

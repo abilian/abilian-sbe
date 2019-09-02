@@ -1,4 +1,3 @@
-# coding=utf-8
 """The blueprint for this app."""
 
 from abilian.core.extensions import db

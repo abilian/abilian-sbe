@@ -1,4 +1,3 @@
-# coding=utf-8
 """Celery tasks related to document transformation and preview."""
 import email
 import mailbox

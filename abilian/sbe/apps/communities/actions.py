@@ -1,4 +1,3 @@
-# coding=utf-8
 from typing import Any, Dict, Union
 
 from abilian.web.action import Action, Endpoint, actions

@@ -1,4 +1,3 @@
-# coding=utf-8
 from abilian.core.util import BasePresenter
 from flask_babel import lazy_gettext as _l
 

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Not used!"""
 
 from abilian.core.extensions import db, mail

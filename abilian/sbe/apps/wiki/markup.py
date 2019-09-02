@@ -1,4 +1,3 @@
-# coding=utf-8
 """Set up the markdown converter.
 
 Add extensions here (for now).

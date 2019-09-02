@@ -1,4 +1,3 @@
-# coding=utf-8
 """Indexing related utilities for Folder, Documents."""
 import sqlalchemy as sa
 from abilian.core.entities import Entity

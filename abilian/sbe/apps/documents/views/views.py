@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Document management blueprint."""
 from typing import Dict
 

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Decorators and helpers to check access to communities."""
 
 from functools import wraps

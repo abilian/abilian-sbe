@@ -1,4 +1,3 @@
-# coding=utf-8
 """"""
 import jinja2
 from abilian.services.preferences import preferences

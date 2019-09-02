@@ -1,4 +1,3 @@
-# coding=utf-8
 """"""
 from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.services.security import Admin

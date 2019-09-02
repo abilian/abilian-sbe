@@ -1,4 +1,3 @@
-# coding=utf-8
 from pytest import mark
 
 from abilian.sbe.apps.documents.cmis.renderer import Feed, to_xml

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Parses XML messages and converts them to objects."""
 import base64
 from datetime import datetime

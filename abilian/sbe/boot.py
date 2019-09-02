@@ -1,4 +1,3 @@
-# coding=utf-8
 """Static configuration for the application.
 
 TODO: add more (runtime) flexibility in plugin discovery, selection

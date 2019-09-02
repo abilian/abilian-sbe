@@ -1,4 +1,3 @@
-# coding=utf-8
 from typing import Any, List, Union
 
 from flask import render_template

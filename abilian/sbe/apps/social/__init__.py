@@ -1,4 +1,3 @@
-# coding=utf-8
 """Default ("home") page for social apps."""
 
 

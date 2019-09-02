@@ -1,4 +1,3 @@
-# coding=utf-8
 
 DAV_PROPS = [
     "creationdate",

@@ -1,4 +1,3 @@
-# coding=utf-8
 """Models for the Forum.
 
 Note: a few features are planned but not implemented yet, and are commented

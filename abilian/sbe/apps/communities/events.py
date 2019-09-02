@@ -1,4 +1,3 @@
-# coding=utf-8
 """Lightweight integration and denormalisation using events (signals)."""
 
 from typing import Any, Optional

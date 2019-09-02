@@ -1,4 +1,3 @@
-# coding=utf-8
 """"""
 import imghdr
 from typing import List, Tuple

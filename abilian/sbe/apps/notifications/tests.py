@@ -1,4 +1,3 @@
-# coding=utf-8
 """"""
 from abilian.core.models.subjects import User
 from abilian.web import url_for
