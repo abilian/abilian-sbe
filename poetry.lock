@@ -1162,9 +1162,7 @@ python-versions = "*"
 version = "0.11.2"
 
 [package.dependencies]
-blinker = ">=1.1"
 certifi = "*"
-flask = ">=0.8"
 urllib3 = "*"
 
 [[package]]
@@ -1458,11 +1456,11 @@ version = "1.11.2"
 
 [[package]]
 category = "main"
-description = "A flexible forms validation and rendering library for python web development."
+description = "A flexible forms validation and rendering library for Python web development."
 name = "wtforms"
 optional = false
 python-versions = "*"
-version = "2.1"
+version = "2.2.1"
 
 [[package]]
 category = "main"
@@ -1525,7 +1523,7 @@ version = "0.6.0"
 more-itertools = "*"
 
 [metadata]
-content-hash = "2045e243ccdeb50e8543e6b90d295616d60f89705e7d2e9d7cbb8301d619b007"
+content-hash = "721f7dc809f125d4811a229b143facafa94e6a27383e33fc8cb3a3e30b61e0ee"
 python-versions = "^3.6"
 
 [metadata.hashes]
@@ -1670,7 +1668,7 @@ webencodings = ["a0af1213f3c2226497a97e2b3aa01a7e4bee4f403f95be16fc9acd2947514a7
 werkzeug = ["00d32beac38fcd48d329566f80d39f10ec2ed994efbecfb8dd4b320062d05902", "0a24d43be6a7dce81bae05292356176d6c46d63e42a0dd3f9504b210a9cfaa43"]
 whoosh = ["7ca5633dbfa9e0e0fa400d3151a8a0c4bec53bd2ecedc0a67705b17565c31a83", "aa39c3c3426e3fd107dcb4bde64ca1e276a65a889d9085a6e4b54ba82420a852", "e0857375f63e9041e03fedd5b7541f97cf78917ac1b6b06c1fcc9b45375dda69"]
 wrapt = ["565a021fd19419476b9362b05eeaa094178de64f8361e44468f9e9d7843901e1"]
-wtforms = ["ffdf10bd1fa565b8233380cb77a304cd36fd55c73023e91d4b803c96bc11d46f"]
+wtforms = ["0cdbac3e7f6878086c334aa25dc5a33869a3954e9d1e015130d65a69309b3b61", "e3ee092c827582c50877cdbd49e9ce6d2c5c1f6561f849b3b068c1b8029626f1"]
 wtforms-alchemy = ["c491755380490c5c016f04e62949b22056f915160f54d0d1103c76b944c1c321"]
 wtforms-components = ["4a7751fc12dc4e4b2ef5700973296b5368094dcdf85c2808d2faff2c8e8f4caa"]
 wtforms-sqlalchemy = ["60a180a358cfdf59ca823af356f5912b59a39ee64750dd05147c923be476eae5", "d36496b6d17ac6748839b80334fda2d26050e8885c541100e2ff9c83333f9633"]

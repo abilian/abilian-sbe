@@ -19,7 +19,7 @@ abilian-core = ">=0.11"
 
 
 # Temp
-wtforms = "<2.2"
+wtforms = "<2.3"
 
 # Email validation (when sending digests)
 validate_email = "*"
