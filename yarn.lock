@@ -574,10 +574,12 @@ eslint-plugin-promise@^3.6.0:
   resolved "https://registry.yarnpkg.com/eslint-plugin-promise/-/eslint-plugin-promise-3.8.0.tgz#65ebf27a845e3c1e9d6f6a5622ddd3801694b621"
   integrity sha512-JiFL9UFR15NKpHyGii1ZcvmtIqa3UTwiDAGb8atSffe43qJ3+1czVGN6UtkklpcJ2DVnqvTMzEKRaJdBkAL2aQ==
 
-eslint-plugin-requirejs@^3.1.1:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-requirejs/-/eslint-plugin-requirejs-3.2.0.tgz#ea5dcfcd9ce4f95e8e5ca83f74a1fdb3b84d697b"
-  integrity sha512-HG9iGoO6I9mlU9y6G9/yOC+Q6jmJf63l1LjGmBuiDFhC/reARexH9hVi6IkPfbbSGK2ruGvMEuivvco1ft0c2Q==
+eslint-plugin-requirejs@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-requirejs/-/eslint-plugin-requirejs-4.0.0.tgz#a168f932a9ed4ef738bdc5d052b55ca9e932a3ed"
+  integrity sha512-0RUXMrQ7elTtTZT6dwP6HozoAUzUBnMawBmdOKyQAWqulrLnKg8WGKJIpo7cDisjAr91SXDUIhCOrIqgbz9ETQ==
+  dependencies:
+    ignore "5.0.5"
 
 eslint-plugin-standard@^3.0.1:
   version "3.1.0"
@@ -938,6 +940,11 @@ iconv-lite@^0.4.17:
   integrity sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==
   dependencies:
     safer-buffer ">= 2.1.2 < 3"
+
+ignore@5.0.5:
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.0.5.tgz#c663c548d6ce186fb33616a8ccb5d46e56bdbbf9"
+  integrity sha512-kOC8IUb8HSDMVcYrDVezCxpJkzSQWTAzf3olpKM6o9rM5zpojx23O0Fl8Wr4+qJ6ZbPEHqf1fdwev/DS7v7pmA==
 
 ignore@^3.3.3, ignore@^3.3.5, ignore@^3.3.6:
   version "3.3.10"
