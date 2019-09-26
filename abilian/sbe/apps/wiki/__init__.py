@@ -1,5 +1,3 @@
-
-
 from abilian.sbe.app import Application
 
 

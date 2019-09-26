@@ -1,5 +1,3 @@
-
-
 import pytest
 from pytest import fixture
 from sqlalchemy.exc import IntegrityError

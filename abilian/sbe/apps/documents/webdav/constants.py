@@ -1,4 +1,3 @@
-
 DAV_PROPS = [
     "creationdate",
     "displayname",

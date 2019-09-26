@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 from pkgutil import extend_path
 
 # noinspection PyUnboundLocalVariable
