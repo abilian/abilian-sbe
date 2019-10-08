@@ -4,7 +4,7 @@ description = "A framework for enterprise applications (CRM, ERP, collaboration.
 name = "abilian-core"
 optional = false
 python-versions = ">=3.6,<4.0"
-version = "0.11.4"
+version = "0.11.5"
 
 [package.dependencies]
 Flask = ">=1.0,<2.0"
@@ -1527,7 +1527,7 @@ content-hash = "2045e243ccdeb50e8543e6b90d295616d60f89705e7d2e9d7cbb8301d619b007
 python-versions = "^3.6"
 
 [metadata.hashes]
-abilian-core = ["0d24a0f36b232279840ccb9ab7aee43c040262ada20e73ecec7c430212a1d901", "f173763e086c244f509e9d28ece40f328fa2b784af0115124d71dc5e0d3d3549"]
+abilian-core = ["61018af78ac2f0ab9de2ef4918da2c25ace0e35d0e78aeef237e2f0c82c2878b", "a31037964d7319bc49778240908ea0f74ebfc38e63aa147fab2dff7f5164e038"]
 alabaster = ["446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359", "a661d72d58e6ea8a57f7a86e37d86716863ee5e92788398526d58b26a4e4dc02"]
 alembic = ["4a4811119efbdc5259d1f4c8f6de977b36ad3bcc919f59a29c2960c5ef9149e4"]
 amqp = ["19a917e260178b8d410122712bac69cb3e6db010d68f6101e7307508aded5e68", "19d851b879a471fcfdcf01df9936cff924f422baa77653289f7095dedd5fb26a"]
