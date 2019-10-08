@@ -1,4 +1,3 @@
-""""""
 from typing import Any
 
 from abilian.services.security import Manager, Reader, Writer, security

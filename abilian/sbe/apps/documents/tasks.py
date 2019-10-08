@@ -1,8 +1,7 @@
 """Celery tasks related to document transformation and preview."""
 import logging
-import typing
 from contextlib import contextmanager
-from typing import Iterator, Optional, Tuple
+from typing import TYPE_CHECKING, Iterator, Optional, Tuple
 
 from abilian.core.extensions import db
 from abilian.services import converter, get_service
@@ -10,7 +9,7 @@ from abilian.services.conversion import ConversionError, HandlerNotFound
 from celery import shared_task
 from sqlalchemy.orm import Session
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from .models import Document
 
 logger = logging.getLogger(__package__)

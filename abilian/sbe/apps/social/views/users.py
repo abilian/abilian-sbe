@@ -1,4 +1,3 @@
-""""""
 import logging
 import pkgutil
 from cgi import escape

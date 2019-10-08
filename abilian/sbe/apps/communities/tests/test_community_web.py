@@ -1,4 +1,3 @@
-""""""
 from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.services.security import Admin
 from abilian.services.security.service import SecurityService

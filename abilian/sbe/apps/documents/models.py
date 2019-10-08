@@ -8,8 +8,8 @@ import mimetypes
 import threading
 import uuid
 from pathlib import Path
-from typing import Any, Collection, Dict, Iterator, List, Optional, Tuple, \
-    Union
+from typing import TYPE_CHECKING, Any, Collection, Dict, Iterator, List, \
+    Optional, Tuple, Union
 
 import pkg_resources
 import sqlalchemy as sa
@@ -39,6 +39,9 @@ from whoosh.support.charset import accent_map
 
 from . import tasks
 from .lock import Lock
+
+if TYPE_CHECKING:
+    from abilian.sbe.apps.communities.models import Community
 
 logger = logging.getLogger(__package__)
 

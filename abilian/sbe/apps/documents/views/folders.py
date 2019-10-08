@@ -1,4 +1,3 @@
-""""""
 import fnmatch
 import itertools
 import logging

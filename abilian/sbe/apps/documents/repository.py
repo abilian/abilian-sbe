@@ -1,6 +1,4 @@
-""""""
-import typing
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 import sqlalchemy as sa
 from abilian.core.models.subjects import User
@@ -8,7 +6,7 @@ from abilian.services.security import READ, Permission, security
 
 from .models import BaseContent, CmisObject, Document, Folder
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from abilian.sbe.app import Application
 
 

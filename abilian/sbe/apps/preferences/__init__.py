@@ -1,4 +1,3 @@
-""""""
 import jinja2
 from abilian.services.preferences import preferences
 

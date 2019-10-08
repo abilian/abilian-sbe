@@ -1,4 +1,3 @@
-""""""
 from typing import Any, Dict
 
 from abilian.i18n import _l

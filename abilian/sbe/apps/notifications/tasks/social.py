@@ -1,6 +1,7 @@
-""""""
 from datetime import datetime, timedelta
+from typing import Dict, List, Set
 
+from abilian.core.entities import Entity
 from abilian.core.models.subjects import User
 from abilian.core.util import md5
 from abilian.i18n import render_template_i18n
@@ -167,14 +168,14 @@ class CommunityDigest:
     def __init__(self, community: Community) -> None:
         self.community = community
 
-        self.seen_entities = set()
-        self.new_members = []
-        self.new_documents = []
-        self.updated_documents = []
-        self.new_conversations = []
-        self.updated_conversations = {}
-        self.new_wiki_pages = []
-        self.updated_wiki_pages = {}
+        self.seen_entities: Set[Entity] = set()
+        self.new_members: List[User] = []
+        self.new_documents: List[Document] = []
+        self.updated_documents: List[Document] = []
+        self.new_conversations: List[Post] = []
+        self.updated_conversations: Dict[Post, Dict] = {}
+        self.new_wiki_pages: List[WikiPage] = []
+        self.updated_wiki_pages: Dict[WikiPage, Dict] = {}
 
     def is_empty(self):
         return (

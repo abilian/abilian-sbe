@@ -1,4 +1,3 @@
-""""""
 from datetime import datetime, timedelta
 from unittest import mock
 
@@ -29,7 +28,7 @@ def test_lock2(app: Application, session: Session, req_ctx: RequestContext) -> N
     user = User(
         email="test@example.com", first_name="Joe", last_name="Smith", can_login=True
     )
-    other = User(email="other@exemple.com")
+    other = User(email="other@example.com")
     session.add(user)
     session.add(other)
     session.commit()
@@ -42,20 +41,20 @@ def test_lock2(app: Application, session: Session, req_ctx: RequestContext) -> N
         mocked.return_value = created_at
 
         login_user(user)
-        l = Lock.new()
-        assert l.user_id == user.id
-        assert l.user == "Joe Smith"
-        assert l.date == created_at
-        assert l.is_owner()
-        assert l.is_owner(user)
-        assert not l.is_owner(other)
+        lock_ = Lock.new()
+        assert lock_.user_id == user.id
+        assert lock_.user == "Joe Smith"
+        assert lock_.date == created_at
+        assert lock_.is_owner()
+        assert lock_.is_owner(user)
+        assert not lock_.is_owner(other)
 
-        assert l.lifetime == 30
+        assert lock_.lifetime == 30
         mocked.return_value = created_at + timedelta(seconds=40)
-        assert l.expired
+        assert lock_.expired
 
         mocked.return_value = created_at + timedelta(seconds=20)
-        assert not l.expired
+        assert not lock_.expired
 
         login_user(other)
-        assert not l.is_owner()
+        assert not lock_.is_owner()

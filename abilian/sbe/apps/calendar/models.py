@@ -1,4 +1,3 @@
-""""""
 from abilian.core.entities import SEARCHABLE, Entity
 from sqlalchemy import Column, DateTime, Unicode
 from sqlalchemy.event import listens_for

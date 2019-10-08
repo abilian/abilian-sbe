@@ -1,4 +1,3 @@
-""""""
 from datetime import date
 from itertools import groupby, islice
 from typing import Any, Dict

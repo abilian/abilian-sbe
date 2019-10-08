@@ -1,4 +1,3 @@
-""""""
 import imghdr
 from typing import List, Tuple
 

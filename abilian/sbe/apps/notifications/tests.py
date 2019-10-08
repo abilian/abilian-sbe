@@ -1,4 +1,3 @@
-""""""
 from abilian.core.models.subjects import User
 from abilian.web import url_for
 from flask import render_template
