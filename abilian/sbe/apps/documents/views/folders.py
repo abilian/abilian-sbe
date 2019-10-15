@@ -1019,7 +1019,7 @@ def descendants_view(folder_id):
             descendants.append((level, type_letter, child))
 
             if is_folder:
-                path_id = child["parent_ids"] + "/{}".format(child["id"])
+                path_id = child["parent_ids"] + f"/{child['id']}"
                 visit(path_id, level + 1)
 
     visit(root_path_ids, 0)

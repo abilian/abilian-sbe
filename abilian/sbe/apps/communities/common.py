@@ -45,16 +45,16 @@ def activity_time_format(time: datetime, now: datetime = None) -> str:
     )
 
     if days == 0 and hours == 0 and minutes == 0:
-        return "{}{}".format(seconds, _l("s"))
+        return f"{seconds}{_l('s')}"
 
     if days == 0 and hours == 0:
-        return "{}{}".format(minutes, _l("m"))
+        return f"{minutes}{_l('m')}"
 
     if days == 0:
-        return "{}{}".format(hours, _l("h"))
+        return f"{hours}{_l('h')}"
 
     if days < 30:
-        return "{}{}".format(days, _l("d"))
+        return f"{days}{_l('d')}"
 
     if time.year == now.year:
         return f"{month_abbreviation} {time.day}"

@@ -494,9 +494,7 @@ def members_excel_export():
     filename = "{}-members-{}.xlsx".format(
         community.slug, strftime("%d:%m:%Y-%H:%M:%S", gmtime())
     )
-    response.headers["content-disposition"] = 'attachment;filename="{}"'.format(
-        filename
-    )
+    response.headers["content-disposition"] = f'attachment;filename="{filename}"'
 
     return response
 

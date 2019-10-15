@@ -210,9 +210,7 @@ def send_post_to_user(community, post, member):
     SBE_FORUM_REPLY_ADDRESS = config.get("SBE_FORUM_REPLY_ADDRESS", SENDER)
     SERVER_NAME = config.get("SERVER_NAME", "example.com")
 
-    list_id = '"{} forum" <forum.{}.{}>'.format(
-        community.name, community.slug, SERVER_NAME
-    )
+    list_id = f'"{community.name} forum" <forum.{community.slug}.{SERVER_NAME}>'
     forum_url = url_for("forum.index", community_id=community.slug, _external=True)
     forum_archive_url = url_for(
         "forum.archives", community_id=community.slug, _external=True

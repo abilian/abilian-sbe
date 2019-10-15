@@ -295,7 +295,7 @@ def document_send(doc_id: int) -> Response:
     recipient = request.form.get("recipient")
     user_msg = request.form.get("message")
 
-    site_name = "[{}] ".format(current_app.config["SITE_NAME"])
+    site_name = f"[{current_app.config['SITE_NAME']}] "
     sender_name = current_user.name
     subject = site_name + _("{sender} sent you a file").format(sender=sender_name)
     msg = Message(subject)
