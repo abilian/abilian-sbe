@@ -84,9 +84,11 @@ def test_wizard_extract_data(db: SQLAlchemy, csv_file: IO[str]) -> None:
     session.flush()
 
     # check wizard function in case of email list
-    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
-        new_emails
-    )
+    (
+        existing_accounts_objects,
+        existing_members_objects,
+        accounts_list,
+    ) = wizard_extract_data(new_emails)
     assert set(existing_accounts_objects) == {user2, user3}
     assert existing_members_objects == [user1]
 
@@ -128,9 +130,11 @@ def test_wizard_extract_data(db: SQLAlchemy, csv_file: IO[str]) -> None:
     )
 
     # check wizard function in case of csv file
-    existing_accounts_objects, existing_members_objects, accounts_list = wizard_extract_data(
-        csv_data=wizard_read_csv(csv_file)
-    )
+    (
+        existing_accounts_objects,
+        existing_members_objects,
+        accounts_list,
+    ) = wizard_extract_data(csv_data=wizard_read_csv(csv_file))
 
     assert existing_accounts_objects == {
         "csv_roles": {

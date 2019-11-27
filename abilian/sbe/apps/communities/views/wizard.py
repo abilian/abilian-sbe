@@ -162,9 +162,11 @@ def wizard_check_data() -> Union[Response, str]:
     is_csv = False
     if request.form.get("wizard-emails"):
         wizard_emails = request.form["wizard-emails"].split(",")
-        existing_accounts_object, existing_members_objects, final_email_list = wizard_extract_data(
-            wizard_emails
-        )
+        (
+            existing_accounts_object,
+            existing_members_objects,
+            final_email_list,
+        ) = wizard_extract_data(wizard_emails)
         final_email_list_json = json.dumps(final_email_list)
 
     else:
@@ -176,9 +178,11 @@ def wizard_check_data() -> Union[Response, str]:
                 url_for(".wizard_data_insertion", community_id=g.community.slug)
             )
 
-        existing_accounts, existing_members_objects, final_email_list = wizard_extract_data(
-            csv_data=accounts_data
-        )
+        (
+            existing_accounts,
+            existing_members_objects,
+            final_email_list,
+        ) = wizard_extract_data(csv_data=accounts_data)
         existing_accounts_object = existing_accounts["account_objects"]
         existing_accounts_csv_roles = existing_accounts["csv_roles"]
         final_email_list_json = json.dumps(final_email_list)
