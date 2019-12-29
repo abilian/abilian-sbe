@@ -19,9 +19,9 @@ install:
 #
 develop: setup-git
 	@echo "--> Installing/updating dependencies"
-	poetry install --develop .
-	pip uninstall -y abilian-core
-	pip install -q -e ../abilian-core
+	poetry install
+	# pip uninstall -y abilian-core
+	# pip install -q -e ../abilian-core
 	yarn
 
 setup-git:

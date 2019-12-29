@@ -85,7 +85,7 @@ pre-commit = "*"
 
 # Formatters
 isort = "*"
-black = { version = "*", allows-prereleases = true }
+black = { version = "*", allow-prereleases = true }
 
 # Pinned because poetry issue
 docutils = "=0.15"
