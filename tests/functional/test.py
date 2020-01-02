@@ -1,4 +1,3 @@
-# encoding: utf-8
 """
 Test the application using py.test and splinter.
 
@@ -32,7 +31,7 @@ def app_port(request):
             test_socket.bind((hostname, port))
             test_socket.close()
 
-        except socket.error as exc:
+        except OSError as exc:
             if exc.errno != 98:
                 # errno(98, Address already in use)
                 raise
