@@ -1,23 +1,56 @@
 Changelog for Abilian SBE
 =========================
 
+
+v0.5.7 (2020-01-02)
+-------------------
+
+- Fix for python 3.8.
+- Py3k.
+
+
+v0.5.6 (2019-10-08)
+-------------------
+
+Fix
+~~~
+- Bytes vs. str.
+
+Other
+~~~~~
+- Refactor: cleanup.
+- Py3k.
+
+
+v0.5.5 (2019-08-07)
+-------------------
+- Type hints.
+- Auto-generate authors.
+- Cleanup.
+
+
+v0.5.4 (2019-07-12)
+-------------------
+- F-strings.
+
+
 0.5.3 (2019-06-28)
 ------------------
-- Modernize (py36) / remove six. [Stefane Fermigier]
-- Runtime typechecker. [Stefane Fermigier]
-- Typing. [Stefane Fermigier]
-- Update dependency on Markdown. [Abdul]
+- Modernize (py36) / remove six.
+- Runtime typechecker.
+- Typing.
+- Update dependency on Markdown.
 
 
 v0.5.2 (2019-05-02)
 -------------------
-- Dont' use pylint. [Stefane Fermigier]
-- Modernize (py36) [Stefane Fermigier]
+- Dont' use pylint.
+- Modernize (py36)
 
 
 v0.5.1 (2019-04-15)
 -------------------
-- Fix botched release. [Stefane Fermigier]
+- Fix botched release.
 
 
 0.5.0 (2019-04-15)
