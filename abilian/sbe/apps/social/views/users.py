@@ -1,6 +1,6 @@
 import logging
 import pkgutil
-from cgi import escape
+from html import escape
 from typing import Dict, List
 
 import sqlalchemy as sa
