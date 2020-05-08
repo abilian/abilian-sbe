@@ -17,9 +17,9 @@ python = "^3.6"
 # abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
 abilian-core = ">=0.11"
 
-
-# Temp
+# Pinned temporarily
 wtforms = "<2.2"
+werkzeug = "<1"
 
 # Email validation (when sending digests)
 validate_email = "*"
