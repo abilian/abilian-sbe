@@ -3,7 +3,7 @@ name = "abilian-sbe"
 version = "0.5.7"
 description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
-license = "LGPL"
+license = "LGPL-2.0-or-later"
 readme = "README.rst"
 repository = "https://github.com/abilian/abilian-sbe"
 packages = [{ include = "abilian" }]
@@ -44,7 +44,6 @@ flask-debugtoolbar = "*"
 
 # Our favorite test runner with some plugins and CI builder
 pytest = "*"
-pytest-sugar = "*"
 pytest-xdist = "*"
 pytest-randomly = "*"
 
@@ -82,6 +81,7 @@ pyannotate = "^1.0"
 gitchangelog = "^3.0"
 mccabe = "*"
 pre-commit = "*"
+devtools = "^0.5.1"
 
 # Formatters
 isort = "*"
