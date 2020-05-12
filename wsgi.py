@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Create an application instance."""
 
 from abilian.sbe.app import create_app
