@@ -3,9 +3,9 @@
 
 
 "@types/requirejs@^2.1.31":
-  version "2.1.31"
-  resolved "https://registry.yarnpkg.com/@types/requirejs/-/requirejs-2.1.31.tgz#a24eaa0ee4f6b84feb8f521ca6550d48490b2bc6"
-  integrity sha512-b2soeyuU76rMbcRJ4e0hEl0tbMhFwZeTC0VZnfuWlfGlk6BwWNsev6kFu/twKABPX29wkX84wU2o+cEJoXsiTw==
+  version "2.1.32"
+  resolved "https://registry.yarnpkg.com/@types/requirejs/-/requirejs-2.1.32.tgz#c936a1f4b08f0a8bc10a380d7b837ccf9137d4b9"
+  integrity sha512-TM8LeNLJkEKDcx2414tsU+aKX+Pcfx8siRgZJWsb16KT77TT2FxINO48dLLkx8a5fEuJYb+rcfgPcvq6vt96NQ==
 
 acorn-jsx@^3.0.0:
   version "3.0.1"
