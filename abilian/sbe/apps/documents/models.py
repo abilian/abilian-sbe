@@ -394,7 +394,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
             elif isinstance(principal, Group):
                 return principal.name
             else:
-                raise Exception("Bad class here: %s" % type(principal))
+                raise Exception(f"Bad class here: {type(principal)}")
 
         return sorted(assignments, key=key)
 
