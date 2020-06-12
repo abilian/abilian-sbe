@@ -1,9 +1,18 @@
-Core developers (present and past):
+Developers:
 
 - Stefane Fermigier
 - Bertrand Mathieu
 - Yvon Bourbotte
 - Vincent Dardel
+- Ahmed Amine Hamrouni
+- Paul Robillard
+
+
+UX & design:
+
+- Viviane Cheng
+- Audrey Chastain
+
 
 Translators:
 
