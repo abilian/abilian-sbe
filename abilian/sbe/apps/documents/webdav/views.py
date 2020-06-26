@@ -255,8 +255,7 @@ def lock(path):
 
     token = repository.lock(obj)
 
-    xml = (
-        f"""<?xml version="1.0" encoding="utf-8" ?>
+    xml = f"""<?xml version="1.0" encoding="utf-8" ?>
 <D:prop xmlns:D="DAV:">
     <D:lockdiscovery>
         <D:activelock>
@@ -271,7 +270,6 @@ def lock(path):
         </D:activelock>
     </D:lockdiscovery>
 </D:prop>"""
-    )
 
     hlist = [("Content-Type", "text/xml"), ("Lock-Token", f"<urn:uuid:{token}>")]
 
