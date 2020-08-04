@@ -8,13 +8,6 @@ from typing import Any, Dict, List, Text, Tuple
 
 import bleach
 import chardet
-from abilian.core.celery import periodic_task
-from abilian.core.extensions import db, mail
-from abilian.core.models.subjects import User
-from abilian.core.signals import activity
-from abilian.core.util import md5, unwrap
-from abilian.i18n import _l, render_template_i18n
-from abilian.web import url_for
 from celery import shared_task
 from celery.schedules import crontab
 from celery.utils.log import get_task_logger
@@ -23,7 +16,14 @@ from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
 
+from abilian.core.celery import periodic_task
+from abilian.core.extensions import db, mail
+from abilian.core.models.subjects import User
+from abilian.core.signals import activity
+from abilian.core.util import md5, unwrap
+from abilian.i18n import _l, render_template_i18n
 from abilian.sbe.app import Application
+from abilian.web import url_for
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 from .models import Post, PostAttachment, Thread

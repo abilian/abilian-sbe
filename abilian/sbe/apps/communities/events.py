@@ -2,12 +2,12 @@
 
 from typing import Any, Optional
 
-from abilian.core.entities import Entity
-from abilian.core.models.subjects import User
-from abilian.core.signals import activity
 from blinker import ANY
 from werkzeug.local import LocalProxy
 
+from abilian.core.entities import Entity
+from abilian.core.models.subjects import User
+from abilian.core.signals import activity
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.wiki.models import WikiPage

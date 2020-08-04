@@ -1,11 +1,12 @@
 """Forum views."""
 from datetime import date, datetime
 
+from flask import g, render_template
+from toolz import groupby
+
 from abilian.i18n import _l
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction
-from flask import g, render_template
-from toolz import groupby
 
 from ..communities.blueprint import Blueprint
 from ..communities.views import default_view_kw

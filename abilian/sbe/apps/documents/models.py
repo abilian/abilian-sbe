@@ -14,15 +14,6 @@ from typing import TYPE_CHECKING, Any, Collection, Dict, Iterator, List, \
 import pkg_resources
 import sqlalchemy as sa
 import whoosh.fields as wf
-from abilian.core.entities import Entity, db
-from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
-from abilian.core.models.blob import Blob
-from abilian.core.models.subjects import Group, User
-from abilian.core.util import md5
-from abilian.services.conversion import converter
-from abilian.services.indexing import indexable_role
-from abilian.services.security import Admin, Anonymous, InheritSecurity, \
-    security
 from flask import current_app, json, url_for
 from flask_login import current_user
 from sqlalchemy.event import listen, listens_for
@@ -36,6 +27,16 @@ from sqlalchemy.util.langhelpers import symbol
 from toolz import first
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
+
+from abilian.core.entities import Entity, db
+from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
+from abilian.core.models.blob import Blob
+from abilian.core.models.subjects import Group, User
+from abilian.core.util import md5
+from abilian.services.conversion import converter
+from abilian.services.indexing import indexable_role
+from abilian.services.security import Admin, Anonymous, InheritSecurity, \
+    security
 
 from . import tasks
 from .lock import Lock

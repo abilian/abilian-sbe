@@ -1,8 +1,8 @@
-from abilian.core.entities import SEARCHABLE, Entity
 from sqlalchemy import Column, DateTime, Unicode
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import backref, relationship
 
+from abilian.core.entities import SEARCHABLE, Entity
 from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
     community_content
 

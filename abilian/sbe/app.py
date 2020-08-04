@@ -7,6 +7,7 @@ import logging
 from typing import Optional, Type
 
 import jinja2
+
 from abilian.app import Application as BaseApplication
 from abilian.core.celery import FlaskLoader as CeleryBaseLoader
 from abilian.services import converter

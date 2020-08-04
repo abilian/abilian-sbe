@@ -1,10 +1,10 @@
-from abilian.core.models.subjects import User
-from abilian.web import url_for
 from flask import render_template
 
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import WRITER, Community
 from abilian.sbe.apps.notifications.tasks.social import CommunityDigest, \
     generate_unsubscribe_token
+from abilian.web import url_for
 
 
 def test_unsubscribe(app, client, db, app_context):

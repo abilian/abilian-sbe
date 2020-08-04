@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Callable, Dict
 
 import pkg_resources
+
 from abilian.core.util import fqcn
 
 if TYPE_CHECKING:

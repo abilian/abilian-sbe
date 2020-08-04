@@ -5,20 +5,6 @@ from pathlib import Path
 from typing import Any, List, Optional, Union
 
 import sqlalchemy as sa
-from abilian.core.entities import Entity, EntityMeta
-from abilian.core.extensions import db
-from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
-from abilian.core.models.blob import Blob
-from abilian.core.models.subjects import Group, User
-from abilian.i18n import _l
-from abilian.services.indexing import indexable_role
-from abilian.services.security import READ, WRITE, Admin
-from abilian.services.security import Manager as MANAGER
-from abilian.services.security import Permission
-from abilian.services.security import Reader as READER
-from abilian.services.security import Role, RoleType
-from abilian.services.security import Writer as WRITER
-from abilian.services.security import security
 from blinker import ANY
 from flask import current_app
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, \
@@ -29,8 +15,22 @@ from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE, Event
 from sqlalchemy.sql.schema import Column
 from werkzeug.local import LocalProxy
 
+from abilian.core.entities import Entity, EntityMeta
+from abilian.core.extensions import db
+from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
+from abilian.core.models.blob import Blob
+from abilian.core.models.subjects import Group, User
+from abilian.i18n import _l
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.repository import repository
+from abilian.services.indexing import indexable_role
+from abilian.services.security import READ, WRITE, Admin
+from abilian.services.security import Manager as MANAGER
+from abilian.services.security import Permission
+from abilian.services.security import Reader as READER
+from abilian.services.security import Role, RoleType
+from abilian.services.security import Writer as WRITER
+from abilian.services.security import security
 
 from . import signals
 

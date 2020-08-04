@@ -1,10 +1,11 @@
 import bleach
+from wtforms import BooleanField, StringField, TextAreaField
+
 from abilian.i18n import _l
 from abilian.web.forms import Form, RichTextWidget
 from abilian.web.forms.fields import FileField
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import Length, optional, required
-from wtforms import BooleanField, StringField, TextAreaField
 
 ALLOWED_TAGS = [
     "a",

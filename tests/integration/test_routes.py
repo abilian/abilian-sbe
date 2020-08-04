@@ -2,6 +2,8 @@ import re
 import traceback
 import warnings
 
+from flask import Flask
+
 from abilian.web import url_for
 
 ENDPOINTS_TO_SKIP = frozenset(
@@ -22,7 +24,7 @@ ENDPOINTS_TO_SKIP = frozenset(
 PATTERNS_TO_SKIP = [r"^.*\.list_json2$", r"^setup\..*$"]
 
 
-def get_all_rules(app):
+def get_all_rules(app: Flask):
     rules = sorted(app.url_map.iter_rules(), key=lambda x: x.endpoint)
 
     for rule in rules:
@@ -50,7 +52,7 @@ def get_all_rules(app):
         yield rule
 
 
-def test_all_registered_urls(app, db, admin_user, client, req_ctx):
+def test_all_registered_urls(app: Flask, db, admin_user, client, req_ctx):
     warnings.filterwarnings("ignore")
 
     rules = get_all_rules(app)
@@ -58,16 +60,16 @@ def test_all_registered_urls(app, db, admin_user, client, req_ctx):
 
     for rule in rules:
         with client.session_transaction() as session:
-            session["user_id"] = user.id
+            session["_user_id"] = user.id
 
-            endpoint = rule.endpoint
-            url = url_for(endpoint)
-            try:
-                response = client.get(url)
-                err_msg = f"Bad link: {url} (status={response.status_code})"
-                assert response.status_code in (200, 302), err_msg
-            except BaseException:
-                msg = f"Problem with endpoint: {endpoint} / url: {url}"
-                print(msg)
-                traceback.print_exc()
-                raise
+        endpoint = rule.endpoint
+        url = url_for(endpoint)
+        try:
+            response = client.get(url)
+            err_msg = f"Bad link: {url} (status={response.status_code})"
+            assert response.status_code in (200, 302), err_msg
+        except BaseException:
+            msg = f"Problem with endpoint: {endpoint} / url: {url}"
+            print(msg)
+            traceback.print_exc()
+            raise

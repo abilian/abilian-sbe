@@ -2,12 +2,12 @@ from unittest import mock
 from urllib.parse import quote_plus
 
 import pytest
-from abilian.testing.util import client_login
 from flask_login import current_user
 from markdown import Markdown
 
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
 from abilian.sbe.apps.wiki.models import WikiPage
+from abilian.testing.util import client_login
 
 
 @pytest.mark.parametrize("text", ["TOTO", "x 123", "/#$", "/*€("])

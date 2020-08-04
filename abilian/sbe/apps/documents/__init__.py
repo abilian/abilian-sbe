@@ -6,11 +6,11 @@ if typing.TYPE_CHECKING:
 
 
 def register_plugin(app: "Application") -> None:
-    from .views import blueprint
-    from .models import setup_listener
-    from .cli import antivirus
     from . import signals  # noqa
     from . import lock
+    from .cli import antivirus
+    from .models import setup_listener
+    from .views import blueprint
 
     app.register_blueprint(blueprint)
     setup_listener()

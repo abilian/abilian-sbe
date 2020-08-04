@@ -6,23 +6,23 @@ from typing import Dict, List
 import sqlalchemy as sa
 import sqlalchemy.exc
 import sqlalchemy.orm
-from abilian.core.extensions import db
-from abilian.core.models.subjects import User
-from abilian.i18n import _, _l
-from abilian.services import get_service
-from abilian.web import url_for
-from abilian.web.filters import age
-from abilian.web.views import ObjectEdit, default_view
-from abilian.web.views.images import user_photo_url
 from flask import Response, flash, jsonify, redirect, render_template, request
 from flask_login import current_user
 from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
 from werkzeug.exceptions import InternalServerError
 
+from abilian.core.extensions import db
+from abilian.core.models.subjects import User
+from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.models import Membership
 from abilian.sbe.apps.social.forms import UserProfileForm, UserProfileViewForm
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.views import get_recent_entries
+from abilian.services import get_service
+from abilian.web import url_for
+from abilian.web.filters import age
+from abilian.web.views import ObjectEdit, default_view
+from abilian.web.views.images import user_photo_url
 
 from .social import social
 

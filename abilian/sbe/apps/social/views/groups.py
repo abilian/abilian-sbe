@@ -1,5 +1,12 @@
 from pathlib import Path
 
+from flask import current_app, flash, jsonify, make_response, redirect, \
+    render_template, request, url_for
+from flask_babel import gettext as _
+from flask_login import current_user
+from sqlalchemy import func
+from werkzeug.exceptions import InternalServerError, NotFound
+
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.services import get_service
@@ -7,12 +14,6 @@ from abilian.services.image import CROP, resize
 from abilian.services.security import security
 from abilian.web import csrf
 from abilian.web.views import default_view
-from flask import current_app, flash, jsonify, make_response, redirect, \
-    render_template, request, url_for
-from flask_babel import gettext as _
-from flask_login import current_user
-from sqlalchemy import func
-from werkzeug.exceptions import InternalServerError, NotFound
 
 from .social import social
 

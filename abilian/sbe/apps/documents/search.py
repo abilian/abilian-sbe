@@ -1,10 +1,10 @@
 """Indexing related utilities for Folder, Documents."""
 import sqlalchemy as sa
+
 from abilian.core.entities import Entity
 from abilian.core.extensions import db
-from abilian.services import get_service
-
 from abilian.sbe.apps.documents.models import Folder
+from abilian.services import get_service
 
 from .models import CmisObject
 

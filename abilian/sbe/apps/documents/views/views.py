@@ -1,14 +1,14 @@
 """Document management blueprint."""
 from typing import Dict
 
-from abilian.i18n import _l
-from abilian.web.action import Endpoint
-from abilian.web.nav import BreadcrumbItem
 from flask import g
 
+from abilian.i18n import _l
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.actions import register_actions
+from abilian.web.action import Endpoint
+from abilian.web.nav import BreadcrumbItem
 
 __all__ = ["blueprint"]
 

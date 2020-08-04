@@ -3,6 +3,11 @@ import json
 from os.path import splitext
 from typing import IO, Any, Dict, List, Optional, Sequence, Tuple, Union
 
+from flask import current_app, flash, g, redirect, render_template, request, \
+    url_for
+from validate_email import validate_email
+from werkzeug.wrappers import Response
+
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 from abilian.core.signals import activity
@@ -12,10 +17,6 @@ from abilian.services.auth.views import send_reset_password_instructions
 from abilian.web import csrf
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
-from flask import current_app, flash, g, redirect, render_template, request, \
-    url_for
-from validate_email import validate_email
-from werkzeug.wrappers import Response
 
 from .views import route, tab
 

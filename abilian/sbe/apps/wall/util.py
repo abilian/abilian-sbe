@@ -4,19 +4,19 @@
 from typing import Any, List, Optional, cast
 
 import sqlalchemy as sa
-from abilian.core.extensions import db
-from abilian.core.models.subjects import User
-from abilian.services import get_service
-from abilian.services.activity import ActivityEntry
-from abilian.services.security import READ, Admin, SecurityService
 from flask import g
 from flask_login import current_user
 from sqlalchemy import orm
 from werkzeug.exceptions import Forbidden
 
+from abilian.core.extensions import db
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Membership
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.documents.models import Document, Folder
+from abilian.services import get_service
+from abilian.services.activity import ActivityEntry
+from abilian.services.security import READ, Admin, SecurityService
 
 
 def get_recent_entries(

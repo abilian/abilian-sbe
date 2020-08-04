@@ -1,5 +1,6 @@
-from abilian.core.util import BasePresenter
 from flask_babel import lazy_gettext as _l
+
+from abilian.core.util import BasePresenter
 
 
 class CommunityPresenter(BasePresenter):

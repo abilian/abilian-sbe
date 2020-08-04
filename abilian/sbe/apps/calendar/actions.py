@@ -1,9 +1,10 @@
+from flask import g, url_for
+from flask_login import current_user
+
 from abilian.i18n import _l
 from abilian.services import get_service
 from abilian.services.security import Admin
 from abilian.web.action import Action, FAIcon, actions
-from flask import g, url_for
-from flask_login import current_user
 
 
 class CalendarAction(Action):

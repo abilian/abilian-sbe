@@ -4,17 +4,17 @@ from unittest import mock
 
 import pytest
 import sqlalchemy as sa
-from abilian.core.entities import Entity
-from abilian.core.models.subjects import User
-from abilian.core.sqlalchemy import SQLAlchemy
-from abilian.testing.util import login
 from flask.ctx import RequestContext
 from pytest import fixture
 from sqlalchemy import orm
 from sqlalchemy.orm import Session
 
+from abilian.core.entities import Entity
+from abilian.core.models.subjects import User
+from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.sbe.app import Application
 from abilian.sbe.apps.documents.models import Folder
+from abilian.testing.util import login
 
 from .. import signals, views
 from ..models import MEMBER, READER, Community, CommunityIdColumn, \

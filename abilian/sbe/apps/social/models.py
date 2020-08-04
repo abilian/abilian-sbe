@@ -2,13 +2,14 @@
 import re
 from typing import List
 
-from abilian.core.entities import SEARCHABLE, Entity
-from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, User
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.query import Query
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, UnicodeText
+
+from abilian.core.entities import SEARCHABLE, Entity
+from abilian.core.extensions import db
+from abilian.core.models.subjects import Group, User
 
 __all__ = ["Message", "PrivateMessage"]
 

@@ -5,9 +5,6 @@ from zipfile import ZipFile
 
 import flask_mail
 import pytest
-from abilian.core.sqlalchemy import SQLAlchemy
-from abilian.testing.util import client_login, path_from_url
-from abilian.web.util import url_for
 from flask import g, get_flashed_messages
 from flask.ctx import RequestContext
 from flask.testing import FlaskClient
@@ -15,11 +12,14 @@ from pytest import fixture
 from toolz import first
 from werkzeug.datastructures import FileStorage
 
+from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.sbe.app import Application
 from abilian.sbe.apps.communities.models import WRITER, Community
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.views import util as view_util
+from abilian.testing.util import client_login, path_from_url
+from abilian.web.util import url_for
 
 
 def open_file(filename: str) -> IO[bytes]:

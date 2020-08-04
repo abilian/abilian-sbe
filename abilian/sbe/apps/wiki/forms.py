@@ -1,13 +1,14 @@
 """Forms for the Wiki module."""
 from typing import Any, Optional
 
+from wtforms import HiddenField, StringField, TextAreaField, ValidationError
+from wtforms.validators import data_required
+
 from abilian.i18n import _, _l
 from abilian.web.forms import Form
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import flaghidden
 from abilian.web.forms.widgets import TextArea
-from wtforms import HiddenField, StringField, TextAreaField, ValidationError
-from wtforms.validators import data_required
 
 from .util import page_exists
 

@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING, Optional, Union
 
 import sqlalchemy as sa
+
 from abilian.core.models.subjects import User
 from abilian.services.security import READ, Permission, security
 

@@ -1,14 +1,14 @@
 import re
 
-from abilian.core.models.subjects import User
-from abilian.testing.util import client_login
 from flask import g, url_for
 from pytest import fixture
 from toolz import first
 
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import READER, Community
 from abilian.sbe.apps.wiki import views
 from abilian.sbe.apps.wiki.models import WikiPage
+from abilian.testing.util import client_login
 
 
 @fixture

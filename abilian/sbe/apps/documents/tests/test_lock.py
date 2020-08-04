@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 from unittest import mock
 
-from abilian.core.models.subjects import User
 from flask.ctx import RequestContext
 from flask_login import login_user
 from pytz import UTC
 from sqlalchemy.orm import Session
 
+from abilian.core.models.subjects import User
 from abilian.sbe.app import Application
 from abilian.sbe.apps.documents import lock
 from abilian.sbe.apps.documents.lock import Lock

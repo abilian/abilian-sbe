@@ -13,17 +13,6 @@ import openpyxl
 import pytz
 import sqlalchemy as sa
 import sqlalchemy.sql.functions
-from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, User, UserQuery
-from abilian.core.signals import activity
-from abilian.core.util import unwrap, utc_dt
-from abilian.i18n import _, _l
-from abilian.services.activity import ActivityEntry
-from abilian.services.security import Role
-from abilian.web import csrf, views
-from abilian.web.action import Endpoint
-from abilian.web.nav import BreadcrumbItem
-from abilian.web.views import images as image_views
 from flask import current_app, flash, g, jsonify, redirect, render_template, \
     request, session, url_for
 from flask.blueprints import BlueprintSetupState
@@ -34,6 +23,11 @@ from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
 from werkzeug.wrappers.response import Response
 from whoosh.searching import Hit
 
+from abilian.core.extensions import db
+from abilian.core.models.subjects import Group, User, UserQuery
+from abilian.core.signals import activity
+from abilian.core.util import unwrap, utc_dt
+from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.actions import register_actions
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.forms import CommunityForm
@@ -42,6 +36,12 @@ from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.communities.security import is_manager, require_admin, \
     require_manage
 from abilian.sbe.apps.documents.models import Document
+from abilian.services.activity import ActivityEntry
+from abilian.services.security import Role
+from abilian.web import csrf, views
+from abilian.web.action import Endpoint
+from abilian.web.nav import BreadcrumbItem
+from abilian.web.views import images as image_views
 
 __all__ = ["communities", "route", "tab"]
 

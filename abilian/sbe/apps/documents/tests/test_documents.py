@@ -3,15 +3,15 @@ from pathlib import Path
 from typing import IO
 
 import pytest
-from abilian.core.models.subjects import User
-from abilian.testing.util import login
 from flask.ctx import RequestContext
 from sqlalchemy.orm import Session
 
+from abilian.core.models.subjects import User
 from abilian.sbe.app import Application
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.documents.views.folders import explore_archive
+from abilian.testing.util import login
 
 
 def open_file(filename: str) -> IO[bytes]:

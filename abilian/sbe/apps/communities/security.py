@@ -3,15 +3,15 @@
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, Union
 
-from abilian.core.models.subjects import User
-from abilian.services import get_service
-from abilian.services.security import MANAGE
 from flask import g
 from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 from werkzeug.wrappers.response import Response
 
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
+from abilian.services import get_service
+from abilian.services.security import MANAGE
 
 
 def require_admin(func: Callable) -> Callable:

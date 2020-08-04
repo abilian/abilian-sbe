@@ -1,13 +1,13 @@
-from abilian.core.sqlalchemy import SQLAlchemy
-from abilian.services.security import Admin
-from abilian.services.security.service import SecurityService
-from abilian.testing.util import client_login
 from flask import url_for
 from flask.ctx import RequestContext
 from flask.testing import FlaskClient
 
+from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.sbe.app import Application
 from abilian.sbe.apps.communities.models import Community
+from abilian.services.security import Admin
+from abilian.services.security.service import SecurityService
+from abilian.testing.util import client_login
 
 
 def test_index(

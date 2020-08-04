@@ -5,10 +5,10 @@ Reuses fixtures defined in abilian-core.
 import logging
 import os
 
-from abilian.testing.fixtures import TestConfig
 from pytest import fixture
 
 from abilian.sbe.app import create_app
+from abilian.testing.fixtures import TestConfig
 
 pytest_plugins = [
     "abilian.testing.fixtures",

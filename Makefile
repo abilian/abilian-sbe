@@ -118,7 +118,7 @@ format: format-py format-js
 
 format-py:
 	black abilian demo tests *.py
-	isort -rc abilian demo tests *.py
+	isort abilian demo tests *.py
 
 format-js:
 	yarn run prettier --write \

@@ -4,18 +4,6 @@ from typing import Any, Dict, Optional, Tuple, Union
 from urllib.parse import quote
 
 import sqlalchemy as sa
-from abilian.core.extensions import db
-from abilian.core.signals import activity
-from abilian.core.util import unwrap
-from abilian.i18n import _, _l, _n
-from abilian.services.security.models import Permission
-from abilian.services.viewtracker import viewtracker
-from abilian.web import csrf
-from abilian.web.action import Endpoint, actions
-from abilian.web.nav import BreadcrumbItem
-from abilian.web.util import url_for
-from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
-    default_view
 from flask import current_app, flash, g, make_response, redirect, \
     render_template, request
 from flask_login import current_user
@@ -26,12 +14,24 @@ from werkzeug.exceptions import NotFound
 from werkzeug.wrappers import Response
 from whoosh.searching import Hit
 
+from abilian.core.extensions import db
+from abilian.core.signals import activity
+from abilian.core.util import unwrap
+from abilian.i18n import _, _l, _n
 from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.common import object_viewers
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.communities.views import \
     default_view_kw as community_dv_kw
+from abilian.services.security.models import Permission
+from abilian.services.viewtracker import viewtracker
+from abilian.web import csrf
+from abilian.web.action import Endpoint, actions
+from abilian.web.nav import BreadcrumbItem
+from abilian.web.util import url_for
+from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
+    default_view
 
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision

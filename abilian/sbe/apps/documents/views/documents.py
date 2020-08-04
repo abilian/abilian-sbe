@@ -3,10 +3,23 @@ from urllib.parse import quote
 
 import sqlalchemy as sa
 import sqlalchemy.orm
+from flask import current_app, flash, g, make_response, redirect, \
+    render_template, request
+from flask_login import current_user
+from flask_mail import Message
+from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.wrappers.response import Response
+
 from abilian.core.extensions import db, mail
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, render_template_i18n
+from abilian.sbe.apps.communities.common import object_viewers
+from abilian.sbe.apps.communities.views import default_view_kw
+from abilian.sbe.apps.documents.models import Document
+from abilian.sbe.apps.documents.repository import repository
+from abilian.sbe.apps.documents.tasks import convert_document_content, \
+    preview_document
 from abilian.services import audit_service
 from abilian.services.conversion import converter
 from abilian.services.image import FIT, resize
@@ -15,19 +28,6 @@ from abilian.web import csrf, url_for
 from abilian.web.action import actions
 from abilian.web.frontend import add_to_recent_items
 from abilian.web.views import default_view
-from flask import current_app, flash, g, make_response, redirect, \
-    render_template, request
-from flask_login import current_user
-from flask_mail import Message
-from werkzeug.exceptions import BadRequest, NotFound
-from werkzeug.wrappers.response import Response
-
-from abilian.sbe.apps.communities.common import object_viewers
-from abilian.sbe.apps.communities.views import default_view_kw
-from abilian.sbe.apps.documents.models import Document
-from abilian.sbe.apps.documents.repository import repository
-from abilian.sbe.apps.documents.tasks import convert_document_content, \
-    preview_document
 
 from .util import breadcrumbs_for, check_manage_access, check_read_access, \
     check_write_access, edit_object, get_document, get_folder, match

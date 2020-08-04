@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 from unittest import mock
 
-from abilian.testing.util import client_login
 from flask import url_for
 from flask_login import login_user
 
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.forum.tests.util import get_string_from_file
+from abilian.testing.util import client_login
 
 from ..cli import inject_email
 from ..models import Post, Thread

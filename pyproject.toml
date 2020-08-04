@@ -45,7 +45,6 @@ flask-debugtoolbar = "*"
 # Our favorite test runner with some plugins and CI builder
 pytest = "*"
 pytest-xdist = "*"
-pytest-randomly = "*"
 
 # Coverage
 coverage = ">=4.1"

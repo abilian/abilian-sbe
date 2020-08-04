@@ -4,10 +4,10 @@
 from datetime import datetime, timedelta
 from typing import Iterator, Union
 
-import abilian.i18n
 import pytest
-from abilian.core.signals import activity
 
+import abilian.i18n
+from abilian.core.signals import activity
 from abilian.sbe.app import Application, create_app
 from abilian.sbe.apps.communities.common import activity_time_format
 

@@ -1,6 +1,5 @@
 from abilian.core.entities import all_entity_classes
 from abilian.core.models.subjects import Group, User
-
 from abilian.sbe.apps.social.models import Message, PrivateMessage
 
 

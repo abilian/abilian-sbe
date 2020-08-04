@@ -3,14 +3,14 @@
 from datetime import datetime
 from typing import List, Union
 
-from abilian.i18n import _l
-from abilian.services.viewtracker import viewtracker
 from flask import g
 from flask_babel import format_date
 
+from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.wiki.models import WikiPage
+from abilian.services.viewtracker import viewtracker
 
 
 def object_viewers(entity: Union[Document, WikiPage]) -> List:

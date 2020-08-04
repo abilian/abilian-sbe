@@ -2,10 +2,11 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
 import dateutil.parser
-from abilian.core.models.subjects import User
-from abilian.core.util import utcnow
 from flask import current_app
 from flask_login import current_user
+
+from abilian.core.models.subjects import User
+from abilian.core.util import utcnow
 
 DEFAULT_LIFETIME = 3600
 

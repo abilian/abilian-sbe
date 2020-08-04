@@ -1,12 +1,13 @@
 """Not used!"""
 
-from abilian.core.extensions import db, mail
 from flask import flash, redirect, render_template, request, url_for
 from flask_babel import gettext as _
 from flask_login import current_user
 from flask_mail import Message as Email
 from sqlalchemy.schema import Column
 from sqlalchemy.types import Text
+
+from abilian.core.extensions import db, mail
 
 from .social import social
 

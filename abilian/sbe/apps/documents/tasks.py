@@ -3,11 +3,12 @@ import logging
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Iterator, Optional, Tuple
 
+from celery import shared_task
+from sqlalchemy.orm import Session
+
 from abilian.core.extensions import db
 from abilian.services import converter, get_service
 from abilian.services.conversion import ConversionError, HandlerNotFound
-from celery import shared_task
-from sqlalchemy.orm import Session
 
 if TYPE_CHECKING:
     from .models import Document

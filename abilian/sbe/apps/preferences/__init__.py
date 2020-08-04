@@ -1,7 +1,7 @@
 import jinja2
-from abilian.services.preferences import preferences
 
 from abilian.sbe.app import Application
+from abilian.services.preferences import preferences
 
 from .panels.sbe_notifications import SbeNotificationsPanel
 
