@@ -67,8 +67,7 @@ def splinter_driver_kwargs():
 
 @pytest.fixture(scope="module")
 def instance_path(request):
-    """Creates a temporary directory for instance data.
-    """
+    """Creates a temporary directory for instance data."""
     tmp_dir = tempfile.mkdtemp(prefix="tmp-pytest-", suffix="-abilian-sbe")
 
     def clear():
