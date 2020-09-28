@@ -2,7 +2,6 @@ from unittest import mock
 from urllib.parse import quote_plus
 
 import pytest
-from flask_login import current_user
 from markdown import Markdown
 
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
@@ -48,19 +47,17 @@ def test_wikilink_extension(text, db, req_ctx):
 
 
 def test_new_page(user, client, req_ctx):
-    with client:
-        with client_login(client, user):
-            print(current_user)
-            page = WikiPage(title="Some page", body_src="abc")
-            assert page.title == "Some page"
-            assert page.name == "Some page"
-            assert page.body_src == "abc"
-            assert page.body_html == "<p>abc</p>"
-            assert len(page.revisions) == 1
+    with client_login(client, user):
+        page = WikiPage(title="Some page", body_src="abc")
+        assert page.title == "Some page"
+        assert page.name == "Some page"
+        assert page.body_src == "abc"
+        assert page.body_html == "<p>abc</p>"
+        assert len(page.revisions) == 1
 
-            revision = page.revisions[0]
-            assert revision.number == 0
-            assert revision.author == user
+        revision = page.revisions[0]
+        assert revision.number == 0
+        assert revision.author == user
 
 
 def test_rename_page(user, req_ctx):
@@ -78,12 +75,11 @@ def test_rename_page(user, req_ctx):
 
 
 def test_create_revision(user, client, req_ctx):
-    with client:
-        with client_login(client, user):
-            page = WikiPage("abc")
-            page.create_revision("def", "page updated")
+    with client_login(client, user):
+        page = WikiPage("abc")
+        page.create_revision("def", "page updated")
 
-            assert len(page.revisions) == 2
-            last_revision = page.revisions[1]
-            assert last_revision.number == 1
-            assert last_revision.author == user
+        assert len(page.revisions) == 2
+        last_revision = page.revisions[1]
+        assert last_revision.number == 1
+        assert last_revision.author == user

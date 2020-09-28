@@ -55,3 +55,9 @@ def config():
 def app(config):
     """Return an App configured with config=TestConfig."""
     return create_app(config=config)
+
+
+@fixture
+def req_ctx(app, request_ctx):
+    """Simple alias (TBR)"""
+    return request_ctx

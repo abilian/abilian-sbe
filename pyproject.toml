@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "abilian-sbe"
-version = "0.5.8"
+version = "0.5.9"
 description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
 authors = ["Abilian SAS"]
 license = "LGPL-2.0-or-later"
@@ -82,6 +82,7 @@ gitchangelog = "^3.0"
 mccabe = "*"
 pre-commit = "*"
 devtools = "^0.5.1"
+pytest-flask = "^1.0.0"
 
 # Formatters
 isort = "*"
