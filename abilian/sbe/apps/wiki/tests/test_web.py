@@ -165,8 +165,12 @@ def test_create_page(community1, app, admin_user, client, req_ctx):
         assert response.status_code == 200
 
         url = url_for("wiki.page_edit", community_id=community.slug)
-        data = {"title": title, "page_id": page_id, "body_src": "abc def"}
-        data["__action"] = "edit"
+        data = {
+            "title": title,
+            "page_id": page_id,
+            "body_src": "abc def",
+            "__action": "edit",
+        }
         response = client.post(url, data=data)
         assert response.status_code == 302
 
