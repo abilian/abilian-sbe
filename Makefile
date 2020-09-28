@@ -189,6 +189,8 @@ release:
 update-deps:
 	pip install -U pip setuptools wheel
 	poetry update
+	dephell deps convert --from=pyproject.toml --to=setup.py
+	black setup.py
 
 sync-deps:
 	pip install -U pip setuptools wheel
