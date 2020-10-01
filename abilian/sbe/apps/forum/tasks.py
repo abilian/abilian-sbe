@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Text, Tuple
 
 import bleach
 import chardet
+import html2text
 from celery import shared_task
 from celery.schedules import crontab
 from celery.utils.log import get_task_logger
@@ -246,8 +247,8 @@ def send_post_to_user(community, post, member):
         "MAIL_REPLY_MARKER": MAIL_REPLY_MARKER,
         "SBE_FORUM_REPLY_BY_MAIL": SBE_FORUM_REPLY_BY_MAIL,
     }
-    msg.body = render_template_i18n("forum/mail/new_message.txt", **ctx)
     msg.html = render_template_i18n("forum/mail/new_message.html", **ctx)
+    msg.body = html2text.html2text(msg.html)
     logger.debug("Sending new post by email to %r", member.email)
 
     try:

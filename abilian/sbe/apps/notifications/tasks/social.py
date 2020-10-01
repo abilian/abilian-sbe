@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
-from typing import Dict, List, Set
+from typing import Dict, List, Optional, Set
 
+import html2text
 from celery import shared_task
 from celery.schedules import crontab
 from flask import current_app
@@ -60,7 +61,7 @@ def send_daily_social_digest():
             current_app.logger.error("Error sending daily social digest", exc_info=True)
 
 
-def send_daily_social_digest_to(user):
+def send_daily_social_digest_to(user: User):
     """Send to a given user a daily digest of activities in its communities.
 
     Return 1 if mail sent, 0 otherwise.
@@ -75,7 +76,7 @@ def send_daily_social_digest_to(user):
         return 0
 
 
-def make_message(user):
+def make_message(user: User) -> Optional[Message]:
     config = current_app.config
     sender = config.get("BULK_MAIL_SENDER", config["MAIL_SENDER"])
     sbe_config = config["ABILIAN_SBE"]
@@ -150,8 +151,8 @@ def make_message(user):
         subject, sender=sender, recipients=[recipient], extra_headers=extra_headers
     )
     ctx = {"digests": digests, "token": token, "unsubscribe_url": unsubscribe_url}
-    msg.body = render_template_i18n("notifications/daily-social-digest.txt", **ctx)
     msg.html = render_template_i18n("notifications/daily-social-digest.html", **ctx)
+    msg.body = html2text.html2text(msg.body)
     return msg
 
 

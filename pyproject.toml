@@ -38,6 +38,7 @@ openpyxl = "^2.3.0"
 
 # Better FP library than itertools IMHO.
 toolz = "*"
+html2text = "^2020.1.16"
 
 [tool.poetry.dev-dependencies]
 # Debug
@@ -92,9 +93,10 @@ black = { version = "*", allow-prereleases = true }
 docutils = "=0.15"
 
 
-# [build-system]
-# requires = ["poetry>=0.12"]
-# build-backend = "poetry.masonry.api"
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
 
 [tool.dephell.main]
 from = {format = "poetry", path = "pyproject.toml"}

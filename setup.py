@@ -116,13 +116,11 @@ setup(
         "abilian.sbe.apps.forum": [
             "templates/forum/*.html",
             "templates/forum/mail/*.html",
-            "templates/forum/mail/*.txt",
         ],
         "abilian.sbe.apps.forum.tests": ["data/*.email"],
         "abilian.sbe.apps.notifications": [
             "templates/notifications/*.css",
             "templates/notifications/*.html",
-            "templates/notifications/*.txt",
         ],
         "abilian.sbe.apps.preferences": ["templates/preferences/*.html"],
         "abilian.sbe.apps.social": [
@@ -136,6 +134,7 @@ setup(
         "abilian-core>=0.11",
         "chardet",
         "flask-babel<2",
+        "html2text==2020.*,>=2020.1.16",
         "langid>=1.1",
         "markdown==3.*,>=3.0.0",
         "openpyxl==2.*,>=2.3.0",
