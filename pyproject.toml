@@ -11,7 +11,7 @@ include = ["abilian/*", "abilian/**/*"]
 
 
 [tool.poetry.dependencies]
-python = "^3.6"
+python = ">=3.6.1"
 
 # Abilian Core
 # abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
@@ -82,7 +82,7 @@ pyannotate = "^1.0"
 gitchangelog = "^3.0"
 mccabe = "*"
 pre-commit = "*"
-devtools = "^0.5.1"
+devtools = "^*"
 pytest-flask = "^1.0.0"
 
 # Formatters
@@ -90,13 +90,9 @@ isort = "*"
 black = { version = "*", allow-prereleases = true }
 
 # Pinned because poetry issue
-docutils = "=0.15"
+docutils = "*"
 
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-
-
-[tool.dephell.main]
-from = {format = "poetry", path = "pyproject.toml"}
