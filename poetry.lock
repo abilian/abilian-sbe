@@ -1,10 +1,10 @@
 [[package]]
 name = "abilian-core"
-version = "0.11.13"
+version = "0.11.14"
 description = "A framework for enterprise applications (CRM, ERP, collaboration...), based on Flask and SQLAlchemy"
 category = "main"
 optional = false
-python-versions = ">=3.6.1"
+python-versions = ">=3.6.1,<4"
 
 [package.dependencies]
 alembic = ">=0.9"
@@ -1555,7 +1555,7 @@ python-versions = ">=3.5"
 
 [[package]]
 name = "tqdm"
-version = "4.50.0"
+version = "4.50.1"
 description = "Fast, Extensible Progress Meter"
 category = "main"
 optional = false
@@ -1797,8 +1797,8 @@ content-hash = "f42e30df2ba920d26e87adc00f984ab60bbe9d5146d84c3154027128ebdb6a22
 
 [metadata.files]
 abilian-core = [
-    {file = "abilian-core-0.11.13.tar.gz", hash = "sha256:b0b7625080cedfd6653a057419d1b1a193780056fde9b4bdf9efb76afa792c9f"},
-    {file = "abilian_core-0.11.13-py3-none-any.whl", hash = "sha256:95a7c9860383fc3e3ad54a6becdbb18211efb5aa8f0d9e406c9b8774d27c7762"},
+    {file = "abilian-core-0.11.14.tar.gz", hash = "sha256:5121737f2408e2fcabf8e7931275edb35bf38e878476d857395eb91993462f43"},
+    {file = "abilian_core-0.11.14-py3-none-any.whl", hash = "sha256:20998f2ba27f2dbf09656bc5f1e95ea7b69758271d0ae18a88e658f0aa1cacf3"},
 ]
 alabaster = [
     {file = "alabaster-0.7.12-py2.py3-none-any.whl", hash = "sha256:446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359"},
@@ -2555,8 +2555,8 @@ toolz = [
     {file = "toolz-0.11.1.tar.gz", hash = "sha256:c7a47921f07822fe534fb1c01c9931ab335a4390c782bd28c6bcc7c2f71f3fbf"},
 ]
 tqdm = [
-    {file = "tqdm-4.50.0-py2.py3-none-any.whl", hash = "sha256:2dd75fdb764f673b8187643496fcfbeac38348015b665878e582b152f3391cdb"},
-    {file = "tqdm-4.50.0.tar.gz", hash = "sha256:93b7a6a9129fce904f6df4cf3ae7ff431d779be681a95c3344c26f3e6c09abfa"},
+    {file = "tqdm-4.50.1-py2.py3-none-any.whl", hash = "sha256:5313148c57fcca7df562187903cf9cfa30fe1df2fe0641ea6ddb8ef9e841a137"},
+    {file = "tqdm-4.50.1.tar.gz", hash = "sha256:b04bbbc52a7f1e3665eaa310f34c6ebbdf058bd3f6251fd64c6ab831817121ea"},
 ]
 typed-ast = [
     {file = "typed_ast-1.4.1-cp35-cp35m-manylinux1_i686.whl", hash = "sha256:73d785a950fc82dd2a25897d525d003f6378d1cb23ab305578394694202a58c3"},
