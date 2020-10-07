@@ -3,17 +3,18 @@ from unittest import mock
 
 from flask import url_for
 from flask_login import login_user
+from flask_sqlalchemy import SQLAlchemy
 
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
-from abilian.sbe.apps.forum.tests.util import get_string_from_file
 from abilian.testing.util import client_login
 
-from ..cli import inject_email
+from ..cli import _inject_email
 from ..models import Post, Thread
 from ..tasks import build_reply_email_address, extract_email_destination
+from .util import get_string_from_file
 
 
-def test_posts_ordering(db, community1):
+def test_posts_ordering(db: SQLAlchemy, community1):
     thread = Thread(community=community1, title="test ordering")
     db.session.add(thread)
     t1 = datetime(2014, 6, 20, 15, 0, 0)
@@ -32,7 +33,7 @@ def test_posts_ordering(db, community1):
     assert [p.id for p in thread.posts] == [p2_id, p1_id]
 
 
-def test_thread_indexed(app, db, community1, community2, req_ctx):
+def test_thread_indexed(app, db: SQLAlchemy, community1, community2, req_ctx):
     index_svc = app.services["indexing"]
     index_svc.start()
     security_svc = app.services["security"]
@@ -66,7 +67,7 @@ def test_forum_home(client, community1, login_admin, req_ctx):
     assert response.status_code == 200
 
 
-def test_create_thread_informative(app, db, client, community1, req_ctx):
+def test_create_thread_informative(app, db: SQLAlchemy, client, community1, req_ctx):
     """Test with 'informative' community.
 
     No mail sent, unless user is MANAGER
@@ -79,8 +80,7 @@ def test_create_thread_informative(app, db, client, community1, req_ctx):
     title = "Brand new thread"
     content = "shiny thread message"
     url = url_for("forum.new_thread", community_id=community1.slug)
-    data = {"title": title, "message": content}
-    data["__action"] = "create"
+    data = {"title": title, "message": content, "__action": "create"}
 
     mail = app.extensions["mail"]
     with client_login(client, user):
@@ -116,25 +116,27 @@ def test_build_reply_email_address(app, req_ctx):
     member.id = 4
 
     result = build_reply_email_address("test", post, member, "example.com")
-    expected = "test+P-en-3-4-a8f33983311589176c711111dc38d94d@example.com"
+    expected = "test+P-en-3-4-c33d74de7b0cc35a086c539c0e8f4fc3@example.com"
     assert result == expected
 
 
-def test_extract_mail_destination(app, req_ctx):
-    # app.config['MAIL_SENDER'] = 'test@testcase.app.tld'
-
-    test_address = "test+P-en-3-4-a8f33983311589176c711111dc38d94d@example.com"
+def test_extract_mail_destination_1(app, req_ctx):
+    test_address = "test+P-en-3-4-c33d74de7b0cc35a086c539c0e8f4fc3@example.com"
     infos = extract_email_destination(test_address)
     assert infos == ("en", "3", "4")
 
+
+def test_extract_mail_destination_2(app, req_ctx):
     test_address = (
-        "John Q Public <test+P-en-3-4-a8f33983311589176c711111dc38d94d@example.com>"
+        "John Q Public <test+P-en-3-4-c33d74de7b0cc35a086c539c0e8f4fc3@example.com>"
     )
     infos = extract_email_destination(test_address)
     assert infos == ("en", "3", "4")
 
+
+def test_extract_mail_destination_3(app, req_ctx):
     test_address = (
-        '"John Q Public" <test+P-en-3-4-a8f33983311589176c711111dc38d94d@example.com>'
+        '"John Q Public" <test+P-en-3-4-c33d74de7b0cc35a086c539c0e8f4fc3@example.com>'
     )
     infos = extract_email_destination(test_address)
     assert infos == ("en", "3", "4")
@@ -157,9 +159,12 @@ def test_create_thread_and_post(community1, client, app, db, req_ctx):
         title = "Brand new thread"
         content = "shiny thread message"
         url = url_for("forum.new_thread", community_id=community.slug)
-        data = {"title": title, "message": content}
-        data["__action"] = "create"
-        data["send_by_email"] = "y"
+        data = {
+            "title": title,
+            "message": content,
+            "__action": "create",
+            "send_by_email": "y",
+        }
         response = client.post(url, data=data)
         assert response.status_code == 302
 
@@ -200,7 +205,7 @@ def test_create_thread_and_post(community1, client, app, db, req_ctx):
 
 
 @mock.patch("fileinput.input")
-@mock.patch("abilian.sbe.apps.forum.commands.process_email")
+@mock.patch("abilian.sbe.apps.forum.cli.process_email")
 def test_parse_forum_email(mock_process_email, mock_email):
     """No processing is tested only parsing into a email.message and
     verifying inject_email() logic."""
@@ -208,7 +213,7 @@ def test_parse_forum_email(mock_process_email, mock_email):
     mock_email.return_value = get_string_from_file("notification.email")
 
     # test the parsing function
-    inject_email()
+    _inject_email()
 
     # assert the email is read
     assert mock_email.called
@@ -222,6 +227,6 @@ def test_parse_forum_email(mock_process_email, mock_email):
     assert not mock_process_email.delay.called
 
     mock_email.return_value = get_string_from_file("defects.email")
-    inject_email()
+    _inject_email()
     assert mock_email.called
     assert not mock_process_email.delay.called

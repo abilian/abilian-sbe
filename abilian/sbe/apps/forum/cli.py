@@ -16,7 +16,10 @@ logger = logging.getLogger(__name__)
 def inject_email(filename="-"):
     """Read one email from stdin, parse it, forward it in a celery task to be
     persisted."""
+    _inject_email(filename)
 
+
+def _inject_email(filename="-"):
     parser = FeedParser()
 
     if logger.level is logging.NOTSET:

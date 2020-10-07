@@ -1,10 +1,8 @@
 import pytest
-from pytest import raises
-
-from abilian.sbe.apps.forum.tests.util import get_email_message_from_file
 
 from ..models import Post, Thread, ThreadClosedError
 from ..tasks import process
+from .util import get_email_message_from_file
 
 
 def test_create_post():
@@ -21,10 +19,13 @@ def test_create_post():
 def test_closed_property():
     thread = Thread(title="Test Thread")
     assert thread.closed is False
+
     thread.closed = True
     assert thread.closed is True
+
     thread.closed = 0
     assert thread.closed is False
+
     thread.closed = 1
     assert thread.closed is True
     assert thread.meta["abilian.sbe.forum"]["closed"] is True
@@ -77,24 +78,20 @@ def test_change_thread_copy_name():
     assert post.name == thread2.name
 
 
-def test_task_process_email():
+@pytest.mark.parametrize(
+    "filename",
+    [
+        "reply.email",
+        "reply_nocharset_specified.email",
+        "reply_no_marker.email",
+        "reply_no_textpart.email",
+    ],
+)
+def test_task_process_email_ok(filename):
     """Test the process_email function."""
 
     marker = "_____Write above this line to post_____"
 
-    message = get_email_message_from_file("reply.email")
+    message = get_email_message_from_file(filename)
     newpost = process(message, marker)[0]
     assert newpost
-
-    message = get_email_message_from_file("reply_nocharset_specified.email")
-    newpost = process(message, marker)[0]
-    assert newpost
-
-    message = get_email_message_from_file("reply_no_marker.email")
-    with raises(LookupError):
-        process(message, marker)
-
-    # dubious check
-    message = get_email_message_from_file("reply_no_textpart.email")
-    with raises(LookupError):
-        process(message, marker)
