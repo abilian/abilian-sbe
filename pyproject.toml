@@ -11,7 +11,7 @@ include = ["abilian/*", "abilian/**/*"]
 
 
 [tool.poetry.dependencies]
-python = ">=3.6.1"
+python = ">=3.6.1,<4"
 
 # Abilian Core
 # abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
