@@ -4,7 +4,7 @@ import mailbox
 import re
 from os.path import expanduser
 from pathlib import Path
-from typing import Any, Dict, List, Text, Tuple
+from typing import Any, Dict, List, Tuple
 
 import bleach
 import chardet
@@ -147,9 +147,7 @@ def build_local_part(name, uid):
     return local_part
 
 
-def build_reply_email_address(
-    name: Text, post: Post, member: User, domain: Text
-) -> Text:
+def build_reply_email_address(name: str, post: Post, member: User, domain: str) -> str:
     """Build a reply-to email address embedding the locale, thread_id and
     user.id.
 
@@ -168,7 +166,7 @@ def build_reply_email_address(
     return local_part + "@" + domain
 
 
-def extract_email_destination(address: Text) -> Tuple[Text, ...]:
+def extract_email_destination(address: str) -> Tuple[str, ...]:
     """Return the values encoded in the email address.
 
     :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
@@ -191,7 +189,7 @@ def extract_email_destination(address: Text) -> Tuple[Text, ...]:
     return tuple(values)
 
 
-def has_subtag(address: Text) -> bool:
+def has_subtag(address: str) -> bool:
     """Return True if a subtag (delimited by '+') was found
     in the name part of the address.
 
@@ -283,7 +281,7 @@ def add_paragraph(newpost):
     return newpost
 
 
-def clean_html(newpost: Text) -> Text:
+def clean_html(newpost: str) -> str:
     """Clean leftover empty blockquotes."""
 
     clean = re.sub(
@@ -308,7 +306,7 @@ def clean_html(newpost: Text) -> Text:
     return clean
 
 
-def decode_payload(part: email.message.Message) -> Text:
+def decode_payload(part: email.message.Message) -> str:
     """Get the payload and decode (base64 & quoted printable)."""
 
     payload = part.get_payload(decode=True)
@@ -334,7 +332,7 @@ def decode_payload(part: email.message.Message) -> Text:
     return payload_str
 
 
-def process(message: email.message.Message, marker: Text) -> Tuple[Text, List[dict]]:
+def process(message: email.message.Message, marker: str) -> Tuple[str, List[dict]]:
     """Check the message for marker presence and return the text up to it if
     present.
 
