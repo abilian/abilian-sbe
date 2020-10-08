@@ -152,7 +152,7 @@ def make_message(user: User) -> Optional[Message]:
     )
     ctx = {"digests": digests, "token": token, "unsubscribe_url": unsubscribe_url}
     msg.html = render_template_i18n("notifications/daily-social-digest.html", **ctx)
-    msg.body = html2text.html2text(msg.body)
+    msg.body = html2text.html2text(msg.html)
     return msg
 
 
