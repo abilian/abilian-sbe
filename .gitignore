@@ -3,6 +3,7 @@ config_prod.py
 generated.py
 custom.ini
 conf
+test-data/
 
 .idea
 .tox
