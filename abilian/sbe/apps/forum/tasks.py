@@ -348,7 +348,7 @@ def process(message: email.message.Message, marker: str) -> Tuple[str, List[dict
         content_type = part.get_content_type()
         content_disposition = part.get("Content-Disposition")
 
-        if content_disposition is not None:
+        if content_disposition not in [None, "inline"]:
             attachments.append(
                 {
                     "filename": part.get_filename(),
