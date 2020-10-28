@@ -225,18 +225,19 @@ def send_post_to_user(community, post, member):
     if SBE_FORUM_REPLY_BY_MAIL:
         name = SBE_FORUM_REPLY_ADDRESS.rsplit("@", 1)[0]
         domain = SBE_FORUM_REPLY_ADDRESS.rsplit("@", 1)[1]
-        replyto = build_reply_email_address(name, post, member, domain)
-        msg = Message(
-            subject,
-            sender=SBE_FORUM_REPLY_ADDRESS,
-            recipients=[recipient],
-            reply_to=replyto,
-            extra_headers=extra_headers,
-        )
+        reply_to = build_reply_email_address(name, post, member, domain)
+        sender = SBE_FORUM_REPLY_ADDRESS
     else:
-        msg = Message(
-            subject, sender=SENDER, recipients=[recipient], extra_headers=extra_headers
-        )
+        sender = SENDER
+        reply_to = None
+
+    msg = Message(
+        subject,
+        recipients=[recipient],
+        sender=sender,
+        reply_to=reply_to,
+        extra_headers=extra_headers,
+    )
 
     ctx = {
         "community": community,

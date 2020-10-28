@@ -14,8 +14,7 @@
 
 <hr>
 
-<h1><a href="{{ url_for(post, _external=True) }}">{{ post.title }}</a>
-</h1>
+<h1 style="font-size: 1.5em;"><a href="{{ url_for(post, _external=True) }}">{{ post.title }}</a></h1>
 
 {{ post.body_html|safe }}
 
