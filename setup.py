@@ -172,6 +172,7 @@ setup(
             "pytest-flask==1.*,>=1.0.0",
             "pytest-xdist",
             "restructuredtext-lint",
+            "safety==1.*,>=1.9.0",
             "sphinx",
             "sphinx-rtd-theme",
             "typeguard",

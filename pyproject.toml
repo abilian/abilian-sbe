@@ -91,6 +91,7 @@ black = { version = "*", allow-prereleases = true }
 
 # Pinned because poetry issue
 docutils = "*"
+safety = "^1.9.0"
 
 
 [build-system]
