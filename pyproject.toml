@@ -47,6 +47,7 @@ flask-debugtoolbar = "*"
 # Our favorite test runner with some plugins and CI builder
 pytest = "*"
 pytest-xdist = "*"
+pytest-flask = "^1.0.0"
 
 # Coverage
 coverage = ">=4.1"
@@ -70,20 +71,25 @@ Flask-LinkTester = "*"
 
 # Static code analysis
 flake8 = "*"
+flake8-assertive = "*"
+flake8-blind-except = "*"
 flake8-bugbear = "*"
 flake8-comprehensions = "*"
+flake8-isort = "*"
+flake8-logging-format = "*"
 flake8-mutable = "*"
 flake8-pytest = "*"
 flake8-super-call = "*"
 flake8-tidy-imports = "*"
 mastool = "*"
 mypy = "*"
+
+# More tools
 pyannotate = "^1.0"
 gitchangelog = "^3.0"
 mccabe = "*"
 pre-commit = "*"
 devtools = "^*"
-pytest-flask = "^1.0.0"
 
 # Formatters
 isort = "*"
