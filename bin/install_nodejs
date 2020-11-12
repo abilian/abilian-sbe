@@ -25,4 +25,3 @@ popd
 ln -s -f ../../vendor/node/bin/node .heroku/python/bin/node
 ln -s -f ../../vendor/node/bin/node-waf .heroku/python/bin/node-waf
 ln -s -f ../../vendor/node/bin/npm .heroku/python/bin/npm
-

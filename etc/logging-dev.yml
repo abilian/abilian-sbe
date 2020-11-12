@@ -11,7 +11,7 @@ formatters:
 
   with_origin:
     format: '%(asctime)s - %(levelname)s: %(pathname)s:%(lineno)d [%(funcName)s()]: %(message)s'
-    datefmt: '%Y/%m/%d %H:%M:%S'    
+    datefmt: '%Y/%m/%d %H:%M:%S'
 
   msg_only:
     format: '%(message)s'

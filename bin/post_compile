@@ -9,4 +9,3 @@ bin/install_nodejs
 npm install -g less
 
 echo "-----> Post-compile done"
-
