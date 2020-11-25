@@ -180,11 +180,10 @@ delete-cache:
 update-pot:
 	python setup.py extract_messages update_catalog compile_catalog
 
-
-release:
-	maketag
+publish: clean
 	git push --tags
-	poetry publish --build
+	poetry build
+	twine upload dist/*
 
 update-deps:
 	pip install -U pip setuptools wheel
