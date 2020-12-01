@@ -115,7 +115,7 @@ class ActivityEntryPresenter(BasePresenter):
             if msg:
                 msg = msg.format(**ctx)
                 if entry.target and not ignore_community:
-                    msg += " " + _("in the community {target}.").format(**ctx)
+                    msg += f" {_('in the community {target}.').format(**ctx)}"
                 else:
                     msg += "."
 
@@ -125,7 +125,7 @@ class ActivityEntryPresenter(BasePresenter):
                 ).format(**ctx)
 
                 if entry.target and not ignore_community:
-                    msg += " " + _("in the community {target}.").format(**ctx)
+                    msg += f" {_('in the community {target}.').format(**ctx)}"
                 else:
                     msg += "."
 
@@ -162,7 +162,7 @@ def get_body_thread(object: Thread) -> Markup:
     body = bleach.clean(object.posts[0].body_html, tags=[], strip=True)
     body = Markup(body).unescape()
     if len(body) > 400:
-        body = body[0:400] + "…"
+        body = f"{body[0:400]}…"
     body = render_template_string(
         POST_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object.posts[0]
     )
@@ -174,7 +174,7 @@ def get_body_post(object: Post) -> Markup:
     body = bleach.clean(object.body_html, tags=[], strip=True)
     body = Markup(body).unescape()
     if len(body) > 400:
-        body = body[0:400] + "…"
+        body = f"{body[0:400]}…"
     body = render_template_string(
         POST_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object
     )
@@ -186,7 +186,7 @@ def get_body_document(object: Document) -> Markup:
     body = bleach.clean(object.body_html, tags=[], strip=True)
     body = Markup(body).unescape()
     if len(body) > 400:
-        body = body[0:400] + "…"
+        body = f"{body[0:400]}…"
     body = render_template_string(
         DOCUMENT_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object
     )

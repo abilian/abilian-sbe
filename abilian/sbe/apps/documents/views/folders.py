@@ -605,7 +605,7 @@ ARCHIVE_IGNORE_FILES_GLOBS = {"__MACOSX/*", ".DS_Store"}
 # translates patterns to match with any parent directory ((*/)?pattern should
 # match)
 ARCHIVE_IGNORE_FILES = {
-    re.compile("(?:.*\\/)?" + fnmatch.translate(pattern))
+    re.compile(f"(?:.*\\/)?{fnmatch.translate(pattern)}")
     for pattern in ARCHIVE_IGNORE_FILES_GLOBS
 }
 
@@ -732,7 +732,7 @@ def download_multiple(folder: Folder) -> Response:
     temp_factory = (
         tempfile.mktemp if current_app.use_x_sendfile else tempfile.NamedTemporaryFile
     )
-    zip_fn = temp_factory(prefix="tmp-" + current_app.name + "-", suffix=".zip")
+    zip_fn = temp_factory(prefix=f"tmp-{current_app.name}-", suffix=".zip")
     with ZipFile(zip_fn, "w") as zipfile:
         for doc in docs:
             zipfile.writestr(doc.title, doc.content or b"")
@@ -971,7 +971,7 @@ def descendants_view(folder_id):
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
 
-    root_path_ids = folder._indexable_parent_ids + f"/{folder.id}"
+    root_path_ids = f"{folder._indexable_parent_ids}/{folder.id}"
     index_service = get_service("indexing")
 
     filters = wq.And(
@@ -1019,7 +1019,7 @@ def descendants_view(folder_id):
             descendants.append((level, type_letter, child))
 
             if is_folder:
-                path_id = child["parent_ids"] + f"/{child['id']}"
+                path_id = f"{child['parent_ids']}/{child['id']}"
                 visit(path_id, level + 1)
 
     visit(root_path_ids, 0)

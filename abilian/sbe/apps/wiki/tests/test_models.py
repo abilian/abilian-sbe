@@ -12,11 +12,11 @@ from abilian.testing.util import client_login
 @pytest.mark.parametrize("text", ["TOTO", "x 123", "/#$", "/*€("])
 def test_wikilink_extension(text, db, req_ctx):
     qtext = str(quote_plus(text.encode("utf-8")))
-    wikilink = "[[" + text + "]]"
+    wikilink = f"[[{text}]]"
 
     def build_url(label: str, base: str, end: str) -> str:
         print("build_url called")
-        return "/?title=" + quote_plus(label.encode("utf-8")) + end
+        return f"/?title={quote_plus(label.encode('utf-8'))}{end}"
 
     extension = SBEWikiLinkExtension(build_url=build_url)
     ctx = {

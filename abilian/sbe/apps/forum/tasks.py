@@ -134,7 +134,7 @@ def build_local_part(name, uid):
     serializer = Serializer(key)
     signature = serializer.dumps(uid)
     digest = md5(signature)
-    local_part = name + "+" + uid + "-" + digest
+    local_part = f"{name}+{uid}-{digest}"
 
     if len(local_part) > 64:
         if (len(local_part) - len(digest) - 1) > 64:
@@ -163,7 +163,7 @@ def build_reply_email_address(name: str, post: Post, member: User, domain: str) 
     locale = get_locale()
     uid = "-".join(["P", str(locale), str(post.thread_id), str(member.id)])
     local_part = build_local_part(name, uid)
-    return local_part + "@" + domain
+    return f"{local_part}@{domain}"
 
 
 def extract_email_destination(address: str) -> Tuple[str, ...]:
@@ -278,7 +278,7 @@ def add_paragraph(newpost):
     """Add surrounding <p>newpost</p> if necessary."""
     newpost = newpost.strip()
     if not newpost.startswith("<p>"):
-        newpost = "<p>" + newpost + "</p>"
+        newpost = f"<p>{newpost}</p>"
     return newpost
 
 

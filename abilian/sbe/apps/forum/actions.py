@@ -31,7 +31,7 @@ class ForumAction(Action):
         if self._url or self.endpoint:
             return super().url(context=context)
 
-        return url_for("." + self.name, community_id=g.community.slug)
+        return url_for(f".{self.name}", community_id=g.community.slug)
 
 
 class ThreadAction(ForumAction):

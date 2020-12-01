@@ -9,7 +9,7 @@ from abilian.web.action import Action, FAIcon, actions
 
 class CalendarAction(Action):
     def url(self, context=None):
-        return url_for("." + self.name, community_id=g.community.slug)
+        return url_for(f".{self.name}", community_id=g.community.slug)
 
 
 class EventAction(CalendarAction):
@@ -20,7 +20,7 @@ class EventAction(CalendarAction):
     def url(self, context=None):
         event = context.get("object")
         return url_for(
-            "." + self.name, community_id=g.community.slug, event_id=event.id
+            f".{self.name}", community_id=g.community.slug, event_id=event.id
         )
 
 

@@ -170,7 +170,7 @@ def list_json2():
 
     query = (
         db.session.query(Community.id, Community.name)
-        .filter(Community.name.ilike("%" + q + "%"))
+        .filter(Community.name.ilike(f"%{q}%"))
         .distinct()
         .order_by(Community.name)
         .limit(50)
@@ -437,7 +437,7 @@ def members_excel_export():
     ws_title = ws_title.strip()
     if len(ws_title) > 31:
         # sheet title cannot exceed 31 char. max length
-        ws_title = ws_title[:30] + "…"
+        ws_title = f"{ws_title[:30]}…"
     ws = wb.create_sheet(title=ws_title)
     row = 0
     cells = []

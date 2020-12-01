@@ -202,7 +202,7 @@ def getObject():
     path = request.args.get("path")
 
     log.debug(f"getObject called on id={id}, path={path}")
-    log.debug("URL: " + request.url)
+    log.debug(f"URL: {request.url}")
 
     options = get_options(request.args)
     log.debug(f"Options: {options}")
@@ -228,7 +228,7 @@ def updateProperties():
     else:
         path = ""
     log.debug(f"updateProperties called on id={id}, path={path}")
-    log.debug("URL: " + request.url)
+    log.debug(f"URL: {request.url}")
 
     obj = get_object(id)
     return Response(to_xml(obj), mimetype=MIME_TYPE_ATOM_ENTRY)
@@ -242,7 +242,7 @@ def deleteObject():
     else:
         path = ""
     log.debug(f"deleteObject called on id={id}, path={path}")
-    log.debug("URL: " + request.url)
+    log.debug(f"URL: {request.url}")
 
     obj = get_object(id)
 
@@ -267,7 +267,7 @@ def deleteObject():
 @route("/content")
 def getContentStream():
     id = request.args.get("id")
-    log.debug("getContentStream called on " + id)
+    log.debug(f"getContentStream called on {id}")
 
     document = get_document(id)
     return Response(document.content, mimetype=document.content_type)
@@ -277,7 +277,7 @@ def getContentStream():
 @route("/content", methods=["PUT"])
 def setContentStream():
     id = request.args.get("id")
-    log.debug("setContentStream called on " + id)
+    log.debug(f"setContentStream called on {id}")
 
     document = get_document(id)
     created = document.content is None
@@ -295,7 +295,7 @@ def setContentStream():
 @route("/content", methods=["DELETE"])
 def deleteContentStream():
     id = request.args.get("id")
-    log.debug("deleteContentStream called on " + id)
+    log.debug(f"deleteContentStream called on {id}")
 
     document = get_document(id)
     document.content = None
@@ -310,7 +310,7 @@ def deleteContentStream():
 @route("/allowableactions")
 def getAllowableActions():
     id = request.args.get("id")
-    log.debug("getAllowableActions called on " + id)
+    log.debug(f"getAllowableActions called on {id}")
 
     obj = get_object(id)
     args = {"ROOT": ROOT, "object": obj}
@@ -324,7 +324,7 @@ def getAllowableActions():
 @route("/type")
 def getTypeDefinition():
     type_id = request.args.get("id")
-    log.debug("getTypeDefinition called on " + type_id)
+    log.debug(f"getTypeDefinition called on {type_id}")
 
     if type_id == "cmis:document":
         result = render_template("cmis/type-document.xml", ROOT=ROOT)
@@ -357,8 +357,8 @@ def deleteType():
 @route("/children")
 def getChildren():
     id = request.args.get("id")
-    log.debug("getChildren called on " + id)
-    log.debug("URL: " + request.url)
+    log.debug(f"getChildren called on {id}")
+    log.debug(f"URL: {request.url}")
 
     folder = get_folder(id)
 
@@ -371,8 +371,8 @@ def getChildren():
 @route("/children", methods=["POST"])
 def createObject():
     id = request.args.get("id")
-    log.debug("createObject called on " + id)
-    log.debug("URL: " + request.url)
+    log.debug(f"createObject called on {id}")
+    log.debug(f"URL: {request.url}")
 
     print("Received:")
     print(request.data)
@@ -423,7 +423,7 @@ def createObject():
 def getObjectParents():
     """Object Parents Feed (GET)."""
     id = request.args.get("id")
-    log.debug("getObjectParents called on " + id)
+    log.debug(f"getObjectParents called on {id}")
 
     obj = get_object(id)
     if obj.parent:
@@ -445,7 +445,7 @@ def getContentChanges():
 @route("/descendants")
 def getDescendants():
     id = request.args.get("id")
-    log.debug("getObjectParents called on " + id)
+    log.debug(f"getObjectParents called on {id}")
     raise NotImplementedError()
 
 
@@ -453,7 +453,7 @@ def getDescendants():
 @route("/foldertree", methods=["DELETE"])
 def deleteTree():
     id = request.args.get("id")
-    log.debug("deleteTree called on " + id)
+    log.debug(f"deleteTree called on {id}")
 
     obj = get_object(id)
     db.session.delete(obj)
@@ -466,7 +466,7 @@ def deleteTree():
 @route("/foldertree")
 def getFolderTree():
     id = request.args.get("id")
-    log.debug("getFolderTree called on " + id)
+    log.debug(f"getFolderTree called on {id}")
     raise NotImplementedError()
 
 
@@ -479,7 +479,7 @@ def getAllVersions():
 @route("/typedesc")
 def getTypeDescendants():
     type_id = request.args.get("typeId")
-    log.debug("getTypeDescendants called on " + type_id)
+    log.debug(f"getTypeDescendants called on {type_id}")
 
     feed = Feed({}, [])
     result = feed.to_xml()
@@ -492,5 +492,5 @@ def getTypeDescendants():
 @route("/query", methods=["POST"])
 def query():
     q = request.form.get("q")
-    log.debug("query called: " + q)
+    log.debug(f"query called: {q}")
     raise NotImplementedError()

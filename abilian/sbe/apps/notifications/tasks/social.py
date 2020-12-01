@@ -25,7 +25,7 @@ from abilian.web import url_for
 
 from .. import TOKEN_SERIALIZER_NAME
 
-DIGEST_TASK_NAME = __name__ + ".send_daily_social_digest_task"
+DIGEST_TASK_NAME = f"{__name__}.send_daily_social_digest_task"
 DEFAULT_DIGEST_SCHEDULE = {
     "task": DIGEST_TASK_NAME,
     "schedule": crontab(hour=10, minute=0),

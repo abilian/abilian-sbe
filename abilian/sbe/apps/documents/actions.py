@@ -67,7 +67,7 @@ class FolderButtonAction(BaseFolderAction):
             self.modal = kwargs.pop("modal")
 
         css_class = kwargs.pop("css_class", "btn-default")
-        self.CSS_CLASS = self.CSS_CLASS + " " + css_class
+        self.CSS_CLASS = f"{self.CSS_CLASS} {css_class}"
 
         BaseFolderAction.__init__(self, *args, **kwargs)
 

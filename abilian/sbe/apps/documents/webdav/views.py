@@ -64,7 +64,7 @@ def log_response(response):
 def normpath(path):
     path = os.path.normpath(path)
     if not path.startswith("/"):
-        path = "/" + path
+        path = f"/{path}"
     return path
 
 
@@ -180,7 +180,7 @@ def delete(path):
 def copy_or_move(path):
     path = normpath(path)
     dest = request.headers.get("destination")
-    dest_path = normpath(dest[len(request.url_root + "webdav") :])
+    dest_path = normpath(dest[len(f"{request.url_root}webdav") :])
     dest_parent_path, dest_name = split_path(dest_path)
     overwrite = request.headers.get("overwrite")
 
@@ -233,7 +233,7 @@ def propfind(path):
 
     if depth == "1" and obj.is_folder:
         for child in obj.children:
-            m.add_response_for(request.url + "/" + child.name, child, DAV_PROPS)
+            m.add_response_for(f"{request.url}/{child.name}", child, DAV_PROPS)
 
     print(m.to_string())
 
@@ -251,7 +251,7 @@ def lock(path):
         if not repository.can_unlock(obj):
             return "", 423, {}
         else:
-            headers = {"Lock-Token": "urn:uuid:" + token}
+            headers = {"Lock-Token": f"urn:uuid:{token}"}
             return "TODO", HTTP_OK, headers
 
     token = repository.lock(obj)

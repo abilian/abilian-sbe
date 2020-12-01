@@ -155,7 +155,7 @@ def test_explore_archive():
 
     fd = open_file("content.zip")
     archive_content = explore_archive(fd, uncompress=True)
-    result = {"/".join(path) + "/" + f.filename for path, f in archive_content}
+    result = {f"{'/'.join(path)}/{f.filename}" for path, f in archive_content}
     assert result == {
         "existing-doc/file.txt",
         "existing-doc/subfolder_in_renamed/doc.txt",

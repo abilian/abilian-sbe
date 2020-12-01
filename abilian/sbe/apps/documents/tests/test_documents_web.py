@@ -72,7 +72,7 @@ def test_util_create(
         db.session.flush()
         assert doc2.parent == folder
         assert len(folder.children) == 2
-        assert doc2.name == name + "-1"
+        assert doc2.name == f"{name}-1"
 
         messages = get_flashed_messages()
         assert len(messages) == 1
@@ -289,7 +289,7 @@ def test_recursive_zip(
         assert response.content_type == "application/zip"
 
         zipfile = ZipFile(BytesIO(response.data))
-        assert zipfile.namelist() == ["my folder/" + title]
+        assert zipfile.namelist() == [f"my folder/{title}"]
 
 
 def test_document_send_by_mail(

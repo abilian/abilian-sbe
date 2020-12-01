@@ -28,12 +28,12 @@ class Blueprint(BaseBlueprint):
 
         if kwargs.pop("set_community_id_prefix", True):
             if (not url_prefix) or url_prefix[0] != "/":
-                url_prefix = "/" + url_prefix
+                url_prefix = f"/{url_prefix}"
             url_prefix = self._ROUTE_PARAM + url_prefix
 
         if not url_prefix.startswith(self._BASE_URL_PREFIX):
             if (not url_prefix) or url_prefix[0] != "/":
-                url_prefix = "/" + url_prefix
+                url_prefix = f"/{url_prefix}"
             url_prefix = self._BASE_URL_PREFIX + url_prefix
 
         if url_prefix[-1] == "/":

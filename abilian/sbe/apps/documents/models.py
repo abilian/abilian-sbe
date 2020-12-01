@@ -64,7 +64,7 @@ ICONS_FOLDER = pkg_resources.resource_filename("abilian.sbe", "static/fileicons"
 
 
 def icon_url(filename: str) -> str:
-    return url_for("abilian_sbe_static", filename="fileicons/" + filename)
+    return url_for("abilian_sbe_static", filename=f"fileicons/{filename}")
 
 
 def icon_exists(filename: str) -> bool:
@@ -161,7 +161,7 @@ class CmisObject(InheritSecurity, Entity):
     @property
     def path(self) -> str:
         if self.parent:
-            return self.parent.path + "/" + self.title
+            return f"{self.parent.path}/{self.title}"
         else:
             return ""
 
@@ -224,7 +224,7 @@ class PathAndSecurityIndexable:
         """Return a string made of ids separated by a slash: "/1/3/4/5", "5"
         being self.parent.id."""
         ids = [str(obj.id) for obj in self._iter_to_root(skip_self=True)]
-        return "/" + "/".join(reversed(ids))
+        return f"/{'/'.join(reversed(ids))}"
 
     @property
     def _indexable_roles_and_users(self) -> str:

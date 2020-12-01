@@ -60,7 +60,7 @@ class SBEWikiLinksInlineProcessor(WikiLinksInlineProcessor):
                 if page_exists(label):
                     a.set("class", html_class)
                 else:
-                    a.set("class", html_class + " new")
+                    a.set("class", f"{html_class} new")
         else:
             a = ""
         return a, m.start(0), m.end(0)

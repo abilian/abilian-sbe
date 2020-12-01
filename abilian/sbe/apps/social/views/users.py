@@ -54,8 +54,8 @@ def users() -> str:
     if query:
         query = query.replace("%", " ")
         q = or_(
-            User.first_name.like("%" + query + "%"),
-            User.last_name.like("%" + query + "%"),
+            User.first_name.like(f"%{query}%"),
+            User.last_name.like(f"%{query}%"),
         )
         users = User.query.filter(q).limit(100).all()
     else:
@@ -87,8 +87,8 @@ def users_dt_json():
     if search:
         # TODO: gérer les accents
         filter = or_(
-            func.lower(User.first_name).like("%" + search + "%"),
-            func.lower(User.last_name).like("%" + search + "%"),
+            func.lower(User.first_name).like(f"%{search}%"),
+            func.lower(User.last_name).like(f"%{search}%"),
         )
         query = query.filter(filter).reset_joinpoint()
 
@@ -250,8 +250,8 @@ def users_json():
 
     query = User.query.filter(
         or_(
-            func.lower(User.first_name).like(q + "%"),
-            func.lower(User.last_name).like(q + "%"),
+            func.lower(User.first_name).like(f"{q}%"),
+            func.lower(User.last_name).like(f"{q}%"),
         )
     ).order_by(func.lower(User.last_name))
 
