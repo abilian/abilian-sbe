@@ -9,7 +9,7 @@ from abilian.web.forms.fields import QuerySelect2Field
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import optional, required
 
-ModelForm = model_form_factory(Form)  # type: Form
+ModelForm: Form = model_form_factory(Form)
 
 
 class UserProfileForm(ModelForm):

@@ -17,7 +17,7 @@ def test_index(
     client: FlaskClient,
     req_ctx: RequestContext,
 ) -> None:
-    security_service = app.services["security"]  # type: SecurityService
+    security_service: SecurityService = app.services["security"]
     security_service.start()
 
     user = community1.test_user
@@ -33,7 +33,7 @@ def test_community_home(
     client: FlaskClient,
     req_ctx: RequestContext,
 ) -> None:
-    security_service = app.services["security"]  # type: SecurityService
+    security_service: SecurityService = app.services["security"]
     security_service.start()
 
     url = app.default_view.url_for(community1)
@@ -61,7 +61,7 @@ def test_new(
     db: SQLAlchemy,
     req_ctx: RequestContext,
 ) -> None:
-    security_service = app.services["security"]  # type: SecurityService
+    security_service: SecurityService = app.services["security"]
     # security_service.use_cache = False
     security_service.start()
 
@@ -85,7 +85,7 @@ def test_community_settings(
     community1: Community,
     req_ctx: RequestContext,
 ) -> None:
-    security_service = app.services["security"]  # type: SecurityService
+    security_service: SecurityService = app.services["security"]
     security_service.start()
 
     url = url_for("communities.settings", community_id=community1.slug)
@@ -119,7 +119,7 @@ def test_members(
     community2: Community,
     req_ctx: RequestContext,
 ) -> None:
-    security_service = app.services["security"]  # type: SecurityService
+    security_service: SecurityService = app.services["security"]
     security_service.start()
 
     user1 = community1.test_user
