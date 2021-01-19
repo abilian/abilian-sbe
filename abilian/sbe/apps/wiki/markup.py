@@ -5,8 +5,7 @@ Add extensions here (for now).
 import markdown
 from flask import url_for
 from markdown.core import Markdown
-from markdown.extensions.wikilinks import WikiLinkExtension, \
-    WikiLinksInlineProcessor
+from markdown.extensions.wikilinks import WikiLinkExtension, WikiLinksInlineProcessor
 from markdown.util import etree
 
 from abilian.sbe.apps.wiki.models import WikiPage

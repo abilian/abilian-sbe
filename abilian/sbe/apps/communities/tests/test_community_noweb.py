@@ -17,8 +17,7 @@ from abilian.sbe.apps.documents.models import Folder
 from abilian.testing.util import login
 
 from .. import signals, views
-from ..models import MEMBER, READER, Community, CommunityIdColumn, \
-    community_content
+from ..models import MEMBER, READER, Community, CommunityIdColumn, community_content
 
 
 @fixture

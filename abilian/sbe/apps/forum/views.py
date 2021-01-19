@@ -5,8 +5,7 @@ from itertools import groupby
 from urllib.parse import quote
 
 import sqlalchemy as sa
-from flask import current_app, flash, g, make_response, render_template, \
-    request
+from flask import current_app, flash, g, make_response, render_template, request
 from flask_babel import format_date
 from flask_login import current_user
 from sqlalchemy.orm import joinedload

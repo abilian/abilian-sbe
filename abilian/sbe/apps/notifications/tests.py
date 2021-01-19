@@ -5,8 +5,10 @@ from werkzeug import Client
 from abilian.core.models.subjects import User
 from abilian.sbe.app import Application
 from abilian.sbe.apps.communities.models import WRITER, Community
-from abilian.sbe.apps.notifications.tasks.social import CommunityDigest, \
-    generate_unsubscribe_token
+from abilian.sbe.apps.notifications.tasks.social import (
+    CommunityDigest,
+    generate_unsubscribe_token,
+)
 from abilian.services.preferences.service import PreferenceService
 from abilian.web import url_for
 

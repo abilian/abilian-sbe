@@ -3,8 +3,7 @@ import json
 from os.path import splitext
 from typing import IO, Any, Dict, List, Optional, Sequence, Tuple, Union
 
-from flask import current_app, flash, g, redirect, render_template, request, \
-    url_for
+from flask import current_app, flash, g, redirect, render_template, request, url_for
 from validate_email import validate_email
 from werkzeug.wrappers import Response
 

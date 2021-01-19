@@ -4,8 +4,15 @@ from typing import Any, Dict, Optional, Tuple, Union
 from urllib.parse import quote
 
 import sqlalchemy as sa
-from flask import current_app, flash, g, make_response, redirect, \
-    render_template, request
+from flask import (
+    current_app,
+    flash,
+    g,
+    make_response,
+    redirect,
+    render_template,
+    request,
+)
 from flask_login import current_user
 from markdown import markdown
 from markupsafe import Markup
@@ -22,16 +29,14 @@ from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.common import object_viewers
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
-from abilian.sbe.apps.communities.views import \
-    default_view_kw as community_dv_kw
+from abilian.sbe.apps.communities.views import default_view_kw as community_dv_kw
 from abilian.services.security.models import Permission
 from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
-from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, \
-    default_view
+from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, default_view
 
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision

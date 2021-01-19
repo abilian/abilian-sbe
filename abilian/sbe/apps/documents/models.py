@@ -8,8 +8,17 @@ import mimetypes
 import threading
 import uuid
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Collection, Dict, Iterator, List, \
-    Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Collection,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    Tuple,
+    Union,
+)
 
 import pkg_resources
 import sqlalchemy as sa
@@ -35,8 +44,7 @@ from abilian.core.models.subjects import Group, User
 from abilian.core.util import md5
 from abilian.services.conversion import converter
 from abilian.services.indexing import indexable_role
-from abilian.services.security import Admin, Anonymous, InheritSecurity, \
-    security
+from abilian.services.security import Admin, Anonymous, InheritSecurity, security
 
 from . import tasks
 from .lock import Lock

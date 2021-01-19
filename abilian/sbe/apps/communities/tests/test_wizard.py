@@ -7,8 +7,10 @@ from flask import g
 from abilian.core.models.subjects import User
 from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.sbe.apps.communities.models import READER, Community
-from abilian.sbe.apps.communities.views.wizard import wizard_extract_data, \
-    wizard_read_csv
+from abilian.sbe.apps.communities.views.wizard import (
+    wizard_extract_data,
+    wizard_read_csv,
+)
 
 
 @pytest.fixture

@@ -12,9 +12,18 @@ from abilian.core.extensions import db
 from abilian.services import get_service
 
 from .. import repository
-from .constants import DAV_PROPS, HTTP_BAD_REQUEST, HTTP_CONFLICT, \
-    HTTP_CREATED, HTTP_METHOD_NOT_ALLOWED, HTTP_MULTI_STATUS, \
-    HTTP_NO_CONTENT, HTTP_OK, HTTP_PRECONDITION_FAILED, OPTIONS
+from .constants import (
+    DAV_PROPS,
+    HTTP_BAD_REQUEST,
+    HTTP_CONFLICT,
+    HTTP_CREATED,
+    HTTP_METHOD_NOT_ALLOWED,
+    HTTP_MULTI_STATUS,
+    HTTP_NO_CONTENT,
+    HTTP_OK,
+    HTTP_PRECONDITION_FAILED,
+    OPTIONS,
+)
 from .xml import MultiStatus, Propfind
 
 webdav = Blueprint("webdav", __name__, url_prefix="/webdav")

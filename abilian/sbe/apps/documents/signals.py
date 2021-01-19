@@ -1,9 +1,7 @@
 from typing import Any
 
-from abilian.sbe.apps.communities.models import VALID_ROLES, Community, \
-    Membership
-from abilian.sbe.apps.communities.signals import membership_removed, \
-    membership_set
+from abilian.sbe.apps.communities.models import VALID_ROLES, Community, Membership
+from abilian.sbe.apps.communities.signals import membership_removed, membership_set
 from abilian.services.security import Manager, Reader, Writer, security
 
 from .search import reindex_tree

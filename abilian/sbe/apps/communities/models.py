@@ -7,8 +7,16 @@ from typing import Any, List, Optional, Union
 import sqlalchemy as sa
 from blinker import ANY
 from flask import current_app
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, \
-    Unicode, UniqueConstraint, and_
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    ForeignKey,
+    Integer,
+    String,
+    Unicode,
+    UniqueConstraint,
+    and_,
+)
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import backref, relation, relationship
 from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE, Event

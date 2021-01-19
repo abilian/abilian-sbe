@@ -15,8 +15,11 @@ from sqlalchemy.orm import backref, relationship
 from sqlalchemy.types import DateTime
 
 from abilian.core.entities import SEARCHABLE, Entity
-from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
-    community_content
+from abilian.sbe.apps.communities.models import (
+    Community,
+    CommunityIdColumn,
+    community_content,
+)
 from abilian.sbe.apps.documents.models import BaseContent
 from abilian.services.indexing.adapter import SAAdapter
 

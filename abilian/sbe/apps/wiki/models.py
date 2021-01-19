@@ -2,8 +2,15 @@ from datetime import datetime
 from typing import Union
 
 from flask_login import current_user
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, Unicode, \
-    UnicodeText, UniqueConstraint
+from sqlalchemy import (
+    Column,
+    DateTime,
+    ForeignKey,
+    Integer,
+    Unicode,
+    UnicodeText,
+    UniqueConstraint,
+)
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, relationship
@@ -13,8 +20,11 @@ from sqlalchemy.util.langhelpers import _symbol
 from abilian.core.entities import Entity, db
 from abilian.core.models import SEARCHABLE
 from abilian.core.models.subjects import User
-from abilian.sbe.apps.communities.models import Community, CommunityIdColumn, \
-    community_content
+from abilian.sbe.apps.communities.models import (
+    Community,
+    CommunityIdColumn,
+    community_content,
+)
 from abilian.sbe.apps.documents.models import BaseContent
 
 __all__ = ["WikiPage", "WikiPageAttachment", "WikiPageRevision"]

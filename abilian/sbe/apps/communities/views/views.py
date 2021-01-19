@@ -13,8 +13,17 @@ import openpyxl
 import pytz
 import sqlalchemy as sa
 import sqlalchemy.sql.functions
-from flask import current_app, flash, g, jsonify, redirect, render_template, \
-    request, session, url_for
+from flask import (
+    current_app,
+    flash,
+    g,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask.blueprints import BlueprintSetupState
 from flask_login import current_user, login_required
 from openpyxl.cell import WriteOnlyCell
@@ -33,8 +42,11 @@ from abilian.sbe.apps.communities.blueprint import Blueprint
 from abilian.sbe.apps.communities.forms import CommunityForm
 from abilian.sbe.apps.communities.models import Community, Membership
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
-from abilian.sbe.apps.communities.security import is_manager, require_admin, \
-    require_manage
+from abilian.sbe.apps.communities.security import (
+    is_manager,
+    require_admin,
+    require_manage,
+)
 from abilian.sbe.apps.documents.models import Document
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
