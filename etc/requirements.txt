@@ -1,9 +1,8 @@
 abilian-core==0.11.16; python_full_version >= "3.6.1" and python_version < "4" \
     --hash=sha256:73688eb3ac92b5cb48b096e72b101a22e67a3710b65b0ac263fb38fb71b31026 \
     --hash=sha256:4536d0d36021b9ca9c867924b73fa26aa4d9742728c6a4721052dec682873d9a
-alembic==1.4.3; python_full_version >= "3.6.1" and python_version < "4" \
-    --hash=sha256:4e02ed2aa796bd179965041afa092c55b51fb077de19d61835673cc80672c01c \
-    --hash=sha256:5334f32314fb2a56d86b4c4dd1ae34b08c03cae4cb888bc699942104d66bc245
+alembic==1.5.0; python_full_version >= "3.6.1" and python_version < "4" \
+    --hash=sha256:b7b3b43adc71447967b5f7bf55d5cc9113bb4e74840b6907d2705b34f2c0f898
 amqp==2.6.1; python_full_version >= "3.6.1" and python_version < "4" \
     --hash=sha256:aa7f313fb887c91f15474c1229907a04dac0b8135822d6603437803424c0aa59 \
     --hash=sha256:70cdb10628468ff14e57ec2f751c7aa9e48e7e3651cfd62d431213c0c4e58f21
@@ -109,9 +108,9 @@ flask-login==0.5.0; python_full_version >= "3.6.1" and python_version < "4" \
     --hash=sha256:7451b5001e17837ba58945aead261ba425fdf7b4f0448777e597ddab39f4fba0
 flask-mail==0.9.1; python_full_version >= "3.6.1" and python_version < "4" \
     --hash=sha256:22e5eb9a940bf407bcf30410ecc3708f3c56cc44b29c34e1726fe85006935f41
-flask-migrate==2.5.3; python_full_version >= "3.6.1" and python_version < "4" \
-    --hash=sha256:a69d508c2e09d289f6e55a417b3b8c7bfe70e640f53d2d9deb0d056a384f37ee \
-    --hash=sha256:4dc4a5cce8cbbb06b8dc963fd86cf8136bd7d875aabe2d840302ea739b243732
+flask-migrate==2.6.0; python_full_version >= "3.6.1" and python_version < "4" \
+    --hash=sha256:8626af845e6071ef80c70b0dc16d373f761c981f0ad61bb143a529cab649e725 \
+    --hash=sha256:c1601dfd46b9204233935e5d73473cd7fa959db7a4b0e894c7aa7a9e8aeebf0e
 flask-sqlalchemy==2.1; python_full_version >= "3.6.1" and python_version < "4" \
     --hash=sha256:c5244de44cc85d2267115624d83faef3f9e8f088756788694f305a5d5ad137c5
 flask-talisman==0.7.0; python_full_version >= "3.6.1" and python_version < "4" \

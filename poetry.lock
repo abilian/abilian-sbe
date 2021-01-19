@@ -57,17 +57,17 @@ python-versions = "*"
 
 [[package]]
 name = "alembic"
-version = "1.4.3"
+version = "1.5.0"
 description = "A database migration tool for SQLAlchemy."
 category = "main"
 optional = false
-python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,>=2.7"
 
 [package.dependencies]
 Mako = "*"
 python-dateutil = "*"
 python-editor = ">=0.3"
-SQLAlchemy = ">=1.1.0"
+SQLAlchemy = ">=1.3.0"
 
 [[package]]
 name = "amqp"
@@ -689,7 +689,7 @@ Flask = "*"
 
 [[package]]
 name = "flask-migrate"
-version = "2.5.3"
+version = "2.6.0"
 description = "SQLAlchemy database migrations for Flask applications using Alembic"
 category = "main"
 optional = false
@@ -827,7 +827,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 
 [[package]]
 name = "importlib-resources"
-version = "5.0.0"
+version = "5.1.0"
 description = "Read resources from Python packages"
 category = "dev"
 optional = false
@@ -1755,7 +1755,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
 name = "virtualenv"
-version = "20.3.1"
+version = "20.4.0"
 description = "Virtual Python Environment builder"
 category = "dev"
 optional = false
@@ -1923,8 +1923,7 @@ alabaster = [
     {file = "alabaster-0.7.12.tar.gz", hash = "sha256:a661d72d58e6ea8a57f7a86e37d86716863ee5e92788398526d58b26a4e4dc02"},
 ]
 alembic = [
-    {file = "alembic-1.4.3-py2.py3-none-any.whl", hash = "sha256:4e02ed2aa796bd179965041afa092c55b51fb077de19d61835673cc80672c01c"},
-    {file = "alembic-1.4.3.tar.gz", hash = "sha256:5334f32314fb2a56d86b4c4dd1ae34b08c03cae4cb888bc699942104d66bc245"},
+    {file = "alembic-1.5.0.tar.gz", hash = "sha256:b7b3b43adc71447967b5f7bf55d5cc9113bb4e74840b6907d2705b34f2c0f898"},
 ]
 amqp = [
     {file = "amqp-2.6.1-py2.py3-none-any.whl", hash = "sha256:aa7f313fb887c91f15474c1229907a04dac0b8135822d6603437803424c0aa59"},
@@ -2211,8 +2210,8 @@ flask-mail = [
     {file = "Flask-Mail-0.9.1.tar.gz", hash = "sha256:22e5eb9a940bf407bcf30410ecc3708f3c56cc44b29c34e1726fe85006935f41"},
 ]
 flask-migrate = [
-    {file = "Flask-Migrate-2.5.3.tar.gz", hash = "sha256:a69d508c2e09d289f6e55a417b3b8c7bfe70e640f53d2d9deb0d056a384f37ee"},
-    {file = "Flask_Migrate-2.5.3-py2.py3-none-any.whl", hash = "sha256:4dc4a5cce8cbbb06b8dc963fd86cf8136bd7d875aabe2d840302ea739b243732"},
+    {file = "Flask-Migrate-2.6.0.tar.gz", hash = "sha256:8626af845e6071ef80c70b0dc16d373f761c981f0ad61bb143a529cab649e725"},
+    {file = "Flask_Migrate-2.6.0-py2.py3-none-any.whl", hash = "sha256:c1601dfd46b9204233935e5d73473cd7fa959db7a4b0e894c7aa7a9e8aeebf0e"},
 ]
 flask-sqlalchemy = [
     {file = "Flask-SQLAlchemy-2.1.tar.gz", hash = "sha256:c5244de44cc85d2267115624d83faef3f9e8f088756788694f305a5d5ad137c5"},
@@ -2258,8 +2257,8 @@ importlib-metadata = [
     {file = "importlib_metadata-3.4.0.tar.gz", hash = "sha256:fa5daa4477a7414ae34e95942e4dd07f62adf589143c875c133c1e53c4eff38d"},
 ]
 importlib-resources = [
-    {file = "importlib_resources-5.0.0-py3-none-any.whl", hash = "sha256:ea17df80a0ff04b5dbd3d96dbeab1842acfd1c6c902eaeb8c8858abf2720161e"},
-    {file = "importlib_resources-5.0.0.tar.gz", hash = "sha256:4743f090ed8946e713745ec0e660249ef9fb0b9843eacc5b5ff931d2fd5aa67f"},
+    {file = "importlib_resources-5.1.0-py3-none-any.whl", hash = "sha256:885b8eae589179f661c909d699a546cf10d83692553e34dca1bf5eb06f7f6217"},
+    {file = "importlib_resources-5.1.0.tar.gz", hash = "sha256:bfdad047bce441405a49cf8eb48ddce5e56c696e185f59147a8b79e75e9e6380"},
 ]
 infinity = [
     {file = "infinity-1.5.tar.gz", hash = "sha256:8daa7c15ce2100fdccfde212337e0cd5cf085869f54dc2634b6c30d61461ecda"},
@@ -2836,8 +2835,8 @@ vine = [
     {file = "vine-1.3.0.tar.gz", hash = "sha256:133ee6d7a9016f177ddeaf191c1f58421a1dcc6ee9a42c58b34bed40e1d2cd87"},
 ]
 virtualenv = [
-    {file = "virtualenv-20.3.1-py2.py3-none-any.whl", hash = "sha256:14b34341e742bdca219e10708198e704e8a7064dd32f474fc16aca68ac53a306"},
-    {file = "virtualenv-20.3.1.tar.gz", hash = "sha256:0c111a2236b191422b37fe8c28b8c828ced39aab4bf5627fa5c331aeffb570d9"},
+    {file = "virtualenv-20.4.0-py2.py3-none-any.whl", hash = "sha256:227a8fed626f2f20a6cdb0870054989f82dd27b2560a911935ba905a2a5e0034"},
+    {file = "virtualenv-20.4.0.tar.gz", hash = "sha256:219ee956e38b08e32d5639289aaa5bd190cfbe7dafcb8fa65407fca08e808f9c"},
 ]
 webassets = [
     {file = "webassets-0.12.1.tar.gz", hash = "sha256:e7d9c8887343123fd5b32309b33167428cb1318cdda97ece12d0907fd69d38db"},
