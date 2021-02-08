@@ -123,10 +123,7 @@ format-py:
 
 format-js:
 	yarn run prettier --write abilian/sbe/static/js
-
-	# yarn run prettier --write \
-	#	--trailing-comma es5 --tab-width 2 \
-	#	./abilian/sbe/static/less/**/*.less
+	yarn run prettier --write --tab-width 2 abilian/sbe/static/less/
 
 #
 # running
@@ -135,7 +132,8 @@ run:
 	python manage.py runserver
 
 run-uwsgi:
-	uwsgi --http 127.0.0.1:8080 --need-app --disable-logging --wsgi-file wsgi.py --processes 1 --threads 4
+	uwsgi --http 127.0.0.1:8080 --need-app --disable-logging \
+		--wsgi-file wsgi.py --processes 1 --threads 4
 
 
 #
