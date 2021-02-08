@@ -1,4 +1,4 @@
-dist: xenial
+dist: bionic
 
 language: python
 
@@ -7,25 +7,24 @@ cache:
   directories:
     - node_modules
 
+python:
+  - 3.9
+  - 3.8
+  - 3.7
+
 addons:
   postgresql: "9.6"
 
+env:
+  matrix:
+    - SQLALCHEMY_URI=""
+    - SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
+
 matrix:
   include:
-    - python: 3.8
-      env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
-    - python: 3.7
-      env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
-    - python: 3.6
-      env: SQLALCHEMY_URI=postgresql://postgres@localhost/abilian
-    - python: 3.8
-      env: SQLALCHEMY_URI=sqlite://
-    - python: 3.7
-      env: SQLALCHEMY_URI=sqlite://
-    - python: 3.6
-      env: SQLALCHEMY_URI=sqlite://
-    - python: 3.6
+    - python: 3.9
       env: TOXENV=lint
+
 
 # Install OS dependencies
 before_install:
