@@ -115,7 +115,7 @@ lint-travis:
 #
 # Formatting
 #
-format: format-py format-js
+format: format-py format-js format-less
 
 format-py:
 	black abilian demo tests *.py
@@ -123,6 +123,8 @@ format-py:
 
 format-js:
 	yarn run prettier --write abilian/sbe/static/js
+
+format-less:
 	yarn run prettier --write --tab-width 2 abilian/sbe/static/less/
 
 #
