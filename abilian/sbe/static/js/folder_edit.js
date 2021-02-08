@@ -1,14 +1,14 @@
 define("SBEFolderEditSetup", ["Abilian", "jquery"], function(Abilian, $) {
   "use strict";
   function setupModalFolderInputnameCheck(modal, object_id, action) {
-    var $submit = modal.find("button.btn-primary");
-    var $input = modal.find('input[name="title"]');
-    var checkUrl = $input.data("check-url");
-    var $help_span = $input.next("span.help-block");
-    var $control_group = $input.closest("div.form-group");
+    const $submit = modal.find("button.btn-primary");
+    const $input = modal.find('input[name="title"]');
+    const checkUrl = $input.data("check-url");
+    const $help_span = $input.next("span.help-block");
+    const $control_group = $input.closest("div.form-group");
 
     $submit.on("click", function(e) {
-      var title = $input.val();
+      const title = $input.val();
       $.ajax(checkUrl, {
         async: false,
         cache: false,
@@ -18,7 +18,7 @@ define("SBEFolderEditSetup", ["Abilian", "jquery"], function(Abilian, $) {
           action: action,
         },
         success: function(data) {
-          var valid = data.valid;
+          const valid = data.valid;
           if (!valid) {
             e.preventDefault();
             $control_group.addClass("has-error");

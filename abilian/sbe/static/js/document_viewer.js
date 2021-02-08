@@ -1,12 +1,12 @@
 define("SBEDocumentViewerSetup", ["Abilian", "jquery"], function(Abilian, $) {
   "use strict";
   function setupDocumentViewer() {
-    var container = $(".preview-container");
-    var img = container.find("img.preview");
-    var imgSrc = img.attr("src");
-    var previewPrev = container.find(".preview-prev");
-    var previewNext = container.find(".preview-next");
-    var pageNum = container.data("pageNum");
+    const container = $(".preview-container");
+    const img = container.find("img.preview");
+    const imgSrc = img.attr("src");
+    const previewPrev = container.find(".preview-prev");
+    const previewNext = container.find(".preview-next");
+    const pageNum = container.data("pageNum");
 
     function showNav() {
       $(document).bind("keydown", keyDown);
@@ -25,7 +25,7 @@ define("SBEDocumentViewerSetup", ["Abilian", "jquery"], function(Abilian, $) {
 
     // TODO: what if we want to go past the last page?
     function loadNext() {
-      var page = img.data("page") + 1;
+      let page = img.data("page") + 1;
       if (page >= pageNum) {
         page = page - 1;
       }
@@ -35,7 +35,7 @@ define("SBEDocumentViewerSetup", ["Abilian", "jquery"], function(Abilian, $) {
     }
 
     function loadPrev() {
-      var page = img.data("page") - 1;
+      let page = img.data("page") - 1;
       if (page < 0) {
         page = 0;
       }
@@ -48,7 +48,7 @@ define("SBEDocumentViewerSetup", ["Abilian", "jquery"], function(Abilian, $) {
     previewPrev.click(loadPrev);
 
     function keyDown(e) {
-      var code = e.keyCode;
+      const code = e.keyCode;
       // Note: we prevent default keyboard action
       if (code === 39) {
         loadNext();

@@ -6,9 +6,9 @@ define("SBEFolderUploadSetup", [
 ], function(Abilian, $, FileAPI) {
   "use strict";
   function setupModalFolderUpload(modalId, url, messages) {
-    var hasErrors = false;
-    var formData = { action: "upload" };
-    var errorMessages = {
+    let hasErrors = false;
+    let formData = { action: "upload" };
+    const errorMessages = {
       fileUploadError: "Error - File not uploaded",
       fileTooLargeError: "Error: maximum file size exceeded",
     };
@@ -22,17 +22,17 @@ define("SBEFolderUploadSetup", [
     }
 
     function onUploadComplete(evt, ui) {
-      var type = evt.type;
-      var uid = FileAPI.uid(ui.file);
-      var widget = $(this).fileapi("widget");
-      var $fileUi = widget.$file(uid);
-      var $statusEl = $fileUi.find(".statusicon");
-      var $icon = $statusEl.find(".glyphicon");
+      const type = evt.type;
+      const uid = FileAPI.uid(ui.file);
+      const widget = $(this).fileapi("widget");
+      const $fileUi = widget.$file(uid);
+      const $statusEl = $fileUi.find(".statusicon");
+      const $icon = $statusEl.find(".glyphicon");
 
       if (ui.error) {
-        var progress = $fileUi.find(".progress");
-        var errorEl = $('<span class="text-danger"></span>');
-        var errorMsg = errorMessages.fileUploadError;
+        const progress = $fileUi.find(".progress");
+        const errorEl = $('<span class="text-danger"></span>');
+        let errorMsg = errorMessages.fileUploadError;
         hasErrors = true;
         $icon.removeClass("glyphicon-upload");
         $icon.addClass("glyphicon-warning-sign text-danger");

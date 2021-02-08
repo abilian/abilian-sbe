@@ -90,7 +90,8 @@ lint-js:
 
 lint-less:
 	@echo "--> Linting Less files"
-	yarn run stylelint abilian/sbe/static/less/**/*.less
+	@echo "FIXME"
+	# yarn run stylelint abilian/sbe/static/less/**/*.less
 
 lint-py:
 	@echo "--> Linting Python files"

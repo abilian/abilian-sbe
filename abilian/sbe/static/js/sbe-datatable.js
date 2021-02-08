@@ -1,7 +1,7 @@
 /* datatable: sort types and filters */
 require(["jquery", "jquery.dataTables"], function($) {
   "use strict";
-  var FOLDER_TYPE = "abilian.sbe.apps.documents.models.folder";
+  const FOLDER_TYPE = "abilian.sbe.apps.documents.models.folder";
 
   function sortFolderFirstCmp(x, y) {
     if (x === y) {

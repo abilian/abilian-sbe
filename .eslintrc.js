@@ -12,9 +12,11 @@ module.exports = {
   rules: {
     quotes: ["error", "double", { avoidEscape: true }],
     semi: ["error", "always"],
-    "comma-dangle": ["error", "always-multiline"],
-    "space-before-function-paren": ["error", "never"],
-    camelcase: "off",
+    // "comma-dangle": ["error", "always-multiline"],
+    // "space-before-function-paren": ["error", "never"],
     curly: "error",
+    "space-before-function-paren": "off",
+    "comma-dangle": "off",
+    camelcase: "off",
   },
 };
