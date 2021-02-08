@@ -3,10 +3,14 @@ define("SBEFolderGalleryListingSetup", [
   "jquery",
   "jquery.dataTables",
   "bootbox",
-], function(Abilian, $, jqDT, bootbox) {
+], function (Abilian, $, jqDT, bootbox) {
   "use strict";
   function setupFolderListing() {
-    $.fn.dataTableExt.afnFiltering.push(function(oSettings, aData, iDataIndex) {
+    $.fn.dataTableExt.afnFiltering.push(function (
+      oSettings,
+      aData,
+      iDataIndex
+    ) {
       const filter_value = $("#filter").val();
       const row_text = aData[2].trim();
       return row_text.match(new RegExp(filter_value, "i"));
@@ -17,12 +21,12 @@ define("SBEFolderGalleryListingSetup", [
       $("input[name='object-selected']").prop("checked", checked);
     }
 
-    $("a[href='#select-all']").click(function(e) {
+    $("a[href='#select-all']").click(function (e) {
       setSelected(true);
       e.preventDefault();
     });
 
-    $("a[href='#unselect-all']").click(function(e) {
+    $("a[href='#unselect-all']").click(function (e) {
       setSelected(false);
       e.preventDefault();
     });
@@ -40,15 +44,13 @@ define("SBEFolderGalleryListingSetup", [
         .next("td");
       const elList = $("<ul />").attr({ class: "folder-items" });
 
-      elements.each(function() {
+      elements.each(function () {
         const li = $("<li />").html($(this).html());
         elList.append(li);
       });
-      msg += $("<div />")
-        .append(elList)
-        .html();
+      msg += $("<div />").append(elList).html();
 
-      bootbox.confirm(msg, function(confirm) {
+      bootbox.confirm(msg, function (confirm) {
         if (confirm) {
           const actionVal = $("<input />", {
             type: "hidden",
@@ -64,7 +66,7 @@ define("SBEFolderGalleryListingSetup", [
     $('button.btn-danger[value="delete"]').click(onClickDelete);
 
     /* Move file functions */
-    const moveFileFillListing = function(modal, folder_url) {
+    const moveFileFillListing = function (modal, folder_url) {
       const tbody = modal.find("tbody");
       const breadcrumbs = modal.find("ul.breadcrumb");
 
@@ -73,11 +75,11 @@ define("SBEFolderGalleryListingSetup", [
         dataType: "json",
         url: folder_url,
         cache: false,
-        success: function(data) {
+        success: function (data) {
           const bc = $(data.breadcrumbs);
           breadcrumbs.empty();
 
-          bc.each(function() {
+          bc.each(function () {
             const li = $("<li />");
             const link = $("<a>" + this.title + "</a>")
               .attr("href", this.url)
@@ -90,7 +92,7 @@ define("SBEFolderGalleryListingSetup", [
           const folders = $(data.folders);
           tbody.empty();
 
-          folders.each(function() {
+          folders.each(function () {
             const tr = $("<tr />");
             const td = $("<td />");
             const link = $("<a>" + this.title + "</a>")
@@ -112,21 +114,23 @@ define("SBEFolderGalleryListingSetup", [
       });
     };
 
-    $(document).on("click", "#modal-move-files-directory-listing a", function(
-      e
-    ) {
-      const self = $(this);
-      const folder_id = self.attr("data-id");
-      const modal = $("#modal-move-files");
-      const url = self.attr("href");
+    $(document).on(
+      "click",
+      "#modal-move-files-directory-listing a",
+      function (e) {
+        const self = $(this);
+        const folder_id = self.attr("data-id");
+        const modal = $("#modal-move-files");
+        const url = self.attr("href");
 
-      modal.find('input[name="target-folder"]').attr("value", folder_id);
+        modal.find('input[name="target-folder"]').attr("value", folder_id);
 
-      moveFileFillListing(modal, url);
-      e.preventDefault();
-    });
+        moveFileFillListing(modal, url);
+        e.preventDefault();
+      }
+    );
 
-    $("#modal-move-files").on("show.bs.modal", function() {
+    $("#modal-move-files").on("show.bs.modal", function () {
       const modal = $(this);
       const listing_form = $(document.forms["folder-listing"]);
       const elements = listing_form.find(
@@ -135,10 +139,7 @@ define("SBEFolderGalleryListingSetup", [
       const footer_inputs = $("#modal-move-files-inputs");
 
       footer_inputs.empty();
-      elements
-        .clone()
-        .attr("type", "hidden")
-        .appendTo(footer_inputs);
+      elements.clone().attr("type", "hidden").appendTo(footer_inputs);
 
       const target = $("<input />").attr({
         type: "hidden",

@@ -3,7 +3,7 @@ define("SBEFolderUploadSetup", [
   "jquery",
   "FileAPI",
   "jquery.fileapi",
-], function(Abilian, $, FileAPI) {
+], function (Abilian, $, FileAPI) {
   "use strict";
   function setupModalFolderUpload(modalId, url, messages) {
     let hasErrors = false;
@@ -87,12 +87,10 @@ define("SBEFolderUploadSetup", [
         onComplete: onComplete,
       })
       .on("fileupload.fileapi filecomplete.fileapi", onUploadComplete)
-      .on("hidden.bs.modal", function(evt) {
+      .on("hidden.bs.modal", function (evt) {
         /* clear file selection when modal is hidden (cancel button) */
         hasErrors = false;
-        $(this)
-          .fileapi("widget")
-          .clear();
+        $(this).fileapi("widget").clear();
       });
 
     formData = null;
