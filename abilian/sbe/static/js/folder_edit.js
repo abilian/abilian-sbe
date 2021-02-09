@@ -17,7 +17,7 @@ define("SBEFolderEditSetup", ["Abilian", "jquery"], (Abilian, $) => {
           title: title,
           action: action,
         },
-        success: function (data) {
+        success(data) {
           const valid = data.valid;
           if (!valid) {
             e.preventDefault();

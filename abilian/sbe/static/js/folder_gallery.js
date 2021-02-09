@@ -71,7 +71,7 @@ define("SBEFolderGalleryListingSetup", [
         dataType: "json",
         url: folder_url,
         cache: false,
-        success: function (data) {
+        success(data) {
           const bc = $(data.breadcrumbs);
           breadcrumbs.empty();
 
