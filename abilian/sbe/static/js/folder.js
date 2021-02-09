@@ -3,14 +3,10 @@ define("SBEFolderListingSetup", [
   "jquery",
   "jquery.dataTables",
   "bootbox",
-], function (Abilian, $, jqDT, bootbox) {
+], (Abilian, $, jqDT, bootbox) => {
   "use strict";
   function setupFolderListing() {
-    $.fn.dataTableExt.afnFiltering.push(function (
-      oSettings,
-      aData,
-      iDataIndex
-    ) {
+    $.fn.dataTableExt.afnFiltering.push((oSettings, aData, iDataIndex) => {
       const filter_value = $("#filter").val();
       const row_text = aData[2].trim();
       return row_text.match(new RegExp(filter_value, "i"));
@@ -77,12 +73,12 @@ define("SBEFolderListingSetup", [
       $("input[name='object-selected']").prop("checked", checked);
     }
 
-    $("a[href='#select-all']").click(function (e) {
+    $("a[href='#select-all']").click(e => {
       setSelected(true);
       e.preventDefault();
     });
 
-    $("a[href='#unselect-all']").click(function (e) {
+    $("a[href='#unselect-all']").click(e => {
       setSelected(false);
       e.preventDefault();
     });
@@ -122,7 +118,7 @@ define("SBEFolderListingSetup", [
       });
       msg += $("<div />").append(elList).html();
 
-      bootbox.confirm(msg, function (confirm) {
+      bootbox.confirm(msg, confirm => {
         if (confirm) {
           const actionVal = $("<input />", {
             type: "hidden",
@@ -138,7 +134,7 @@ define("SBEFolderListingSetup", [
     $('button.btn-danger[value="delete"]').click(onClickDelete);
 
     /* Move file functions */
-    const moveFileFillListing = function (modal, folder_url) {
+    const moveFileFillListing = (modal, folder_url) => {
       const tbody = modal.find("tbody");
       const breadcrumbs = modal.find("ul.breadcrumb");
 

@@ -3,7 +3,7 @@ define("SBEFolderUploadSetup", [
   "jquery",
   "FileAPI",
   "jquery.fileapi",
-], function (Abilian, $, FileAPI) {
+], (Abilian, $, FileAPI) => {
   "use strict";
   function setupModalFolderUpload(modalId, url, messages) {
     let hasErrors = false;

@@ -1,4 +1,4 @@
-define("SBEDocumentViewerSetup", ["Abilian", "jquery"], function (Abilian, $) {
+define("SBEDocumentViewerSetup", ["Abilian", "jquery"], (Abilian, $) => {
   "use strict";
   function setupDocumentViewer() {
     const container = $(".preview-container");
