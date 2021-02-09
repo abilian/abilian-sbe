@@ -17,12 +17,12 @@ define("SBEFolderGalleryListingSetup", [
       $("input[name='object-selected']").prop("checked", checked);
     }
 
-    $("a[href='#select-all']").click(e => {
+    $("a[href='#select-all']").click((e) => {
       setSelected(true);
       e.preventDefault();
     });
 
-    $("a[href='#unselect-all']").click(e => {
+    $("a[href='#unselect-all']").click((e) => {
       setSelected(false);
       e.preventDefault();
     });
@@ -46,7 +46,7 @@ define("SBEFolderGalleryListingSetup", [
       });
       msg += $("<div />").append(elList).html();
 
-      bootbox.confirm(msg, confirm => {
+      bootbox.confirm(msg, (confirm) => {
         if (confirm) {
           const actionVal = $("<input />", {
             type: "hidden",

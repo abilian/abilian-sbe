@@ -7,7 +7,7 @@ define("SBEFolderEditSetup", ["Abilian", "jquery"], (Abilian, $) => {
     const $help_span = $input.next("span.help-block");
     const $control_group = $input.closest("div.form-group");
 
-    $submit.on("click", e => {
+    $submit.on("click", (e) => {
       const title = $input.val();
       $.ajax(checkUrl, {
         async: false,
