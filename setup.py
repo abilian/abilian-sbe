@@ -24,7 +24,7 @@ setup(
     name="abilian-sbe",
     version="0.5.17",
     description="Social Business platform, including: document management, wiki, forum, enterprise social networking, and more",
-    python_requires="<4,>=3.6.1",
+    python_requires="<4,>=3.7",
     project_urls={"repository": "https://github.com/abilian/abilian-sbe"},
     author="Abilian SAS",
     license="LGPL-2.0-or-later",
