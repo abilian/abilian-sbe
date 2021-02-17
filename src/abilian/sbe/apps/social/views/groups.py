@@ -96,7 +96,7 @@ def group_post(group_id):
 
     membership_actions = frozenset(("add", "remove", "add-admin", "remove-admin"))
 
-    if action not in {"join", "leave"}.union(membership_actions):
+    if action not in {"join", "leave"} | membership_actions:
         raise ValueError(f"Unknown action: {action}")
 
     if action not in ("join", "leave"):

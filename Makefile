@@ -85,7 +85,7 @@ lint: lint-js lint-py lint-less lint-doc
 
 lint-js:
 	@echo "--> Linting JavaScript files"
-	yarn run eslint abilian/sbe/static/js
+	yarn run eslint src/abilian/sbe/static/js
 
 lint-less:
 	@echo "--> Linting Less files"
@@ -98,10 +98,10 @@ lint-py:
 	# @make lint-mypy
 
 lint-flake8:
-	-flake8 abilian tests
+	flake8 src tests
 
 lint-mypy:
-	mypy abilian
+	mypy src tests
 
 lint-doc:
 	@echo "--> Linting .rst files"
