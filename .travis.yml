@@ -34,7 +34,7 @@ before_install:
   - gem install travis
 
 install:
-  - pip install -U pip setuptools wheel tox tox-travis
+  - pip install -U pip setuptools wheel tox tox-travis poetry
   - yarn
 
 # Create DB

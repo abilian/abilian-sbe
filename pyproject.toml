@@ -6,8 +6,8 @@ authors = ["Abilian SAS"]
 license = "LGPL-2.0-or-later"
 readme = "README.rst"
 repository = "https://github.com/abilian/abilian-sbe"
-packages = [{ include = "abilian" }]
-include = ["abilian/*", "abilian/**/*"]
+packages = [{ include = "abilian", from = "src" }]
+include = ["src/*", "src/**/*"]
 
 
 [tool.poetry.dependencies]

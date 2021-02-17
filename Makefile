@@ -1,6 +1,5 @@
 .PHONY: test full-test clean setup default
 
-SRC=abilian/sbe
 PKG=$(SRC)
 
 INSTANCE_FOLDER=$(shell 												\
@@ -62,16 +61,16 @@ endif
 # testing
 #
 test:
-	pytest --ff -x --tb=short $(PKG) tests
+	pytest --ff -x --tb=short src tests
 
 test-with-coverage:
 	pytest --tb=short --durations 10 \
 		--cov $(PKG) \
 		--cov-config etc/coverage.rc \
-		--cov-report term-missing $(SRC) tests
+		--cov-report term-missing src tests
 
 test-long:
-	RUN_SLOW_TESTS=True pytest -x $(SRC) tests
+	RUN_SLOW_TESTS=True pytest -x src tests
 
 vagrant-tests:
 	vagrant up
