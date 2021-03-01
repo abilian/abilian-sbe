@@ -57,7 +57,7 @@ setup(
         "abilian.sbe.apps.wiki",
         "abilian.sbe.apps.wiki.tests",
     ],
-    package_dir={"": "."},
+    package_dir={"": "src"},
     package_data={
         "abilian.sbe": [
             "static/csv/*.csv",
