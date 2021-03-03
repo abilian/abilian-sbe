@@ -1,0 +1,62 @@
+version: 2.1
+
+common: &common
+  working_directory: ~/repo
+  steps:
+    - checkout
+    - restore_cache:
+        keys:
+          - v2-deps-{{ .Environment.CIRCLE_JOB }}-{{ checksum "poetry.lock" }}
+    - run:
+        name: install dependencies
+        command: |
+            sudo apt install yarnpkg
+            sudo ln -sf /usr/bin/yarnpkg /usr/bin/yarn
+            sudo yarn global add less
+            pip install --user tox codecov "coverage<5"
+    - run:
+        name: run tox
+        command: ~/.local/bin/tox
+    - save_cache:
+        paths:
+          - .tox
+          - ~/.cache/pip
+          - ~/.local
+          - ./eggs
+        key: v2-deps-{{ .Environment.CIRCLE_JOB }}-{{ checksum "poetry.lock" }}
+
+jobs:
+  lint:
+    <<: *common
+    docker:
+      - image: circleci/python:3.8
+        environment:
+          - TOXENV=lint
+          - UPLOAD_COVERAGE=0
+  py37:
+    <<: *common
+    docker:
+      - image: circleci/python:3.7
+        environment:
+          TOXENV=py37
+  py38:
+    <<: *common
+    docker:
+      - image: circleci/python:3.8
+        environment:
+          TOXENV=py38
+  py39:
+    <<: *common
+    docker:
+      - image: circleci/python:3.9
+        environment:
+          TOXENV=py39
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - lint
+      - py37
+      - py38
+      - py39
