@@ -10,6 +10,7 @@ common: &common
     - run:
         name: install dependencies
         command: |
+            sudo apt install poppler-utils
             sudo apt install yarnpkg
             sudo ln -sf /usr/bin/yarnpkg /usr/bin/yarn
             sudo yarn global add less
