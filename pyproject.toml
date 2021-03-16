@@ -11,11 +11,11 @@ include = ["src/*", "src/**/*"]
 
 
 [tool.poetry.dependencies]
-python = ">=3.7,<4"
+python = "^3.7"
 
 # Abilian Core
 # abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
-abilian-core = ">=0.11"
+abilian-core = "^0.11"
 
 # Pinned temporarily
 wtforms = "<2.2"
@@ -38,6 +38,7 @@ openpyxl = "^2.3.0"
 
 # Better FP library than itertools IMHO.
 toolz = "*"
+
 html2text = "^2020.1.16"
 
 [tool.poetry.dev-dependencies]
