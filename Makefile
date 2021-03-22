@@ -117,14 +117,14 @@ lint-travis:
 format: format-py format-js format-less
 
 format-py:
-	black abilian demo tests *.py
-	isort abilian demo tests *.py
+	black src demo tests *.py
+	isort src demo tests *.py
 
 format-js:
-	yarn run prettier --write abilian/sbe/static/js
+	yarn run prettier --write src/abilian/sbe/static/js
 
 format-less:
-	yarn run prettier --write --tab-width 2 abilian/sbe/static/less/
+	yarn run prettier --write --tab-width 2 src/abilian/sbe/static/less/
 
 #
 # running
