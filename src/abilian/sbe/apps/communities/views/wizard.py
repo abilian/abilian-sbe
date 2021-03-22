@@ -1,4 +1,5 @@
 import csv
+import io
 import json
 from os.path import splitext
 from typing import IO, Any, Dict, List, Optional, Sequence, Tuple, Union
@@ -106,7 +107,13 @@ def wizard_read_csv(csv_file: IO[str]) -> List[Dict[str, str]]:
     if file_extension != ".csv":
         return []
 
-    contents = csv.reader(csv_file, delimiter=";")
+    raw_data = csv_file.read()
+    if isinstance(raw_data, bytes):
+        data = raw_data.decode("utf8")  # FIXME
+    else:
+        data = raw_data
+
+    contents = csv.reader(io.StringIO(data), delimiter=";")
 
     new_accounts = []
 
