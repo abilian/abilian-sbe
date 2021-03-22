@@ -98,7 +98,11 @@ def wizard_extract_data(
 def wizard_read_csv(csv_file: IO[str]) -> List[Dict[str, str]]:
     """Read new members data from CSV file."""
 
-    file_extension = splitext(csv_file.name)[-1]
+    if hasattr(csv_file, "filename"):
+        filename = csv_file.filename
+    else:
+        filename = csv_file.name
+    file_extension = splitext(filename)[-1]
     if file_extension != ".csv":
         return []
 
