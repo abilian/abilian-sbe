@@ -104,3 +104,7 @@ safety = "^1.9.0"
 [build-system]
 requires = ["poetry-core>=1.0.0", "setuptools"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.semantic_release]
+version_toml = "pyproject.toml:tool.poetry.version"
+# version_pattern = 'version = "{version}"'
