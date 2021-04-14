@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master, dev]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, windows, macos]
+        python-version: ['3.7', '3.8', '3.9', 'pypy3']
+        exclude:
+          - os: windows
+            python-version: pypy3
+    steps:
+      - if: ${{ matrix.os == 'ubuntu' }}
+        run: sudo apt-get install strace
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -U pip setuptools wheel tox tox-gh-actions poetry
+      - id: pip-cache
+        run: echo "::set-output name=dir::$(pip cache dir)"
+      - uses: actions/cache@v2
+        with:
+          path: ${{ steps.pip-cache.outputs.dir }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-${{ matrix.python-version }}-
+            ${{ runner.os }}-pip-
+      - run: tox
+      - if: ${{ matrix.os == 'ubuntu' && matrix.python-version == '3.8' }}
+        run: |
+          pip install codecov
+          # doit coverage
+          codecov
