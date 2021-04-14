@@ -19,7 +19,9 @@ jobs:
             python-version: pypy3
     steps:
       - if: ${{ matrix.os == 'ubuntu' }}
-        run: sudo apt-get install strace
+        run:
+          sudo apt-get install strace poppler-utils
+          sudo yarn global add less
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
