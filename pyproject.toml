@@ -19,8 +19,8 @@ abilian-core = "^0.11"
 
 # Pinned temporarily
 wtforms = "<2.2"
-werkzeug = "<1"
 flask-babel = "<2"
+# werkzeug = "<1"
 
 # Email validation (when sending digests)
 validate_email = "*"
