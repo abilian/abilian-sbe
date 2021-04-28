@@ -139,7 +139,6 @@ setup(
         "openpyxl==2.*,>=2.3.0",
         "toolz",
         "validate-email",
-        "werkzeug<1",
         "wtforms<2.2",
         "xlwt",
     ],
