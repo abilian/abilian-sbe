@@ -145,6 +145,13 @@ ul.threads {
     padding-right: 9px;
     box-shadow: 0 4px 2px -4px silver;
 
+    // Break long lines
+    // see: https://css-tricks.com/better-line-breaks-for-long-urls/)
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+
     img {
       max-width: 100%;
     }
