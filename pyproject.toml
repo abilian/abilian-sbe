@@ -20,6 +20,7 @@ abilian-core = "^0.11"
 # Pinned temporarily
 wtforms = "<2.2"
 flask-babel = "<2"
+itsdangerous = "<2"
 # werkzeug = "<1"
 
 # Email validation (when sending digests)
