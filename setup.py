@@ -22,7 +22,7 @@ if os.path.exists(readme_path):
 setup(
     long_description=readme,
     name="abilian-sbe",
-    version="0.5.19",
+    version="0.5.20",
     description="Social Business platform, including: document management, wiki, forum, enterprise social networking, and more",
     python_requires="==3.*,>=3.7.0",
     project_urls={"repository": "https://github.com/abilian/abilian-sbe"},
@@ -134,6 +134,7 @@ setup(
         "chardet",
         "flask-babel<2",
         "html2text==2020.*,>=2020.1.16",
+        "itsdangerous<2",
         "langid>=1.1",
         "markdown==3.*,>=3.0.0",
         "openpyxl==2.*,>=2.3.0",
