@@ -135,6 +135,7 @@ setup(
         "flask-babel<2",
         "html2text==2020.*,>=2020.1.16",
         "itsdangerous<2",
+        "jinja2<3",
         "langid>=1.1",
         "markdown==3.*,>=3.0.0",
         "openpyxl==2.*,>=2.3.0",
