@@ -81,7 +81,7 @@ vagrant-tests:
 #
 # Linting
 #
-lint: lint-js lint-py lint-less lint-doc
+lint: lint-js lint-py lint-less lint-doc lint-licenses
 
 lint-js:
 	@echo "--> Linting JavaScript files"
@@ -110,6 +110,9 @@ lint-doc:
 lint-travis:
 	@echo "--> Linting .travis.yml"
 	travis lint --no-interactive
+
+lint-licenses:
+	liccheck -s etc/liccheck.ini -r etc/requirements.txt
 
 #
 # Formatting
