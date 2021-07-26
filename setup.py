@@ -166,6 +166,7 @@ setup(
             "gitchangelog==3.*,>=3.0.0",
             "honcho",
             "isort",
+            "liccheck==0.*,>=0.6.0",
             "mastool",
             "mccabe",
             "mypy",
