@@ -3,7 +3,7 @@ Changelog for Abilian SBE
 
 
 v0.5.21 (2021-08-02)
--------------------
+--------------------
 
 - Cleanup.
 - Drop support for Python < 3.8.
