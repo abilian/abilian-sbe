@@ -1,16 +1,7 @@
 import nox
 
-PYTHON_VERSIONS = ["3.6", "3.7", "3.8"]
+PYTHON_VERSIONS = ["3.8", "3.9"]
 PACKAGE = "abilian"
-
-
-@nox.session(python="python3.6")
-def lint(session):
-    session.run("poetry", "install", "-q")
-    session.install("poetry", "psycopg2-binary")
-    session.run("yarn", external="True")
-
-    session.run("make", "lint-ci")
 
 
 @nox.session(python=PYTHON_VERSIONS)
@@ -21,6 +12,15 @@ def pytest(session):
 
     session.run("pip", "check")
     session.run("pytest", "-q")
+
+
+@nox.session(python="python3.8")
+def lint(session):
+    session.run("poetry", "install", "-q")
+    session.install("poetry", "psycopg2-binary")
+    session.run("yarn", external="True")
+
+    session.run("make", "lint-ci")
 
 
 @nox.session(python="3.8")
