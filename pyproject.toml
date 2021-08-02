@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "abilian-sbe"
 version = "0.5.20"
-description = "Social Business platform, including: document management, wiki, forum, enterprise social networking, and more"
+description = "Social Business platform (entreprise collaboration and information management)"
 authors = ["Abilian SAS"]
 license = "LGPL-2.0-or-later"
 readme = "README.rst"
@@ -42,6 +42,7 @@ openpyxl = "^2.3.0"
 toolz = "*"
 
 html2text = "^2020.1.16"
+
 
 [tool.poetry.dev-dependencies]
 # Debug
@@ -88,8 +89,8 @@ mastool = "*"
 mypy = "*"
 
 # More tools
-pyannotate = "^1.0"
-gitchangelog = "^3.0"
+pyannotate = "*"
+gitchangelog = "*"
 mccabe = "*"
 pre-commit = "*"
 devtools = "^*"
@@ -100,8 +101,8 @@ black = { version = "*", allow-prereleases = true }
 
 # Pinned because poetry issue
 docutils = "*"
-safety = "^1.9.0"
-liccheck = "^0.6.0"
+liccheck = "*"
+safety = "*"
 
 
 [build-system]

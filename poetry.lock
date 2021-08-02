@@ -1915,7 +1915,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "937f0b7cbaff3c01f395847c388a17ece9b50fceddd4cf5f2ff39ec929ef3aae"
+content-hash = "4686fd4ba3263c7bbb452eff8c661752f260872f9f4d95a07d58a65008a78457"
 
 [metadata.files]
 abilian-core = [
