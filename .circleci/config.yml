@@ -46,6 +46,12 @@ jobs:
         environment:
           - TOXENV=lint
           - UPLOAD_COVERAGE=0
+  safety:
+    <<: *common
+    docker:
+      - image: circleci/python:3.9
+        environment:
+          - TOXENV=safety
 
 workflows:
   version: 2
@@ -54,3 +60,4 @@ workflows:
       - py38
       - py39
       - lint
+      - safety
