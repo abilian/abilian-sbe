@@ -9,8 +9,14 @@ It is based on the `Abilian Core <http://abilian-core.readthedocs.org/en/latest/
 
 Abilian SBE is used by several major customers in production, since mid 2013.
 
+
+
+.. image:: https://circleci.com/gh/abilian/abilian-sbe.svg?style=svg
+   :target: https://circleci.com/gh/abilian/abilian-sbe
+
 .. image:: https://static.pepy.tech/badge/abilian-core
    :target: https://pepy.tech/project/abilian-core
+
 
 Screenshots
 -----------
