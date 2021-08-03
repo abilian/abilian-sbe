@@ -120,7 +120,7 @@ lint-licenses:
 format: format-py format-js format-less
 
 format-py:
-	black src demo tests *.py
+	black -t py38 src demo tests *.py
 	isort src demo tests *.py
 
 format-js:

@@ -127,7 +127,7 @@ def convert_to_pdf(doc: "Document") -> None:
                 "Conversion to PDF failed for document %s: %s",
                 doc.name,
                 e,
-                **error_kwargs
+                **error_kwargs,
             )
 
 
