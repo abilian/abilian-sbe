@@ -61,7 +61,7 @@ endif
 # testing
 #
 test:
-	pytest --ff -x --tb=short src tests
+	pytest -n auto --ff -x --tb=short src tests
 
 test-with-coverage:
 	pytest --tb=short --durations 10 \
