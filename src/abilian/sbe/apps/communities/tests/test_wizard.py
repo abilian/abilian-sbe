@@ -28,7 +28,6 @@ def csv_file() -> IO[str]:
     csv.write("example.com;example;userfour;member\n")
 
     csv.seek(0)
-
     return csv
 
 
@@ -57,81 +56,8 @@ def test_wizard_read_csv(csv_file: IO[str]):
     ]
 
 
-def test_wizard_extract_data(db: SQLAlchemy, csv_file: IO[str]):
-    session = db.session
-    community = Community(name="Hp")
-    g.community = community
-
-    user1 = User(email="user_1@example.com")
-    user2 = User(email="user_2@example.com")
-    user3 = User(email="user_3@example.com")
-
-    new_emails = [
-        "user_1@example.com",
-        "user_2@example.com",
-        "user_3@example.com",
-        "user_4@example.com",
-        "user_5@example.com",
-    ]
-
-    # creating community
-    session.add(community)
-
-    # creating users
-    session.add(user1)
-    session.add(user2)
-    session.add(user3)
-    session.flush()
-
-    # add user1 to the community
-    community.set_membership(user1, READER)
-    session.flush()
-
-    # check wizard function in case of email list
-    (
-        existing_accounts_objects,
-        existing_members_objects,
-        accounts_list,
-    ) = wizard_extract_data(new_emails)
-    assert set(existing_accounts_objects) == {user2, user3}
-    assert existing_members_objects == [user1]
-
-    def sorter(x):
-        return x["email"]
-
-    assert sorted(accounts_list, key=sorter) == sorted(
-        [
-            {
-                "status": "existing",
-                "first_name": None,
-                "last_name": None,
-                "role": "member",
-                "email": "user_2@example.com",
-            },
-            {
-                "status": "existing",
-                "first_name": None,
-                "last_name": None,
-                "role": "member",
-                "email": "user_3@example.com",
-            },
-            {
-                "status": "new",
-                "first_name": "",
-                "last_name": "",
-                "role": "member",
-                "email": "user_5@example.com",
-            },
-            {
-                "status": "new",
-                "first_name": "",
-                "last_name": "",
-                "role": "member",
-                "email": "user_4@example.com",
-            },
-        ],
-        key=sorter,
-    )
+def test_wizard_extract_data_from_csv_file(db: SQLAlchemy, csv_file: IO[str]):
+    user1, user2, user3 = _setup_community(db)
 
     # check wizard function in case of csv file
     (
@@ -168,3 +94,85 @@ def test_wizard_extract_data(db: SQLAlchemy, csv_file: IO[str]):
         ],
         key=sorter,
     )
+
+
+def test_wizard_extract_data_from_emails(db: SQLAlchemy):
+    user1, user2, user3 = _setup_community(db)
+    new_emails = [
+        "user_1@example.com",
+        "user_2@example.com",
+        "user_3@example.com",
+        "user_4@example.com",
+        "user_5@example.com",
+    ]
+
+    # check wizard function in case of email list
+    (
+        existing_accounts_objects,
+        existing_members_objects,
+        accounts_list,
+    ) = wizard_extract_data(new_emails)
+    assert set(existing_accounts_objects) == {user2, user3}
+    assert existing_members_objects == [user1]
+
+    assert sorted(accounts_list, key=sorter) == sorted(
+        [
+            {
+                "status": "existing",
+                "first_name": None,
+                "last_name": None,
+                "role": "member",
+                "email": "user_2@example.com",
+            },
+            {
+                "status": "existing",
+                "first_name": None,
+                "last_name": None,
+                "role": "member",
+                "email": "user_3@example.com",
+            },
+            {
+                "status": "new",
+                "first_name": "",
+                "last_name": "",
+                "role": "member",
+                "email": "user_5@example.com",
+            },
+            {
+                "status": "new",
+                "first_name": "",
+                "last_name": "",
+                "role": "member",
+                "email": "user_4@example.com",
+            },
+        ],
+        key=sorter,
+    )
+
+
+def sorter(x):
+    return x["email"]
+
+
+def _setup_community(db):
+    session = db.session
+
+    # create community
+    community = Community(name="Hp")
+    g.community = community
+    session.add(community)
+
+    # create users
+    user1 = User(email="user_1@example.com")
+    user2 = User(email="user_2@example.com")
+    user3 = User(email="user_3@example.com")
+    session.add(user1)
+    session.add(user2)
+    session.add(user3)
+    session.flush()
+
+    # add user1 to the community
+    community.set_membership(user1, READER)
+    session.flush()
+
+    return user1, user2, user3
