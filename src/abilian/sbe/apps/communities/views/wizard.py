@@ -22,12 +22,98 @@ from abilian.web.nav import BreadcrumbItem
 
 from .views import route, tab
 
+# class MemberSorter:
+#     from_csv = False
+#     emails = ()
+#     existing_accounts = ()
+#     existing_members = ()
+#     accounts = ()
+#
+#     def __init__(self):
+#         pass
+#
+#     def parse_emails(self, emails):
+#         self.emails = {email.strip() for email in emails}
+#         self.parse()
+#
+#     def parse_csv(self, csv_data):
+#         self.from_csv = True
+#         self.existing_account_csv_roles = {user["email"]: user["role"] for user in csv_data}
+#         self.emails = {user["email"].strip() for user in csv_data}
+#         self.parse()
+#
+#     def parse(self):
+#         emails = self.emails
+#
+#         already_member_emails = [
+#             member.email for member in g.community.members if member.email in emails
+#         ]
+#         not_member_emails = set(emails) - set(already_member_emails)
+#
+#         existing_members_objects = [
+#             user for user in g.community.members if user.email in already_member_emails
+#         ]
+#
+#         existing_accounts_objects = User.query.filter(
+#             User.email.in_(not_member_emails)
+#         ).all()
+#         existing_account_emails = [user.email for user in existing_accounts_objects]
+#
+#         emails_without_account = set(not_member_emails) - set(existing_account_emails)
+#
+#         accounts_list: list[dict[str, Any] ] = []
+#         account: dict[str, Any]
+#
+#         for user in existing_accounts_objects:
+#             account = {}
+#             account["email"] = user.email
+#             account["first_name"] = user.first_name
+#             account["last_name"] = user.last_name
+#             account["role"] = existing_account_csv_roles[user.email] if is_csv else "member"
+#             account["status"] = "existing"
+#             accounts_list.append(account)
+#
+#         if is_csv:
+#             emails_without_account = [
+#                 csv_account
+#                 for csv_account in csv_data
+#                 if csv_account["email"] in emails_without_account
+#             ]
+#             existing_accounts_objects = {
+#                 "account_objects": existing_accounts_objects,
+#                 "csv_roles": existing_account_csv_roles,
+#             }
+#
+#             for csv_account in emails_without_account:
+#                 account = {}
+#                 account["email"] = csv_account["email"]
+#                 account["first_name"] = csv_account["first_name"]
+#                 account["last_name"] = csv_account["last_name"]
+#                 account["role"] = csv_account["role"]
+#                 account["status"] = "new"
+#                 accounts_list.append(account)
+#
+#         else:
+#             for email in emails_without_account:
+#                 account = {}
+#                 account["email"] = email
+#                 account["first_name"] = ""
+#                 account["last_name"] = ""
+#                 account["role"] = "member"
+#                 account["status"] = "new"
+#                 accounts_list.append(account)
+#
+#         self.existing_accounts_objects = existing_accounts_objects
+#         self.existing_members_objects = existing_members_objects
+#         self.accounts_list = accounts_list
+
 
 def wizard_extract_data(
     emails: Sequence[str] = (), csv_data: Sequence[dict[str, str]] = ()
 ) -> tuple[dict[str, Any] | list[User], list[User], list[dict[str, str | None]]]:
     """Filter data and extract existing accounts, existing members and new
     emails."""
+
     if csv_data:
         existing_account_csv_roles = {user["email"]: user["role"] for user in csv_data}
         emails = [user["email"] for user in csv_data]
@@ -53,7 +139,9 @@ def wizard_extract_data(
 
     emails_without_account = set(not_member_emails) - set(existing_account_emails)
 
-    accounts_list = []
+    accounts_list: list[dict[str, Any]] = []
+    account: dict[str, Any]
+
     for user in existing_accounts_objects:
         account = {}
         account["email"] = user.email
