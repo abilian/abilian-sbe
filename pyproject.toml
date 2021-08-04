@@ -14,8 +14,8 @@ include = ["src/*", "src/**/*"]
 python = "^3.8"
 
 # Abilian Core
-# abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "master" }
-abilian-core = "^0.11"
+abilian-core = { git = "https://github.com/abilian/abilian-core.git", branch = "main" }
+# abilian-core = "^0.11"
 
 # Pinned temporarily
 wtforms = "<2.2"
