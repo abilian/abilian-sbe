@@ -35,7 +35,6 @@ def test_create_doc(root: Folder, session: Session):
 
 def test_create_folder(root: Folder, session: Session):
     folder = root.create_subfolder("folder")
-    session.flush()
     assert folder.title == "folder"
     assert folder.name == "folder"
     assert folder.path == "/folder"

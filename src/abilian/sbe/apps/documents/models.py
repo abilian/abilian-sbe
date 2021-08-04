@@ -118,6 +118,8 @@ class CmisObject(InheritSecurity, Entity):
     # Convenience default values
     content_length = 0
 
+    name: str
+
     def __init__(self, *args, **kwargs):
         # ensure 'title' prevails over 'name'
         if "title" in kwargs and "name" in kwargs:
