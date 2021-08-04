@@ -25,9 +25,7 @@ from .views import route, tab
 
 def wizard_extract_data(
     emails: Sequence[str] = (), csv_data: Sequence[dict[str, str]] = ()
-) -> tuple[
-    dict[str, Any] | list[User], list[User], list[dict[str, str | None]]
-]:
+) -> tuple[dict[str, Any] | list[User], list[User], list[dict[str, str | None]]]:
     """Filter data and extract existing accounts, existing members and new
     emails."""
     if csv_data:

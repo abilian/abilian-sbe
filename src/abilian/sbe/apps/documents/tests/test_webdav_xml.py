@@ -9,19 +9,19 @@ from abilian.sbe.apps.documents.webdav.xml import MultiStatus, Propfind
 
 
 def test_propfind_sample1():
-    xml = (Path(__file__).parent / "data" / "propfind1.xml").open("rb").read()
+    xml = read_file("propfind1.xml")
     propfind = Propfind(xml)
     assert propfind.mode == "prop"
 
 
 def test_propfind_sample2():
-    xml = (Path(__file__).parent / "data" / "propfind2.xml").open("rb").read()
+    xml = read_file("propfind2.xml")
     propfind = Propfind(xml)
     assert propfind.mode == "prop"
 
 
 def test_propfind_sample3():
-    xml = (Path(__file__).parent / "data" / "propfind3.xml").open("rb").read()
+    xml = read_file("propfind3.xml")
     propfind = Propfind(xml)
     assert propfind.mode == "allprop"
 
@@ -46,3 +46,7 @@ def test_multistatus():
 
     # Check XML is weel-formed
     etree.fromstring(result)
+
+
+def read_file(filename: str) -> bytes:
+    return (Path(__file__).parent / "data" / filename).open("rb").read()

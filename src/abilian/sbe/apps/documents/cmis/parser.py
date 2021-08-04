@@ -39,11 +39,15 @@ class Entry:
 
     @property
     def name(self) -> str:
-        return self.properties["cmis:name"].value
+        value = self.properties["cmis:name"].value
+        assert isinstance(value, str)
+        return value
 
     @property
     def type(self) -> str:
-        return self.properties["cmis:objectTypeId"].value
+        value = self.properties["cmis:objectTypeId"].value
+        assert isinstance(value, str)
+        return value
 
 
 class Property:
