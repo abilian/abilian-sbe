@@ -184,6 +184,12 @@ setup(
             "sphinx",
             "sphinx-rtd-theme",
             "typeguard",
+            "types-bleach",
+            "types-chardet",
+            "types-markdown",
+            "types-python-dateutil",
+            "types-pytz",
+            "types-setuptools",
         ]
     },
 )

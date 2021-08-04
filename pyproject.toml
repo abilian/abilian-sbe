@@ -99,10 +99,17 @@ devtools = "^*"
 isort = "*"
 black = { version = "*", allow-prereleases = true }
 
-# Pinned because poetry issue
 docutils = "*"
 liccheck = "*"
 safety = "*"
+
+# For mypy
+types-bleach = "*"
+types-chardet = "*"
+types-markdown = "*"
+types-python-dateutil = "*"
+types-pytz = "*"
+types-setuptools = "*"
 
 
 [build-system]
