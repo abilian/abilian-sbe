@@ -130,7 +130,7 @@ setup(
         "abilian.sbe.apps.wiki": ["data/*.txt", "templates/wiki/*.html"],
     },
     install_requires=[
-        "abilian-core==0.*,>=0.11.0",
+        "abilian-core",
         "chardet",
         "flask-babel<2",
         "html2text==2020.*,>=2020.1.16",
@@ -143,6 +143,9 @@ setup(
         "validate-email",
         "wtforms<2.2",
         "xlwt",
+    ],
+    dependency_links=[
+        "git+https://github.com/abilian/abilian-core.git@main#egg=abilian-core"
     ],
     extras_require={
         "dev": [
