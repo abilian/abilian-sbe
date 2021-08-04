@@ -29,7 +29,7 @@ class CmisContentAction(Action):
 
         Action.__init__(self, *args, **kwargs)
 
-    def pre_condition(self, ctx: Dict[str, Any]) -> bool:
+    def pre_condition(self, ctx: dict[str, Any]) -> bool:
         obj = ctx["object"]
         ok = obj.sbe_type == self.sbe_type
 

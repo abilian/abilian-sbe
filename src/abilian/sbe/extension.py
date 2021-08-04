@@ -32,11 +32,11 @@ JS = (
 class AbilianSBE:
     """Base extension required by abilian.sbe.apps."""
 
-    def __init__(self, app: "Application" = None):
+    def __init__(self, app: Application = None):
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app: "Application"):
+    def init_app(self, app: Application):
         # False: it's ok if antivirus task was run but service couldn't get a
         # result
         app.config.setdefault("ANTIVIRUS_CHECK_REQUIRED", False)
@@ -68,5 +68,5 @@ FQCN = fqcn(AbilianSBE)
 sbe = AbilianSBE()
 
 
-def inject_template_utils() -> Dict[str, Callable]:
+def inject_template_utils() -> dict[str, Callable]:
     return {"uuid": uuid.uuid1}

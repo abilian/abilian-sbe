@@ -50,7 +50,7 @@ class Message(Entity):
     query = db.session.query_property(MessageQuery)
 
     @property
-    def tags(self) -> List[str]:
+    def tags(self) -> list[str]:
         return re.findall(r"(?u)#([^\W]+)", self.content)
 
 

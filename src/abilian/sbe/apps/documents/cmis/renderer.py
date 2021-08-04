@@ -12,7 +12,7 @@ XML_HEADER = "<?xml version='1.0' encoding='UTF-8'?>\n"
 
 
 class Feed:
-    def __init__(self, object: Folder, collection: List[Document]):
+    def __init__(self, object: Folder, collection: list[Document]):
         self.object = object
         self.collection = collection
 
@@ -27,7 +27,7 @@ class Feed:
 
 
 class Entry:
-    def __init__(self, obj: Union[Document, Folder]):
+    def __init__(self, obj: Document | Folder):
         self.obj = obj
 
     def to_xml(self, **options: Any) -> str:
@@ -52,6 +52,6 @@ class Entry:
         return result
 
 
-def to_xml(obj: Union[Document, Folder], **options: Any) -> str:
+def to_xml(obj: Document | Folder, **options: Any) -> str:
     entry = Entry(obj)
     return entry.to_xml(**options)

@@ -17,7 +17,7 @@ from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 class WikiPageAction(Action):
     Endpoint = CommunityEndpoint
 
-    def pre_condition(self, context: Dict[str, Any]) -> bool:
+    def pre_condition(self, context: dict[str, Any]) -> bool:
         page = context.get("object")
         return bool(page)
 

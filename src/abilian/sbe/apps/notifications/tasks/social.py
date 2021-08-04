@@ -78,7 +78,7 @@ def send_daily_social_digest_to(user: User):
         return 0
 
 
-def make_message(user: User) -> Optional[Message]:
+def make_message(user: User) -> Message | None:
     config = current_app.config
     sender = config.get("BULK_MAIL_SENDER", config["MAIL_SENDER"])
     sbe_config = config["ABILIAN_SBE"]
@@ -171,14 +171,14 @@ class CommunityDigest:
     def __init__(self, community: Community):
         self.community = community
 
-        self.seen_entities: Set[Entity] = set()
-        self.new_members: List[User] = []
-        self.new_documents: List[Document] = []
-        self.updated_documents: List[Document] = []
-        self.new_conversations: List[Post] = []
-        self.updated_conversations: Dict[Post, Dict] = {}
-        self.new_wiki_pages: List[WikiPage] = []
-        self.updated_wiki_pages: Dict[WikiPage, Dict] = {}
+        self.seen_entities: set[Entity] = set()
+        self.new_members: list[User] = []
+        self.new_documents: list[Document] = []
+        self.updated_documents: list[Document] = []
+        self.new_conversations: list[Post] = []
+        self.updated_conversations: dict[Post, dict] = {}
+        self.new_wiki_pages: list[WikiPage] = []
+        self.updated_wiki_pages: dict[WikiPage, dict] = {}
 
     def is_empty(self):
         return (

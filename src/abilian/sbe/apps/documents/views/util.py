@@ -20,7 +20,7 @@ from abilian.web import url_for
 #
 # Utils
 #
-def breadcrumbs_for(obj: Document) -> List[Dict[str, str]]:
+def breadcrumbs_for(obj: Document) -> list[dict[str, str]]:
     if obj is None:
         return []
 
@@ -135,7 +135,7 @@ def edit_object(obj):
     return changed
 
 
-def get_selected_objects(folder: Folder) -> Tuple[List[Folder], List[Document]]:
+def get_selected_objects(folder: Folder) -> tuple[list[Folder], list[Document]]:
     """Returns a tuple, (folders, docs), of folders and docs in the specified
     folder that have been selected from the UI."""
     selected_ids = request.form.getlist("object-selected")
@@ -219,7 +219,7 @@ def check_manage_access(obj):
     raise Forbidden()
 
 
-def match(mime_type: str, patterns: Tuple[str, str, str]) -> bool:
+def match(mime_type: str, patterns: tuple[str, str, str]) -> bool:
     if not mime_type:
         mime_type = "application/binary"
     for pat in patterns:

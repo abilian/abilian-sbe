@@ -21,7 +21,7 @@ def clean_up(src: str) -> str:
     return src
 
 
-def int_or_none(val: Any) -> Optional[int]:
+def int_or_none(val: Any) -> int | None:
     try:
         return int(val)
     except (TypeError, ValueError):

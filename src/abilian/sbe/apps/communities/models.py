@@ -100,7 +100,7 @@ def community_content(cls: type) -> Any:
     return cls
 
 
-def indexable_roles_and_users(community: "Community") -> str:
+def indexable_roles_and_users(community: Community) -> str:
     """Mixin to use to replace Entity._indexable_roles_and_users.
 
     Will be removed when communities are upgraded to use standard role
@@ -222,14 +222,14 @@ class Community(Entity):
             # FIXME: use signals
             self.folder.name = name
 
-    def get_memberships(self, role: Optional[str] = None) -> List[Membership]:
+    def get_memberships(self, role: str | None = None) -> list[Membership]:
         M = Membership
         memberships = M.query.filter(M.community_id == self.id)
         if role:
             memberships = memberships.filter(M.role == role)
         return memberships.all()
 
-    def set_membership(self, user: User, role: Union[str, Role]):
+    def set_membership(self, user: User, role: str | Role):
         """Add a member with the given role, or set the role of an existing
         member."""
         assert isinstance(user, User)
@@ -289,7 +289,7 @@ class Community(Entity):
             for principal, role in role_assignments:
                 security.ungrant_role(principal, role, self.folder)
 
-    def get_role(self, user: Union[User, LocalProxy]) -> Optional[Role]:
+    def get_role(self, user: User | LocalProxy) -> Role | None:
         """Returns the given user's role in this community."""
         M = Membership
         membership = (
@@ -424,7 +424,7 @@ def _on_linked_group_change(
         value.members = members
 
 
-def _safe_get_community(group: Group) -> Optional[Community]:
+def _safe_get_community(group: Group) -> Community | None:
     session = sa.orm.object_session(group)
     if not session:
         return None

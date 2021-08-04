@@ -7,7 +7,7 @@ from abilian.sbe.apps.documents.models import PathAndSecurityIndexable
 
 
 class MockPath(PathAndSecurityIndexable):
-    def __init__(self, id: int, parent: Optional[MockPath] = None):
+    def __init__(self, id: int, parent: MockPath | None = None):
         self.id = id
         self.parent = parent
 

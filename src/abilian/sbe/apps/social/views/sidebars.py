@@ -20,7 +20,7 @@ from .social import social
 
 class Sidebars:
     @property
-    def latest_visitors(self) -> List[User]:
+    def latest_visitors(self) -> list[User]:
         return (
             User.query.filter(User.last_active != None)
             .order_by(User.last_active.desc())
@@ -34,7 +34,7 @@ class Sidebars:
         return User.query.filter(User.last_active > one_minute_ago).count()
 
     @property
-    def my_communities(self) -> List[Community]:
+    def my_communities(self) -> list[Community]:
         query = Community.query
         query = query.order_by(Community.last_active_at.desc())
         if not current_user.has_role("admin"):

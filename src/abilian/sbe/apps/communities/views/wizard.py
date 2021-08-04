@@ -24,9 +24,9 @@ from .views import route, tab
 
 
 def wizard_extract_data(
-    emails: Sequence[str] = (), csv_data: Sequence[Dict[str, str]] = ()
-) -> Tuple[
-    Union[Dict[str, Any], List[User]], List[User], List[Dict[str, Optional[str]]]
+    emails: Sequence[str] = (), csv_data: Sequence[dict[str, str]] = ()
+) -> tuple[
+    dict[str, Any] | list[User], list[User], list[dict[str, str | None]]
 ]:
     """Filter data and extract existing accounts, existing members and new
     emails."""
@@ -98,7 +98,7 @@ def wizard_extract_data(
     return existing_accounts_objects, existing_members_objects, accounts_list
 
 
-def wizard_read_csv(csv_file: IO[str]) -> List[Dict[str, str]]:
+def wizard_read_csv(csv_file: IO[str]) -> list[dict[str, str]]:
     """Read new members data from CSV file."""
 
     if hasattr(csv_file, "filename"):
@@ -160,7 +160,7 @@ def wizard_data_insertion():
 @route("/<string:community_id>/members/wizard/step2", methods=["GET", "POST"])
 @csrf.protect
 @tab("members")
-def wizard_check_data() -> Union[Response, str]:
+def wizard_check_data() -> Response | str:
     """Filter and detect existing members, existing accounts and new emails."""
     if request.method == "GET":
         return redirect(url_for(".members", community_id=g.community.slug))
@@ -218,7 +218,7 @@ def wizard_check_data() -> Union[Response, str]:
 @route("/<string:community_id>/members/wizard/step3", methods=["GET", "POST"])
 @csrf.protect
 @tab("members")
-def wizard_new_accounts() -> Union[str, Response]:
+def wizard_new_accounts() -> str | Response:
     """Complete new emails information."""
     if request.method == "GET":
         return redirect(url_for(".members", community_id=g.community.slug))

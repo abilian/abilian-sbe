@@ -26,7 +26,7 @@ def strip(s: str) -> str:
     return s.strip()
 
 
-def _group_choices() -> List[Tuple[str, str]]:
+def _group_choices() -> list[tuple[str, str]]:
     m_prop = Group.members.property
     membership = m_prop.secondary
     query = Group.query.session.query(

@@ -20,7 +20,7 @@ class Lock:
         self,
         user_id: int,
         user: str,
-        date: Union[datetime, str],
+        date: datetime | str,
         *args: Any,
         **kwargs: Any,
     ):
@@ -38,7 +38,7 @@ class Lock:
     def new() -> Lock:
         return Lock(current_user.id, str(current_user), utcnow())
 
-    def as_dict(self) -> Dict[str, Any]:
+    def as_dict(self) -> dict[str, Any]:
         """Return a dict suitable for serialization to JSON."""
         return {
             "user_id": self.user_id,
@@ -47,7 +47,7 @@ class Lock:
         }
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> Lock:
+    def from_dict(d: dict[str, Any]) -> Lock:
         """Deserialize from a `dict` created by :meth:`as_dict`."""
         return Lock(**d)
 
@@ -59,7 +59,7 @@ class Lock:
     def expired(self) -> bool:
         return (utcnow() - self.date) > timedelta(seconds=self.lifetime)
 
-    def is_owner(self, user: Optional[User] = None) -> bool:
+    def is_owner(self, user: User | None = None) -> bool:
         if user is None:
             user = current_user
 

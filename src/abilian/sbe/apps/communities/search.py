@@ -54,7 +54,7 @@ def init_app(app: Application):
             schema.add(fieldname, field)
 
 
-def filter_user_communities() -> Union[Or, Term]:
+def filter_user_communities() -> Or | Term:
     if g.is_manager:
         return None
 
@@ -77,7 +77,7 @@ def filter_user_communities() -> Union[Or, Term]:
     return filter_q
 
 
-def mark_non_community_content(document: Dict[str, Any], obj: Any) -> Dict[str, Any]:
+def mark_non_community_content(document: dict[str, Any], obj: Any) -> dict[str, Any]:
     if _COMMUNITY_CONTENT_FIELDNAME not in document:
         document[_COMMUNITY_CONTENT_FIELDNAME] = getattr(
             obj, _COMMUNITY_CONTENT_FIELDNAME, False

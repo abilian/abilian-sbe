@@ -64,7 +64,7 @@ logger = logging.getLogger(__name__)
 EPOCH = datetime.fromtimestamp(0.0, tz=pytz.utc)
 
 
-def seconds_since_epoch(dt: Optional[datetime]) -> int:
+def seconds_since_epoch(dt: datetime | None) -> int:
     if not dt:
         return 0
     return int((utc_dt(dt) - EPOCH).total_seconds())
@@ -84,7 +84,7 @@ communities.record_once(register_actions)
 @communities.record_once
 def register_context_processors(state: BlueprintSetupState):
     @state.app.context_processor
-    def communities_context_processor() -> Dict[str, Callable]:
+    def communities_context_processor() -> dict[str, Callable]:
         # helper to get an url for community image
         return {"community_image_url": image_url}
 
@@ -95,7 +95,7 @@ def tab(tab_name: str) -> Callable:
 
     def decorator(f):
         @wraps(f)
-        def set_current_tab(*args: Any, **kwargs: Any) -> Union[str, Response]:
+        def set_current_tab(*args: Any, **kwargs: Any) -> str | Response:
             g.current_tab = tab_name
             return f(*args, **kwargs)
 
@@ -105,8 +105,8 @@ def tab(tab_name: str) -> Callable:
 
 
 def default_view_kw(
-    kw: Dict[str, int], obj: Any, obj_type: str, obj_id: int, **kwargs: Any
-) -> Dict[str, Any]:
+    kw: dict[str, int], obj: Any, obj_type: str, obj_id: int, **kwargs: Any
+) -> dict[str, Any]:
     """Helper for using :func:`abilian.web.views.default_view` on objects that
     belongs to a community. This function should be used as `kw_func`::
 
@@ -204,14 +204,14 @@ class BaseCommunityView:
     decorators = [require_admin]
     view_endpoint = ""
 
-    def init_object(self, args: Tuple[()], kwargs: Dict) -> Tuple[Tuple[()], Dict]:
+    def init_object(self, args: tuple[()], kwargs: dict) -> tuple[tuple[()], dict]:
         self.obj = g.community._model
         return args, kwargs
 
     def view_url(self) -> str:
         return url_for(self.view_endpoint, community_id=self.obj.slug)
 
-    def get_form_kwargs(self) -> Dict[str, Any]:
+    def get_form_kwargs(self) -> dict[str, Any]:
         kwargs = super().get_form_kwargs()
 
         image = self.obj.image
@@ -319,7 +319,7 @@ image = CommunityImageView.as_view("image", max_size=500, set_expire=True)
 route("/<string:community_id>/image")(image)
 
 
-def image_url(community: Union[Community, CommunityPresenter], **kwargs: Any) -> str:
+def image_url(community: Community | CommunityPresenter, **kwargs: Any) -> str:
     """Return proper URL for image url."""
     if not community or not community.image:
         kwargs["md5"] = _DEFAULT_IMAGE_MD5

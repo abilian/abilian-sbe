@@ -25,7 +25,7 @@ route = wall.route
 
 
 @wall.url_value_preprocessor
-def set_current_tab(endpoint: str, values: Dict[Any, Any]):
+def set_current_tab(endpoint: str, values: dict[Any, Any]):
     g.current_tab = "wall"
 
 

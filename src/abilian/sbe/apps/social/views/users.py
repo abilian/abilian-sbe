@@ -35,7 +35,7 @@ DEFAULT_USER_MUGSHOT = pkgutil.get_data(
 )
 
 
-def make_tabs(user: User) -> List[Dict[str, str]]:
+def make_tabs(user: User) -> list[dict[str, str]]:
     return [
         {"id": "profile", "label": _("Profile"), "link": url_for(user, tab="profile")},
         # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),

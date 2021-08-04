@@ -16,8 +16,8 @@ CMIS_NS = "http://docs.oasis-open.org/ns/cmis/core/200908/"
 
 class Entry:
     def __init__(self, xml: bytes = None):
-        self.properties: Dict[str, Property] = {}
-        self.links: List[str] = []
+        self.properties: dict[str, Property] = {}
+        self.links: list[str] = []
         self.content_type = ""
         self.content = b""
 

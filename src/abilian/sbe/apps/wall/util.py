@@ -23,9 +23,9 @@ from abilian.services.security import READ, Admin, SecurityService
 
 def get_recent_entries(
     num: int = 20,
-    user: Optional[User] = None,
-    community: Optional[CommunityPresenter] = None,
-) -> List[Any]:
+    user: User | None = None,
+    community: CommunityPresenter | None = None,
+) -> list[Any]:
 
     AE = ActivityEntry
 
@@ -63,7 +63,7 @@ def get_recent_entries(
     query = query.order_by(AE.happened_at.desc()).limit(1000)
     # get twice entries as needed, but ceil to 100
     limit = min(num * 2, 100)
-    entries: List[ActivityEntry] = []
+    entries: list[ActivityEntry] = []
     deleted = False
     security = cast(SecurityService, get_service("security"))
     has_permission = security.has_permission

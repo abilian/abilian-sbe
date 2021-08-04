@@ -18,7 +18,7 @@ from abilian.services.security import MANAGE
 
 def require_admin(func: Callable) -> Callable:
     @wraps(func)
-    def decorated_view(*args: Any, **kwargs: Any) -> Union[str, Response]:
+    def decorated_view(*args: Any, **kwargs: Any) -> str | Response:
         security = get_service("security")
         is_admin = security.has_role(current_user, "admin")
         if not is_admin:
@@ -52,13 +52,13 @@ def require_access(func):
     return decorated_view
 
 
-def check_access(community: CommunityPresenter = None, user: Optional[User] = None):
+def check_access(community: CommunityPresenter = None, user: User | None = None):
     if not has_access(community, user):
         raise Forbidden()
 
 
 def has_access(
-    community: CommunityPresenter = None, user: Optional[User] = None
+    community: CommunityPresenter = None, user: User | None = None
 ) -> bool:
     if not user:
         user = current_user
@@ -80,7 +80,7 @@ def has_access(
 
 
 def is_manager(
-    context: Optional[Dict[str, Any]] = None, user: Optional[User] = None
+    context: dict[str, Any] | None = None, user: User | None = None
 ) -> bool:
     security = get_service("security")
 

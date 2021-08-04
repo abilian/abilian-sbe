@@ -21,7 +21,7 @@ class Repository:
     """A simple document repository, implementing the basic functionalities of
     the CMIS model."""
 
-    def __init__(self, app: Optional[Application] = None):
+    def __init__(self, app: Application | None = None):
         if app is not None:
             self.init_app(app)
 
@@ -39,7 +39,7 @@ class Repository:
         folder = Folder(title="root")
         return folder
 
-    def get_object(self, id: Optional[int] = None, path: Optional[str] = None):
+    def get_object(self, id: int | None = None, path: str | None = None):
         """Get the CMIS object (document or folder) with either the given `id`
         or the given `path`.
 
@@ -55,7 +55,7 @@ class Repository:
     #
     # Id based navigation
     #
-    def get_object_by_id(self, id: int) -> Optional[BaseContent]:
+    def get_object_by_id(self, id: int) -> BaseContent | None:
         """Get the CMIS object (document or folder) with the given `id`.
 
         Returns None if the object doesn't exist.
@@ -65,14 +65,14 @@ class Repository:
         #     return None
         return obj
 
-    def get_folder_by_id(self, id: int) -> Optional[Folder]:
+    def get_folder_by_id(self, id: int) -> Folder | None:
         """Get the folder with the given `id`.
 
         Returns None if the folder doesn't exist.
         """
         return Folder.query.get(id)
 
-    def get_document_by_id(self, id: int) -> Optional[Document]:
+    def get_document_by_id(self, id: int) -> Document | None:
         """Get the document with the given `id`.
 
         Returns None if the document doesn't exist.
@@ -82,14 +82,14 @@ class Repository:
     #
     # Path based navigation
     #
-    def get_object_by_path(self, path: str) -> Optional[BaseContent]:
+    def get_object_by_path(self, path: str) -> BaseContent | None:
         """Gets the CMIS object (document or folder) with the given `path`.
 
         Returns None if the object doesn't exist.
         """
         return self.root_folder.get_object_by_path(path)
 
-    def get_folder_by_path(self, path: str) -> Optional[Folder]:
+    def get_folder_by_path(self, path: str) -> Folder | None:
         """Gets the folder with the given `path`.
 
         Returns None if the folder doesn't exist.
@@ -100,7 +100,7 @@ class Repository:
         else:
             return obj
 
-    def get_document_by_path(self, path: str) -> Optional[Document]:
+    def get_document_by_path(self, path: str) -> Document | None:
         """Gets the document with the given `path`.
 
         Returns None if the document doesn't exist.
@@ -115,8 +115,8 @@ class Repository:
     # COPY / MOVE support
     #
     def copy_object(
-        self, obj: BaseContent, dest_folder: Folder, dest_title: Optional[str] = None
-    ) -> Union[Document, Folder]:
+        self, obj: BaseContent, dest_folder: Folder, dest_title: str | None = None
+    ) -> Document | Folder:
         new_obj = obj.clone(title=dest_title, parent=dest_folder)
         if obj.is_folder:
             for child in obj.children:
@@ -124,7 +124,7 @@ class Repository:
         return new_obj
 
     def move_object(
-        self, obj: BaseContent, dest_folder: Folder, dest_title: Optional[str] = None
+        self, obj: BaseContent, dest_folder: Folder, dest_title: str | None = None
     ):
         obj.parent = dest_folder
         if dest_title:

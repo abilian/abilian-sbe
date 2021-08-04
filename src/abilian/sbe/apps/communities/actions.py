@@ -19,7 +19,7 @@ def url_for(endpoint: str, **kw: Any) -> str:
 
 
 class CommunityEndpoint(Endpoint):
-    def get_kwargs(self) -> Dict[str, str]:
+    def get_kwargs(self) -> dict[str, str]:
         kwargs = super().get_kwargs()
         kwargs["community_id"] = g.community.slug
         return kwargs
@@ -29,7 +29,7 @@ class CommunityTabAction(Action):
 
     Endpoint = CommunityEndpoint
 
-    def url(self, context: Dict[str, Any] = None) -> Union[CommunityEndpoint, str]:
+    def url(self, context: dict[str, Any] = None) -> CommunityEndpoint | str:
         if self._url:
             return Action.url(self)
 

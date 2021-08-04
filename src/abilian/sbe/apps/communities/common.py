@@ -15,7 +15,7 @@ from abilian.sbe.apps.wiki.models import WikiPage
 from abilian.services.viewtracker import viewtracker
 
 
-def object_viewers(entity: Union[Document, WikiPage]) -> List:
+def object_viewers(entity: Document | WikiPage) -> list:
     if is_manager():
         views = viewtracker.get_views(entity=entity)
         community_members_id = [

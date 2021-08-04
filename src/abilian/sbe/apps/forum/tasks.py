@@ -168,7 +168,7 @@ def build_reply_email_address(name: str, post: Post, member: User, domain: str) 
     return f"{local_part}@{domain}"
 
 
-def extract_email_destination(address: str) -> Tuple[str, ...]:
+def extract_email_destination(address: str) -> tuple[str, ...]:
     """Return the values encoded in the email address.
 
     :param address: similar to test+IjEvMy8yLzQi.xjE04-4S0IzsdicTHKTAqcqa1fE@testcase.app.tld
@@ -335,7 +335,7 @@ def decode_payload(part: email.message.Message) -> str:
     return payload_str
 
 
-def process(message: email.message.Message, marker: str) -> Tuple[str, List[dict]]:
+def process(message: email.message.Message, marker: str) -> tuple[str, list[dict]]:
     """Check the message for marker presence and return the text up to it if
     present.
 
@@ -344,7 +344,7 @@ def process(message: email.message.Message, marker: str) -> Tuple[str, List[dict
     """
     assert isinstance(message, email.message.Message)
     content = {"plain": "", "html": ""}
-    attachments: List[Dict[str, Any]] = []
+    attachments: list[dict[str, Any]] = []
 
     # Iterate all message's parts for text/*
     for part in message.walk():

@@ -48,7 +48,7 @@ route = wiki.route
 
 
 @wiki.url_value_preprocessor
-def init_wiki_values(endpoint: str, values: Dict[Any, Any]):
+def init_wiki_values(endpoint: str, values: dict[Any, Any]):
     g.current_tab = "wiki"
 
     endpoint = Endpoint("wiki.index", community_id=g.community.slug)
@@ -92,7 +92,7 @@ class BasePageView:
         return self.obj is not None and self.obj.title == "Home"
 
     @property
-    def template_kwargs(self) -> Dict[str, Union[WikiPageForm, WikiPage]]:
+    def template_kwargs(self) -> dict[str, WikiPageForm | WikiPage]:
         """Template render arguments.
 
         You can override `base_template` for instance. Only `view` and
@@ -104,8 +104,8 @@ class BasePageView:
         return kw
 
     def init_object(
-        self, args: Tuple[Any], kwargs: Dict[str, Any]
-    ) -> Tuple[Tuple[Any], Dict[str, Any]]:
+        self, args: tuple[Any], kwargs: dict[str, Any]
+    ) -> tuple[tuple[Any], dict[str, Any]]:
         title = kwargs["title"] = request.args["title"].strip()
         if title:
             try:
@@ -142,8 +142,8 @@ class PageView(BasePageView, ObjectView):
     ]
 
     def init_object(
-        self, args: Tuple[Any], kwargs: Dict[str, Any]
-    ) -> Tuple[Tuple[Any], Dict[str, Any]]:
+        self, args: tuple[Any], kwargs: dict[str, Any]
+    ) -> tuple[tuple[Any], dict[str, Any]]:
         args, kwargs = BasePageView.init_object(self, args, kwargs)
         if not self.obj:
             title = kwargs["title"]
@@ -176,8 +176,8 @@ class PageEdit(BasePageView, ObjectEdit):
     _message_success = _l("Wiki page successfully edited.")
 
     def init_object(
-        self, args: Tuple[Any], kwargs: Dict[str, Any]
-    ) -> Tuple[Tuple, Dict[str, Any]]:
+        self, args: tuple[Any], kwargs: dict[str, Any]
+    ) -> tuple[tuple, dict[str, Any]]:
         if request.method != "POST":
             return super().init_object(args, kwargs)
 
@@ -189,7 +189,7 @@ class PageEdit(BasePageView, ObjectEdit):
 
         return args, kwargs
 
-    def get_form_kwargs(self) -> Dict[str, Union[WikiPage, Permission, int]]:
+    def get_form_kwargs(self) -> dict[str, WikiPage | Permission | int]:
         kwargs = ObjectEdit.get_form_kwargs(self)
         kwargs["page_id"] = kwargs["last_revision_id"] = None
         if self.obj is not None and self.obj.id:
@@ -201,8 +201,8 @@ class PageEdit(BasePageView, ObjectEdit):
         return kwargs
 
     def prepare_args(
-        self, args: Tuple[Any], kwargs: Dict[str, Any]
-    ) -> Tuple[Tuple, Dict[str, Any]]:
+        self, args: tuple[Any], kwargs: dict[str, Any]
+    ) -> tuple[tuple, dict[str, Any]]:
         super().prepare_args(args, kwargs)
         last_revision_id = self.form.last_revision_id.data
         if last_revision_id:
@@ -218,7 +218,7 @@ class PageEdit(BasePageView, ObjectEdit):
         self.obj.create_revision(form.body_src.data, form.message.data)
 
     # FIXME: does nothing !
-    def redirect_if_no_change(self) -> Optional[Response]:
+    def redirect_if_no_change(self) -> Response | None:
         form = self.form
         if all(f.data == f.object_data for f in (form.title, form.body_src)):
             flash(_("You didn't make any change to this page."))
@@ -226,7 +226,7 @@ class PageEdit(BasePageView, ObjectEdit):
         return None
 
     @property
-    def activity_target(self) -> Union[CommunityPresenter, Community]:
+    def activity_target(self) -> CommunityPresenter | Community:
         return self.obj.community
 
     def form_invalid(self):
@@ -283,8 +283,8 @@ class PageCreate(PageEdit, ObjectCreate):
     get_form_kwargs = ObjectCreate.get_form_kwargs
 
     def init_object(
-        self, args: Tuple[Any], kwargs: Dict[str, Any]
-    ) -> Tuple[Tuple[Any], Dict[str, Any]]:
+        self, args: tuple[Any], kwargs: dict[str, Any]
+    ) -> tuple[tuple[Any], dict[str, Any]]:
         args, kwargs = ObjectCreate.init_object(self, args, kwargs)
         self.obj.community = g.community
         session = sa.orm.object_session(self.obj)
@@ -299,7 +299,7 @@ route("/new")(PageCreate.as_view("page_new", view_endpoint=".page"))
 
 
 @route("/source/")
-def page_source() -> Union[str, Response]:
+def page_source() -> str | Response:
     title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
@@ -313,7 +313,7 @@ def page_source() -> Union[str, Response]:
 
 
 @route("/changes/")
-def page_changes() -> Union[str, Response]:
+def page_changes() -> str | Response:
     title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)
@@ -327,7 +327,7 @@ def page_changes() -> Union[str, Response]:
 
 
 @route("/compare/")
-def page_compare() -> Union[str, Response]:
+def page_compare() -> str | Response:
     title = request.args["title"].strip()
     try:
         page = get_page_by_title(title)

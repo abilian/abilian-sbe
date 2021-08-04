@@ -530,7 +530,7 @@ def iter_permissions(folder, user):
         """Sorts by name, groups first."""
         principal = item[0][0]
         is_user = isinstance(principal, User)
-        item_key: List[Any] = [is_user]
+        item_key: list[Any] = [is_user]
         if is_user:
             last_name = principal.last_name or ""
             first_name = principal.first_name or ""
@@ -636,7 +636,7 @@ ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate("*/")))
 
 def explore_archive(
     fd: FileStorage, uncompress: bool = False
-) -> Iterator[Tuple[List[str], IO[bytes]]]:
+) -> Iterator[tuple[list[str], IO[bytes]]]:
     """Given an uploaded file descriptor, return it or a list of archive
     content.
 
@@ -687,7 +687,7 @@ def upload_new(folder: Folder) -> Response:
     uncompress_files = "uncompress_files" in request.form
     fds = request.files.getlist("file")
     created_count = 0
-    path_cache: Dict[str, Folder] = {}  # mapping folder path in zip -> folder instance
+    path_cache: dict[str, Folder] = {}  # mapping folder path in zip -> folder instance
 
     for upload_fd in fds:
         for filepath, fd in explore_archive(upload_fd, uncompress=uncompress_files):

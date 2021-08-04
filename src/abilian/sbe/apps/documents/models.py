@@ -148,7 +148,7 @@ class CmisObject(InheritSecurity, Entity):
             self.name = title
 
     def clone(
-        self, title: Optional[str] = None, parent: Optional[Folder] = None
+        self, title: str | None = None, parent: Folder | None = None
     ) -> CmisObject:
         if not title:
             title = self.title
@@ -190,7 +190,7 @@ class CmisObject(InheritSecurity, Entity):
         return self._parent_id is None
 
     @property
-    def community(self) -> Optional[Community]:
+    def community(self) -> Community | None:
         if not self.is_folder:
             return self.parent and self.parent.community
 
@@ -202,7 +202,7 @@ class CmisObject(InheritSecurity, Entity):
 
 @listens_for(CmisObject.name, "set", propagate=True, active_history=True)
 def _cmis_sync_name_title(
-    entity: CmisObject, new_value: str, old_value: Union[symbol, str], initiator: Event
+    entity: CmisObject, new_value: str, old_value: symbol | str, initiator: Event
 ) -> str:
     """Synchronize CmisObject name -> title.
 
@@ -225,7 +225,7 @@ class PathAndSecurityIndexable:
 
     def _iter_to_root(
         self, skip_self: bool = False
-    ) -> Iterator[Union[Document, Folder]]:
+    ) -> Iterator[Document | Folder]:
         obj = self if not skip_self else self.parent
         while obj:
             yield obj
@@ -285,7 +285,7 @@ class PathAndSecurityIndexable:
 
 
 class Folder(PathAndSecurityIndexable, CmisObject):
-    __tablename__: Optional[str] = None
+    __tablename__: str | None = None
     sbe_type = "cmis:folder"
 
     __indexable__ = True
@@ -308,7 +308,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
         return icon_url("folder.png")
 
     @property
-    def children(self) -> List[Union[Document, Folder]]:
+    def children(self) -> list[Document | Folder]:
         return self.subfolders + self.documents
 
     @property
@@ -336,7 +336,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
         assert doc in self.children
         return doc
 
-    def get_object_by_path(self, path: str) -> Union[Document, Folder, None]:
+    def get_object_by_path(self, path: str) -> Document | Folder | None:
         assert path.startswith("/")
         assert "//" not in path
 
@@ -366,13 +366,13 @@ class Folder(PathAndSecurityIndexable, CmisObject):
     # Security related methods
     #
     @property
-    def filtered_children(self) -> List[Union[Folder, Document]]:
+    def filtered_children(self) -> list[Folder | Document]:
         return security.filter_with_permission(
             current_user, "read", self.children, inherit=True
         )
 
     @property
-    def filtered_subfolders(self) -> List[Folder]:
+    def filtered_subfolders(self) -> list[Folder]:
         return security.filter_with_permission(
             current_user, "read", self.subfolders, inherit=True
         )
@@ -432,7 +432,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
 class BaseContent(CmisObject):
     """A base class for cmisobject with an attached file."""
 
-    __tablename__: Optional[str] = None
+    __tablename__: str | None = None
 
     _content_id = Column(Integer, db.ForeignKey(Blob.id))
     content_blob = relationship(Blob, cascade="all, delete", foreign_keys=[_content_id])
@@ -525,7 +525,7 @@ class BaseContent(CmisObject):
 class Document(BaseContent, PathAndSecurityIndexable):
     """A document, in the CMIS sense."""
 
-    __tablename__: Optional[str] = None
+    __tablename__: str | None = None
 
     __indexable__ = True
     __index_to__ = (("text", ("text",)),)
@@ -609,7 +609,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self.content_blob and "antivirus" in self.content_blob.meta
 
     @property
-    def antivirus_status(self) -> Optional[bool]:
+    def antivirus_status(self) -> bool | None:
         """
         True: antivirus has scanned file: no virus
         False: antivirus has scanned file: virus detected
@@ -670,7 +670,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         self.text_blob.value = value.encode("utf8")
 
     @property
-    def extra_metadata(self) -> Dict[str, Any]:
+    def extra_metadata(self) -> dict[str, Any]:
         if not hasattr(self, "_extra_metadata"):
             if self._extra_metadata is not None:
                 self._extra_metadata = json.loads(self.extra_metadata_json)
@@ -679,7 +679,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return self._extra_metadata
 
     @extra_metadata.setter
-    def extra_metadata(self, extra_metadata: Dict[str, Any]):
+    def extra_metadata(self, extra_metadata: dict[str, Any]):
         self._extra_metadata = extra_metadata
         self.extra_metadata_json = str(json.dumps(extra_metadata))
 
@@ -696,7 +696,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
     # locking management; used for checkin/checkout - this could be generalized to
     # any entity
     @property
-    def lock(self) -> Optional[Lock]:
+    def lock(self) -> Lock | None:
         """
         :returns: either `None` if no lock or current lock is expired; either the
         current valid :class:`Lock` instance.
@@ -761,7 +761,7 @@ def icon_for(content_type: str) -> str:
 _async_data = threading.local()
 
 
-def _get_documents_queue() -> List[Tuple[Document, str]]:
+def _get_documents_queue() -> list[tuple[Document, str]]:
     if not hasattr(_async_data, "documents"):
         _async_data.documents = []
     return _async_data.documents

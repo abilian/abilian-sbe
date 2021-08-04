@@ -15,7 +15,7 @@ from abilian.sbe.apps.communities.common import activity_time_format
 
 
 @pytest.fixture
-def app(config: type) -> Iterator[Union[Iterator, Iterator[Application]]]:
+def app(config: type) -> Iterator[Iterator | Iterator[Application]]:
     app = create_app(config)
 
     # We need some incantations here to make babel work in the test
