@@ -5,6 +5,8 @@ from flask.testing import FlaskClient
 from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.sbe.app import Application
 from abilian.sbe.apps.communities.models import Community
+from abilian.sbe.testing import start_services
+from abilian.services import get_security_service
 from abilian.services.security import Admin
 from abilian.services.security.service import SecurityService
 from abilian.testing.util import client_login
@@ -17,8 +19,7 @@ def test_index(
     client: FlaskClient,
     req_ctx: RequestContext,
 ) -> None:
-    security_service: SecurityService = app.services["security"]
-    security_service.start()
+    start_services(["security"])
 
     user = community1.test_user
     with client_login(client, user):
@@ -33,8 +34,7 @@ def test_community_home(
     client: FlaskClient,
     req_ctx: RequestContext,
 ) -> None:
-    security_service: SecurityService = app.services["security"]
-    security_service.start()
+    start_services(["security"])
 
     url = app.default_view.url_for(community1)
 
@@ -61,9 +61,8 @@ def test_new(
     db: SQLAlchemy,
     req_ctx: RequestContext,
 ) -> None:
-    security_service: SecurityService = app.services["security"]
-    # security_service.use_cache = False
-    security_service.start()
+    start_services(["security"])
+    security_service = get_security_service()
 
     user = community1.test_user
 
@@ -85,8 +84,7 @@ def test_community_settings(
     community1: Community,
     req_ctx: RequestContext,
 ) -> None:
-    security_service: SecurityService = app.services["security"]
-    security_service.start()
+    start_services(["security"])
 
     url = url_for("communities.settings", community_id=community1.slug)
     user = community1.test_user
@@ -119,8 +117,8 @@ def test_members(
     community2: Community,
     req_ctx: RequestContext,
 ) -> None:
-    security_service: SecurityService = app.services["security"]
-    security_service.start()
+    start_services(["security"])
+    security_service = get_security_service()
 
     user1 = community1.test_user
     user2 = community2.test_user

@@ -14,6 +14,8 @@ from abilian.core.models.subjects import User
 from abilian.core.sqlalchemy import SQLAlchemy
 from abilian.sbe.app import Application
 from abilian.sbe.apps.documents.models import Folder
+from abilian.sbe.testing import start_services
+from abilian.services import get_service
 from abilian.testing.util import login
 
 from .. import signals, views
@@ -186,11 +188,8 @@ def test_community_content_decorator(community: Community, db: SQLAlchemy) -> No
 def test_community_indexed(
     app: Application, db: SQLAlchemy, req_ctx: RequestContext
 ) -> None:
-    index_service = app.services["indexing"]
-    index_service.start()
-
-    security_service = app.services["security"]
-    security_service.start()
+    start_services(["security", "indexing"])
+    index_service = get_service("indexing")
 
     obj_types = (Community.entity_type,)
 
@@ -233,11 +232,9 @@ def test_community_indexed(
 def test_default_view_kw_with_hit(
     app: Application, db: SQLAlchemy, community: Community, req_ctx: RequestContext
 ) -> None:
-    index_service = app.services["indexing"]
-    index_service.start()
 
-    security_service = app.services["security"]
-    security_service.start()
+    start_services(["security", "indexing"])
+    index_service = get_service("indexing")
 
     user = User(email="user_1@example.com")
     db.session.add(user)

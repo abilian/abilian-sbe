@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from typing import IO
+from typing import IO, cast
 
 import pytest
 from flask.ctx import RequestContext
@@ -11,6 +11,9 @@ from abilian.sbe.app import Application
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.documents.views.folders import explore_archive
+from abilian.sbe.testing import start_services
+from abilian.services import get_service
+from abilian.services.indexing.service import WhooshIndexService
 from abilian.testing.util import login
 
 
@@ -108,11 +111,9 @@ def test_folder_indexed(
     community2: Community,
     req_ctx: RequestContext,
 ) -> None:
-    index_service = app.services["indexing"]
-    index_service.start()
 
-    security_service = app.services["security"]
-    security_service.start()
+    start_services(["security", "indexing"])
+    index_service = cast(WhooshIndexService, get_service("indexing"))
 
     folder = Folder(title="Folder 1", parent=community1.folder)
     session.add(folder)

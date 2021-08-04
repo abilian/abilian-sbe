@@ -110,6 +110,7 @@ types-markdown = "*"
 types-python-dateutil = "*"
 types-pytz = "*"
 types-setuptools = "*"
+watchgod = "^0.7"
 
 
 [build-system]

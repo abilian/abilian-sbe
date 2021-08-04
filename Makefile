@@ -170,7 +170,7 @@ clean:
 
 tidy: clean delete-cache
 	rm -rf instance/data
-	rm -rf .tox
+	rm -rf .tox .nox
 
 # remove template cache
 delete-cache:

@@ -1,4 +1,5 @@
 import re
+from typing import cast
 
 from flask import Flask, g, url_for
 from flask.ctx import RequestContext
@@ -10,6 +11,9 @@ from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import READER, Community
 from abilian.sbe.apps.wiki import views
 from abilian.sbe.apps.wiki.models import WikiPage
+from abilian.sbe.testing import start_services
+from abilian.services import get_service
+from abilian.services.indexing.service import WhooshIndexService
 from abilian.testing.util import client_login
 
 
@@ -82,13 +86,9 @@ def test_wiki_indexed(
     client,
     req_ctx: RequestContext,
 ):
-    SERVICES = ("security", "indexing")
-    for svc in SERVICES:
-        svc = app.services[svc]
-        if not svc.running:
-            svc.start()
+    start_services(["indexing", "security"])
 
-    svc = app.services["indexing"]
+    svc = cast(WhooshIndexService, get_service("indexing"))
 
     with client_login(client, admin_user):
         page1 = WikiPage(title="Community 1", community=community1)

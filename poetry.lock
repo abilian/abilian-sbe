@@ -1845,6 +1845,14 @@ docs = ["proselint (>=0.10.2)", "sphinx (>=3)", "sphinx-argparse (>=0.2.5)", "sp
 testing = ["coverage (>=4)", "coverage-enable-subprocess (>=1)", "flaky (>=3)", "pytest (>=4)", "pytest-env (>=0.6.2)", "pytest-freezegun (>=0.4.1)", "pytest-mock (>=2)", "pytest-randomly (>=1)", "pytest-timeout (>=1)", "packaging (>=20.0)"]
 
 [[package]]
+name = "watchgod"
+version = "0.7"
+description = "Simple, modern file watching and code reload in python."
+category = "dev"
+optional = false
+python-versions = ">=3.5"
+
+[[package]]
 name = "webassets"
 version = "0.12.1"
 description = "Media asset management for Python, with glue code for various web frameworks"
@@ -1970,7 +1978,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "45526ff8cb1ee74c4da1550082d5da47d5869064e1f33a84ee70adf148409963"
+content-hash = "8210b7f0ab4fa254ec438569b3b4451c80223bdbfd62928dc78e776fed615bc9"
 
 [metadata.files]
 abilian-core = []
@@ -2933,6 +2941,10 @@ vine = [
 virtualenv = [
     {file = "virtualenv-20.7.0-py2.py3-none-any.whl", hash = "sha256:fdfdaaf0979ac03ae7f76d5224a05b58165f3c804f8aa633f3dd6f22fbd435d5"},
     {file = "virtualenv-20.7.0.tar.gz", hash = "sha256:97066a978431ec096d163e72771df5357c5c898ffdd587048f45e0aecc228094"},
+]
+watchgod = [
+    {file = "watchgod-0.7-py3-none-any.whl", hash = "sha256:d6c1ea21df37847ac0537ca0d6c2f4cdf513562e95f77bb93abbcf05573407b7"},
+    {file = "watchgod-0.7.tar.gz", hash = "sha256:48140d62b0ebe9dd9cf8381337f06351e1f2e70b2203fa9c6eff4e572ca84f29"},
 ]
 webassets = [
     {file = "webassets-0.12.1.tar.gz", hash = "sha256:e7d9c8887343123fd5b32309b33167428cb1318cdda97ece12d0907fd69d38db"},
