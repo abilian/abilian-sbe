@@ -54,7 +54,7 @@ wtforms-sqlalchemy = "*"
 type = "git"
 url = "https://github.com/abilian/abilian-core.git"
 reference = "main"
-resolved_reference = "ad91e54427af532e5a33db1b0f59c0084085c900"
+resolved_reference = "ff96cc448b493cf5bc3e43668e2e08242ce67141"
 
 [[package]]
 name = "alabaster"
@@ -808,7 +808,7 @@ idna = ">=2.5"
 
 [[package]]
 name = "identify"
-version = "2.2.11"
+version = "2.2.12"
 description = "File identification library for Python"
 category = "dev"
 optional = false
@@ -2324,8 +2324,8 @@ hyperlink = [
     {file = "hyperlink-21.0.0.tar.gz", hash = "sha256:427af957daa58bc909471c6c40f74c5450fa123dd093fc53efd2e91d2705a56b"},
 ]
 identify = [
-    {file = "identify-2.2.11-py2.py3-none-any.whl", hash = "sha256:7abaecbb414e385752e8ce02d8c494f4fbc780c975074b46172598a28f1ab839"},
-    {file = "identify-2.2.11.tar.gz", hash = "sha256:a0e700637abcbd1caae58e0463861250095dfe330a8371733a471af706a4a29a"},
+    {file = "identify-2.2.12-py2.py3-none-any.whl", hash = "sha256:a510cbe155f39665625c8a4c4b4f9360cbce539f51f23f47836ab7dd852db541"},
+    {file = "identify-2.2.12.tar.gz", hash = "sha256:242332b3bdd45a8af1752d5d5a3afb12bee26f8e67c4be06e394f82d05ef1a4d"},
 ]
 idna = [
     {file = "idna-3.2-py3-none-any.whl", hash = "sha256:14475042e284991034cb48e06f6851428fb14c4dc953acd9be9a5e95c7b6dd7a"},
