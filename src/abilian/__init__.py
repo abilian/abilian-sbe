@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pkgutil import extend_path
 
 # noinspection PyUnboundLocalVariable

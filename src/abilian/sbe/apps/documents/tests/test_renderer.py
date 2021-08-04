@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from pytest import mark
 
 from abilian.sbe.apps.documents.cmis.renderer import Feed, to_xml
@@ -5,7 +7,7 @@ from abilian.sbe.apps.documents.models import Document, Folder
 
 
 @mark.usefixtures("app_context")
-def test_folder_renderer() -> None:
+def test_folder_renderer():
     folder = Folder(name="tototiti")
     result = to_xml(folder)
     assert "tototiti" in result
@@ -13,7 +15,7 @@ def test_folder_renderer() -> None:
 
 
 @mark.usefixtures("app_context")
-def test_document_renderer() -> None:
+def test_document_renderer():
     document = Document(name="tototiti")
     result = to_xml(document)
     assert "tototiti" in result
@@ -25,7 +27,7 @@ def test_document_renderer() -> None:
 
 
 @mark.usefixtures("app_context")
-def test_feed_renderer() -> None:
+def test_feed_renderer():
     folder = Folder(title="Toto Titi")
     document = Document(title="tatatutu")
     feed = Feed(folder, [document])

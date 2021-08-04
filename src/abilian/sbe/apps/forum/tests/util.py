@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from email.feedparser import FeedParser
 from pathlib import Path
 

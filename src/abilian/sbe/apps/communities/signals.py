@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from blinker.base import Namespace
 
 # pylint: disable=C0103

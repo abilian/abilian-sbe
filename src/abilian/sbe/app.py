@@ -3,6 +3,8 @@
 TODO: add more (runtime) flexibility in plugin discovery, selection
 and activation.
 """
+from __future__ import annotations
+
 import logging
 from typing import Optional, Type
 
@@ -44,12 +46,12 @@ class Application(BaseApplication):
         "abilian.sbe.apps.preferences",
     )
 
-    def setup(self, config: Optional[Type]) -> None:
+    def setup(self, config: Optional[Type]):
         super().setup(config)
         loader = jinja2.PackageLoader("abilian.sbe", "templates")
         self.register_jinja_loaders(loader)
 
-    def init_extensions(self) -> None:
+    def init_extensions(self):
         BaseApplication.init_extensions(self)
         sbe.init_app(self)
         repository.init_app(self)

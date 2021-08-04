@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import cast
 
 from flask import g, request, url_for
@@ -115,7 +117,7 @@ _actions = (
 )
 
 
-def register_actions(state: BlueprintSetupState) -> None:
+def register_actions(state: BlueprintSetupState):
     if not actions.installed(state.app):
         return
     with state.app.app_context():

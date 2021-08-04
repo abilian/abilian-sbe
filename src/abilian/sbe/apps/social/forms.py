@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from flask_babel import lazy_gettext as _l
 from wtforms import StringField, TextAreaField
 from wtforms_alchemy import model_form_factory

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 from unittest import mock
 
@@ -12,7 +14,7 @@ from abilian.sbe.apps.documents import lock
 from abilian.sbe.apps.documents.lock import Lock
 
 
-def test_lock() -> None:
+def test_lock():
     date = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)
     l = Lock(user_id=3, user="Joe Smith", date=date)
     d = l.as_dict()
@@ -24,7 +26,7 @@ def test_lock() -> None:
     assert l.date == date
 
 
-def test_lock2(app: Application, session: Session, req_ctx: RequestContext) -> None:
+def test_lock2(app: Application, session: Session, req_ctx: RequestContext):
     user = User(
         email="test@example.com", first_name="Joe", last_name="Smith", can_login=True
     )

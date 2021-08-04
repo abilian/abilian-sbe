@@ -1,12 +1,14 @@
 """Notifications."""
 
+from __future__ import annotations
+
 from abilian.sbe.app import Application
 
 # Constants
 TOKEN_SERIALIZER_NAME = "unsubscribe_sbe"
 
 
-def register_plugin(app: Application) -> None:
+def register_plugin(app: Application):
     cfg = app.config.setdefault("ABILIAN_SBE", {})
     cfg.setdefault("DAILY_SOCIAL_DIGEST_SUBJECT", "Des nouvelles de vos communautés")
 

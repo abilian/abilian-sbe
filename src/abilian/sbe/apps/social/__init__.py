@@ -1,10 +1,12 @@
 """Default ("home") page for social apps."""
 
 
+from __future__ import annotations
+
 from abilian.sbe.app import Application
 
 
-def register_plugin(app: Application) -> None:
+def register_plugin(app: Application):
     from .views import groups, sidebars, users  # noqa
     from .views.social import social  # noqa
 

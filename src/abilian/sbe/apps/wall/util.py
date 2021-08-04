@@ -1,6 +1,8 @@
 """Some functions to retrieve activity entries."""
 # TODO: move to the activity service ?
 
+from __future__ import annotations
+
 from typing import Any, List, Optional, cast
 
 import sqlalchemy as sa

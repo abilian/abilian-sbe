@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abilian.core.entities import all_entity_classes
 from abilian.core.models.subjects import Group, User
 from abilian.sbe.apps.social.models import Message, PrivateMessage
@@ -9,7 +11,7 @@ def check_editable(object):
             assert hasattr(object, k)
 
 
-def test_user() -> None:
+def test_user():
     user = User(
         first_name="John",
         last_name="Test User",
@@ -23,7 +25,7 @@ def test_user() -> None:
     # self.assertEquals(len(user.messages), 0)
 
 
-def test_user_follow() -> None:
+def test_user_follow():
     # id is provided by DB (which is not used in this test), and is required for
     # having in (user1 != user2) == True
     user1 = User(
@@ -65,7 +67,7 @@ def test_user_follow() -> None:
     assert user2 not in user1.followers
 
 
-def test_group() -> None:
+def test_group():
     user = User(
         first_name="John",
         last_name="Test User",
@@ -89,7 +91,7 @@ def test_group() -> None:
     assert len(user.groups) == 0
 
 
-def test_private_message() -> None:
+def test_private_message():
     pm = PrivateMessage(creator_id=0, recipient_id=0)
     check_editable(pm)
 
@@ -115,12 +117,12 @@ def test_private_message() -> None:
 #     assert message.author_id == user.uid
 
 
-def test_tags() -> None:
+def test_tags():
     m = Message(content="abc #123 #cde #voilà_l_été #789")
     assert m.tags == ["123", "cde", "voilà_l_été", "789"]
 
 
-def test_get_all_entity_classes() -> None:
+def test_get_all_entity_classes():
     classes = all_entity_classes()
     assert Message in classes
     assert PrivateMessage in classes

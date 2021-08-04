@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import imghdr
 from typing import List, Tuple
 
@@ -91,7 +93,7 @@ class CommunityForm(Form):
         label=_l("Has a forum"), widget=BooleanWidget(on_off_mode=True)
     )
 
-    def validate_name(self, field: StringField) -> None:
+    def validate_name(self, field: StringField):
         name = field.data = field.data.strip()
 
         if name and field.object_data:
@@ -103,7 +105,7 @@ class CommunityForm(Form):
                         _("A community with this name already exists")
                     )
 
-    def validate_description(self, field: TextAreaField) -> None:
+    def validate_description(self, field: TextAreaField):
         field.data = field.data.strip()
 
     # FIXME: code duplicated from the user edit form (UserProfileForm).

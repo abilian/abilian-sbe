@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict
 
 from flask import g
@@ -21,7 +23,7 @@ class CmisContentAction(Action):
     sbe_type: str = ""
     permission: str = ""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs):
         if "permission" in kwargs:
             self.permission = kwargs.pop("permission")
 
@@ -60,7 +62,7 @@ class FolderButtonAction(BaseFolderAction):
         "{{ action.icon }}</a>"
     )
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args, **kwargs):
         self.modal = False
 
         if "modal" in kwargs:
@@ -338,7 +340,7 @@ _actions = (
 )
 
 
-def register_actions(state: BlueprintSetupState) -> None:
+def register_actions(state: BlueprintSetupState):
     if not actions.installed(state.app):
         return
 

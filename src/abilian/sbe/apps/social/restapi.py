@@ -3,6 +3,8 @@ NOTE: this code is a legacy from the early days of the application,
 and currently not used.
 """
 
+from __future__ import annotations
+
 import json
 
 from flask import Blueprint, make_response, request

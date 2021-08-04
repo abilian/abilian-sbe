@@ -1,6 +1,8 @@
 # Note: this test suite is using pytest instead of the unittest-based scaffolding
 # provided by SBE. Hopefully one day all of SBE will follow.
 
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 from typing import Iterator, Union
 
@@ -27,7 +29,7 @@ def app(config: type) -> Iterator[Union[Iterator, Iterator[Application]]]:
     activity._clear_state()
 
 
-def test_activity_time_format(app: Application) -> None:
+def test_activity_time_format(app: Application):
     # We need the app context because of Babel.
 
     with app.app_context():

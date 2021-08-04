@@ -1,4 +1,6 @@
 """First cut at a notification system."""
+from __future__ import annotations
+
 from flask import current_app as app
 from flask import request
 from flask_login import current_user

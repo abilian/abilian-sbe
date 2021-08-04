@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import bleach
 from wtforms import BooleanField, StringField, TextAreaField
 

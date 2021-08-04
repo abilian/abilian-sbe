@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from itertools import count
 from typing import Optional
 
@@ -5,7 +7,7 @@ from abilian.sbe.apps.documents.models import PathAndSecurityIndexable
 
 
 class MockPath(PathAndSecurityIndexable):
-    def __init__(self, id: int, parent: Optional["MockPath"] = None) -> None:
+    def __init__(self, id: int, parent: Optional[MockPath] = None):
         self.id = id
         self.parent = parent
 
@@ -19,12 +21,12 @@ def get_obj() -> MockPath:
     return level3
 
 
-def test_iter_to_root() -> None:
+def test_iter_to_root():
     obj = get_obj()
     assert [o.id for o in obj._iter_to_root()] == [3, 2, 1, 0]
     assert [o.id for o in obj._iter_to_root(skip_self=True)] == [2, 1, 0]
 
 
-def test_indexable_parent_ids() -> None:
+def test_indexable_parent_ids():
     obj = get_obj()
     assert obj._indexable_parent_ids == "/0/1/2"

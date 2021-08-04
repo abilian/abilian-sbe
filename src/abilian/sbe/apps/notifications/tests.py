@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from flask import render_template
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import Client

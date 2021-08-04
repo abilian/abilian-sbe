@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import pkgutil
 from html import escape

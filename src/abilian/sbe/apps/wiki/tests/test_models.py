@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from unittest import mock
 from urllib.parse import quote_plus
 
@@ -25,7 +27,7 @@ def test_wikilink_extension(text, db, req_ctx):
     }
     md = Markdown(**ctx)
 
-    def check(page_exists: bool) -> None:
+    def check(page_exists: bool):
         page_exists_mock = mock.MagicMock(return_value=page_exists)
         with mock.patch("abilian.sbe.apps.wiki.markup.page_exists", page_exists_mock):
             result = md.convert(wikilink)

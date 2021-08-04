@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Set
 
@@ -166,7 +168,7 @@ def generate_unsubscribe_token(user: User) -> str:
 
 
 class CommunityDigest:
-    def __init__(self, community: Community) -> None:
+    def __init__(self, community: Community):
         self.community = community
 
         self.seen_entities: Set[Entity] = set()

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from . import documents, folders
 from .views import blueprint
 

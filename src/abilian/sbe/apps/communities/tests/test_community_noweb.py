@@ -1,5 +1,7 @@
 """Tests from test_community are currently refactored using pytest in this
 module."""
+from __future__ import annotations
+
 from unittest import mock
 
 import pytest
@@ -33,13 +35,13 @@ def community(db_session: Session) -> Community:
 #
 # Actual tests
 #
-def test_instanciation(db: SQLAlchemy) -> None:
+def test_instanciation(db: SQLAlchemy):
     community = Community(name="My Community")
     assert isinstance(community.folder, Folder)
     # assert isinstance(community.group, Group)
 
 
-def test_default_view_kw() -> None:
+def test_default_view_kw():
     # test exceptions are handled if passed an object with 'community' attribute
     # and no community_id in kwargs. and ValueError is properly raised
     dummy = type("Dummy", (object,), {"community": None})()
@@ -50,12 +52,12 @@ def test_default_view_kw() -> None:
     assert exc_info.value.args == ("Cannot find community_id value",)
 
 
-def test_default_url(app: Application, community: Community) -> None:
+def test_default_url(app: Application, community: Community):
     url = app.default_view.url_for(community)
     assert url.endswith("/communities/my-community/")
 
 
-def test_can_recreate_with_same_name(community: Community, db: SQLAlchemy) -> None:
+def test_can_recreate_with_same_name(community: Community, db: SQLAlchemy):
     name = community.name
 
     db.session.delete(community)
@@ -69,18 +71,18 @@ def test_can_recreate_with_same_name(community: Community, db: SQLAlchemy) -> No
     db.session.commit()
 
 
-def test_rename(community: Community) -> None:
+def test_rename(community: Community):
     NEW_NAME = "My new name"
     community.rename(NEW_NAME)
     assert community.name == NEW_NAME
     assert community.folder.name == NEW_NAME
 
 
-def test_auto_slug(community: Community) -> None:
+def test_auto_slug(community: Community):
     assert community.slug == "my-community"
 
 
-def test_membership(community: Community, db: SQLAlchemy) -> None:
+def test_membership(community: Community, db: SQLAlchemy):
     user = User(email="user@example.com")
 
     memberships = community.memberships
@@ -147,7 +149,7 @@ def test_membership(community: Community, db: SQLAlchemy) -> None:
     when_removed.assert_called_once_with(community, membership=membership)
 
 
-def test_folder_roles(community: Community, db: SQLAlchemy, app: Application) -> None:
+def test_folder_roles(community: Community, db: SQLAlchemy, app: Application):
     user = User(email="user@example.com")
     folder = community.folder
     community.set_membership(user, "member")
@@ -162,7 +164,7 @@ def test_folder_roles(community: Community, db: SQLAlchemy, app: Application) ->
     assert security.get_roles(user, folder) == ["reader"]
 
 
-def test_community_content_decorator(community: Community, db: SQLAlchemy) -> None:
+def test_community_content_decorator(community: Community, db: SQLAlchemy):
     @community_content
     class CommunityContent(Entity):
         community_id = CommunityIdColumn()
@@ -185,9 +187,7 @@ def test_community_content_decorator(community: Community, db: SQLAlchemy) -> No
 ##########################################################################
 
 
-def test_community_indexed(
-    app: Application, db: SQLAlchemy, req_ctx: RequestContext
-) -> None:
+def test_community_indexed(app: Application, db: SQLAlchemy, req_ctx: RequestContext):
     start_services(["security", "indexing"])
     index_service = get_service("indexing")
 
@@ -231,7 +231,7 @@ def test_community_indexed(
 
 def test_default_view_kw_with_hit(
     app: Application, db: SQLAlchemy, community: Community, req_ctx: RequestContext
-) -> None:
+):
 
     start_services(["security", "indexing"])
     index_service = get_service("indexing")

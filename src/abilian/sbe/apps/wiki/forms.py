@@ -1,4 +1,6 @@
 """Forms for the Wiki module."""
+from __future__ import annotations
+
 from typing import Any, Optional
 
 from wtforms import HiddenField, StringField, TextAreaField, ValidationError
@@ -41,14 +43,14 @@ class WikiPageForm(Form):
     page_id = HiddenField(filters=(int_or_none,), validators=[flaghidden()])
     last_revision_id = HiddenField(filters=(int_or_none,), validators=[flaghidden()])
 
-    def validate_title(self, field: StringField) -> None:
+    def validate_title(self, field: StringField):
         title = field.data
         if title != field.object_data and page_exists(title):
             raise ValidationError(
                 _("A page with this name already exists. Please use another name.")
             )
 
-    def validate_last_revision_id(self, field: HiddenField) -> None:
+    def validate_last_revision_id(self, field: HiddenField):
         val = field.data
         current = field.object_data
 

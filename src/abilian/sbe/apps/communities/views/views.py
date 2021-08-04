@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import hashlib
 import logging
 from collections import Counter
@@ -80,7 +82,7 @@ communities.record_once(register_actions)
 
 
 @communities.record_once
-def register_context_processors(state: BlueprintSetupState) -> None:
+def register_context_processors(state: BlueprintSetupState):
     @state.app.context_processor
     def communities_context_processor() -> Dict[str, Callable]:
         # helper to get an url for community image
@@ -229,7 +231,7 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
         url = Endpoint("communities.settings", community_id=g.community.slug)
         return BreadcrumbItem(label=_("Settings"), icon="cog", url=url)
 
-    def before_populate_obj(self) -> None:
+    def before_populate_obj(self):
         form = self.form
         name = form.name.data
         if name != self.obj.name:
@@ -248,7 +250,7 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
             self.linked_group = Group.query.get(int(self.linked_group))
         del form.linked_group
 
-    def after_populate_obj(self) -> None:
+    def after_populate_obj(self):
         self.obj.group = self.linked_group
 
 

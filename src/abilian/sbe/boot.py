@@ -5,6 +5,8 @@ and activation.
 
 NB: not used anymore.
 """
+from __future__ import annotations
+
 import logging
 import os
 import subprocess

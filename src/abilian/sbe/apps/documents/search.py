@@ -1,4 +1,6 @@
 """Indexing related utilities for Folder, Documents."""
+from __future__ import annotations
+
 import sqlalchemy as sa
 
 from abilian.core.entities import Entity
@@ -9,7 +11,7 @@ from abilian.services import get_service
 from .models import CmisObject
 
 
-def reindex_tree(obj: Folder) -> None:
+def reindex_tree(obj: Folder):
     """Schedule reindexing `obj` and all of its descendants.
 
     Generally needed to update indexed security.

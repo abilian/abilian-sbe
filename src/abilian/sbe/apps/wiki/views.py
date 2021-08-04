@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import difflib
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple, Union
@@ -46,7 +48,7 @@ route = wiki.route
 
 
 @wiki.url_value_preprocessor
-def init_wiki_values(endpoint: str, values: Dict[Any, Any]) -> None:
+def init_wiki_values(endpoint: str, values: Dict[Any, Any]):
     g.current_tab = "wiki"
 
     endpoint = Endpoint("wiki.index", community_id=g.community.slug)
@@ -210,7 +212,7 @@ class PageEdit(BasePageView, ObjectEdit):
             ).first()
         return args, kwargs
 
-    def before_populate_obj(self) -> None:
+    def before_populate_obj(self):
         self.redirect_if_no_change()
         form = self.form
         self.obj.create_revision(form.body_src.data, form.message.data)

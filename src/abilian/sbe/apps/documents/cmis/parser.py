@@ -1,4 +1,6 @@
 """Parses XML messages and converts them to objects."""
+from __future__ import annotations
+
 import base64
 from datetime import datetime
 from typing import Dict, List
@@ -13,7 +15,7 @@ CMIS_NS = "http://docs.oasis-open.org/ns/cmis/core/200908/"
 
 
 class Entry:
-    def __init__(self, xml: bytes = None) -> None:
+    def __init__(self, xml: bytes = None):
         self.properties: Dict[str, Property] = {}
         self.links: List[str] = []
         self.content_type = ""
@@ -22,7 +24,7 @@ class Entry:
         if xml:
             self.parse(xml)
 
-    def parse(self, xml: bytes) -> None:
+    def parse(self, xml: bytes):
         root = objectify.fromstring(xml)
         object = root["{%s}object" % CMISRA_NS]
         properties = object["{%s}properties" % CMIS_NS]
@@ -66,11 +68,11 @@ class Property:
     value(s) held by the property. CMIS specifies the following property-types.
     """
 
-    def __init__(self, element: ObjectifiedElement = None) -> None:
+    def __init__(self, element: ObjectifiedElement = None):
         if element is not None:
             self.parse(element)
 
-    def parse(self, element: ObjectifiedElement) -> None:
+    def parse(self, element: ObjectifiedElement):
         tag = element.tag
         self.type = tag[tag.index("}") + 1 + len("property") :].lower()
         self.property_definition_id = element.attrib["propertyDefinitionId"]

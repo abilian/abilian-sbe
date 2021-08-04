@@ -1,4 +1,6 @@
 """Document management blueprint."""
+from __future__ import annotations
+
 from typing import Dict
 
 from flask import g
@@ -20,7 +22,7 @@ blueprint.record_once(register_actions)
 
 
 @blueprint.url_value_preprocessor
-def init_document_values(endpoint: str, values: Dict[str, int]) -> None:
+def init_document_values(endpoint: str, values: Dict[str, int]):
     g.current_tab = "documents"
     g.is_manager = is_manager()
 

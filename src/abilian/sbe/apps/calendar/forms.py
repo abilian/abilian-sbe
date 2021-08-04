@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import bleach
 from wtforms import StringField, TextAreaField, ValidationError
 from wtforms.fields.html5 import URLField

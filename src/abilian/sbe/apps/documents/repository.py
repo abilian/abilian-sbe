@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TYPE_CHECKING, Optional, Union
 
 import sqlalchemy as sa
@@ -19,11 +21,11 @@ class Repository:
     """A simple document repository, implementing the basic functionalities of
     the CMIS model."""
 
-    def __init__(self, app: Optional["Application"] = None) -> None:
+    def __init__(self, app: Optional[Application] = None):
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app: "Application") -> None:
+    def init_app(self, app: Application):
         # self.app = app
         app.extensions["content_repository"] = self
 
@@ -123,15 +125,15 @@ class Repository:
 
     def move_object(
         self, obj: BaseContent, dest_folder: Folder, dest_title: Optional[str] = None
-    ) -> None:
+    ):
         obj.parent = dest_folder
         if dest_title:
             obj.title = dest_title
 
-    def rename_object(self, obj: BaseContent, title: str) -> None:
+    def rename_object(self, obj: BaseContent, title: str):
         obj.title = title
 
-    def delete_object(self, obj: BaseContent) -> None:
+    def delete_object(self, obj: BaseContent):
         if obj.is_root_folder:
             raise Exception("Can't delete root folder.")
 

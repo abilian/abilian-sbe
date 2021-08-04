@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from sqlalchemy import Column, DateTime, Unicode
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import backref, relationship

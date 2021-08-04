@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import time
 from datetime import datetime
@@ -214,7 +216,7 @@ class Community(Entity):
         config = current_app.config
         return bool(config.get("ENABLE_CALENDAR"))
 
-    def rename(self, name: str) -> None:
+    def rename(self, name: str):
         self.name = name
         if self.folder:
             # FIXME: use signals
@@ -227,7 +229,7 @@ class Community(Entity):
             memberships = memberships.filter(M.role == role)
         return memberships.all()
 
-    def set_membership(self, user: User, role: Union[str, Role]) -> None:
+    def set_membership(self, user: User, role: Union[str, Role]):
         """Add a member with the given role, or set the role of an existing
         member."""
         assert isinstance(user, User)
@@ -255,7 +257,7 @@ class Community(Entity):
 
         signals.membership_set.send(self, membership=membership, is_new=is_new)
 
-    def remove_membership(self, user: User) -> None:
+    def remove_membership(self, user: User):
         M = Membership
         membership = M.query.filter(
             and_(M.user_id == user.id, M.community_id == self.id)
@@ -267,7 +269,7 @@ class Community(Entity):
         self.membership_count -= 1
         signals.membership_removed.send(self, membership=membership)
 
-    def update_roles_on_folder(self) -> None:
+    def update_roles_on_folder(self):
         if self.folder:
             self.ungrant_all_roles_on_folder()
             for membership in self.memberships:
@@ -281,7 +283,7 @@ class Community(Entity):
                     else:
                         security.grant_role(user, READER, self.folder)
 
-    def ungrant_all_roles_on_folder(self) -> None:
+    def ungrant_all_roles_on_folder(self):
         if self.folder:
             role_assignments = security.get_role_assignements(self.folder)
             for principal, role in role_assignments:
@@ -316,7 +318,7 @@ class Community(Entity):
             return True
         return False
 
-    def touch(self) -> None:
+    def touch(self):
         self.last_active_at = datetime.utcnow()
 
     @property
@@ -338,7 +340,7 @@ _PROCESSED_ATTR = "__sbe_community_group_sync_processed__"
 
 
 @signals.membership_set.connect_via(ANY)
-def _membership_added(sender: Community, membership: Membership, is_new: bool) -> None:
+def _membership_added(sender: Community, membership: Membership, is_new: bool):
     if not is_new:
         return
 
@@ -358,7 +360,7 @@ def _membership_added(sender: Community, membership: Membership, is_new: bool) -
 
 
 @signals.membership_removed.connect_via(ANY)
-def membership_removed(sender: Community, membership: Membership) -> None:
+def membership_removed(sender: Community, membership: Membership):
     if getattr(membership.user, _PROCESSED_ATTR, False) is OP_REMOVE:
         return
 
@@ -396,7 +398,7 @@ def _on_member_change(community, user, initiator):
 @listens_for(Community.group, "set", active_history=True)
 def _on_linked_group_change(
     community: Community, value: Any, oldvalue: Any, initiator: Event
-) -> None:
+):
     if value == oldvalue:
         return
 
@@ -444,7 +446,7 @@ def _safe_get_community(group: Group) -> Optional[Community]:
 
 @listens_for(Group.members, "append")
 @listens_for(Group.members, "remove")
-def _on_group_member_change(group: Group, user: User, initiator: Event) -> None:
+def _on_group_member_change(group: Group, user: User, initiator: Event):
     community = _safe_get_community(group)
 
     if not community:

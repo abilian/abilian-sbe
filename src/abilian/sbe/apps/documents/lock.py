@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional, Union
 
@@ -21,7 +23,7 @@ class Lock:
         date: Union[datetime, str],
         *args: Any,
         **kwargs: Any,
-    ) -> None:
+    ):
         self.user_id = user_id
         self.user = user
         if not isinstance(date, datetime):
@@ -33,7 +35,7 @@ class Lock:
         self.date = date
 
     @staticmethod
-    def new() -> "Lock":
+    def new() -> Lock:
         return Lock(current_user.id, str(current_user), utcnow())
 
     def as_dict(self) -> Dict[str, Any]:
@@ -45,7 +47,7 @@ class Lock:
         }
 
     @staticmethod
-    def from_dict(d: Dict[str, Any]) -> "Lock":
+    def from_dict(d: Dict[str, Any]) -> Lock:
         """Deserialize from a `dict` created by :meth:`as_dict`."""
         return Lock(**d)
 

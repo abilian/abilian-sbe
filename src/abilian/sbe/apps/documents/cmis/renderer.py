@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, List, Union
 
 from flask import render_template
@@ -10,7 +12,7 @@ XML_HEADER = "<?xml version='1.0' encoding='UTF-8'?>\n"
 
 
 class Feed:
-    def __init__(self, object: Folder, collection: List[Document]) -> None:
+    def __init__(self, object: Folder, collection: List[Document]):
         self.object = object
         self.collection = collection
 
@@ -25,7 +27,7 @@ class Feed:
 
 
 class Entry:
-    def __init__(self, obj: Union[Document, Folder]) -> None:
+    def __init__(self, obj: Union[Document, Folder]):
         self.obj = obj
 
     def to_xml(self, **options: Any) -> str:

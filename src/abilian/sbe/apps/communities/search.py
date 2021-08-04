@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 from typing import Any, Dict, Union
 
@@ -29,7 +31,7 @@ _FIELDS = [
 ]
 
 
-def init_app(app: Application) -> None:
+def init_app(app: Application):
     """Add community fields to indexing service schema."""
     indexing = app.services["indexing"]
     indexing.register_search_filter(filter_user_communities)

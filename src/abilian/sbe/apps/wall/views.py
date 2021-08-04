@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import date
 from itertools import groupby, islice
 from typing import Any, Dict
@@ -23,7 +25,7 @@ route = wall.route
 
 
 @wall.url_value_preprocessor
-def set_current_tab(endpoint: str, values: Dict[Any, Any]) -> None:
+def set_current_tab(endpoint: str, values: Dict[Any, Any]):
     g.current_tab = "wall"
 
 

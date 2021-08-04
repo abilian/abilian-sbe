@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 from pytest import fixture
 from sqlalchemy.exc import IntegrityError
@@ -23,7 +25,7 @@ def root(session: Session) -> Folder:
     return root
 
 
-def test_create_doc(root: Folder, session: Session) -> None:
+def test_create_doc(root: Folder, session: Session):
     doc = root.create_document("doc")
     session.flush()
     assert doc.path == "/doc"
@@ -31,7 +33,7 @@ def test_create_doc(root: Folder, session: Session) -> None:
     assert not doc.is_root_folder
 
 
-def test_create_folder(root: Folder, session: Session) -> None:
+def test_create_folder(root: Folder, session: Session):
     folder = root.create_subfolder("folder")
     session.flush()
     assert folder.title == "folder"
@@ -42,7 +44,7 @@ def test_create_folder(root: Folder, session: Session) -> None:
     assert not folder.is_root_folder
 
 
-def test_move(root: Folder, repository: Repository) -> None:
+def test_move(root: Folder, repository: Repository):
     doc = root.create_document("doc")
     folder = root.create_subfolder("folder")
 
@@ -55,7 +57,7 @@ def test_move(root: Folder, repository: Repository) -> None:
     assert doc.path == "/folder/newdoc"
 
 
-def test_copy(root: Folder, repository: Repository) -> None:
+def test_copy(root: Folder, repository: Repository):
     doc = root.create_document("doc")
     folder = root.create_subfolder("folder")
 
@@ -69,7 +71,7 @@ def test_copy(root: Folder, repository: Repository) -> None:
     assert doc_copy in folder.children
 
 
-def test_copy_nested_folders(root: Folder, repository: Repository) -> None:
+def test_copy_nested_folders(root: Folder, repository: Repository):
     folder1 = root.create_subfolder("folder1")
     folder2 = root.create_subfolder("folder2")
     subfolder = folder1.create_subfolder("subfolder")
@@ -87,7 +89,7 @@ def test_copy_nested_folders(root: Folder, repository: Repository) -> None:
     assert folder1_copy in folder2.children
 
 
-def test_move_nested_folders(root: Folder, repository: Repository) -> None:
+def test_move_nested_folders(root: Folder, repository: Repository):
     folder1 = root.create_subfolder("folder1")
     folder2 = root.create_subfolder("folder2")
     subfolder = folder1.create_subfolder("subfolder")  # noqa
@@ -98,7 +100,7 @@ def test_move_nested_folders(root: Folder, repository: Repository) -> None:
     assert len(folder1.children) == 1
 
 
-def test_rename(root: Folder, repository: Repository) -> None:
+def test_rename(root: Folder, repository: Repository):
     folder = root.create_subfolder("folder")
     doc = folder.create_document("doc")
 
@@ -114,7 +116,7 @@ def test_rename(root: Folder, repository: Repository) -> None:
     assert doc.path == "/folder1/doc1"
 
 
-def test_delete(root: Folder, repository: Repository, session: Session) -> None:
+def test_delete(root: Folder, repository: Repository, session: Session):
     doc = root.create_document("doc")
     folder = root.create_subfolder("folder")
     session.flush()
@@ -149,7 +151,7 @@ def test_delete(root: Folder, repository: Repository, session: Session) -> None:
     assert Document.query.all() == []
 
 
-def test_no_duplicate_name(root: Folder, session: Session) -> None:
+def test_no_duplicate_name(root: Folder, session: Session):
     root.create_subfolder("folder_1")
     root.create_subfolder("folder_1")
     with pytest.raises(IntegrityError):

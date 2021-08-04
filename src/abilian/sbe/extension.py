@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import logging
 import uuid
 from pathlib import Path
@@ -30,11 +32,11 @@ JS = (
 class AbilianSBE:
     """Base extension required by abilian.sbe.apps."""
 
-    def __init__(self, app: "Application" = None) -> None:
+    def __init__(self, app: "Application" = None):
         if app is not None:
             self.init_app(app)
 
-    def init_app(self, app: "Application") -> None:
+    def init_app(self, app: "Application"):
         # False: it's ok if antivirus task was run but service couldn't get a
         # result
         app.config.setdefault("ANTIVIRUS_CHECK_REQUIRED", False)

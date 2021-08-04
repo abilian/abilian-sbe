@@ -1,4 +1,6 @@
 """Forum views."""
+from __future__ import annotations
+
 from datetime import date, datetime
 
 from flask import g, render_template

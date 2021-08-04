@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Union
 
@@ -67,14 +69,14 @@ class WikiPage(Entity):
         return self._title
 
     @title.setter
-    def title(self, title: str) -> None:
+    def title(self, title: str):
         # set title before setting name, so that we don't enter an infinite loop
         # with _wiki_sync_name_title
         self._title = title
         if self.name != title:
             self.name = title
 
-    def create_revision(self, body_src: str, message: str = "") -> None:
+    def create_revision(self, body_src: str, message: str = ""):
         revision = WikiPageRevision()
         if self.revisions:
             revision.number = max(r.number for r in self.revisions) + 1
@@ -86,7 +88,7 @@ class WikiPage(Entity):
         revision.page = self
 
     @property
-    def last_revision(self) -> "WikiPageRevision":
+    def last_revision(self) -> WikiPageRevision:
         return (
             WikiPageRevision.query.filter(WikiPageRevision.page == self)
             .order_by(WikiPageRevision.number.desc())

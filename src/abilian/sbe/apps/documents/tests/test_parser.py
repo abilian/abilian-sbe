@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abilian.sbe.apps.documents.cmis.parser import Entry
 
 XML_ENTRY = b"""\
@@ -44,13 +46,13 @@ XML_ENTRY_WITH_CONTENT = b"""\
 """
 
 
-def test_parse_folder_entry() -> None:
+def test_parse_folder_entry():
     e = Entry(XML_ENTRY)
     assert e.name == "Toto Titi"
     assert e.type == "cmis:folder"
 
 
-def test_parse_document_entry() -> None:
+def test_parse_document_entry():
     e = Entry(XML_ENTRY_WITH_CONTENT)
     assert e.name == "testDocument"
     assert e.type == "cmis:document"

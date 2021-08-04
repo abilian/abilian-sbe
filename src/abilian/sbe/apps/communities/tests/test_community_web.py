@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from flask import url_for
 from flask.ctx import RequestContext
 from flask.testing import FlaskClient
@@ -18,7 +20,7 @@ def test_index(
     db: SQLAlchemy,
     client: FlaskClient,
     req_ctx: RequestContext,
-) -> None:
+):
     start_services(["security"])
 
     user = community1.test_user
@@ -33,7 +35,7 @@ def test_community_home(
     app: Application,
     client: FlaskClient,
     req_ctx: RequestContext,
-) -> None:
+):
     start_services(["security"])
 
     url = app.default_view.url_for(community1)
@@ -60,7 +62,7 @@ def test_new(
     client: FlaskClient,
     db: SQLAlchemy,
     req_ctx: RequestContext,
-) -> None:
+):
     start_services(["security"])
     security_service = get_security_service()
 
@@ -83,7 +85,7 @@ def test_community_settings(
     client: FlaskClient,
     community1: Community,
     req_ctx: RequestContext,
-) -> None:
+):
     start_services(["security"])
 
     url = url_for("communities.settings", community_id=community1.slug)
@@ -116,7 +118,7 @@ def test_members(
     community1: Community,
     community2: Community,
     req_ctx: RequestContext,
-) -> None:
+):
     start_services(["security"])
     security_service = get_security_service()
 

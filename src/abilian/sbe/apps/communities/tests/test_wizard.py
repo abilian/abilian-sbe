@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from tempfile import NamedTemporaryFile
 from typing import IO
 
@@ -30,7 +32,7 @@ def csv_file() -> IO[str]:
     return csv
 
 
-def test_wizard_read_csv(csv_file: IO[str]) -> None:
+def test_wizard_read_csv(csv_file: IO[str]):
     wizard_read = wizard_read_csv(csv_file)
 
     assert wizard_read == [
@@ -55,7 +57,7 @@ def test_wizard_read_csv(csv_file: IO[str]) -> None:
     ]
 
 
-def test_wizard_extract_data(db: SQLAlchemy, csv_file: IO[str]) -> None:
+def test_wizard_extract_data(db: SQLAlchemy, csv_file: IO[str]):
     session = db.session
     community = Community(name="Hp")
     g.community = community

@@ -1,4 +1,6 @@
 """Celery tasks related to document transformation and preview."""
+from __future__ import annotations
+
 import email
 import mailbox
 import re
@@ -36,7 +38,7 @@ MAIL_REPLY_MARKER = _l("_____Write above this line to post_____")
 logger = get_task_logger(__name__)
 
 
-def init_app(app: Application) -> None:
+def init_app(app: Application):
     global check_maildir
     if app.config["INCOMING_MAIL_USE_MAILDIR"]:
         make_task = periodic_task(run_every=crontab(minute="*"))

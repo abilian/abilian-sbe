@@ -1,4 +1,6 @@
 """Parses and produces XML documents specified by the standard."""
+from __future__ import annotations
+
 from typing import Any, List
 
 from lxml import etree, objectify
@@ -9,7 +11,7 @@ E = ElementMaker(namespace="DAV:")
 
 
 class Propfind:
-    def __init__(self, xml: bytes = b"") -> None:
+    def __init__(self, xml: bytes = b""):
         self.mode = ""
         self.prop_names: List[str] = []
 
@@ -17,7 +19,7 @@ class Propfind:
             xml = b"<D:propfind xmlns:D='DAV:'><D:allprop/></D:propfind>"
         self.parse(xml)
 
-    def parse(self, xml: bytes) -> None:
+    def parse(self, xml: bytes):
         root = objectify.fromstring(xml)
 
         child = root.getchildren()[0]
@@ -29,10 +31,10 @@ class Propfind:
 
 
 class MultiStatus:
-    def __init__(self) -> None:
+    def __init__(self):
         self.responses: List[Response] = []
 
-    def add_response_for(self, href: str, obj: Any, property_list: List[str]) -> None:
+    def add_response_for(self, href: str, obj: Any, property_list: List[str]):
         response = Response(href, obj, property_list)
         self.responses.append(response)
 
@@ -47,7 +49,7 @@ class MultiStatus:
 
 
 class Response:
-    def __init__(self, href: str, obj: Any, property_list: List[str]) -> None:
+    def __init__(self, href: str, obj: Any, property_list: List[str]):
         self.href = href
         self.property_list = property_list
         self.obj = obj

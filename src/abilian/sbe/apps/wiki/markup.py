@@ -2,6 +2,8 @@
 
 Add extensions here (for now).
 """
+from __future__ import annotations
+
 import markdown
 from flask import url_for
 from markdown.core import Markdown
@@ -16,7 +18,7 @@ __all__ = ("convert", "SBEWikiLinkExtension")
 
 
 class UrlBuilder:
-    def __init__(self, page: WikiPage) -> None:
+    def __init__(self, page: WikiPage):
         self.page = page
 
     def build(self, label: str, base: str, end: str) -> str:
@@ -36,7 +38,7 @@ def convert(page: WikiPage, text: str) -> str:
 
 
 class SBEWikiLinkExtension(WikiLinkExtension):
-    def extendMarkdown(self, md: Markdown) -> None:
+    def extendMarkdown(self, md: Markdown):
         # self.md = md
 
         # append to end of inline patterns

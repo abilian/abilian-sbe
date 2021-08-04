@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from typing import Dict, List, Tuple
 
@@ -173,7 +175,7 @@ def check_read_access(obj: BaseContent) -> bool:
     raise Forbidden()
 
 
-def check_write_access(obj: BaseContent) -> None:
+def check_write_access(obj: BaseContent):
     """Checks the current user has appropriate write access on the given
     object.
 

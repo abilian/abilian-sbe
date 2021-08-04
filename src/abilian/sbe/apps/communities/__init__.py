@@ -1,8 +1,10 @@
 """Communities module."""
+from __future__ import annotations
+
 from flask import Flask
 
 
-def register_plugin(app: Flask) -> None:
+def register_plugin(app: Flask):
     # Used for side-effect
     from . import events  # noqa
     from . import search

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any
 
 from abilian.sbe.apps.communities.models import VALID_ROLES, Community, Membership
@@ -10,7 +12,7 @@ from .search import reindex_tree
 @membership_set.connect
 def new_community_member(
     community: Community, membership: Membership, is_new: bool, **kwargs: Any
-) -> None:
+):
     if not community.folder:
         return
 
@@ -36,7 +38,7 @@ def new_community_member(
 @membership_removed.connect
 def remove_community_member(
     community: Community, membership: Membership, **kwargs: Any
-) -> None:
+):
     if not community.folder:
         return
 

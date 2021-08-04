@@ -1,6 +1,8 @@
 """
 Test helpers.
 """
+from __future__ import annotations
+
 from typing import List
 
 from abilian.services import get_service

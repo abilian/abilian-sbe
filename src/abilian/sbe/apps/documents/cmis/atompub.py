@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Callable
 
 from flask import Blueprint, Response, make_response, render_template, request

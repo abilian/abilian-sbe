@@ -1,5 +1,7 @@
 """Decorators and helpers to check access to communities."""
 
+from __future__ import annotations
+
 from functools import wraps
 from typing import Any, Callable, Dict, Optional, Union
 
@@ -50,9 +52,7 @@ def require_access(func):
     return decorated_view
 
 
-def check_access(
-    community: CommunityPresenter = None, user: Optional[User] = None
-) -> None:
+def check_access(community: CommunityPresenter = None, user: Optional[User] = None):
     if not has_access(community, user):
         raise Forbidden()
 

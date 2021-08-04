@@ -1,5 +1,7 @@
 """Lightweight integration and denormalisation using events (signals)."""
 
+from __future__ import annotations
+
 from typing import Any, Optional
 
 from blinker import ANY
@@ -18,7 +20,7 @@ from .models import Community
 @activity.connect_via(ANY)
 def update_community(
     sender: Any, verb: str, actor: User, object: Entity, target: Optional[Entity] = None
-) -> None:
+):
     if isinstance(object, Community):
         object.touch()
         return

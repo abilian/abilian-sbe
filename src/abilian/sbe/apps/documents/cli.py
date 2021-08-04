@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import click
 import sqlalchemy as sa
 import sqlalchemy.orm

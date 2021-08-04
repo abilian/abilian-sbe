@@ -4,6 +4,8 @@ TODO: make it smarter (direct access from 'g' using lazy objects?) and
 cacheable.
 """
 
+from __future__ import annotations
+
 from datetime import datetime, timedelta
 from typing import List
 
@@ -48,5 +50,5 @@ class Sidebars:
 
 
 @social.before_request
-def inject_sidebars() -> None:
+def inject_sidebars():
     g.sidebars = Sidebars()

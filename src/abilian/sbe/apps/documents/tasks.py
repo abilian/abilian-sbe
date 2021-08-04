@@ -1,4 +1,6 @@
 """Celery tasks related to document transformation and preview."""
+from __future__ import annotations
+
 import logging
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Iterator, Optional, Tuple
@@ -19,7 +21,7 @@ logger = logging.getLogger(__package__)
 @contextmanager
 def get_document(
     document_id: int, session: Optional[Session] = None
-) -> Iterator[Tuple[Session, Optional["Document"]]]:
+) -> Iterator[Tuple[Session, Optional[Document]]]:
     """Context manager that yields (session, document)."""
     from .models import Document
 
@@ -40,7 +42,7 @@ def get_document(
 
 
 @shared_task
-def process_document(document_id: int) -> None:
+def process_document(document_id: int):
     """Run document processing chain."""
     with get_document(document_id) as (session, document):
         if document is None:
@@ -55,7 +57,7 @@ def process_document(document_id: int) -> None:
     convert_document_content.delay(document_id)
 
 
-def _run_antivirus(document: "Document") -> Optional[bool]:
+def _run_antivirus(document: Document) -> Optional[bool]:
     antivirus = get_service("antivirus")
     if antivirus and antivirus.running:
         is_clean = antivirus.scan(document.content_blob)
@@ -75,7 +77,7 @@ def antivirus_scan(document_id):
 
 
 @shared_task
-def preview_document(document_id: int) -> None:
+def preview_document(document_id: int):
     """Compute the document preview images with its default preview size."""
     with get_document(document_id) as (session, document):
         if document is None:
@@ -97,7 +99,7 @@ def preview_document(document_id: int) -> None:
 
 
 @shared_task
-def convert_document_content(document_id: int) -> None:
+def convert_document_content(document_id: int):
     """Convert document content."""
     with get_document(document_id) as (session, doc):
         if doc is None:
@@ -109,7 +111,7 @@ def convert_document_content(document_id: int) -> None:
         extract_metadata(doc)
 
 
-def convert_to_pdf(doc: "Document") -> None:
+def convert_to_pdf(doc: "Document"):
     error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
     if doc.content_type == "application/pdf":
@@ -131,7 +133,7 @@ def convert_to_pdf(doc: "Document") -> None:
             )
 
 
-def convert_to_text(doc: "Document") -> None:
+def convert_to_text(doc: "Document"):
     error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
     try:
@@ -143,7 +145,7 @@ def convert_to_text(doc: "Document") -> None:
         )
 
 
-def extract_metadata(doc: "Document") -> None:
+def extract_metadata(doc: "Document"):
     error_kwargs = {"exc_info": True, "extra": {"stack": True}}
 
     doc.extra_metadata = {}

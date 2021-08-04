@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, Dict
 
 from flask import Blueprint as BaseBlueprint
@@ -23,7 +25,7 @@ class Blueprint(BaseBlueprint):
     _BASE_URL_PREFIX = "/communities"
     _ROUTE_PARAM = "<string:community_id>"
 
-    def __init__(self, *args: str, **kwargs: Any) -> None:
+    def __init__(self, *args: str, **kwargs: Any):
         url_prefix = kwargs.get("url_prefix", "")
 
         if kwargs.pop("set_community_id_prefix", True):
@@ -46,18 +48,18 @@ class Blueprint(BaseBlueprint):
         self.before_request(check_access)
 
 
-def check_access() -> None:
+def check_access():
     if hasattr(g, "community"):
         # communities.index is not inside a community, for example
         security.check_access(g.community)
 
 
-def init_current_tab(endpoint: str, values: Dict[str, int]) -> None:
+def init_current_tab(endpoint: str, values: Dict[str, int]):
     """Ensure g.current_tab exists."""
     g.current_tab = None
 
 
-def pull_community(endpoint: str, values: Dict[str, Any]) -> None:
+def pull_community(endpoint: str, values: Dict[str, Any]):
     """url_value_preprocessor function."""
     g.nav["active"] = "section:communities"
     g.breadcrumb.append(

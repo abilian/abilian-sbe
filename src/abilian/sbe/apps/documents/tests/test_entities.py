@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Union
 
 from flask.ctx import AppContext
@@ -13,13 +15,13 @@ def app(config: type) -> Application:
     return create_app(config=config)
 
 
-def check_editable(object: Union[Document, Folder]) -> None:
+def check_editable(object: Union[Document, Folder]):
     if hasattr(object, "__editable__"):
         for k in object.__editable__:
             assert hasattr(object, k)
 
 
-def test_title_prevails() -> None:
+def test_title_prevails():
     f = Folder(name="name", title="title")
     assert f.title == "title"
     assert f.name == "title"
@@ -33,12 +35,12 @@ def test_title_prevails() -> None:
     assert f.name == "name"
 
 
-def test_folder_editables() -> None:
+def test_folder_editables():
     root = Folder(title="/")
     check_editable(root)
 
 
-def test_folder_can_create_documents() -> None:
+def test_folder_can_create_documents():
     root = Folder(title="/")
 
     document = root.create_document("doc")
@@ -51,7 +53,7 @@ def test_folder_can_create_documents() -> None:
     assert document.parent == root
 
 
-def test_folder_can_create_subfolders() -> None:
+def test_folder_can_create_subfolders():
     root = Folder(title="/")
 
     subfolder = root.create_subfolder("folder")
@@ -63,7 +65,7 @@ def test_folder_can_create_subfolders() -> None:
     assert subfolder.parent == root
 
 
-def test_nested_subobjects() -> None:
+def test_nested_subobjects():
     root = Folder(title="/")
     subfolder = root.create_subfolder("folder1")
     subsubfolder = subfolder.create_subfolder("folder2")
@@ -81,7 +83,7 @@ def test_nested_subobjects() -> None:
     assert root.get_object_by_path("/folder1/doc") == document
 
 
-def test_folder_is_clonable() -> None:
+def test_folder_is_clonable():
     root = Folder(title="/")
     clone = root.clone()
 
@@ -89,18 +91,18 @@ def test_folder_is_clonable() -> None:
     assert clone.path == root.path
 
 
-def test_document_editables() -> None:
+def test_document_editables():
     doc = Document()
     check_editable(doc)
 
 
-def test_content_length(session: Session) -> None:
+def test_content_length(session: Session):
     doc = Document(title="toto")
     doc.set_content(b"tototiti", "application/binary")
     assert doc.content_length == len("tototiti")
 
 
-def test_document_is_clonable(session: Session) -> None:
+def test_document_is_clonable(session: Session):
     root = Folder(title="/")
     doc = root.create_document(title="toto")
     doc.content = b"tototiti"
@@ -110,7 +112,7 @@ def test_document_is_clonable(session: Session) -> None:
     assert clone.content == doc.content
 
 
-def test_document_has_an_icon(app_context: AppContext) -> None:
+def test_document_has_an_icon(app_context: AppContext):
     root = Folder(title="/")
     doc = root.create_document(title="toto")
     doc.content_type = "image/jpeg"
@@ -118,7 +120,7 @@ def test_document_has_an_icon(app_context: AppContext) -> None:
     assert filename in ("jpg.png", "jpeg.png"), doc.icon
 
 
-def test_icon_from_mime_type(app_context: AppContext) -> None:
+def test_icon_from_mime_type(app_context: AppContext):
     icon = icon_for("text/html")
     filename = icon.split("/")[-1]
     assert filename in ("html.png", "htm.png"), icon
