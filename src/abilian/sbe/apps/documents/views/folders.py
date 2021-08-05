@@ -837,7 +837,7 @@ def move_multiple(folder: Folder) -> Response:
         return redirect(current_folder_url)
 
     target_folder = repository.get_folder_by_id(target_folder_id)
-    if not folder:
+    if not target_folder:
         raise NotFound()
 
     if folder == target_folder:

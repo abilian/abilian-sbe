@@ -210,7 +210,7 @@ def _guard_closed_thread_collection(thread, value, *args):
 
 
 class PostAttachment(BaseContent):
-    __tablename__: str = None
+    __tablename__: str
     __mapper_args__ = {"polymorphic_identity": "forum_post_attachment"}
     sbe_type = "forum_post:attachment"
 

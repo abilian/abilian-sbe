@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import imghdr
-from typing import List, Tuple
 
 import sqlalchemy as sa
 from flask import request
