@@ -9,7 +9,7 @@ import tempfile
 from datetime import datetime
 from functools import partial
 from io import StringIO
-from typing import IO, Any, Dict, Iterator, List, Tuple
+from typing import IO, Any, Iterator
 from urllib.parse import quote
 from zipfile import ZipFile, is_zipfile
 
@@ -32,7 +32,7 @@ from flask import (
 from flask_login import current_user
 from sqlalchemy import func
 from werkzeug.datastructures import FileStorage
-from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import InternalServerError, NotFound
 from werkzeug.wrappers import Response
 from xlwt import Workbook, easyxf
 
@@ -837,6 +837,8 @@ def move_multiple(folder: Folder) -> Response:
         return redirect(current_folder_url)
 
     target_folder = repository.get_folder_by_id(target_folder_id)
+    if not folder:
+        raise NotFound()
 
     if folder == target_folder:
         flash(
