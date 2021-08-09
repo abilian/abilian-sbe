@@ -1,6 +1,6 @@
 [[package]]
 name = "abilian-core"
-version = "0.11.22"
+version = "0.11.23"
 description = "A framework for enterprise applications (CRM, ERP, collaboration...)."
 category = "main"
 optional = false
@@ -1975,8 +1975,8 @@ content-hash = "23ff09e329363418eba20c6f93fed5cb89a3842de76ec5085530a7fdf869d434
 
 [metadata.files]
 abilian-core = [
-    {file = "abilian-core-0.11.22.tar.gz", hash = "sha256:5ab13c32c9ab80108a093c032b065e1c7c43575be49d04e9869e32eb15ed5f5e"},
-    {file = "abilian_core-0.11.22-py3-none-any.whl", hash = "sha256:62080a561a99ee2a003814aa2bf2c007fb586b6f9cd79a2ab168c0f59fd3aaa6"},
+    {file = "abilian-core-0.11.23.tar.gz", hash = "sha256:5863f42688a6c07983f511d7cbd61016462ac24755e83a16e05ad92a2d22c504"},
+    {file = "abilian_core-0.11.23-py3-none-any.whl", hash = "sha256:084f6343b22ce5eb2d3d7ec459a6b1107068e00f25669c1108868e2f0ed178d8"},
 ]
 alabaster = [
     {file = "alabaster-0.7.12-py2.py3-none-any.whl", hash = "sha256:446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359"},
