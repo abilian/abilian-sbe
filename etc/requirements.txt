@@ -1,4 +1,6 @@
-abilian-core @ git+https://github.com/abilian/abilian-core.git@main ; python_version >= "3.8" and python_version < "4.0"
+abilian-core==0.11.22; python_version >= "3.8" and python_version < "4.0" \
+    --hash=sha256:5ab13c32c9ab80108a093c032b065e1c7c43575be49d04e9869e32eb15ed5f5e \
+    --hash=sha256:62080a561a99ee2a003814aa2bf2c007fb586b6f9cd79a2ab168c0f59fd3aaa6
 alembic==1.6.5; python_version >= "3.8" and python_full_version < "3.0.0" and python_version < "4.0" or python_version >= "3.8" and python_version < "4.0" and python_full_version >= "3.6.0" \
     --hash=sha256:e78be5b919f5bb184e3e0e2dd1ca986f2362e29a2bc933c446fe89f39dbe4e9c \
     --hash=sha256:a21fedebb3fb8f6bbbba51a11114f08c78709377051384c9c5ead5705ee93a51
