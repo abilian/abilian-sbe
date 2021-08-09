@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import logging
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Iterator, Optional, Tuple
+from typing import TYPE_CHECKING, Iterator
 
 from celery import shared_task
 from sqlalchemy.orm import Session

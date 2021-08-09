@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import re
-from typing import Dict, List, Tuple
 
 from flask import current_app, flash, g, request
 from flask_babel import gettext as _

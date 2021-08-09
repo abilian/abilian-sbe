@@ -7,7 +7,6 @@ cacheable.
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import List
 
 from flask import g
 from flask_login import current_user

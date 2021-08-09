@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Union
 
 from flask import g
 from flask_babel import format_date

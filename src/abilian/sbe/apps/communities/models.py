@@ -25,7 +25,7 @@ from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE, Event
 from sqlalchemy.sql.schema import Column
 from werkzeug.local import LocalProxy
 
-from abilian.core.entities import Entity, EntityMeta
+from abilian.core.entities import Entity
 from abilian.core.extensions import db
 from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.blob import Blob

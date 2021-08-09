@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import date
 from itertools import groupby, islice
-from typing import Any, Dict
+from typing import Any
 
 import whoosh
 import whoosh.query as wq

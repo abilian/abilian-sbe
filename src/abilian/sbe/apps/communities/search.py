@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, Union
+from typing import Any
 
 import whoosh.fields as wf
 import whoosh.query as wq

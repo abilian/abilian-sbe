@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Union
-
 from flask.ctx import AppContext
 from pytest import fixture
 from sqlalchemy.orm import Session

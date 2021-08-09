@@ -6,7 +6,7 @@ import mailbox
 import re
 from os.path import expanduser
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import bleach
 import chardet

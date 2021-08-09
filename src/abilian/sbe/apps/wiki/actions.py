@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Dict, cast
+from typing import Any, cast
 
 from flask import url_for
 from flask.blueprints import BlueprintSetupState

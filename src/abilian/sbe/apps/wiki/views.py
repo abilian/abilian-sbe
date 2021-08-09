@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import difflib
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, Union
+from typing import Any
 from urllib.parse import quote
 
 import sqlalchemy as sa

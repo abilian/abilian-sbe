@@ -1,7 +1,7 @@
 """Parses and produces XML documents specified by the standard."""
 from __future__ import annotations
 
-from typing import Any, List
+from typing import Any
 
 from lxml import etree, objectify
 from lxml.builder import ElementMaker

@@ -10,17 +10,7 @@ import mimetypes
 import threading
 import uuid
 from pathlib import Path
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Collection,
-    Dict,
-    Iterator,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Collection, Iterator
 
 import pkg_resources
 import sqlalchemy as sa

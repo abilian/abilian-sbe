@@ -10,7 +10,6 @@ from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.testing import start_services
 from abilian.services import get_security_service
 from abilian.services.security import Admin
-from abilian.services.security.service import SecurityService
 from abilian.testing.util import client_login
 
 

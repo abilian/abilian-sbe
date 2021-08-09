@@ -3,7 +3,7 @@
 
 from __future__ import annotations
 
-from typing import Any, List, Optional, cast
+from typing import Any, cast
 
 import sqlalchemy as sa
 from flask import g

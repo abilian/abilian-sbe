@@ -9,7 +9,7 @@ from io import BytesIO
 from operator import attrgetter
 from pathlib import Path
 from time import gmtime, strftime
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable
 
 import openpyxl
 import pytz

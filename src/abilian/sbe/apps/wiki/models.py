@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Union
 
 from flask_login import current_user
 from sqlalchemy import (

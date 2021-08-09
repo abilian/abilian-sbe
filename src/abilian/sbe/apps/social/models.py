@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import re
-from typing import List
 
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.query import Query

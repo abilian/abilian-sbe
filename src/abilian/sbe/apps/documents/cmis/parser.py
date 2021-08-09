@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import base64
 from datetime import datetime
-from typing import Dict, List
 
 from lxml import objectify
 from lxml.objectify import ObjectifiedElement

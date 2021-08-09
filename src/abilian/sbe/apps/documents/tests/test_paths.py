@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from itertools import count
-from typing import Optional
 
 from abilian.sbe.apps.documents.models import PathAndSecurityIndexable
 

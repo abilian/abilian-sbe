@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from functools import wraps
-from typing import Any, Callable, Dict, Optional, Union
+from typing import Any, Callable
 
 from flask import g
 from flask_login import current_user

@@ -1,8 +1,6 @@
 """Document management blueprint."""
 from __future__ import annotations
 
-from typing import Dict
-
 from flask import g
 
 from abilian.i18n import _l
