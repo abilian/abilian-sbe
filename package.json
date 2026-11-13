@@ -7,7 +7,7 @@
   },
   "devDependencies": {
     "htmlhint": "^1.1.4",
-    "less": "^4.2.1"
+    "less": "4.2.1"
   },
   "dependencies": {
     "lessc": "^1.0.2",
