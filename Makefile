@@ -110,7 +110,7 @@ clean:
 .PHONY: tidy
 ## Make super-clean
 tidy: clean
-	rm -rf .tox .nox
+	rm -rf .tox .nox .venv
 
 .PHONY:
 update-pot: update-pot
