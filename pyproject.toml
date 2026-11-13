@@ -165,7 +165,7 @@ filterwarnings = [
     'ignore::DeprecationWarning',
     'ignore::sqlalchemy.exc.SAWarning',
 ]
-# addopts = "-ra -q"
+addopts = "-ra -q --tb=short"
 testpaths = ["tests"]
 python_files = ["test_*.py", "tests.py", "test.py", "*_tests.py"]
 # norecursedirs = .* env* _build *.egg *.egg-info tools deploy etc docs demo bin

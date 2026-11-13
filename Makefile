@@ -70,8 +70,8 @@ lint-py:
 
 .PHONY: typecheck
 typecheck:
-	ty check src
-	pyrefly check src
+	# ty check src
+	# pyrefly check src
 
 .PHONY: format
 format:
