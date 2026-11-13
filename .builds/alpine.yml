@@ -30,11 +30,17 @@ packages:
   # Other deps
   - curl
   - poppler-utils
+  # Docker-based tests (tests/docker/)
+  - docker
+  - docker-cli-compose
 
 tasks:
   - setup: |
       cd abilian-sbe
       npm install
+      # Each task is a new login, so the group applies from the next task on.
+      sudo addgroup build docker
+      sudo service docker start
 
   - lint-nox: |
       cd abilian-sbe
@@ -45,3 +51,11 @@ tasks:
       # Default Python version is python 3.12
       # TODO: install other versions using rye
       nox -e pytest-3.12
+
+  - test-mariadb-docker: |
+      cd abilian-sbe
+      make test-mariadb-docker
+
+  - test-postgres-docker: |
+      cd abilian-sbe
+      make test-postgres-docker
