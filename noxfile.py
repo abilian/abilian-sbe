@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import nox
 
-PYTHON_VERSIONS = ["3.11", "3.12"]
+PYTHON_VERSIONS = ["3.11", "3.12", "3.13", "3.14", "3.15"]
 DB_URIS = [
     "sqlite:///test.db",
     # TODO: Postgres & MariaDB
@@ -29,7 +29,7 @@ def audit(session: nox.Session) -> None:
 @nox.session(python=PYTHON_VERSIONS)
 def pytest(session: nox.Session) -> None:
     uv_sync(session)
-    session.run("uv", "run", "--active", "pytest", "--tb=short")
+    session.run("uv", "run", "--active", "make", "test")
 
 
 @nox.session
