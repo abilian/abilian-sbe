@@ -69,7 +69,7 @@ class BaseEventView:
         return url_for(self.obj)
 
 
-class EventView(BaseEventView, views.ObjectView):
+class EventView(BaseEventView, views.ObjectView[Event, EventForm]):
     methods = ["GET", "HEAD"]
     Form = EventForm
     template = "calendar/event.html"
@@ -86,7 +86,7 @@ views.default_view(blueprint, Event, "event_id", kw_func=default_view_kw)(event_
 route("/<int:event_id>/")(event_view)
 
 
-class EventCreateView(BaseEventView, views.ObjectCreate):
+class EventCreateView(BaseEventView, views.ObjectCreate[Event, EventForm]):
     POST_BUTTON = ButtonAction(
         "form", "create", btn_class="primary", title=_l("Post this event")
     )
@@ -109,7 +109,7 @@ event_create_view = EventCreateView.as_view("new_event", view_endpoint=".event")
 route("/new_event/")(event_create_view)
 
 
-class EventEditView(BaseEventView, views.ObjectEdit):
+class EventEditView(BaseEventView, views.ObjectEdit[Event, EventForm]):
     POST_BUTTON = ButtonAction(
         "form", "create", btn_class="primary", title=_l("Post this event")
     )

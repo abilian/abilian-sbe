@@ -102,7 +102,7 @@ class BaseCommentView:
         return self.entity
 
 
-class CommentEditView(BaseCommentView, ObjectEdit):
+class CommentEditView(BaseCommentView, ObjectEdit[Comment, CommentForm]):
     _message_success = _l("Comment edited")
 
     def has_capability(self, comments) -> bool:
@@ -132,7 +132,7 @@ edit_view = CommentEditView.as_view("edit")
 bp.route("/<int:entity_id>/<int:object_id>/edit")(edit_view)
 
 
-class CommentCreateView(BaseCommentView, ObjectCreate):
+class CommentCreateView(BaseCommentView, ObjectCreate[Comment, CommentForm]):
     """"""
 
     _message_success = _l("Comment added")
@@ -165,7 +165,7 @@ create_view = CommentCreateView.as_view("create")
 bp.route("/<int:entity_id>/create")(create_view)
 
 
-class CommentDeleteView(BaseCommentView, ObjectDelete):
+class CommentDeleteView(BaseCommentView, ObjectDelete[Comment, CommentForm]):
     _message_success = _l("Comment deleted")
 
     def has_capability(self, comments) -> bool:

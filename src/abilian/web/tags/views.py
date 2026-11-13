@@ -38,7 +38,7 @@ class BaseTagView:
         self.extension = current_app.extensions["tags"]
 
 
-class TagEdit(BaseTagView, ObjectEdit):
+class TagEdit(BaseTagView, ObjectEdit[Tag, TagForm]):
     _message_success = _l("Tag edited")
 
 
@@ -46,7 +46,7 @@ edit_view = TagEdit.as_view("edit")
 bp.route("/manage/<int:object_id>/edit")(edit_view)
 
 
-class TagCreate(BaseTagView, ObjectCreate):
+class TagCreate(BaseTagView, ObjectCreate[Tag, TagForm]):
     _message_success = _l("Tag created")
 
 
@@ -54,7 +54,7 @@ create_view = TagCreate.as_view("create")
 bp.route("/manage/new")(create_view)
 
 
-class TagDelete(BaseTagView, ObjectDelete):
+class TagDelete(BaseTagView, ObjectDelete[Tag, TagForm]):
     _message_success = _l("Tag deleted")
 
 
@@ -86,7 +86,7 @@ class BaseEntityTagView(BaseTagView):
         return self.view_url()
 
 
-class EntityTagList(BaseEntityTagView, BaseObjectView, JSONView):
+class EntityTagList(BaseEntityTagView, BaseObjectView[Tag], JSONView):
     def get(self, *args, **kwargs):
         return JSONView.get(self, *args, **kwargs)
 
@@ -98,7 +98,7 @@ class EntityTagList(BaseEntityTagView, BaseObjectView, JSONView):
 entity_bp.route("/<int:object_id>/list")(EntityTagList.as_view("list"))
 
 
-class EntityTagManage(BaseEntityTagView, ObjectEdit):
+class EntityTagManage(BaseEntityTagView, ObjectEdit[Tag, TagForm]):
     methods = ["POST"]
 
     # operation: add or remove

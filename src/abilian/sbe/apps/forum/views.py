@@ -29,7 +29,7 @@ from abilian.web.action import ButtonAction, Endpoint
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import default_view
 
-from .forms import PostEditForm, PostForm, ThreadForm
+from .forms import BasePostForm, PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
 
@@ -226,8 +226,8 @@ def attachments():
 
 
 class BaseThreadView:
-    Model = Thread
-    Form = ThreadForm
+    Model: type[Thread | Post] = Thread
+    Form: type[BasePostForm] = ThreadForm
     pk = "thread_id"
     base_template = "community/_base.html"
 
@@ -251,7 +251,7 @@ class BaseThreadView:
         return url_for(self.obj)
 
 
-class ThreadView(BaseThreadView, views.ObjectView):
+class ThreadView(BaseThreadView, views.ObjectView[Thread, PostForm]):
     methods = ["GET", "HEAD"]
     Form = PostForm
     template = "forum/thread.html"
@@ -279,7 +279,7 @@ route("/<int:thread_id>/attachments")(
 )
 
 
-class ThreadCreate(BaseThreadView, views.ObjectCreate):
+class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
     base_template = "community/_forumbase.html"
     template = "forum/thread_create.html"
     POST_BUTTON = ButtonAction(
@@ -395,7 +395,7 @@ route("/<int:thread_id>/")(
 route("/<int:thread_id>/viewers")(ThreadViewers.as_view("thread_viewers"))
 
 
-class ThreadDelete(BaseThreadView, views.ObjectDelete):
+class ThreadDelete(BaseThreadView, views.ObjectDelete[Thread, ThreadForm]):
     methods = ["POST"]
     _message_success = _('Thread "{title}" deleted.')
 
@@ -406,7 +406,7 @@ class ThreadDelete(BaseThreadView, views.ObjectDelete):
 route("/<int:thread_id>/delete")(ThreadDelete.as_view("thread_delete"))
 
 
-class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
+class ThreadCloseView(BaseThreadView, views.object.BaseObjectView[Thread]):
     """Close / Re-open a thread."""
 
     methods = ["POST"]
@@ -436,7 +436,7 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
 route("/<int:thread_id>/close")(ThreadCloseView.as_view("thread_close"))
 
 
-class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
+class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
     Form = PostEditForm
     Model = Post
     pk = "object_id"

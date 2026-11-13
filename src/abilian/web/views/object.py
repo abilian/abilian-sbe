@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Never
+from typing import Any, ClassVar, Never, Protocol
 
 import sqlalchemy as sa
 import sqlalchemy.exc
@@ -13,6 +13,7 @@ import sqlalchemy.orm
 from flask import current_app, flash, g, redirect, render_template, request, url_for
 from loguru import logger
 from werkzeug.exceptions import BadRequest, NotFound
+from wtforms import Form
 
 from abilian.core.entities import ValidationError
 from abilian.core.extensions import db
@@ -26,20 +27,27 @@ from abilian.web.action import ButtonAction, Endpoint, actions
 from .base import JSONView, View
 
 
-class BaseObjectView(View):
+class ViewedModel(Protocol):
+    """What the object views need of a model: an id, and a query on the class."""
+
+    id: Any
+    query: ClassVar[Any]
+
+
+class BaseObjectView[M: ViewedModel](View):
     """Base class common to all database objects views."""
 
     #: form title
     title: str
 
     #: Model class
-    Model: type
+    Model: type[M]
 
     #: primary key name to look for in url arguments
     pk = "object_id"
 
     #: object instance for this view
-    obj: object
+    obj: M
 
     #: object id
     object_id: int
@@ -113,22 +121,21 @@ class BaseObjectView(View):
         return {}
 
 
-class ObjectView(BaseObjectView):
+class ObjectView[M: ViewedModel, F: Form](BaseObjectView[M]):
     """View objects."""
 
     #: html template
     template = "default/object_view.html"
 
     #: View form class. Form object used to show objects fields
-    Form: type
+    Form: type[F]
 
     #: required permission. Must be an instance of
     #: :class:`abilian.services.security.Permission`
     permission = READ
 
     #: form instance for this view
-    # TODO
-    form: object
+    form: F
 
     def __init__(
         self, Model=None, pk=None, Form=None, template=None, *args, **kwargs
@@ -147,8 +154,8 @@ class ObjectView(BaseObjectView):
         self.form = self.Form(**form_kwargs)
         return args, kwargs
 
-    def get_form_kwargs(self):
-        kw = {"obj": self.obj}
+    def get_form_kwargs(self) -> dict[str, Any]:
+        kw: dict[str, Any] = {"obj": self.obj}
         if issubclass(self.Form, forms.Form) and self.permission:
             kw["permission"] = self.permission
         return kw
@@ -185,7 +192,7 @@ ADD_ANOTHER_BUTTON = ButtonAction(
 )
 
 
-class ObjectEdit(ObjectView):
+class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
     """Edit object."""
 
     template = "default/object_edit.html"
@@ -444,7 +451,7 @@ CHAIN_CREATE_BUTTON = ButtonAction(
 )
 
 
-class ObjectCreate(ObjectEdit):
+class ObjectCreate[M: ViewedModel, F: Form](ObjectEdit[M, F]):
     """Create a new object."""
 
     permission = CREATE
@@ -506,7 +513,7 @@ class ObjectCreate(ObjectEdit):
 DELETE_BUTTON = ButtonAction("form", "delete", title=_l("Delete"))
 
 
-class ObjectDelete(ObjectEdit):
+class ObjectDelete[M: ViewedModel, F: Form](ObjectEdit[M, F]):
     """Delete object.
 
     Supports the DELETE verb.

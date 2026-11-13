@@ -104,7 +104,7 @@ class BaseAttachmentView:
         return self.entity
 
 
-class AttachmentDownload(BaseAttachmentView, BaseObjectView):
+class AttachmentDownload(BaseAttachmentView, BaseObjectView[Attachment]):
     def get(self):
         blob = self.obj.blob
         metadata = blob.meta
@@ -129,7 +129,7 @@ download_view = AttachmentDownload.as_view("download")
 bp.route("/<int:entity_id>/<int:object_id>/download")(download_view)
 
 
-class AttachmentEdit(BaseAttachmentView, ObjectEdit):
+class AttachmentEdit(BaseAttachmentView, ObjectEdit[Attachment, AttachmentForm]):
     capability = "can_write"
     _message_success = _l("Attachment edited")
 
@@ -138,7 +138,9 @@ edit_view = AttachmentEdit.as_view("edit")
 bp.route("/<int:entity_id>/<int:object_id>/edit")(edit_view)
 
 
-class AttachmentCreateView(BaseAttachmentView, ObjectCreate):
+class AttachmentCreateView(
+    BaseAttachmentView, ObjectCreate[Attachment, AttachmentForm]
+):
     capability = "can_create"
     _message_success = _l("Attachment added")
 
@@ -165,7 +167,7 @@ create_view = AttachmentCreateView.as_view("create")
 bp.route("/<int:entity_id>/create")(create_view)
 
 
-class AttachmentDelete(BaseAttachmentView, ObjectDelete):
+class AttachmentDelete(BaseAttachmentView, ObjectDelete[Attachment, AttachmentForm]):
     capability = "can_delete"
 
 
@@ -173,7 +175,7 @@ delete_view = AttachmentDelete.as_view("delete")
 bp.route("/<int:entity_id>/<int:object_id>/delete")(delete_view)
 
 
-class AttachmentEntity(BaseObjectView):
+class AttachmentEntity(BaseObjectView[Attachment]):
     """Redirects to an attachment's entity view."""
 
     Model = Attachment

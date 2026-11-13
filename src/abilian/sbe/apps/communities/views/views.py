@@ -237,7 +237,7 @@ class BaseCommunityView:
         return kwargs
 
 
-class CommunityEdit(BaseCommunityView, views.ObjectEdit):
+class CommunityEdit(BaseCommunityView, views.ObjectEdit[Community, CommunityForm]):
     template = "community/edit.html"
     title = _l("Edit community")
     decorators = (*views.ObjectEdit.decorators, can_manage, tab("settings"))
@@ -279,7 +279,7 @@ add_url(
 )
 
 
-class CommunityCreate(views.ObjectCreate, CommunityEdit):
+class CommunityCreate(views.ObjectCreate[Community, CommunityForm], CommunityEdit):
     title = _l("Create community")
     decorators = (*views.ObjectCreate.decorators, is_site_admin)
     template = views.ObjectCreate.template
@@ -313,7 +313,7 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
 add_url("/new", view_func=CommunityCreate.as_view("new", view_endpoint=".community"))
 
 
-class CommunityDelete(BaseCommunityView, views.ObjectDelete):
+class CommunityDelete(BaseCommunityView, views.ObjectDelete[Community, CommunityForm]):
     get_form_kwargs = views.ObjectDelete.get_form_kwargs
 
 

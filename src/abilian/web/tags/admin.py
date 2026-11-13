@@ -232,7 +232,7 @@ class BaseTagView:
         return self.view_url()
 
 
-class TagEdit(BaseTagView, ObjectEdit):
+class TagEdit(BaseTagView, ObjectEdit[Tag, TagForm]):
     _message_success = _l("Tag edited")
     has_changes = False
     _entities_to_reindex: list[Entity] = []

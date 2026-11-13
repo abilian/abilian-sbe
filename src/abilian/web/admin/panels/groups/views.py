@@ -52,7 +52,7 @@ REMOVE_USER_BUTTON = ButtonAction(
 )
 
 
-class GroupView(GroupBase, views.ObjectView):
+class GroupView(GroupBase, views.ObjectView[Group, GroupAdminForm]):
     template = "admin/group_view.html"
 
     def breadcrumb(self):
@@ -74,7 +74,7 @@ class GroupView(GroupBase, views.ObjectView):
         return kw
 
 
-class GroupEdit(GroupBase, views.ObjectEdit):
+class GroupEdit(GroupBase, views.ObjectEdit[Group, GroupAdminForm]):
     def breadcrumb(self):
         label = render_template_string("<em>{{ g }}</em>", g=self.obj.name)
         return BreadcrumbItem(label=label, url="", description=self.obj.name)
@@ -123,5 +123,5 @@ class GroupEdit(GroupBase, views.ObjectEdit):
         return self.redirect_to_view()
 
 
-class GroupCreate(GroupBase, views.ObjectCreate):
+class GroupCreate(GroupBase, views.ObjectCreate[Group, GroupAdminForm]):
     chain_create_allowed = True

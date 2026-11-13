@@ -100,7 +100,7 @@ def can_edit(user: User) -> bool:
     return (user == current_user) or is_site_admin()
 
 
-class UserProfileEdit(ObjectEdit):
+class UserProfileEdit(ObjectEdit[User, UserProfileForm]):
     Model = User
     Form = UserProfileForm
     pk = "user_id"

@@ -142,7 +142,7 @@ class BasePageView:
         )
 
 
-class PageView(BasePageView, ObjectView):
+class PageView(BasePageView, ObjectView[WikiPage, WikiPageForm]):
     template = "wiki/page.html"
     view_endpoint = ".page"
     decorators = [
@@ -176,7 +176,7 @@ class PageViewers(PageView):
 route("/viewers")(PageViewers.as_view("page_viewers"))
 
 
-class PageEdit(BasePageView, ObjectEdit):
+class PageEdit(BasePageView, ObjectEdit[WikiPage, WikiPageForm]):
     # template = 'wiki/page_edit.html'
     title = _("Edit page")
     last_revision: int = None
@@ -282,7 +282,7 @@ class PageEdit(BasePageView, ObjectEdit):
 route("/edit")(PageEdit.as_view("page_edit", view_endpoint=".page"))
 
 
-class PageCreate(PageEdit, ObjectCreate):
+class PageCreate(PageEdit, ObjectCreate[WikiPage, WikiPageForm]):
     title = _l("Create page")
     _message_success = _l("Wiki page successfully created.")
 
