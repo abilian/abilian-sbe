@@ -153,6 +153,7 @@ dev = [
     "nox>=2026.8.17",
     "pre-commit>=4.6.2",
     "import-linter>=2.15",
+    "zuban>=0.10.2",
 ]
 
 [tool.uv]
