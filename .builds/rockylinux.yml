@@ -12,7 +12,6 @@ packages:
   # Build tools
   - make
   - gcc
-  - npm
   # Libraries
   - libpq-devel
   - mariadb-connector-c-devel
@@ -25,6 +24,8 @@ packages:
 tasks:
   - setup: |
       sudo pip3.12 install -U uv
+      # The default Node 16 is too old for Vite 7 and Tailwind 4.
+      sudo dnf module -y install nodejs:22/common
       cd abilian-sbe
       uv sync -q
       npm install -q
