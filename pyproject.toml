@@ -230,7 +230,7 @@ ignore_missing_imports = true
 # -----------------------------------------------------------------------------
 
 [tool.pyrefly]
-python-version = "3.10.0"
+python-version = "3.13"
 ignore-missing-imports = ["*"]
 # nothing
 
