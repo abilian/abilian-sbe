@@ -65,10 +65,6 @@ class UserPreferencesForm(Form):
 
         im = open_png_or_jpeg(field.data)
 
-        img_type = (im.format or "").lower()
-        if img_type not in ("png", "jpeg"):
-            raise ValidationError(_("Only PNG or JPG image files are accepted"))
-
         # convert to jpeg
         # FIXME: better do this at model level?
         jpeg = BytesIO()
