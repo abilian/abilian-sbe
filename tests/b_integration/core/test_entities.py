@@ -4,16 +4,19 @@
 
 from __future__ import annotations
 
+from collections import Counter
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 from abilian.core.entities import Entity
+from abilian.core.extensions import db
 from abilian.core.models.base import AUDITABLE, NOT_SEARCHABLE, SEARCHABLE, Info
 from abilian.core.models.subjects import User
 
 from .dummy import DummyContact
 
 if TYPE_CHECKING:
+    from flask import Flask
     from sqlalchemy.orm.session import Session
 
 # @fixture
@@ -187,3 +190,14 @@ def test_info_searchable_or_auditable() -> None:
     assert isinstance(info, Info)
     assert info["searchable"]
     assert info["auditable"]
+
+
+def test_foreign_key_names_are_unique(app: Flask) -> None:
+    """MariaDB/MySQL reject a foreign key name already used by another table."""
+    names = Counter(
+        fk.name
+        for table in db.metadata.tables.values()
+        for fk in table.foreign_key_constraints
+        if fk.name
+    )
+    assert [name for name, count in names.items() if count > 1] == []

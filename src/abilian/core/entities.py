@@ -142,9 +142,12 @@ class _EntityInherit:
 
     @declared_attr
     def id(cls) -> Column:
+        # One name per table: MariaDB/MySQL require foreign key names to be
+        # unique in the whole database, not just in their table.
+        fk_name = f"fk_{cls.__tablename__}_entity_id"
         return Column(
             Integer,
-            ForeignKey("entity.id", use_alter=True, name="fk_inherited_entity_id"),
+            ForeignKey("entity.id", use_alter=True, name=fk_name),
             primary_key=True,
             info=SYSTEM | SEARCHABLE,
         )
@@ -194,7 +197,9 @@ class EntityMeta(BaseMeta):
         if d["__module__"] != EntityMeta.__module__ or classname != "Entity":
             if not any(issubclass(b, _EntityInherit) for b in bases):
                 bases = (_EntityInherit, *bases)
-                d["id"] = _EntityInherit.id
+                # The declared_attr itself (not `.id`, which would evaluate it
+                # on the mixin), so that it runs once per mapped class.
+                d["id"] = _EntityInherit.__dict__["id"]
 
             if d.get("entity_type") is None:
                 entity_type_base = d.get("ENTITY_TYPE_BASE")

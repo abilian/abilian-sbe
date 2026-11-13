@@ -106,6 +106,8 @@ sudo mariadb -e "
 "
 ```
 
+To run the tests against MariaDB without installing it, use `make test-mariadb-docker`: it runs the database and the tests in containers (see `tests/docker/`).
+
 On macOS (Homebrew `mariadb`), or to create the `sbe_test` database for `make test-mariadb`:
 
 ```bash

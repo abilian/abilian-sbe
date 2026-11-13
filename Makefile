@@ -1,4 +1,4 @@
-.PHONY: test test-mariadb unit full-test pep8 clean setup
+.PHONY: test test-mariadb test-mariadb-docker unit full-test pep8 clean setup
 
 default: lint-ruff test lint
 all: default
@@ -18,6 +18,13 @@ MARIADB_TEST_URI ?= mysql+pymysql://sbe:sbe@127.0.0.1/sbe_test?charset=utf8mb4
 ## Run tests against MariaDB
 test-mariadb:
 	SQLALCHEMY_DATABASE_URI="$(MARIADB_TEST_URI)" pytest tests
+
+DOCKER_TESTS = docker compose -f tests/docker/compose.yaml
+
+## Run tests against MariaDB, database and tests both in Docker
+test-mariadb-docker:
+	$(DOCKER_TESTS) run --rm --build tests; status=$$?; \
+	$(DOCKER_TESTS) down; exit $$status
 
 test-with-coverage:
 	pytest \

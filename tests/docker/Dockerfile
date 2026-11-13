@@ -1,0 +1,22 @@
+# Test runner image. Build context is the repo root (see compose.yaml).
+FROM python:3.13-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libmagic1 node-less poppler-utils \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:0.13 /uv /usr/local/bin/uv
+
+ENV UV_LINK_MODE=copy \
+    PATH=/app/.venv/bin:$PATH
+WORKDIR /app
+
+# Dependencies first, so editing code doesn't reinstall them.
+COPY pyproject.toml uv.lock README.md ./
+RUN uv sync --frozen --no-group doc --no-install-project
+
+COPY src src
+COPY tests tests
+RUN uv sync --frozen --no-group doc
+
+CMD ["pytest", "tests"]
