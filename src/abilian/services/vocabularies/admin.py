@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from flask import g, redirect, render_template, request
+from werkzeug.exceptions import NotFound
 
 from abilian.core.extensions import db
 from abilian.i18n import _, _l
@@ -214,6 +215,8 @@ class VocabularyPanel(AdminPanel):
         if model_name is not None:
             svc = get_service("vocabularies")
             Model = svc.get_vocabulary(name=model_name, group=group)
+            if Model is None:
+                raise NotFound
             g.breadcrumb.append(
                 BreadcrumbItem(
                     label=Model.Meta.group if group else _("Global"),

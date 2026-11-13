@@ -34,7 +34,7 @@ def _grouped_vocabularies():
     return by_group
 
 
-def get_vocabulary(name: str, group: str = "") -> type[BaseVocabulary] | None:
+def get_vocabulary(name: str, group: str | None = "") -> type[BaseVocabulary] | None:
     name = name.lower()
     vocs = _grouped_vocabularies()
     for voc in vocs.get(group, ()):
@@ -60,7 +60,7 @@ class VocabularyService(Service):
     def grouped_vocabularies(self):
         return _grouped_vocabularies()
 
-    def get_vocabulary(self, name: str, group: str = ""):
+    def get_vocabulary(self, name: str, group: str | None = ""):
         return get_vocabulary(name, group=group)
 
 

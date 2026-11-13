@@ -93,6 +93,8 @@ class BaseVocabulary(db.Model, metaclass=_VocabularyMeta):
     #     return {"order_by": [cls.__table__.c.position.asc()]}
 
     class Meta:
+        # Set by Vocabulary(), which makes the concrete classes.
+        name: str
         label = None
         group = None
 
