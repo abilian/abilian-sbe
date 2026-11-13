@@ -113,7 +113,6 @@ doc = [
 ]
 dev = [
     "abilian-devtools",
-    "mypy",
     # "flask-debugtoolbar",
     # "sqlparse>=0.4.4,<0.5.0",
     # Dev server
@@ -212,20 +211,9 @@ reportPrivateImportUsage = false
 
 # -----------------------------------------------------------------------------
 
-[tool.mypy]
-python_version = "3.10"
-
+[tool.zuban]
+python_version = "3.13"
 ignore_missing_imports = true
-#warn_redundant_casts = true
-#warn_no_return = true
-#warn_return_any = true
-#strict_optional = true
-#warn_unused_ignores = true
-
-# exclude = [
-#     '^file1\.py$',  # TOML literal string (single-quotes, no escaping necessary)
-#     "^file2\\.py$",  # TOML basic string (double-quotes, backslash and other characters need escaping)
-# ]
 
 # -----------------------------------------------------------------------------
 
