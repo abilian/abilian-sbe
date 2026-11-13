@@ -66,3 +66,6 @@ htmlcov
 # Cruft
 /src/abilian/sbe/apps/documents/tests/data/dummy_files/existing-doc/
 /src/abilian/sbe/apps/documents/tests/data/dummy_files/folder 1/
+
+#
+dump.rdb
