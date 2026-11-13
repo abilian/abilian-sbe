@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from flask.testing import FlaskClient
     from sqlalchemy.orm import Session
 
+    from abilian.app import Application
     from abilian.core.sqlalchemy import SQLAlchemy
 
 
@@ -58,7 +59,7 @@ def config() -> Any:
 
 
 @fixture(scope="module")
-def app(config: Any) -> Flask:
+def app(config: Any) -> Application:
     # We currently return a fresh app for each test.
     # Using session-scoped app doesn't currently work.
     # Note: the impact on speed is minimal.
@@ -68,7 +69,7 @@ def app(config: Any) -> Flask:
 
 
 @fixture
-def db(app: Flask, app_context: AppContext) -> Iterator[SQLAlchemy]:
+def db(app: Application, app_context: AppContext) -> Iterator[SQLAlchemy]:
     """Return a fresh db for each test."""
     from abilian.core.extensions import db as _db
 

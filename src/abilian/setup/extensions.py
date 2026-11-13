@@ -38,6 +38,8 @@ from abilian.web.admin import Admin
 if TYPE_CHECKING:
     from flask import Flask
 
+    from abilian.app import Application
+
 defusedxml.defuse_stdlib()
 
 db = extensions.db
@@ -82,7 +84,7 @@ def vite_asset(path: str) -> Markup:
 warnings.simplefilter("ignore", category=sa.exc.SAWarning)
 
 
-def init_extensions(app: Flask) -> None:
+def init_extensions(app: Application) -> None:
     """Initialize flask extensions, helpers and services."""
 
     extensions.redis.init_app(app)

@@ -8,9 +8,9 @@ http://flask.pocoo.org/docs/extensiondev/ )
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
-
 from flask import current_app
+
+from abilian.core.application import as_application
 
 # This one must be imported first
 from .base import Service, ServiceState
@@ -23,10 +23,7 @@ assert Service, ServiceState
 
 
 def get_service(service: str) -> Service:
-    from abilian.app import Application
-
-    app = cast(Application, current_app)
-    return app.service_manager.get_service(service)
+    return as_application(current_app).service_manager.get_service(service)
 
 
 from .activity import ActivityService

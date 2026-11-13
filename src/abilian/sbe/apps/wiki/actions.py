@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
-from flask import Flask, url_for
+from flask import url_for
 from flask_babel import lazy_gettext as _l
 
+from abilian.core.application import as_application
 from abilian.sbe.apps.communities.actions import CommunityEndpoint
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
@@ -115,9 +116,9 @@ _actions = (
 
 
 def register_actions(state: BlueprintSetupState) -> None:
-    if not actions.installed(state.app):
+    app = as_application(state.app)
+    if not actions.installed(app):
         return
 
-    app = cast("Flask", state.app)
     with app.app_context():
         actions.register(*_actions)

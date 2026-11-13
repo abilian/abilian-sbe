@@ -33,6 +33,7 @@ from whoosh.qparser import DisMaxParser
 from whoosh.writing import CLEAR, AsyncWriter
 
 from abilian.core import signals
+from abilian.core.application import as_application
 from abilian.core.dramatiq.singleton import dramatiq
 from abilian.core.entities import Entity, Indexable
 from abilian.core.extensions import db
@@ -66,7 +67,9 @@ def url_for_hit(hit, default="#"):
     try:
         object_type = hit["object_type"]
         object_id = int(hit["id"])
-        return current_app.default_view.url_for(hit, object_type, object_id)
+        return as_application(current_app).default_view.url_for(
+            hit, object_type, object_id
+        )
     except KeyError:
         return default
     except Exception:

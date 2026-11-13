@@ -13,6 +13,7 @@ from flask import current_app
 from flask_login import current_user
 from werkzeug.exceptions import BadRequest, Forbidden
 
+from abilian.core.application import as_application
 from abilian.core.entities import Entity
 from abilian.core.models.comment import Comment, is_commentable
 from abilian.core.util import utc_dt
@@ -42,7 +43,7 @@ def _default_comment_view(obj, obj_type, obj_id, **kwargs):
 
 @bp.record_once
 def register_default_view(state: BlueprintSetupState) -> None:
-    state.app.default_view.register(Comment, _default_comment_view)
+    as_application(state.app).default_view.register(Comment, _default_comment_view)
 
 
 COMMENT_BUTTON = ButtonAction("form", "edit", btn_class="primary", title=_l("Post"))

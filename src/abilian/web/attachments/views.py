@@ -12,6 +12,7 @@ from flask import current_app, send_file
 from werkzeug.exceptions import BadRequest, Forbidden
 from werkzeug.utils import redirect
 
+from abilian.core.application import as_application
 from abilian.core.entities import Entity
 from abilian.core.models.attachment import Attachment, supports_attachments
 from abilian.i18n import _, _l
@@ -37,7 +38,9 @@ def _default_attachment_view(obj, obj_type, obj_id, **kwargs):
 
 @bp.record_once
 def register_default_view(state: BlueprintSetupState) -> None:
-    state.app.default_view.register(Attachment, _default_attachment_view)
+    as_application(state.app).default_view.register(
+        Attachment, _default_attachment_view
+    )
 
 
 UPLOAD_BUTTON = ButtonAction("form", "edit", btn_class="primary", title=_l("Send"))

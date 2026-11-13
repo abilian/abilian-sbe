@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 from flask import Blueprint, url_for
 from whoosh.searching import Hit
 
+from abilian.core.application import as_application
 from abilian.core.extensions import db
 
 if TYPE_CHECKING:
@@ -102,7 +103,6 @@ class default_view:
         kw_func: Any | None = None,
     ) -> None:
         self.app_or_blueprint = app_or_blueprint
-        self.is_bp = isinstance(app_or_blueprint, Blueprint)
         self.entity = entity
         self.id_attr = id_attr
         self.endpoint = endpoint
@@ -113,7 +113,7 @@ class default_view:
 
         if endpoint is None:
             endpoint = view.__name__
-            if self.is_bp:
+            if isinstance(self.app_or_blueprint, Blueprint):
                 endpoint = f".{endpoint}"
 
         if endpoint[0] == ".":
@@ -130,13 +130,16 @@ class default_view:
                 kw = self.kw_func(kw, obj, obj_type, obj_id, **kwargs)
             return url_for(endpoint, **kw)
 
-        if self.is_bp:
+        target = self.app_or_blueprint
+        if isinstance(target, Blueprint):
 
-            @self.app_or_blueprint.record_once
+            @target.record_once
             def set_default_view(state: BlueprintSetupState) -> None:
-                state.app.default_view.register(self.entity, default_url)
+                as_application(state.app).default_view.register(
+                    self.entity, default_url
+                )
 
         else:
-            self.app_or_blueprint.default_view.register(self.entity, default_url)
+            target.default_view.register(self.entity, default_url)
 
         return view

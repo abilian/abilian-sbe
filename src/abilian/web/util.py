@@ -14,6 +14,8 @@ from flask import current_app, url_for as flask_url_for
 from flask.helpers import send_from_directory
 from werkzeug.routing import BuildError
 
+from abilian.core.application import as_application
+
 
 def url_for(obj: Any, **kw: Any) -> str:
     """Polymorphic variant of Flask's `url_for` function.
@@ -25,7 +27,7 @@ def url_for(obj: Any, **kw: Any) -> str:
         return flask_url_for(obj, **kw)
 
     try:
-        return current_app.default_view.url_for(obj, **kw)
+        return as_application(current_app).default_view.url_for(obj, **kw)
     except KeyError:
         if hasattr(obj, "_url"):
             return obj._url

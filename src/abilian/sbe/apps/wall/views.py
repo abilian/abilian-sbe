@@ -13,6 +13,7 @@ from flask import current_app, g, render_template
 from flask_babel import format_date
 from sqlalchemy.orm import joinedload
 
+from abilian.core.application import as_application
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
 from abilian.sbe.apps.documents.models import Document, icon_for
 from abilian.sbe.apps.forum.models import Thread
@@ -100,7 +101,7 @@ def get_attachments_from_forum(community):
     attachments = []
     for post in posts_with_attachments:
         for att in post.attachments:
-            url = current_app.default_view.url_for(att)
+            url = as_application(current_app).default_view.url_for(att)
             attachment = Attachment(
                 url,
                 att.name,

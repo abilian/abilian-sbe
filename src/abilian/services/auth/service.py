@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 
-from flask import Flask, current_app, g, redirect, request, url_for
+from flask import current_app, g, redirect, request, url_for
 from flask_babel import lazy_gettext as _l
 from flask_login import current_user, login_user, user_logged_in, user_logged_out
 from loguru import logger
@@ -141,7 +141,7 @@ class AuthService(Service):
     AppStateClass = AuthServiceState
     login_url_prefix: str
 
-    def init_app(self, app: Flask) -> None:
+    def init_app(self, app: Application) -> None:
         login_manager.init_app(app)
         login_manager.login_view = "login.login_form"
 

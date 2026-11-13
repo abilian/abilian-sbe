@@ -24,6 +24,7 @@ import abilian.core.util
 import abilian.i18n
 from abilian.config import default_config
 from abilian.core import extensions, signals
+from abilian.core.application import as_application
 from abilian.core.plugin_manager import PluginManager
 from abilian.core.service_manager import ServiceManager
 from abilian.lib.scanner import scan_package
@@ -109,7 +110,7 @@ def stamp_static_version(endpoint: str, values: dict[str, Any]) -> None:
     if not filename or "v" in values:
         return
 
-    app = current_app
+    app = as_application(current_app)
     directory = app.static_directories.get(endpoint)
     if directory is None:
         if endpoint != "static" or not app.static_folder:

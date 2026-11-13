@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 from flask import g, url_for as url_for_orig
 from flask_login import current_user
 
+from abilian.core.application import as_application
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.services.security import MANAGE, WRITE, Permission, is_site_admin
@@ -344,8 +345,9 @@ _actions = (
 
 
 def register_actions(state: BlueprintSetupState) -> None:
-    if not actions.installed(state.app):
+    app = as_application(state.app)
+    if not actions.installed(app):
         return
 
-    with state.app.app_context():
+    with app.app_context():
         actions.register(*_actions)
