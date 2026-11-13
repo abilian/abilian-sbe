@@ -177,9 +177,9 @@ python_files = ["test_*.py", "tests.py", "test.py", "*_tests.py"]
 DEP002 = [
     # Used by Flask
     "python-dotenv",
-    # Used by webassets
-    # Used implicitly by SQLA
+    # Database drivers: SQLAlchemy loads them from the database URL
     'pymysql',
+    'psycopg2-binary',
     # Web
     'gunicorn',
 ]
