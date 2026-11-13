@@ -180,7 +180,7 @@ class Live(views.JSONView):
             q = ""
         svc = get_service("indexing")
         url_for_hit = svc.app_state.url_for_hit
-        search_kwargs = {"facet_by_type": 5}
+        search_kwargs = {"facet_by_type": True}
         results = svc.search(q, **search_kwargs)
         datasets = {}
 
