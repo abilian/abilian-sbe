@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import nox
 
-PYTHON_VERSIONS = ["3.11", "3.12", "3.13", "3.14", "3.15"]
+PYTHON_VERSIONS = ["3.13"]  # keep in sync with requires-python
 DB_URIS = [
     "sqlite:///test.db",
     # TODO: Postgres & MariaDB
