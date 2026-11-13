@@ -95,7 +95,7 @@ class Attachment(Entity):
     #: file. Stored in a :class:`Blob`
     blob = relationship(Blob, cascade="all, delete", foreign_keys=[blob_id])
 
-    description = Column(UnicodeText(), nullable=False, default="", server_default="")
+    description = Column(UnicodeText(), nullable=False, default="")
 
     query_class = AttachmentQuery
 

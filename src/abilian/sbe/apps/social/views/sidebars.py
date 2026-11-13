@@ -15,6 +15,7 @@ from flask_login import current_user
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community, Membership
+from abilian.services.security import is_site_admin
 
 from .social import social
 
@@ -38,7 +39,7 @@ class Sidebars:
     def my_communities(self) -> list[Community]:
         query = Community.query
         query = query.order_by(Community.last_active_at.desc())
-        if not current_user.has_role("admin"):
+        if not is_site_admin():
             # Filter with permissions
             query = query.join(Membership).filter(Membership.user == current_user)
         return query.limit(10).all()

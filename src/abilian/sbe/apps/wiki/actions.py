@@ -6,12 +6,9 @@ from typing import TYPE_CHECKING, Any, cast
 
 from flask import Flask, url_for
 from flask_babel import lazy_gettext as _l
-from flask_login import current_user
 
 from abilian.sbe.apps.communities.actions import CommunityEndpoint
-from abilian.sbe.apps.communities.security import is_manager
-from abilian.services import get_service
-from abilian.services.security import ADMIN, SecurityService
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 if TYPE_CHECKING:
@@ -34,11 +31,6 @@ class WikiPageAction(Action):
         return url_for(self.endpoint.name, **kw)
 
 
-def is_admin(context):
-    security = cast("SecurityService", get_service("security"))
-    return security.has_role(current_user, ADMIN, object=context.get("object"))
-
-
 class WikiPageModalAction(ModalActionMixin, WikiPageAction):
     pass
 
@@ -53,7 +45,7 @@ _actions = (
         "page_viewers",
         _l("Readers list"),
         icon="user",
-        condition=lambda ctx: is_manager(context=ctx),
+        condition=lambda ctx: can_manage(ctx["object"].community),
         endpoint=".page_viewers",
     ),
     WikiPageAction(
@@ -61,7 +53,7 @@ _actions = (
         "view",
         _l("View"),
         endpoint=".page",
-        icon="eye-open",
+        icon="eye",
     ),
     WikiPageAction(
         "wiki:page",
@@ -89,7 +81,7 @@ _actions = (
         "changes",
         _l("Changes"),
         endpoint=".page_changes",
-        icon="time",
+        icon="clock-o",
     ),
     WikiPageModalAction(
         "wiki:page",
@@ -117,7 +109,7 @@ _actions = (
         "help",
         _l("Syntax help"),
         endpoint=".wiki_help",
-        icon="info-sign",
+        icon="info-circle",
     ),
 )
 

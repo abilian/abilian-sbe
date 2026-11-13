@@ -5,43 +5,46 @@
 {% from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
-  <div class="col-md-12">
-    {%- block forumsidebar %}
-
-      <div class="forum-menu-container">
-        <div class="forum-menu" role="group" style="width:100%;">
-          <span style="color:gray;">{{ _("Showing :") }}</span>
-          {%- set global_actions = actions.for_category('forum:global') %}
-          {{ forum_menu(global_actions) }}
-        </div>
+  <div class="w-full">
+    <div class="mb-6">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-gray-500 text-sm">{{ _("Showing :") }}</span>
+        {%- set global_actions = actions.for_category('forum:global') %}
+        {{ forum_menu(global_actions) }}
       </div>
-
-    {%- endblock %}
+    </div>
 
     {% for month, posts in grouped_posts %}
-      <br>
-      <h2>{{ month }}</h2>
-      <table border="0" class="attachment-table">
-        <tr>
-          <th style="width:33%;">
-            {{ _("Topic") }}
-          </th>
-          <th style="width: 8.9%;text-align:center;">
-            {{ _("Owner") }}
-          </th>
-          <th style="float:left;position: relative;left: 5px;">
-            {{ _("Document") }}
-          </th>
-          <th>
-            {{ _("Size") }}
-          </th>
-        </tr>
-        {% for post in posts %}
-          {{ m_postattachments(post) }}
-        {% endfor %}
-      </table>
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">{{ month }}</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b-2 border-gray-200">
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-1/3">
+                  {{ _("Topic") }}
+                </th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
+                  {{ _("Owner") }}
+                </th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {{ _("Document") }}
+                </th>
+                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
+                  {{ _("Size") }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for post in posts %}
+                {{ m_postattachments(post) }}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
     {% else %}
-      <p>{{ _("No attachment has been posted to this community yet") }}</p>
+      <p class="text-gray-500 py-8 text-center">{{ _("No attachment has been posted to this community yet") }}</p>
     {% endfor %}
   </div>
 {% endblock %}

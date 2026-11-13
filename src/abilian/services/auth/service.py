@@ -16,7 +16,7 @@ from abilian.core.models.subjects import User
 from abilian.core.signals import user_loaded
 from abilian.core.util import unwrap
 from abilian.services import Service, ServiceState, get_service
-from abilian.web.action import DynamicIcon, actions
+from abilian.web.action import DynamicIcon, Endpoint, actions
 from abilian.web.nav import NavGroup, NavItem
 
 from .models import LoginSession
@@ -52,6 +52,23 @@ def _user_photo_icon_args(icon: DynamicIcon, url_args: dict) -> dict[str, Any]:
     return images.user_url_args(current_user, max(icon.width, icon.height))[1]
 
 
+def is_admin(context: dict[str, bool]) -> bool:
+    from abilian.services.security import is_site_admin  # lazy: circular import
+
+    if "admin" not in current_app.extensions:
+        return False
+    return is_authenticated(context) and is_site_admin()
+
+
+def _admin_endpoint(context: dict[str, bool]) -> Endpoint:
+    """The admin landing page, which is whichever panel registered first.
+
+    Resolved per request rather than at import: the endpoint depends on which
+    panels the app configured, and one process can serve several apps.
+    """
+    return current_app.extensions["admin"].nav_root.endpoint
+
+
 user_menu = NavGroup(
     "user",
     "authenticated",
@@ -59,16 +76,29 @@ user_menu = NavGroup(
     icon=DynamicIcon(
         endpoint=_user_photo_endpoint,
         css="avatar",
-        size=20,
+        # Matches `nav .avatar` in vite/src/components/navbar.css; the value
+        # also picks the resolution the photo is fetched at.
+        size=36,
         url_args=_user_photo_icon_args,
     ),
     condition=is_authenticated,
     items=(
+        # The admin section used to be a second dropdown of its own in the top
+        # bar, holding nothing but the panel list the admin pages already show
+        # in their own sidebar. One entry here reaches the same place.
+        NavItem(
+            "user",
+            "admin",
+            title=_l("Admin"),
+            icon="wrench",
+            endpoint=_admin_endpoint,
+            condition=is_admin,
+        ),
         NavItem(
             "user",
             "logout",
             title=_l("Logout"),
-            icon="log-out",
+            icon="sign-out",
             url=lambda context: url_for("login.logout"),
             divider=True,
         ),
@@ -80,7 +110,7 @@ _ACTIONS = (
         "user",
         "login",
         title=_l("Login"),
-        icon="log-in",
+        icon="sign-in",
         url=lambda context: url_for("login.login_form"),
         condition=is_anonymous,
     ),
@@ -161,24 +191,13 @@ class AuthService(Service):
         # `g.logged_user` is the actual user. In the future for example we may allow
         # a manager to see site as another user (impersonate), or propose a "see as
         # anonymous" function
-        from abilian.services import security_service
 
         g.user = g.logged_user = user
-        is_anonymous = user is None or user.is_anonymous
-        g.is_manager = (
-            user
-            and not is_anonymous
-            and (
-                security_service.has_role(user, "admin")
-                or security_service.has_role(user, "manager")
-            )
-        )
 
     def user_logged_out(self, app: Application, user: User) -> None:
         if hasattr(g, "user"):
             del g.user
             del g.logged_user
-            del g.is_manager
 
     def redirect_to_login(self, next_url=True) -> Response:
         kw = {}

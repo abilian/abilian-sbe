@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING, Any
 import bleach
 import dateutil.parser
 import flask_babel as babel
-from babel.dates import DateTimePattern, format_timedelta, parse_pattern
+from babel.dates import format_timedelta
 from deprecated import deprecated
 from jinja2 import Environment, pass_eval_context
 from markupsafe import Markup, escape
@@ -195,49 +195,6 @@ def date_fmt(value, format="EE, d MMMM y"):
     return babel.format_date(local_dt(value), format)
 
 
-def babel2datepicker(pattern: DateTimePattern) -> str:
-    """Convert date format from babel (http://babel.pocoo.org/docs/dates/#date-
-    fields)) to a format understood by bootstrap-datepicker."""
-    if not isinstance(pattern, DateTimePattern):
-        pattern = parse_pattern(pattern)
-
-    map_fmt = {
-        # days
-        "d": "dd",
-        "dd": "dd",
-        "EEE": "D",
-        "EEEE": "DD",
-        "EEEEE": "D",  # narrow name => short name
-        # months
-        "M": "mm",
-        "MM": "mm",
-        "MMM": "M",
-        "MMMM": "MM",
-        # years
-        "y": "yyyy",
-        "yy": "yyyy",
-        "yyy": "yyyy",
-        "yyyy": "yyyy",
-        # time picker format
-        # hours
-        "h": "%I",
-        "hh": "%I",
-        "H": "%H",
-        "HH": "%H",
-        # minutes,
-        "m": "%M",
-        "mm": "%M",
-        # seconds
-        "s": "%S",
-        "ss": "%S",
-        # am/pm
-        "a": "%p",
-    }
-
-    return pattern.format % map_fmt
-
-
-# Doesn't work yet. TZ issues.
 def to_timestamp(dt):
     utc_datetime = dt.astimezone(utc)
     return timegm(utc_datetime.timetuple()) + utc_datetime.microsecond / 1e6
@@ -280,7 +237,6 @@ def init_filters(env: Environment) -> None:
     env.filters["datetimeparse"] = datetimeparse
     env.filters["age"] = age
     env.filters["date"] = date_fmt
-    env.filters["babel2datepicker"] = babel2datepicker
     env.filters["to_timestamp"] = to_timestamp
     env.filters["url_for"] = obj_to_url
     env.filters["abbrev"] = abbrev

@@ -1,0 +1,12 @@
+/* What is left of the Bootstrap-plugin compatibility layer.
+ *
+ * The dropdown, modal, collapse, tab and alert rules that were here are gone
+ * with the shim that drove them: dropdowns live in ui.css, modals are native
+ * <dialog> (modals.css), and nothing in the app ever used collapse, tabs or
+ * dismissible alerts -- the markup those rules matched does not exist.
+ */
+
+/* Hides an Alpine component until Alpine has evaluated its directives. */
+[x-cloak] {
+  @apply hidden;
+}

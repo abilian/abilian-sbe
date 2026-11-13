@@ -26,7 +26,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, foreign, relationship, remote
 from sqlalchemy.orm.session import Session
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.types import Integer, Text, UnicodeText
+from sqlalchemy.types import Integer, Text, Unicode, UnicodeText
 from toolz import first
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
@@ -97,7 +97,7 @@ class CmisObject(InheritSecurity, Entity):
         ("community.slug", ("community_slug",)),
     )
 
-    _title = Column("title", UnicodeText, nullable=False, default="")
+    _title = Column("title", Unicode(255), nullable=False, default="")
     description = Column(
         UnicodeText,
         nullable=False,
@@ -454,7 +454,7 @@ class BaseContent(CmisObject):
     )
 
     @property
-    def content(self) -> bytes:
+    def content(self) -> bytes | None:
         return self.content_blob.value
 
     @content.setter

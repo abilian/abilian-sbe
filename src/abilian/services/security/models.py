@@ -164,28 +164,6 @@ DELETE = Permission("delete")
 
 class RoleAssignment(Model):
     __tablename__ = "roleassignment"
-    __table_args__ = (
-        #
-        CheckConstraint(
-            "(CAST(anonymous AS INTEGER) = 1)"
-            " OR "
-            "((CAST(anonymous AS INTEGER) = 0)"
-            " AND "
-            " ((user_id IS NOT NULL AND group_id IS NULL)"
-            "  OR "
-            "  (user_id IS NULL AND group_id IS NOT NULL)))",
-            name="roleassignment_ck_user_xor_group",
-        ),
-        #
-        UniqueConstraint(
-            "anonymous",
-            "user_id",
-            "group_id",
-            "role",
-            "object_id",
-            name="assignment_mapped_role_unique",
-        ),
-    )
 
     id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
     role = Column(RoleType, index=True, nullable=False)
@@ -204,6 +182,30 @@ class RoleAssignment(Model):
 
     object_id = Column(Integer, ForeignKey(Entity.id, ondelete="CASCADE"), index=True)
     object = relationship(Entity, lazy="select")
+
+    __table_args__ = (
+        CheckConstraint(
+            sql.or_(
+                sql.cast(anonymous, Integer) == 1,
+                sql.and_(
+                    sql.cast(anonymous, Integer) == 0,
+                    sql.or_(
+                        sql.and_(user_id.isnot(None), group_id.is_(None)),
+                        sql.and_(user_id.is_(None), group_id.isnot(None)),
+                    ),
+                ),
+            ),
+            name="roleassignment_ck_user_xor_group",
+        ),
+        UniqueConstraint(
+            "anonymous",
+            "user_id",
+            "group_id",
+            "role",
+            "object_id",
+            name="assignment_mapped_role_unique",
+        ),
+    )
 
 
 # On postgres the UniqueConstraint will not be effective because at least 1
@@ -382,30 +384,6 @@ class SecurityAudit(db.Model):
     UNSET_INHERIT = "UNSET_INHERIT"
 
     __tablename__ = "securityaudit"
-    __table_args__ = (
-        # constraint: either a inherit/no_inherit op on an object AND no user no group
-        #             either a grant/revoke on a user XOR a group.
-        CheckConstraint(
-            f"(op IN ('{SET_INHERIT}', '{UNSET_INHERIT}') "
-            " AND object_id IS NOT NULL"
-            " AND user_id IS NULL "
-            " AND group_id IS NULL "
-            " AND (CAST(anonymous AS INTEGER) = 0)"
-            ")"
-            " OR "
-            f"(op NOT IN ('{SET_INHERIT}', '{UNSET_INHERIT}')"
-            " AND "
-            " (((CAST(anonymous AS INTEGER) = 1) "
-            "   AND user_id IS NULL AND group_id IS NULL)"
-            "  OR "
-            "  ((CAST(anonymous AS INTEGER) = 0) "
-            "   AND ((user_id IS NOT NULL AND group_id IS NULL)"
-            "  OR "
-            "  (user_id IS NULL AND group_id IS NOT NULL)))"
-            "))",
-            name="securityaudit_ck_user_xor_group",
-        ),
-    )
 
     id = Column(Integer, primary_key=True)
     happened_at = Column(DateTime, default=datetime.utcnow, index=True)
@@ -428,6 +406,40 @@ class SecurityAudit(db.Model):
     object_id = Column(Integer)
     object_type = Column(String(1000))
     object_name = Column(UnicodeText)
+
+    __table_args__ = (
+        # constraint: either a inherit/no_inherit op on an object AND no user no group
+        #             either a grant/revoke on a user XOR a group.
+        CheckConstraint(
+            sql.or_(
+                sql.and_(
+                    op.in_((SET_INHERIT, UNSET_INHERIT)),
+                    object_id.isnot(None),
+                    user_id.is_(None),
+                    group_id.is_(None),
+                    sql.cast(anonymous, Integer) == 0,
+                ),
+                sql.and_(
+                    op.notin_((SET_INHERIT, UNSET_INHERIT)),
+                    sql.or_(
+                        sql.and_(
+                            sql.cast(anonymous, Integer) == 1,
+                            user_id.is_(None),
+                            group_id.is_(None),
+                        ),
+                        sql.and_(
+                            sql.cast(anonymous, Integer) == 0,
+                            sql.or_(
+                                sql.and_(user_id.isnot(None), group_id.is_(None)),
+                                sql.and_(user_id.is_(None), group_id.isnot(None)),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
+            name="securityaudit_ck_user_xor_group",
+        ),
+    )
 
     # query: BaseQuery
 

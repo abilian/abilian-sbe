@@ -33,25 +33,7 @@ PUBLIC_ENDPOINTS = [
 ]
 
 ENDPOINTS_TO_IGNORE = {
-    "login.logout",
-    "notifications.debug_social",
-    "communities.community_default_image",
-    "communities.list_json2",
-    "images.user_default",
-    "preferences.user",
-    "search.live",
-    "search.search_main",
-    # Fixe later
-    "social.groups",
-    "social.groups_json",
-    "social.groups_new",
-    "social.home",
-    "social.users",
-    "social.users_dt_json",
-    "social.users_json",
-    "users.json_list",
-    "preferences.index",
-    "preferences.sbe_notifications",
+    "login.logout",  # would end the session the sweep runs in
 }
 
 

@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from PIL import Image
 from wtforms import Field, Form, validators
 
 from abilian.i18n import _, _n
@@ -19,6 +20,11 @@ from abilian.services import get_service
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from werkzeug.datastructures import FileStorage
+
+IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg")
+IMAGE_FORMATS = ("PNG", "JPEG")
 
 __all__ = (
     "VALIDATORS",
@@ -31,6 +37,7 @@ __all__ = (
     "macaddress",
     "noneof",
     "numberrange",
+    "open_png_or_jpeg",
     "optional",
     "regexp",
     "renderempty",
@@ -279,6 +286,30 @@ def siret_validator() -> Callable:
 
 # These are the canonical names that should be used.
 equalto = EqualTo
+
+
+def open_png_or_jpeg(data: FileStorage) -> Image.Image:
+    """Decode an uploaded PNG or JPEG image, or raise a validation error.
+
+    The format is read from the decoded image itself: the filename is checked
+    too, but only because it is what the user sees.
+    """
+    not_accepted = _("Only PNG or JPG image files are accepted")
+    if not data.filename or not data.filename.lower().endswith(IMAGE_EXTENSIONS):
+        raise validators.ValidationError(not_accepted)
+
+    try:
+        image = Image.open(data)
+        image.load()
+    except Exception as e:
+        raise validators.ValidationError(_("Could not decode image file")) from e
+    if image.format not in IMAGE_FORMATS:
+        raise validators.ValidationError(not_accepted)
+
+    data.seek(0)
+    return image
+
+
 length = Length
 numberrange = NumberRange
 optional = Optional

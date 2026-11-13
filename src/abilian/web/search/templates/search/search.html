@@ -6,28 +6,25 @@
 {% block main %}
 
 {# Search bar on top #}
-
-<div class="ab-search-input row">
-  <div class="col-sm-8 col-sm-offset-2">
+<div class="mb-8">
+  <div class="max-w-2xl mx-auto">
     <form role="search" method="GET" action="{{ url_for('search.search_main') }}">
-      <div class="input-group">
-        <input type="search" name="q" class="search-query form-control" value="{{ q }}"
+      <div class="flex">
+        <input type="search" name="q"
+               class="flex-1 px-4 py-3 border border-r-0 border-gray-300 rounded-l-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+               value="{{ q }}"
                placeholder="{{ _('Search') }}" autocomplete="off"
                autofocus="autofocus" />
-        <span class="input-group-btn">
-          <button class="btn btn-default" type="submit">
-            <span class="glyphicon glyphicon-search"></span>
-          </button>
-        </span>
+        <button class="px-4 py-3 text-gray-600 bg-gray-100 border border-gray-300 rounded-r-lg hover:bg-gray-200" type="submit">
+          <i class="fa fa-search"></i>
+        </button>
       </div>
     </form>
 
-    <div class="clearfix visible-xs-block"></div>
-
     {%- if not results %}
-      <p class="lead">{{ _("Your query didn't match any results.") }}</p>
+      <p class="mt-4 text-lg text-gray-600">{{ _("Your query didn't match any results.") }}</p>
     {%- else %}
-      <p class="ab-search-results-count">
+      <p class="mt-4 text-sm text-gray-500">
         {{ _('%(count)d items found', count=results_count) }}
       </p>
     {%- endif -%}
@@ -35,17 +32,20 @@
 </div>
 
 
-<div class="row">
-  <div class="col-sm-3">
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+  <div class="md:col-span-3">
     {%- if by_object_type %}
       {% call m_box_menu(title=_('Filter by type'), omit_body=True) %}
-        <div class="list-group">
+        <div class="divide-y divide-gray-200">
           {%- for name, count, link, is_active in by_object_type %}
-            <a class="list-group-item{% if is_active %} active{%- endif %}"
-               href="{{ link }}">{{ name }}
-              {%- if count %}
-              <span class="badge">{{ count|roughsize }}</span>
-              {%- endif %}
+            <a class="block px-4 py-3 text-sm hover:bg-gray-50 {% if is_active %}bg-blue-50 text-blue-700 font-medium{% else %}text-gray-700{% endif %}"
+               href="{{ link }}">
+              <span class="flex items-center justify-between">
+                <span>{{ name }}</span>
+                {%- if count %}
+                  <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">{{ count|roughsize }}</span>
+                {%- endif %}
+              </span>
             </a>
           {%- endfor %}
         </div>
@@ -53,35 +53,40 @@
     {%- endif %}
   </div>
 
-  <div class="col-sm-9">
+  <div class="md:col-span-9">
     {% if results %}
-      <div class="ab-search-results">
+      <div class="space-y-6">
       {%- for hit in results %}
-        <div class="ab-search-result">
-          {%- if (filtered_by_type|length) != 1 %}
-            <span class="label label-info">{{ friendly_fqcn(hit['object_type']) }}</span> &nbsp;
-          {%- endif %}
-          <a href="{{ url_for_hit(hit)|safe }}"><span class="title">{{ hit.highlights('name')|safe or hit['name']}}</span></a>
+        <div class="ab-search-result p-4 bg-white border border-gray-200 rounded-lg hover:shadow-sm">
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            {%- if (filtered_by_type|length) != 1 %}
+              <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded">{{ friendly_fqcn(hit['object_type']) }}</span>
+            {%- endif %}
+            <a href="{{ url_for_hit(hit)|safe }}" class="text-lg font-medium text-blue-600 hover:text-blue-800">
+              {{ hit.highlights('name')|safe or hit['name']}}
+            </a>
+          </div>
+
           {%- if hit['tag_ids'] %}
-            <div class="tags">
+            <div class="mb-2">
               {{ m_tags_from_hit(hit) }}
             </div>
           {%- endif  %}
 
           {%- if 'description' in hit %}
-            <div class="snippet text-muted">{{ hit.highlights('description')|safe }}</div>
+            <div class="text-sm text-gray-500 mb-2">{{ hit.highlights('description')|safe }}</div>
           {%- endif %}
 
           {%- if 'creator' in hit %}
           {%- set author_type, author_id = hit['creator'].split(':') %}
           {%- set author_href = url_for('social.' + author_type, **{(author_type + '_id'): author_id}) %}
-            <div class="metadata">
+            <div class="text-xs text-gray-400">
               <i>{{ _('by') }}
-                <a href="{{ author_href }}">{{hit['creator_name'] }}</a>
+                <a href="{{ author_href }}" class="text-blue-600 hover:text-blue-800">{{hit['creator_name'] }}</a>
                 &ndash;
                 {{ _('Last modification: %(date)s',
                      date=hit['updated_at'] | age(date_threshold='day')) }}
-              </i><br />
+              </i>
             </div>
           {%- endif %}
         </div>
@@ -89,31 +94,46 @@
       </div>
 
       {%- if pagecount > 1 %}
-        <ul class="pagination">
+        <nav class="mt-8 flex justify-center" aria-label="Pagination">
+          <ul class="inline-flex items-center -space-x-px">
+            {%- if next_pages_numbered and next_pages_numbered[0][0] > 1 %}
+              <li>
+                <a href="{{ first_page }}"
+                   class="px-3 py-2 ml-0 leading-tight text-gray-500 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-100">
+                  <i class="fa fa-step-backward"></i>
+                </a>
+              </li>
+              <li>
+                <span class="px-3 py-2 leading-tight text-gray-300 bg-white border border-gray-300">…</span>
+              </li>
+            {%- endif %}
 
-          {%- if next_pages_numbered and next_pages_numbered[0][0] > 1 %}
-            <li><a href="{{ first_page }}">
-              <i class="glyphicon glyphicon-step-backward"></i>
-            </a></li>
-            <li class="disabled"><span>…</span></li>
-          {%- endif %}
+            {%- for page_number, page_url in next_pages_numbered %}
+              {%- set is_current = (page_number == results.pagenum) %}
+              <li>
+                {%- if is_current %}
+                  <span class="px-3 py-2 leading-tight text-blue-600 bg-blue-50 border border-gray-300 font-medium">{{ page_number }}</span>
+                {%- else %}
+                  <a href="{{ page_url }}" class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100">
+                    {{ page_number }}
+                  </a>
+                {%- endif %}
+              </li>
+            {%- endfor %}
 
-          {%- for page_number, page_url in next_pages_numbered %}
-            {%- set is_current = (page_number == results.pagenum) %}
-            <li{% if is_current %} class="active"{%- endif %}>
-            {%- if not is_current %}<a href="{{ page_url }}">{%- endif %}
-            <span>{{ page_number }}</span>
-            {%- if not is_current %}</a>{%- endif %}
-          {%- endfor %}
-
-          {%- if next_pages_numbered and next_pages_numbered[-1][0] < pagecount %}
-          <li class="disabled"><span>…</span></li>
-          <li><a href="{{ last_page }}">
-            <i class="glyphicon glyphicon-step-forward"></i>
-          </a></li>
-          {%- endif %}
-
-        </ul>
+            {%- if next_pages_numbered and next_pages_numbered[-1][0] < pagecount %}
+              <li>
+                <span class="px-3 py-2 leading-tight text-gray-300 bg-white border border-gray-300">…</span>
+              </li>
+              <li>
+                <a href="{{ last_page }}"
+                   class="px-3 py-2 leading-tight text-gray-500 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-100">
+                  <i class="fa fa-step-forward"></i>
+                </a>
+              </li>
+            {%- endif %}
+          </ul>
+        </nav>
       {%- endif %}
     {%- endif %}
   </div>

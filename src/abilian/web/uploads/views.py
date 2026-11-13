@@ -60,7 +60,7 @@ class NewUploadView(BaseUploadsView, JSONView):
             msg = "File is missing."
             raise BadRequest(msg)
 
-        uploaded = form["file"].data[0]
+        uploaded = form["file"].data
         filename = secure_filename(uploaded.filename)
         mimetype = uploaded.mimetype
         self.handle = self.uploads.add_file(
@@ -97,8 +97,8 @@ class UploadView(BaseUploadsView, View):
             as_attachment=True,
             download_name=filename,
             mimetype=content_type,
-            cache_timeout=0,
-            add_etags=False,
+            max_age=0,
+            etag=False,
         )
 
     def delete(self, handle, *args, **kwargs) -> dict:

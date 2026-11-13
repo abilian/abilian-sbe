@@ -1,0 +1,381 @@
+# Copyright (c) 2012-2024, Abilian SAS
+
+"""The widget layer: the plugins the pages actually depend on.
+
+test_front_end.py checks that scripts load and pages raise no errors. That is
+not the same as the widgets working -- a rich-text field can render as a plain
+textarea, and a chart as an empty div, with the console perfectly clean.
+"""
+
+from __future__ import annotations
+
+import json
+import re
+from typing import TYPE_CHECKING
+
+import pytest
+from playwright.sync_api import expect
+
+if TYPE_CHECKING:
+    from conftest import JSErrors
+    from playwright.sync_api import Page
+
+COMMUNITY = "e2e-community"
+
+
+def test_dashboard_charts_render(logged_in: Page, base_url: str) -> None:
+    """uPlot is a Vite entry of its own, loaded by this page and no other.
+
+    The server hands it columnar data in a <script type="application/json">
+    block; nothing else on the site uses that path, and a chart that fails to
+    draw leaves a perfectly clean console and an empty div.
+    """
+    logged_in.goto(f"{base_url}/admin/dashboard", wait_until="networkidle")
+
+    for chart_id in ("chart-users", "chart-connections"):
+        chart = logged_in.locator(f"#{chart_id}")
+        chart.wait_for(state="attached", timeout=15_000)
+        # uPlot draws into a <canvas> and builds a legend beside it.
+        chart.locator("canvas").wait_for(state="attached", timeout=15_000)
+        assert chart.locator(".u-legend .u-series").count() > 0, (
+            f"uPlot drew no legend into #{chart_id}"
+        )
+
+    # The granularity switch is built from the payload, so its buttons prove
+    # the data made it across as well as the library.
+    grains = logged_in.locator("#chart-connections .chart-grains button")
+    assert grains.count() == 3, "expected daily / weekly / monthly buttons"
+
+    # Switching grain reloads the series: daily covers the same span in many
+    # more points than weekly.
+    points = "() => document.getElementById('chart-connections').uplot.data[0].length"
+    weekly = logged_in.evaluate(points)
+    grains.filter(has_text="Daily").click()
+    assert logged_in.evaluate(points) > weekly * 5, "the grain switch changed nothing"
+    assert grains.filter(has_text="Daily").get_attribute("aria-pressed") == "true"
+    assert grains.filter(has_text="Weekly").get_attribute("aria-pressed") == "false"
+
+    canvas = logged_in.locator("#chart-users canvas").first
+    assert canvas.bounding_box()["width"] > 100, "the chart canvas has no width"
+
+
+def test_dashboard_chart_zooms_on_a_drag(logged_in: Page, base_url: str) -> None:
+    """Dragging a range zooms the x axis. This is what replaced nvd3's brush.
+
+    nvd3 could not zoom, so it drew a second miniature chart under each plot to
+    act as a range selector. uPlot zooms in place -- and if that broke, the
+    charts would still render perfectly while eleven years of daily points
+    became unreadable with no way in.
+    """
+    logged_in.goto(f"{base_url}/admin/dashboard", wait_until="networkidle")
+    plot = logged_in.locator("#chart-users .u-over")
+    plot.wait_for(state="visible", timeout=15_000)
+
+    span = "() => { const s = document.getElementById('chart-users').uplot.scales.x; return s.max - s.min; }"
+    before = logged_in.evaluate(span)
+
+    box = plot.bounding_box()
+    middle = box["y"] + box["height"] / 2
+    logged_in.mouse.move(box["x"] + box["width"] * 0.3, middle)
+    logged_in.mouse.down()
+    logged_in.mouse.move(box["x"] + box["width"] * 0.7, middle)
+    logged_in.mouse.up()
+
+    assert logged_in.evaluate(span) < before / 2, "dragging a range did not zoom"
+
+    logged_in.mouse.dblclick(box["x"] + box["width"] / 2, middle)
+    assert logged_in.evaluate(span) == before, "double-click did not reset the zoom"
+
+
+def test_the_editor_replaces_its_field_only_where_there_is_one(
+    logged_in: Page, base_url: str
+) -> None:
+    """400K of editor, so only the pages with the widget may load it."""
+    requested: list[str] = []
+    logged_in.on("request", lambda request: requested.append(request.url))
+
+    logged_in.goto(
+        f"{base_url}/communities/{COMMUNITY}/forum/", wait_until="networkidle"
+    )
+    assert not [url for url in requested if "/editor.js" in url]
+
+    logged_in.goto(
+        f"{base_url}/communities/{COMMUNITY}/forum/new_thread/",
+        wait_until="networkidle",
+    )
+    expect(logged_in.get_by_role("textbox", name="Message")).to_be_visible()
+    expect(logged_in.locator("textarea[data-richtext]")).to_be_hidden()
+    expect(logged_in.get_by_role("toolbar")).to_be_visible()
+    assert [url for url in requested if "/editor.js" in url]
+
+
+def test_page_scripts_set_up_their_widgets(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    """Pages whose own scripts run after the widget layer. Each builds something
+    visible, so these fail when such a script stops running, not just on a throw."""
+    page = logged_in
+    community = f"{base_url}/communities/{COMMUNITY}"
+
+    page.goto(f"{community}/members", wait_until="networkidle")
+    expect(page.locator("#user-select")).to_have_attribute("role", "combobox")
+
+    page.goto(f"{community}/docs/", wait_until="networkidle")
+    page.goto(f"{page.url.rstrip('/')}/permissions", wait_until="networkidle")
+    expect(page.locator("#deactivate_inheritance")).to_be_visible()
+
+    page.goto(f"{base_url}/admin/audit", wait_until="networkidle")
+    expect(page.locator("#audit-filters #user-select")).to_have_attribute(
+        "role", "combobox"
+    )
+
+    page.goto(f"{base_url}/admin/groups", wait_until="networkidle")
+    page.get_by_role("link", name="E2E Group").click()
+    page.wait_for_load_state("networkidle")
+    expect(page.locator("#user-select")).to_have_attribute("role", "combobox")
+
+    js_errors.assert_clean("pages with their own scripts")
+
+
+def test_navbar_renders_the_search_box(logged_in: Page, base_url: str) -> None:
+    """The navbar gates its search box on the search plugin being registered.
+
+    It tested `app.APP_PLUGINS`, an attribute that exists nowhere in the
+    codebase, so the box never rendered on any page.
+    """
+    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+
+    box = logged_in.locator("#search-box")
+    assert box.count() > 0, "the navbar search box did not render"
+    # Two of them: the desktop navbar and the mobile menu.
+    form = logged_in.locator('form[role="search"]').first
+    assert "search" in (form.get_attribute("action") or ""), (
+        "the search box does not submit to the search endpoint"
+    )
+
+
+def test_navbar_search_offers_suggestions(logged_in: Page, base_url: str) -> None:
+    """livesearch.js replaced twitter typeahead driven by Hogan.
+
+    Suggestions themselves need a populated index, which a throwaway instance
+    has no reason to have, so what is asserted here is the wiring. Whether the
+    endpoint behind it answers is test_live_search_endpoint_is_broken, below.
+    """
+    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+
+    box = logged_in.locator("#search-box")
+    assert box.get_attribute("role") == "combobox", "livesearch.js did not attach"
+    assert box.get_attribute("aria-controls") == "search-box-results"
+    assert logged_in.evaluate("typeof window.Hogan") == "undefined", (
+        "Hogan is still being loaded"
+    )
+
+
+def test_search_endpoints_answer(logged_in: Page, base_url: str) -> None:
+    """Both endpoints, over HTTP, from a browser that carries no session.
+
+    They used to 500: `filter_user_communities` read `g.is_manager` bare, and
+    that attribute only exists once flask-login has loaded a user. Nothing
+    called either endpoint -- typeahead bailed out before making the request
+    whenever the index was empty -- so the crash sat there unseen until
+    livesearch.js started calling /search/live directly.
+
+    The unit coverage is tests/c_e2e/web/test_search.py; this is the same thing
+    through the real stack, with Talisman and the real CSP in front of it.
+    """
+    # JSONView content-negotiates, so ask for JSON the way livesearch.js does.
+    live = logged_in.request.get(
+        f"{base_url}/search/live?q=welcome",
+        headers={"Accept": "application/json"},
+    )
+    assert live.ok, f"live search returned HTTP {live.status}"
+    assert "results" in live.json()
+
+    page = logged_in.request.get(f"{base_url}/search?q=welcome")
+    assert page.ok, f"the search page returned HTTP {page.status}"
+
+
+def test_the_live_search_box_reaches_its_endpoint(
+    logged_in: Page, base_url: str
+) -> None:
+    """End to end: typing in the box produces a request the server answers."""
+    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+
+    with logged_in.expect_response("**/search/live?*") as caught:
+        logged_in.fill("#search-box", "welcome")
+    response = caught.value
+
+    assert response.ok, f"the box's own request returned HTTP {response.status}"
+    assert "results" in response.json()
+
+
+SUGGESTIONS = {
+    "results": {
+        "abilian.sbe.apps.documents.models.Document": [
+            {"name": "Quarterly report.pdf", "url": "/doc/1"},
+            # A name is whatever the user called their file. Hogan escaped it;
+            # livesearch.js writes it with textContent instead.
+            {"name": "<script>alert(1)</script>", "url": "/doc/2"},
+        ],
+        "abilian.core.models.subjects.User": [
+            {"name": "Ada Lovelace", "url": "/user/1"},
+        ],
+    }
+}
+
+
+def test_live_search_renders_suggestions(logged_in: Page, base_url: str) -> None:
+    """The dropdown, its grouping, its keyboard handling and its escaping.
+
+    The endpoint is stubbed: it is broken today (above), and even fixed it
+    would return nothing against a throwaway index. What is under test is the
+    widget, and the widget only needs the response shape.
+    """
+    logged_in.route(
+        "**/search/live?*",
+        lambda route: route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(SUGGESTIONS),
+        ),
+    )
+    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.fill("#search-box", "report")
+
+    results = logged_in.locator("#search-box-results")
+    results.wait_for(state="visible", timeout=5_000)
+    assert results.locator(".combobox-hit").count() == 3
+    # One header per object type, labelled by class name until the index knows
+    # a friendlier one.
+    assert results.locator(".combobox-group").count() == 2
+    # text_content, not inner_text: the CSS renders these headers uppercased.
+    assert "Document" in results.locator(".combobox-group").first.text_content()
+
+    # The markup in that second name is text, not markup.
+    assert results.locator("script").count() == 0, "a result name was parsed as HTML"
+    assert "<script>" in results.locator(".combobox-hit").nth(1).text_content()
+
+    # Arrow keys move the selection, Enter follows it.
+    logged_in.press("#search-box", "ArrowDown")
+    assert results.locator(".combobox-hit.is-active").count() == 1
+    logged_in.press("#search-box", "Enter")
+    logged_in.wait_for_url("**/doc/1", timeout=5_000)
+
+
+def test_live_search_closes_on_escape(logged_in: Page, base_url: str) -> None:
+    logged_in.route(
+        "**/search/live?*",
+        lambda route: route.fulfill(
+            status=200,
+            content_type="application/json",
+            body=json.dumps(SUGGESTIONS),
+        ),
+    )
+    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.fill("#search-box", "report")
+
+    results = logged_in.locator("#search-box-results")
+    results.wait_for(state="visible", timeout=5_000)
+    logged_in.press("#search-box", "Escape")
+    results.wait_for(state="hidden", timeout=5_000)
+    assert logged_in.locator("#search-box").get_attribute("aria-expanded") == "false"
+
+
+def test_file_input_widget_initialises(logged_in: Page, base_url: str) -> None:
+    """Every attachment field is one of these; widgets/file.js binds it."""
+    logged_in.goto(
+        f"{base_url}/communities/{COMMUNITY}/forum/new_thread/",
+        wait_until="networkidle",
+    )
+
+    if logged_in.locator(".js-file-button").count() == 0:
+        pytest.skip("no file input on this form")
+
+    assert logged_in.locator('.js-file-button input[type="file"]').count() > 0
+
+
+def test_delete_confirmation_opens(logged_in: Page, base_url: str) -> None:
+    """folder.js builds a confirmation listing the selected items.
+
+    This threw "$.fn.modal is not defined" until bootbox was replaced: it
+    drove Bootstrap's jQuery modal plugin, which went with Bootstrap's JS, so
+    every destructive action silently did nothing.
+    """
+    logged_in.goto(
+        f"{base_url}/communities/{COMMUNITY}/docs/", wait_until="networkidle"
+    )
+
+    checkbox = logged_in.locator('input[name="object-selected"]').first
+    if checkbox.count() == 0:
+        pytest.skip("nothing in the folder to delete")
+    checkbox.check()
+
+    delete_button = logged_in.locator('button[value="delete"]').first
+    if delete_button.count() == 0:
+        pytest.skip("no delete button on the listing")
+    delete_button.click()
+
+    dialog = logged_in.locator("dialog[open]")
+    dialog.wait_for(state="visible", timeout=10_000)
+    assert dialog.locator("ul.folder-items li").count() > 0, (
+        "the confirmation did not list the selected items"
+    )
+
+
+def test_alpine_collapse_plugin_is_registered(logged_in: Page, base_url: str) -> None:
+    """x-collapse is used in four templates, and did nothing for a while.
+
+    @alpinejs/collapse was never installed, so Alpine silently ignored the
+    directive. An unregistered directive is inert rather than noisy, so ask
+    Alpine directly instead of waiting for an error that never comes.
+    """
+    logged_in.goto(
+        f"{base_url}/communities/{COMMUNITY}/docs/", wait_until="networkidle"
+    )
+
+    assert logged_in.evaluate("typeof window.Alpine") != "undefined", "Alpine missing"
+    registered = logged_in.evaluate(
+        "() => !!window.Alpine.directives || "
+        "typeof window.Alpine.directive === 'function'"
+    )
+    assert registered, "Alpine exposes no directive registry"
+    # Build the probe with the DOM API: an x-collapse element Alpine has not
+    # been taught about keeps its inline height untouched.
+    took_effect = logged_in.evaluate("""() => {
+      const host = document.createElement("div");
+      host.setAttribute("x-data", "{ open: false }");
+      const inner = document.createElement("span");
+      inner.setAttribute("x-show", "open");
+      inner.setAttribute("x-collapse", "");
+      host.appendChild(inner);
+      document.body.appendChild(host);
+      window.Alpine.initTree(host);
+      const styled = inner.style.height !== "" || inner.style.display === "none";
+      host.remove();
+      return styled;
+    }""")
+    assert took_effect, "x-collapse had no effect: @alpinejs/collapse is not registered"
+
+
+def test_the_audit_log_jumps_to_the_day_picked(logged_in: Page, base_url: str) -> None:
+    """A native date input, shown and sent as YYYY-MM-DD whatever the locale.
+
+    Picking a day reloads the log at the entries before that day's end.
+    """
+    page = logged_in
+    page.goto(f"{base_url}/admin/audit", wait_until="networkidle")
+    chooser = page.locator("#date-chooser")
+    # The seed ran today, so the newest entries are today's.
+    today = chooser.input_value()
+    assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", today), today
+
+    year, month, day = today.split("-")
+    todays_heading = page.locator("h2", has_text=f"{day}-{month}-{year}")
+
+    chooser.fill("2000-01-01")
+    page.wait_for_url(re.compile(r"before=2000-01-0[12]T"))
+    expect(todays_heading).to_have_count(0)
+
+    page.locator("#date-chooser").fill(today)
+    page.wait_for_url(re.compile(r"before=(?!2000-)"))
+    expect(todays_heading).to_be_visible()

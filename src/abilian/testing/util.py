@@ -89,15 +89,38 @@ def login(user, remember=False, force=False):
 
 def cleanup_db(db: SQLAlchemy) -> None:
     """Drop all the tables, in a way that doesn't raise integrity errors."""
+    if db.engine.name in ("mysql", "mariadb"):
+        _delete_tables(db)
+        db.session.remove()
+        return
 
     # Need to run this sequence twice for some reason
     _delete_tables(db)
     _delete_tables(db)
+    # Commit first: drop_all() runs on another connection and, on PostgreSQL,
+    # would wait forever for the locks held by the session's open transaction.
+    db.session.commit()
     # One more time, just in case ?
     db.drop_all()
 
 
 def _delete_tables(db: SQLAlchemy) -> None:
+    if db.engine.name in ("mysql", "mariadb"):
+        db.session.execute("SET FOREIGN_KEY_CHECKS=0;")
+        for table in reversed(db.metadata.sorted_tables):
+            with contextlib.suppress(DatabaseError):
+                db.session.execute(table.delete())
+        rows = db.session.execute(
+            "SELECT TABLE_NAME FROM information_schema.TABLES "
+            "WHERE TABLE_SCHEMA = DATABASE() AND AUTO_INCREMENT > 1;"
+        ).fetchall()
+        for (tbl_name,) in rows:
+            with contextlib.suppress(DatabaseError):
+                db.session.execute(f"ALTER TABLE `{tbl_name}` AUTO_INCREMENT = 1;")
+        db.session.execute("SET FOREIGN_KEY_CHECKS=1;")
+        db.session.commit()
+        return
+
     for table in reversed(db.metadata.sorted_tables):
         with contextlib.suppress(DatabaseError):
             db.session.execute(table.delete())

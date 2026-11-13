@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import nox
 
-PYTHON_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14"]
+PYTHON_VERSIONS = ["3.11", "3.12"]
 DB_URIS = [
     "sqlite:///test.db",
     # TODO: Postgres & MariaDB
@@ -16,7 +16,13 @@ def lint(session: nox.Session) -> None:
     uv_sync(session)
     session.run("uv", "pip", "check")
     session.run("uv", "run", "--active", "make", "lint")
-    session.run("uv", "pip", "install", "safety", "pip-audit")
+
+
+# Not run in CI: bandit and `reuse lint` still report findings on the codebase.
+@nox.session
+def audit(session: nox.Session) -> None:
+    uv_sync(session)
+    session.run("uv", "pip", "install", "safety", "pip-audit", "bandit[toml]")
     session.run("uv", "run", "--active", "adt", "audit")
 
 

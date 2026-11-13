@@ -5,31 +5,40 @@
 {% block content %}
   {%- call m_box(title="Security audit") %}
 
-    <h2>Recent user sessions</h2>
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Recent user sessions</h2>
 
-    <table class="table table-striped">
-      <thead>
-      <tr>
-        <th>User name</th>
-        <th>Started at</th>
-        <th>Ended at</th>
-        <th>Duration</th>
-        <th>IP Address</th>
-      </tr>
-      </thead>
-      {% for session in sessions %}
+    <div class="overflow-hidden border border-gray-200 rounded-lg">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
         <tr>
-          <td><a href="{{ session.user|url_for }}">{{ session.user.name }}</a>
-          </td>
-          <td>{{ local_dt(session.started_at) | datetimeformat(format='short') }}</td>
-          <td>{%- if session.ended_at %}
-            {{ local_dt(session.ended_at) | datetimeformat(format='short') }}{%- else %}
-            still active{%- endif %}</td>
-          <td>{%- if session.ended_at %}{{ (session.ended_at - session.started_at)|timedeltaformat }}{%- endif %}</td>
-          <td>{{ session.ip_address }} ({{ session.country }})</td>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User name</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Started at</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ended at</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">IP Address</th>
         </tr>
-      {% endfor %}
-    </table>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+        {% for session in sessions %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3">
+              <a href="{{ session.user|url_for }}" class="text-blue-600 hover:text-blue-800">{{ session.user.name }}</a>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-600">{{ local_dt(session.started_at) | datetimeformat(format='short') }}</td>
+            <td class="px-4 py-3 text-sm text-gray-600">
+              {%- if session.ended_at %}
+                {{ local_dt(session.ended_at) | datetimeformat(format='short') }}
+              {%- else %}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">still active</span>
+              {%- endif %}
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-600">{%- if session.ended_at %}{{ (session.ended_at - session.started_at)|timedeltaformat }}{%- endif %}</td>
+            <td class="px-4 py-3 text-sm text-gray-600">{{ session.ip_address }} ({{ session.country }})</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
 
   {% endcall %}
 

@@ -6,13 +6,11 @@ from __future__ import annotations
 
 import contextlib
 from contextlib import AbstractContextManager
-from functools import cache
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from flask_login import login_user, logout_user
 from hyperlink import URL
-from redis import Redis
 from sqlalchemy.exc import DatabaseError
 
 from abilian.services import get_service
@@ -35,7 +33,6 @@ __all__ = (
     "ensure_services_started",
     "login",
     "path_from_url",
-    "redis_available",
     "stop_all_services",
 )
 
@@ -119,17 +116,6 @@ def stop_all_services(app: Application) -> None:
     for service in app.service_manager.list_services():
         if service.running:
             service.stop()
-
-
-@cache
-def redis_available() -> bool:
-    redis_host = "127.0.0.1"
-    try:
-        client = Redis(redis_host, socket_connect_timeout=0.5)
-        client.ping()
-    except Exception:
-        return False
-    return True
 
 
 def class_fqn(cls: type) -> str:

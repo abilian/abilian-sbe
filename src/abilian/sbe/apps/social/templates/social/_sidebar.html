@@ -1,21 +1,27 @@
 {% from "macros/box.html" import m_box, m_box_menu with context %}
 
 {% call m_box_menu() %}
-  <ul class="nav nav-list">
-  <ul class="nav nav-list">
-    <li><a href="{{ url_for("social.home") }}">{{ _("My feed") }}</a></li>
-    <li><a href="{{ url_for(current_user) }}">{{ _("My profile") }}</a></li>
-    <li><a href="{{ url_for("social.users") }}">{{ _("User directory") }}</a></li>
+  <ul class="space-y-1">
+    <li class="px-3 py-2 hover:bg-gray-50 rounded">
+      <a href="{{ url_for("social.home") }}">{{ _("My feed") }}</a>
+    </li>
+    <li class="px-3 py-2 hover:bg-gray-50 rounded">
+      <a href="{{ url_for(current_user) }}">{{ _("My profile") }}</a>
+    </li>
+    <li class="px-3 py-2 hover:bg-gray-50 rounded">
+      <a href="{{ url_for("social.users") }}">{{ _("User directory") }}</a>
+    </li>
   </ul>
 {% endcall %}
 
 
 {% call m_box(_("My communities"), color="orange") %}
-  <ul class="nav nav-list">
+  <ul class="space-y-1">
     {% set communities = g.sidebars.my_communities %}
     {% for community in communities %}
-      <li><a
-          href="{{ url_for("communities.community", community_id=community.slug) }}">{{ community.name }}</a>
+      <li class="px-3 py-2 hover:bg-gray-50 rounded">
+        <a href="{{ url_for("communities.community", community_id=community.slug) }}"
+          >{{ community.name }}</a>
       </li>
     {% endfor %}
   </ul>
@@ -23,15 +29,16 @@
 
 
 {% call m_box(_("Latest visitors"), color="orange") %}
-  <ul class="latest-visitors">
+  <ul class="space-y-2">
     {%- set img_online = url_for('abilian_sbe_static', filename='img/greendot.png') %}
     {%- for user in g.sidebars.latest_visitors %}
-      <li><a href="{{ url_for(user) }}">
-        <img class="avatar" src="{{ user_photo_url(user, size=20) }}" alt=""/>
-        {{ user.name }}
-      </a>
+      <li class="flex items-center gap-2">
+        <a href="{{ url_for(user) }}" class="flex items-center gap-2">
+          <img class="w-5 h-5 rounded-full" src="{{ user_photo_url(user, size=20) }}" alt=""/>
+          <span>{{ user.name }}</span>
+        </a>
         {%- if user.is_online %}
-          <img src="{{ img_online }}" alt=""/>
+          <img src="{{ img_online }}" alt="online" class="w-2 h-2"/>
         {%- endif %}
       </li>
     {%- endfor %}

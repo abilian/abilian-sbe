@@ -6,7 +6,7 @@
   {%- set m_voc_caller = caller %} {# save caller value of this macro for use inside m_box #}
   {%- call m_box(title=voc.Meta.label, href=voc_url) %}
     {%- if items %}
-      <form class="form" method="POST" action="{{ url_for('.vocabularies') }}">
+      <form method="POST" action="{{ url_for('.vocabularies') }}">
         {{ csrf.field() }}
         {%- if voc.Meta.group %}
           <input type="hidden" name="group" value="{{ voc.Meta.group }}" />
@@ -17,37 +17,49 @@
           <input type="hidden" name="return_to" value="{{ edit_return_to }}" />
         {%- endif %}
 
-        <table class="table table-condensed table-striped">
-          <thead>
-            <tr>
-              <th>{{ _('Label') }}</th>
-              <th>{{ _('Default') }}</th>
-              <th>{{ _('Active') }}</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            {%- for item in items %}
+        <div class="overflow-hidden border border-gray-200 rounded-lg">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
               <tr>
-                <td><a href="{{ url_for_voc_edit(item) }}">{{ item.label|safe }}</a></td>
-                <td>{%- if item.default %}{{ icon_checked }}{%- endif %}</td>
-                <td>{%- if item.active %}{{ icon_checked }}{%- endif %}</td>
-                <td>
-                  <button type="submit" name="down" value="{{ item.id }}" class="btn btn-inline{%- if loop.last %} disabled{%- endif %}">
-                    <span class="caret-down"></span>
-                  </button>
-
-                  <button type="submit" name="up" value="{{ item.id }}" class="btn btn-inline{%- if loop.first %} disabled{%- endif %}">
-                    <span class="caret-up"</span>
-                  </button>
-                </td>
+                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Label') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Default') }}</th>
+                <th class="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">{{ _('Active') }}</th>
+                <th class="px-4 py-3 w-24"></th>
               </tr>
-            {%- endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              {%- for item in items %}
+                <tr class="hover:bg-gray-50">
+                  <td class="px-4 py-3">
+                    <a href="{{ url_for_voc_edit(item) }}" class="text-blue-600 hover:text-blue-800">{{ item.label|safe }}</a>
+                  </td>
+                  <td class="px-4 py-3 text-center">{%- if item.default %}{{ icon_checked }}{%- endif %}</td>
+                  <td class="px-4 py-3 text-center">{%- if item.active %}{{ icon_checked }}{%- endif %}</td>
+                  <td class="px-4 py-3">
+                    <div class="flex gap-1">
+                      <button type="submit" name="down" value="{{ item.id }}"
+                              class="p-1 text-gray-400 hover:text-gray-600 rounded {%- if loop.last %} opacity-30 cursor-not-allowed{%- endif %}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                      </button>
+
+                      <button type="submit" name="up" value="{{ item.id }}"
+                              class="p-1 text-gray-400 hover:text-gray-600 rounded {%- if loop.first %} opacity-30 cursor-not-allowed{%- endif %}">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              {%- endfor %}
+            </tbody>
+          </table>
+        </div>
       </form>
     {%- else %}
-      <p class="text-muted text-center h3">
+      <p class="text-gray-500 text-center text-lg py-8">
         <i>{{ _('No item in this vocabulary') }}</i>
       </p>
     {%- endif %}

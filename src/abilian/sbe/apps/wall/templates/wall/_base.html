@@ -5,7 +5,7 @@
 {# TODO: manage actions outside of the template #}
 {% block sidebar %}
   {% call m_box_menu() %}
-    <ul class="nav nav-list">
+    <ul class="flex flex-wrap pl-0 mb-0 list-none flex flex-col pl-0 mb-0 list-none">
       <li><a
           href="{{ url_for(".index", community_id=g.community.slug) }}">{{ _("Activity stream") }}</a>
       </li>

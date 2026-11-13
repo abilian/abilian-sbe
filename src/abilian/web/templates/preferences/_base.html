@@ -1,25 +1,25 @@
 {% extends "base.html" %}
 
-{% from "macros/box.html" import m_box %}
+{% from "macros/box.html" import m_box_menu %}
 
 {% block main %}
-  <div class="col-xs-3">
-    <div class="panel panel-default">
-      <div class="panel-heading">{{ _("Preferences") }}</div>
-
-      <div class="list-group">
-        {%- for entry in menu %}
-          <a class="list-group-item {%- if entry.active %} active{%- endif %}"
-              href="{{ entry.url }}">
-            {{ entry.label }}
-          </a>
-        {%- endfor %}
-      </div>
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="lg:col-span-3">
+      {%- call m_box_menu(_("Preferences")) %}
+        <nav class="menu-nav">
+          {%- for entry in menu %}
+            <a class="menu-nav-item{% if entry.active %} is-active{% endif %}"
+                href="{{ entry.url }}">
+              {{ entry.label }}
+            </a>
+          {%- endfor %}
+        </nav>
+      {%- endcall %}
     </div>
-  </div>
 
-  <div class="col-xs-9">
-    {% block content %}
-    {% endblock %}
+    <div class="lg:col-span-9">
+      {% block content %}
+      {% endblock %}
+    </div>
   </div>
 {% endblock %}

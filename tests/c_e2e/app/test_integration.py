@@ -5,12 +5,11 @@ from __future__ import annotations
 import warnings
 from typing import TYPE_CHECKING, Never, cast
 
-from devtools import debug
-
 from abilian.core.models.subjects import User
-from abilian.services import get_service, security_service
+from abilian.services import get_service
 from abilian.services.security import ADMIN, SecurityService
 from abilian.web import url_for
+from tests.util import ensure_services_started
 
 from .conftest import ENDPOINTS_TO_IGNORE
 
@@ -36,60 +35,68 @@ def all_rules_to_test(app: Application) -> Iterator[Rule]:
     return sorted(rules, key=lambda r: r.endpoint)
 
 
+#: Endpoints that answer a bare GET with something other than the default, and
+#: why that is right.
+EXPECTED_STATUS = {
+    # Need a `q` of two characters or more.
+    "admin.audit_search_users": 400,
+    "communities.list_json2": 400,
+    "social.users_json": 400,
+    # Need the image's `md5`, which is what lets them be cached forever.
+    "communities.community_default_image": 400,
+    "images.user_default": 400,
+    # Redirects to the first panel.
+    "preferences.index": 302,
+}
+
+#: What an anonymous visitor may get: the page, the login page, or a refusal.
+ANONYMOUS_STATUSES = {200, 302, 403}
+
+
 def test_all_simple_endpoints_with_no_login(client, app: Application) -> None:
     warnings.simplefilter("ignore")
-    security_service.start(ignore_state=True)
+    ensure_services_started(["security", "indexing"])
 
+    failures = []
     for rule in all_rules_to_test(app):
-        debug(rule)
-        if rule.endpoint in ENDPOINTS_TO_IGNORE:
+        endpoint = rule.endpoint
+        if endpoint in ENDPOINTS_TO_IGNORE:
             continue
 
-        url = url_for(rule.endpoint)
         try:
-            r = client.get(url)
-            assert r.status_code in {200, 302, 403}
+            status = client.get(url_for(endpoint)).status_code
         except Exception as e:
-            print(f"Failed:{url=}, {rule.endpoint=} : {e}")
-            raise
+            failures.append(f"{rule.rule} ({endpoint}): raised {e!r}")
+            continue
+        if status not in ANONYMOUS_STATUSES and status != EXPECTED_STATUS.get(endpoint):
+            failures.append(f"{rule.rule} ({endpoint}): {status}")
+
+    assert not failures, "\n".join(failures)
 
 
 def test_all_simple_endpoints_as_admin(
     client, app: Application, db: SQLAlchemy
 ) -> None:
-    # FIXME: not done yet
     warnings.simplefilter("ignore")
-    # app.services['security'].start()
-
+    ensure_services_started(["security", "indexing"])
     login_as_admin(client, db)
 
-    errors = []
+    failures = []
     for rule in all_rules_to_test(app):
         endpoint = rule.endpoint
-
         if endpoint in ENDPOINTS_TO_IGNORE:
             continue
 
-        if endpoint.endswith((".list_json2", ".export_xls")):
-            continue
-
-        url = url_for(endpoint)
-
+        expected = EXPECTED_STATUS.get(endpoint, 200)
         try:
-            r = client.get(url)
-        except BaseException:
-            errors.append((endpoint, "500", rule.rule))
+            status = client.get(url_for(endpoint)).status_code
+        except Exception as e:
+            failures.append(f"{rule.rule} ({endpoint}): raised {e!r}")
             continue
+        if status != expected:
+            failures.append(f"{rule.rule} ({endpoint}): {status}, expected {expected}")
 
-        errors.append((endpoint, str(r.status_code), rule.rule))
-        if r.status_code != 200:
-            print(endpoint, r.status_code, rule.rule)
-    # assert r.status_code == 200, "for endpoint = '{}'".format(rule.endpoint)
-
-    print(78 * "-")
-    for t in errors:
-        print(" ".join(t))
-    print()
+    assert not failures, "\n".join(failures)
 
 
 def test_login_as_admin(client, db: SQLAlchemy) -> None:

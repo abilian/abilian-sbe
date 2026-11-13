@@ -1,104 +1,84 @@
-<div class="modal fade" id="modal-upload-files" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="POST" class="b-upload b-upload_multi"
-            action="{{ folder_post_url }}" enctype="multipart/form-data">
+<dialog class="modal" id="modal-upload-files"
+        data-error-upload="{{ _('Error - File not uploaded') }}"
+        data-error-too-large="{{ _('Error: maximum file size exceeded') }}">
+  <div class="modal-dialog relative mx-auto my-8 max-w-lg">
+    <div class="modal-content bg-white rounded-lg shadow-xl">
+      <form method="POST" action="{{ folder_post_url }}" enctype="multipart/form-data">
         {{ csrf.field() }}
 
-        <div class="modal-header">
-          <button class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">{{ _("Upload new files") }}</h4>
+        <div class="modal-header flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 class="modal-title text-lg font-semibold text-gray-900">{{ _("Upload new files") }}</h2>
+          <button type="button" class="text-gray-400 hover:text-gray-500" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body">
-          <div class="multiupload">
-            <div class="btn btn-default btn-small btn-file js-fileapi-wrapper">
-              <span class="glyphicon glyphicon-plus"></span>
-              <span>{{ _('Add files to selection') }}</span>
-              <input name="file" type="file">
-            </div>
-
-            <ul class="list-group js-files b-upload__files">
-
-              <li class="list-group-item js-file-tpl">
-                <div class="media b-thumb" data-id="<%=uid%>"
-                     title="<%-name%> (<%-sizeText%>)">
-                  <div class="pull-left b-thumb__preview">
-                    <div class="media-object b-thumb__preview__pic"
-                         style="width: 40px; height: 40px"></div>
-                  </div>
-
-                  <div class="pull-right">
-                    <div style="display: inline-block; width: 10em;">
-                      <div class="progress" data-fileapi="active.show">
-                        <div class="progress-bar" role="progressbar" data-fileapi="file.progress"
-                             style="width: 100%;"></div>
-                      </div>
-                    </div>
-
-                    <div class="hidden btn btn-default pull-right statusicon">
-                      <span class="glyphicon"></span>
-                    </div>
-
-                    <div class="btn btn-danger b-thumb__del"
-                         data-fileapi="file.remove">
-                      <span class="glyphicon glyphicon-minus"></span>
-                    </div>
-                  </div>
-
-                  <div class="media-body">
-                    <div class="b-thumb__name">
-                      <h4 class="list-group-item-heading"><%-name%></h4>
-                      <span>(<%-sizeText%>)</span>
-                    </div>
-                  </div>
-                </div>
-              </li>
-            </ul>
-
-            <div class="progress" data-fileapi="active.show">
-              <div class="progress-bar" role="progressbar"
-                   style="width: 0;" data-fileapi="progress">
-              </div>
-            </div>
+        <div class="modal-body p-4">
+          <div class="btn-file inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
+            <span class="fa fa-plus mr-2"></span>
+            <span>{{ _('Add files to selection') }}</span>
+            <input name="file" type="file" multiple aria-label="{{ _('Add files to selection') }}" class="absolute inset-0 opacity-0 cursor-pointer">
           </div>
 
-          <div class="checkbox">
-            <label>
-              <input type="checkbox" name="uncompress_files" value="true"/>
-              {{ _('Uncompress ZIP files') }}
+          <template class="js-file-tpl">
+            <li class="border border-gray-200 rounded-lg p-3">
+              <div class="flex items-start gap-x-4">
+                <div class="w-10 h-10 shrink-0 bg-gray-100 rounded overflow-hidden">
+                  <img class="js-file-preview w-full h-full object-cover" alt="" hidden>
+                </div>
+
+                <div class="flex-1 min-w-0">
+                  <h4 class="js-file-name text-sm font-medium text-gray-900 truncate"></h4>
+                  <span class="js-file-size text-xs text-gray-500"></span>
+                  <p class="js-file-error text-sm text-red-600" hidden></p>
+                </div>
+
+                <div class="flex items-center gap-x-2">
+                  <div class="js-file-progress w-24" hidden>
+                    <div class="h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div class="h-full bg-blue-600 rounded-full transition-all" role="progressbar"
+                           style="width: 0%;"></div>
+                    </div>
+                  </div>
+
+                  <span class="js-file-sent fa fa-check text-green-600" hidden></span>
+                  <span class="js-file-failed fa fa-exclamation-triangle text-red-600" hidden></span>
+
+                  <button type="button"
+                          class="js-file-remove inline-flex items-center justify-center w-8 h-8 text-white bg-red-600 rounded-md hover:bg-red-700"
+                          aria-label="{{ _('Remove') }}">
+                    <span class="fa fa-minus"></span>
+                  </button>
+                </div>
+              </div>
+            </li>
+          </template>
+
+          <ul class="js-files mt-4 space-y-2"></ul>
+
+          <div class="js-total-progress mt-4 h-2 bg-gray-200 rounded-full overflow-hidden" hidden>
+            <div class="h-full bg-blue-600 rounded-full transition-all" role="progressbar"
+                 style="width: 0;"></div>
+          </div>
+
+          <div class="mt-4">
+            <label class="flex items-center">
+              <input type="checkbox" name="uncompress_files" value="true"
+                     class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"/>
+              <span class="ml-2 text-sm text-gray-700">{{ _('Uncompress ZIP files') }}</span>
             </label>
           </div>
         </div>
-        <!-- modal-body -->
 
-        <div class="modal-footer">
-          <button data-dismiss="modal"
-                  class="btn btn-default">{{ _("Cancel") }}</button>
-          <div class="js-upload btn btn-success btn-small">
-            <span>{{ _("Upload") }}</span>
-          </div>
+        <div class="modal-footer flex justify-end gap-2 p-4 border-t border-gray-200">
+          <button data-modal-close type="button"
+                  class="btn btn-default">
+            {{ _("Cancel") }}
+          </button>
+          <button type="button" hidden
+                  class="js-upload inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 cursor-pointer">
+            {{ _("Upload") }}
+          </button>
         </div>
       </form>
     </div>
   </div>
-</div>
-
-{%- deferJS %}
-  <script>
-    require(
-        ['Abilian', 'SBEFolderUploadSetup'],
-        function (Abilian, setupFolderUpload) {
-          var messages = {
-            fileUploadError: {{ _('Error - File not uploaded')|tojson }},
-            fileTooLargeError: {{ _('Error: maximum file size exceeded')|tojson }}
-          };
-
-          Abilian.fn.onAppInit(function () {
-            setupFolderUpload('modal-upload-files',
-                {{ folder_post_url|tojson }},
-                messages);
-          });
-        });
-  </script>
-{%- enddeferJS %}
+</dialog>

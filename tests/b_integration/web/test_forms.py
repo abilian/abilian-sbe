@@ -8,6 +8,7 @@ import datetime as dt
 from typing import TYPE_CHECKING
 from unittest import mock
 
+import pytest
 import pytz
 from wtforms import Form
 
@@ -17,8 +18,6 @@ from abilian.web.forms import FormPermissions, fields, filters
 
 if TYPE_CHECKING:
     from abilian.app import Application
-
-NNSP = "\u202f"  # narrow no-break space
 
 
 def user_tz() -> str:
@@ -123,26 +122,27 @@ def test_datetime_field(app: Application) -> None:
     headers = {"Accept-Language": "fr-FR,fr;q=0.8"}
     with app.test_request_context(headers=headers):
         field = fields.DateTimeField(use_naive=False).bind(Form(), "dt")
-        field.process_formdata(["17/06/1789 | 10:42"])
+        field.process_formdata(["1789-06-17", "10:42"])
         # 1789: applied offset for HongKong is equal to LMT+7:37:00,
         # thus we compare with tzinfo=user_tz
         expected_datetime = dt.datetime(1789, 6, 17, 10, 42, tzinfo=USER_TZ)
         assert field.data == expected_datetime
         # UTC stored
         assert field.data.tzinfo is pytz.UTC
-        # displayed in user current timezone
-        assert field._value() == "17/06/1789 10:42"
 
         # non-naive mode: test process_data change TZ to user's TZ
         field.process_data(field.data)
         assert field.data.tzinfo is USER_TZ
         assert field.data == expected_datetime
+        # displayed in user current timezone
+        field.raw_data = None
+        assert field._value() == "1789-06-17 10:42"
 
         field.populate_obj(obj, "dt")
         assert obj.dt == expected_datetime
 
         # test more recent date: offset is GMT+8
-        field.process_formdata(["23/01/2011 | 10:42"])
+        field.process_formdata(["2011-01-23", "10:42"])
         expected_datetime = dt.datetime(2011, 1, 23, 2, 42, tzinfo=pytz.utc)
         assert field.data == expected_datetime
 
@@ -159,7 +159,7 @@ def test_datetime_field_naive(app: Application) -> None:
         # when year < 1900: strptime will raise an Exception use naive dates; by
         # default
         field = fields.DateTimeField().bind(Form(), "dt")
-        field.process_formdata(["17/06/1789 | 10:42"])
+        field.process_formdata(["1789-06-17", "10:42"])
 
         # UTC stored
         assert field.data.tzinfo is pytz.UTC
@@ -171,15 +171,45 @@ def test_datetime_field_naive(app: Application) -> None:
         assert obj.dt == dt.datetime(1789, 6, 17, 10, 42)
 
 
-def test_datetime_field_force_4digit_year(app: Application) -> None:
-    # use 'en': short date pattern is 'M/d/yy'
+@pytest.mark.parametrize("language", ["en", "fr"])
+def test_datetime_field_renders_native_inputs_whatever_the_locale(
+    app: Application, language: str
+) -> None:
+    """The browser sends ISO values and localises the display itself, so the
+    markup must not follow the locale ('en' writes 1/23/11, 'fr' 23/01/2011)."""
     patch_babel(app)
 
-    headers = {"Accept-Language": "en"}
-    with app.test_request_context(headers=headers):
+    with app.test_request_context(headers={"Accept-Language": language}):
         field = fields.DateTimeField().bind(Form(), "dt")
-        field.data = dt.datetime(2011, 1, 23, 10, 42, tzinfo=pytz.utc)
-        assert field._value() == f"1/23/2011, 6:42{NNSP}PM"
+        field.process(None, dt.datetime(2011, 1, 23, 10, 42))
+        html = field()
+
+    assert 'type="date"' in html
+    assert 'value="2011-01-23"' in html
+    assert 'type="time"' in html
+    assert 'value="10:42"' in html
+    assert html.count('name="dt"') == 2
+
+
+def test_datetime_field_keeps_a_suggested_time_without_a_date(
+    app: Application,
+) -> None:
+    """A new event suggests a time and leaves the day blank."""
+    with app.test_request_context():
+        field = fields.DateTimeField(raw_data=["", "09:00"]).bind(Form(), "dt")
+        field.process(None)
+        html = field()
+
+    assert 'type="date"' in html
+    assert 'value=""' in html
+    assert 'value="09:00"' in html
+
+
+def test_datetime_field_rejects_a_missing_date(app: Application) -> None:
+    with app.test_request_context():
+        field = fields.DateTimeField().bind(Form(), "dt")
+        with pytest.raises(ValueError, match="Not a valid datetime value"):
+            field.process_formdata(["", "09:00"])
 
 
 def test_date_field(app: Application) -> None:
@@ -189,17 +219,9 @@ def test_date_field(app: Application) -> None:
     headers = {"Accept-Language": "fr-FR,fr;q=0.8"}
     with app.test_request_context(headers=headers):
         field = fields.DateField().bind(Form(), "dt")
-        field.process_formdata(["17/06/1789"])
+        field.process_formdata(["1789-06-17"])
         assert field.data == dt.date(1789, 6, 17)
-        assert field._value() == "17/06/1789"
 
-
-def test_datefield_force_4digit_year(app: Application) -> None:
-    patch_babel(app)
-
-    # use 'en': short date pattern is 'M/d/yy'
-    headers = {"Accept-Language": "en"}
-    with app.test_request_context(headers=headers):
-        field = fields.DateField().bind(Form(), "dt")
-        field.data = dt.date(2011, 1, 23)
-        assert field._value() == "1/23/2011"
+        field.raw_data = None
+        assert field._value() == "1789-06-17"
+        assert 'type="date"' in field()

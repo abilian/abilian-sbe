@@ -7,11 +7,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 import sqlalchemy as sa
-from pytest import fixture, mark
+from pytest import fixture
 
 from abilian.core.entities import Entity
 from abilian.services import get_service
-from tests.util import redis_available
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -43,7 +42,6 @@ def test_app_state(app: Application, svc: WhooshIndexService) -> None:
     assert IndexedContact.entity_type in state.indexed_fqcn
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_index_only_after_final_commit(
     app: Application, session: Session, svc: WhooshIndexService
 ) -> None:

@@ -10,33 +10,33 @@
 
 {%- block content %}
   {% call m_box_content() %}
-    {#  TODO #}
     <p>
-      <a class="conversation-back-btn" href="{{ url_for('.index', community_id=g.community.slug) }}">
-        <i class="fa fa-arrow-left"></i> {{ _("Back to conversation list") }}</a>
+      <a class="conversation-back-btn inline-flex items-center text-gray-600 hover:text-blue-600"
+         href="{{ url_for('.index', community_id=g.community.slug) }}">
+        <i class="fa fa-arrow-left mr-2"></i> {{ _("Back to conversation list") }}
+      </a>
     </p>
     <br>
 
     <article class="thread">
       {%- set post = thread.posts[0] %}
-      <div class="media post thread-content" style="margin-bottom: -38px;">
-        <div class="media-left">
+      <div class="post thread-content flex flex-wrap items-start gap-x-4 gap-y-3">
+        <div class="flex-shrink-0">
           {% call m_user_link(thread.creator) %}
             {{ m_user_photo(thread.creator, size=40) }}
           {% endcall %}
         </div>
 
-        <div class="media-body" style="line-height:13px;color:#797C7E;">
-          <h2 class="thread-current-title">
+        <div class="flex-1 leading-tight text-gray-600">
+          <h2 class="thread-current-title text-xl font-semibold text-gray-900 mb-2">
             {{ thread.title }}
           </h2>
 
-          <div style="margin-bottom: 10px;">
-            <span style="color:gray;">{{ _("Posted by") }}</span>
-            <span
-                style="font-weight:bold;">{{ m_user_link(thread.creator) }}</span>
-            <span style="float:right;color:gray;"> {{ thread.created_at | age(date_threshold='day') }} </span>
-            {%- if is_closed %} <i class="fa fa-lock fa-big"></i>{%- endif %}
+          <div class="mb-3 text-sm">
+            <span class="text-gray-500">{{ _("Posted by") }}</span>
+            <span class="font-semibold">{{ m_user_link(thread.creator) }}</span>
+            <span class="float-right text-gray-500">{{ thread.created_at | age(date_threshold='day') }}</span>
+            {%- if is_closed %}<i class="fa fa-lock text-gray-400 ml-2"></i>{%- endif %}
             {{ m_post_edit_link(post) }}
           </div>
           <br>
@@ -60,13 +60,11 @@
                 {% call m_user_link(replies[-1].creator) %}
                   {{ m_user_photo(replies[-1].creator, size=22) }}
                 {% endcall %}
-                <span
-                    class="viewers-panel-label">{{ activity_time_format(replies[-1].created_at) }}</span>
+                <span class="viewers-panel-label">{{ activity_time_format(replies[-1].created_at) }}</span>
               </li>
             {% endif %}
             <li>
-              <span
-                  class="text-center viewers-panel-count">{{ thread.posts|length-1 }}</span>
+              <span class="text-center viewers-panel-count">{{ thread.posts|length-1 }}</span>
               <br>
               <span>{{ _('replies') }}</span>
             </li>
@@ -93,17 +91,17 @@
           </ul>
 
           {% set frequent_posters = thread.get_frequent_posters(6) %}
-          {% if is_manager or frequent_posters %}
-            <button onclick="show_panel_info()" class="viewers-panel-button">
-              <span id="panel-direction" class="glyphicon glyphicon-chevron-down" aria-hidden="true"></span>
+          {% if can_manage_community or frequent_posters %}
+            <button type="button" data-viewers-toggle class="viewers-panel-button" aria-label="{{ _('Frequent Posters') }}">
+              <span class="fa fa-chevron-down" aria-hidden="true"></span>
             </button>
           {% endif %}
         </div>
 
-        <div class="viewers-panel-content" style="{% if is_manager %}padding-bottom: 9px;{% endif %}">
+        <div class="viewers-panel-content {% if can_manage_community %}pb-2{% endif %}">
           {% if frequent_posters %}
-            <p>{{ _('Frequent Posters') }}</p>
-            <span>
+            <p class="text-sm font-medium text-gray-700 mb-2">{{ _('Frequent Posters') }}</p>
+            <span class="flex flex-wrap gap-1">
                {% for user in frequent_posters %}
                  {% call m_user_link(user) %}
                    {{ m_user_photo(user, size=32) }}
@@ -111,40 +109,21 @@
                {% endfor %}
             </span>
           {% endif %}
-          {% if frequent_posters and is_manager %}
-            <hr>
+          {% if frequent_posters and can_manage_community %}
+            <hr class="my-3 border-gray-200">
           {% endif %}
-          {% if is_manager %}
+          {% if can_manage_community %}
             {{ show_all_viewers(viewers) }}
           {% endif %}
         </div>
 
-        <script>
-          var opened = false;
-
-          function show_panel_info() {
-            if (!opened) {
-              $(".viewers-panel-posters").fadeOut();
-              $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-up");
-              $(".viewers-panel-content").fadeIn();
-              $(".thread-content").css("margin-bottom", "15px");
-              opened = true;
-            } else {
-              $(".viewers-panel-posters").fadeIn();
-              $("#panel-direction").attr("class", "glyphicon glyphicon-chevron-down");
-              $(".viewers-panel-content").fadeOut();
-              $(".thread-content").css("margin-bottom", "-38px");
-              opened = false;
-            }
-          }
-        </script>
       </div>
 
       {%- if thread.posts|length > 1 %}
-        <hr class="forum-thread-divider">
+        <hr class="forum-thread-divider my-6 border-gray-200">
       {%- endif %}
 
-      <ul class="posts">
+      <ul class="posts space-y-4">
         {%- for post in thread.posts[1:] %}
           <li>
             {{ m_post(post) }}
@@ -154,16 +133,16 @@
 
       {%- if not is_closed %}
         <br>
-        <hr/>
-        <div class="media">
-          <div class="media-left">
+        <hr class="my-6 border-gray-200"/>
+        <div class="flex items-start gap-x-4">
+          <div class="flex-shrink-0">
             {% call m_user_link(current_user) %}
               {{ m_user_photo(current_user, size=40) }}
             {% endcall %}
           </div>
 
-          <div class="media-body">
-            <h3 style="margin-top: 0;">{{ _("Post a comment") }}</h3>
+          <div class="flex-1">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ _("Post a comment") }}</h3>
 
             <form action="." method="POST" enctype="multipart/form-data">
               {{ form.csrf_token }}
@@ -171,15 +150,17 @@
               {{ m_field(form.message, class_="resizeable-vertical", rows=10) }}
               {{ m_field(form.attachments) }}
 
-              {%- if g.community.type == 'participative' or is_manager %}
+              {%- if g.community.type == 'participative' or can_manage_community %}
                 {{ m_field(form.send_by_email) }}
               {%- endif %}
 
-              <div class="form-actions">
-                <button type="submit" class="btn btn-primary" name="__action" value="create">
+              <div class="flex gap-2 pt-4 mt-4 border-t border-gray-200">
+                <button type="submit" name="__action" value="create"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
                   {{ _("Post this comment") }}
                 </button>
-                <button type="submit" class="btn cancel" name="__action" value="cancel">
+                <button type="submit" name="__action" value="cancel"
+                        class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                   {{ _("Cancel") }}
                 </button>
               </div>
@@ -193,8 +174,12 @@
 
 {# macros #}
 {%- macro m_post_edit_link(post) %}
-  {%- if not is_closed and (current_user == post.owner or g.is_manager) %}
-    <a href="{{ url_for('.post_edit', community_id=post.thread.community.slug, thread_id=post.thread.id, object_id=post.id) }}">
+  {#- The rule used to be written out here -- `current_user == post.owner or
+      is_site_admin()` -- and nowhere else, while the view behind the link
+      enforced nothing at all. #}
+  {%- if not is_closed and can_write_post(post) %}
+    <a href="{{ url_for('.post_edit', community_id=post.thread.community.slug, thread_id=post.thread.id, object_id=post.id) }}"
+       class="text-blue-600 underline hover:text-blue-800 text-sm ml-2">
       <i class="fa fa-edit"></i>
       {{ _('Edit') }}
     </a>
@@ -202,19 +187,19 @@
 {%- endmacro %}
 
 {%- macro m_post_content(post) %}
-  <div class="body" style="margin-bottom: -11px;line-height: 18px;">
+  <div class="body prose prose-sm max-w-none mb-[-11px] leading-relaxed">
     {{ post.body_html|safe }}
   </div>
   <br>
   {%- if post.attachments %}
-    <div class="attachments">
-      <ul>
+    <div class="attachments mt-4 p-3 bg-gray-50 rounded-lg">
+      <ul class="space-y-2">
         {%- for attachment in post.attachments %}
           <li>
-            <span class="attachment-item">
-              <img src="{{ attachment.icon }}"/>
-              <a href="{{ url_for(attachment) }}">{{ attachment.name }}</a>
-              ({{ attachment.content_length | filesize }})
+            <span class="attachment-item inline-flex items-center text-sm">
+              <img src="{{ attachment.icon }}" class="w-4 h-4 mr-2"/>
+              <a href="{{ url_for(attachment) }}" class="text-blue-600 hover:text-blue-800">{{ attachment.name }}</a>
+              <span class="text-gray-500 ml-2">({{ attachment.content_length | filesize }})</span>
             </span>
           </li>
         {%- endfor %}
@@ -223,42 +208,42 @@
   {%- endif %}
 
   {%- for entry in post.history %}
-    <div class="history">
+    <div class="history mt-2 text-xs text-gray-500 italic">
       {%- set date = entry.date|datetimeparse|age(date_threshold='day') %}
       {{ _('edited by %(user)s - %(date)s', user=entry.user, date=date) }}
-      {%- if entry.reason %}<q class="reason">{{ entry.reason }}</q>{%- endif %}
+      {%- if entry.reason %}<q class="reason ml-1 not-italic text-gray-600">{{ entry.reason }}</q>{%- endif %}
     </div>
   {%- endfor %}
 {%- endmacro %}
 
 {%- macro m_post(post) %}
-  <div class="post media">
-    <div class="media-left">
+  <div class="post flex items-start gap-x-4">
+    <div class="flex-shrink-0">
       {% call m_user_link(post.creator) %}
         {{ m_user_photo(post.creator, size=40) }}
       {% endcall %}
     </div>
 
-    <div class="media-body" style="line-height:13px;">
+    <div class="flex-1 leading-tight">
       <a id="post_{{ post.id }}"></a>
 
-      <div>
+      <div class="text-sm mb-2">
         {% call m_user_link(post.creator) %}
-          <b>{{ post.creator }}</b>
+          <b class="text-gray-900">{{ post.creator }}</b>
         {% endcall %}
-        <span class="date">{{ post.created_at | age(date_threshold='day') }}</span>
+        <span class="date text-gray-500 ml-2">{{ post.created_at | age(date_threshold='day') }}</span>
         {{ m_post_edit_link(post) }}
       </div>
       <br><br>
       {{ m_post_content(post) }}
     </div>
   </div>
-  <hr>
+  <hr class="my-4 border-gray-200">
 {%- endmacro %}
 
 {%- block sidebar %}
   {%- call m_box_menu() %}
-    <ul class="nav nav-list">
+    <ul class="menu-actions">
       {%- set content_actions = actions.for_category('forum:thread') %}
       {%- set global_actions = actions.for_category('forum:global') %}
 
@@ -267,7 +252,7 @@
       {%- endfor %}
 
       {%- if content_actions and global_actions %}
-        <li class="divider"></li>
+        <li class="menu-divider"></li>
       {%- endif %}
 
       {%- for action in global_actions %}
@@ -279,33 +264,35 @@
 
 
 {%- block modals %}
-  <div class="modal fade" id="modal-delete" role="dialog"
-       data-keyboard="true">
-
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form
-            action="{{ url_for('.thread_delete', thread_id=thread.id, community_id=g.community.slug) }}"
-            method="POST" style="margin-bottom: 0;">
+  <dialog class="modal" id="modal-delete">
+    <div class="modal-dialog relative mx-auto my-8 max-w-lg">
+      <div class="modal-content bg-white rounded-lg shadow-xl">
+        <form action="{{ url_for('.thread_delete', thread_id=thread.id, community_id=g.community.slug) }}"
+              method="POST" class="mb-0">
 
           {{ csrf.field() }}
 
-          <div class="modal-header">
-            <button class="close" data-dismiss="modal">&times;</button>
-            <h3>{{ _("Delete Thread") }}</h3>
+          <div class="modal-header flex items-center justify-between p-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-900">{{ _("Delete Thread") }}</h3>
+            <button type="button" class="text-gray-400 hover:text-gray-500" data-modal-close>&times;</button>
           </div>
 
-          <div class="modal-body">
+          <div class="modal-body p-4 text-gray-700">
             {{ _('Are you sure you want to delete this thread?') }}
           </div>
 
-          <div class="modal-footer">
-            <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+          <div class="modal-footer flex justify-end gap-2 p-4 border-t border-gray-200">
+            <button type="button" data-modal-close
+                    class="btn btn-default">
+              {{ _("Cancel") }}
+            </button>
             <button type="submit" name="__action" value="delete"
-                    class="btn btn-danger">{{ _("Really Delete") }}</button>
+                    class="btn btn-danger">
+              {{ _("Really Delete") }}
+            </button>
           </div>
         </form>
       </div>
     </div>
-  </div>
+  </dialog>
 {%- endblock %}

@@ -28,7 +28,7 @@ class UserPreference(db.Model):
     user_id = Column(ForeignKey(User.id))
 
     #: The key
-    key = Column(String, nullable=False)
+    key = Column(String(255), nullable=False)
 
     #: The value
     value = Column(JSON, nullable=False)

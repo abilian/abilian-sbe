@@ -24,7 +24,14 @@ from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import backref, deferred, relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.types import Boolean, DateTime, Integer, LargeBinary, UnicodeText
+from sqlalchemy.types import (
+    Boolean,
+    DateTime,
+    Integer,
+    LargeBinary,
+    Unicode,
+    UnicodeText,
+)
 
 from abilian.core import sqlalchemy as sa_types
 from abilian.core.util import fqcn
@@ -35,6 +42,7 @@ if TYPE_CHECKING:
     from sqlalchemy.orm.mapper import Mapper
 
 __all__ = (
+    "ROOT_USER_ID",
     "ClearPasswordStrategy",
     "Group",
     "Principal",
@@ -198,7 +206,7 @@ class User(Principal, UserMixin, db.Model):
     # Should we add gender, salutation ?
 
     # System information
-    email = Column(UnicodeText, nullable=False)
+    email = Column(Unicode(255), nullable=False)  # for Mariadb set length of varchar
     can_login = Column(Boolean, nullable=False, default=True)
     password = Column(UnicodeText, default="*", info={"audit_hide_content": True})
 
@@ -343,11 +351,20 @@ class Group(Principal, db.Model):
         )
 
 
+#: The SYSTEM principal. Not a person: it is what actions taken with no acting
+#: user are attributed to. Created by `flask initdb`, not by `create_all`, so
+#: code that looks it up must cope with it being absent.
+ROOT_USER_ID = 0
+
+
 def create_root_user() -> User:
-    user = User.query.get(0)
+    user = User.query.get(ROOT_USER_ID)
     if user is None:
         user = User(
-            id=0, last_name="SYSTEM", email="system@example.com", can_login=False
+            id=ROOT_USER_ID,
+            last_name="SYSTEM",
+            email="system@example.com",
+            can_login=False,
         )
         db.session.add(user)
         db.session.commit()

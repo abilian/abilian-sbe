@@ -4,125 +4,20 @@
 
 from __future__ import annotations
 
-import html
-from typing import TYPE_CHECKING, cast
-
-import sqlalchemy as sa
-import sqlalchemy.orm
 from flask import render_template_string, request
-from flask_babel import format_datetime
 from flask_login import current_user
-from sqlalchemy.sql.expression import asc, desc, func, nullslast, or_
 from werkzeug.datastructures import MultiDict
 
 from abilian.core.models.subjects import User, gen_random_password
-from abilian.i18n import _
 from abilian.services import get_service
 from abilian.services.security.models import ADMIN, Role
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
-from abilian.web.views import base, object as views
-from abilian.web.views.images import user_photo_url
+from abilian.web.views import object as views
 
 from .forms import UserAdminForm, UserCreateForm
 
-if TYPE_CHECKING:
-    from abilian.services.security import SecurityService
-
 MUGSHOT_SIZE = 45
-
-
-class JsonUsersList(base.JSONView):
-    """JSON user list for datatable."""
-
-    def data(self, *args, **kw) -> dict:
-        security = cast("SecurityService", get_service("security"))
-        length = int(kw.get("iDisplayLength", 0))
-        start = int(kw.get("iDisplayStart", 0))
-        sort_col = int(kw.get("iSortCol_0", 1))
-        sort_dir = kw.get("sSortDir_0", "asc")
-        echo = int(kw.get("sEcho", 0))
-        search = kw.get("sSearch", "").replace("%", "").strip().lower()
-
-        end = start + length
-        query = User.query.options(
-            sa.orm.subqueryload("groups"), sa.orm.undefer("photo")
-        ).filter(User.id != 0)
-        total_count = query.count()
-
-        if search:
-            # TODO: gérer les accents
-            filter = or_(
-                func.lower(User.first_name).like(f"%{search}%"),
-                func.lower(User.last_name).like(f"%{search}%"),
-                func.lower(User.email).like(f"%{search}%"),
-            )
-            query = query.filter(filter)
-
-        count = query.count()
-        SORT_COLS = {
-            1: [],  # [User.last_name, User.first_name] will be added anyway
-            2: [func.lower(User.email)],
-            5: [User.last_active],
-        }
-        columns = list(SORT_COLS.get(sort_col, []))
-        columns.extend([func.lower(User.last_name), func.lower(User.first_name)])
-
-        direction = asc if sort_dir == "asc" else desc
-        order_by = list(map(direction, columns))
-
-        # sqlite does not support 'NULLS FIRST|LAST' in ORDER BY clauses
-        engine = query.session.get_bind(User.__mapper__)
-        if engine.name != "sqlite":
-            order_by[0] = nullslast(order_by[0])
-
-        query = query.order_by(*order_by)
-
-        users = query.slice(start, end).all()
-
-        data = []
-        for user in users:
-            # TODO: this should be done on the browser.
-            user_url = url_for(".users_user", user_id=user.id)
-            mugshot = user_photo_url(user, size=MUGSHOT_SIZE)
-            name = html.escape(user.name or "")
-            email = html.escape(user.email or "")
-            roles = [
-                r for r in security.get_roles(user, no_group_roles=True) if r.assignable
-            ]
-            columns = [
-                f'<a href="{user_url}"><img src="{mugshot}" width="{MUGSHOT_SIZE}" height="{MUGSHOT_SIZE}"></a>',
-                f'<a href="{user_url}">{name}</a>',
-                f'<a href="{user_url}"><em>{email}</em></a>',
-                "\u2713" if user.can_login else "",
-                render_template_string(
-                    """{%- for g in groups %}
-                        <span class="badge badge-default">{{ g.name }}</span>
-                    {%- endfor %}""",
-                    groups=sorted(user.groups),
-                ),
-                render_template_string(
-                    """{%- for role in roles %}
-                       <span class="badge badge-default">{{ role }}</span>
-                    {%- endfor %}""",
-                    roles=roles,
-                ),
-            ]
-
-            if user.last_active:
-                last_active = format_datetime(user.last_active)
-            else:
-                last_active = _("Never logged in")
-            columns.append(last_active)
-
-            data.append(columns)
-
-        return {
-            "sEcho": echo,
-            "iTotalRecords": total_count,
-            "iTotalDisplayRecords": count,
-            "aaData": data,
-        }
 
 
 # User edit / create views

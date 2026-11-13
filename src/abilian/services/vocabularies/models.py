@@ -77,7 +77,7 @@ class BaseVocabulary(db.Model, metaclass=_VocabularyMeta):
     query_class = VocabularyQuery
 
     id = Column(sa.Integer(), primary_key=True, autoincrement=True, nullable=False)
-    label = Column(sa.UnicodeText(), nullable=False, unique=True)
+    label = Column(sa.Unicode(255), nullable=False, unique=True)
     active = Column(
         sa.Boolean(), nullable=False, server_default=sa.sql.true(), default=True
     )

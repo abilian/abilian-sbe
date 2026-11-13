@@ -50,7 +50,7 @@
   {%- set content_actions = actions.for_category('documents:content') %}
   {%- if content_actions %}
     {% call m_box_menu() %}
-      <ul class="nav nav-list">
+      <ul class="menu-actions">
         {%- for action in content_actions %}
           <li>{{ action.render() }}</li>
         {%- endfor %}

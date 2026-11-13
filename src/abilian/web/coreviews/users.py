@@ -6,15 +6,19 @@ from __future__ import annotations
 
 import hashlib
 
-from flask import Blueprint, Response, g, make_response, request
+from flask import Response, g, make_response, request
 from sqlalchemy.sql.expression import func, or_
 from werkzeug.exceptions import NotFound
 
 from abilian.core.models.subjects import User
+from abilian.services.security import AUTHENTICATED
 from abilian.web import url_for
+from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.views import JSONModelSearch
 
-blueprint = Blueprint("users", __name__, url_prefix="/users")
+blueprint = AccessControlBlueprint(
+    "users", __name__, url_prefix="/users", allowed_roles=AUTHENTICATED
+)
 
 
 @blueprint.url_value_preprocessor

@@ -1,60 +1,50 @@
 {% if obj %}
   {% set doc = obj %}
 {% endif %}
-<div class="modal fade" id="folder-modal-edit" role="dialog">
-  <div class="modal-dialog">
-    <div class="modal-content">
+<dialog class="modal" id="modal-edit-folder" data-no-enter
+        data-name-check-action="folder-edit" data-renames="{{ folder.id }}">
+  <div class="modal-dialog relative mx-auto my-8 max-w-lg">
+    <div class="modal-content bg-white rounded-lg shadow-xl">
       <form id="modal-editfolder-form" method="POST" action="{{ folder_post_url }}"
             enctype="multipart/form-data" role="form">
         {{ csrf.field() }}
 
-        <div class="modal-header">
-          <button class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">{{ _("Edit folder properties") }}</h4>
+        <div class="modal-header flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 class="modal-title text-lg font-semibold text-gray-900">{{ _("Edit folder properties") }}</h2>
+          <button type="button" class="text-gray-400 hover:text-gray-500" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="control-label" for="inputName">{{ _('Name') }}</label>
-            <input type="text" class="form-control form-folder-title" id="inputName" name="title"
+        <div class="modal-body p-4 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="inputName">{{ _('Name') }}</label>
+            <input type="text"
+                   class="form-folder-title block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                   id="inputName" name="title"
                    data-check-url="{{ url_for('.check_valid_name', community_id=g.community.slug) }}"
                    value="{{ folder.title }}"/>
-            <span class="help-block"></span>
+            <span class="help-block hidden text-sm text-gray-500 mt-1"></span>
           </div>
 
-          <div class="form-group">
-            <label class="control-label"
-                   for="inputDescription">{{ _("Description") }}</label>
-            <textarea rows="5" class="form-control not-resizeable form-folder-description"
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1" for="inputDescription">{{ _("Description") }}</label>
+            <textarea rows="5"
+                      class="form-folder-description block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       id="inputDescription"
                       name="description">{{ folder.description }}</textarea>
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button data-dismiss="modal"
-                  class="btn btn-default">{{ _("Cancel") }}</button>
-          <button class="btn btn-primary" type="submit" name="action"
-                  value="edit">{{ _("Save changes") }}</button>
+        <div class="modal-footer flex justify-end gap-2 p-4 border-t border-gray-200">
+          <button data-modal-close type="button"
+                  class="btn btn-default">
+            {{ _("Cancel") }}
+          </button>
+          <button class="btn btn-primary"
+                  type="submit" name="action" value="edit">
+            {{ _("Save changes") }}
+          </button>
         </div>
       </form>
     </div>
   </div>
-</div>
-
-{%- deferJS %}
-  <script>
-    require(
-        ['Abilian', 'SBEFolderEditSetup'],
-        function (Abilian, setupFolderEdit) {
-          Abilian.fn.onAppInit(function () {
-            setupFolderEdit(
-                $('#modal-edit'),
-                '{{ folder.id }}',
-                'folder-edit');
-
-            $('#modal-edit input[type="text"]').preventEnterKey();
-          });
-        });
-  </script>
-{%- enddeferJS %}
+</dialog>

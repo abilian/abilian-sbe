@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from sqlalchemy import Column, DateTime, Unicode
+from sqlalchemy import Column, DateTime, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import backref, relationship
 
@@ -26,16 +26,16 @@ class Event(Entity):
         backref=backref("events", cascade="all, delete-orphan"),
     )
 
-    title = Column(Unicode, nullable=False, default="", info=SEARCHABLE)
+    title = Column(Unicode(255), nullable=False, default="", info=SEARCHABLE)
 
-    description = Column(Unicode, nullable=False, default="", info=SEARCHABLE)
+    description = Column(UnicodeText, nullable=False, default="", info=SEARCHABLE)
 
-    location = Column(Unicode, nullable=False, default="", info=SEARCHABLE)
+    location = Column(UnicodeText, nullable=False, default="", info=SEARCHABLE)
 
     start = Column(DateTime, nullable=False)
     end = Column(DateTime)
 
-    url = Column(Unicode, nullable=False, default="")
+    url = Column(UnicodeText, nullable=False, default="")
 
 
 @listens_for(Event.title, "set", active_history=True)

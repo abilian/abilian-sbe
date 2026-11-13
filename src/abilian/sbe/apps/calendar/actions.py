@@ -3,11 +3,8 @@
 from __future__ import annotations
 
 from flask import g, url_for
-from flask_login import current_user
 
 from abilian.i18n import _l
-from abilian.services import get_service
-from abilian.services.security import ADMIN
 from abilian.web.action import Action, FAIcon, actions
 
 
@@ -26,11 +23,6 @@ class EventAction(CalendarAction):
         return url_for(
             f".{self.name}", community_id=g.community.slug, event_id=event.id
         )
-
-
-def is_admin(context):
-    security = get_service("security")
-    return security.has_role(current_user, ADMIN, object=context.get("object"))
 
 
 _actions = [

@@ -4,9 +4,12 @@
 
 {% block content %}
   {% call m_box_content(_("All pages")) %}
-    <ul style="list-style: none;">
+    <ul class="space-y-1">
       {% for page in pages %}
-        <li><a href="{{ url_for(".page", community_id=g.community.slug, title=page.title) }}">{{ page.title }}</a></li>
+        <li class="px-3 py-2 hover:bg-gray-50 rounded">
+          <a href="{{ url_for(".page", community_id=g.community.slug, title=page.title) }}"
+             class="text-blue-600 hover:text-blue-800">{{ page.title }}</a>
+        </li>
       {% endfor %}
     </ul>
   {% endcall %}

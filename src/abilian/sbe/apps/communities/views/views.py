@@ -5,7 +5,7 @@ from __future__ import annotations
 import contextlib
 import hashlib
 from collections import Counter
-from functools import wraps
+from functools import cache, wraps
 from io import BytesIO
 from operator import attrgetter
 from pathlib import Path
@@ -29,6 +29,7 @@ from flask import (
 from flask_login import current_user, login_required
 from openpyxl.cell import WriteOnlyCell
 from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
+from werkzeug.local import LocalProxy
 from whoosh.searching import Hit
 
 from abilian.core.extensions import db
@@ -36,26 +37,24 @@ from abilian.core.models.subjects import Group, User, UserQuery
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _l
+from abilian.sbe.apps.communities import security as community_security
 from abilian.sbe.apps.communities.actions import register_actions
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.communities.decorators import can_manage, is_site_admin
 from abilian.sbe.apps.communities.forms import CommunityForm
-from abilian.sbe.apps.communities.models import Community, Membership
-from abilian.sbe.apps.communities.security import (
-    is_manager,
-    require_admin,
-    require_manage,
-)
+from abilian.sbe.apps.communities.models import MANAGER, Community, Membership
 from abilian.sbe.apps.documents.models import Document
+from abilian.services import security as site_security
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
 from abilian.web import csrf, views
 from abilian.web.action import Endpoint
+from abilian.web.listing import Listing, by_name
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import images as image_views
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from datetime import datetime
 
     from flask.blueprints import BlueprintSetupState
     from werkzeug.wrappers.response import Response
@@ -63,12 +62,6 @@ if TYPE_CHECKING:
     from abilian.sbe.apps.communities.presenters import CommunityPresenter
 
 __all__ = ["BaseCommunityView", "communities", "default_view_kw", "route", "tab"]
-
-
-def seconds_since_epoch(dt: datetime | None) -> int:
-    if not dt:
-        return 0
-    return int(dt.timestamp())
 
 
 communities = CommunityBlueprint(
@@ -85,9 +78,23 @@ communities.record_once(register_actions)
 @communities.record_once
 def register_context_processors(state: BlueprintSetupState) -> None:
     @state.app.context_processor
-    def communities_context_processor() -> dict[str, Callable]:
-        # helper to get an url for community image
-        return {"community_image_url": image_url}
+    def communities_context_processor() -> dict[str, Any]:
+        # `can_manage_community` is supplied here rather than by each view that
+        # renders a members table. Left to the views, the wizard's three did not,
+        # and the header and the row disagreed about how many columns there were.
+        #
+        # Lazy, because every template renders with this context, the error pages
+        # included, and those run after the session that holds `g.community` is
+        # gone: asking the security service there turned a 500 into a raw one.
+        # Cached for this render, as each row of a members table reads it.
+        return {
+            "community_image_url": image_url,  # url for a community image
+            "can_manage_community": LocalProxy(cache(_can_manage_current_community)),
+        }
+
+
+def _can_manage_current_community() -> bool:
+    return hasattr(g, "community") and community_security.can_manage(g.community)
 
 
 def tab(tab_name: str) -> Callable:
@@ -158,11 +165,19 @@ def index() -> str:
 
     session["sort_communities_order"] = sort_order
 
-    if not current_user.has_role("admin"):
+    # Not passed to the template: `is_admin` was one name for two different
+    # questions there -- site-wide here, group-scoped in `social/group.html` --
+    # which is how `g.is_manager` went wrong one layer down. The template asks
+    # `is_site_admin()` by name instead.
+    is_admin = site_security.is_site_admin()
+    if not is_admin:
         # Filter with permissions
         query = query.join(Membership).filter(Membership.user == current_user)
 
-    ctx = {"my_communities": query.all(), "sort_order": sort_order}
+    ctx = {
+        "my_communities": query.all(),
+        "sort_order": sort_order,
+    }
     return render_template("community/home.html", **ctx)
 
 
@@ -201,7 +216,7 @@ class BaseCommunityView:
     pk = "community_id"
     Form = CommunityForm
     base_template = "community/_base.html"
-    decorators = [require_admin]
+    decorators = [is_site_admin]
     view_endpoint = ""
 
     def init_object(self, args: tuple[()], kwargs: dict) -> tuple[tuple[()], dict]:
@@ -225,7 +240,7 @@ class BaseCommunityView:
 class CommunityEdit(BaseCommunityView, views.ObjectEdit):
     template = "community/edit.html"
     title = _l("Edit community")
-    decorators = (*views.ObjectEdit.decorators, require_admin, tab("settings"))
+    decorators = (*views.ObjectEdit.decorators, can_manage, tab("settings"))
 
     def breadcrumb(self) -> BreadcrumbItem:
         url = Endpoint("communities.settings", community_id=g.community.slug)
@@ -266,12 +281,30 @@ add_url(
 
 class CommunityCreate(views.ObjectCreate, CommunityEdit):
     title = _l("Create community")
-    decorators = (*views.ObjectCreate.decorators, require_admin)
+    decorators = (*views.ObjectCreate.decorators, is_site_admin)
     template = views.ObjectCreate.template
     base_template = views.ObjectCreate.base_template
 
     def breadcrumb(self) -> BreadcrumbItem:
         return BreadcrumbItem(label=_("Create new community"))
+
+    def commit_success(self) -> None:
+        """Whoever creates a community manages it.
+
+        Recorded as a membership like anyone else's rather than as a special
+        case in a predicate. It used to be the latter -- `is_manager` alone
+        granted to `community.creator` -- so a creator was offered manage
+        actions and then refused by the views behind them, and "who manages
+        this" could not be read off the member list or revoked through it.
+
+        After the commit, not in `after_populate_obj`: adding a membership
+        fires the signal that grants the corresponding role on the community's
+        folder, and inside `no_autoflush` that folder has no id yet.
+        """
+        super().commit_success()
+        if self.obj.creator:
+            self.obj.set_membership(self.obj.creator, MANAGER)
+            db.session.commit()
 
     def message_success(self):
         return _("Community %(name)s created successfully", name=self.obj.name)
@@ -365,13 +398,23 @@ def members() -> str:
             url=Endpoint("communities.members", community_id=g.community.slug),
         )
     )
-    memberships = _members_query().all()
     community_threads_users = [thread.creator for thread in g.community.threads]
     threads_count = Counter(community_threads_users)
+    sort_keys = {
+        "name": lambda row: by_name(row[0]),
+        "posts": lambda row: threads_count[row[0]],
+        "activity": lambda row: (row[3] is not None, row[3]),
+        "role": lambda row: (str(row[2]), by_name(row[0])),
+    }
+    listing, memberships = Listing.from_rows(
+        _members_query().all(),
+        sort_keys,
+        "name",
+        text=lambda row: f"{row[0].name} {row[0].email}",
+    )
 
     ctx = {
-        "seconds_since_epoch": seconds_since_epoch,
-        "is_manager": is_manager(user=current_user),
+        "listing": listing,
         "memberships": memberships,
         "threads_count": threads_count,
     }
@@ -380,7 +423,7 @@ def members() -> str:
 
 @route("/<string:community_id>/members", methods=["POST"])
 @csrf.protect
-@require_manage
+@can_manage
 def members_post() -> Response:
     community = g.community._model
     action = request.form.get("action")

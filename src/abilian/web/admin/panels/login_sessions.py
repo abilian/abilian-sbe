@@ -14,7 +14,7 @@ from .geoip.ip_country_code import ip_to_country_code
 class LoginSessionsPanel(AdminPanel):
     id = "login_sessions"
     label = "Session log"
-    icon = "log-in"
+    icon = "sign-in"
 
     def get(self) -> str:
         sessions = LoginSession.query.order_by(LoginSession.id.desc()).limit(50).all()

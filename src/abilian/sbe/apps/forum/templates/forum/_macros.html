@@ -3,12 +3,12 @@
 {%- macro m_postinfos(post) %}
   {%- set author_href = url_for("social.user", user_id=post.creator.id) %}
   {%- set thread_href = url_for(".thread", thread_id=post.thread_id, community_id=g.community.slug) %}
-  <td>
-    <a href="{{ url_for(post) }}">
-      <small>{{ post.thread.title }}</small>
+  <td class="px-3 py-2">
+    <a href="{{ url_for(post) }}" class="text-blue-600 hover:text-blue-800">
+      <small class="text-sm">{{ post.thread.title }}</small>
     </a>
   </td>
-  <td>
+  <td class="px-3 py-2">
     {% call m_user_link(post.creator) %}
       {{ m_user_photo(post.creator, size=35) }}
     {% endcall %}
@@ -18,18 +18,20 @@
 
 {%- macro m_postattachments(post) %}
   {%- if post.attachments %}
-    <tr>
+    <tr class="border-b border-gray-100">
       {{ m_postinfos(post) }}
-      <td colspan="2">
-        <table border="0" style="width:100%">
+      <td colspan="2" class="px-3 py-2">
+        <table class="w-full">
           {%- for attachment in post.attachments %}
             <tr>
-              <td style="line-height: 1.5;"><img src="{{ attachment.icon }}" style="vertical-align: middle;" alt=""/>
-                <a href="{{ url_for(attachment) }}">{{ attachment.name |truncate(70, False, '...', 0) }}</a>
+              <td class="py-1">
+                <img src="{{ attachment.icon }}" class="inline-block align-middle w-4 h-4 mr-2" alt=""/>
+                <a href="{{ url_for(attachment) }}" class="text-blue-600 hover:text-blue-800">
+                  {{ attachment.name |truncate(70, False, '...', 0) }}
+                </a>
               </td>
-
-              <td style="float:right;">
-                <span style="color:silver;">{{ attachment.content_length|filesize }}</span>
+              <td class="text-right">
+                <span class="text-gray-400 text-sm">{{ attachment.content_length|filesize }}</span>
               </td>
             </tr>
           {%- endfor %}
@@ -42,27 +44,47 @@
 {% macro forum_menu(global_actions) %}
   {%- for action in global_actions %}
     {% if loop.index == 2 %}
-      <div class="dropdown" style="display: inline;">
-        <div
-            style="color:#95989A;"
-            class="{% if action.is_filtered() %}forum-btn-active {% endif %}btn btn-default dropdown-toggle forum-action-dropdown"
-            type="button" id="dropdownMenu2" data-toggle="dropdown" aria-haspopup="true"
-            aria-expanded="true">
-          {{ action.render() }}
-          <span class="glyphicon glyphicon-chevron-down"
-                style="position: relative;top: 3px;"></span>
-        </div>
-        <ul class="dropdown-menu forum-action-dropdownmenu" aria-labelledby="dropdownMenu2">
-          <li><a href='{{ url_for(".index", filter="year", community_id=g.community.slug) }}'>Year</a></li>
-          <li><a href='{{ url_for(".index", filter="month", community_id=g.community.slug) }}'>Month</a></li>
-          <li><a href='{{ url_for(".index", filter="week", community_id=g.community.slug) }}'>Week</a></li>
-          <li><a href='{{ url_for(".index", filter="today", community_id=g.community.slug) }}'>Today</a></li>
+      {# Alpine.js dropdown replacing Bootstrap dropdown #}
+      <div x-data="{ open: false }" class="inline-block relative" @keydown.escape="open = false">
+        <button @click="open = !open"
+                type="button" aria-haspopup="true" :aria-expanded="open"
+                class="inline-flex items-center px-3 py-2 text-sm text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50 {% if action.is_filtered() %}bg-blue-50 text-blue-600 border-blue-300{% endif %}">
+          {%- if action.icon %}{{ action.icon }}&nbsp;{% endif %}{{ action.title }}
+          <svg class="w-4 h-4 ml-2" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
+        <ul x-show="open"
+            @click.away="open = false"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="opacity-0 scale-95"
+            x-transition:enter-end="opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="opacity-100 scale-100"
+            x-transition:leave-end="opacity-0 scale-95"
+            class="absolute z-10 mt-1 w-32 bg-white border border-gray-200 rounded-md shadow-lg py-1">
+          <li>
+            <a href='{{ url_for(".index", filter="year", community_id=g.community.slug) }}'
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Year</a>
+          </li>
+          <li>
+            <a href='{{ url_for(".index", filter="month", community_id=g.community.slug) }}'
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Month</a>
+          </li>
+          <li>
+            <a href='{{ url_for(".index", filter="week", community_id=g.community.slug) }}'
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Week</a>
+          </li>
+          <li>
+            <a href='{{ url_for(".index", filter="today", community_id=g.community.slug) }}'
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Today</a>
+          </li>
         </ul>
       </div>
     {% else %}
-      <div
-          type="button" style="border: none;padding: 10px;display:inline;"
-          {% if action.is_current() %}class="forum-btn-active" {% endif %}{% if loop.last %}class="forum-action-conversation"{% endif %}>{{ action.render() }}</div>
+      <span class="inline-block px-3 py-2 text-sm {% if action.is_current() %}text-blue-600 font-medium{% else %}text-gray-500{% endif %}">
+        {{ action.render() }}
+      </span>
     {% endif %}
   {%- endfor %}
 {% endmacro %}

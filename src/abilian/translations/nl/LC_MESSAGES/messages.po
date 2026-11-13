@@ -358,8 +358,8 @@ msgstr "Volgende"
 #: abilian/web/admin/panels/groups/__init__.py:47
 #: abilian/web/admin/panels/users/__init__.py:45
 #: abilian/web/forms/widgets.py:351 abilian/web/forms/widgets.py:352
-msgid "Showing _START_ to _END_ of _TOTAL_ entries"
-msgstr "Weergegeven: van _START_ tot _END_ van _TOTAL_ posten"
+msgid "Showing {start} to {end} of {total} entries"
+msgstr "Weergegeven: van {start} tot {end} van {total} posten"
 
 #: abilian/web/admin/panels/groups/__init__.py:48
 #: abilian/web/admin/panels/users/__init__.py:46
@@ -669,7 +669,7 @@ msgid ""
 "(%(code)s)"
 msgstr ""
 "SIRET ziet eruit als speciale SIRET maar geografische code lijkt ongeldig"
-" (%s)"
+" (%(code)s)"
 
 #: abilian/web/forms/validators.py:268
 msgid "SIRET number is invalid (length is ok: verify numbers)"

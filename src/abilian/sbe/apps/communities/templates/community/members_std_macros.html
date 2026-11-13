@@ -2,97 +2,83 @@
  should override 'members_macros.html'.
  This allow to override only some of the macros without copying all others.
 #}
+{% from "macros/listing.html" import m_sort_th %}
 {% from "macros/user.html" import m_user_link, m_user_photo %}
 
-{% macro std_thead() %}
-  <tr style="color:silver;">
-    <th class="hide" style="">Last Name</th>
-    <th class="hide">First Name</th>
-    <th style="text-align: left !important;">{{ _('Name') }}</th>
-    <th>{{ _('Posts') }}</th>
-    <th class="hide">{# last activity seconds since epoch #}</th>
-    <th width="20%">{{ _('Last activity in this community') }}</th>
-    <th width="10%">
-      <center>{{ _('Role') }}</center>
-    </th>
-    {% if is_manager %}
-      <th>{{ _('Action') }}</th>
+{% macro std_thead(listing) %}
+  <tr class="text-gray-500 text-xs uppercase tracking-wider">
+    {{ m_sort_th(listing, "name", _('Name'), "px-4 py-3 text-left font-semibold") }}
+    {{ m_sort_th(listing, "posts", _('Posts'), "px-4 py-3 text-center font-semibold") }}
+    {{ m_sort_th(listing, "activity", _('Last activity in this community'), "px-4 py-3 text-left font-semibold w-1/5") }}
+    {{ m_sort_th(listing, "role", _('Role'), "px-4 py-3 text-center font-semibold w-24") }}
+    {% if can_manage_community %}
+      <th class="px-4 py-3 text-center font-semibold w-20">{{ _('Action') }}</th>
     {% endif %}
   </tr>
 {% endmacro %}
 
-{% macro std_table_config() %}
-  {
-  "aoColumns": [
-  { "bVisible": false },
-  { "bVisible": false },
-  { "aDataSort": [0, 1], "asSorting": [ "asc", "desc" ] },
-  { "asSorting": [ "asc", "desc" ]},
-  { "bVisible": false },
-  { "aDataSort": [3], "asSorting": [ "asc", "desc" ] },
-  { "asSorting": [ "asc", "desc" ]}
-  {%- if is_manager %}
-    , { }
-  {% endif %}
-  ],
-  "sPaginationType": "bootstrap",
-  "bFilter":         true,
-  "bLengthChange":   false
-  }
-{% endmacro %}
-
 
 {% macro std_member_row(user, m_id, role, last_activity_date) %}
-  <td class="hide">{{ user.last_name }}</td>
-  <td class="hide">{{ user.first_name }}</td>
-  <td>
-    <div class="media">
-      <div class="media-left">
-        {% call m_user_link(user, css="media-object") %}
+  <td class="px-4 py-4">
+    <div class="flex items-start gap-x-4">
+      <div class="flex-shrink-0">
+        {% call m_user_link(user) %}
           {{ m_user_photo(user, size="32") }}
         {%- endcall %}
       </div>
 
-      <div class="media-body">
+      <div class="flex-1 min-w-0">
         {%- if not user.can_login %}
-          <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i><s>
+          <i class="fa fa-lock text-gray-400" title="{{ _('account disabled') }}"></i>
+          <s class="text-gray-400">
         {%- endif %}
         {{ m_user_link(user) }}
         <br/>
-        (<i>{{ user.email }}</i>)
+        <span class="text-sm text-gray-500 italic">{{ user.email }}</span>
         {%- if not user.can_login %}</s>{%- endif %}
       </div>
     </div>
   </td>
-  <td style="width: 18%;"><span class="badge members-data">{{ threads_count[user] }}</span></td>
-  <td class="hide">{{ seconds_since_epoch(last_activity_date) }}</td>
-  <td><span class="members-data">{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</span></td>
-  <!-- bug jinja : do not use [not is_manager] -->
-  {%- if is_manager == False %}
-    <td>{{ _(role) }}</td>
+  <td class="px-4 py-4 text-center">
+    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+      {{ threads_count[user] }}
+    </span>
+  </td>
+  <td class="px-4 py-4">
+    <span class="text-sm text-gray-600">{{ last_activity_date | age(add_direction=False, date_threshold='day') }}</span>
+  </td>
+  {#- Same truthiness test as std_thead above, and in the same direction: the
+      manager branch adds a cell and the header a column. They have to agree.
+      Written as `is_manager == False` this one disagreed
+      whenever it was undefined -- falsy for the header, but not equal
+      to False -- so the row rendered more cells than there were columns. #}
+  {%- if not can_manage_community %}
+    <td class="px-4 py-4 text-center text-sm text-gray-700">{{ _(role) }}</td>
   {%- else %}
-    <td>
+    <td class="px-4 py-4">
       <form action="{{ url_for('.members_post', community_id=g.community.slug) }}" method="POST"
-            style="display: inline;">
+            class="inline-block">
         {{ csrf.field() }}
         <input type="hidden" name="user" value="{{ user.id }}"/>
         <input type="hidden" name="action" value="set-user-role"/>
-        <select onchange="this.form.submit();" id="role-select" name="role" class="form-control" style="width: auto;">
+        <select data-autosubmit id="role-select" name="role"
+                class="block w-auto px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
           <option value="member" default="default" {%- if role == 'member' %}
                   selected="selected"{%- endif %}>{{ _("Member") }}</option>
           <option value="manager" {%- if role == 'manager' %}selected="selected"{%- endif %}>{{ _("Manager") }}</option>
         </select>
       </form>
     </td>
-    <td>
+    <td class="px-4 py-4 text-center">
       <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
-            method="POST" style="display: inline;">
+            method="POST" class="inline-block">
         {{ csrf.field() }}
         <input type="hidden" name="membership" value="{{ m_id }}">
         <input type="hidden" name="user" value="{{ user.id }}">
-        <button style="position: relative;left: 4.5px;" type="submit" name="action" value="delete"
-                class="btn btn-danger" data-original-title="" title=""><i
-            class="fa fa-times"></i></button>
+        <button type="submit" name="action" value="delete" aria-label="{{ _('Remove') }}"
+                class="p-2 text-white bg-red-600 rounded-md hover:bg-red-700">
+          <i class="fa fa-times"></i>
+        </button>
       </form>
     </td>
   {% endif %}

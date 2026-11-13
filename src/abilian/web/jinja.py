@@ -51,11 +51,6 @@ class JinjaManagerMixin(Flask):
     def jinja_options(self) -> dict[str, Any]:
         options = dict(Flask.jinja_options)
 
-        jinja_exts = options.setdefault("extensions", [])
-        ext = "abilian.core.extensions.jinjaext.DeferredJSExtension"
-        if ext not in jinja_exts:
-            jinja_exts.append(ext)
-
         if "bytecode_cache" not in options:
             cache_dir = Path(self.instance_path, "cache", "jinja")
             if not cache_dir.exists():

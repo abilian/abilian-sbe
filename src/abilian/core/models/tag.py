@@ -74,12 +74,14 @@ class Tag(IdMixin, Model):
     __tablename__ = "tag"
 
     #: namespace
+
+    # for Mariadb set length of varchar:
     ns = sa.Column(
-        sa.UnicodeText(), nullable=False, default="default", server_default="default"
+        sa.Unicode(255), nullable=False, default="default", server_default="default"
     )
 
     #: Label visible to the user
-    label = sa.Column(sa.UnicodeText(), nullable=False)
+    label = sa.Column(sa.Unicode(255), nullable=False)
 
     #: :class:`entities <.Entity>` attached to this tag
     entities = sa.orm.relationship(

@@ -51,12 +51,15 @@ def get_recent_entries(
     # we use communities ids instead of object because as of sqlalchemy 0.8 the
     # 'in_' operator cannot be used with relationships, only foreign keys values
     if not community and not current_user.has_role(ADMIN):
-        community_ids = Membership.query.filter(
-            Membership.user_id == current_user.id
-        ).values(Membership.community_id)
-
-        # convert generator to list: we'll need it twice during query filtering
-        community_ids = list(community_ids)
+        # `.values()` yields Row tuples, so unpack them: binding a Row into the
+        # `in_()` below raises "type 'Row' is not supported".
+        # Listed because we need them twice during query filtering.
+        community_ids = [
+            community_id
+            for (community_id,) in Membership.query.filter(
+                Membership.user_id == current_user.id
+            ).values(Membership.community_id)
+        ]
         if not community_ids:
             return []
 
@@ -86,9 +89,9 @@ def get_recent_entries(
                 deleted = True
                 continue
 
-            case Folder() | Document() if (not has_permission(
+            case Folder() | Document() if not has_permission(
                 current_user, READ, obj=entry.object, inherit=True
-            )):
+            ):
                 continue
 
         entries.append(entry)

@@ -6,16 +6,28 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
+import sqlalchemy.orm
 from flask import render_template
+from sqlalchemy.sql.expression import func
 
-from abilian.i18n import _, _l
+from abilian.core.models.subjects import User
+from abilian.i18n import _l
+from abilian.services import get_security_service
 from abilian.web.admin.panel import AdminPanel
-from abilian.web.util import url_for
+from abilian.web.listing import Listing
 
 from . import views
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+_NAME = (func.lower(User.last_name), func.lower(User.first_name))
+SORT_COLUMNS = {
+    "name": _NAME,
+    "email": (func.lower(User.email), *_NAME),
+    "last_active": (User.last_active, *_NAME),
+}
 
 
 class UsersPanel(AdminPanel):
@@ -26,43 +38,29 @@ class UsersPanel(AdminPanel):
     icon = "user"
 
     def install_additional_rules(self, add_url_rule: Callable) -> None:
-        add_url_rule("/users", view_func=views.JsonUsersList.as_view("json_list"))
         add_url_rule("/new", view_func=views.UserCreate.as_view("new"))
         add_url_rule("/<int:user_id>", view_func=views.UserEdit.as_view("user"))
 
-    def get(self):
-        # FIXME: use widgets.AjaxMainTableView instead
-        datatable_options = {
-            "sDom": "lfFritip",
-            "aaSorting": [[1, "asc"]],
-            "aoColumns": [
-                {"bSortable": False},
-                {"asSorting": ["asc", "desc"]},
-                {"asSorting": ["asc", "desc"]},
-                {"bSortable": False},
-                {"bSortable": False},
-                {"bSortable": False},
-                {"asSorting": ["asc", "desc"]},
-            ],
-            "bFilter": True,
-            "oLanguage": {
-                "sSearch": _("Filter records:"),
-                "sPrevious": _("Previous"),
-                "sNext": _("Next"),
-                "sInfo": _("Showing _START_ to _END_ of _TOTAL_ entries"),
-                "sInfoFiltered": _("(filtered from _MAX_ total entries)"),
-                "sAddAdvancedFilter": _("Add a filter"),
-            },
-            "bStateSave": False,
-            "bPaginate": True,
-            "sPaginationType": "bootstrap",
-            "bLengthChange": False,
-            "iDisplayLength": 30,
-            "bProcessing": True,
-            "bServerSide": True,
-            "sAjaxSource": url_for(".users_json_list"),
-        }
-
-        return render_template(
-            "admin/users.html", next=next, datatable_options=datatable_options
+    def get(self) -> str:
+        security = get_security_service()
+        query = User.query.options(
+            sa.orm.subqueryload("groups"), sa.orm.undefer("photo")
+        ).filter(User.id != 0)
+        listing, users = Listing.from_query(
+            query,
+            SORT_COLUMNS,
+            "name",
+            (User.first_name, User.last_name, User.email),
         )
+        rows = [
+            (
+                user,
+                [
+                    role
+                    for role in security.get_roles(user, no_group_roles=True)
+                    if role.assignable
+                ],
+            )
+            for user in users
+        ]
+        return render_template("admin/users.html", listing=listing, rows=rows)

@@ -1,20 +1,21 @@
 <div class="file-input js-widget" data-init-with="fileInput">
-  <span class="js-fileapi-wrapper upload-btn">
-    <span class="btn btn-default btn-file">
+  <span class="js-file-button upload-btn">
+    <span class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 cursor-pointer">
       {{ button_label }}
       {{ input|safe }}
     </span>
   </span>
 
-  <div class="selected-files">
+  <div class="selected-files mt-4 space-y-2">
     {%- for data in existing %}
-      <div class="file-item file-item-existing">
-        <span class="file-info">{{ data.filename |default('') or loop.index0 }} — {{ data.size | filesize }}</span>
+      <div class="file-item file-item-existing flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+        <span class="file-info text-sm text-gray-600">{{ data.filename |default('') or loop.index0 }} — {{ data.size | filesize }}</span>
         {%- if field.allow_delete %}
-          <button type="button" class="btn"
+          <button type="button" class="ml-auto p-2 text-gray-400 hover:text-red-600"
               data-name="__{{ field.name }}_delete__"
               data-value="{{ loop.index0 }}"
-              data-deleted="{{ data.delete |tojson }}">
+              data-deleted="{{ data.delete |tojson }}"
+              aria-label="{{ _('Delete') }}">
             <span class="fa fa-trash"></span>
           </button>
         {%- endif %}
@@ -22,10 +23,10 @@
     {%- endfor %}
 
     {%- for data in uploaded %}
-      <div class="file-item file-item-uploaded">
-        <span class="file-info">{{ data.filename }} – {{ data.size|filesize }}</span>
+      <div class="file-item file-item-uploaded flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+        <span class="file-info text-sm text-gray-600">{{ data.filename }} – {{ data.size|filesize }}</span>
         <input type="hidden" name="{{ field.name }}" value="{{ data.handle }}"/>
-        <a class="close" href="#">&times;</a>
+        <a class="ml-auto p-1 text-gray-400 hover:text-gray-600" href="#">&times;</a>
       </div>
     {%- endfor %}
   </div>

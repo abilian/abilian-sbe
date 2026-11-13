@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import sqlalchemy as sa
 from flask import Flask, g
-from flask.signals import request_started
 from wtforms import Form, IntegerField, StringField
 
 # Import for side effects (monkey-patch)
@@ -12,14 +11,12 @@ import abilian.web.forms
 from abilian.core.entities import Entity
 from abilian.web.forms.widgets import (
     EmailWidget,
-    MainTableView,
     Panel,
     Row,
     SingleView,
     linkify_url,
     text2html,
 )
-from abilian.web.views import default_view
 
 # Dpnt' remove
 assert abilian.web.forms
@@ -51,27 +48,6 @@ class DummyForm(Form):
     _groups = {"all": ["name", "price", "email"]}
 
 
-def test_table_view(app: Flask) -> None:
-    @default_view(app, WidgetTestModel)
-    @app.route("/dummy_view/<object_id>")
-    def dummy_view(object_id) -> None:
-        pass
-
-    request_started.send(app)  # needed for deferJS tag
-    columns = [{"name": "name"}, {"name": "price"}]
-    view = MainTableView(columns)
-
-    model1 = WidgetTestModel(id=1, name="Renault Megane", price=10000)
-    model2 = WidgetTestModel(id=2, name="Peugeot 308", price=12000)
-    models = [model1, model2]
-    res = view.render(models)
-
-    assert model1._display_value_called
-    assert model2._display_value_called
-    assert "Renault Megane" in res
-    assert "10000" in res
-
-
 def test_single_view(app: Flask) -> None:
     model = WidgetTestModel(name="Renault Megane", price=10000, email="joe@example.com")
     panels = [Panel("main", Row("name"), Row("price"), Row("email"))]
@@ -86,7 +62,6 @@ def test_single_view(app: Flask) -> None:
 
 
 def test_edit_view(app: Flask) -> None:
-    g.deferred_js = []
     g.view = {"buttons": []}
 
     model = WidgetTestModel(name="Renault Megane", price=10000)

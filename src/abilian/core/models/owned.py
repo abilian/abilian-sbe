@@ -6,11 +6,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from flask import g
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import Column, ForeignKey
 from whoosh.fields import STORED
+
+from abilian.core.context import get_current_principal
 
 from .base import AUDITABLE, EDITABLE, SEARCHABLE, SYSTEM
 from .subjects import User
@@ -25,14 +26,21 @@ class OwnedMixin:
     )
 
     def __init__(self, *args: list, **kwargs: dict[str, Any]) -> None:
-        try:
-            user = g.user
-            if not self.creator and not g.user.is_anonymous:
-                self.creator = user
-            if not self.owner and not g.user.is_anonymous:
-                self.owner = user
-        except (RuntimeError, AttributeError):
-            pass
+        """Attribute a new entity to whoever is creating it, if anyone is.
+
+        Nobody is, when this runs outside a request: a migration, the CLI, a
+        dramatiq task. That used to be spelled as `g.user` inside
+        `except (RuntimeError, AttributeError): pass`, which also swallowed any
+        real AttributeError raised while assigning.
+        """
+        user = get_current_principal()
+        if user is None:
+            return
+
+        if not self.creator:
+            self.creator = user
+        if not self.owner:
+            self.owner = user
 
     @declared_attr
     def creator_id(cls):

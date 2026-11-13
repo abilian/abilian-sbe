@@ -1828,3 +1828,27 @@ msgstr "(source)"
 
 #~ msgid " Refresh preview"
 #~ msgstr "Rafraîchir l'aperçu"
+
+msgid "Registered"
+msgstr "Inscription"
+
+msgid "Last activity"
+msgstr "Dernière activité"
+
+msgid "These addresses are not valid and were left out: {addresses}"
+msgstr "Ces adresses ne sont pas valides et ont été ignorées : {addresses}"
+
+msgid "Remove"
+msgstr "Retirer"
+
+msgid "List view"
+msgstr "Vue en liste"
+
+msgid "Gallery view"
+msgstr "Vue en galerie"
+
+msgid "Home"
+msgstr "Accueil"
+
+msgid "Main"
+msgstr "Principale"

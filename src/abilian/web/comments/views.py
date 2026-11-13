@@ -9,8 +9,9 @@ from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 import sqlalchemy.orm
+from flask import current_app
 from flask_login import current_user
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, Forbidden
 
 from abilian.core.entities import Entity
 from abilian.core.models.comment import Comment, is_commentable
@@ -68,8 +69,23 @@ class BaseCommentView:
             msg = "This entity is not commentable"
             raise BadRequest(msg)
 
+        # Nothing used to check anything here. The rule was written twice in
+        # `macros/comment.html` and nowhere else, so every route was open to
+        # any authenticated user -- unreachable only because no model is
+        # registered commentable. See notes/plan-attachments.md.
+        if not self.has_capability(current_app.extensions["comments"]):
+            raise Forbidden
+
         actions.context["object"] = self.entity
         return args, kwargs
+
+    def has_capability(self, comments) -> bool:
+        """The capability this view needs, asked of the comments extension.
+
+        Reading is about the commented entity; editing and deleting are about
+        the comment, because their rule includes its author.
+        """
+        return comments.can_read(self.entity)
 
     def view_url(self):
         kw = {}
@@ -87,6 +103,9 @@ class BaseCommentView:
 
 class CommentEditView(BaseCommentView, ObjectEdit):
     _message_success = _l("Comment edited")
+
+    def has_capability(self, comments) -> bool:
+        return comments.can_write(self.obj)
 
     def breadcrumb(self):
         label = _('Edit comment on "{title}"').format(title=self.entity.name)
@@ -120,6 +139,9 @@ class CommentCreateView(BaseCommentView, ObjectCreate):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
+    def has_capability(self, comments) -> bool:
+        return comments.can_create(self.entity)
+
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         self.obj.entity = self.entity
@@ -144,6 +166,9 @@ bp.route("/<int:entity_id>/create")(create_view)
 
 class CommentDeleteView(BaseCommentView, ObjectDelete):
     _message_success = _l("Comment deleted")
+
+    def has_capability(self, comments) -> bool:
+        return comments.can_delete(self.obj)
 
 
 delete_view = CommentDeleteView.as_view("delete")

@@ -4,49 +4,63 @@
 {% from "forum/_macros.html" import forum_menu %}
 
 {% block forumcontent %}
-  {%- block forumsidebar %}
-    <div class="forum-menu-container">
-      <div class="forum-menu" role="group" style="width:100%;">
-        <span style="color:gray;">{{ _("Showing :") }}</span>
+  <div class="w-full">
+    <div class="mb-6">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="text-gray-500 text-sm">{{ _("Showing :") }}</span>
         {%- set global_actions = actions.for_category('forum:global') %}
         {{ forum_menu(global_actions) }}
       </div>
     </div>
-  {%- endblock %}
 
-  {% for month, threads in grouped_threads %}
-    <h2>{{ month }}</h2>
-
-    <table border="0" class="thread-table">
-      <tr>
-        <th style="width:3.5%;"></th>
-        <th>
-          {{ _("Topic") }}
-        </th>
-        <th style="width: 3.9%;">
-          {{ _("Replies") }}
-        </th>
-      </tr>
-      {% for thread in threads %}
-        {{ m_thread(thread) }}
-      {% endfor %}
-    </table>
-  {% else %}
-    <p>{{ _("No message has been posted to this community yet") }}</p>
-  {% endfor %}
+    {% for month, threads in grouped_threads %}
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">{{ month }}</h2>
+        <div class="overflow-x-auto">
+          <table class="min-w-full">
+            <thead>
+              <tr class="border-b-2 border-gray-200">
+                <th class="px-4 py-3 w-10"></th>
+                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  {{ _("Topic") }}
+                </th>
+                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
+                  {{ _("Replies") }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for thread in threads %}
+                {{ m_thread(thread) }}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% else %}
+      <p class="text-gray-500 py-8 text-center">{{ _("No message has been posted to this community yet") }}</p>
+    {% endfor %}
+  </div>
 {% endblock %}
 
 
 {% macro m_thread(thread) %}
   {%- set thread_href = url_for(".thread", thread_id=thread.id, community_id=g.community.slug) %}
   {%- set thread_length = thread.posts|length %}
-  <tr>
-    <td></td>
-    <td><a href="{{ thread_href }}" class="thread-title">{{ thread.title }}</a>
-      <p style="color:silver;">{{ thread.posts[0].body_html|safe|striptags|truncate(155, False, '...', 0) }}</p>
+  <tr class="hover:bg-gray-50">
+    <td class="px-4 py-4"></td>
+    <td class="px-4 py-4">
+      <div>
+        <a href="{{ thread_href }}" class="text-base font-medium text-gray-900 hover:text-blue-600">
+          {{ thread.title }}
+        </a>
+        <p class="text-sm text-gray-400 mt-1 line-clamp-2">
+          {{ thread.posts[0].body_html|safe|striptags|truncate(155, False, '...', 0) }}
+        </p>
+      </div>
     </td>
-    <td style="text-align:center;">
-      {{ thread_length-1 }}
+    <td class="px-4 py-4 text-center">
+      <span class="text-gray-700 font-medium">{{ thread_length-1 }}</span>
     </td>
   </tr>
 {% endmacro %}

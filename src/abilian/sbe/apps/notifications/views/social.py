@@ -13,7 +13,7 @@ from werkzeug.exceptions import MethodNotAllowed
 from abilian.core.extensions import csrf, db
 from abilian.core.models.subjects import User
 from abilian.i18n import render_template_i18n
-from abilian.sbe.apps.communities.security import require_admin
+from abilian.sbe.apps.communities.decorators import is_site_admin
 from abilian.sbe.apps.notifications import TOKEN_SERIALIZER_NAME
 from abilian.sbe.apps.notifications.tasks.social import (
     make_message,
@@ -32,8 +32,8 @@ __all__ = ()
 route = notifications.route
 
 
-@require_admin
 @route("/debug/social/")
+@is_site_admin
 def debug_social():
     """Send a digest to current user, or user with given email.
 

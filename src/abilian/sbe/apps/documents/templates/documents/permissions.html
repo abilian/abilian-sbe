@@ -1,226 +1,136 @@
 {% extends "community/_base.html" %}
 
 {% from "macros/box.html" import  m_box_content, m_box_menu with context %}
+{% from "macros/listing.html" import m_filter, m_sort_th, m_no_rows, m_pagination %}
 {% from "macros/recent.html" import m_recent_items %}
 
-{% macro m_users_table(users_and_roles, controls) %}
-  {% set table_id = uuid() %}
+{% macro m_users_table(listing, users_and_roles, controls) %}
+  {%- set th = "px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" %}
+  {{ m_filter(listing) }}
+
   <form method="POST">
     {{ csrf.field() }}
 
-    <table class="table table-condensed table-striped" id="{{ table_id }}">
-      <thead>
-      <tr>
-        <th></th>
-        <th class="hide">Last Name</th>
-        <th class="hide">First Name</th>
-        <th>{{ _("Name") }}</th>
-        <th>{{ _("Role") }}</th>
-        {% if controls %}
-          <th>{{ _("Action") }}</th>
-        {% endif %}
-      </tr>
-      </thead>
-
-      <tbody>
-      {% for user, role, has_access in users_and_roles %}
+    <div class="overflow-hidden border border-gray-200 rounded-lg">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
         <tr>
-          <td>{%- if not user.can_login %}
-            <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i>
-          {%- elif has_access %}
-            <i class="fa fa-check">&nbsp;</i>
-          {%- endif %}
-          </td>
-          <td class="hide">{{ user.last_name }}</td>
-          <td class="hide">{{ user.first_name }}</td>
-          <td>
-            {%- if not user.can_login %}<s title="{{ _('account disabled') }}">{%- endif %}
-            <a href="{{ url_for("social.user", user_id=user.id) }}">{{ user.name }}</a>
-            ({{ user.email }})
-            {%- if not user.can_login %}</s>{%- endif %}
-          </td>
-          <td>{{ role }}</td>
-          {%- if controls %}
-            <td>
-              <button type="submit" name="delete-user-role"
-                      value="{{ "%s:%s" % (role, user.id) }}"
-                      class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
-              </button>
-            </td>
-          {%- endif %}
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </form>
-
-  {%- deferJS %}
-    <script>
-      $(document).ready(function () {
-        var id = "#{{ table_id }}"; // Should be unique enough
-        $(id).dataTable({
-          aaSorting: [[3, "asc"]],
-          aoColumns: [
-            {bSortable: false}, // 0: has_access
-            {bVisible: false},  // 1: last_name
-            {bVisible: false}, // 2: first_name
-            {aDataSort: [1, 2], asSorting: ["asc", "desc"]}, // 3: fullname
-            {aDataSort: [4, 1, 2], asSorting: ["asc", "desc"]}, // 4: role - sort by role then name
-            {%- if controls %}
-              {bSortable: false}
-            {% endif %}
-          ],
-          sPaginationType: "bootstrap",
-          bFilter: true,
-          bLengthChange: false
-        });
-      });
-    </script>
-  {%- enddeferJS %}
-
-  <div style="clear: both;"></div>
-{% endmacro %}
-
-{% macro m_groups_table(groups_and_roles, controls) %}
-  {% set table_id = uuid() %}
-  <form method="POST">
-    {{ csrf.field() }}
-    <table class="table table-condensed table-striped" id="{{ table_id }}">
-      <thead>
-      <tr>
-        <th>{{ _("Name") }}</th>
-        <th>{{ _("Role") }}</th>
-        {% if controls %}
-          <th>{{ _("Action") }}</th>
-        {% endif %}
-      </tr>
-      </thead>
-
-      <tbody>
-      {% for group, role in groups_and_roles %}
-        <tr>
-          <td><a
-              href="{{ url_for("social.group_home", group_id=group.id) }}">{{ group.name }}</a>
-          </td>
-          <td>{{ role }}</td>
-          {%- if controls %}
-            <td>
-              <button type="submit" name="delete-group-role"
-                      value="{{ role }}:{{ group.id }}"
-                      class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
-              </button>
-            </td>
+          <th class="px-4 py-3 w-12"></th>
+          {{ m_sort_th(listing, "name", _("Name"), th) }}
+          {{ m_sort_th(listing, "role", _("Role"), th) }}
+          {% if controls %}
+            <th class="{{ th }}">{{ _("Action") }}</th>
           {% endif %}
         </tr>
-      {% endfor %}
-      </tbody>
-    </table>
+        </thead>
+
+        <tbody class="bg-white divide-y divide-gray-200">
+        {% for user, role, has_access in users_and_roles %}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3 text-center">{%- if not user.can_login %}
+              <i class="fa fa-lock text-gray-400" title="{{ _('account disabled') }}"></i>
+            {%- elif has_access %}
+              <i class="fa fa-check text-green-500"></i>
+            {%- endif %}
+            </td>
+            <td class="px-4 py-3">
+              {%- if not user.can_login %}<span class="line-through text-gray-400" title="{{ _('account disabled') }}">{%- endif %}
+              <a href="{{ url_for("social.user", user_id=user.id) }}" class="text-blue-600 hover:text-blue-800">{{ user.name }}</a>
+              <span class="text-sm text-gray-500">({{ user.email }})</span>
+              {%- if not user.can_login %}</span>{%- endif %}
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-600">{{ role }}</td>
+            {%- if controls %}
+              <td class="px-4 py-3">
+                <button type="submit" name="delete-user-role"
+                        value="{{ "%s:%s" % (role, user.id) }}"
+                        aria-label="{{ _('Delete') }}"
+                        class="inline-flex items-center p-2 text-white bg-red-600 rounded hover:bg-red-700">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </td>
+            {%- endif %}
+          </tr>
+        {% else %}
+          {{ m_no_rows(4) }}
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </form>
 
-  {%- deferJS %}
-    <script>
-      $(document).ready(function () {
-        var id = "#{{ table_id }}"; // Should be unique enough
-        $(id).dataTable({
-          aoColumns: [
-            {asSorting: ["asc", "desc"]},
-            {asSorting: ["asc", "desc"]},
-            {%- if controls %}
-              {asSorting: ["asc", "desc"]}
-            {% endif %}
-          ],
-          sPaginationType: "bootstrap",
-          bFilter: true,
-          bLengthChange: false
-        });
-      });
-    </script>
-  {%- enddeferJS %}
+  {{ m_pagination(listing) }}
+
   <div style="clear: both;"></div>
 {% endmacro %}
-
 
 {% block content %}
   {% call m_box_content("Permissions") %}
-    <h2 style="margin-top: 0;">{{ _('Manage permissions on <em>{folder}</em>').format(folder=folder.title) }}</h2>
+    <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ _('Manage permissions on <em>{folder}</em>').format(folder=folder.title) }}</h2>
 
-    <a class="btn btn-default datatable-export"
-       href="{{ url_for('.permissions_export', folder_id=folder.id, community_id=folder.community.slug) }}"><i
-        class="fa fa-align-justify"></i>{{ _("Export to Excel") }}</a>
+    <a class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+       href="{{ url_for('.permissions_export', folder_id=folder.id, community_id=folder.community.slug) }}">
+      <i class="fa fa-align-justify"></i>{{ _("Export to Excel") }}
+    </a>
 
-    <hr/>
+    <hr class="my-6 border-gray-200"/>
 
-    <h3>{{ _("Inheritance") }}</h3>
+    <h3 class="text-lg font-semibold text-gray-900 mb-3">{{ _("Inheritance") }}</h3>
 
-    {% if folder.inherit_security %}
-      <i class="fa fa-check-circle-o"></i>{{ _("Activated") }}
-      <button class="btn btn-default"
-              id="deactivate_inheritance">{{ _("Deactivate") }}</button>
-    {% else %}
-      <i class="fa fa-ban"></i>{{ _("Deactivated") }}
-      <button class="btn btn-default" id="activate_inheritance">{{ _("Activate") }}</button>
-    {% endif %}
-
-    {#
-    <h3>Current local roles for groups</h3>
-
-    {% if groups_and_local_roles %}
-      {{ m_groups_table(groups_and_local_roles, controls=True) }}
-    {% else %}
-      {{ _("Nothing") }}.
-    {% endif %}
-
-    <p>
-      <button class="btn" href="#modal-add-group-local-role"
-          data-toggle="modal">
-        <i class="fa fa-plus"></i>{{ _("Add new local role") }}&hellip;</button>
-    </p>
-
-    <h3>{{ _("Current inherited roles for groups") }}</h3>
-
-    {% if folder.inherit_security %}
-      {% if groups_and_inherited_roles %}
-        {{ m_groups_table(groups_and_inherited_roles, controls=False) }}
+    <div class="flex items-center gap-3 mb-6">
+      {% if folder.inherit_security %}
+        <span class="flex items-center gap-2 text-green-600">
+          <i class="fa fa-check-circle-o"></i>{{ _("Activated") }}
+        </span>
+        <form method="POST" action="{{ request.path }}">
+          {{ csrf.field() }}
+          <button class="btn btn-default" id="deactivate_inheritance"
+                  type="submit" name="action" value="deactivate_inheritance">{{ _("Deactivate") }}</button>
+        </form>
       {% else %}
-        {{ _("Nothing") }}.
+        <span class="flex items-center gap-2 text-gray-500">
+          <i class="fa fa-ban"></i>{{ _("Deactivated") }}
+        </span>
+        <form method="POST" action="{{ request.path }}">
+          {{ csrf.field() }}
+          <button class="btn btn-default" id="activate_inheritance"
+                  type="submit" name="action" value="activate_inheritance">{{ _("Activate") }}</button>
+        </form>
       {% endif %}
+    </div>
+
+    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ _("Current local roles for users") }}</h3>
+
+    {% if users_and_local_roles or local_listing.search %}
+      {{ m_users_table(local_listing, users_and_local_roles, controls=True) }}
     {% else %}
-      {{ _("Deactivated") }}
+      <p class="text-gray-500">{{ _("Nothing") }}.</p>
     {% endif %}
 
-    <hr>
-    #}
-
-    <h3>{{ _("Current local roles for users") }}</h3>
-
-    {% if users_and_local_roles %}
-      {{ m_users_table(users_and_local_roles, controls=True) }}
-    {% else %}
-      {{ _("Nothing") }}.
-    {% endif %}
-
-    <p>
-      <button class="btn btn-default" href="#modal-add-user-local-role" data-toggle="modal">
+    <p class="mt-4">
+      <button type="button"
+              class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+              data-modal-open="#modal-add-user-local-role">
         <i class="fa fa-plus"></i>{{ _("Add new local role") }}&hellip;
       </button>
     </p>
 
-    <h3>{{ _("Current inherited roles for users") }}</h3>
+    <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ _("Current inherited roles for users") }}</h3>
 
     {% if folder.inherit_security %}
-      {% if users_and_inherited_roles %}
-        {{ m_users_table(users_and_inherited_roles, controls=False) }}
+      {% if users_and_inherited_roles or inherited_listing.search %}
+        {{ m_users_table(inherited_listing, users_and_inherited_roles, controls=False) }}
       {% else %}
-        {{ _("Nothing") }}.
+        <p class="text-gray-500">{{ _("Nothing") }}.</p>
       {% endif %}
     {% else %}
-      {{ _("Deactivated") }}
+      <p class="text-gray-500">{{ _("Deactivated") }}</p>
     {% endif %}
 
-    <h3 class="main">{{ _("Audit Log") }}</h3>
-    <div style="margin-bottom: 25px;">
+    <h3 class="text-lg font-semibold text-gray-900 mt-8 mb-3">{{ _("Audit Log") }}</h3>
+    <div class="space-y-2 mb-6">
       {% for entry in audit_entries %}
-        <div>{{ entry.msg }}</div>
+        <div class="text-sm text-gray-600 p-2 bg-gray-50 rounded">{{ entry.msg }}</div>
       {% endfor %}
     </div>
 
@@ -232,7 +142,7 @@
   {%- set content_actions = actions.for_category('documents:content') %}
   {%- if content_actions %}
     {% call m_box_menu() %}
-      <ul class="nav nav-list">
+      <ul class="menu-actions">
         {%- for action in content_actions %}
           <li>{{ action.render() }}</li>
         {%- endfor %}
@@ -245,50 +155,4 @@
 {% block modals %}
   {% include "documents/_modals_folder.html" %}
   {% include "documents/_modals_roles.html" %}
-{% endblock %}
-
-{% block js %}
-  <script>
-    require(
-        ['Abilian', 'jquery'],
-        function (Abilian, $) {
-
-          Abilian.fn.onAppInit(function () {
-            $("#deactivate_inheritance").click(function () {
-              var form = $('<form>{{ csrf.field() }}<input type="text" name="action" value="deactivate_inheritance" /></form>');
-              form.attr("method", "post");
-              form.attr("action", "{{ request.path }}");
-              $(document.body).append(form);
-              form.submit();
-            });
-
-            $("#activate_inheritance").click(function () {
-              var form = $('<form>{{ csrf.field() }}<input type="text" name="action" value="activate_inheritance" /></form>');
-              form.attr("method", "post");
-              form.attr("action", "{{ request.path }}");
-              $(document.body).append(form);
-              form.submit();
-            });
-
-            $("#user-select").attr("style", "width: 220px").select2({
-              minimumInputLength: 2,
-              ajax: {
-                url: "{{ url_for("social.users_json") }}",
-                dataType: 'json',
-                quietMillis: 100,
-                data: function (term, page) {
-                  return {q: term};
-                },
-                results: function (data, page) {
-                  return {results: data.results, more: false};
-                }
-              },
-              allowClear: true
-            });
-            $("#s2id_user-select a span").text("");
-            $("input#user-select").attr("value", "");
-
-          });
-        });
-  </script>
 {% endblock %}

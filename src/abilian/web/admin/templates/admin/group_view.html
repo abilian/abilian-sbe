@@ -2,32 +2,37 @@
 
 {% block content %}
 
-  <h1>
-    {{ form['name'].render_view() }}
-    <a class="btn btn-default pull-right" href="{{ url_for('.groups_group_edit', group_id=view.obj.id) }}"><i
-        class="fa fa-pencil"></i> {{ _('Edit') }}</a>
-  </h1>
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold text-gray-900">{{ form['name'].render_view() }}</h1>
+    <a class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+       href="{{ url_for('.groups_group_edit', group_id=view.obj.id) }}">
+      <i class="fa fa-pencil"></i> {{ _('Edit') }}
+    </a>
+  </div>
 
-  <p class="lead">{{ form['description'].render_view() }}</p>
+  <p class="text-lg text-gray-600 mb-6">{{ form['description'].render_view() }}</p>
 
-  <h2>{{ _('Roles') }}</h2>
+  <h2 class="text-xl font-semibold text-gray-900 mb-3">{{ _('Roles') }}</h2>
 
-  <p>
+  <p class="mb-6">
     {%- for role in roles %}
-      <span class="badge badge-default">{{ role }}</span>
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 mr-1">{{ role }}</span>
     {%- endfor %}
   </p>
 
-  <h2>{{ _('Members') }}</h2>
+  <h2 class="text-xl font-semibold text-gray-900 mb-3">{{ _('Members') }}</h2>
 
-  <div id="add-user-role" role="dialog">
-    <form method="POST" action="{{ url_for(".groups_group_edit", group_id=view.obj.id) }}" class="form-inline"
+  <div id="add-user-role" class="mb-4">
+    <form method="POST" action="{{ url_for(".groups_group_edit", group_id=view.obj.id) }}"
+          class="flex items-end gap-4"
           enctype="multipart/form-data" role="form">
       {{ csrf.field() }}
 
-      <div class="form-group">
-        <label for="user-select">{{ _('User') }}</label>
-        <input class="form-control" type="text" id="user-select" name="user"/>
+      <div>
+        <label for="user-select" class="block text-sm font-medium text-gray-700 mb-1">{{ _('User') }}</label>
+        <input class="block w-64 px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+               type="text" id="user-select" name="user" required
+               data-picker="{{ url_for('users.json_list') }}"/>
       </div>
 
       {{ ADD_USER_BUTTON.render() }}
@@ -35,37 +40,38 @@
   </div>
 
 
-  <p>(<i class="glyphicon glyphicon-lock"></i>: {{ _('account disabled') }})</p>
+  <p class="text-sm text-gray-500 mb-4">(<i class="fa fa-lock"></i>: {{ _('account disabled') }})</p>
 
   {% set table_id = uuid() %}
-  <table class="table table-condensed table-striped" id="{{ table_id }}">
-    <thead>
+  <table class="min-w-full divide-y divide-gray-200" id="{{ table_id }}">
+    <thead class="bg-gray-50">
     <tr>
-      <th class="hide">Last Name</th>
-      <th class="hide">First Name</th>
-      <th>Nom</th>
-      <th></th>
+      <th class="hidden">Last Name</th>
+      <th class="hidden">First Name</th>
+      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+      <th class="px-4 py-3"><span class="sr-only">{{ _('Action') }}</span></th>
     </tr>
     </thead>
 
-    <tbody>
+    <tbody class="bg-white divide-y divide-gray-200">
     {% for user in members %}
-      <tr>
-        <td class="hide">{{ user.last_name }}</td>
-        <td class="hide">{{ user.first_name }}</td>
-        <td>
+      <tr class="hover:bg-gray-50">
+        <td class="hidden">{{ user.last_name }}</td>
+        <td class="hidden">{{ user.first_name }}</td>
+        <td class="px-4 py-3">
           {%- if not user.can_login %}
-            <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i><s>
+            <i class="fa fa-lock text-gray-400" title="{{ _('account disabled') }}"></i>
+            <span class="line-through text-gray-400">
           {%- endif %}
 
-          <a href="{{ url_for(".users_user", user_id=user.id) }}">{{ user.name }}</a>
+          <a href="{{ url_for(".users_user", user_id=user.id) }}" class="text-blue-600 hover:text-blue-800">{{ user.name }}</a>
           <br/>
-          (<i>{{ user.email }}</i>)
-          {%- if not user.can_login %}</s>{%- endif %}
+          <span class="text-sm text-gray-500">{{ user.email }}</span>
+          {%- if not user.can_login %}</span>{%- endif %}
         </td>
-        <td>
+        <td class="px-4 py-3">
           <form action="{{ url_for(".groups_group_edit", group_id=view.obj.id) }}" method="POST"
-                style="display: inline;">
+                class="inline-block">
             {{ csrf.field() }}
             <input type="hidden" name="user" value="{{ user.id }}">
             {{ REMOVE_USER_BUTTON.render() }}
@@ -77,51 +83,5 @@
   </table>
 
 
-  {%- deferJS %}
-    <script type="text/javascript">
-      (function (factory) {
-        require(['Abilian', 'jquery'], factory);
-      })
-      (function (Abilian, $) {
-        function initSelect() {
-          $("#user-select")
-              .attr("style", "min-width: 220px")
-              .select2({
-                minimumInputLength: 2,
-                ajax: {
-                  url: "{{ url_for("users.json_list") }}",
-                  dataType: 'json',
-                  quietMillis: 100,
-                  data: function (term, page) {
-                    return {q: term};
-                  },
-                  results: function (data, page) {
-                    return {results: data.results, more: false};
-                  }
-                },
-                allowClear: true,
-                formatResult: function (state, container, query, escapeMarkup) {
-                  var markup = [], text;
-                  window.Select2.util.markMatch(state.name, query.term, markup, escapeMarkup);
-                  text = '<b>' + markup.join("") + '</b>';
-                  if (state.role) {
-                    text += ' <small class="label label-default pull-right">' + escapeMarkup(state.role) + '</small> ';
-                  }
-
-                  if (state.email) {
-                    text += ' <br /><i>' + escapeMarkup(state.email) + '</i> ';
-                  }
-                  return text;
-                }
-              });
-
-          $("#s2id_user-select a span").text("");
-          $("input#user-select").attr("value", "");
-        };
-
-        Abilian.fn.onAppInit(initSelect);
-      });
-    </script>
-  {%- enddeferJS %}
 
 {% endblock %}

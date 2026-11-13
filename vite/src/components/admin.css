@@ -1,0 +1,27 @@
+/*
+ * Admin interface styles
+ * Dashboard statistics and admin-specific components
+ * Uses Tailwind's @apply for design system integration
+ */
+
+#dashboard .stats {
+  /* Was four inline-block cells at a fixed w-[22%], which at 375px left ~82px
+     each and ran "new documents" into "new messages". Two up on small screens. */
+  @apply grid grid-cols-2 gap-x-4 gap-y-6 text-center pt-6 pb-2.5 mb-2.5 sm:grid-cols-4;
+}
+
+#dashboard .stats li {
+  @apply text-center;
+}
+
+/* One weight for all four figures. They were blue / orange / green / yellow,
+   which read as four unrelated statuses rather than one row of counts -- and
+   yellow-300 on white is about 1.4:1, effectively invisible. The label below
+   carries the meaning; the number only has to be legible. */
+#dashboard .stats li strong {
+  @apply block text-6xl mb-5 text-gray-900;
+}
+
+#dashboard .stats li span {
+  @apply block text-sm text-gray-500 leading-8;
+}

@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 class SbeNotificationsForm(Form):
     daily = BooleanField(
         label=_("Receive by email a daily digest of activities in your communities"),
-        widget=widgets.BooleanWidget(on_off_mode=True),
+        widget=widgets.BooleanWidget(),
     )
 
 

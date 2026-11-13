@@ -1,0 +1,37 @@
+/*
+ * Layout styles
+ * Global layout structure and spacing
+ * Uses Tailwind's @apply for design system integration
+ */
+
+body {
+  @apply pb-10 bg-[#fcfcfc];
+}
+
+#content {
+  @apply mt-4 p-4;
+}
+
+/* Model view */
+.model-view h1 {
+  @apply mt-2.5;
+}
+
+/* Community specific styles */
+.community-header {
+  @apply flex items-center mb-6 text-2xl font-bold;
+}
+
+.community-header img {
+  @apply mr-3;
+}
+
+.community-tabs {
+  @apply mb-8;
+}
+
+/* Generic model view (widgets/render_single.html). The last surviving rule of
+   web/resources/less/models.less. */
+.model-view h1 {
+  @apply mt-2.5;
+}

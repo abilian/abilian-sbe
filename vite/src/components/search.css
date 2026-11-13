@@ -1,0 +1,21 @@
+/*
+ * Search UI styles
+ * Search input and results display
+ * Uses Tailwind's @apply for design system integration
+ */
+
+.ab-search-input {
+  @apply mb-8;
+}
+
+.ab-search-result {
+  @apply pb-4;
+}
+
+.ab-search-result .title {
+  @apply text-xl font-bold;
+}
+
+.ab-search-result .tags {
+  @apply mt-2;
+}

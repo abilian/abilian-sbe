@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import operator
 from datetime import datetime
-from functools import cached_property, partial
+from functools import partial
 from typing import TYPE_CHECKING, Any
 
 import babel
@@ -14,7 +14,7 @@ import babel.dates
 import sqlalchemy as sa
 import sqlalchemy.exc
 from flask import current_app
-from flask_babel import format_date, format_datetime, get_locale, get_timezone
+from flask_babel import get_timezone
 from flask_login import current_user
 from flask_wtf.file import FileField as BaseFileField
 from loguru import logger
@@ -38,8 +38,7 @@ from abilian import i18n
 from abilian.core.extensions import db
 from abilian.core.util import utc_dt
 
-from .util import babel2datetime
-from .widgets import DateInput, DateTimeInput, FileInput, Select2, Select2Ajax
+from .widgets import DateInput, DateTimeInput, FileInput, SelectWidget
 
 if TYPE_CHECKING:
     from babel.core import Locale
@@ -53,16 +52,14 @@ if TYPE_CHECKING:
 
 
 __all__ = [
+    "ChoiceField",
     "DateField",
     "DateTimeField",
     "FileField",
     "FormField",
-    "JsonSelect2Field",
-    "JsonSelect2MultipleField",
     "ModelFieldList",
-    "QuerySelect2Field",
-    "Select2Field",
-    "Select2MultipleField",
+    "MultipleChoiceField",
+    "QuerySelectField",
 ]
 
 
@@ -279,6 +276,7 @@ class FileField(BaseFileField):
         if name not in mapper.relationships:
             # directly store in the database
             super().populate_obj(obj, name)
+            return
 
         rel = getattr(mapper.relationships, name)
         if rel.uselist:
@@ -306,7 +304,14 @@ class FileField(BaseFileField):
         setattr(val, self.blob_attr, data)
 
 
+#: What the browser's date and time inputs send, whatever the user's locale.
+DATE_FORMAT = "%Y-%m-%d"
+DATETIME_FORMAT = f"{DATE_FORMAT} %H:%M"
+
+
 class DateTimeField(Field):
+    """A date and a time, entered in two native inputs that share its name."""
+
     widget = DateTimeInput()
 
     def __init__(
@@ -328,19 +333,7 @@ class DateTimeField(Field):
     def _value(self) -> str:
         if self.raw_data:
             return " ".join(self.raw_data)
-        locale = get_locale()
-        date_fmt = locale.date_formats["short"].pattern
-        # force numerical months and 4 digit years
-        date_fmt = (
-            date_fmt.replace("MMMM", "MM")
-            .replace("MMM", "MM")
-            .replace("yyyy", "y")
-            .replace("yy", "y")
-            .replace("y", "yyyy")
-        )
-        time_fmt = locale.time_formats["short"]
-        dt_fmt = locale.datetime_formats["short"].format(time_fmt, date_fmt)
-        return format_datetime(self.data, dt_fmt) if self.data else ""
+        return self.data.strftime(DATETIME_FORMAT) if self.data else ""
 
     def process_data(self, value: datetime) -> None:
         if value is not None:
@@ -356,18 +349,8 @@ class DateTimeField(Field):
 
     def process_formdata(self, valuelist: list[str]) -> None:
         if valuelist:
-            date_str = " ".join(valuelist)
-            locale = get_locale()
-            date_fmt = locale.date_formats["short"]
-            date_fmt = babel2datetime(date_fmt)
-            date_fmt = date_fmt.replace("%B", "%m").replace(
-                "%b", "%m"
-            )  # force numerical months
-            time_fmt = locale.time_formats["short"]
-            time_fmt = babel2datetime(time_fmt)
-            datetime_fmt = f"{date_fmt} | {time_fmt}"
             try:
-                self.data = datetime.strptime(date_str, datetime_fmt)
+                self.data = datetime.strptime(" ".join(valuelist), DATETIME_FORMAT)
                 if not self.use_naive:
                     tz = get_timezone()
                     if self.data.tzinfo:
@@ -390,7 +373,7 @@ class DateTimeField(Field):
 
 
 class DateField(Field):
-    """A text field which stores a `date` matching a format."""
+    """A `date`, entered in a native date input."""
 
     widget = DateInput()
 
@@ -402,29 +385,14 @@ class DateField(Field):
     def _value(self) -> str:
         if self.raw_data:
             return " ".join(self.raw_data)
-        date_fmt = get_locale().date_formats["short"].pattern
-        # force numerical months and 4 digit years
-        date_fmt = (
-            date_fmt.replace("MMMM", "MM")
-            .replace("MMM", "MM")
-            .replace("yyyy", "y")
-            .replace("yy", "y")
-            .replace("y", "yyyy")
-        )
-        return format_date(self.data, date_fmt) if self.data else ""
+        return self.data.strftime(DATE_FORMAT) if self.data else ""
 
     def process_formdata(self, valuelist: list[str]) -> None:
         valuelist = [i for i in valuelist if i.strip()]
 
         if valuelist:
-            date_str = " ".join(valuelist)
-            date_fmt = get_locale().date_formats["short"]
-            date_fmt = babel2datetime(date_fmt)
-            date_fmt = date_fmt.replace("%B", "%m").replace("%b", "%m")
-
             try:
-                strptime = datetime.strptime
-                self.data = strptime(date_str, date_fmt).date()
+                self.data = datetime.strptime(" ".join(valuelist), DATE_FORMAT).date()
             except (ValueError, TypeError) as e:
                 self.data = None
                 raise ValueError(self.gettext("Not a valid datetime value")) from e
@@ -432,18 +400,18 @@ class DateField(Field):
             self.data = None
 
 
-class Select2Field(SelectField):
-    """Allows choices to be a function instead of an iterable."""
+class ChoiceField(SelectField):
+    """A select with a read-only rendering. `choices` can be a function."""
 
-    widget = Select2()
+    widget = SelectWidget()
 
 
-class Select2MultipleField(SelectMultipleField):
-    widget = Select2(multiple=True)
+class MultipleChoiceField(SelectMultipleField):
+    widget = SelectWidget(multiple=True)
     multiple = True
 
 
-class QuerySelect2Field(SelectFieldBase):
+class QuerySelectField(SelectFieldBase):
     """COPY/PASTED (and patched) from WTForms!
 
     Will display a select drop-down field to choose between ORM results in a
@@ -488,7 +456,7 @@ class QuerySelect2Field(SelectFieldBase):
         **kwargs,
     ) -> None:
         if widget is None:
-            widget = Select2(multiple=multiple)
+            widget = SelectWidget(multiple=multiple)
 
         kwargs["widget"] = widget
         self.multiple = multiple
@@ -575,8 +543,9 @@ class QuerySelect2Field(SelectFieldBase):
         return self._object_list
 
     def iter_choices(self):
-        if not self.flags.required:
-            yield (None, None, self.data == [] if self.multiple else self.data is None)
+        # Nothing selected already means blank in a multiple select.
+        if not self.flags.required and not self.multiple:
+            yield (None, None, self.data is None)
 
         predicate = (
             operator.contains
@@ -614,155 +583,8 @@ class QuerySelect2Field(SelectFieldBase):
                 raise ValidationError(self.gettext("Not a valid choice"))
 
 
-class JsonSelect2Field(SelectFieldBase):
-    """TODO: rewrite this docstring. This is copy-pasted from QuerySelectField.
-
-    Will display a select drop-down field to choose between ORM results in a
-    sqlalchemy `Query`.  The `data` property actually will store/keep an ORM
-    model instance, not the ID. Submitting a choice which is not in the query
-    will result in a validation error.
-
-    This field only works for queries on models whose primary key column(s)
-    have a consistent string representation. This means it mostly only works
-    for those composed of string and integer types. For the most
-    part, the primary keys will be auto-detected from the model, alternately
-    pass a one-argument callable to `get_pk` which can return a unique
-    comparable key.
-
-    The `query` property on the field can be set from within a view to assign
-    a query per-instance to the field. If the property is not set, the
-    `query_factory` callable passed to the field constructor will be called to
-    obtain a query.
-
-    Specify `get_label` to customize the label associated with each option. If
-    a string, this is the name of an attribute on the model object to use as
-    the label text. If a one-argument callable, this callable will be passed
-    model instance and expected to return the label text. Otherwise, the model
-    object's `__str__` or `__unicode__` will be used.
-
-    If `allow_blank` is set to `True`, then a blank choice will be added to the
-    top of the list. Selecting this choice will result in the `data` property
-    being `None`. The label for this blank choice can be set by specifying the
-    `blank_text` parameter.
-
-    :param model_class: can be an sqlalchemy model, or a string with model
-    name. The model will be looked up in sqlalchemy class registry on first
-    access. This allows to use a model when it cannot be imported during field
-    declaration.
-    """
-
-    def __init__(
-        self,
-        label=None,
-        validators=None,
-        *,
-        ajax_source=None,
-        widget=None,
-        blank_text="",
-        model_class=None,
-        multiple=False,
-        **kwargs,
-    ) -> None:
-        self.multiple = multiple
-
-        if widget is None:
-            widget = Select2Ajax(multiple=self.multiple)
-
-        kwargs["widget"] = widget
-        super().__init__(label, validators, **kwargs)
-        self.ajax_source = ajax_source
-        self._model_class = model_class
-
-        self.allow_blank = not self.flags.required
-        self.blank_text = blank_text
-
-    @cached_property
-    def model_class(self):
-        cls = self._model_class
-        if isinstance(cls, type) and issubclass(cls, db.Model):
-            return cls
-
-        reg = db.Model.registry._class_registry
-        return reg[cls]
-
-    def iter_choices(self):
-        if not self.flags.required:
-            yield (None, None, self.data is None)
-
-        data = self.data
-        if not self.multiple:
-            if data is None:
-                return
-            data = [data]
-        elif not data:
-            return
-
-        for obj in data:
-            yield (obj.id, obj.name, True)
-
-    def _get_data(self):
-        formdata = self._formdata
-        if formdata:
-            if not self.multiple:
-                formdata = [formdata]
-            data = [
-                self.model_class.query.get(int(pk))
-                for pk in formdata
-                if pk not in ("", None)
-            ]
-            if not self.multiple:
-                data = data[0] if data else None
-            self._set_data(data)
-        return self._data
-
-    def _set_data(self, data) -> None:
-        self._data = data
-        self._formdata = None
-
-    data = property(_get_data, _set_data)
-
-    def process_formdata(self, valuelist) -> None:
-        if not valuelist:
-            self.data = [] if self.multiple else None
-        else:
-            self._data = None
-
-            if hasattr(self.widget, "process_formdata"):
-                # might need custom deserialization, i.e  Select2 3.x with multiple +
-                # ajax
-                valuelist = self.widget.process_formdata(valuelist)
-
-            if not self.multiple:
-                valuelist = valuelist[0]
-            self._formdata = valuelist
-
-    def populate_obj(self, obj, name) -> None:
-        data = self.data
-
-        try:
-            state = sa.inspect(obj)
-        except sa.exc.NoInspectionAvailable:
-            super().populate_obj(obj, name)
-
-        relations = state.mapper.relationships
-
-        if self.multiple and name in relations:
-            prop = relations[name]
-            if prop.collection_class:
-                # data is a list, try to convert to actual type; generally
-                # `set()`
-                data = prop.collection_class(data)
-
-        setattr(obj, name, data)
-
-
-class JsonSelect2MultipleField(JsonSelect2Field):
-    # legacy class, now use JsonSelect2Field(multiple=True)
-    pass
-
-
 class LocaleSelectField(SelectField):
-    widget = Select2()
+    widget = SelectWidget()
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs["coerce"] = LocaleSelectField.coerce
@@ -791,7 +613,7 @@ class LocaleSelectField(SelectField):
 
 
 class TimezoneField(SelectField):
-    widget = Select2()
+    widget = SelectWidget()
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         kwargs["coerce"] = babel.dates.get_timezone

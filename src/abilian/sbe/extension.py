@@ -4,13 +4,13 @@ from __future__ import annotations
 
 import uuid
 from importlib import resources as rso
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 from loguru import logger
 
 from abilian.core.util import fqcn
-from abilian.extensions import asset_manager
+
+# Asset management now handled by Vite
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -19,17 +19,6 @@ if TYPE_CHECKING:
 
 
 STATIC_DIR = str(rso.files("abilian.sbe") / "static")
-LESSCSS_FILE = str(Path(STATIC_DIR, "less", "abilian-sbe.less"))
-JS = (
-    "js/sbe-datatable.js",
-    "js/folder.js",
-    "js/folder_edit.js",
-    "js/folder_gallery.js",
-    "js/folder_upload.js",
-    "js/document_viewer.js",
-    "vendor/bootstrap-tagsinput.js",
-    "vendor/jquery.fileapi.js",
-)
 
 
 class AbilianSBE:
@@ -40,7 +29,7 @@ class AbilianSBE:
             self.init_app(app)
 
     def init_app(self, app: Application) -> None:
-        # False: it's ok if antivirus task was run but service couldn't get a
+        # False: it's ok if the antivirus task was run, but service couldn't get a
         # result
         app.config.setdefault("ANTIVIRUS_CHECK_REQUIRED", False)
         app.config.setdefault("SBE_FORUM_REPLY_BY_MAIL", False)
@@ -55,12 +44,7 @@ class AbilianSBE:
 
         # sbe static assets
         app.add_static_url("abilian/sbe", STATIC_DIR, endpoint="abilian_sbe_static")
-        app.extensions["webassets"].append_path(
-            STATIC_DIR, f"{app.static_url_path}/abilian/sbe"
-        )
-
-        asset_manager.register_asset("js", *JS)
-        asset_manager.register_asset("css", LESSCSS_FILE)
+        # Note: SBE-specific assets are now handled by Vite or included in components
 
         # Jinja
         logger.info("Register jinja context processors")
@@ -72,4 +56,11 @@ sbe = AbilianSBE()
 
 
 def inject_template_utils() -> dict[str, Callable]:
-    return {"uuid": uuid.uuid1}
+    from abilian.sbe.apps.communities.security import can_manage
+    from abilian.sbe.apps.forum.security import can_write as can_write_post
+
+    return {
+        "uuid": uuid.uuid1,
+        "can_manage": can_manage,
+        "can_write_post": can_write_post,
+    }

@@ -5,14 +5,13 @@ from __future__ import annotations
 import sqlalchemy as sa
 from flask import request
 from flask_babel import gettext as _, lazy_gettext as _l
-from PIL import Image
 from wtforms import BooleanField, StringField, TextAreaField
 from wtforms.validators import ValidationError, data_required, optional
 
 from abilian.core.models.subjects import Group
 from abilian.web.forms import Form
-from abilian.web.forms.fields import FileField, Select2Field
-from abilian.web.forms.validators import length
+from abilian.web.forms.fields import ChoiceField, FileField
+from abilian.web.forms.validators import length, open_png_or_jpeg
 from abilian.web.forms.widgets import BooleanWidget, ImageInput, TextArea
 
 from .models import Community
@@ -60,7 +59,7 @@ class CommunityForm(Form):
         widget=TextArea(resizeable="vertical"),
     )
 
-    linked_group = Select2Field(
+    linked_group = ChoiceField(
         label=_l("Linked to group"),
         description=_l("Manages a group of users through this community members."),
         choices=_group_choices,
@@ -72,7 +71,7 @@ class CommunityForm(Form):
         validators=[optional()],
     )
 
-    type = Select2Field(
+    type = ChoiceField(
         label=_("Type"),
         validators=[data_required()],
         filters=(strip,),
@@ -82,15 +81,9 @@ class CommunityForm(Form):
         ],
     )
 
-    has_documents = BooleanField(
-        label=_l("Has documents"), widget=BooleanWidget(on_off_mode=True)
-    )
-    has_wiki = BooleanField(
-        label=_l("Has a wiki"), widget=BooleanWidget(on_off_mode=True)
-    )
-    has_forum = BooleanField(
-        label=_l("Has a forum"), widget=BooleanWidget(on_off_mode=True)
-    )
+    has_documents = BooleanField(label=_l("Has documents"), widget=BooleanWidget())
+    has_wiki = BooleanField(label=_l("Has a wiki"), widget=BooleanWidget())
+    has_forum = BooleanField(label=_l("Has a forum"), widget=BooleanWidget())
 
     def validate_name(self, field: StringField) -> None:
         name = field.data = field.data.strip()
@@ -112,31 +105,7 @@ class CommunityForm(Form):
     def validate_description(self, field: TextAreaField) -> None:
         field.data = field.data.strip()
 
-    # FIXME: code duplicated from the user edit form (UserProfileForm).
-    # Needs to be refactored.
     def validate_image(self, field) -> None:
-        data = request.form.get("image")
-        if not data:
+        if not request.form.get("image"):
             return
-
-        data = field.data
-        filename = data.filename
-        valid = any(map(filename.lower().endswith, (".png", ".jpg", ".jpeg")))
-
-        if not valid:
-            raise ValidationError(_("Only PNG or JPG image files are accepted"))
-
-        data.seek(0)
-        try:
-            # check this is actually an image file
-            im = Image.open(data)
-            im.load()
-        except BaseException as e:
-            raise ValidationError(_("Could not decode image file")) from e
-
-        img_type = (im.format or "").lower()
-        if img_type not in ("png", "jpeg"):
-            raise ValidationError(_("Only PNG or JPG image files are accepted"))
-
-        data.seek(0)
-        field.data = data
+        open_png_or_jpeg(field.data)

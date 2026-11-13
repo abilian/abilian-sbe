@@ -1,7 +1,7 @@
 {%- extends "admin/_base.html" %}
 
 {% block content %}
-  <p class="lead">
+  <p class="text-xl font-light text-gray-600">
     {% trans %}
     Tags are grouped by namespaces, so that different set of tags can be
     defined for different type of objects, or for a different purpose.
@@ -22,6 +22,12 @@
         <td><a href="{{ url_for('.tags_ns', ns=info.ns) }}">{{ info.ns }}</a></td>
         <td>{{ info.tag_count or 0 }}</td>
         <td>{{ info.obj_count or 0 }}</td>
+      </tr>
+  {%- else %}
+      <tr>
+        <td colspan="3" class="text-gray-500 italic">
+          {{ _('No tags have been created yet.') }}
+        </td>
       </tr>
   {%- endfor %}
     </tbody>

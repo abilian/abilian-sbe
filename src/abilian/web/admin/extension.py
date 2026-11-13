@@ -12,9 +12,8 @@ from loguru import logger
 from werkzeug.exceptions import Forbidden
 from werkzeug.utils import import_string
 
-from abilian.core.util import unwrap
 from abilian.i18n import _l
-from abilian.services.security import ADMIN, security
+from abilian.services.security import ADMIN, is_site_admin, security
 from abilian.web.action import Endpoint, actions
 from abilian.web.nav import BreadcrumbItem, NavGroup, NavItem
 
@@ -45,6 +44,9 @@ class Admin:
                 current_user, ADMIN
             )
 
+        # Not rendered as a menu: the navbar reaches the admin section through
+        # one entry in the user menu. This stays the container that owns the
+        # panel items, the breadcrumb root and the active-path lookup.
         self.nav_root = NavGroup(
             "admin", "root", title=_l("Admin"), endpoint=None, condition=condition
         )
@@ -174,8 +176,7 @@ class Admin:
 
         @self.blueprint.before_request
         def check_security() -> None:
-            user = unwrap(current_user)
-            if not security.has_role(user, "admin"):
+            if not is_site_admin():
                 raise Forbidden
 
     def panel_preprocess_value(self, endpoint: str, view_args: dict[Any, Any]) -> None:

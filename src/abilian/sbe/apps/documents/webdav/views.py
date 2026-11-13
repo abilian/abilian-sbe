@@ -6,7 +6,6 @@ import os.path
 import uuid
 
 from flask import Blueprint, request
-from flask_login import current_user
 from lxml.etree import XMLSyntaxError
 from werkzeug.datastructures import Headers
 from werkzeug.exceptions import Forbidden, NotFound
@@ -14,7 +13,7 @@ from werkzeug.wrappers import Response
 
 from abilian.core.extensions import db
 from abilian.sbe.apps.documents import repository
-from abilian.services import get_service
+from abilian.services.security import is_site_admin
 
 from .constants import (
     DAV_PROPS,
@@ -59,9 +58,7 @@ def log_request() -> None:
 
 @webdav.before_request
 def only_admin() -> None:
-    security = get_service("security")
-
-    if not security.has_role(current_user, "admin"):
+    if not is_site_admin():
         raise Forbidden
 
 

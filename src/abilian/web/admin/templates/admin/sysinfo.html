@@ -6,46 +6,49 @@
 
   {%- call m_box("System information") %}
 
-    <h2>OS information</h2>
-    <pre>{{ uname }}</pre>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">OS information</h2>
+    <pre tabindex="0" class="p-4 bg-gray-50 rounded-lg text-sm overflow-x-auto mb-6">{{ uname }}</pre>
 
-    <h2>Python version</h2>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Python version</h2>
+    <pre tabindex="0" class="p-4 bg-gray-50 rounded-lg text-sm overflow-x-auto mb-6">{{ python_version }}</pre>
 
-    <pre>{{ python_version }}</pre>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Installed Python packages</h2>
 
-    <h2>Installed Python packages</h2>
+    <div class="overflow-hidden border border-gray-200 rounded-lg mb-6">
+      <table tabindex="0" class="min-w-full divide-y divide-gray-200">
+        <tbody class="bg-white divide-y divide-gray-200">
+        {%- for package in packages -%}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ package.name }}</td>
+            <td class="px-4 py-2 text-sm text-gray-600">{{ package.version }}</td>
+            <td class="px-4 py-2 text-sm">
+              {%- if package.vcs %}
+                <span title="{{ package.vcs.url }}@{{ package.vcs.revision }}">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">{{ package.vcs.name }}</span>
+                  <code class="ml-1 text-xs text-gray-500">{{ package.vcs.revision }}</code>
+                </span>
+              {%- endif %}
+            </td>
+          </tr>
+        {% endfor -%}
+        </tbody>
+      </table>
+    </div>
 
-    <table class="table table-striped table-bordered table-condensed">
-      <tbody>
-      {%- for package in packages -%}
-        <tr>
-          <td>{{ package.name }}</td>
-          <td>{{ package.version }}</td>
-          <td>
-            {%- if package.vcs %}
-              <span title="{{ package.vcs.url }}@{{ package.vcs.revision }}">
-                <span class="label label-info">{{ package.vcs.name }}</span>
-                <samp>{{ package.vcs.revision }}</samp>
-              </span>
-            {%- endif %}
-          </td>
-        </tr>
-      {% endfor -%}
-      </tbody>
-    </table>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">Application config</h2>
 
-    <h2>Application config</h2>
-
-    <table class="table table-striped table-bordered table-condensed">
-      <tbody>
-      {%- for k, v in config_values -%}
-        <tr>
-          <td>{{ k }}</td>
-          <td>{{ v }}</td>
-        </tr>
-      {% endfor -%}
-      </tbody>
-    </table>
+    <div class="overflow-hidden border border-gray-200 rounded-lg">
+      <table tabindex="0" class="min-w-full divide-y divide-gray-200">
+        <tbody class="bg-white divide-y divide-gray-200">
+        {%- for k, v in config_values -%}
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-2 text-sm font-medium text-gray-900 w-1/3">{{ k }}</td>
+            <td class="px-4 py-2 text-sm text-gray-600 break-all">{{ v }}</td>
+          </tr>
+        {% endfor -%}
+        </tbody>
+      </table>
+    </div>
 
   {% endcall %}
 

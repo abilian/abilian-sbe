@@ -48,13 +48,6 @@ ALLOWED_ATTRIBUTES = {
 
 ALLOWED_STYLES = ["text-align"]
 
-WIDGET_ALLOWED = {}
-for attr in ALLOWED_TAGS:
-    allowed = ALLOWED_ATTRIBUTES.get(attr, True)
-    if not isinstance(allowed, bool):
-        allowed = dict.fromkeys(allowed, True)
-    WIDGET_ALLOWED[attr] = allowed
-
 # instantiate this one before PostForm fields, so that it is listed first
 # when Threadform is displayed
 _TITLE_FIELD = StringField(
@@ -65,7 +58,7 @@ _TITLE_FIELD = StringField(
 class BasePostForm(Form):
     message = TextAreaField(
         label=_l("Message"),
-        widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
+        widget=RichTextWidget(),
         filters=(strip,),
         validators=[required()],
     )

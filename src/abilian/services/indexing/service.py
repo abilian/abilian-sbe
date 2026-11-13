@@ -37,9 +37,15 @@ from abilian.core.dramatiq.singleton import dramatiq
 from abilian.core.entities import Entity, Indexable
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
-from abilian.core.util import fqcn as base_fqcn, friendly_fqcn
+from abilian.core.util import fqcn as base_fqcn, friendly_fqcn, unwrap
 from abilian.services import Service, ServiceState
-from abilian.services.security import ANONYMOUS, AUTHENTICATED, Role, security
+from abilian.services.security import (
+    ANONYMOUS,
+    AUTHENTICATED,
+    Role,
+    is_site_admin,
+    security,
+)
 
 from .adapter import SAAdapter
 from .schema import DefaultSearchSchema, indexable_role
@@ -151,11 +157,18 @@ class WhooshIndexService(IndexService):
         js_api["object_types"] = self.searchable_object_types()
 
     def register_search_filter(self, func) -> None:
-        """Register a function that returns a query used for filtering search
-        results. This query is And'ed with other filters.
+        """Register a filter narrowing search results for one user.
 
-        If no filtering should be performed the function must return
-        None.
+        Called as `func(user)` and And'ed with the other filters; return None to
+        add nothing. The user is passed rather than read from the request, so a
+        filter is callable outside one and its dependencies are in its
+        signature.
+
+        A filter is not asked to consider whether the user may see everything
+        anyway: `search` settles that once, before calling any of them. Both
+        this and the role filter below used to make that decision separately,
+        off `g.is_manager`, which is how one of them came to be written without
+        the guard.
         """
         self.app_state.search_filter_funcs.append(func)
 
@@ -259,6 +272,7 @@ class WhooshIndexService(IndexService):
         object_types: Collection[str] = (),
         prefix: bool = True,
         facet_by_type: bool = False,
+        user: User | None = None,
         **search_args,
     ):
         """Interface to search indexes.
@@ -295,9 +309,14 @@ class WhooshIndexService(IndexService):
         filters = [filters] if filters is not None else []
         del search_args["filter"]
 
-        if not hasattr(g, "is_manager") or not g.is_manager:
-            # security access filter
+        if user is None:
             user = current_user
+        user = unwrap(user)
+
+        # One decision for every filter below: a site administrator sees
+        # everything, so none of them are applied.
+        if not is_site_admin(user):
+            # security access filter
             roles = {indexable_role(user)}
             if not user.is_anonymous:
                 roles.add(indexable_role(ANONYMOUS))
@@ -308,6 +327,11 @@ class WhooshIndexService(IndexService):
                 [wq.Term("allowed_roles_and_users", role) for role in roles]
             )
             filters.append(filter_q)
+
+            for func in self.app_state.search_filter_funcs:
+                filter_q = func(user)
+                if filter_q is not None:
+                    filters.append(filter_q)
 
         object_types_set = set(object_types)
         for m in Models:
@@ -326,11 +350,6 @@ class WhooshIndexService(IndexService):
         # limit object_type
         filter_q = wq.Or([wq.Term("object_type", t) for t in object_types_set])
         filters.append(filter_q)
-
-        for func in self.app_state.search_filter_funcs:
-            filter_q = func()
-            if filter_q is not None:
-                filters.append(filter_q)
 
         if filters:
             filter_q = wq.And(filters) if len(filters) > 1 else filters[0]

@@ -41,10 +41,9 @@ See https://github.com/adobe-type-tools/cmap-resources
   <script src="{{ url_for('abilian_sbe_static', filename='pdfjs/debugger.js') }}"></script>
   <script src="{{ url_for('abilian_sbe_static', filename='pdfjs/viewer.js') }}"></script>
 
-  <script>
-    PDFJS.workerSrc = "{{ url_for('abilian_sbe_static', filename='pdfjs/pdf.worker.js') }}";
-    DEFAULT_URL = "{{ pdf_url }}";
-  </script>
+  <script src="{{ url_for('abilian_sbe_static', filename='pdfjs/abilian-config.js') }}"
+          data-worker-src="{{ url_for('abilian_sbe_static', filename='pdfjs/pdf.worker.js') }}"
+          data-pdf-url="{{ pdf_url }}"></script>
 
 </head>
 
@@ -367,13 +366,13 @@ See https://github.com/adobe-type-tools/cmap-resources
   <!-- mainContainer -->
 
   <div id="overlayContainer" class="hidden">
-    <div id="passwordOverlay" class="container hidden">
+    <div id="passwordOverlay" class="w-full mx-auto px-4 hidden">
       <div class="dialog">
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <p id="passwordText" data-l10n-id="password_label">Enter the password
             to open this PDF file:</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <input type="password" id="password" class="toolbarField"/>
         </div>
         <div class="buttonRow">
@@ -384,67 +383,67 @@ See https://github.com/adobe-type-tools/cmap-resources
         </div>
       </div>
     </div>
-    <div id="documentPropertiesOverlay" class="container hidden">
+    <div id="documentPropertiesOverlay" class="w-full mx-auto px-4 hidden">
       <div class="dialog">
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_file_name">File name:</span>
 
           <p id="fileNameField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_file_size">File size:</span>
 
           <p id="fileSizeField">-</p>
         </div>
         <div class="separator"></div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_title">Title:</span>
 
           <p id="titleField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_author">Author:</span>
 
           <p id="authorField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_subject">Subject:</span>
 
           <p id="subjectField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_keywords">Keywords:</span>
 
           <p id="keywordsField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span
               data-l10n-id="document_properties_creation_date">Creation Date:</span>
 
           <p id="creationDateField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_modification_date">Modification Date:</span>
 
           <p id="modificationDateField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_creator">Creator:</span>
 
           <p id="creatorField">-</p>
         </div>
         <div class="separator"></div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_producer">PDF Producer:</span>
 
           <p id="producerField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_version">PDF Version:</span>
 
           <p id="versionField">-</p>
         </div>
-        <div class="row">
+        <div class="flex flex-wrap -mx-4">
           <span data-l10n-id="document_properties_page_count">Page Count:</span>
 
           <p id="pageCountField">-</p>

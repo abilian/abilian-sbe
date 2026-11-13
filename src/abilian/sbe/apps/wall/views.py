@@ -20,6 +20,7 @@ from abilian.services import get_service
 from abilian.web import url_for
 from abilian.web.action import actions
 
+from .page import Page
 from .presenters import ActivityEntryPresenter
 from .util import get_recent_entries
 
@@ -39,7 +40,10 @@ def index() -> str:
     actions.context["object"] = g.community._model
     entries = get_recent_entries(20, community=g.community)
     entries = ActivityEntryPresenter.wrap_collection(entries)
-    return render_template("wall/index.html", entries=entries)
+    ctx = {"entries": entries}
+    page = Page(ctx)
+    return page.render()
+    # return render_template("wall/index.html", entries=entries)
 
 
 @route("/files")

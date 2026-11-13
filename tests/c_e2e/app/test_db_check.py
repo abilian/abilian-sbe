@@ -14,4 +14,4 @@ def test_supported_db(app: Application) -> None:
     # with a supported DB
     config = app.config
     sqla_uri = config["SQLALCHEMY_DATABASE_URI"]
-    assert re.match(r"(sqlite|postgres|mysql)://.*", sqla_uri)
+    assert re.match(r"(sqlite|postgres(ql)?|mysql|mariadb)(\+\w+)?://.*", sqla_uri)

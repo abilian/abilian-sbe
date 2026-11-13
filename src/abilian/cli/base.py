@@ -40,7 +40,7 @@ def dropdb(yes=None) -> None:
 @click.argument("path", type=click.Path(exists=True))
 @with_appcontext
 def script(path) -> None:
-    """Run given script in the app context."""
+    """Run the given script in the app context."""
     runpy.run_path(path, run_name="__main__")
 
 
@@ -52,7 +52,7 @@ def script(path) -> None:
 @click.option("--first_name")
 @with_appcontext
 def createuser(email, password, role=None, name=None, first_name=None) -> None:
-    """Create new user."""
+    """Create a new user."""
 
     if User.query.filter(User.email == email).count() > 0:
         print(f"A user with email '{email}' already exists, aborting.")

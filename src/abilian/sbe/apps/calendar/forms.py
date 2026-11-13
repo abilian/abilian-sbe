@@ -49,13 +49,6 @@ ALLOWED_ATTRIBUTES = {
 
 ALLOWED_STYLES = ["text-align"]
 
-WIDGET_ALLOWED = {}
-for attr in ALLOWED_TAGS:
-    allowed = ALLOWED_ATTRIBUTES.get(attr, True)
-    if not isinstance(allowed, bool):
-        allowed = dict.fromkeys(allowed, True)
-    WIDGET_ALLOWED[attr] = allowed
-
 
 class EventForm(Form):
     title = StringField(label=_l("Title"), filters=(strip,), validators=[required()])
@@ -69,7 +62,7 @@ class EventForm(Form):
 
     description = TextAreaField(
         label=_l("Description"),
-        widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
+        widget=RichTextWidget(),
         filters=(strip,),
         validators=[required()],
     )
@@ -88,5 +81,6 @@ class EventForm(Form):
             raise ValidationError(_l("End date/time must be after start"))
 
 
-EventForm.start.kwargs["raw_data"] = [" | 09:00"]
-EventForm.end.kwargs["raw_data"] = [" | 18:00"]
+# A new event suggests office hours and leaves the day to the user.
+EventForm.start.kwargs["raw_data"] = ["", "09:00"]
+EventForm.end.kwargs["raw_data"] = ["", "18:00"]

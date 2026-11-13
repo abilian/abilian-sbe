@@ -2,14 +2,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 from flask import g, request, url_for
-from flask_login import current_user
 
 from abilian.i18n import _l
-from abilian.services import get_service
-from abilian.services.security import ADMIN, SecurityService
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 if TYPE_CHECKING:
@@ -43,9 +41,16 @@ class ThreadAction(ForumAction):
         return bool(thread)
 
 
-def is_admin(context):
-    security = cast("SecurityService", get_service("security"))
-    return security.has_role(current_user, ADMIN, object=context.get("object"))
+def can_moderate(context) -> bool:
+    """Closing, reopening and deleting a thread: the community's managers.
+
+    This asked `has_role(current_user, ADMIN, object=thread)`. Nothing ever
+    grants a role on a Thread and `has_role` unions the global roles in
+    regardless, so that was the site-wide answer wearing an object-scoped
+    spelling: the manager of a community could not moderate its own forum,
+    and only a site admin could.
+    """
+    return can_manage(context["object"].community)
 
 
 def is_in_thread(context) -> bool:
@@ -78,9 +83,11 @@ _close_template_action = """
 """
 
 _actions = (
-    ForumAction("forum:global", "index", _l("Recent conversations")),
-    ForumAction("forum:global", "index/<string:filter>", _l("Top"), url="#filter"),
-    ForumAction("forum:global", "archives", _l("Archives")),
+    ForumAction("forum:global", "index", _l("Recent conversations"), icon="comments"),
+    ForumAction(
+        "forum:global", "index/<string:filter>", _l("Top"), url="#filter", icon="fire"
+    ),
+    ForumAction("forum:global", "archives", _l("Archives"), icon="archive"),
     ForumAction(
         "forum:global", "attachments", _l("Attachments"), condition=is_in_thread
     ),
@@ -89,7 +96,7 @@ _actions = (
         "forum:thread",
         "delete",
         _l("Delete"),
-        condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
+        condition=lambda ctx: can_moderate(ctx) and not_closed(ctx),
         url="#modal-delete",
         icon="trash",
     ),
@@ -100,7 +107,7 @@ _actions = (
         _l("Close thread"),
         url="close",
         template_string=_close_template_action,
-        condition=lambda ctx: is_admin(ctx) and not_closed(ctx),
+        condition=lambda ctx: can_moderate(ctx) and not_closed(ctx),
         icon=FAIcon("lock"),
     ),
     ThreadAction(
@@ -109,7 +116,7 @@ _actions = (
         _l("Re-open thread"),
         url="close",
         template_string=_close_template_action,
-        condition=lambda ctx: is_admin(ctx) and is_closed(ctx),
+        condition=lambda ctx: can_moderate(ctx) and is_closed(ctx),
         icon=FAIcon("unlock"),
     ),
     ThreadAction(

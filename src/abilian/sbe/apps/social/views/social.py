@@ -4,21 +4,29 @@
 
 from __future__ import annotations
 
-from flask import Blueprint, redirect, render_template, url_for
+from flask import redirect, render_template, url_for
 
 from abilian.core.extensions import db
 from abilian.core.util import get_params
 from abilian.sbe.apps.social.models import Message
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.util import get_recent_entries
+from abilian.services.security import AUTHENTICATED
+from abilian.web.access_blueprint import AccessControlBlueprint
 
 __all__ = ["social"]
 
 MAX_LAST_USERS = 15
 MAX_MESSAGES = 15
 
-social = Blueprint(
-    "social", __name__, url_prefix="/social", template_folder="../templates"
+# The whole blueprint, not route by route: most routes here had no
+# `@login_required`, and the user directory leaked to anonymous visitors.
+social = AccessControlBlueprint(
+    "social",
+    __name__,
+    url_prefix="/social",
+    template_folder="../templates",
+    allowed_roles=AUTHENTICATED,
 )
 route = social.route
 

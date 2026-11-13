@@ -24,10 +24,11 @@ packages:
 
 tasks:
   - setup: |
-      sudo pip3.12 install -U uv nox
+      sudo pip3.12 install -U uv
       cd abilian-sbe
       uv sync
       npm install
+      make front
 
   - lint: |
       cd abilian-sbe
@@ -37,15 +38,14 @@ tasks:
       cd abilian-sbe
       uv run make test
 
+  # nox runs through uv, on the Python version that requires-python allows.
   - nox-lint: |
       cd abilian-sbe
-      nox -e lint
+      uvx --python 3.13 nox -e lint
 
   - nox-test: |
       cd abilian-sbe
-      # Default Python version is python 3.12
-      # TODO: install other versions using rye
-      nox -e pytest-3.12
+      uvx --python 3.13 nox -e pytest-3.13
 
   - buildah: |
       cd abilian-sbe

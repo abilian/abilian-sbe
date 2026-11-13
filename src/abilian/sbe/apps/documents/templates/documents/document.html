@@ -8,169 +8,183 @@
 {%- from "community/macros.html" import viewers_snapshot -%}
 
 {% macro user_markup(user) %}
-  <a href="{{ url_for('social.user', user_id=user.id) }}"><img
-      style="border-radius: 22px;" alt=""
-      src="{{ user_photo_url(user, size=16) }}"/>
+  <a href="{{ url_for('social.user', user_id=user.id) }}" class="inline-flex items-center text-blue-600 hover:text-blue-800">
+    <img class="w-4 h-4 rounded-full mr-1" alt="" src="{{ user_photo_url(user, size=16) }}"/>
     {{ user }}
   </a>
 {% endmacro %}
 
 {% macro m_breadcrumbs_path(breadcrumbs) %}
   {% for obj in breadcrumbs[0:-1] %}
-    <a href="{{ obj.path }}">{{ obj.label }}</a>
-    <span class="divider">/</span>
+    <a href="{{ obj.path }}" class="text-blue-600 hover:text-blue-800">{{ obj.label }}</a>
+    <span class="text-gray-400 mx-1">/</span>
   {% endfor %}
 
-  <span style="font-size: 14pt; color: gray;">{% if doc.lock %}
-    <i style="color:black;" class="fa fa-lock"></i>{% endif %}
-    {{ doc.title }}</span>
+  <span class="text-lg text-gray-500">
+    {% if doc.lock %}<i class="fa fa-lock text-gray-900 mr-1"></i>{% endif %}
+    {{ doc.title }}
+  </span>
 {% endmacro %}
 
 {% block content %}
-  {#  <script>#}
-  {#    window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");#}
-  {#  </script>#}
+  <div x-data="{ showMetadata: false, sidebarVisible: true }">
 
   {%- if doc.antivirus_required %}
-    <div style="margin: 5px 0;">
-      <i class="fa fa-file-o fa-lg"></i>
+    <div class="my-2">
+      <i class="fa fa-file-o fa-lg text-gray-500"></i>
       {{ m_breadcrumbs2(breadcrumbs) }}
     </div>
 
-    <hr/>
+    <hr class="border-gray-200 my-4"/>
 
-    <p class="small alert alert-warning">
-      <span class="fa-stack">
+    <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
+      <span class="fa-stack mr-2">
         <i class="fa fa-search fa-stack-2x"></i>
-        <i class="fa fa-bug fa-stack-1x text-danger"></i>
+        <i class="fa fa-bug fa-stack-1x text-red-600"></i>
       </span>
       {% trans %}Waiting for virus check...{% endtrans %}
-    </p>
+    </div>
 
   {%- elif not doc.antivirus_ok %}
-    <p class="alert alert-danger">
-      <i class="fa fa-exclamation-triangle"></i>
+    <div class="p-4 bg-red-50 border border-red-200 rounded-md text-red-800">
+      <i class="fa fa-exclamation-triangle mr-2"></i>
       {%- trans %}Virus found. Access disabled.{%- endtrans %}
-    </p>
+    </div>
   {%- endif %}
 
-  <form name="folder-listing" style="margin-bottom: 0;" method="POST">
-    <input id="check_{{ doc.id }}" style="display:none;" type="checkbox" name="object-selected"
+  <form name="folder-listing" class="mb-0" method="POST">
+    <input id="check_{{ doc.id }}" class="hidden" type="checkbox" name="object-selected"
            value="{{ doc.sbe_type }}:{{ doc.id }}" checked>
   </form>
 
   <div>
-    <h2>
+    <h2 class="text-xl font-semibold text-gray-900">
       {{ m_breadcrumbs_path(breadcrumbs) }}
     </h2>
     <br>
-    <a class="conversation-back-btn" href="{{ url_for('.index', community_id=g.community.slug) }}">
-      <i class="fa fa-arrow-left"></i> {{ _("Back to document list") }}
+    <a class="inline-flex items-center text-gray-600 hover:text-blue-600" href="{{ url_for('.index', community_id=g.community.slug) }}">
+      <i class="fa fa-arrow-left mr-2"></i> {{ _("Back to document list") }}
     </a>
 
-    <div id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline; right:0px; top:0px;">
-      <div class="btn-group">
+    <div id="horizontal-doc-menu" class="document-horizontal-menu inline-flex items-center gap-x-2 float-right">
+      <div>
         {%- if doc.antivirus_ok %}
-          <a class="btn btn-success btn-md pull-right"
+          <a class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-700 rounded-md hover:bg-green-800"
              href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
-            <i class="glyphicon glyphicon-download"></i>
+            <i class="fa fa-download mr-2"></i>
             {{ _('Download') }}
-            <small>({{ doc.content_length|filesize }})</small>
+            <small class="ml-1 text-green-100">({{ doc.content_length|filesize }})</small>
           </a>
         {%- endif %}
       </div>
-      <div class="btn-group">
-        <a onclick="edit_document()"
-           class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default"
-           href="#modal-edit" title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
+      <div>
+        <button data-modal-open="#modal-edit"
+           data-form-target="#modal-edit-form" data-form-action="{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}"
+           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+           type="button" title="{{ _('Edit') }}">
+          <i class="fa fa-pencil"></i>
+        </button>
       </div>
-      <div class="btn-group">
-        <a onclick="email_document()"
-           class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default"
-           href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i
-            class="glyphicon glyphicon-envelope"></i></a>
+      <div>
+        <button data-modal-open="#modal-send-by-email"
+           data-form-target="#modal-email-form" data-form-action="{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}"
+           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+           type="button" title="{{ _('Send by email') }}">
+          <i class="fa fa-envelope"></i>
+        </button>
       </div>
-      <div class="btn-group">
-        <a href="#modal-delete"
-           class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger"
-           data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
+      <div>
+        <button data-modal-open="#modal-delete"
+           class="inline-flex items-center justify-center w-10 h-10 text-white bg-red-600 rounded-md hover:bg-red-700"
+           type="button" title="{{ _('Delete') }}">
+          <i class="fa fa-trash"></i>
+        </button>
       </div>
-      <div class="btn-group">
-        <div class="dropdown">
-          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="true">
-            <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <li>
-              <a class="" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder">
-                <i class="glyphicon glyphicon-move"></i>
-                {{ _("Move") }}
-              </a>
-            </li>
-            <li>
-              <a onclick="replace_document()" class="" href="#modal-upload-new-version" data-toggle="modal"
-                 role="button"
-                 title="Move to another folder">
-                <i class="fa fa-refresh" aria-hidden="true"></i>
-                {{ _("Replace") }}
-              </a>
-            </li>
-            <li>
-              <form id="document_checkout"
-                    action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}"
-                    method="POST" target="_new">
-                {{ csrf.field() }}
-                {% if doc.lock == None %}
-                  <input type="hidden" name="action" value="checkout"/>
-                  <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"
-                     class="btn btn-link"
-                     onclick="$('#document_checkout').submit(); setTimeout(function () { window.location = '{{ url_for(doc) }}'  }, 500);">
-                    <i class="glyphicon glyphicon-download"></i>
-                    {{ _("Checkout") }}
-                  </a>
-                {% else %}
-                  <input type="hidden" name="action" value="unlock"/>
-                  <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"
-                     class="btn btn-link" onclick="$('#document_checkout').submit();">
-                    <i class="fa fa-unlock"></i>
-                    {{ _("Unlock") }}
-                  </a>
-                {% endif %}
-              </form>
-            </li>
-            <li>
-              <a href="{{ url_for(doc) }}" data-toggle="modal" role="button" title="Move to another folder">
-                <i class="glyphicon glyphicon-refresh"></i>
-                {{ _("Refresh preview") }}
-              </a>
-            </li>
-          </ul>
-        </div>
+      <div x-data="{ open: false }" class="relative" @keydown.escape="open = false">
+        <button @click="open = !open"
+                class="inline-flex items-center justify-center w-10 h-10 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                type="button" aria-label="{{ _('Action') }}" aria-haspopup="true" :aria-expanded="open">
+          <span class="fa fa-ellipsis-h" aria-hidden="true"></span>
+        </button>
+        <ul x-show="open"
+            @click.away="open = false"
+            x-transition
+            class="absolute right-0 z-10 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black/5 py-1">
+          <li>
+            <button @click="open = false" data-modal-open="#modal-move-files"
+               class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+               type="button" title="{{ _('Move to another folder') }}">
+              <i class="fa fa-arrows mr-2"></i>
+              {{ _("Move") }}
+            </button>
+          </li>
+          <li>
+            <button @click="open = false" data-modal-open="#modal-upload-new-version"
+               data-form-target=".modal-replacedoc-form" data-form-action="{{ url_for('.document_upload', doc_id=doc.id, community_id=doc.community.slug) }}"
+               class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+               type="button" title="{{ _('Replace document') }}">
+              <i class="fa fa-refresh mr-2"></i>
+              {{ _("Replace") }}
+            </button>
+          </li>
+          <li>
+            <form id="document_checkout"
+                  action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}"
+                  method="POST" target="_new">
+              {{ csrf.field() }}
+              {% if doc.lock == None %}
+                <input type="hidden" name="action" value="checkout"/>
+                <button type="submit"
+                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        data-reload-after-submit>
+                  <i class="fa fa-download mr-2"></i>
+                  {{ _("Checkout") }}
+                </button>
+              {% else %}
+                <input type="hidden" name="action" value="unlock"/>
+                <button type="submit"
+                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="fa fa-unlock mr-2"></i>
+                  {{ _("Unlock") }}
+                </button>
+              {% endif %}
+            </form>
+          </li>
+          <li>
+            <a href="{{ url_for(doc) }}"
+               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+               title="{{ _('Refresh preview') }}">
+              <i class="fa fa-refresh mr-2"></i>
+              {{ _("Refresh preview") }}
+            </a>
+          </li>
+        </ul>
       </div>
     </div>
-    <span onclick="view_info()" class="glyphicon glyphicon-chevron-right" id="view_info"
-          aria-hidden="true"
-          style="float: right; font-size: 18pt; position: relative; top: -72px; left: 283px; cursor: pointer; z-index:10;"></span>
+    <button @click="sidebarVisible = !sidebarVisible"
+            class="float-right text-2xl text-gray-400 hover:text-gray-600 cursor-pointer relative -top-16 z-10"
+            id="view_info"
+            type="button"
+            aria-label="{{ _('Toggle sidebar') }}">
+      <i class="fa" :class="sidebarVisible ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
+    </button>
 
     <br><br>
-    <div>
-    </div>
+    <div></div>
   </div>
 
   {%- if doc.description %}
-    <p>{{ doc.description }}</p>
-    <p>&nbsp;</p>
+    <p class="text-gray-700 mb-4">{{ doc.description }}</p>
   {%- endif %}
 
   <br>
 
-  <div style="border:1px solid silver; width:100%; padding-top: 10px; padding-bottom: 10px;">
+  <div class="border border-gray-300 rounded-lg w-full py-3">
     <div class="preview-container" data-page-num="{{ doc.page_num }}">
       <img src="{{ url_for('.document_preview_image',
                         community_id=g.community.slug, doc_id=doc.id,
                         size=doc.preview_size) }}"
-           alt="" class="preview" data-page="0"/>
+           alt="" class="preview mx-auto" data-page="0"/>
 
       {%- if has_preview %}
         <a class="preview-nav-button preview-prev" title="{{ _('Previous') }}">
@@ -182,116 +196,87 @@
           <span class="sr-only">{{ _('Next') }}</span>
         </a>
 
-        {%- deferJS %}
-          <script>
-            require(
-                ['Abilian', 'SBEDocumentViewerSetup'],
-                function (Abilian, viewerSetup) {
-                  Abilian.fn.onAppInit(viewerSetup);
-                });
-          </script>
-        {%- enddeferJS %}
-
       {%- else %}
-        {{ _("Document preview not yet available") }}
+        <p class="text-center text-gray-500 py-8">{{ _("Document preview not yet available") }}</p>
       {%- endif %}
     </div>
   </div>
 
   {%- if doc.extra_metadata %}
-    <h3 class="main collapsed" data-toggle="collapse"
-        href="#doc_extra_metadata">Extra Metadata</h3>
+    <h3 @click="showMetadata = !showMetadata"
+        class="mt-6 mb-2 text-lg font-semibold text-gray-900 cursor-pointer flex items-center">
+      <svg class="w-4 h-4 mr-2 text-gray-400 transition-transform" :class="{ 'rotate-90': showMetadata }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+      Extra Metadata
+    </h3>
 
-    <div id="doc_extra_metadata" class="collapse">
+    <div x-show="showMetadata" x-collapse x-cloak>
       {%- set sorted = doc.extra_metadata|dictsort %}
       {{ m_table(sorted) }}
     </div>
   {%- endif %}
 
+  {# The move dialog moves whatever the folder listing has selected. This page
+     has no listing, so it declares the one document as the selection. #}
+  <form name="folder-listing" hidden>
+    <input type="checkbox" name="object-selected"
+           value="{{ doc.sbe_type }}:{{ doc.id }}" checked>
+  </form>
+
+  {%- set folder_post_url = url_for(".folder_post", folder_id=folder.id, community_id=folder.community.slug) %}
+  {% include "documents/_modals_document.html" %}
+  {% include "documents/_modals_folder_move.html" %}
+
+  </div>
 {% endblock %}
 
 
 {% block sidebar %}
   <br><br>
-  <div style="border: 1px solid #eee;padding: 14px;">
-    <small>
-      <p><b>{{ doc.title|truncate(32, False, '...', 0) }}</b></p>
-      <b>{{ _("Owner") }}</b> : {{ user_markup(doc.creator) }} <br>
-      {{ _('<b>Uploaded:</b> %(date)s (%(age)s)',
-               date=(doc.created_at | datetimeformat('short')),
-               age=doc.created_at | age(add_direction=False)) }}
+  <div class="border border-gray-200 rounded-t-lg p-4 bg-white">
+    <div class="text-sm space-y-2">
+      <p class="font-semibold text-gray-900">{{ doc.title|truncate(32, False, '...', 0) }}</p>
+      <p>
+        <span class="font-semibold text-gray-700">{{ _("Owner") }}</span>:
+        {{ user_markup(doc.creator) }}
+      </p>
+      <p>
+        <span class="font-semibold text-gray-700">{{ _("Uploaded") }}:</span>
+        {{ doc.created_at | datetimeformat('short') }}
+        <span class="text-gray-500">({{ doc.created_at | age(add_direction=False) }})</span>
+      </p>
       {%- if doc.updated_at != doc.created_at %}
-        <br/>
-        {{ _('<b>Modified:</b> %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
+        <p>
+          <span class="font-semibold text-gray-700">{{ _("Modified") }}:</span>
+          {{ doc.updated_at|age(add_direction=False, date_threshold='day') }}
+        </p>
         {%- set lock = doc.lock %}
         {%- if lock %}
-          <div class="lock">
-            <i class="fa fa-lock"></i>
+          <div class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-xs">
+            <i class="fa fa-lock mr-1"></i>
             {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
                   user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
           </div>
         {%- endif %}
       {%- endif %}
-    </small>
+    </div>
   </div>
 
-  {% if g.is_manager %}
-    <div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
-      <p style="color:gray;"><b>{{ _('Readers') }}</b></p>
+  {# Who viewed this: for the people who run the community it is in. #}
+  {% if can_manage(g.community) %}
+    <div class="border-l border-r border-b border-gray-200 p-4 bg-white">
+      <p class="text-gray-500 font-semibold text-sm mb-2">{{ _('Readers') }}</p>
       {{ show_all_viewers(viewers,_("viewed by")) }}
     </div>
   {% endif %}
 
-  <div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
-    <p style="color:gray;"><b>{{ _('Last Changes') }}</b></p>
+  <div class="border-l border-r border-b border-gray-200 rounded-b-lg p-4 bg-white">
+    <p class="text-gray-500 font-semibold text-sm mb-2">{{ _('Last Changes') }}</p>
     {{ m_audit_log(audit_entries) }}
   </div>
-
-  {%- deferJS %}
-    <script>
-      require(['Abilian', 'SBEFolderGalleryListingSetup'],
-          function (Abilian, setupFolderListing) {
-            Abilian.fn.onAppInit(setupFolderListing);
-          });
-    </script>
-  {%- enddeferJS %}
-
-  <script>
-    var show = 0;
-
-    function view_info() {
-      if (show === 0) {
-        $("#view_info").css("left", "0");
-        $("#sidebar").hide();
-        $("div[class='col-md-9']").attr("class", "col-md-12");
-        show = 1;
-      } else {
-        $("#view_info").css("left", "283px");
-        $("#sidebar").show();
-        $("div[class='col-md-12']").attr("class", "col-md-9");
-        show = 0;
-      }
-    }
-
-    function email_document() {
-      var doc_url = "{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}";
-      $("#modal-email-form").attr("action", doc_url);
-    }
-
-    function edit_document() {
-      var doc_url = "{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}";
-      $("#modal-edit-form").attr("action", doc_url);
-    }
-
-    function replace_document() {
-      var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, community_id=doc.community.slug) }}";
-      $(".modal-replacedoc-form").attr("action", doc_url);
-    }
-  </script>
 {% endblock %}
 
 {% block modals %}
-  {% include "documents/_modals_document.html" %}
-  {% include "documents/_modals_folder_move.html" %}
-  {% include "documents/_modals_document_upload_new_version.html" %}
+  {# Included from the content block, where `folder_post_url` is in scope. #}
 {% endblock %}

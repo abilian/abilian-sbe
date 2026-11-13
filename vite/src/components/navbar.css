@@ -1,0 +1,86 @@
+/*
+ * Navbar styles
+ * Minimal styles for navbar action links - let Tailwind handle layout
+ * Uses Tailwind's @apply for design system integration
+ */
+
+/* Action links in the navbar. The header is a light surface, so these are
+   dark-on-light; the dropdown rule below still has to opt out because those
+   panels sit on their own white ground. */
+nav[role="navigation"] a {
+  @apply px-3 py-2 rounded-md text-sm font-medium text-gray-600 no-underline transition-all duration-150;
+}
+
+nav[role="navigation"] a:hover {
+  @apply bg-gray-100 text-gray-900;
+}
+
+/* Dropdown panels are white, so the light-on-dark rule above makes their links
+   nearly invisible. The user menu's "Preferences" and "Logout" were pale grey
+   on white. */
+nav[role="navigation"] .nav-menu a {
+  @apply block px-0 py-0 text-gray-700;
+}
+
+nav[role="navigation"] .nav-menu a:hover {
+  @apply bg-transparent text-gray-900;
+}
+
+/* Active navigation item. A filled dark pill reads as a slab on a light
+   header, so the current section is marked with a brand tint instead. */
+nav[role="navigation"] li.active > a,
+nav[role="navigation"] .active > a {
+  @apply bg-blue-50 text-blue-700 font-semibold;
+}
+
+/* Suggestions under a text box (combobox.js). The list is at the end of a
+   container that positions it: the search form, or the picker's wrapper. */
+.livesearch {
+  @apply relative;
+}
+
+.combobox-results {
+  @apply absolute z-30 mt-1 max-h-80 w-full overflow-y-auto rounded-md
+         border border-gray-200 bg-white py-1 shadow-lg;
+}
+
+.combobox-group {
+  @apply px-3 pt-2 pb-1 text-xs font-semibold uppercase tracking-wide text-gray-500;
+}
+
+.combobox-hit {
+  @apply cursor-pointer truncate px-3 py-1.5 text-sm text-gray-900;
+}
+
+.combobox-hit:hover,
+.combobox-hit.is-active {
+  @apply bg-blue-50 text-blue-700;
+}
+
+/* User pickers (picker.js). */
+.picker {
+  @apply relative block;
+}
+
+.picker .combobox-results {
+  @apply left-0 min-w-64;
+  top: 100%;
+}
+
+.picker-role {
+  @apply float-right rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-600;
+}
+
+.picker-email {
+  @apply truncate text-xs text-gray-500 italic;
+}
+
+/* Alpine.js will handle mobile menu visibility with x-show */
+
+/* User menu avatar. It is the only thing identifying the user in the bar now
+   that the name is gone, so it matches the height of the search box beside it
+   (36px). Keep in sync with DynamicIcon(size=...) in services/auth/service.py,
+   which is what the image is actually fetched at. */
+nav .avatar {
+  @apply h-9 w-9 shrink-0 rounded-full object-cover;
+}

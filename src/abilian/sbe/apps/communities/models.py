@@ -36,11 +36,8 @@ from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.repository import content_repository
 from abilian.services.indexing import indexable_role
 from abilian.services.security import (
-    ADMIN,
     MANAGER,
-    READ,
     READER,
-    WRITE,
     WRITER,
     Permission,
     Role,
@@ -317,15 +314,19 @@ class Community(Entity):
         return self.get_role(user) is not None
 
     def has_permission(self, user: LocalProxy, permission: Permission) -> bool:
-        if not isinstance(permission, Permission):
-            assert isinstance(permission, str)
-            permission = Permission(permission)
+        """Sugar over the policy engine, with no rule of its own.
 
-        if user.has_role(ADMIN):
-            return True
+        It used to carry a second role -> permission table (MANAGER: anything,
+        MEMBER: read and write) alongside the security service's, which is how
+        a community manager could come to be granted more than the service
+        would have granted them. It then answered only MANAGE and raised for
+        everything else, because community roles lived in `Membership` where
+        the engine could not see them. They are recorded on the community now,
+        so there is nothing left for this to do but ask.
+        """
+        from abilian.services.security import security
 
-        role = self.get_role(user)
-        return role == MANAGER or (role == MEMBER and permission in (READ, WRITE))
+        return security.has_permission(user, permission, self)
 
     def touch(self) -> None:
         self.last_active_at = datetime.utcnow()

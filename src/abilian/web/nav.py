@@ -16,6 +16,8 @@ from flask import Flask, g, request
 from jinja2 import Template
 from markupsafe import Markup
 
+from abilian.i18n import _l
+
 from .action import ACTIVE, ENABLED, Action, Glyphicon, getset
 
 if typing.TYPE_CHECKING:
@@ -41,7 +43,11 @@ def init_breadcrumbs() -> None:
     This happens during `request_started` event, which is triggered
     before any url_value_preprocessor and `before_request` handlers.
     """
-    g.breadcrumb.append(BreadcrumbItem(icon="home", url=f"/{request.script_root}"))
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            icon="home", url=f"/{request.script_root}", description=_l("Home")
+        )
+    )
 
 
 class NavItem(Action):
@@ -74,23 +80,37 @@ class NavItem(Action):
 
 
 class NavGroup(NavItem):
-    """A navigation group renders a list of items."""
+    """A navigation group renders a list of items using Alpine.js."""
 
     template_string = """
-    <ul class="nav navbar-nav {{ action.css_class }}">
-      <li class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown">
-          {%- if action.icon %}{{ action.icon }}{% endif %}
-          {{ action.title }} <b class="caret"></b>
-        </a>
-        <ul class="dropdown-menu">
-          {%- for item in action_items %}
-          {%- if item.divider %}<li class="divider"></li>{%- endif %}
-          <li class="{{ item.status|safe }}">{{ item.render() }}</li>
-          {%- endfor %}
-        </ul>
-      </li>
-    </ul>
+    <div x-data="{ open: false }" class="relative {{ action.css_class }}" @keydown.escape="open = false">
+      <button type="button" @click="open = !open" aria-haspopup="true" :aria-expanded="open"
+              class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium
+                     text-current opacity-90 hover:opacity-100">
+        {#- The icon speaks for the group when there is one: the user menu shows
+            the avatar, which needs neither the name nor a chevron to read as a
+            menu. The title stays as the button's accessible name -- the avatar's
+            alt is empty, so dropping it outright would leave the menu unnamed
+            for a screen reader. A group with no icon has only its
+            label, so it keeps the chevron to show there is more behind it. #}
+        {%- if action.icon %}
+          {{ action.icon }}<span class="sr-only">{{ action.title }}</span>
+        {%- else %}
+          {{ action.title }}
+          <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        {%- endif %}
+      </button>
+      <ul x-show="open" @click.away="open = false" x-transition
+          class="nav-menu absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md
+                 bg-white text-gray-700 shadow-lg ring-1 ring-black/5 py-1">
+        {%- for item in action_items %}
+        {%- if item.divider %}<li class="border-t border-gray-100 my-1"></li>{%- endif %}
+        <li class="px-4 py-2 hover:bg-gray-100 {% if item.status == 'active' %}bg-gray-100{% endif %}">{{ item.render() }}</li>
+        {%- endfor %}
+      </ul>
+    </div>
     """
 
     def __init__(
@@ -143,7 +163,9 @@ class BreadcrumbItem:
     _url = None
 
     template_string = (
-        '{%- if url %}<a href="{{ url }}">{%- endif %}'
+        '{%- if url %}<a href="{{ url }}"'
+        "{%- if item.description and not item.label %}"
+        ' aria-label="{{ item.description | e }}"{% endif %}>{%- endif %}'
         "{%- if item.icon %}{{ item.icon }}\u00a0{%- endif %}"
         "{{ item.label }}"
         "{%- if url %}</a>{%- endif %}"

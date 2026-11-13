@@ -88,7 +88,9 @@ class AntiVirusService(Service):
                 try:
                     file_or_stream = bytes(file_or_stream.file)
                 except TypeError as e:
-                    self.logger.warning("Error during content scan: {error}", error=str(e))
+                    self.logger.warning(
+                        "Error during content scan: {error}", error=str(e)
+                    )
                     return None
 
             case str():

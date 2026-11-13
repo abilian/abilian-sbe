@@ -2,6 +2,73 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+The Tailwind front-end migration and an authorization convergence. Large: ~150 commits, and it changes framework API that downstream applications may import.
+
+### Upgrade steps
+
+Run in this order. The backfills ship *with* this release, so they cannot run before it is installed — install, backfill, then serve traffic.
+
+1. `flask db current`, then `flask db upgrade` — no new migrations in this release, but run it anyway. A database created by `flask initdb` records no version: `current` prints no revision and `upgrade` fails with `relation "sbe_event" already exists`, leaving the database unchanged. Run `flask db stamp head` once on such a database instead of `upgrade`. The two migrations date from 2017, and `initdb` already creates what they add.
+2. `flask backfill-community-roles` — **required.** Community memberships used to be recorded only on the community's folder; permissions are now asked of the community itself. Until this runs, every existing community manager loses MANAGE on their community. Idempotent, and `--dry-run` lists what it would change.
+3. `flask backfill-creator-memberships` — recommended. Makes each community's creator a MANAGER member. Skips creators who already hold a role, so a deliberate demotion is not undone.
+4. Rebuild assets: the front end is Vite + Tailwind now, and `flask assets build` no longer does anything.
+5. If `TRACKING_CODE` is set, make sure it loads its script by URL from an allowed origin: the Content Security Policy now refuses inline scripts.
+
+### Security
+
+- Any member of a community could edit any other member's forum post: the route enforced nothing, and the Edit link was merely hidden from them.
+- Any member of a community could promote themselves to manager through the member wizard, which carried only a membership check.
+- Group administration — including adding and removing administrators — was guarded by `assert`, which `python -O` removes entirely.
+- The attachment and comment routes carried no authorization at all. Not exploitable, since no model is registered attachable or commentable, but they are now checked rather than left armed for whoever registers one.
+- The policy engine had an off switch: `has_role`, `has_permission` and `query_entity_with_permission` returned True when the service was not running.
+- Anonymous search raised rather than returning results.
+- A community manager could not edit their own community's settings, nor moderate its forum. Both are theirs now.
+- Anyone who could read a document could lock or unlock it, which stops others uploading a new version. It now takes write access.
+
+### Breaking — framework API
+
+| was | is |
+|---|---|
+| `is_manager(context, user)` | `can_manage(community, user)` |
+| `@require_manage` | `@can_manage` |
+| `@require_admin` | `@is_site_admin` |
+| `@require_access` | removed — the community blueprint already gates every route |
+| `has_access(community, user)` | `is_member(community, user)` |
+| `check_access(...)` | `check_membership(...)` |
+| `can_administrate(context)` | `is_admin(context)` |
+| `AttachmentsManager.can_view` / `.can_edit` | `.can_read` / `.can_write` |
+| template variable `is_manager` | `can_manage_community` |
+| `Select2Field`, `Select2MultipleField`, `QuerySelect2Field` | `ChoiceField`, `MultipleChoiceField`, `QuerySelectField`: native selects |
+| `JsonSelect2Field`, `Select2Ajax`, `Select2`, `Chosen`, `TagInput` | removed; pick a user with `<input data-picker="url">` |
+| `{% deferJS %}`, `{% block js %}`, `form.js`, `window.Abilian` | removed; the scripts are ES modules in `vite/src/` |
+| `g.is_manager` | removed — ask `is_site_admin()` or `can_manage(community)` |
+
+`Community.has_permission(user, permission)` no longer raises for anything but MANAGE; it answers all five permissions. `AttachmentsManager.can_create` and `.can_delete` ask CREATE and DELETE rather than both asking WRITE — the same answer under the default role matrix, but now separable by a `PermissionAssignment`.
+
+### Front end
+
+- Bootstrap and all 115 LESS files replaced by Tailwind v4 and Vite.
+- Removed: jQuery, select2, bootstrap-tagsinput, DataTables, CKEditor, RequireJS, twitter typeahead, Hogan, bootstrap-switch, d3 3.5 and nvd3, the flask-assets pipeline, and the Bootstrap compatibility shim.
+- No inline scripts or event handlers, and neither `'unsafe-inline'` nor `'unsafe-eval'` for scripts in the Content Security Policy. A normal page loads 97K of JavaScript.
+- Charts are uPlot (24K) rather than d3 + nvd3 (147K gzipped); the admin dashboard was rebuilt on correct data.
+- Modals are native `<dialog>`; live search is a native combobox.
+- Static URLs are versioned and served with a far-future cache.
+- `pandas` and `numpy` dropped from the dependencies.
+
+### Fixed
+
+- Selecting rows in a folder offers Download again. The action declared no permission, its check raised on the empty default, and the exception hid the button.
+- A server error inside a community shows the error page again rather than a raw 500.
+- The translation catalogs compile without errors: the French and Dutch SIRET messages used a placeholder that did not match the source.
+
+### Testing
+
+- Playwright browser suite (97 tests) — `make test-e2e`, which now picks free ports rather than hardcoding 8899 and 6399.
+- `pytest` no longer needs a Redis running on the machine.
+- import-linter contracts keep Flask out of the policy engine and the domain models.
+
 ## [1.1.16] - 2025-12-4
 
 ### Chore

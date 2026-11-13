@@ -16,14 +16,12 @@ from flask import (
 )
 from flask_babel import gettext as _
 from flask_login import current_user
-from sqlalchemy import func
-from werkzeug.exceptions import InternalServerError, NotFound
+from werkzeug.exceptions import Forbidden, NotFound
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
-from abilian.services import get_service
 from abilian.services.image import CROP, resize
-from abilian.services.security import security
+from abilian.services.security import is_site_admin
 from abilian.web import csrf
 from abilian.web.views import default_view
 
@@ -39,7 +37,7 @@ def groups() -> str:
     tab = request.args.get("tab", "all_groups")
     if tab == "all_groups":
         groups = Group.query.order_by(Group.name).all()
-        if not security.has_role(current_user, "admin"):
+        if not is_site_admin():
             groups = [
                 group
                 for group in groups
@@ -53,12 +51,14 @@ def groups() -> str:
 
 
 def is_admin(group):
-    security = get_service("security")
-    is_admin = current_user in group.admins
-    if not is_admin and "security" in current_app.extensions:
-        is_admin = security.has_role(current_user, "admin")
+    """May the current user administer `group`?
 
-    return is_admin
+    Group administrators are a relationship on `Group`, not role assignments,
+    so this cannot be `has_role(user, ADMIN, group)` yet.
+    """
+    if current_user in group.admins:
+        return True
+    return "security" in current_app.extensions and is_site_admin()
 
 
 @social.route("/groups/<int:group_id>")
@@ -102,8 +102,12 @@ def group_post(group_id):
         msg = f"Unknown action: {action}"
         raise ValueError(msg)
 
-    if action not in ("join", "leave"):
-        assert is_admin(group)
+    # Everything but join and leave writes somebody else's membership, and
+    # add-admin writes who may do that. This was an `assert`, which `python -O`
+    # compiles out entirely and which raises a 500 rather than refusing when it
+    # is compiled in.
+    if action not in ("join", "leave") and not is_admin(group):
+        raise Forbidden
 
     if action == "join":
         current_user.join(group)
@@ -126,7 +130,7 @@ def group_post(group_id):
                 user.leave(group)
             case "add-admin":
                 if user not in group.admins:
-                    group.admins.append(user)
+                    group.admins.add(user)
             case "remove-admin":
                 if user in group.admins:
                     group.admins.remove(user)
@@ -138,37 +142,6 @@ def group_post(group_id):
 
     # TODO: security check
     return redirect(return_url)
-
-
-@social.route("/groups/new")
-def groups_new() -> None:
-    # TODO later
-    return
-
-    # e = Env()
-    # e.form = GroupForm()
-    # return render_template("social/groups-new.html", **e)
-
-
-@social.route("/groups/new", methods=["POST"])
-def groups_new_post() -> None:
-    # TODO later
-    return
-
-    # form = GroupForm()
-    #
-    # if form.validate():
-    #     group = Group()
-    #     form.populate_obj(group)
-    #     db.session.add(group)
-    #     db.session.commit()
-    #     flash(_(u"Your new group has been created"), category='info')
-    #     return redirect(url_for('.group_home', group_id=group.id))
-    #
-    # else:
-    #     e = Env()
-    #     e.form = form
-    #     return render_template("social/groups-new.html", **e)
 
 
 @social.route("/groups/<int:group_id>/mugshot")
@@ -195,22 +168,3 @@ def group_mugshot(group_id):
     response.headers["content-type"] = "image/jpeg"
     response.headers.add("Cache-Control", "public, max-age=600")
     return response
-
-
-#
-# Ad-hoc JSON endpoints, used by select boxes
-#
-@social.route("/groups/json")
-def groups_json():
-    q = request.args.get("q").replace("%", " ").lower()
-
-    if not q or len(q) < 2:
-        raise InternalServerError
-
-    query = Group.query
-    # query = query.filter(func.lower(Group.name).like(q + "%"))
-    query = query.order_by(func.lower(Group.name))
-    all = query.all()
-
-    result = {"results": [{"id": obj.id, "text": obj.name} for obj in all]}
-    return jsonify(result)

@@ -14,7 +14,8 @@ from flask_super import register_commands
 from flask_talisman import DEFAULT_CSP_POLICY, Talisman
 
 from abilian.core import extensions, signals
-from abilian.extensions import asset_manager
+
+# Vite integration now handled by Flask-Vite in setup/extensions.py
 from abilian.services import settings_service
 from abilian.services.security import ANONYMOUS
 from abilian.web.access_blueprint import allow_access_for_roles
@@ -56,7 +57,11 @@ def setup_app(app: Application, plugins=None) -> None:
     if not app.debug:
         # CSP
         csp = app.config.get("CONTENT_SECURITY_POLICY", DEFAULT_CSP_POLICY)
-        Talisman(app, content_security_policy=csp)
+        Talisman(
+            app,
+            content_security_policy=csp,
+            force_https=app.config.get("TALISMAN_FORCE_HTTPS", True),
+        )
 
     setup_blueprints(app)
 
@@ -67,7 +72,7 @@ def setup_app(app: Application, plugins=None) -> None:
 
     init_access_controllers(app)
 
-    asset_manager.finalize_assets_setup(app)
+    # Vite assets don't need finalization like Flask-Assets did
 
     # At this point all models should have been imported: time to configure
     # mappers. Normally Sqlalchemy does it when needed but mappers may be

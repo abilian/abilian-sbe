@@ -3,173 +3,35 @@
 {% from "macros/box.html" import m_box %}
 {% from "admin/_macros.html" import m_stats %}
 
-{% block css %}
-  <link href="https://cdn.rawgit.com/novus/nvd3/v1.8.1/build/nv.d3.css"
-        rel="stylesheet">
-  <style>
-    .d3-chart svg {
-      height: 400px;
-      min-width: 100px;
-      min-height: 100px;
-    }
-
-    body {
-      overflow-y: scroll;
-    }
-
-    text {
-      font: 12px sans-serif;
-    }
-  </style>
-{% endblock %}
-
 {% block content %}
-  {% call m_box(title="Connections Stats") %}
-
-    <div id="chart-new-logins" class="d3-chart">
-      <svg></svg>
-    </div>
-
-    <div id="chart-connections" class="d3-chart">
-      <svg></svg>
-    </div>
+  {% call m_box(title=_("Users")) %}
+    <div id="chart-users" class="chart"></div>
   {% endcall %}
 
-  {% call m_box(title="Dashboard") %}
+  {% call m_box(title=_("Unique connections")) %}
+    <div id="chart-connections" class="chart"></div>
+  {% endcall %}
+
+  {% call m_box(title=_("Recent activity")) %}
     <div id="dashboard">
 
-      <h2>Today</h2>
+      <h2>{{ _("Today") }}</h2>
       {{ m_stats(stats.today) }}
 
-      <h2>This week</h2>
+      <h2>{{ _("This week") }}</h2>
       {{ m_stats(stats.this_week) }}
 
-      <h2>This month</h2>
+      <h2>{{ _("This month") }}</h2>
       {{ m_stats(stats.this_month) }}
 
     </div>
   {% endcall %}
 
+  {# Data, not code: a JSON block is never executed, so it needs none of the
+     CSP exemptions an inline <script> would. charts.js reads it by id. #}
+  <script type="application/json" id="chart-users-data">{{ users | tojson }}</script>
+  <script type="application/json" id="chart-connections-data">{{ connections | tojson }}</script>
 
-  {%- deferJS %}
-
-    <script type="text/javascript">
-      require(
-          ['Abilian', 'jquery', 'nvd3'],
-          function (Abilian, $, nv) {
-
-            function setupCharts() {
-
-              // -------------------------------------------------------
-              // linePlusBarChart  line:Total #users Bar:Nouveaux logins
-              // id: #chart-new-users
-
-              var new_logins = {{ new_logins |tojson}};
-
-              nv.addGraph(function () {
-                var chart = nv.models.linePlusBarChart()
-                    .margin({top: 50, right: 60, bottom: 30, left: 70})
-                    .legendRightAxisHint(' {{_('[Right axis]')}}')
-                    .legendLeftAxisHint(' {{_('[Left axis]')}}')
-                    .x(function (d, i) {
-                      return i;
-                    })
-                    .y(function (d, i) {
-                      return d['y'];
-                    })
-                    .color(d3.scale.category10().range());
-
-                var cg = chart.tooltip.contentGenerator();
-
-                chart.tooltip.contentGenerator(function (data) {
-                  if (data === null) {
-                    return '';
-                  }
-                  if ('index' in data) {
-                    var dx = data['index'];
-                    data['value'] = dx;
-                  }
-
-                  if ('pointIndex' in data) {
-                    var dx = data['pointIndex'];
-                    data['value'] = dx;
-                  }
-                  return cg(data);
-                });
-
-                chart.xAxis.tickFormat(function (d) {
-                  var dx = new_logins[0].values[d] && new_logins[0].values[d]['x'] || 0;
-                  return d3.time.format('%d/%m/%y')(new Date(dx));
-                });
-
-                {#
-                      chart.xAxis.tickFormat(function(d) {
-                              return d3.time.format('%d/%m/%y')(new Date(d))
-                          })
-                          .showMaxMin(false);
-                #}
-                chart.y1Axis.tickFormat(function (d) {
-                  return d3.format(',r')(d);
-                });
-                chart.y1Axis.axisLabel('{{_('Users')}}');
-                chart.bars.forceY([0]).padData(false);
-                chart.x2Axis.tickFormat(function (d) {
-                  var dx = new_logins[0].values[d] && new_logins[0].values[d]['x'] || 0;
-                  return d3.time.format('%d/%m/%y')(new Date(dx));
-                }).showMaxMin(false);
-                chart.y2Axis.axisLabel('{{_('Users')}}');
-                d3.select('#chart-new-logins svg')
-                    .datum(new_logins)
-                    .transition().duration(500).call(chart);
-                nv.utils.windowResize(chart.update);
-                chart.dispatch.on('stateChange', function (e) {
-                  nv.log('New State:', JSON.stringify(e));
-                });
-                return chart;
-              });
-
-
-              // -------------------------------------------------------
-              // lineWithFocusChart  line:daily unique connections
-              // id: #chart-connections
-
-              var connections = {{ connections |tojson}};
-
-              nv.addGraph(function () {
-                var chart = nv.models.lineWithFocusChart()
-                    .margin({top: 50, right: 60, bottom: 30, left: 70});
-                //chart.legend.margin({top: 10, right:130, left:0, bottom: 5});
-                chart.xScale(d3.time.scale());
-                chart.xAxis
-                    .tickFormat(function (d) {
-                      return d3.time.format('%d/%m/%y')(new Date(d));
-                    })
-                    .showMaxMin(false);
-
-                chart.x2Axis
-                    .tickFormat(function (d) {
-                      return d3.time.format('%d/%m/%y')(new Date(d));
-                    })
-                    .showMaxMin(false)
-                    .axisLabel('Jours');
-
-                chart.yAxis
-                    .tickFormat(d3.format(',r'))
-                    .axisLabel('{{_('unique connections')}}');
-                d3.select('#chart-connections svg')
-                    .datum(connections)
-                    .transition()
-                    .duration(500)
-                    .call(chart);
-                nv.utils.windowResize(chart.update);
-                return chart;
-              });
-
-            }//setupChart()
-
-            Abilian.fn.onAppInit(setupCharts);
-          });//require()
-    </script>
-  {%- enddeferJS %}
-
+  {# The only page with charts on it, so the only page that loads uPlot. #}
+  {{ vite_asset('src/charts.js') }}
 {% endblock %}

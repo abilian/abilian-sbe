@@ -14,14 +14,15 @@ from flask import current_app, flash, g, make_response, render_template, request
 from flask_babel import format_date
 from flask_login import current_user
 from sqlalchemy.orm import joinedload
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
 from abilian.sbe.apps.communities.common import activity_time_format, object_viewers
-from abilian.sbe.apps.communities.security import is_manager
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.sbe.apps.communities.views import default_view_kw
+from abilian.sbe.apps.forum.security import can_write
 from abilian.services.viewtracker import viewtracker
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction, Endpoint
@@ -231,7 +232,7 @@ class BaseThreadView:
     base_template = "community/_base.html"
 
     def can_send_by_mail(self):
-        return g.community.type == "participative" or is_manager(user=current_user)
+        return g.community.type == "participative" or can_manage(g.community)
 
     def prepare_args(self, args, kwargs):
         args, kwargs = super().prepare_args(args, kwargs)
@@ -260,7 +261,6 @@ class ThreadView(BaseThreadView, views.ObjectView):
         kw = super().template_kwargs
         kw["thread"] = self.obj
         kw["is_closed"] = self.obj.closed
-        kw["is_manager"] = is_manager(user=current_user)
         kw["viewers"] = object_viewers(self.obj)
         kw["views"] = get_viewed_times([self.obj])
         kw["participants"] = {post.creator for post in self.obj.posts}
@@ -452,6 +452,13 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         thread_id = kwargs.pop("thread_id", None)
         self.thread = self.obj.thread
         assert thread_id == self.thread.id
+
+        # Nothing checked whose post this was. The community blueprint gates
+        # the route to members, so any member could edit any other member's
+        # post through a URL the template declines to show them.
+        if not can_write(self.obj):
+            raise Forbidden
+
         return args, kwargs
 
     def get_form_kwargs(self):

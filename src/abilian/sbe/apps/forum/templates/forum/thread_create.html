@@ -15,7 +15,7 @@
   {%- set css_class = kwargs.pop('class_', '') %}
   {%- set standard_field = field.type not in ('CSRFTokenField',) %}
   {%- if standard_field and field.type not in ('BooleanField',) %}
-    {%- set css_class =  'form-control ' + css_class %}
+    {%- set css_class = 'block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ' + css_class %}
   {%- endif %}
 
   {%- if field.flags.required %}
@@ -25,37 +25,31 @@
   {%- if is_hidden %}
     {{ field(**kwargs) }}
   {%- else %}
-    <div
-        class="form-group{% if field.errors and not field.form %} has-error{% endif %}{% if field.flags.required %} required{% endif %}">
+    <div class="mb-4 {% if field.errors and not field.form %}border-l-4 border-red-500 pl-4{% endif %}">
       {%- if with_label and not is_hidden %}
-        <label class="control-label {%- if horizontal %} col-sm-{{ label_width }} {%- endif %}"
+        <label class="block text-sm font-medium text-gray-700 mb-1 {% if field.flags.required %}after:content-['*'] after:ml-0.5 after:text-red-500{% endif %}"
                for="{{ field.id }}">{{ field.label.text }}</label>
-      {%- endif %}
-
-      {%- if horizontal and standard_field %}
-        <div class="col-sm-{{ field_width }}">
       {%- endif %}
 
       {%- if field.type == 'CSRFTokenField' %}
         {{ field(**kwargs) }}
 
       {%- elif field.type == 'BooleanField' %}
-        <label class="checkbox-inline">
-          {# the 'nbsp' after the field is here because without any text bootstrap
-           misalign the checkbox :-( #}
-          {{ field(class_=css_class, **kwargs) }} {#- comment to prevent trailing whitespace cleanup by editors.. #}
+        <label class="flex items-center">
+          {{ field(class_=css_class + ' h-4 w-4 text-blue-600 border-gray-300 rounded', **kwargs) }}
+          <span class="ml-2 text-sm text-gray-700">{{ field.label.text }}</span>
         </label>
 
       {%- else %}
         {%- if field.type == 'FileField' %}
-          {%- set css_class = css_class + ' input-file' %}
+          {%- set css_class = css_class + ' file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700' %}
         {%- endif %}
         {{ field(class_=css_class, placeholder=placeholder, **kwargs)|safe }}
       {%- endif %}
 
       {%- if field.errors and not field.form %}
         {%- if 'FieldList' in field.type %}
-          <span class="help-inline text-danger">
+          <p class="mt-1 text-sm text-red-600">
           {% for error in field.errors %}
             {% if 'dict' in error.__class__.__name__ %}
               {% if not loop.first %}<br/>{% endif %}
@@ -66,20 +60,16 @@
               {{ error |safe }}
             {% endif %}
           {% endfor %}
-          </span>
+          </p>
         {%- else %}
-          <span class="help-inline text-danger">{{ field.errors|join('<br />'|safe) }}</span>
+          <p class="mt-1 text-sm text-red-600">{{ field.errors|join('<br />'|safe) }}</p>
         {%- endif %}
       {%- endif %}
 
       {%- if field.description %}
-        <span class="help-block">{{ field.description|safe }}</span>
+        <p class="mt-1 text-sm text-gray-500">{{ field.description|safe }}</p>
       {%- endif %}
-
-      {%- if standard_field and horizontal %}
-        </div> {# when horizontal: close input div; else closes div.col-xs-12 before label #}
-      {%- endif %}
-    </div> {# form-group #}
+    </div>
   {%- endif %}
 {%- endmacro %}
 
@@ -87,19 +77,17 @@
                  horizontal=False, id=None, role="form",
                  label_width=2, field_width=6) %}
   <form action="{{ action }}" method="{{ method }}" enctype="{{ enctype }}"
-        {%- if horizontal %}class="form-horizontal" {%- endif %} {%- if id %} id="{{ id }}" {%- endif %}
-        role="{{ role }}" novalidate>
+        {%- if id %} id="{{ id }}" {%- endif %}
+        role="{{ role }}" novalidate class="space-y-4">
 
     {%- for field in (fields or form) %}
       {{ m_field(field, horizontal=horizontal, label_width=label_width, field_width=field_width) }}
     {%- endfor %}
 
-    <div class="form-group form-actions">
-      <div class="{%- if horizontal %}col-sm-{{ field_width }} col-sm-push-{{ label_width }}{%- endif %}">
-        {%- for button in g.view.buttons %}
-          {{ button.render() }}
-        {%- endfor %}
-      </div>
+    <div class="flex gap-2 pt-4 mt-4 border-t border-gray-200">
+      {%- for button in g.view.buttons %}
+        {{ button.render() }}
+      {%- endfor %}
     </div>
 
   </form>
@@ -114,23 +102,12 @@
 
     {%- endblock %}
 
-
-
-    {{ m_form(form, horizontal=True, action=request.path, id="edit-form") }}
+    <div data-title-counter="150">
+      {{ m_form(form, horizontal=True, action=request.path, id="edit-form") }}
+    </div>
   {%- endcall %}
 
   {%- block after_form %}
   {%- endblock %}
-  <script>
-    $("#title").after("<span class='thread-title-counter'></span>")
-    $("#title").bind("keyup change", function () {
-      var title_length = $("#title").val().length;
-      $(".thread-title-counter").html(title_length + "/150");
-      if (title_length > 150) {
-        $(".thread-title-counter").css({"background": "orange", "color": "white"});
-      } else {
-        $(".thread-title-counter").css({"background": "ghostwhite", "color": "silver"});
-      }
-    });
-  </script>
+
 {% endblock %}

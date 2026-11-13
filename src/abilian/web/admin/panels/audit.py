@@ -15,9 +15,8 @@ from flask import (
     render_template_string,
     request,
 )
-from flask_babel import format_date, get_locale
 from markupsafe import Markup
-from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import BadRequest
 from werkzeug.routing import BuildError
 
 from abilian.core.entities import Entity, all_entity_classes
@@ -35,22 +34,13 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
 
-def format_date_for_input(date):
-    date_fmt = get_locale().date_formats["short"].pattern
-    # force numerical months
-    date_fmt = date_fmt.replace("MMMM", "MM").replace("MMM", "MM")
-    return format_date(date, date_fmt)
-
-
 class JSONUserSearch(JSONView):
     """Search users by fullname."""
 
     def data(self, *args, **kwargs) -> dict:
-        q: str = kwargs["q"]
-        q = q.replace("%", " ").strip().lower()
-
-        if not q or len(q) < 2:
-            raise InternalServerError
+        q = kwargs.get("q", "").replace("%", " ").strip().lower()
+        if len(q) < 2:
+            raise BadRequest
 
         query = User.query
         lower = sa.sql.func.lower
@@ -232,7 +222,7 @@ class AuditPanel(AdminPanel):
 
         current_date = None
         if entries:
-            current_date = format_date_for_input(entries[0][0])
+            current_date = entries[0][0].isoformat()
 
         # build prev/next urls
         url_params = {}
@@ -280,6 +270,19 @@ class BaseEntryPresenter:
     def model(model_name):
         return db.Model.registry._class_registry.get(model_name)
 
+    def render_user(self, user: User | None) -> str:
+        """Render the actor of an entry, which may not be one.
+
+        `AuditEntry.user_id` is nullable: anything done outside a request --
+        a migration, the CLI, `create_root_user` -- is recorded with no actor.
+        Only one of the two presenters below used to allow for that, and the
+        other took the whole admin audit panel down with an AttributeError the
+        first time it met such an entry.
+        """
+        if user is None:
+            return Markup("<em>{}</em>").format(_("System"))
+        return render_template_string(self._USER_FMT, user=user)
+
     def render(self) -> str:
         raise NotImplementedError
 
@@ -294,7 +297,7 @@ class AuditEntryPresenter(BaseEntryPresenter):
     def render(self) -> str:
         render = render_template_string
         e = self.entry
-        user = render(self._USER_FMT, user=e.user)
+        user = self.render_user(e.user)
         entity_html = e.entity_name
 
         if not self.entity_deleted:
@@ -343,17 +346,17 @@ class SecurityEntryPresenter(BaseEntryPresenter):
         render = render_template_string
         e = self.entry
 
+        # `manager` is nullable for the same reason `user` is: a role granted
+        # by the CLI or a migration has nobody who granted it.
         manager = render(
             '<img class="avatar" '
-            'src="{{ user_photo_url(user=e.manager, size=16) }}" alt="" />'
-            '<a href="'
-            '{{ url_for("social.user", user_id=e.manager.id) }}">'
-            "{{ e.manager.name }}</a>",
-            e=e,
+            'src="{{ user_photo_url(user=manager, size=16) }}" alt="" />{{ link }}',
+            manager=e.manager,
+            link=self.render_user(e.manager),
         )
 
         if self.entry.user:
-            principal = render(self._USER_FMT, user=self.entry.user)
+            principal = self.render_user(self.entry.user)
         elif self.entry.group:
             principal = render(self._GROUP_FMT, group=self.entry.group)
         else:
@@ -380,7 +383,9 @@ class SecurityEntryPresenter(BaseEntryPresenter):
                 case e.UNSET_INHERIT:
                     msg = _("{manager} has deactivated inheritance on {entity}")
                 case e.GRANT:
-                    msg = _('{manager} has given role "{role}" to {principal} on {entity}')
+                    msg = _(
+                        '{manager} has given role "{role}" to {principal} on {entity}'
+                    )
                 case e.REVOKE:
                     msg = _(
                         '{manager} has revoked role "{role}" from {principal} on {entity}'

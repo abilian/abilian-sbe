@@ -24,9 +24,12 @@ yarn.lock
 
 # Secret / local settings
 .aider*
+.claude
 .env
 .envrc
+CLAUDE.md
 config
+private
 sandbox
 ssl
 
@@ -40,6 +43,9 @@ abilian.db
 tmp
 cache
 dist
+# Vite build output, copied out of vite/dist by `npm run build`.
+# Phase 2 decides whether built assets ship in the wheel.
+src/abilian/sbe/static/vite/
 tests/cache
 tests/tmp
 tests/extra_files
@@ -66,3 +72,8 @@ htmlcov
 # Cruft
 /src/abilian/sbe/apps/documents/tests/data/dummy_files/existing-doc/
 /src/abilian/sbe/apps/documents/tests/data/dummy_files/folder 1/
+dump.rdb
+
+# Playwright e2e scratch instance
+/tmp/abilian-sbe-e2e/
+/e2e_playwright/screenshot-results/

@@ -1,29 +1,35 @@
 {% if obj %}
   {% set doc = obj %}
 {% endif %}
-<div class="modal fade" id="modal-delete" role="dialog" data-keyboard="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
+<dialog class="modal" id="modal-delete">
+  <div class="modal-dialog relative mx-auto my-8 max-w-lg">
+    <div class="modal-content bg-white rounded-lg shadow-xl">
       <form id="modal-delete-document"
             action="{{ url_for('.document_delete', doc_id=doc.id, community_id=doc.community.slug) }}"
             method="POST">
         {{ csrf.field() }}
 
-        <div class="modal-header">
-          <button class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">{{ _("Delete File") }}</h4>
+        <div class="modal-header flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 class="modal-title text-lg font-semibold text-gray-900">{{ _("Delete File") }}</h2>
+          <button type="button" class="text-gray-400 hover:text-gray-500" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body">
-          {{ _('Are you sure you want to delete the file : ') }} <span id="delete-doc-title">{{ doc.title }}</span>
+        <div class="modal-body p-4 text-gray-700">
+          {{ _('Are you sure you want to delete the file : ') }}
+          <span id="delete-doc-title" class="font-semibold">{{ doc.title }}</span>
         </div>
 
-        <div class="modal-footer">
-          <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
+        <div class="modal-footer flex justify-end gap-2 p-4 border-t border-gray-200">
+          <button data-modal-close type="button"
+                  class="btn btn-default">
+            {{ _("Cancel") }}
+          </button>
           <button type="submit"
-                  class="btn btn-danger">{{ _("Really Delete") }}</button>
+                  class="btn btn-danger">
+            {{ _("Really Delete") }}
+          </button>
         </div>
       </form>
     </div>
   </div>
-</div>
+</dialog>

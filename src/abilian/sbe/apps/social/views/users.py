@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pkgutil
-from html import escape
 
 import sqlalchemy as sa
 import sqlalchemy.exc
@@ -11,8 +10,8 @@ import sqlalchemy.orm
 from flask import Response, flash, jsonify, redirect, render_template, request
 from flask_login import current_user
 from loguru import logger
-from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
-from werkzeug.exceptions import InternalServerError
+from sqlalchemy.sql.expression import and_, func, or_
+from werkzeug.exceptions import BadRequest
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
@@ -22,10 +21,10 @@ from abilian.sbe.apps.social.forms import UserProfileForm, UserProfileViewForm
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.views import get_recent_entries
 from abilian.services import security_service
+from abilian.services.security import is_site_admin
 from abilian.web import url_for
-from abilian.web.filters import age
+from abilian.web.listing import Listing
 from abilian.web.views import ObjectEdit, default_view
-from abilian.web.views.images import user_photo_url
 
 from .social import social
 
@@ -48,98 +47,20 @@ def make_tabs(user: User) -> list[dict[str, str]]:
     ]
 
 
+_NAME = (func.lower(User.last_name), func.lower(User.first_name))
+DIRECTORY_SORT_COLUMNS = {
+    "name": _NAME,
+    "created_at": (User.created_at, *_NAME),
+    "last_active": (User.last_active, *_NAME),
+}
+
+
 @social.route("/users/")
 def users() -> str:
-    query = request.args.get("query")
-
-    if query:
-        query = query.replace("%", " ")
-        q = or_(
-            User.first_name.like(f"%{query}%"),
-            User.last_name.like(f"%{query}%"),
-        )
-        users = User.query.filter(q).limit(100).all()
-    else:
-        users = User.query.limit(100).all()
-    ctx = {"users": users}
-    return render_template("social/users.html", **ctx)
-
-
-@social.route("/users/dt_json")
-def users_dt_json():
-    """JSON call to fill a DataTable.
-
-    Needs some refactoring.
-    """
-    args = request.args
-
-    length = int(args.get("iDisplayLength", 0))
-    start = int(args.get("iDisplayStart", 0))
-    sort_col = int(args.get("iSortCol_0", 1))
-    sort_dir = args.get("sSortDir_0", "asc")
-    echo = int(args.get("sEcho", 0))
-    search = args.get("sSearch", "").replace("%", "").lower()
-
-    end = start + length
-
-    query = User.query
-    total_count = query.count()
-
-    if search:
-        # TODO: gérer les accents
-        filter = or_(
-            func.lower(User.first_name).like(f"%{search}%"),
-            func.lower(User.last_name).like(f"%{search}%"),
-        )
-        query = query.filter(filter).reset_joinpoint()
-
-    count = query.count()
-    SORT_COLS = {
-        1: [],  # will be set to [User.last_name, User.first_name]
-        2: [User.created_at],
-        3: [User.last_active],
-    }
-    columns = list(SORT_COLS.get(sort_col, []))
-    columns.extend([func.lower(User.last_name), func.lower(User.first_name)])
-
-    direction = asc if sort_dir == "asc" else desc
-    order_by = [direction(column) for column in columns]
-
-    # sqlite does not support 'NULLS FIRST|LAST' in ORDER BY clauses
-    engine = query.session.get_bind(User.__mapper__)
-    if engine.name != "sqlite":
-        order_by[0] = nullslast(order_by[0])
-
-    query = query.order_by(*order_by)
-
-    users = query.slice(start, end).all()
-
-    data = []
-    MUGSHOT_SIZE = 45
-    for user in users:
-        # TODO: this should be done on the browser.
-        user_url = url_for(".user", user_id=user.id)
-        mugshot = user_photo_url(user, size=MUGSHOT_SIZE)
-        name = escape(user.name or "")
-
-        cell0 = (
-            f'<a href="{user_url}"><img src="{mugshot}" width="{MUGSHOT_SIZE}" height="{MUGSHOT_SIZE}">'
-            "</a>"
-        )
-        cell1 = f'<div class="info"><a href="{user_url}">{name}</a></div>'
-        cell2 = age(user.created_at)
-        cell3 = age(user.last_active)
-        _cell4 = ""  # TODO: follow / unfollow?
-
-        data.append([cell0, cell1, cell2, cell3])
-
-    result = {
-        "sEcho": echo,
-        "iTotalRecords": total_count,
-        "iTotalDisplayRecords": count,
-        "aaData": data,
-    }
-    return jsonify(result)
+    listing, users = Listing.from_query(
+        User.query, DIRECTORY_SORT_COLUMNS, "name", (User.first_name, User.last_name)
+    )
+    return render_template("social/users.html", listing=listing, users=users)
 
 
 @social.route("/users/<int:user_id>")
@@ -176,7 +97,7 @@ def user(user_id: int) -> str:
 
 def can_edit(user: User) -> bool:
     # TODO: introduce a "self" role?
-    return (user == current_user) or security_service.has_role(current_user, "admin")
+    return (user == current_user) or is_site_admin()
 
 
 class UserProfileEdit(ObjectEdit):
@@ -239,10 +160,9 @@ def user_post(user_id):
 #
 @social.route("/users/json")
 def users_json():
-    q = request.args.get("q").replace("%", " ").lower()
-
-    if not q or len(q) < 2:
-        raise InternalServerError
+    q = request.args.get("q", "").replace("%", " ").strip().lower()
+    if len(q) < 2:
+        raise BadRequest
 
     query = User.query.filter(
         or_(

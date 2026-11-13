@@ -6,55 +6,48 @@
 {% block content %}
 
   {% call m_box(_("Profile")) %}
-    <img width="140" height="140"
-         src="{{ user_photo_url(user, size=140) }}"
-         class="media-object avatar pull-left" alt=""/>
+    <div class="flex flex-col sm:flex-row gap-6">
+      <img width="140" height="140"
+           src="{{ user_photo_url(user, size=140) }}"
+           class="rounded-lg flex-shrink-0" alt=""/>
 
-    <div class="info col-xs-6">
-      <h2 class="title">{{ user.name }}
-        {#
-          {%- if can_edit %}
-            <a class="btn btn-default"
-                href="{{ url_for('.user_edit', user_id=user.id) }}"><i
-                class="fa fa-edit"></i>{{ _("Edit") }}</a>
-          {%- endif %}
-#}
-      </h2>
+      <div class="flex-1 min-w-0 break-words">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ user.name }}</h2>
 
-      {%- if user.email %}
-        <div class="row">
-          <a class="col-xs-10 email" href="mailto:{{ user.email }}"><i
-              class="fa fa-envelope"></i> {{ user.email }}</a>
-        </div>
-      {%- endif %}
+        {%- if user.email %}
+          <div class="mb-2">
+            <a href="mailto:{{ user.email }}" class="text-blue-600 hover:text-blue-800 break-all">
+              <i class="fa fa-envelope text-gray-400 mr-2"></i> {{ user.email }}
+            </a>
+          </div>
+        {%- endif %}
 
-      {%- if user.location %}
-        <div class="row">
-          <b class="col-xs-3"><i class="fa fa-map-marker"></i>{{ _("Location:") }}
-          </b><span class="col-xs-8">{{ user.location }}</span>
-        </div>
-      {%- endif %}
-
+        {%- if user.location %}
+          <div class="flex items-center text-gray-700">
+            <i class="fa fa-map-marker text-gray-400 mr-2"></i>
+            <span class="font-medium mr-2">{{ _("Location:") }}</span>
+            <span>{{ user.location }}</span>
+          </div>
+        {%- endif %}
+      </div>
     </div>
   {% endcall %}
-
-  <div class="clearfix"></div>
 
   {% call m_box(_("Details")) %}
 
     {%- if view_form.communautes.data %}
-      <h2>{{ _("Communities") }}</h2>
-
-      <p>{{ view_form.communautes.view_widget.render_view(view_form.communautes)|safe }}</p>
+      <h2 class="text-lg font-semibold text-gray-900 mb-3">{{ _("Communities") }}</h2>
+      <div class="mb-6">{{ view_form.communautes.view_widget.render_view(view_form.communautes)|safe }}</div>
     {%- endif %}
 
-    <h2>{{ _("Stats") }}</h2>
+    <h2 class="text-lg font-semibold text-gray-900 mb-3">{{ _("Stats") }}</h2>
 
-    <p>
-      <b>{{ _("Joined on:") }}</b> {{ user.created_at|date_age }}. </p>
+    <p class="text-gray-700 mb-2">
+      <span class="font-medium">{{ _("Joined on:") }}</span> {{ user.created_at|date_age }}.
+    </p>
 
-    <p>
-      <b>{{ _("Latest connection:") }}</b>
+    <p class="text-gray-700">
+      <span class="font-medium">{{ _("Latest connection:") }}</span>
       {%- if user.last_active %}
         {{ user.last_active|date_age }}.
       {%- else %}

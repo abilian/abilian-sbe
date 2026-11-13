@@ -1,0 +1,76 @@
+/* Dashboard charts.
+ *
+ * uPlot ships its own stylesheet for the plot chrome (cursor, legend table,
+ * selection rectangle). It is imported by styles.css just above this file, and
+ * theming it means overriding a handful of its classes -- there are no
+ * variables to set. uPlot's markup is fixed, so unlike the rest of the design
+ * system these are element-and-class selectors rather than a component API.
+ *
+ * ~1KB gzipped, which is why it rides along on the global stylesheet rather
+ * than earning a second CSS entry and a dev/prod branch in the template. The
+ * chart *code* is a separate Vite entry -- only the dashboard loads that.
+ */
+
+.chart {
+  /* uPlot sizes the canvas from clientWidth, so the container has to have one
+     before the chart is built. */
+  width: 100%;
+}
+
+.chart .u-title {
+  @apply text-sm font-semibold text-gray-900;
+}
+
+/* The legend doubles as the tooltip: it tracks the cursor and prints each
+   series' value at that point. Clicking a row toggles the series. */
+.chart .u-legend {
+  @apply mt-2 text-sm text-gray-700;
+}
+
+/* uPlot colours the marker's border inline and leaves the middle transparent,
+   so at the series' 2px it reads as an empty checkbox. Half the box on each
+   side is exactly a solid swatch. */
+.chart .u-legend .u-marker {
+  @apply mr-1;
+  border-width: 0.5em !important;
+}
+
+/* The first legend row is the x axis. It carries no series, so its swatch is
+   an uncoloured box that reads as a fourth series. */
+.chart .u-legend .u-series:first-child .u-marker {
+  @apply hidden;
+}
+
+.chart .u-legend .u-series {
+  @apply cursor-pointer;
+}
+
+.chart .u-legend .u-series.u-off {
+  @apply text-gray-400;
+}
+
+.chart .u-legend .u-value {
+  @apply font-medium tabular-nums text-gray-900;
+}
+
+.chart .u-select {
+  @apply bg-blue-500/15;
+}
+
+/* Granularity switch: day / week / month are the same measure at three
+   resolutions, so they are a switch and not three series to overlay. */
+.chart-grains {
+  @apply mb-2 flex justify-end gap-1;
+}
+
+.chart-grains button {
+  @apply rounded px-2 py-1 text-xs font-medium text-gray-600;
+}
+
+.chart-grains button:hover {
+  @apply bg-gray-100 text-gray-900;
+}
+
+.chart-grains button[aria-pressed="true"] {
+  @apply bg-blue-50 text-blue-700;
+}

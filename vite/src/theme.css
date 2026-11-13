@@ -1,0 +1,44 @@
+/* Design tokens.
+ *
+ * Everything here is derived from the logo (src/abilian/web/resources/img/
+ * abilian.png), which carries four colours: navy #0f3269, blue #2986ff,
+ * cyan #02c6d0 and coral #ff4a77.
+ *
+ * The blue ramp overrides Tailwind's default `blue`, so the ~90 existing
+ * `blue-600` call sites pick up the brand colour without a template sweep.
+ * Steps share the logo's hue with a chroma curve that keeps the tints blue
+ * rather than drifting to cyan; lightness is chosen so that 600 clears WCAG
+ * AA on white. The raw logo blue is only 3.5:1 and is NOT usable for text.
+ */
+
+@theme {
+  --color-blue-50: #f3f7fe;
+  --color-blue-100: #e4eefc;
+  --color-blue-200: #c7dbf7;
+  --color-blue-300: #9fc2f3;
+  --color-blue-400: #6ca4f4;
+  --color-blue-500: #3888f4; /* 3.51:1 -- fills and borders, never text */
+  --color-blue-600: #006be2; /* 4.98:1 -- the interactive colour */
+  --color-blue-700: #0053c1; /* 6.96:1 */
+  --color-blue-800: #003d9c; /* 9.75:1 */
+  --color-blue-900: #002771; /* 13.77:1 */
+
+  /* Straight from the logo. Cyan (2.1:1) and coral (3.2:1) are decorative:
+     accents, badges and indicators, never text on white. */
+  --color-brand-navy: #0f3269;
+  --color-brand-blue: #2986ff;
+  --color-brand-cyan: #02c6d0;
+  --color-brand-coral: #ff4a77;
+
+  /* Application chrome. Light header: the navy is kept for type and
+     accents rather than as a field, so the logo keeps a white ground. */
+  --color-nav-bg: #ffffff;
+  --color-nav-line: #e2e8f0;
+
+  /* Density. `text-sm` is the workhorse of this UI (358 uses), so moving it
+     one step is the single lever that loosens every screen at once. */
+  --text-xs: 0.8125rem;
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5rem;
+}

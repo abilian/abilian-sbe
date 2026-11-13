@@ -1,0 +1,51 @@
+/*
+ * Print styles
+ * Print-specific layout and visibility rules
+ */
+
+@media print {
+  /* Things we don't want to see printed */
+  .navbar,
+  .nav,
+  .btn {
+    display: none;
+  }
+
+  /* Things we want to see - collapsible: always expand */
+  .collapse {
+    height: auto !important;
+  }
+
+  /* Except log entries */
+  #audit_log_entries {
+    height: 0 !important;
+  }
+
+  /* Margins */
+  @page {
+    margin: 1.2cm 1cm;
+  }
+
+  body {
+    padding: 0;
+  }
+
+  #wrapper {
+    width: auto !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Page breaks */
+  h1,
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+
+  /* Flask debug toolbar: hide it! */
+  #flDebugToolbarHandle,
+  #flDebugToolbar {
+    display: none;
+  }
+}

@@ -53,6 +53,7 @@ from abilian.services import get_service
 from abilian.services.security import READ, WRITE, Role, security
 from abilian.web import csrf, http, url_for
 from abilian.web.action import actions
+from abilian.web.listing import Listing, by_name
 from abilian.web.views import default_view
 
 from .util import (
@@ -70,7 +71,7 @@ from .util import (
 from .views import community_blueprint
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
 
     from werkzeug.datastructures import FileStorage
     from werkzeug.wrappers import Response
@@ -100,19 +101,52 @@ def index() -> Response:
     return redirect(url)
 
 
+#: Folders come first until asked otherwise, and count as empty for their size.
+#: "age" is how long ago: the youngest has the smallest.
+FOLDER_SORT_KEYS = {
+    "title": lambda content: (content.is_document, content.title.lower()),
+    "size": lambda content: content.content_length if content.is_document else 0,
+    "owner": lambda content: by_name(content.owner),
+    "age": lambda content: -content.created_at.timestamp(),
+}
+
+
+def _user_roles_listing(
+    rows: Iterable[tuple[User, Role, bool]], prefix: str
+) -> tuple[Listing, list[tuple[User, Role, bool]]]:
+    return Listing.from_rows(
+        rows,
+        {
+            "name": lambda row: by_name(row[0]),
+            "role": lambda row: (str(row[1]), by_name(row[0])),
+        },
+        "name",
+        text=lambda row: f"{row[0].name} {row[0].email}",
+        prefix=prefix,
+    )
+
+
 @default_view(community_blueprint, Folder, id_attr="folder_id", kw_func=default_view_kw)
 @route("/folder/<int:folder_id>")
 def folder_view(folder_id):
     folder = get_folder(folder_id)
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
-    ctx = {"folder": folder, "children": folder.filtered_children, "breadcrumbs": bc}
+    children = folder.filtered_children
+    ctx = {"folder": folder, "breadcrumbs": bc}
 
     view_style = session.get("sbe_doc_view_style", "thumbnail_view")
     if view_style == "thumbnail_view":
-        resp = render_template("documents/folder.html", **ctx)
+        listing, children = Listing.from_rows(
+            children, FOLDER_SORT_KEYS, "title", text=lambda content: content.title
+        )
+        resp = render_template(
+            "documents/folder.html", listing=listing, children=children, **ctx
+        )
     elif view_style == "gallery_view":
-        resp = render_template("documents/folder_gallery_view.html", **ctx)
+        resp = render_template(
+            "documents/folder_gallery_view.html", children=children, **ctx
+        )
     else:
         msg = "Unknown value for sbe_doc_view_style"
         raise InternalServerError(msg)
@@ -217,24 +251,31 @@ def permissions(folder_id):
     principals = {p for p, r in local_roles_assignments}
     security._fill_role_cache_batch(principals)
 
-    users_and_local_roles = [
-        (user, role, content_repository.has_access(user, folder))
-        for user, role in local_roles_assignments
-        if isinstance(user, User)
-    ]
+    local_listing, users_and_local_roles = _user_roles_listing(
+        (
+            (user, role, content_repository.has_access(user, folder))
+            for user, role in local_roles_assignments
+            if isinstance(user, User)
+        ),
+        "local_",
+    )
     groups_and_local_roles = [
         t for t in local_roles_assignments if isinstance(t[0], Group)
     ]
 
-    users_and_inherited_roles = groups_and_inherited_roles = ()
-
-    if folder.inherit_security:
-        inherited_roles_assignments = folder.get_inherited_roles_assignments()
-        users_and_inherited_roles = [
+    groups_and_inherited_roles = ()
+    inherited_roles_assignments = (
+        folder.get_inherited_roles_assignments() if folder.inherit_security else ()
+    )
+    inherited_listing, users_and_inherited_roles = _user_roles_listing(
+        (
             (user, role, False)
             for user, role in inherited_roles_assignments
             if isinstance(user, User)
-        ]
+        ),
+        "inherited_",
+    )
+    if folder.inherit_security:
         groups_and_inherited_roles = [
             t for t in inherited_roles_assignments if isinstance(t[0], Group)
         ]
@@ -297,7 +338,9 @@ def permissions(folder_id):
 
     ctx = {
         "folder": folder,
+        "local_listing": local_listing,
         "users_and_local_roles": users_and_local_roles,
+        "inherited_listing": inherited_listing,
         "users_and_inherited_roles": users_and_inherited_roles,
         "groups_and_local_roles": groups_and_local_roles,
         "groups_and_inherited_roles": groups_and_inherited_roles,

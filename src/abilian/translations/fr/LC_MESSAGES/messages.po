@@ -367,8 +367,8 @@ msgstr "Suivante"
 #: abilian/web/admin/panels/groups/__init__.py:47
 #: abilian/web/admin/panels/users/__init__.py:45
 #: abilian/web/forms/widgets.py:351 abilian/web/forms/widgets.py:352
-msgid "Showing _START_ to _END_ of _TOTAL_ entries"
-msgstr "Affiche de _START_ à _END_ sur _TOTAL_ entrées"
+msgid "Showing {start} to {end} of {total} entries"
+msgstr "Affiche de {start} à {end} sur {total} entrées"
 
 #: abilian/web/admin/panels/groups/__init__.py:48
 #: abilian/web/admin/panels/users/__init__.py:46
@@ -676,7 +676,7 @@ msgid ""
 "(%(code)s)"
 msgstr ""
 "Ce SIRET ressemble à un SIRET spécial, mais le code géographique semble "
-"invalide (%s)"
+"invalide (%(code)s)"
 
 #: abilian/web/forms/validators.py:268
 msgid "SIRET number is invalid (length is ok: verify numbers)"
@@ -1030,6 +1030,58 @@ msgstr "Objet supprimé"
 #: abilian/web/views/object.py:543
 msgid "This entity is referenced by another object and cannot be deleted."
 msgstr "Cette entité est référencée par un autre objet et ne peut être supprimée."
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Formatting"
+msgstr "Mise en forme"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Bold"
+msgstr "Gras"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Italic"
+msgstr "Italique"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Heading"
+msgstr "Titre"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Subheading"
+msgstr "Sous-titre"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Bulleted list"
+msgstr "Liste à puces"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Numbered list"
+msgstr "Liste numérotée"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Quote"
+msgstr "Citation"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Link"
+msgstr "Lien"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Link address"
+msgstr "Adresse du lien"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Clear formatting"
+msgstr "Effacer la mise en forme"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Undo"
+msgstr "Annuler"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Redo"
+msgstr "Rétablir"
 
 #~ msgid "An entity with this name already exists in the database"
 #~ msgstr "Il y a déjà une entité avec ce nom dans la base de donnée"

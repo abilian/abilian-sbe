@@ -6,36 +6,46 @@
 {% block content %}
   {% call m_box_content() %}
     {{ viewers_snapshot(viewers) }}
-    <br>
-    <div class="wiki-page">
-      <h1>{{ page.title }}</h1>
 
-      <div class="wiki-page-info">
-        <span class="last-modified">
-          {{ _("Last modified by") }} {{ page.last_modified_by }}
-          {{ _("on") }} {{ page.updated_at | datetimeformat }}</span>
+    <div class="wiki-page mt-4">
+      <h1 class="text-2xl font-bold text-gray-900 mb-4">{{ page.title }}</h1>
+
+      <div class="wiki-page-info text-sm text-gray-500 mb-6 pb-4 border-b border-gray-200">
+        <span>
+          {%- if page.last_modified_by %}
+            {{ _("Last modified by") }} {{ page.last_modified_by }} {{ _("on") }}
+          {%- else %}
+            {{ _("Last modified on") }}
+          {%- endif %}
+          {{ page.updated_at | datetimeformat }}</span>
       </div>
 
-      <div class="wiki-page-body">
+      <div class="wiki-page-body prose max-w-none">
         {{ page.body_html|safe }}
       </div>
 
       {%- if page.attachments %}
-        <div id="attachments">
-          <ul>
+        <div id="attachments" class="mt-8 pt-6 border-t border-gray-200"
+             data-delete-message="{{ _('Delete attachment?') }}"
+             data-delete-label="{{ _('Delete') }}"
+             data-cancel-label="{{ _('Cancel') }}">
+          <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ _("Attachments") }}</h3>
+          <ul class="space-y-2">
             {%- for attachment in page.attachments %}
-              <li>
-              <span class="attachment-item">
-                <img src="{{ attachment.icon }}" style="vertical-align: middle;" alt=""/>
-                <a href="{{ url_for(".attachment_download", community_id=g.community.slug, title=page.title, attachment=attachment.id) }}">{{ attachment.name }}</a>
-                ({{ attachment.content_length|filesize }})
-              </span>
+              <li class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center gap-3">
+                  <img src="{{ attachment.icon }}" alt="" class="w-5 h-5"/>
+                  <a href="{{ url_for(".attachment_download", community_id=g.community.slug, title=page.title, attachment=attachment.id) }}"
+                     class="text-blue-600 hover:text-blue-800">{{ attachment.name }}</a>
+                  <span class="text-sm text-gray-400">({{ attachment.content_length|filesize }})</span>
+                </div>
 
-                <form
-                    action="{{ url_for('.attachment_delete', community_id=g.community.slug, title=page.title, attachment=attachment.id) }}"
-                    method="POST" style="display: inline;">
+                <form action="{{ url_for('.attachment_delete', community_id=g.community.slug, title=page.title, attachment=attachment.id) }}"
+                      method="POST" class="inline-block">
                   {{ csrf.field() }}
-                  <button type="submit" disabled="disabled" name="action" value="delete"><i class="fa fa-trash"></i>
+                  <button type="submit" disabled="disabled" name="action" value="delete"
+                          class="p-2 text-gray-400 hover:text-red-600 disabled:opacity-50">
+                    <i class="fa fa-trash"></i>
                   </button>
                 </form>
               </li>

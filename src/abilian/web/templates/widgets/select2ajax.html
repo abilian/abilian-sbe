@@ -1,6 +1,0 @@
-<input type="text" size="10" name="{{ name }}" value="{{ input_value }}" {{ extra_args }}/>
-{%- if data_node_id %}
-<script type="application/json" id="{{ data_node_id }}">
- {{ json_data|tojson }}
-</script>
-{%- endif %}

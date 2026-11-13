@@ -1,21 +1,20 @@
 {%- from "wiki/macros.html" import m_difflines %}
-<span
-    class="text-muted">{{ _('Last edit by: %(user)s', user=current.author.name) }}, {{ current.created_at | datetimeformat }}</span>
-{{ _('Text has been replaced by last version.') }}<br/>
-<p class="text-center ">
+<p class="text-gray-500 mb-2">
+  {{ _('Last edit by: %(user)s', user=current.author.name) }}, {{ current.created_at | datetimeformat }}
+</p>
+<p class="text-gray-700 mb-4">{{ _('Text has been replaced by last version.') }}</p>
+<p class="text-center text-gray-600 mb-6">
   {{ _('Here is a comparison of your edits and new version edits') }}
 </p>
 
-<span class="col-md-6">
-  {{ _('Your version') }}<br/>
-  <pre>
-    {{ m_difflines(edited_diff) }}
-  </pre>
-</span>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div>
+    <h3 class="text-sm font-medium text-gray-700 mb-2">{{ _('Your version') }}</h3>
+    <pre class="p-4 bg-gray-50 rounded-lg text-sm overflow-x-auto">{{ m_difflines(edited_diff) }}</pre>
+  </div>
 
-<span class="col-md-6">
-  {{ _('Last version') }}<br/>
-  <pre>
-    {{ m_difflines(current_diff) }}
-  </pre>
-</span>
+  <div>
+    <h3 class="text-sm font-medium text-gray-700 mb-2">{{ _('Last version') }}</h3>
+    <pre class="p-4 bg-gray-50 rounded-lg text-sm overflow-x-auto">{{ m_difflines(current_diff) }}</pre>
+  </div>
+</div>

@@ -14,6 +14,7 @@ from abilian.sbe.apps.notifications.tasks.social import (
 )
 from abilian.services import get_service
 from abilian.web import url_for
+from tests.util import client_login
 
 if TYPE_CHECKING:
     from flask_sqlalchemy import SQLAlchemy
@@ -66,3 +67,17 @@ def test_mail_templates(db: SQLAlchemy, app_context) -> None:
     token = generate_unsubscribe_token(user)
     ctx = {"digests": digests, "token": token}
     render_template("notifications/daily-social-digest.html", **ctx)
+
+
+def test_the_digest_debug_page_is_for_site_admins_only(
+    client: Client, user: User, admin_user: User
+) -> None:
+    """It mails anyone's digest and shows it in the browser.
+
+    The admin check sat above the route decorator, so it guarded a copy of the
+    view that was never registered: any visitor could read another user's digest
+    by passing their email.
+    """
+    url = url_for("notifications.debug_social", email=admin_user.email)
+    with client_login(client, user):
+        assert client.get(url).status_code == 403

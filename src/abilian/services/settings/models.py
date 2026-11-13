@@ -70,7 +70,7 @@ class Setting(db.Model):
     __tablename__ = "setting"
 
     transformers = _transformers
-    key = sa.Column("key", sa.String(length=1000), primary_key=True)
+    key = sa.Column("key", sa.String(length=255), primary_key=True)
 
     #: Can be a string (Unicode), int, bool, json... or even a long dotted name
     #: if that's what you need. Type must be set before setting `value`

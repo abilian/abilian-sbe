@@ -7,8 +7,8 @@
   {% if viewers %}
     {% set nb_viewers = viewers|length %}
 
-    <div class="manager-thread-viewers">
-      <i class="fa fa-bookmark" aria-hidden="true" style="color:yellowgreen;"></i> {{ label }} :
+    <div class="manager-thread-viewers text-sm text-gray-600">
+      <i class="fa fa-bookmark text-green-500 mr-1"></i> {{ label }} :
       {% for viewer in viewers %}
         {% if loop.index <= limit %}
           {{ m_user_link(viewer.user) }}
@@ -16,7 +16,7 @@
         {% else %}
           {% if limit < nb_viewers %}
             {% if loop.last %}
-              <span> ...</span>
+              <span class="text-gray-400"> ...</span>
             {% endif %}
           {% endif %}
         {% endif %}
@@ -34,38 +34,48 @@
     {% set viewers = [] %}
   {% endif %}
   {% set nb_viewers=viewers|length %}
-  <p class="viewed">
+  <p class="viewed font-medium text-gray-700 mb-2">
     {{ label }}
-    <span style="color: silver;"> {{ nb_viewers }} {{ _("member") }}
+    <span class="text-gray-500 font-normal"> {{ nb_viewers }} {{ _("member") }}
       {%- if nb_viewers > 1 %}s{% endif %} </span>
   </p>
 
   {% if viewers %}
-    {% for viewer in viewers %}
-      <p>
-        {% call m_user_link(viewer.user) %}
-          {{ m_user_photo(viewer.user, size=30) }}
-        {% endcall %}
-        {{ m_user_link(viewer.user) }}
-        <span
-            style="color:silver;">- {{ viewer.viewed_at | age(date_threshold='day') }}</span>
-      </p>
-    {% endfor %}
+    <div class="space-y-2">
+      {% for viewer in viewers %}
+        <div class="flex items-center gap-2">
+          {% call m_user_link(viewer.user) %}
+            {{ m_user_photo(viewer.user, size=30) }}
+          {% endcall %}
+          {{ m_user_link(viewer.user) }}
+          <span class="text-gray-400 text-sm">- {{ viewer.viewed_at | age(date_threshold='day') }}</span>
+        </div>
+      {% endfor %}
+    </div>
   {% endif %}
 {% endmacro %}
 
 {% macro wizard_steps(steps,active_n) %}
-  <div class="row">
-  <!-- Responsive Arrow Progress Bar -->
-  <div class="arrow-steps clearfix col-sm-12 progress_bar">
-    {% for step in steps %}
-      <div class="step {% if loop.index <= active_n %}current{% endif %}"><span>
-        <a href="#">
-          {%- if loop.index <= active_n %}
-            <span class="step-number">{{ loop.index }}. </span>
-          {% endif %}
-          {{ step }}</a></span>
-      </div>
-    {% endfor %}
+  <div class="mb-8">
+    {# Responsive Arrow Progress Bar #}
+    <div class="flex items-center justify-between">
+      {% for step in steps %}
+        <div class="min-w-0 {% if loop.index == active_n %}flex-none{% else %}flex-1{% endif %} {% if not loop.last %}pr-2{% endif %}">
+          <div class="relative flex items-center">
+            <div class="flex shrink-0 items-center justify-center w-8 h-8 rounded-full text-sm font-medium
+                        {% if loop.index <= active_n %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
+              {{ loop.index }}
+            </div>
+            {#- On a phone only the current step has room for its name. #}
+            <span class="ml-2 text-sm {% if loop.index != active_n %}hidden sm:inline{% endif %} {% if loop.index <= active_n %}text-blue-600 font-medium{% else %}text-gray-500{% endif %}">
+              {{ step }}
+            </span>
+            {% if not loop.last %}
+              <div class="flex-1 ml-4 h-0.5 {% if loop.index < active_n %}bg-blue-600{% else %}bg-gray-200{% endif %}"></div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
   </div>
 {% endmacro %}

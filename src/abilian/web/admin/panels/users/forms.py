@@ -12,7 +12,7 @@ from abilian.core.models.subjects import Group
 from abilian.i18n import _, _l
 from abilian.services.security.models import Role
 from abilian.web.forms import Form, widgets
-from abilian.web.forms.fields import QuerySelect2Field, Select2MultipleField
+from abilian.web.forms.fields import MultipleChoiceField, QuerySelectField
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import optional, required
 
@@ -44,7 +44,7 @@ class BaseUserAdminForm(Form):
         widget=widgets.BooleanWidget(),
     )
 
-    groups = QuerySelect2Field(
+    groups = QuerySelectField(
         _l("Groups"),
         validators=(optional(),),
         multiple=True,
@@ -53,7 +53,7 @@ class BaseUserAdminForm(Form):
         get_label="name",
     )
 
-    roles = Select2MultipleField(
+    roles = MultipleChoiceField(
         _l("Roles"),
         description=_l(
             "Prefer groups to manage access rights. Directly assigning roles "

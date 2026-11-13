@@ -41,16 +41,19 @@ packages:
 
 tasks:
   - setup: |
-      sudo pip install --break-system-packages -U uv nox
+      # Not `sudo pip install`: it can't upgrade Debian's own packages.
+      pipx install uv
       cd abilian-sbe
       npm install
+      make front
 
+  # nox runs through uv, on the Python version that requires-python allows.
   - lint-nox: |
+      export PATH=$HOME/.local/bin:$PATH
       cd abilian-sbe
-      nox -e lint
+      uvx --python 3.13 nox -e lint
 
   - test-nox: |
+      export PATH=$HOME/.local/bin:$PATH
       cd abilian-sbe
-      # Default Python version is python 3.12
-      # TODO: install other versions using rye or uv
-      nox -e pytest-3.12
+      uvx --python 3.13 nox -e pytest-3.13

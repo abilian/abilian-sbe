@@ -1,4 +1,4 @@
-.PHONY: test unit full-test pep8 clean setup
+.PHONY: test test-mariadb test-mariadb-docker test-postgres-docker unit full-test pep8 clean setup
 
 default: lint-ruff test lint
 all: default
@@ -12,6 +12,20 @@ all: default
 test:
 	# pytest -n auto
 	pytest tests
+
+MARIADB_TEST_URI ?= mysql+pymysql://sbe:sbe@127.0.0.1/sbe_test?charset=utf8mb4
+
+## Run tests against MariaDB
+test-mariadb:
+	SQLALCHEMY_DATABASE_URI="$(MARIADB_TEST_URI)" pytest tests
+
+# CI adds `-f tests/docker/compose.host-network.yaml` through DOCKER_TESTS_EXTRA.
+DOCKER_TESTS = docker compose -f tests/docker/compose.yaml $(DOCKER_TESTS_EXTRA)
+
+## Run tests against MariaDB or PostgreSQL, database and tests both in Docker
+test-mariadb-docker test-postgres-docker: test-%-docker:
+	$(DOCKER_TESTS) run --rm --build tests-$*; status=$$?; \
+	$(DOCKER_TESTS) down; exit $$status
 
 test-with-coverage:
 	pytest \
@@ -43,27 +57,25 @@ lint-ruff:
 	ruff check src tests
 
 .PHONY: lint
-lint: lint-ruff
+lint: lint-ruff lint-py lint-imports
 
-    #.PHONY: lint-py
-    #lint-py:
-	#flake8 src tests
-	# deptry src
-	# python -m pyanalyze --config-file pyproject.toml
+.PHONY: lint-imports
+lint-imports:
+	## Check the architectural boundaries (contracts in pyproject.toml)
+	lint-imports
+
+.PHONY: lint-py
+lint-py:
+	deptry src
+	# pyrefly check src
+	# ty check src
 	# mypy --show-error-codes src tests
 	# pyright src tests
 
-.PHONY: lint-mypy
-lint-mypy:
-	mypy --show-error-codes src tests
-
-.PHONY: lint-pyright
-lint-pyright:
-	pyright src tests
-
-
 .PHONY: format
 format:
+	ruff format src tests *.py
+	ruff check --fix src tests
 	ruff format src tests *.py
 	markdown-toc -i README.md
 	markdown-toc -i docs/roadmap.md
@@ -97,7 +109,7 @@ clean:
 .PHONY: tidy
 ## Make super-clean
 tidy: clean
-	rm -rf .tox .nox
+	rm -rf .tox .nox .venv
 
 .PHONY:
 update-pot: update-pot
@@ -113,8 +125,25 @@ install:
 	@echo "--> Activating pre-commit hook"
 	pre-commit install
 	@echo "Remember to run `uv run $SHELL` to activate the virtualenv"
-	yarn
+	npm install
+	$(MAKE) front
 
+
+.PHONY: test-e2e
+test-e2e:  ## Run the Playwright browser tests
+	cd e2e_playwright && eval "$$(sh pick-ports.sh)" && honcho start
+
+.PHONY: test-screenshots
+test-screenshots:  ## Compare screenshots with the approved ones (needs Docker)
+	cd e2e_playwright && eval "$$(sh pick-ports.sh)" && honcho start -f Procfile.screenshots
+
+.PHONY: update-screenshots
+update-screenshots:  ## Approve the current screenshots (needs Docker)
+	E2E_UPDATE_SCREENSHOTS=1 $(MAKE) test-screenshots
+
+.PHONY: front
+front:  ## Build the front-end assets (CSS/JS) into the package
+	cd vite && npm install && npm run build
 
 .PHONY: update-deps
 update-deps:  ## Update dependencies
@@ -133,5 +162,6 @@ help:
 ## Publish to PyPI
 publish: clean
 	git push --tags
+	$(MAKE) front
 	uv build
 	twine upload dist/*

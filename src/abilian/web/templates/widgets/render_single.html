@@ -2,41 +2,45 @@
 {%- set view = widget.options.view -%}
 
 <div class="model-view">
-  <div class="actions pull-right">
-    {%- for action in view.object_actions %}
-      {{ action.render() }}
-    {%- endfor %}
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">{{ entity.name }}</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        {{ _("Created at:") }} {{ entity.created_at|datetimeformat("medium") }}
+        {% if entity.creator %}
+          {{ _("by") }} <a href="{{ url_for(entity.creator) }}" class="text-blue-600 hover:text-blue-800">{{ entity.creator }}</a>
+        {% endif %}
+
+        {% if entity.created_at != entity.updated_at %}
+          - {{ _("Updated at:") }} {{ entity.updated_at|datetimeformat("medium") }}
+        {% endif %}
+      </p>
+    </div>
+    <div class="flex gap-2">
+      {%- for action in view.object_actions %}
+        {{ action.render() }}
+      {%- endfor %}
+    </div>
   </div>
 
-  <h1>{{ entity.name }}</h1>
-  <small>
-    {{ _("Created at:") }} {{ entity.created_at|datetimeformat("medium") }}
-    {% if entity.creator %}
-      {{ _("by") }} <a href="{{ url_for(entity.creator) }}">{{ entity.creator }}</a>
-    {% endif %}
-
-    {% if entity.created_at != entity.updated_at %}
-      - {{ _("Updated at:") }} {{ entity.updated_at|datetimeformat("medium") }}
-      {#  TODO: link to last updater #}
-    {% endif %}
-  </small>
-
   {%- for panel, data in panels %}
-    <h2>{{ panel.label }}</h2>
+    <h2 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ panel.label }}</h2>
 
-    <table class="table table-striped table-condensed">
-      <tbody>
-      {%- for row in panel %}
-        {%- if row.cols[0] in data %}
-          {%- set label, value = data[row.cols[0]] %}
-          <tr class="row">
-            <td class="col-sm-4 text-muted">{{ label.text }}</td>
-            <td class="col-sm-8" colspan="3">{{ value }}</td>
-          </tr>
-        {%- endif %}
-      {%- endfor %}
-      </tbody>
-    </table>
+    <div class="overflow-hidden border border-gray-200 rounded-lg">
+      <table class="min-w-full divide-y divide-gray-200">
+        <tbody class="bg-white divide-y divide-gray-200">
+        {%- for row in panel %}
+          {%- if row.cols[0] in data %}
+            {%- set label, value = data[row.cols[0]] %}
+            <tr class="hover:bg-gray-50">
+              <td class="px-4 py-3 w-1/3 text-sm text-gray-500 bg-gray-50">{{ label.text }}</td>
+              <td class="px-4 py-3 text-sm text-gray-900" colspan="3">{{ value }}</td>
+            </tr>
+          {%- endif %}
+        {%- endfor %}
+        </tbody>
+      </table>
+    </div>
   {% endfor %}
 
 </div>

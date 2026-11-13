@@ -6,14 +6,12 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 from unittest import mock
 
-import pytest
 from flask_login import login_user
 from pytz import UTC
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents import lock
 from abilian.sbe.apps.documents.lock import Lock
-from tests.util import redis_available
 
 if TYPE_CHECKING:
     from flask import Flask
@@ -32,7 +30,6 @@ def test_lock() -> None:
     assert l.date == date
 
 
-@pytest.mark.skipif(not redis_available(), reason="requires redis connection")
 def test_lock2(app: Flask, session: Session) -> None:
     user = User(
         email="test@example.com", first_name="Joe", last_name="Smith", can_login=True

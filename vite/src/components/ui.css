@@ -1,0 +1,381 @@
+/* UI components inherited from Bootstrap's vocabulary.
+ *
+ * What is left of bootstrap-compat.css, which existed to keep un-migrated
+ * markup rendering. These are not compatibility shims any more: the markup that
+ * uses them is Tailwind throughout, and a third of them are applied at runtime
+ * by our own JavaScript -- file.js adds .progress-bar, folder_edit.js toggles
+ * .has-error -- so scanning templates alone does not find them.
+ *
+ * Renaming them out of Bootstrap's vocabulary is a separate job: it means
+ * touching the markup and the scripts together.
+ */
+
+.btn {
+  @apply inline-block text-sm font-medium text-center align-middle cursor-pointer border border-transparent rounded-md px-4 py-2 leading-normal transition-colors duration-150;
+}
+
+/* Only 5 of 144 buttons carried a focus ring, so keyboard users could not see
+   where they were. Putting it on the component fixes every migrated call site
+   at once. */
+.btn:focus-visible {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
+.btn-primary {
+  @apply text-white bg-blue-600 border-blue-600;
+}
+
+.btn-primary:hover {
+  @apply bg-blue-700 border-blue-700;
+}
+
+.btn-default {
+  @apply text-gray-700 bg-white border-gray-300;
+}
+
+.btn-default:hover {
+  @apply bg-gray-50;
+}
+
+.btn-success {
+  @apply text-white bg-green-600 border-green-600;
+}
+
+.btn-success:hover {
+  @apply bg-green-700;
+}
+
+.btn-danger {
+  @apply text-white bg-red-600 border-red-600;
+}
+
+.btn-danger:hover {
+  @apply bg-red-700;
+}
+
+.form-control {
+  @apply block w-full px-3 py-2 text-base leading-normal text-gray-700 bg-white border border-gray-300 rounded-md transition-all duration-150;
+}
+
+.form-control:focus {
+  @apply border-blue-500 outline-none ring-4 ring-blue-100;
+}
+
+.table {
+  @apply w-full mb-4 text-gray-700 border-collapse;
+}
+
+.table th, .table td {
+  @apply px-3 py-3 align-top border-b border-gray-200;
+}
+
+.table thead th {
+  @apply align-bottom border-b-2 border-gray-200 font-semibold;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  @apply bg-gray-50;
+}
+
+.nav-tabs {
+  @apply flex flex-wrap pl-0 mb-0 list-none border-b border-gray-200;
+}
+
+.nav-tabs li {
+  @apply -mb-px;
+}
+
+.nav-tabs li a {
+  @apply block px-4 py-2 mr-0.5 leading-normal text-gray-500 no-underline bg-transparent border border-transparent rounded-t-md transition-colors duration-150;
+}
+
+.nav-tabs li a:hover {
+  @apply text-gray-700 bg-gray-50;
+}
+
+.nav-tabs li.active a {
+  @apply text-gray-700 bg-white border-gray-200 border-b-white;
+}
+
+.alert {
+  @apply p-4 mb-4 border border-transparent rounded-md;
+}
+
+.alert-warning {
+  @apply bg-yellow-50 border-yellow-300 text-yellow-800;
+}
+
+.alert-danger {
+  @apply bg-red-50 border-red-300 text-red-800;
+}
+
+.badge {
+  @apply inline-block px-2 py-1 text-xs font-semibold leading-none rounded;
+}
+
+.dropdown-menu {
+  @apply absolute z-10 mt-2 min-w-[10rem] py-2 bg-white border border-gray-200 rounded-md shadow-lg;
+}
+
+/* Closed by default -- Bootstrap's .dropdown-menu was display:none until
+   opened, and nothing replaced that, so every menu sat permanently open.
+   But only for menus nothing else controls: Alpine opens an element by
+   clearing its inline `display`, which cannot beat a class, so applying
+   `hidden` to every .dropdown-menu instead left every x-show dropdown
+   permanently invisible. */
+.dropdown-menu:not([x-show]) {
+  @apply hidden;
+}
+
+/* A row is a row whether it is a link or a form submit: actions that POST
+   (Download, Send by mail) render as <button class="btn btn-link">, which
+   carries no padding of its own and otherwise collapses into its neighbours. */
+.dropdown-menu li a,
+.dropdown-menu li button {
+  @apply block w-full px-4 py-2 text-left text-gray-700 no-underline;
+}
+
+.dropdown-menu li a:hover,
+.dropdown-menu li button:hover {
+  @apply bg-gray-100;
+}
+
+.breadcrumb {
+  @apply flex flex-wrap px-4 py-2 mb-4 list-none bg-gray-100 rounded-md;
+}
+
+.breadcrumb li {
+  @apply flex items-center;
+}
+
+.breadcrumb li + li:before {
+  @apply px-2 text-gray-500 content-['/'];
+}
+
+.breadcrumb li a {
+  @apply text-blue-600 no-underline;
+}
+
+.breadcrumb li a:hover {
+  @apply text-blue-700;
+}
+
+.breadcrumb li.active {
+  @apply text-gray-500;
+}
+
+/* An action rendered as a form submit so it can POST -- "Close thread",
+   "Delete document". It sits in a menu next to plain links, so it must not
+   carry .btn's padding or weight, or it hangs indented beside them. */
+.btn-link {
+  @apply p-0 align-baseline font-normal text-blue-600 bg-transparent border-transparent;
+  /* .btn sets text-sm; inheriting instead keeps this the same size as the
+     plain links it sits beside. */
+  font-size: inherit;
+}
+
+.btn-link:hover {
+  @apply text-blue-800 underline;
+}
+
+.btn-group > .btn {
+  @apply relative rounded-none;
+}
+
+.btn-group > .btn:first-child {
+  @apply rounded-l-md;
+}
+
+.btn-group > .btn:last-child {
+  @apply rounded-r-md;
+}
+
+.form-inline .form-control {
+  @apply w-auto inline-block;
+}
+
+.help-block {
+  @apply mt-1 text-sm text-gray-500;
+}
+
+.has-error .form-control {
+  @apply border-red-500;
+}
+
+.has-error .control-label, .has-error .help-block {
+  @apply text-red-600;
+}
+
+.has-warning .form-control {
+  @apply border-yellow-500;
+}
+
+.has-success .form-control {
+  @apply border-green-500;
+}
+
+.input-group .form-control {
+  @apply relative flex-1 z-[2];
+}
+
+.input-group .form-control:not(:first-child) {
+  @apply rounded-l-none;
+}
+
+.input-group .form-control:not(:last-child) {
+  @apply rounded-r-none;
+}
+
+.input-group-btn > .btn {
+  @apply relative;
+}
+
+.input-group-btn:first-child > .btn {
+  @apply rounded-r-none;
+}
+
+.input-group-btn:last-child > .btn {
+  @apply rounded-l-none;
+}
+
+.text-danger {
+  @apply text-red-600;
+}
+
+.label {
+  @apply inline px-2 py-0.5 text-xs font-semibold leading-none text-white rounded;
+}
+
+.label-default {
+  @apply bg-gray-500;
+}
+
+.progress {
+  @apply h-5 overflow-hidden bg-gray-200 rounded;
+}
+
+.progress-bar {
+  @apply flex flex-col justify-center h-full text-xs text-white text-center bg-blue-600 transition-all duration-500;
+}
+
+.small, small {
+  @apply text-sm;
+}
+
+.dropdown {
+  @apply relative;
+}
+
+.dropdown.open > .dropdown-menu {
+  @apply block;
+}
+
+.glyphicon {
+  @apply inline-block font-normal leading-none;
+}
+
+/* Tables on narrow screens.
+ *
+ * Every listing table is `min-w-full`, i.e. exactly the container width, so at
+ * 375px the columns crushed instead of scrolling -- "Login enabled" became
+ * "LOG ENAB" stacked over two lines. Only 7 of the 19 tables sit in a scroll
+ * container, so widening them would have pushed the page sideways; making the
+ * table its own scroll box needs no wrapper and covers all of them.
+ */
+@media (max-width: 640px) {
+  table.min-w-full {
+    @apply block overflow-x-auto whitespace-nowrap;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Sidebar action menu
+ *
+ * Every m_box_menu list of actions -- forum, wiki, documents, calendar,
+ * members, permissions. Templates supply structure only:
+ *
+ *     <ul class="menu-actions">
+ *       <li>{{ action.render() }}</li>
+ *       <li class="menu-divider"></li>
+ *     </ul>
+ *
+ * Spacing, colour and the icon column live here, so the eight menus cannot
+ * drift apart again the way they had (px-3 py-2, px-2 py-1 and px-4 py-2 all
+ * in use, half of them blue and half grey).
+ *
+ * Actions are commands, not destinations: neutral until hovered, so "Delete"
+ * does not compete with "Archives" for attention.
+ * ------------------------------------------------------------------------ */
+.menu-actions {
+  @apply m-0 list-none p-0;
+}
+
+.menu-actions > li {
+  @apply rounded px-2 py-1;
+}
+
+.menu-actions > li:hover {
+  @apply bg-gray-100;
+}
+
+.menu-actions > li.menu-divider {
+  @apply my-1.5 border-t border-gray-200 p-0;
+}
+
+.menu-actions > li.menu-divider:hover {
+  @apply bg-transparent;
+}
+
+.menu-actions a,
+.menu-actions button {
+  @apply text-gray-700 no-underline;
+}
+
+.menu-actions a:hover,
+.menu-actions button:hover {
+  @apply text-blue-700 no-underline;
+}
+
+/* Glyphs differ in width (fa-fire is narrow, fa-comments wide), so without a
+   fixed column the labels start at a different x on every row. */
+.menu-actions i,
+.menu-nav i {
+  @apply inline-block w-4 text-center;
+}
+
+/* ---------------------------------------------------------------------------
+ * Sidebar navigation menu
+ *
+ * Distinct from .menu-actions: these are destinations with a current one, so
+ * they keep the blue active marker. Admin and Preferences had the same design
+ * spelled two different ways -- a <ul>/<li>/<span> and a <nav>/<a> -- with the
+ * active state duplicated inline in both.
+ *
+ *     <ul class="menu-nav">
+ *       <li><span class="menu-nav-item is-active">...</span></li>
+ *     </ul>
+ * ------------------------------------------------------------------------ */
+.menu-nav {
+  @apply m-0 flex flex-col list-none p-0;
+}
+
+/* Rows are pills, like .menu-actions. The previous left accent bar sat inside
+   the card's 16px padding, so it read as a stray vertical line floating in the
+   gutter rather than an edge marker -- an accent bar only works flush against
+   the container edge. The tint and weight mark the current item instead. */
+.menu-nav .menu-nav-item {
+  @apply block rounded px-2 py-1 text-sm text-gray-700 no-underline transition-colors;
+}
+
+.menu-nav .menu-nav-item:hover {
+  @apply bg-gray-100 text-gray-900;
+}
+
+.menu-nav .menu-nav-item.is-active {
+  @apply bg-blue-50 font-medium text-blue-700;
+}
+
+/* The row carries the colour; a rendered action's own <a> inherits it. */
+.menu-nav .menu-nav-item a {
+  @apply text-inherit no-underline;
+}

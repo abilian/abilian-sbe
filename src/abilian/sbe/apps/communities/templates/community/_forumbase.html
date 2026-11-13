@@ -3,26 +3,30 @@
 {% from "macros/box.html" import m_box_forum %}
 
 {% block header %}
+  <div class="community-header flex items-center gap-3 mb-4">
+    <img src="{{ community_image_url(g.community, s=40) }}" class="rounded-lg" alt=""/>
+    <h1 class="text-xl font-semibold text-gray-900">{{ g.community.name }}</h1>
+    {% if threads %}
+      <span class="text-gray-500">-</span>
+      <span class="text-sm text-gray-500">{{ threads|length }} Conversation(s)</span>
+    {% endif %}
+  </div>
 
-  <h1 class="community-header">
-    <img src="{{ community_image_url(g.community, s=40) }}"/>
-    <span style="color:black;">
-    {{ g.community.name }}{% if threads %}</span> -
-      <span class="nb-conversation">{{ threads|length }} Conversation(s)</span>{% endif %}
-  </h1>
   {%- set tabs = actions.for_category('communities:tabs') %}
-
-  <ul class="nav nav-tabs community-tabs" id="community-tabs">
+  <ul class="flex flex-wrap border-b border-gray-200 gap-1 mb-6" id="community-tabs">
     {%- for tab in tabs %}
-      <li {% if tab.is_current() %}class="active"{% endif %}>{{ tab.render() }}</li>
+      <li class="-mb-px">
+        <span class="inline-block px-4 py-2 text-sm font-medium rounded-t-lg border-b-2 {% if tab.is_current() %}border-blue-500 text-blue-600 bg-white{% else %}border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300{% endif %}">
+          {{ tab.render() }}
+        </span>
+      </li>
     {%- endfor %}
   </ul>
 {% endblock %}
 
 {% block main %}
-  <div class="row">
-
-    <div class="col-md-13">
+  <div class="w-full">
+    <div>
       {%- block content %}
       {%- endblock %}
     </div>
@@ -39,5 +43,7 @@
 
 {% macro forum_menu(action) %}
   <button type="button"
-          class="{% if action.is_current() %}forum-action-active{% else %}forum-action{% endif %}">{{ action.render() }}</button>
+          class="px-3 py-2 text-sm rounded-md {% if action.is_current() %}bg-blue-100 text-blue-700 font-medium{% else %}text-gray-600 hover:bg-gray-100{% endif %}">
+    {{ action.render() }}
+  </button>
 {% endmacro %}

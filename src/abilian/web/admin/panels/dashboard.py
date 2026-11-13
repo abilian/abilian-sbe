@@ -1,36 +1,87 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-""""""
+"""Admin dashboard: user growth and connection activity.
+
+The charts are drawn by uPlot, which wants columnar data -- one shared array of
+timestamps per chart, then one array of values per series -- so that is the
+shape built here, rather than leaving the browser to reshape a list of points.
+"""
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
-from typing import Any
+from collections import Counter, defaultdict
+from datetime import UTC, date, datetime, timedelta
+from itertools import accumulate
+from typing import TYPE_CHECKING
 
-import pandas as pd
 import sqlalchemy as sa
 from flask import render_template
-from numpy import sum as numpysum
 
 from abilian.core.extensions import db
-from abilian.core.models.subjects import User
+from abilian.core.models.subjects import ROOT_USER_ID, User
 from abilian.i18n import _, _l
 from abilian.services.audit import CREATION, AuditEntry
 from abilian.services.auth.models import LoginSession
 from abilian.web.admin import AdminPanel
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable, Mapping
 
 
 class DashboardPanel(AdminPanel):
     id = "dashboard"
     path = ""
     label = _l("Dashboard")
-    icon = "eye-open"
+    icon = "eye"
 
     def get(self) -> str:
-        login_entries = LoginSession.query.order_by(LoginSession.started_at.asc()).all()
-        # .options(sa.orm.joinedload(LoginSession.user))
-        daily, weekly, monthly = uniquelogins(login_entries)
-        new_logins, total_users = newlogins(login_entries)
+        # Two columns, one query. The aggregation below is plain Python, so
+        # there is no reason to hydrate LoginSession rows and then lazy-load
+        # `.user` on each of them -- which is what this did before, one SELECT
+        # per session, on every dashboard load.
+        sessions = (
+            db.session.query(LoginSession.started_at, LoginSession.user_id)
+            .filter(LoginSession.user_id != ROOT_USER_ID)
+            .all()
+        )
+        signups = (
+            db.session.query(User.created_at)
+            .filter(User.id != ROOT_USER_ID, User.created_at.is_not(None))
+            .all()
+        )
+
+        today = _utc_today()
+        by_day, by_week, by_month = unique_users(sessions)
+        new_per_month = Counter(
+            _month_start(created_at.date()) for (created_at,) in signups
+        )
+
+        # Colours are set here and nowhere else. These are slots 1-3 of the
+        # categorical palette, validated for colour-vision deficiency and for
+        # >= 3:1 contrast on white. The pairing they replace -- green and orange
+        # -- is precisely the one a deuteranope cannot separate.
+        users = {
+            "x_label": _("Date"),
+            "data": user_columns(new_per_month, by_month, today),
+            "series": [
+                {"label": _("Registered"), "stroke": "#2a78d6"},
+                {"label": _("Active"), "stroke": "#eb6834"},
+                {"label": _("New"), "stroke": "#4a3aa7"},
+            ],
+        }
+        # One measure at three resolutions: a granularity switch, not three
+        # series to overlay. Weekly leads because it is the default view --
+        # eleven years of daily points is a hairball.
+        connections = {
+            "x_label": _("Date"),
+            "label": _("Connections"),
+            "stroke": "#0053c1",
+            "grains": [
+                {"label": _("Weekly"), "data": columns(by_week, today, _next_week)},
+                {"label": _("Daily"), "data": columns(by_day, today, _next_day)},
+                {"label": _("Monthly"), "data": columns(by_month, today, _next_month)},
+            ],
+        }
 
         stats = {
             "today": stats_since(timedelta(days=1)),
@@ -38,32 +89,11 @@ class DashboardPanel(AdminPanel):
             "this_month": stats_since(timedelta(days=30)),
         }
 
-        # let's format the data into NVD3 datastructures
-        connections = [
-            {"key": _("Daily"), "color": "#7777ff", "values": daily},
-            {
-                "key": _("Weekly"),
-                "color": "#2ca02c",
-                "values": weekly,
-                "disabled": True,
-            },
-            {
-                "key": _("Monthly"),
-                "color": "#ff7f0e",
-                "values": monthly,
-                "disabled": True,
-            },
-        ]
-        new_logins = [
-            {"key": _("New"), "color": "#ff7f0e", "bar": True, "values": new_logins},
-            {"key": _("Total"), "color": "#2ca02c", "values": total_users},
-        ]
-
         return render_template(
             "admin/dashboard.html",
             stats=stats,
+            users=users,
             connections=connections,
-            new_logins=new_logins,
         )
 
 
@@ -106,108 +136,129 @@ def stats_since(dt: timedelta) -> dict[str, int]:
     }
 
 
-epoch = datetime.utcfromtimestamp(0)
+def unique_users(
+    sessions: Iterable[tuple[datetime, int]],
+) -> tuple[dict[date, int], dict[date, int], dict[date, int]]:
+    """Distinct users who connected, per day, per week and per month.
 
-
-def unix_time_millis(dt):
-    return (dt - epoch).total_seconds() * 1000.0
-
-
-def newlogins(sessions: list[Any]) -> tuple[list[Any], list[Any]]:
-    """Brand new logins each day, and total of users each day.
-
-    :return: data, total
-      2 lists of dictionaries of the following format [{'x':epoch, 'y': value},]
+    Every grain is counted from the raw sessions. Summing the daily counts into
+    a week -- which is what this used to do -- counts a user once per day they
+    showed up, and that is not what "unique connections per week" means.
     """
-    if not sessions:
-        return [], []
-    users = {}
-    dates = {}
+    daily: dict[date, set[int]] = defaultdict(set)
+    weekly: dict[date, set[int]] = defaultdict(set)
+    monthly: dict[date, set[int]] = defaultdict(set)
 
-    for session in sessions:
-        user = session.user
-        # time value is discarded to aggregate on days only
-        date = session.started_at.strftime("%Y/%m/%d")
-        # keep the info only it's the first time we encounter a user
-        if user not in users:
-            users[user] = date
-            # build the list of users on a given day
-            if date not in dates:
-                dates[date] = [user]
-            else:
-                dates[date].append(user)
+    for started_at, user_id in sessions:
+        day = started_at.date()
+        daily[day].add(user_id)
+        weekly[_week_start(day)].add(user_id)
+        monthly[_month_start(day)].add(user_id)
 
-    data = []
-    total = []
-    previous = 0
-    for date in sorted(dates.keys()):
-        # print u"{} : {}".format(date, len(dates[date]))
-        date_epoch = unix_time_millis(datetime.strptime(date, "%Y/%m/%d"))
-        data.append({"x": date_epoch, "y": len(dates[date])})
-        previous += len(dates[date])
-        total.append({"x": date_epoch, "y": previous})
-
-    return data, total
+    return (_sizes(daily), _sizes(weekly), _sizes(monthly))
 
 
-def uniquelogins(sessions: list[Any]) -> tuple[list[Any], list[Any], list[Any]]:
-    """Unique logins per days/weeks/months.
+def user_columns(
+    new_per_month: Mapping[date, int],
+    active_per_month: Mapping[date, int],
+    through: date,
+) -> list[list[int]]:
+    """`[timestamps, registered, active, new]` on one shared grid of months.
 
-    :return: daily, weekly, monthly
-    3 lists of dictionaries of the following format [{'x':epoch, 'y': value},]
+    New users are counted from `User.created_at`, not from the date of a first
+    login: an account that was created and never used is still an account, and
+    the login-based version left those out of the totals entirely. Registered is
+    the running total of that, so it can only rise.
     """
-    # sessions = LoginSession.query.order_by(LoginSession.started_at.asc()).all()
-    if not sessions:
-        return [], [], []
+    known = [*new_per_month, *active_per_month]
+    if not known:
+        return [[], [], [], []]
 
-    dates: dict[str, set[User]] = {}
-    for session in sessions:
-        user = session.user
-        # time value is discarded to aggregate on days only
-        date = session.started_at.strftime("%Y/%m/%d")
+    months = _periods(min(known), through, _next_month)
+    new = [new_per_month.get(month, 0) for month in months]
+    return [
+        [_epoch_seconds(month) for month in months],
+        list(accumulate(new)),
+        [active_per_month.get(month, 0) for month in months],
+        new,
+    ]
 
-        if date not in dates:
-            dates[date] = set()  # we want unique users on a given day
-            dates[date].add(user)
-        else:
-            dates[date].add(user)
 
-    daily = []
-    weekly = []
-    monthly = []
+def columns(
+    counts: Mapping[date, int],
+    through: date,
+    next_period: Callable[[date], date],
+) -> list[list[int]]:
+    """`[timestamps, values]` for one grain, with no period missing."""
+    if not counts:
+        return [[], []]
 
-    for date in sorted(dates.keys()):
-        # print u"{} : {}".format(date, len(dates[date]))
-        date_epoch = unix_time_millis(datetime.strptime(date, "%Y/%m/%d"))
-        daily.append({"x": date_epoch, "y": len(dates[date])})
+    periods = _periods(min(counts), through, next_period)
+    return [
+        [_epoch_seconds(period) for period in periods],
+        [counts.get(period, 0) for period in periods],
+    ]
 
-    # first_day = data[0]['x']
-    # last_day = data[-1]['x']
 
-    daily_serie = pd.Series(dates)
-    # convert the index to Datetime type
-    daily_serie.index = pd.DatetimeIndex(daily_serie.index)
-    # calculate the values instead of users lists
-    daily_serie = daily_serie.apply(len)
+def _periods(
+    first: date, through: date, next_period: Callable[[date], date]
+) -> list[date]:
+    """Every period start from `first` up to `through`, with none left out.
 
-    # GroupBy Week/month, Thanks Panda
-    weekly_serie = daily_serie.groupby(pd.Grouper(freq="W")).aggregate(numpysum)
-    monthly_serie = daily_serie.groupby(pd.Grouper(freq="ME")).aggregate(numpysum)
+    The gaps are the point. A period with no data still gets its slot, so that
+    "nobody connected" is distinguishable from "no sample here" -- otherwise a
+    line is drawn straight across the silence, and an index-based x axis quietly
+    squeezes eleven years of history into evenly spaced points.
 
-    for date, value in weekly_serie.items():
-        try:
-            value = int(value)
-        except ValueError:
-            continue
-        date_epoch = unix_time_millis(date)
-        weekly.append({"x": date_epoch, "y": value})
+    The period `through` falls in is left off: it is still filling up, and its
+    count is not comparable with the completed ones beside it. Plotted, it ends
+    every chart in a cliff that belongs to the calendar rather than to the data.
+    Today's own figures belong on the stat tiles, which is where they are.
+    """
+    periods = []
+    period = first
+    while period <= through:
+        periods.append(period)
+        period = next_period(period)
 
-    for date, value in monthly_serie.items():
-        try:
-            value = int(value)
-        except ValueError:
-            continue
-        date_epoch = unix_time_millis(date)
-        monthly.append({"x": date_epoch, "y": value})
+    if len(periods) > 1 and next_period(periods[-1]) > through:
+        periods.pop()
+    return periods
 
-    return daily, weekly, monthly
+
+def _sizes(buckets: Mapping[date, set[int]]) -> dict[date, int]:
+    return {period: len(users) for period, users in buckets.items()}
+
+
+EPOCH = date(1970, 1, 1)
+
+
+def _utc_today() -> date:
+    """Today in UTC -- the timezone the timestamps in the database are in."""
+    return datetime.now(UTC).date()
+
+
+def _epoch_seconds(day: date) -> int:
+    """Midnight UTC on `day`, in the seconds uPlot's time axis expects."""
+    return (day - EPOCH).days * 86_400
+
+
+def _week_start(day: date) -> date:
+    """The Monday of the week `day` falls in."""
+    return day - timedelta(days=day.weekday())
+
+
+def _month_start(day: date) -> date:
+    return day.replace(day=1)
+
+
+def _next_day(day: date) -> date:
+    return day + timedelta(days=1)
+
+
+def _next_week(day: date) -> date:
+    return day + timedelta(days=7)
+
+
+def _next_month(day: date) -> date:
+    return date(day.year + day.month // 12, day.month % 12 + 1, 1)

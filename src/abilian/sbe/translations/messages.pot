@@ -1726,3 +1726,21 @@ msgstr ""
 #: abilian/sbe/apps/wiki/templates/wiki/source.html:6
 msgid "(source)"
 msgstr ""
+
+msgid "These addresses are not valid and were left out: {addresses}"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "List view"
+msgstr ""
+
+msgid "Gallery view"
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+msgid "Main"
+msgstr ""

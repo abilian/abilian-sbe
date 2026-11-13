@@ -11,7 +11,7 @@ from flask import g
 from flask_babel import format_date
 
 from abilian.i18n import _l
-from abilian.sbe.apps.communities.security import is_manager
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.services.viewtracker import viewtracker
 
 if TYPE_CHECKING:
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 def object_viewers(entity: Document | WikiPage) -> list:
-    if is_manager():
+    if can_manage(g.community):
         views = viewtracker.get_views(entity=entity)
         community_members_id = [
             user.id for user in g.community.members if user.id != entity.creator.id

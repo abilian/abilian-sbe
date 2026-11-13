@@ -1,122 +1,134 @@
+{% from "macros/box.html" import m_box %}
+
 {% macro render_message(message) %}
   {% set user_href = url_for(".user", user_id=message.creator.id) %}
-  <li class="stream-item clearfix">
-    <a href="{{ user_href }}" class="user-photo" target=""
+  <li class="flex gap-4 py-4 border-b border-gray-100 last:border-0">
+    <a href="{{ user_href }}"
+       class="w-12 h-12 rounded-full bg-cover bg-center flex-shrink-0"
        style="background-image: url('{{ user_photo_url(message.creator, size=45) }}');"></a>
 
-    <div class="activity-body">
+    <div class="flex-1 min-w-0">
       {%- if message.group %}
-        <span class="label pull-right">{{ message.group.name }}</span>
+        <span class="float-right inline-flex px-2 py-0.5 text-xs font-medium bg-gray-100 text-gray-600 rounded">
+          {{ message.group.name }}
+        </span>
       {% endif %}
-      <a href="{{ user_href }}">{{ message.creator }}</a> <span class="action">a écrit</span>
+      <a href="{{ user_href }}" class="font-medium text-gray-900 hover:text-blue-600">{{ message.creator }}</a>
+      <span class="text-gray-500">a écrit</span>
 
-      <div class="activity-body-inner  clearfix">
+      <div class="mt-2 text-gray-700">
         {{ message.content | linkify |paragraphs }}
       </div>
-      <div class="stream-subtext">{{ message.created_at | age }}</div>
+      <div class="mt-2 text-sm text-gray-400">{{ message.created_at | age }}</div>
     </div>
   </li>
 {% endmacro %}
 
 {% macro render_field(field) %}
   {% if field.widget.input_type == 'hidden' %}
-    <!-- pass -->
+    {{ field(**kwargs) }}
   {% elif field.errors %}
-    <div class="form-group error">
-      {% set css_class = 'has_error ' + kwargs.pop('class', '') %}
-      <label class="control-label"
+    <div class="mb-4 border-l-4 border-red-500 pl-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1"
              for="input-{{ field.name }}">{{ field.label }}</label>
-
-      <div class="controls">
-        {{ field(class=css_class, **kwargs) }}
-        <span class="help-block">{% for error in field.errors %}{{ error|e }}
-          . {% endfor %}</span>
+      <div>
+        {{ field(class="block w-full px-3 py-2 border border-red-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-red-500", **kwargs) }}
+        <p class="mt-1 text-sm text-red-600">
+          {% for error in field.errors %}{{ error|e }}. {% endfor %}
+        </p>
       </div>
     </div>
   {% else %}
-    <div class="form-group">
-      <label class="control-label"
+    <div class="mb-4">
+      <label class="block text-sm font-medium text-gray-700 mb-1"
              for="input-{{ field.name }}">{{ field.label }}</label>
-
-      <div class="controls">
-        {{ field(**kwargs) }}
+      <div>
+        {{ field(class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500", **kwargs) }}
       </div>
     </div>
   {% endif %}
 {% endmacro %}
 
 
-{# Not sure if these macros are still needed #}
+{# Macros for activity and images #}
 
 {% macro m_activity(entries) %}
-  {%- for e in entries %}
-    <p>{{ e.post }} on {{ e.object_id }}</p>
-  {%- endfor %}
+  <div class="space-y-2">
+    {%- for e in entries %}
+      <p class="text-gray-700">{{ e.post }} on {{ e.object_id }}</p>
+    {%- endfor %}
+  </div>
 {% endmacro %}
 
 
 {% macro m_images(images) %}
-  <ul class="image-gallery">
+  <ul class="flex flex-wrap gap-2">
     {%- for image in images %}
-      <li id="image-{{ image.id }}">
-        <a href="{{ url_for(image) }}"><img alt=""
-                                            src="{{ url_for(image) }}/preview?size=100"/></a>
+      <li id="image-{{ image.id }}" class="relative">
+        <a href="{{ url_for(image) }}">
+          <img alt="" src="{{ url_for(image) }}/preview?size=100" class="w-24 h-24 object-cover rounded-lg"/>
+        </a>
       </li>
-      <script>
-        $(document).ready(function () {
-          var id = "#image-{{ image.id }}";
-          $(id).popover({
-            placement: "top",
-            html: true,
-            title: "{{ image.name }}",
-            content: function () {
-              return 'Uploaded on {{ image.created_at.strftime("%Y-%m-%d") }}';
-            }
-          });
-        });
-      </script>
     {%- endfor %}
   </ul>
-  <div style="clear: both"></div>
 {% endmacro %}
 
+{# Alpine.js collapse replacing Bootstrap collapse #}
 {% macro m_audit(entries) %}
-  <h3 class="main collapsed" data-toggle="collapse"
-      href="#audit_log_entries">{{ _("Audit log") }}</h3>
+  <div x-data="{ open: false }">
+    <h3 class="text-lg font-semibold text-gray-900 cursor-pointer flex items-center gap-2 mb-4"
+        @click="open = !open">
+      <svg class="w-4 h-4 transition-transform" :class="{ 'rotate-90': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+      </svg>
+      {{ _("Audit log") }}
+    </h3>
 
-  <div id="audit_log_entries" class="collapse" style="margin-bottom: 25px;">
-    {%- for entry in entries %}
-      {%- if entry.type == 1 %}
-        <div>
-          <img src="{{ user_photo_url(entry.user, size="16") }}" alt=""/>
-          <a href="{{ url_for(entry.user) }}">{{ entry.user.name }}</a>
-          made changes on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
-          to entity {{ entry.entity }}
-          <ul>
-            {%- for key in entry.changes %}
-              {%- set old_value, new_value = entry.changes[key] %}
-              <li>
-                {%- if old_value %}
-                  Field <b>{{ key }}</b> changed from <em>{{ old_value }}</em>
-                  to <em>{{ new_value }}</em>
-                {%- else %}
-                  Field <b>{{ key }}</b> set to <em>{{ new_value }}</em>
-                {%- endif %}
-              </li>
-            {%- endfor %}
-          </ul>
-        </div>
-      {%- elif entry.type == 0 %}
-        <div>
-          <img src="{{ user_photo_url(entry.user, size=16) }}" alt=""/>
-          <a href="{{ url_for(entry.user) }}">{{ entry.user.name }}</a>
-          created a new {{ entry.entity.__class__.__name__ }},
-          <a href="{{ url_for(entry.entity) }}">{{ entry.entity.name }}</a>,
-          on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
-        </div>
-      {%- elif entry.type == 2 %}
-        {# TODO: deletion. #}
-      {%- endif %}
-    {%- endfor %}
+    <div x-show="open"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 -translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 -translate-y-2"
+         class="space-y-4 mb-6">
+      {%- for entry in entries %}
+        {%- if entry.type == 1 %}
+          <div class="p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center gap-2 mb-2">
+              <img src="{{ user_photo_url(entry.user, size="16") }}" alt="" class="w-4 h-4 rounded-full"/>
+              <a href="{{ url_for(entry.user) }}" class="text-blue-600 hover:text-blue-800">{{ entry.user.name }}</a>
+              <span class="text-gray-500">made changes on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+            <p class="text-sm text-gray-600 mb-2">to entity {{ entry.entity }}</p>
+            <ul class="text-sm text-gray-700 list-disc list-inside">
+              {%- for key in entry.changes %}
+                {%- set old_value, new_value = entry.changes[key] %}
+                <li>
+                  {%- if old_value %}
+                    Field <span class="font-medium">{{ key }}</span> changed from <em>{{ old_value }}</em>
+                    to <em>{{ new_value }}</em>
+                  {%- else %}
+                    Field <span class="font-medium">{{ key }}</span> set to <em>{{ new_value }}</em>
+                  {%- endif %}
+                </li>
+              {%- endfor %}
+            </ul>
+          </div>
+        {%- elif entry.type == 0 %}
+          <div class="p-4 bg-gray-50 rounded-lg flex items-center gap-2">
+            <img src="{{ user_photo_url(entry.user, size=16) }}" alt="" class="w-4 h-4 rounded-full"/>
+            <a href="{{ url_for(entry.user) }}" class="text-blue-600 hover:text-blue-800">{{ entry.user.name }}</a>
+            <span class="text-gray-600">
+              created a new {{ entry.entity.__class__.__name__ }},
+              <a href="{{ url_for(entry.entity) }}" class="text-blue-600 hover:text-blue-800">{{ entry.entity.name }}</a>,
+              on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
+            </span>
+          </div>
+        {%- elif entry.type == 2 %}
+          {# TODO: deletion. #}
+        {%- endif %}
+      {%- endfor %}
+    </div>
   </div>
 {% endmacro %}

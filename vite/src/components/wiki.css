@@ -1,0 +1,21 @@
+/*
+ * Wiki module styles
+ * Wiki pages and wikilinks
+ * Uses Tailwind's @apply for design system integration
+ */
+
+.wiki-page-info {
+  @apply pt-[3px] border-t border-gray-200 text-gray-400;
+}
+
+.wiki-page-body {
+  @apply my-2.5 text-sm;
+}
+
+.wikilink.new {
+  color: #ba0000;
+}
+
+.wikilink.new:hover {
+  color: #ba0000;
+}

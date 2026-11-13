@@ -12,6 +12,8 @@ from abilian.core.signals import activity
 from abilian.sbe.apps.documents.models import Document
 
 from .models import Community
+from .roles import clear_roles, set_exclusive_role
+from .signals import membership_removed, membership_set
 
 if TYPE_CHECKING:
     from abilian.core.entities import Entity
@@ -36,3 +38,25 @@ def update_community(
                     community.document_count += 1
                 case "delete":
                     community.document_count -= 1
+
+
+@membership_set.connect_via(ANY)
+def grant_role_on_community(
+    sender: Community, membership: Any, is_new: bool, **kwargs: Any
+) -> None:
+    """Record the membership as a role on the community itself.
+
+    Without this the engine cannot answer `has_permission(user, MANAGE,
+    community)` -- nothing granted a role there -- which is why `can_manage`
+    had to be hand-written as two role tests. `MANAGE` belongs to `{ADMIN,
+    MANAGER}` in the engine's default matrix, so no `PermissionAssignment` row
+    is needed for the grant to mean something.
+    """
+    set_exclusive_role(membership.user, membership.role, sender)
+
+
+@membership_removed.connect_via(ANY)
+def ungrant_roles_on_community(
+    sender: Community, membership: Any, **kwargs: Any
+) -> None:
+    clear_roles(membership.user, sender)

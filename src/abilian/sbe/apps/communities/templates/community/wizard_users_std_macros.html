@@ -5,125 +5,64 @@
 {% from "macros/user.html" import m_user_link, m_user_photo %}
 
 {% macro std_thead() %}
-  <tr style="color:silver;">
-    <th class="hide" style="">Last Name</th>
-    <th class="hide">First Name</th>
-    <th>{{ _('Name') }}</th>
-    <th class="hide">{# last activity seconds since epoch #}</th>
-    <th width="10%" class="text-center">{{ _('Role') }}</th>
-    {% if is_manager %}
-      <th>{{ _('Action') }}</th>
+  <tr class="text-gray-500 text-xs uppercase tracking-wider">
+    <th class="hidden">Last Name</th>
+    <th class="hidden">First Name</th>
+    <th class="px-4 py-3 text-left font-semibold">{{ _('Name') }}</th>
+    <th class="hidden">{# last activity seconds since epoch #}</th>
+    <th class="px-4 py-3 text-center font-semibold w-24">{{ _('Role') }}</th>
+    {% if can_manage_community %}
+      <th class="px-4 py-3 text-center font-semibold w-20">{{ _('Action') }}</th>
     {% endif %}
     <th></th>
   </tr>
 {% endmacro %}
 
-{% macro std_table_config() %}
-  {
-  "aoColumns": [
-  { "bVisible": false },
-  { "bVisible": false },
-  { "aDataSort": [0, 1], "asSorting": [ "asc", "desc" ] },
-  { "bVisible": false },
-  { "aDataSort": [3], "asSorting": [ "asc", "desc" ] },
-  { "asSorting": [ "asc", "desc" ]}
-  {%- if is_manager %}
-    , { }
-  {% endif %}
-  ],
-  "sPaginationType": "bootstrap",
-  "bFilter":         true,
-  "bLengthChange":   false
-  }
-{% endmacro %}
-
-
 {% macro std_member_row(user, m_id, role, last_activity_date) %}
-  <td class="hide">{{ user.last_name }}</td>
-  <td class="hide">{{ user.first_name }}</td>
-  <td style="padding-top: 11px;padding-left: 10px;">
-    <div class="media">
-      <div class="media-left">
-        {% call m_user_link(user, css="media-object") %}
+  <td class="hidden">{{ user.last_name }}</td>
+  <td class="hidden">{{ user.first_name }}</td>
+  <td class="px-4 py-3">
+    <div class="flex items-start gap-x-4">
+      <div class="flex-shrink-0">
+        {% call m_user_link(user) %}
           {{ m_user_photo(user, size="32") }}
         {%- endcall %}
       </div>
 
-      <div class="media-body" style="position: relative;top: -4.5px;">
+      <div class="flex-1 min-w-0">
         {%- if not user.can_login %}
-          <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i><s>
+          <i class="fa fa-lock text-gray-400" title="{{ _('account disabled') }}"></i>
+          <s class="text-gray-400">
         {%- endif %}
         {{ m_user_link(user) }}
         <br/>
-        (<i>{{ user.email }}</i>)
+        <span class="text-sm text-gray-500 italic">{{ user.email }}</span>
         {%- if not user.can_login %}</s>{%- endif %}
       </div>
     </div>
   </td>
 
-  <!-- bug jinja : do not use [not is_manager] -->
-  {%- if is_manager == False %}
-    <td style="padding-top: 11px;padding-left: 10px;">{{ _(role) }}</td>
+  {#- Same truthiness test as std_thead above, and in the same direction: the
+      manager branch adds two cells, the header adds one column plus its
+      trailing <th>. They have to agree. Written as `is_manager == False` this one disagreed
+      whenever it was undefined -- falsy for the header, but not equal
+      to False -- so the row rendered more cells than there were columns. #}
+  {%- if not can_manage_community %}
+    <td class="px-4 py-3 text-center text-sm text-gray-700">{{ _(role) }}</td>
   {%- else %}
-    <td style="padding-top: 11px;padding-left: 10px;">
-      <form action="{{ url_for(".members_post", community_id=g.community.slug) }}"
-            method="POST" style="display: inline;">
-        {{ csrf.field() }}
-        <input type="hidden" name="user" value="{{ user.id }}"/>
-        <input type="hidden" name="action" value="set-user-role"/>
-        <select onchange="role_change(this)" id="{{ user.email }}" name="role" class="form-control role-change"
-                style="width: auto;border-radius: 0px;">
-          <option value="member" default="default" {% if csv_roles %}{%- if csv_roles[user.email] == 'member' %}
-                  selected="selected"{%- endif %}{% endif %}>{{ _("Member") }}</option>
-          <option value="manager" {% if csv_roles %}{%- if csv_roles[user.email] == 'manager' %}selected="selected"
-          {%- endif %}{%- endif %}>{{ _("Manager") }}</option>
-        </select>
-      </form>
+    <td class="px-4 py-3">
+      <select data-wizard-role="{{ user.email }}" name="role" aria-label="{{ _('Role') }}"
+              class="block w-auto px-2 py-1 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+        <option value="member" {%- if csv_roles and csv_roles[user.email] == 'member' %} selected{%- endif %}>{{ _("Member") }}</option>
+        <option value="manager" {%- if csv_roles and csv_roles[user.email] == 'manager' %} selected{%- endif %}>{{ _("Manager") }}</option>
+      </select>
     </td>
-    <td style="padding-top: 11px;padding-left: 10px;padding-right: 10px;">
-      <input type="hidden" name="membership" value="{{ m_id }}">
-      <input type="hidden" name="user" value="{{ user.id }}">
-      <a id="{{ user.email }}" onclick="delete_current(this)" class="btn btn-danger"><i class="fa fa-times"></i></a>
+    <td class="px-4 py-3">
+      <button type="button" data-wizard-remove="{{ user.email }}" aria-label="{{ _('Remove') }}"
+              class="inline-flex items-center justify-center p-2 text-white bg-red-600 rounded-md hover:bg-red-700">
+        <i class="fa fa-times"></i>
+      </button>
     </td>
   {% endif %}
-
-  <script>
-    function delete_current(e) {
-      $(e).closest('tr').fadeOut('slow', function () {
-        $(e).closest('tr').remove();
-        var wizard_emails = $("#wizard-emails").val();
-        var tmp_emails = jQuery.parseJSON(wizard_emails);
-        jQuery.each(tmp_emails, function (i, val) {
-          if (val.email === e.id) {
-            delete tmp_emails[i];
-          }
-
-        });
-        tmp_emails = jQuery.grep(tmp_emails, function (n, i) {
-          return (n !== "" && n != null);
-        });
-
-        $("#wizard-emails").val(JSON.stringify(tmp_emails));
-
-        $("#account-nb").html($(".table-condensed tr").length - 1);
-        if ($(".table-condensed tr").length === 1) {
-          $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> There is no existing accounts</td></tr>");
-          $("#wizard-msg").fadeIn();
-        }
-      });
-    }
-
-    function role_change(e) {
-      var wizard_emails = $("#wizard-emails").val();
-      var tmp_emails = jQuery.parseJSON(wizard_emails);
-      jQuery.each(tmp_emails, function (i, val) {
-        if (val.email === e.id) {
-          tmp_emails[i].role = $(e).val();
-        }
-      });
-
-      $("#wizard-emails").val(JSON.stringify(tmp_emails));
-    }
-  </script>
 
 {% endmacro %}

@@ -6,11 +6,11 @@
 
 {% block content %}
   {%- call m_box(title=_("My communities")) %}
-    {%- set is_admin = current_user.has_role('admin') %}
-
-    <div class="form-group pull-right">
-      <form action=".">
-        <select name="sort" class="form-control" onchange="this.form.submit()">
+    <div class="flex justify-end mb-4">
+      <form action="." class="inline-flex">
+        <select name="sort" aria-label="{{ _('Sort by activity') }}"
+                class="block w-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                data-autosubmit>
           <option value="alpha"
                   {% if not sort_order=='activity' %}selected{% endif %}>{{ _("Sort alphabetically") }}</option>
           <option value="activity"
@@ -20,44 +20,45 @@
     </div>
 
     {%- if my_communities %}
-      <table class="table table-striped table-condensed community-list">
-        {%- for community in my_communities %}
-          <tr>
-            <td class="logo">
-              <a href="{{ url_for(community) }}">
-                <img src="{{ community_image_url(community, s=65) }}" alt=""/>
-              </a>
-            </td>
-            <td>
-              <a href="{{ url_for(community) }}">
-                <div class="profile">
-                  <div class="name">{{ community.name }}</div>
-                  <div class="description">{{ community.description }}</div>
-                  <div class="stats">
-                    <i class="fa fa-user"></i> {{ community.membership_count }}
-                    -
-                    <i class="fa fa-file"></i> {{ community.document_count }}
-                    -
-                    <i class="fa fa-time"></i> {{ community.last_active_at | age }}
-                  </div>
-                </div>
-              </a>
-            </td>
-          </tr>
-        {%- endfor %}
-      </table>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <tbody class="divide-y divide-gray-100">
+            {%- for community in my_communities %}
+              <tr class="hover:bg-gray-50">
+                <td class="py-4 pr-4 w-20">
+                  <a href="{{ url_for(community) }}">
+                    <img src="{{ community_image_url(community, s=65) }}" alt="{{ community.name }}"
+                         class="rounded-lg"/>
+                  </a>
+                </td>
+                <td class="py-4">
+                  <a href="{{ url_for(community) }}" class="block">
+                    <div class="font-medium text-gray-900 hover:text-blue-600">{{ community.name }}</div>
+                    <div class="text-sm text-gray-500 mt-1">{{ community.description }}</div>
+                    <div class="text-sm text-gray-500 mt-2 flex items-center gap-4">
+                      <span><i class="fa fa-user mr-1"></i>{{ community.membership_count }}</span>
+                      <span><i class="fa fa-file mr-1"></i>{{ community.document_count }}</span>
+                      <span><i class="fa fa-clock-o mr-1"></i>{{ community.last_active_at | age }}</span>
+                    </div>
+                  </a>
+                </td>
+              </tr>
+            {%- endfor %}
+          </tbody>
+        </table>
+      </div>
     {% else %}
-      {{ _("You're not a member of a community yet.") }}
+      <p class="text-gray-500 py-8 text-center">{{ _("You're not a member of a community yet.") }}</p>
     {% endif %}
 
   {% endcall %}
 {% endblock %}
 
 {% block sidebar %}
-  {% if current_user.has_role("admin") %}
+  {% if is_site_admin() %}
     {% call m_box_menu() %}
-      <div style="padding: 15px;">
-        <a class="btn btn-default" style="white-space: normal;"
+      <div class="p-4">
+        <a class="inline-block px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
            href="{{ url_for(".new") }}">{{ _("Create new community") }}</a>
       </div>
     {% endcall %}

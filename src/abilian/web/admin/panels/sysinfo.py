@@ -23,7 +23,7 @@ def installed_packages() -> list[dict[str, str]]:
 class SysinfoPanel(AdminPanel):
     id = "sysinfo"
     label = "System information"
-    icon = "hdd"
+    icon = "hdd-o"
 
     def get(self) -> str:
         uname = subprocess.check_output(["uname", "-a"]).decode().strip()

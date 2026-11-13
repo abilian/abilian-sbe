@@ -11,7 +11,7 @@ from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.documents.views.folders import explore_archive
 from abilian.services import index_service, security_service
-from tests.util import DATA_DIR, login, redis_available
+from tests.util import DATA_DIR, login
 
 if TYPE_CHECKING:
     from sqlalchemy.orm import Session
@@ -25,7 +25,6 @@ def open_file(filename: str) -> IO[bytes]:
     return path.open("rb")
 
 
-@pytest.mark.skipif(not redis_available(), reason="requires redis connection")
 def test_document(app: Application, session: Session) -> None:
     root = Folder(title="root")
     doc = Document(parent=root, title="test")

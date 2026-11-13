@@ -11,6 +11,7 @@ from warnings import warn
 from magic import Magic
 from pytest import fixture, mark
 
+from abilian.services.conversion.handler_lock import init_conversion_lock_dir
 from abilian.services.conversion.handlers import HAS_LIBREOFFICE, HAS_PDFTOTEXT
 
 if TYPE_CHECKING:
@@ -31,6 +32,9 @@ def converter() -> Iterator[Converter]:
     cache_dir = Path(tempfile.mkdtemp(suffix="unittest"))
     tmp_dir = Path(tempfile.mkdtemp(suffix="unittest"))
     converter_instance.init_work_dirs(cache_dir, tmp_dir)
+    # No app here, so ConversionService.init_app() never runs; the handlers take
+    # a file lock and need somewhere to put it.
+    init_conversion_lock_dir(str(tmp_dir))
     yield converter_instance
 
     converter_instance.clear()

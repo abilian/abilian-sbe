@@ -20,7 +20,6 @@ packages:
   # Python dev
   - python3-dev
   - py3-tox
-  - py3-nox
   - py3-pip
   - uv
   # - poetry
@@ -30,18 +29,33 @@ packages:
   # Other deps
   - curl
   - poppler-utils
+  # Docker-based tests (tests/docker/)
+  - docker
+  - docker-cli-compose
 
 tasks:
   - setup: |
       cd abilian-sbe
       npm install
+      make front
+      # Each task is a new login, so the group applies from the next task on.
+      sudo addgroup build docker
+      sudo service docker start
 
+  # Alpine's py3-nox lacks its attrs dependency, and Alpine's Python (3.14)
+  # is outside requires-python: run nox through uv, on Python 3.13.
   - lint-nox: |
       cd abilian-sbe
-      nox -e lint
+      uvx --python 3.13 nox -e lint
 
   - test-nox: |
       cd abilian-sbe
-      # Default Python version is python 3.12
-      # TODO: install other versions using rye
-      nox -e pytest-3.12
+      uvx --python 3.13 nox -e pytest-3.13
+
+  - test-mariadb-docker: |
+      cd abilian-sbe
+      make test-mariadb-docker DOCKER_TESTS_EXTRA="-f tests/docker/compose.host-network.yaml"
+
+  - test-postgres-docker: |
+      cd abilian-sbe
+      make test-postgres-docker DOCKER_TESTS_EXTRA="-f tests/docker/compose.host-network.yaml"

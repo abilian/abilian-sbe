@@ -1,5 +1,3 @@
-exclude = []
-
 lint.select = ["ALL"]
 
 lint.extend-ignore = [
@@ -13,6 +11,8 @@ lint.extend-ignore = [
     "PGH", # pygrep-hooks
     "TD", # flake8-todos
     "DOC", # pydocstyle
+    # Must be there
+    "ISC001", # Conflicts with the formatter
 
     # Fix these
     "PTH", # Pathlib
@@ -25,7 +25,7 @@ lint.extend-ignore = [
     "E713", # Test for membership should be `not in`
     "PLR2044", # Line with empty comment
     "RET504", # Unnecessary variable assignment before `return` statement
-    "S101", # Use of `assert` detected
+    "S101", # Use of `assert` detected (assert are use throughout)
     "SIM102", # Use a single `if` statement instead of nested `if` statements
     "SIM108", # Use ternary operator
 
@@ -87,10 +87,22 @@ lint.extend-ignore = [
 ]
 
 [lint.per-file-ignores]
-"tests/**/*.py" = ["INP001"] # implicit namespace packages
-"**/__init__.py" = ["F401"] # 'module' imported but unused
-"migrations/**/*.py" = ["E402","INP001"] # Module level import not at top of file, part of an implicit namespace package
-"cloud/slapos/utils/*.py" = ["INP001"] #  part of an implicit namespace package
+"tests/**/*.py" = [
+    "INP001", # implicit namespace packages
+]
+"e2e_playwright/**/*.py" = [
+    "INP001", # implicit namespace packages
+]
+"**/__init__.py" = [
+    "F401", # 'module' imported but unused
+]
+"migrations/**/*.py" = [
+    "E402", # module level import not at top of file
+    "INP001", # implicit namespace packages
+]
+"cloud/slapos/utils/*.py" = [
+    "INP001", # implicit namespace packages
+]
 
 [lint.mccabe]
 max-complexity = 10

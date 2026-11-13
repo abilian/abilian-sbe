@@ -171,7 +171,6 @@ CANCEL_BUTTON = ButtonAction(
     "form",
     "cancel",
     title=_l("Cancel"),
-    # .cancel: if jquery.validate is used it will properly skip validation
     btn_class="default cancel",
 )
 
@@ -597,7 +596,7 @@ class JSONBaseSearch(JSONView):
 class JSONModelSearch(JSONBaseSearch):
     """Base class for json sqlalchemy model search.
 
-    As used by select2 widgets for example.
+    As used by the user pickers for example.
     """
 
     def get_results(self, q, *args, **kwargs):
@@ -634,7 +633,7 @@ class JSONModelSearch(JSONBaseSearch):
 
 
 class JSONWhooshSearch(JSONBaseSearch):
-    """Base class for JSON Whoosh search, as used by select2 widgets for
+    """Base class for JSON Whoosh search, as used by the user pickers for
     example."""
 
     def get_results(self, q, *args, **kwargs):

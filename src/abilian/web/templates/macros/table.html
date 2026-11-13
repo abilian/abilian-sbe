@@ -1,19 +1,19 @@
 <!-- table for file properties -->
 {% macro m_table(lines, responsive=True) %}
   {%- if responsive %}
-    <div class="table-responsive">
+    <div class="overflow-x-auto">
   {%- endif %}
-<table class="table table-striped table-condensed" style="margin: 10px 0 15px 0;">
-  <tbody>
-  {%- for name, value in lines %}
-    <tr class="row">
-      <td class="col-md-3">{{ name }}</td>
-      <td class="col-md-9">{{ value }}</td>
-    </tr>
-  {%- endfor %}
-  </tbody>
-</table>
-{%- if responsive %}
-  </div>
-{%- endif %}
+  <table class="min-w-full divide-y divide-gray-200 my-3">
+    <tbody class="bg-white divide-y divide-gray-100">
+    {%- for name, value in lines %}
+      <tr class="hover:bg-gray-50">
+        <td class="px-4 py-2 text-sm font-medium text-gray-700 w-1/4">{{ name }}</td>
+        <td class="px-4 py-2 text-sm text-gray-600 w-3/4">{{ value }}</td>
+      </tr>
+    {%- endfor %}
+    </tbody>
+  </table>
+  {%- if responsive %}
+    </div>
+  {%- endif %}
 {%- endmacro %}

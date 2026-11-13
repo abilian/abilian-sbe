@@ -8,7 +8,7 @@ from flask import Flask, current_app
 from flask_login import current_user
 
 from abilian.core.models import attachment as attachments
-from abilian.services.security import READ, WRITE, security
+from abilian.services.security import CREATE, DELETE, READ, WRITE, security
 from abilian.web import url_for
 
 from .forms import AttachmentForm
@@ -123,18 +123,23 @@ class AttachmentsManager:
     #
     # current user capabilities
     #
-    def can_view(self, entity):
-        """True if user can view attachments on entity."""
+    def can_read(self, entity):
+        """True if user can read attachments on entity."""
         return security.has_permission(current_user, READ, obj=entity)
 
-    def can_edit(self, entity):
-        """True if user can edit attachments on entity."""
+    def can_write(self, entity):
+        """True if user can write attachments on entity."""
         return security.has_permission(current_user, WRITE, obj=entity)
 
+    # These asked WRITE, so "may add" and "may remove" were one question while
+    # the names said two. CREATE, DELETE and WRITE share a default role set --
+    # {ADMIN, MANAGER, WRITER}, service.py:71 -- so asking each its own
+    # permission answers the same today, and lets a PermissionAssignment
+    # separate them without touching this code.
     def can_create(self, entity):
         """True if user can add attachments."""
-        return security.has_permission(current_user, WRITE, obj=entity)
+        return security.has_permission(current_user, CREATE, obj=entity)
 
     def can_delete(self, entity):
         """True if user can delete attachments."""
-        return security.has_permission(current_user, WRITE, obj=entity)
+        return security.has_permission(current_user, DELETE, obj=entity)

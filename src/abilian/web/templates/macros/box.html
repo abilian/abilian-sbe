@@ -1,24 +1,22 @@
-{# Generic renderer for boxes / portlets #}
+{# Generic renderer for boxes / portlets - Tailwind version #}
 
-{%- set color_map = dict(blue="info", green="success", orange="warning", red="danger",
-                         primary="primary", info="info", success="success",
-                         warning="warning", danger="danger", cls="") %}
-
-{%- macro m_box(title, color="info", href=None, icon_class="") %}
+{%- macro m_box(title, color="", href=None, icon_class="") %}
   <!-- begin box "{{ title }}" -->
-  <div class="panel panel-{{ color_map.get(color, 'default') }} {{ cls }}">
+  {% set border_color = 'border-red-500' if color in ['red', 'danger'] else 'border-gray-200' %}
+  {% set header_bg = 'bg-red-50' if color in ['red', 'danger'] else 'bg-gray-50' %}
+  <div class="bg-white border {{ border_color }} rounded-lg shadow-sm mb-6">
     {%- if title %}
-      <div class="panel-heading">
-        <h5 class="panel-title">
-          {%- if href %}<a href="{{ href }}">{%- endif %}
-          {%- if icon_class -%}<span class="{{ icon_class }}"></span>{% endif %}
+      <div class="px-4 py-3 border-b border-gray-200 {{ header_bg }} rounded-t-lg">
+        <h2 class="font-semibold text-lg text-gray-900">
+          {%- if href %}<a href="{{ href }}" class="hover:text-blue-600">{%- endif %}
+          {%- if icon_class -%}<span class="{{ icon_class }} mr-2"></span>{% endif %}
           {{ title }}
           {%- if href %}</a>{%- endif %}
-        </h5>
+        </h2>
       </div>
     {%- endif %}
 
-    <div class="panel-body">
+    <div class="box-body p-4">
       {{ caller() }}
     </div>
   </div>
@@ -27,13 +25,15 @@
 
 {%- macro m_box_menu(title=None, color="green", omit_body=False) %}
   <!-- begin menu box "{{ title }}" -->
-  <div class="panel panel-{{ color_map.get(color, 'default') }}">
-    <div class="panel-heading">
-      <h5 class="panel-title">{{ title or _('Menu') }}</h5>
+  {% set border_color = 'border-red-500' if color in ['red', 'danger'] else 'border-gray-200' %}
+  {% set header_bg = 'bg-red-50' if color in ['red', 'danger'] else 'bg-gray-50' %}
+  <div class="bg-white border {{ border_color }} rounded-lg shadow-sm mb-6">
+    <div class="px-4 py-3 border-b border-gray-200 {{ header_bg }} rounded-t-lg">
+      <h2 class="font-semibold text-lg text-gray-900">{{ title or _('Menu') }}</h2>
     </div>
 
     {%- if not omit_body %}
-      <div class="panel-body">
+      <div class="box-body p-4">
     {%- endif %}
     {{ caller() }}
     {%- if not omit_body %}
@@ -53,17 +53,19 @@
 
 {%- macro m_box_content(title=None, color="blue") %}
   <!-- begin box "{{ title }}" -->
-  <div class="panel panel-{{ color_map.get(color, 'default') }}">
+  {% set border_color = 'border-red-500' if color in ['red', 'danger'] else 'border-gray-200' %}
+  {% set header_bg = 'bg-red-50' if color in ['red', 'danger'] else 'bg-gray-50' %}
+  <div class="bg-white border {{ border_color }} rounded-lg shadow-sm mb-6">
     {%- if title %}
-      <div class="panel-heading">
-        <h5 class="panel-title">{{ title }}</h5>
+      <div class="px-4 py-3 border-b border-gray-200 {{ header_bg }} rounded-t-lg">
+        <h2 class="font-semibold text-lg text-gray-900">{{ title }}</h2>
       </div>
     {%- endif %}
 
-    <div class="panel-body">
+    <div class="box-body p-4">
       {{ caller() }}
     </div>
   </div>
-  <div class="clearfix"></div>
+  <div class="clear-both"></div>
   <!-- end box "{{ title }}" -->
 {%- endmacro %}

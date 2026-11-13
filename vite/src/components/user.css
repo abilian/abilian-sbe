@@ -1,0 +1,9 @@
+/*
+ * User styles
+ * Avatar and user profile components
+ * Uses Tailwind's @apply for design system integration
+ */
+
+.avatar {
+  @apply rounded-full;
+}

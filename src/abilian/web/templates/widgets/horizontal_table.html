@@ -1,23 +1,25 @@
 {%- if rows %}
-  <table class="table table-condensed table-striped">
-    {%- if labels %}
-      <thead>
-      <tr>
-        {%- for label in labels %}
-          <th>{{ label }}</th>
-        {%- endfor %}
-      </tr>
-      </thead>
-    {%- endif %}
+  <div class="overflow-hidden border border-gray-200 rounded-lg">
+    <table class="min-w-full divide-y divide-gray-200">
+      {%- if labels %}
+        <thead class="bg-gray-50">
+        <tr>
+          {%- for label in labels %}
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ label }}</th>
+          {%- endfor %}
+        </tr>
+        </thead>
+      {%- endif %}
 
-    <tbody>
-    {%- for row in rows %}
-      <tr>
-        {%- for value in row %}
-          <td>{{ value }}</td>
-        {%- endfor %}
-      </tr>
-    {%- endfor %}
-    </tbody>
-  </table>
+      <tbody class="bg-white divide-y divide-gray-200">
+      {%- for row in rows %}
+        <tr class="hover:bg-gray-50">
+          {%- for value in row %}
+            <td class="px-4 py-3 text-sm text-gray-700">{{ value }}</td>
+          {%- endfor %}
+        </tr>
+      {%- endfor %}
+      </tbody>
+    </table>
+  </div>
 {%- endif %}

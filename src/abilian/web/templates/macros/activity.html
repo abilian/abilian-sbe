@@ -7,6 +7,10 @@
       <li>
         {{ m_activity(entry, ignore_communities) }}
       </li>
+    {%- else %}
+      <li class="py-6 text-center text-gray-500">
+        {{ _("Nothing has happened here yet.") }}
+      </li>
     {%- endfor %}
   </ul>
 {% endmacro %}
@@ -30,6 +34,3 @@
     {%- endif %}
   </div>
 {%- endmacro %}
-
-{% macro m_actor(actor) %}
-{% endmacro %}

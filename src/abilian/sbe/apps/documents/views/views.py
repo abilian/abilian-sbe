@@ -8,7 +8,6 @@ from flask import g
 
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
-from abilian.sbe.apps.communities.security import is_manager
 from abilian.sbe.apps.documents.actions import register_actions
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
@@ -25,7 +24,6 @@ community_blueprint.record_once(register_actions)
 @community_blueprint.url_value_preprocessor
 def init_document_values(endpoint: str, values: dict[str, int]) -> None:
     g.current_tab = "documents"
-    g.is_manager = is_manager()
 
     g.breadcrumb.append(
         BreadcrumbItem(

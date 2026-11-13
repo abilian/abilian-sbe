@@ -8,15 +8,37 @@
   </title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-  <meta name="description" content=""/>
-  <meta name="author" content=""/>
 
-  {%- assets "css" %}
-    <link href="{{ ASSET_URL }}" rel="stylesheet"/>
-  {%- endassets %}
+  {# Vendored CSS the Tailwind build does not replace: `fa fa-*` is used
+     throughout, including by action.py's Glyphicon/FAIcon. #}
+  <link rel="stylesheet" href="{{ url_for('abilian_static', filename='font-awesome/css/font-awesome.css') }}"/>
+
+  {%- set sentry_url = config.get("SENTRY_SDK_URL") %}
+  {%- set sentry_dsn = config.get("SENTRY_DSN") %}
+  {%- set use_sentry = sentry_url and sentry_dsn %}
+  {#- Data, not a script: the Content Security Policy rules out inline scripts.
+      vite/src/config.js reads it. #}
+  <script type="application/json" id="abilian-config">{{ {
+    'csrf_fieldname': csrf.name(),
+    'csrf_token': csrf.token(),
+    'api': app.js_api,
+    'sentry': {
+      'dsn': sentry_dsn,
+      'app_name': app.name ~ '_front',
+      'server_name': config.get('SERVER_NAME', 'unknown'),
+    } if use_sentry else None,
+  } | tojson }}</script>
+  {%- if use_sentry %}
+    <script src="{{ sentry_url }}" crossorigin="anonymous"></script>
+  {%- endif %}
+
+  <!-- Vite integration for CSS and JS -->
+  {{ vite_asset('src/styles.css') }}
+  {{ vite_asset('src/main.js') }}
+
   {%- block css %}{%- endblock css %}
 
-  <!-- Le fav and touch icons -->
+  <!-- Favicons -->
   <link
       rel="shortcut icon"
       type="image/png"
@@ -26,65 +48,41 @@
       type="image/png"
       href="{{ config['FAVICO_URL'] | string }}"/>
 
-  <script>
-    var require = {{ app.extensions['webassets'].requirejs_config | tojson }};
-  </script>
-
-  {%- assets "js-top" %}
-    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-  {%- endassets %}
-
-  {%- set sentry_url = config.get("SENTRY_SDK_URL") %}
-  {%- set sentry_dsn = config.get("SENTRY_DSN") %}
-  {%- if sentry_url and sentry_dsn %}
-    <script src="{{ sentry_url }}" crossorigin="anonymous"></script>
-    <script>
-      var dsn = {{ sentry_dsn | tojson }};
-      var app_name = {{ (app.name+'_front') | tojson }};
-      var server_name = {{ config.get('SERVER_NAME', 'unknown') | tojson }};
-
-      if (typeof Sentry != "undefined") {
-        Sentry.init({dsn: dsn});
-        Sentry.configureScope(function (scope) {
-          scope.setTag("app_name", app_name);
-          scope.setTag("server_name", server_name);
-        });
-      }
-    </script>
-  {%- endif %}
-
   {%- block top_js %}{%- endblock top_js %}
+
 </head>
 
 <body {%- if body_class is defined %} class="{{ body_class }}" {% endif -%}>
 {%- block body %} {#- accessibility link: see
     http://getbootstrap.com/getting-started/#accessibility #}
-  <a href="#content" class="sr-only">{{ _("Skip to content") }}</a>
+  <a href="#content" class="sr-only focus:not-sr-only">{{ _("Skip to content") }}</a>
 
   <!-- navbar -->
   {% include "navbar.html" %}
 
-  <div id="content" class="container clearfix">
+  <main id="content" class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+    {#- For the pages whose title is not otherwise a heading. #}
+    {% block page_heading %}<h1 class="sr-only">{{ self.page_title() | trim or _('Home') }}</h1>{% endblock page_heading %}
     <!-- breadcrumbs -->
     {% if g.breadcrumb|length > 1 %}
-      <div class="row">
-        <div class="col-xs-12">{% include "breadcrumbs.html" %}</div>
+      <div class="w-full">
+        <div>{% include "breadcrumbs.html" %}</div>
       </div>
     {% endif %}
 
     <!-- flash messages -->
-    <div class="row" id="flash-messages">
-      <div class="col-xs-12">{%- include "flash-messages.html" %}</div>
+    <div class="w-full" id="flash-messages">
+      <div>{%- include "flash-messages.html" %}</div>
     </div>
 
-    <div class="row">
-      <header class="col-xs-12">
+    <div class="w-full">
+      <header>
         {% block header %} {%- endblock header %}
       </header>
     </div>
 
-    <div class="row">
-      <div class="col-xs-12">
+    <div class="w-full">
+      <div>
         <div class="main-block">
           {% block main %}
             <div class="content-block">
@@ -94,15 +92,15 @@
         </div>
       </div>
     </div>
-  </div>
+  </main>
 
   {%- block footer %}
     <footer>
-      <div class="container">
-        <div class="row">
-          <div class="col-xs-12">
-            <hr/>
-            <p class="text-right">
+      <div class="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div class="w-full">
+          <div>
+            <hr class="mt-8 border-t border-gray-200"/>
+            <p class="py-4 text-right text-gray-500">
               <small
               >Powered by <a href="https://www.abilian.com/">Abilian</a>
               </small>
@@ -114,43 +112,6 @@
   {%- endblock footer %}
 {%- endblock body %}
 
-{%- assets "js" %}
-  <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-{%- endassets %}
-
-{%- block js %}{%- endblock js %} {# this block should be
-    used to load additional libraries #}
-
-<!-- app init -->
-<script type="text/javascript">
-  {%- include "abilian_init.js" %}
-</script>
-
-{#- i18n bundles #} {%- set js_i18n_bundle = "js-i18n-" + locale.language %}
-{%- if js_i18n_bundle in app.extensions['webassets'] %}
-  <!-- i18n -->
-  {%- assets js_i18n_bundle %}
-    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
-  {%- endassets %}
-{%- endif %}
-
-{% block locale_js %} {% endblock locale_js %}
-{#- 'abilian_init.js' will load additional libraries by writing new 'script'
-    tags. We put deferred JS and inline_js in a separate script tag so that the
-    code is executed after thoses libraries have been loaded. #}
-
-<script type="text/javascript">
-  {% deferredJS %}{% enddeferredJS %}
-
-  {% block inline_js %}{% endblock inline_js %}
-
-  {#- template can also use an 'inline_js' variable #}
-  {%- set inline_js = inline_js|default(None) %}
-  {%- if inline_js %}
-    {{ inline_js }}
-  {%- endif %}
-</script>
-
-{%- if config.TRACKING_CODE %} branc{{ config.TRACKING_CODE | safe }} {%- endif %}
+{%- if config.TRACKING_CODE %}{{ config.TRACKING_CODE | safe }}{%- endif %}
 </body>
 </html>

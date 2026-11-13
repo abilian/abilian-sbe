@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import io
 import json
+import re
 from os.path import splitext
 from typing import IO, TYPE_CHECKING, Any
 
@@ -16,6 +17,7 @@ from abilian.core.models.subjects import User
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _
+from abilian.sbe.apps.communities.decorators import can_manage
 from abilian.services.auth.views import send_reset_password_instructions
 from abilian.web import csrf
 from abilian.web.action import Endpoint
@@ -27,6 +29,18 @@ if TYPE_CHECKING:
     from collections.abc import Sequence
 
     from werkzeug.wrappers import Response
+
+
+#: People paste addresses from anywhere: a spreadsheet column, a mail header.
+EMAIL_SEPARATORS = re.compile(r"[\s,;]+")
+
+
+def wizard_parse_emails(text: str) -> tuple[list[str], list[str]]:
+    """Split pasted text into its valid and invalid addresses, without repeats."""
+    addresses = dict.fromkeys(filter(None, EMAIL_SEPARATORS.split(text)))
+    valid = [address for address in addresses if validate_email(address)]
+    invalid = [address for address in addresses if address not in valid]
+    return valid, invalid
 
 
 def wizard_extract_data(
@@ -149,6 +163,7 @@ def wizard_read_csv(csv_file: IO[str]) -> list[dict[str, str]]:
 
 
 @route("/<string:community_id>/members/wizard/step1")
+@can_manage
 @tab("members")
 def wizard_data_insertion():
     """Insert new members data into the community via emails or CSV file."""
@@ -164,6 +179,7 @@ def wizard_data_insertion():
 
 @route("/<string:community_id>/members/wizard/step2", methods=["GET", "POST"])
 @csrf.protect
+@can_manage
 @tab("members")
 def wizard_check_data() -> Response | str:
     """Filter and detect existing members, existing accounts and new emails."""
@@ -179,7 +195,16 @@ def wizard_check_data() -> Response | str:
 
     is_csv = False
     if request.form.get("wizard-emails"):
-        wizard_emails = request.form["wizard-emails"].split(",")
+        wizard_emails, invalid_emails = wizard_parse_emails(
+            request.form["wizard-emails"]
+        )
+        if invalid_emails:
+            flash(
+                _(
+                    "These addresses are not valid and were left out: {addresses}"
+                ).format(addresses=", ".join(invalid_emails)),
+                "warning",
+            )
         (
             existing_accounts_object,
             existing_members_objects,
@@ -188,8 +213,15 @@ def wizard_check_data() -> Response | str:
         final_email_list_json = json.dumps(final_email_list)
 
     else:
+        csv_file = request.files.get("csv_file")
+        if not (csv_file and csv_file.filename):
+            flash(_("No new members were found"), "warning")
+            return redirect(
+                url_for(".wizard_data_insertion", community_id=g.community.slug)
+            )
+
         is_csv = True
-        accounts_data = wizard_read_csv(request.files["csv_file"])
+        accounts_data = wizard_read_csv(csv_file)
         if not accounts_data:
             flash(_("To add new members, please follow the CSV file model."), "warning")
             return redirect(
@@ -222,6 +254,7 @@ def wizard_check_data() -> Response | str:
 
 @route("/<string:community_id>/members/wizard/step3", methods=["GET", "POST"])
 @csrf.protect
+@can_manage
 @tab("members")
 def wizard_new_accounts() -> str | Response:
     """Complete new emails information."""
@@ -260,6 +293,7 @@ def wizard_new_accounts() -> str | Response:
 
 @route("/<string:community_id>/members/wizard/complete", methods=["POST"])
 @csrf.protect
+@can_manage
 def wizard_saving() -> Response:
     """Automatically add existing accounts to the current community.
 

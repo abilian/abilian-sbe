@@ -4,7 +4,7 @@
 
 {%- block sidebar %}
   {%- call m_box_menu() %}
-    <ul class="nav nav-list">
+    <ul class="menu-actions">
       {%- set content_actions = actions.for_category('calendar:event') %}
       {%- set global_actions = actions.for_category('calendar:global') %}
 
@@ -13,7 +13,7 @@
       {%- endfor %}
 
       {%- if content_actions and global_actions %}
-        <li class="divider"></li>
+        <li class="h-px my-2 overflow-hidden bg-gray-200"></li>
       {%- endif %}
 
       {%- for action in global_actions %}

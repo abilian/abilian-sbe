@@ -8,8 +8,8 @@ from flask import g, url_for as url_for_orig
 from flask_login import current_user
 
 from abilian.i18n import _l
-from abilian.sbe.apps.communities.security import is_manager
-from abilian.services.security import MANAGE, WRITE, security
+from abilian.sbe.apps.communities.security import can_manage
+from abilian.services.security import MANAGE, WRITE, Permission, is_site_admin
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
 
 from .repository import content_repository
@@ -24,7 +24,7 @@ def url_for(endpoint, **kw):
 
 class CmisContentAction(Action):
     sbe_type: str = ""
-    permission: str = ""
+    permission: Permission | None = None
 
     def __init__(self, *args, **kwargs) -> None:
         if "permission" in kwargs:
@@ -41,7 +41,7 @@ class CmisContentAction(Action):
 
         return ok
 
-    def has_access(self, permission: str, obj: Any) -> bool:
+    def has_access(self, permission: Permission, obj: Any) -> bool:
         return content_repository.has_permission(current_user, permission, obj)
 
 
@@ -59,9 +59,9 @@ class FolderButtonAction(BaseFolderAction):
     )
 
     _modal_template_string = (
-        '<a class="btn {{ action.css_class }}" href="{{ url }}" '
-        'data-toggle="modal" role="button" title="{{ action.title }}">'
-        "{{ action.icon }}</a>"
+        '<button type="button" class="btn {{ action.css_class }}" '
+        'data-modal-open="{{ url }}" title="{{ action.title }}">'
+        "{{ action.icon }}</button>"
     )
 
     def __init__(self, *args, **kwargs) -> None:
@@ -125,7 +125,7 @@ _checkin_template_action = """
   {{ csrf.field() }}
   <button type="submit" class="btn btn-link" name="action"
           value="{{ action.name}}"
-     onclick="window.setTimeout(function () { window.location.reload() }, 500)">
+     data-reload-after-submit>
     {%- if action.icon %}{{ action.icon }} {% endif %}
     {{ action.title }}
   </button>
@@ -152,7 +152,7 @@ _actions = (
         "documents:folder-listing",
         "move-files",
         _l("Move to another folder"),
-        icon="move",
+        icon="arrows",
         url="#modal-move-files",
         modal=True,
         permission=WRITE,
@@ -181,7 +181,7 @@ _actions = (
         "view",
         _l("List content"),
         icon="list",
-        condition=(lambda ctx: security.has_role(current_user, "admin")),
+        condition=lambda ctx: is_site_admin(),
         url=lambda ctx: url_for(".folder_view", folder_id=ctx["object"].id),
     ),
     # view
@@ -215,7 +215,7 @@ _actions = (
         "edit",
         _l("Edit properties"),
         icon="pencil",
-        url="#modal-edit",
+        url="#modal-edit-folder",
         permission=WRITE,
     ),
     # new folder
@@ -246,21 +246,23 @@ _actions = (
         "documents:content",
         "preview",
         _l("View in browser"),
-        icon="eye-open",
+        icon="eye",
         url=lambda ctx: url_for(".document_preview", doc_id=ctx["object"].id),
         condition=(
-            lambda ctx: ctx["object"].antivirus_ok
-            and ctx["object"].content_type
-            in ("text/html", "text/plain", "application/pdf")
+            lambda ctx: (
+                ctx["object"].antivirus_ok
+                and ctx["object"].content_type
+                in ("text/html", "text/plain", "application/pdf")
+            )
         ),
     ),
     # viewers
-    DocumentModalAction(
+    DocumentAction(
         "documents:content",
         "document_viewers",
         _l("Viewers list"),
         icon="user",
-        condition=lambda ctx: is_manager(context=ctx),
+        condition=lambda ctx: can_manage(ctx["object"].community),
         url=lambda ctx: url_for(".document_viewers", doc_id=ctx["object"].id),
     ),
     # edit

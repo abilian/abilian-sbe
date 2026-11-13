@@ -1,8 +1,8 @@
-{% macro _key_fmt(key) %}<strong>{{ key }}</strong>{% endmacro %}
-{% macro _value_fmt(value) %}<em>{{ value }}</em>{% endmacro %}
+{% macro _key_fmt(key) %}<strong class="font-semibold">{{ key }}</strong>{% endmacro %}
+{% macro _value_fmt(value) %}<em class="text-gray-600">{{ value }}</em>{% endmacro %}
 
 {% macro m_audit_field_changes(changes) %}
-  <ul>
+  <ul class="list-disc list-inside ml-4 text-sm text-gray-700">
     {%- for key in changes.columns|sort %}
       {% set values = changes.columns[key] %}
       <li>
@@ -23,12 +23,12 @@
     {%- endfor %}
     {%- for key, (appended, removed) in changes.collections.items() %}
       <li>
-        <b>{{ key }}</b>:
+        <span class="font-semibold">{{ key }}</span>:
         {%- if appended %}
-          Added {%- for label in appended %} <span class="badge">{{ label }}</span>{%- endfor %}
+          Added {%- for label in appended %} <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">{{ label }}</span>{%- endfor %}
         {%- endif %}
         {%- if removed %}
-          Removed {%- for label in removed %} <span class="badge">{{ label }}</span>{%- endfor %}
+          Removed {%- for label in removed %} <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">{{ label }}</span>{%- endfor %}
         {%- endif %}
       </li>
     {%- endfor %}
@@ -36,28 +36,35 @@
 {% endmacro %}
 
 {% macro m_audit_entry(entry) %}
-  <div>
+  <div class="py-2 border-b border-gray-100 last:border-0">
     {#- FIXME: use macro for user avatar #}
-    <img src="{{ user_photo_url(entry.user, size=16) }}" style="margin-bottom: 2px;" alt=""/>
+    <img src="{{ user_photo_url(entry.user, size=16) }}" class="inline-block w-4 h-4 rounded-full mr-1" alt=""/>
 
-    <a href="{{ url_for("social.user", user_id=entry.user.id) }}">{{ entry.user.name }}</a>
+    <a href="{{ url_for("social.user", user_id=entry.user.id) }}" class="text-blue-600 hover:text-blue-800">{{ entry.user.name }}</a>
     {%- if entry.related or entry.op == 1 %}
-      made changes on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
+      <span class="text-gray-600 text-sm">made changes on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span>
       {{ m_audit_field_changes(entry.changes) }}
     {%- elif entry.type == 0 %}
-      created this record on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}
+      <span class="text-gray-600 text-sm">created this record on {{ entry.happened_at.strftime('%Y-%m-%d %H:%M') }}</span>
     {%- endif %}
   </div>
 {% endmacro %}
 
 {% macro m_audit_log(entries) %}
   {%- if entries %}
-    <h3 class="main collapsed" data-toggle="collapse"
-        href="#audit_log_entries">{{ _("Audit Log") }}</h3>
-    <div id="audit_log_entries" class="collapse" style="margin-bottom: 25px;">
-      {%- for entry in entries %}
-        {{ m_audit_entry(entry) }}
-      {%- endfor %}
+    <div x-data="{ open: false }">
+      <h3 @click="open = !open"
+          class="text-sm font-semibold text-gray-700 cursor-pointer flex items-center hover:text-gray-900">
+        <svg class="w-4 h-4 mr-1 text-gray-400 transition-transform" :class="{ 'rotate-90': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+        {{ _("Audit Log") }}
+      </h3>
+      <div x-show="open" x-collapse x-cloak class="mt-2 mb-4">
+        {%- for entry in entries %}
+          {{ m_audit_entry(entry) }}
+        {%- endfor %}
+      </div>
     </div>
   {%- endif %}
 {% endmacro %}

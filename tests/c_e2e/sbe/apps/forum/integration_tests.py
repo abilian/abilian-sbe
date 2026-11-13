@@ -21,7 +21,7 @@ from abilian.sbe.apps.forum.tasks import (
 from abilian.sbe.apps.forum.views import ThreadCreate
 from abilian.services import get_service, security_service
 from tests.forum_util import get_string_from_file
-from tests.util import client_login, redis_available
+from tests.util import client_login
 
 if TYPE_CHECKING:
     from flask_sqlalchemy import SQLAlchemy
@@ -48,7 +48,6 @@ def test_posts_ordering(db: SQLAlchemy, community1) -> None:
     assert [p.id for p in thread.posts] == [p2_id, p1_id]
 
 
-@pytest.mark.skipif(not redis_available(), reason="requires redis connection")
 def test_thread_indexed(
     app, db: SQLAlchemy, community1, community2, monkeypatch
 ) -> None:

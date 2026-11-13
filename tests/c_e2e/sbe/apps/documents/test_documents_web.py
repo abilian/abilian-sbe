@@ -8,7 +8,8 @@ from zipfile import ZipFile
 
 import flask_mail
 from flask import g, get_flashed_messages
-from pytest import fixture, mark
+from PIL import Image
+from pytest import fixture
 from toolz import first
 from werkzeug.datastructures import FileStorage
 
@@ -17,7 +18,7 @@ from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.views import util as view_util
 from abilian.web.util import url_for
-from tests.util import DATA_DIR, client_login, path_from_url, redis_available
+from tests.util import DATA_DIR, client_login, path_from_url
 
 if TYPE_CHECKING:
     from flask.testing import FlaskClient
@@ -50,7 +51,6 @@ def community(community1: Community, db: SQLAlchemy) -> Community:
     return community
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_util_create(
     app: Application, client: FlaskClient, db: SQLAlchemy, community: Community
 ) -> None:
@@ -79,7 +79,6 @@ def test_util_create(
         assert len(messages) == 1
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_home(
     app: Application, client: FlaskClient, db: SQLAlchemy, community: Community
 ) -> None:
@@ -155,7 +154,6 @@ def _test_upload(
     assert response.status_code == 404
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_text_upload(client: FlaskClient, community: Community) -> None:
     name = "wikipedia-fr.txt"
     user = community.test_user
@@ -163,7 +161,6 @@ def test_text_upload(client: FlaskClient, community: Community) -> None:
         _test_upload(community, client, name, "text/plain", test_preview=False)
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_pdf_upload(client: FlaskClient, community: Community) -> None:
     name = "onepage.pdf"
     user = community.test_user
@@ -171,7 +168,6 @@ def test_pdf_upload(client: FlaskClient, community: Community) -> None:
         _test_upload(community, client, name, "application/pdf")
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_image_upload(client: FlaskClient, community: Community) -> None:
     name = "picture.jpg"
     user = community.test_user
@@ -179,7 +175,75 @@ def test_image_upload(client: FlaskClient, community: Community) -> None:
         _test_upload(community, client, name, "image/jpeg")
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
+def test_the_preview_of_a_png_says_it_is_a_png(
+    client: FlaskClient, community: Community
+) -> None:
+    """It used to say image/jpeg, whatever the format it actually carried."""
+    png = BytesIO()
+    Image.new("RGB", (800, 600), "red").save(png, "PNG")
+    png.seek(0)
+    folder = community.folder
+
+    with client_login(client, community.test_user):
+        client.post(
+            url_for(
+                "documents.folder_post",
+                community_id=community.slug,
+                folder_id=folder.id,
+            ),
+            data={"file": (png, "red.png", "image/png"), "action": "upload"},
+        )
+        response = client.get(
+            url_for(
+                "documents.document_preview_image",
+                community_id=community.slug,
+                doc_id=folder.children[0].id,
+                size=500,
+            )
+        )
+
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "image/png"
+    assert response.data.startswith(b"\x89PNG")
+
+
+def test_preview_of_an_image_whose_blob_file_is_gone(
+    client: FlaskClient, community: Community
+) -> None:
+    """A Blob row can outlive its file -- a restore without the file store.
+
+    `Blob.value` is None then, and the image branch of the preview view handed
+    that straight to resize(), which 500ed on `None.read()`. The view has a
+    missing-preview image for exactly this case; it just never reached it.
+    """
+    name = "picture.jpg"
+    user = community.test_user
+
+    with client_login(client, user):
+        data = {"file": (open_file(name), name, "image/jpeg"), "action": "upload"}
+        url = url_for(
+            "documents.folder_post",
+            community_id=community.slug,
+            folder_id=community.folder.id,
+        )
+        assert client.post(url, data=data).status_code == 302
+
+        doc = community.folder.children[0]
+        doc.content_blob.file.unlink()
+        assert doc.content is None
+
+        url = url_for(
+            "documents.document_preview_image",
+            community_id=community.slug,
+            doc_id=doc.id,
+            size=500,
+        )
+        response = client.get(url)
+
+    assert response.status_code == 302
+    assert response.headers["Cache-Control"] == "no-cache"
+
+
 def test_binary_upload(client, community) -> None:
     name = "random.bin"
     user = community.test_user
@@ -193,7 +257,6 @@ def test_binary_upload(client, community) -> None:
         )
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_zip_upload_uncompress(
     community: Community, db: SQLAlchemy, client: FlaskClient
 ) -> None:
@@ -223,7 +286,6 @@ def test_zip_upload_uncompress(
     assert expected == {f.title for f in folder.subfolders}
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_zip(community: Community, client: FlaskClient) -> None:
     user = community.test_user
     with client_login(client, user):
@@ -250,7 +312,6 @@ def test_zip(community: Community, client: FlaskClient) -> None:
         assert [zipfile.namelist()[0]] == [title]
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_recursive_zip(community: Community, client: FlaskClient) -> None:
     user = community.test_user
     with client_login(client, user):
@@ -288,7 +349,6 @@ def test_recursive_zip(community: Community, client: FlaskClient) -> None:
         assert zipfile.namelist() == [f"my folder/{title}"]
 
 
-@mark.skipif(not redis_available(), reason="requires redis connection")
 def test_document_send_by_mail(
     app: Application, community: Community, client: FlaskClient
 ) -> None:

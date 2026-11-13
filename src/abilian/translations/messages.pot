@@ -354,7 +354,7 @@ msgstr ""
 #: abilian/web/admin/panels/groups/__init__.py:47
 #: abilian/web/admin/panels/users/__init__.py:45
 #: abilian/web/forms/widgets.py:351 abilian/web/forms/widgets.py:352
-msgid "Showing _START_ to _END_ of _TOTAL_ entries"
+msgid "Showing {start} to {end} of {total} entries"
 msgstr ""
 
 #: abilian/web/admin/panels/groups/__init__.py:48
@@ -1003,4 +1003,56 @@ msgstr ""
 
 #: abilian/web/views/object.py:543
 msgid "This entity is referenced by another object and cannot be deleted."
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Formatting"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Bold"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Italic"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Heading"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Subheading"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Bulleted list"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Numbered list"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Quote"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Link"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Link address"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Clear formatting"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Undo"
+msgstr ""
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Redo"
 msgstr ""

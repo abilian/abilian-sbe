@@ -11,177 +11,101 @@
     {{ wizard_steps(steps,3) }}
     <br>
 
-    <div class="row">
-      <form class="form-horizontal" id="wizard-1">
-        <div class="form-bootstrapWizard col-sm-offset-2">
-          <div class="clearfix"></div>
-        </div>
-        <div style="margin-right: 8%;margin-left: 8%;">
-          <div class="tab-content col-sm-12">
+    <div class="max-w-4xl mx-auto">
+      <div>
+        <div class="space-y-6">
+          <div>
+            <h3 class="text-xl font-semibold text-gray-900">{{ _("New Users Accounts") }}</h3>
+            <h4 class="text-sm text-gray-500 mt-1">
+              {{ _("The members below are not registered on the platform. Please create their accounts so that they can join the community.") }}
+            </h4>
+          </div>
 
-            <div class="tab-pane active" id="tab1">
-              <br>
-              <h3 class="titre"> {{ _("New Users Accounts") }} </h3>
-              <h4 class="sous_titre">
-                {{ _("The members below are not registered on the platform. Please create their accounts so that they can join the community.") }}
-              </h4>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-900 mb-1">{{ _("Profile") }}</label>
+              <p class="text-xs text-gray-500 mb-4">
+                {{ _("Complete the information below to create a new user. They will receive a mail instruction to connect.") }}
+              </p>
+            </div>
 
-              <div class="form-group bloc col-lg-12">
-                <br>
-                <label>{{ _("Profile") }}</label>
-                <h6 class="sous_titre_step2">
-                  {{ _("Complete the information below to create a new user. They will receive a mail instruction to connect.") }}
-                </h6>
-                <br>
-                <div class="input-group col-lg-12">
-                  <div class="alert alert-warning wizard-warning" style="display:none;" role="alert">
-                      <span
-                          class="glyphicon glyphicon-check"
-                          aria-hidden="true"></span>
-                    {{ _("You need to complete all the fields") }}
-                  </div>
-                  {% set table_id = uuid() %}
-                  <table class="table table-condensed table-striped" id="{{ table_id }}">
-                    <tr>
-                      <th>Email</th>
-                      <th>First Name <span class="content-required">*</span></th>
-                      <th>Last Name <span class="content-required">*</span></th>
-                      <th>Role</th>
-                      <th></th>
+            <div hidden class="wizard-warning p-4 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800 text-sm" role="alert">
+              <i class="fa fa-check mr-2"></i>
+              {{ _("You need to complete all the fields") }}
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="min-w-full divide-y divide-gray-200" data-wizard-new-accounts>
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">First Name <span class="text-red-500">*</span></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Name <span class="text-red-500">*</span></th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                    <th class="px-4 py-3"></th>
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  {% for user in new_accounts %}
+                    <tr data-wizard-row>
+                      <td class="px-4 py-3 text-sm font-medium text-gray-700">
+                        <input value="{{ user.email }}" type="hidden" name="account"/>
+                        {{ user.email }}
+                      </td>
+                      <td class="px-4 py-3">
+                        <input placeholder="First Name" name="first_name"
+                               class="wizard-required block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               type="text" value="{{ user.first_name }}"/>
+                      </td>
+                      <td class="px-4 py-3">
+                        <input name="last_name" placeholder="Last Name"
+                               class="wizard-required block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                               type="text" value="{{ user.last_name }}"/>
+                      </td>
+                      <td class="px-4 py-3">
+                        <select name="role" aria-label="{{ _('Role') }}"
+                                class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                          <option value="member" {%- if user.role == "member" %} selected{% endif %}>{{ _("Member") }}</option>
+                          <option value="manager" {%- if user.role == "manager" %} selected{% endif %}>{{ _("Manager") }}</option>
+                        </select>
+                      </td>
+                      <td class="px-4 py-3">
+                        <button type="button" data-wizard-remove aria-label="{{ _('Remove') }}"
+                                class="inline-flex items-center justify-center w-8 h-8 text-white bg-red-600 rounded-md hover:bg-red-700">
+                          <i class="fa fa-times"></i>
+                        </button>
+                      </td>
                     </tr>
-                    {% set nb_new_accounts = (new_accounts|length) %}
-                    {% if new_accounts %}
-                      {% for user in new_accounts %}
-                        <tr>
-                          <td style="color: gray;font-weight: bold;position: relative;top: 6px;left:3px;">
-                            <input
-                                id="email{{ loop.index-1 }}" value="{{ user.email }}" type="hidden"
-                                name="account"/> {{ user.email }}
-                          </td>
-                          <td>
-                            <input placeholder="First Name" id="first_name{{ loop.index-1 }}" name="first_name"
-                                   class="form-control wizard-required" type="text" value="{{ user.first_name }}"/>
-                          </td>
-                          <td>
-                            <input name="last_name" id="last_name{{ loop.index-1 }}" placeholder="Last Name"
-                                   class="form-control wizard-required" type="text" value="{{ user.last_name }}"/>
-                          </td>
-                          <td>
-                            <select onchange="" id="role{{ loop.index-1 }}" name="role"
-                                    class="form-control role-change" style="">
-                              {% set default_role = user.role %}
-                              <option value="{{ user.role }}"
-                                      {%- if default_role == "member" %}selected="selected"{% endif %}
-                                  {%- if role == 'member' %}
-                                      selected="selected"{%- endif %}>{{ _("Member") }}</option>
-                              <option value="manager"
-                                      {%- if default_role == "manager" %}selected="selected"{% endif %}
-                                      {%- if role == 'manager' %}selected="selected"{%- endif %}>{{ _("Manager") }}</option>
-                            </select>
-                          </td>
-                          <td>
-                            <a style="position: relative;left: 10px;" id="{{ user.email }}"
-                               onclick="remove_user(this)" class="btn btn-danger"><i class="fa fa-times"></i></a>
-                          </td>
-                        </tr>
-                      {% endfor %}
-                    {% endif %}
-                  </table>
+                  {% endfor %}
+                  <tr data-wizard-empty {%- if new_accounts %} hidden{% endif %}>
+                    <td colspan="5" class="px-4 py-3 text-gray-500">
+                      <i class="fa fa-check-circle mr-1"></i> {{ _('There is no new accounts') }}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
 
-                  <a class="users-wizard-next btn default" onclick="wizard_check()"
-                     style="float: right;color: white;background: yellowgreen;margin-bottom: 13px;"><i
-                      class="fa fa-floppy-o" aria-hidden="true"></i>
-                    {{ _("Save") }}</a>
-                </div>
-              </div>
+            <div class="flex justify-end pt-4">
+              <button type="button" data-wizard-save
+                      class="users-wizard-next inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-700 rounded-md hover:bg-green-800">
+                <i class="fa fa-floppy-o mr-2"></i>
+                {{ _("Save") }}
+              </button>
             </div>
           </div>
         </div>
-      </form>
+      </div>
     </div>
 
-    <form method="POST" id="wizard-form" class="form-inline"
+    <form method="POST" id="wizard-form" class="inline"
           action=" {{ url_for('.wizard_saving',community_id=g.community.slug) }}">
       {{ csrf.field() }}
       <input id="existing_account" type="hidden" name="existing_account" value="{{ existing_account }}">
       <input id="new_accounts" type="hidden" name="new_accounts" value='{{ new_accounts|tojson }}'>
     </form>
 
-    <script>
-      function wizard_check() {
-        var nb_missed = 0;
-        $(".wizard-required").each(function (index) {
-          if ($(this).val().trim() === "") {
-            $(".wizard-warning").fadeIn();
-            $(this).css("border", "2px solid coral");
-            nb_missed += 1;
-          } else {
-            $(this).css("border", "0px");
-          }
-        });
 
-        if (nb_missed === 0) {
-          var existing_account = $("#existing_account").val();
-          existing_account = jQuery.parseJSON(existing_account);
-
-          var new_accounts = $("#new_accounts").val();
-          new_accounts = jQuery.parseJSON(new_accounts);
-
-          var new_accounts_list = [];
-          for (var n = 0; n <={{nb_new_accounts}}; n++) {
-
-            if ($("#first_name" + n).length !== 0) {
-
-              var tmp_account = {};
-              tmp_account["email"] = $("#email" + n).val();
-              tmp_account["first_name"] = $("#first_name" + n).val();
-              tmp_account["last_name"] = $("#last_name" + n).val();
-              tmp_account["role"] = $("#role" + n).val();
-              new_accounts_list.push(tmp_account);
-            }
-          }
-
-          $("#new_accounts").val(JSON.stringify(new_accounts_list));
-
-          $("#wizard-form").submit();
-        }
-      }
-
-      function remove_user(e) {
-
-        $(e).closest('tr').fadeOut('slow', function () {
-          $(e).closest('tr').remove();
-
-          var wizard_emails = $("#new_accounts").val();
-          var tmp_emails = jQuery.parseJSON(wizard_emails);
-          jQuery.each(tmp_emails, function (i, val) {
-            if (val.email === e.id) {
-              delete tmp_emails[i];
-            }
-          });
-
-          tmp_emails = jQuery.grep(tmp_emails, function (n, i) {
-            return (n !== "" && n !== null);
-          });
-          $("#new_accounts").val(JSON.stringify(tmp_emails));
-
-          if ($(".table-condensed tr").length === 1) {
-            $(".table-condensed").closest('tr').remove();
-            $(".table-condensed").append("<tr><td id='wizard-msg' colspan='5' style='display:none;padding: 10px;color: gray;width: 18cm;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no new accounts')}}</td></tr>");
-            $("#wizard-msg").fadeIn();
-          }
-        });
-
-      }
-
-      if ($(".table-condensed tr").length === 1) {
-        $(".table-condensed").closest('tr').remove();
-        $(".table-condensed").append("<tr><td id='wizard-msg' colspan='5' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
-        $("#wizard-msg").fadeIn();
-      }
-    </script>
-
-    <div class="clearfix"></div>
   {% endcall %}
 {% endblock %}
 
@@ -189,7 +113,7 @@
   {%- set actions = actions.for_category('members:menu') %}
   {%- if actions %}
     {% call m_box_menu() %}
-      <ul class="nav nav-list">
+      <ul class="menu-actions">
         {%- for action in actions %}
           <li>{{ action.render() }}</li>
         {%- endfor %}

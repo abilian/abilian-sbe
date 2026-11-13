@@ -1,58 +1,99 @@
-<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-  <div class="container">
-    {# Brand and toggle get grouped for better mobile display #}
-    <div class="navbar-header">
-      <button type="button" class="navbar-toggle" data-toggle="collapse"
-          data-target=".navbar-ex1-collapse">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="fa fa-bars"></span>
-      </button>
-      <a class="navbar-brand" href="{{ request.url_root }}">
-        <img src="{{ app.config['LOGO_URL'] | string }}"/>
-      </a>
+<nav class="bg-(--color-nav-bg) text-gray-700 border-b border-(--color-nav-line) sticky top-0 z-50" role="navigation" aria-label="{{ _('Main') }}" x-data="{ open: false }">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="relative flex h-16 items-center justify-between">
+      {# Logo/Brand #}
+      <div class="flex items-center px-2 lg:px-0">
+        <div class="shrink-0">
+          <a href="{{ request.url_root }}">
+            <img src="{{ app.config['LOGO_URL'] | string }}" alt="{{ config.SITE_NAME or _('Home') }}" class="h-8 w-auto"/>
+          </a>
+        </div>
+
+        {# Desktop Navigation #}
+        <div class="hidden lg:ml-6 lg:block">
+          <div class="flex space-x-4">
+            {%- for navitem in actions.for_category('navigation:section') %}
+              {%- if not navitem.divider %}
+                <span class="{{ navitem.status }}">{{ navitem.render() }}</span>
+              {%- endif %}
+            {%- endfor %}
+          </div>
+        </div>
+      </div>
+
+      {# Search and User Menu - Desktop #}
+      <div class="flex flex-1 justify-center px-2 lg:ml-6 lg:justify-end">
+        {%- if 'abilian.web.search' in app.plugin_manager.registered_plugins %}
+          {%- if not (current_user.is_anonymous and app.private_site) %}
+            <div class="w-full max-w-lg lg:max-w-xs">
+              <form role="search" class="livesearch" method="GET" action="{{ url_for('search.search_main') }}">
+                <input
+                  type="text" name="q" id="search-box"
+                  placeholder="{{ _('Search') }}" autocomplete="off"
+                  class="block w-full rounded-md border-0 bg-gray-100 py-1.5 pl-3 pr-3 text-gray-900 ring-1 ring-inset ring-gray-200 placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6"/>
+              </form>
+            </div>
+          {%- endif %}
+        {%- endif %}
+      </div>
+
+      {# Mobile menu button #}
+      <div class="flex lg:hidden">
+        <button type="button" @click="open = !open"
+                class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+          <span class="absolute -inset-0.5"></span>
+          <span class="sr-only">{{ _('Open main menu') }}</span>
+          <!-- Hamburger icon (shown when menu is closed) -->
+          <svg class="h-6 w-6" x-show="!open" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+          </svg>
+          <!-- Close icon (shown when menu is open) -->
+          <svg class="h-6 w-6" x-show="open" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" style="display: none;" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      {# Desktop User Menu #}
+      <div class="hidden lg:ml-4 lg:block">
+        <div class="flex items-center space-x-4">
+          {# Admin is an entry inside this menu, not a dropdown of its own. #}
+          {%- for action in actions.for_category('navigation:user') %}
+            <span class="{{ action.status }}">{{ action.render() }}</span>
+          {%- endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# Mobile menu #}
+  <div x-show="open" x-cloak class="lg:hidden">
+    <div class="space-y-1 px-2 pt-2 pb-3">
+      {%- for navitem in actions.for_category('navigation:section') %}
+        {%- if not navitem.divider %}
+          <div class="{{ navitem.status }} block">{{ navitem.render() }}</div>
+        {%- endif %}
+      {%- endfor %}
     </div>
 
-    <div id="navigation-sections"
-        class="collapse navbar-collapse navbar-ex1-collapse">
-      <ul class="nav navbar-nav">
-        {%- for navitem in actions.for_category('navigation:section') %}
-          {%- if navitem.divider %}
-            <li class="divider"></li>
-          {%- endif %}
-          <li class="{{ navitem.status }}">{{ navitem.render() }}</li>
-        {%- endfor %}
-      </ul>
-
-      <ul id="nav-menu-user" class="nav navbar-nav navbar-right">
-        {%- for action in actions.for_category('navigation:user') %}
-          {%- if action.divider %}
-            <li class="divider"></li>
-          {%- endif %}
-          <li class="{{ action.status }}">{{ action.render() }}</li>
-        {%- endfor %}
-      </ul>
-
-      {%- if 'abilian.web.search' in app.APP_PLUGINS %}
+    <div class="border-t border-gray-200 pt-4 pb-3">
+      {%- if 'abilian.web.search' in app.plugin_manager.registered_plugins %}
         {%- if not (current_user.is_anonymous and app.private_site) %}
-          <form class="navbar-form navbar-right" role="search" method="GET"
-              action="{{ url_for('search.search_main') }}">
-            <input type="text" name="q" class="search-query form-control"
-                placeholder="{{ _('Search') }}" autocomplete="off" id="search-box"/>
-          </form>
+          <div class="px-2 pb-3">
+            <form role="search" class="livesearch" method="GET" action="{{ url_for('search.search_main') }}">
+              <input type="text" name="q" id="search-box-mobile"
+                     placeholder="{{ _('Search') }}" autocomplete="off"
+                     class="block w-full rounded-md border-0 bg-gray-100 py-1.5 pl-3 pr-3 text-gray-900 ring-1 ring-inset ring-gray-200 placeholder:text-gray-500 focus:bg-white focus:ring-2 focus:ring-inset focus:ring-blue-500"/>
+            </form>
+          </div>
         {%- endif %}
       {%- endif %}
 
-      {%- set admin_nav = actions.for_category('navigation:admin') %}
-      {%- if admin_nav %}
-        <ul id="nav-menu-admin" class="nav navbar-nav navbar-right">
-          {%- for action in admin_nav %}
-            <li class="{{ action.status }}">{{ action.render() }}</li>
-          {%- endfor %}
-        </ul>
-      {%- endif %}
-
+      <div class="space-y-1 px-2">
+        {%- for action in actions.for_category('navigation:user') %}
+          <div class="{{ action.status }}">{{ action.render() }}</div>
+        {%- endfor %}
+      </div>
     </div>
-    {# navbar-collapse #}
   </div>
-  {# div.container-fluid #}
 </nav>

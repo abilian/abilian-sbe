@@ -20,6 +20,7 @@ from flask import (
 )
 from flask_login import current_user
 from flask_mail import Message
+from PIL import Image
 from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.core.extensions import db, mail
@@ -33,7 +34,7 @@ from abilian.sbe.apps.documents.repository import content_repository
 from abilian.sbe.apps.documents.tasks import convert_document_content, preview_document
 from abilian.services import audit_service
 from abilian.services.conversion import ConversionError, converter
-from abilian.services.image import FIT, resize
+from abilian.services.image import FIT, get_format, resize
 from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf, url_for
 from abilian.web.action import actions
@@ -207,6 +208,7 @@ def document_download(doc_id: int, attach: bool = False) -> Response:
 @route("/doc/<int:doc_id>/checkin_checkout", methods=["POST"])
 def checkin_checkout(doc_id):
     doc = get_document(doc_id)
+    check_write_access(doc)
     action = request.form.get("action")
 
     if action not in ("checkout", "lock", "unlock"):
@@ -259,6 +261,13 @@ def document_preview_image(doc_id: int) -> Response:
     if not doc.antivirus_ok:
         return preview_missing_image()
 
+    # `Blob.value` is None when the row survives but its file does not -- a
+    # database restored without its file store, a pruned repository. Every
+    # branch below needs the content, so this is the one place to say so;
+    # without it the image branch reached resize(None, ...) and 500ed.
+    if not doc.content:
+        return preview_missing_image()
+
     size = int(request.args.get("size", 0))
 
     # Just in case
@@ -276,6 +285,9 @@ def document_preview_image(doc_id: int) -> Response:
         image = doc.content
         if size:
             image = resize(image, size, size, mode=FIT)
+        # Not the default: resizing keeps a PNG a PNG.
+        if image:
+            content_type = Image.MIME[get_format(image)]
     else:
         page = int(request.args.get("page", 0))
         try:

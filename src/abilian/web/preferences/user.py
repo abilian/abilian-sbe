@@ -8,7 +8,6 @@ from io import BytesIO
 from typing import TYPE_CHECKING
 
 import babel.dates
-import PIL.Image
 from flask import current_app, flash, g, redirect, render_template, request, url_for
 from werkzeug.exceptions import InternalServerError
 from wtforms import StringField
@@ -19,6 +18,7 @@ from abilian.i18n import _, _l, get_default_locale
 from abilian.services.preferences.panel import PreferencePanel
 from abilian.web import csrf
 from abilian.web.forms import Form, fields, required, widgets
+from abilian.web.forms.validators import open_png_or_jpeg
 
 if TYPE_CHECKING:
     from abilian.web.forms.fields import FileField
@@ -63,20 +63,7 @@ class UserPreferencesForm(Form):
         if not data:
             return
 
-        data = field.data
-        filename = data.filename
-        valid = any(filename.lower().endswith(ext) for ext in (".png", ".jpg", ".jpeg"))
-
-        if not valid:
-            raise ValidationError(_("Only PNG or JPG image files are accepted"))
-
-        data.seek(0)
-        try:
-            # check this is actually an image file
-            im = PIL.Image.open(data)
-            im.load()
-        except Exception as e:
-            raise ValidationError(_("Could not decode image file")) from e
+        im = open_png_or_jpeg(field.data)
 
         img_type = (im.format or "").lower()
         if img_type not in ("png", "jpeg"):

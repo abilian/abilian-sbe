@@ -1,45 +1,50 @@
 {% if obj %}
   {% set doc = obj %}
 {% endif %}
-<div class="modal fade" id="modal-send-by-email" role="dialog"
-     data-keyboard="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form id="modal-email-form"
-            action=''
-            method="POST">
+<dialog class="modal" id="modal-send-by-email">
+  <div class="modal-dialog relative mx-auto my-8 max-w-lg">
+    <div class="modal-content bg-white rounded-lg shadow-xl">
+      <form id="modal-email-form" action="" method="POST">
         {{ csrf.field() }}
 
-        <div class="modal-header">
-          <button class="close" data-dismiss="modal">&times;</button>
-          <h4 class="modal-title">{{ _("Send by email") }}</h4>
+        <div class="modal-header flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 class="modal-title text-lg font-semibold text-gray-900">{{ _("Send by email") }}</h2>
+          <button type="button" class="text-gray-400 hover:text-gray-500" data-modal-close>&times;</button>
         </div>
 
-        <div class="modal-body">
-          <div class="form-group">
-            <label class="control-label">{{ _("Recipient") }}</label>
-
-            <div class="input-group">
-              <span class="input-group-addon">@</span>
-              <input class="form-control" id="prependedInput"
-                     type="text" name="recipient"
-                     value="{{ request.args.get('recipient', '') }} "/>
+        <div class="modal-body p-4 space-y-4">
+          <div>
+            <label for="prependedInput" class="block text-sm font-medium text-gray-700 mb-1">{{ _("Recipient") }}</label>
+            <div class="flex">
+              <span class="inline-flex items-center px-3 border border-r-0 border-gray-300 rounded-l-md bg-gray-50 text-gray-500 text-sm">
+                @
+              </span>
+              <input class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     id="prependedInput" type="text" name="recipient"
+                     value="{{ request.args.get('recipient', '') }}"/>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="control-label">{{ _("Message") }}</label>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ _("Message") }}</label>
             <textarea name="message"
-                      class="form-control resizeable-vertical" rows="6"
+                      class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-y"
+                      rows="6"
                       placeholder="{{ _('Message...') }}">{{ request.args.get('message', '') }}</textarea>
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
-          <button class="btn btn-primary" type="submit">{{ _("Send") }}</button>
+        <div class="modal-footer flex justify-end gap-2 p-4 border-t border-gray-200">
+          <button data-modal-close type="button"
+                  class="btn btn-default">
+            {{ _("Cancel") }}
+          </button>
+          <button class="btn btn-primary"
+                  type="submit">
+            {{ _("Send") }}
+          </button>
         </div>
       </form>
     </div>
   </div>
-</div>
+</dialog>

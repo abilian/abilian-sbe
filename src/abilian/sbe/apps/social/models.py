@@ -9,7 +9,7 @@ import re
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm.query import Query
 from sqlalchemy.schema import Column, ForeignKey
-from sqlalchemy.types import Integer, UnicodeText
+from sqlalchemy.types import Integer, Unicode, UnicodeText
 
 from abilian.core.entities import SEARCHABLE, Entity
 from abilian.core.extensions import db
@@ -61,7 +61,7 @@ class Message(Entity):
 class TagApplication(Entity):
     __tablename__ = "tag_application"
 
-    tag = Column(UnicodeText, index=True)
+    tag = Column(Unicode(255), index=True)
     message_id = Column(Integer, ForeignKey("message.id"))
 
 
