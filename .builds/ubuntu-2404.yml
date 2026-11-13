@@ -16,10 +16,6 @@ packages:
   - python3-pip
   - python3-wheel
   - pipx
-  # Node
-  - nodejs
-  - npm
-  - libnode-dev
   # Librairies for DB connectors
   - libsqlite3-dev
   - libpq-dev
@@ -43,6 +39,9 @@ tasks:
   - setup: |
       # Not `sudo pip install`: it can't upgrade Debian's own packages.
       pipx install uv
+      # Ubuntu's Node 18 is too old for Vite 7 and Tailwind 4.
+      curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+      sudo apt-get install -y nodejs
       cd abilian-sbe
       npm install
       make front
