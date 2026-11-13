@@ -3,7 +3,7 @@ name = "abilian-sbe"
 version = "1.1.21"
 description = "Social Business platform (entreprise collaboration and information management)"
 readme = "README.md"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.12"
 license = "LGPL-2.0-or-later"
 authors = [{ name = "Abilian SAS", email = "sales@abilian.com" }]
 dependencies = [
@@ -212,13 +212,13 @@ reportPrivateImportUsage = false
 # -----------------------------------------------------------------------------
 
 [tool.zuban]
-python_version = "3.13"
+python_version = "3.12"
 ignore_missing_imports = true
 
 # -----------------------------------------------------------------------------
 
 [tool.pyrefly]
-python-version = "3.13"
+python-version = "3.12"
 ignore-missing-imports = ["*"]
 # nothing
 
