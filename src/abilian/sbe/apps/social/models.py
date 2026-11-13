@@ -7,18 +7,16 @@ from __future__ import annotations
 import re
 
 from sqlalchemy.orm import relationship
-from sqlalchemy.orm.query import Query
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, Unicode, UnicodeText
 
-from abilian.core.entities import SEARCHABLE, Entity
-from abilian.core.extensions import db
+from abilian.core.entities import SEARCHABLE, Entity, EntityQuery
 from abilian.core.models.subjects import Group, User
 
 __all__ = ["Message", "PrivateMessage"]
 
 
-class MessageQuery(Query):
+class MessageQuery(EntityQuery):
     def by_creator(self, user):
         return self.filter(Message.creator_id == user.id)
 
@@ -50,7 +48,7 @@ class Message(Entity):
     #: The group this message has been posted to.
     group = relationship("Group", primaryjoin=(group_id == Group.id), lazy="joined")
 
-    query = db.session.query_property(MessageQuery)
+    query_class = MessageQuery
 
     @property
     def tags(self) -> list[str]:

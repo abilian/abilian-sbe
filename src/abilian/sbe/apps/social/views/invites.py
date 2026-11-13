@@ -23,8 +23,6 @@ class Invite(db.Model):
 
     email = Column(Text, nullable=False)
 
-    query = db.session.query_property()
-
 
 @social.route("/invite")
 def invite():
