@@ -17,6 +17,7 @@ from abilian.sbe.apps.communities.models import WRITER, Community
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.views import util as view_util
+from abilian.services.conversion.handlers import HAS_PDFTOTEXT
 from abilian.web.util import url_for
 from tests.util import DATA_DIR, client_login, path_from_url
 
@@ -165,7 +166,14 @@ def test_pdf_upload(client: FlaskClient, community: Community) -> None:
     name = "onepage.pdf"
     user = community.test_user
     with client_login(client, user):
-        _test_upload(community, client, name, "application/pdf")
+        # The preview is rendered by poppler, which CI images may lack.
+        _test_upload(
+            community,
+            client,
+            name,
+            "application/pdf",
+            assert_preview_available=HAS_PDFTOTEXT,
+        )
 
 
 def test_image_upload(client: FlaskClient, community: Community) -> None:
