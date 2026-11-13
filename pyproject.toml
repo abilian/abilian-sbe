@@ -97,6 +97,11 @@ dependencies = [
 [project.urls]
 Repository = "https://github.com/abilian/abilian-sbe"
 
+[project.optional-dependencies]
+postgres = [
+    "psycopg2-binary>=2.9.13",
+]
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

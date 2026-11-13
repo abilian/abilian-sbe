@@ -13,10 +13,10 @@ WORKDIR /app
 
 # Dependencies first, so editing code doesn't reinstall them.
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-group doc --no-install-project
+RUN uv sync --frozen --no-group doc --extra postgres --no-install-project
 
 COPY src src
 COPY tests tests
-RUN uv sync --frozen --no-group doc
+RUN uv sync --frozen --no-group doc --extra postgres
 
 CMD ["pytest", "tests"]

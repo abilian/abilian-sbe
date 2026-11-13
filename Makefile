@@ -1,4 +1,4 @@
-.PHONY: test test-mariadb test-mariadb-docker unit full-test pep8 clean setup
+.PHONY: test test-mariadb test-mariadb-docker test-postgres-docker unit full-test pep8 clean setup
 
 default: lint-ruff test lint
 all: default
@@ -21,9 +21,9 @@ test-mariadb:
 
 DOCKER_TESTS = docker compose -f tests/docker/compose.yaml
 
-## Run tests against MariaDB, database and tests both in Docker
-test-mariadb-docker:
-	$(DOCKER_TESTS) run --rm --build tests; status=$$?; \
+## Run tests against MariaDB or PostgreSQL, database and tests both in Docker
+test-mariadb-docker test-postgres-docker: test-%-docker:
+	$(DOCKER_TESTS) run --rm --build tests-$*; status=$$?; \
 	$(DOCKER_TESTS) down; exit $$status
 
 test-with-coverage:

@@ -71,10 +71,10 @@ The commands below assume this virtual env is active (or prefix them with `uv ru
 
 ## Create a PostgreSQL database (here named "sbe")
 
-The PostgreSQL driver is no longer a default dependency, add it first:
+The PostgreSQL driver is an optional extra, install it first:
 
 ```bash
-uv add psycopg2-binary
+uv sync --no-dev --extra postgres
 ```
 
 Then create the database:
@@ -106,7 +106,7 @@ sudo mariadb -e "
 "
 ```
 
-To run the tests against MariaDB without installing it, use `make test-mariadb-docker`: it runs the database and the tests in containers (see `tests/docker/`).
+To run the tests against MariaDB without installing it, use `make test-mariadb-docker`: it runs the database and the tests in containers (see `tests/docker/`). `make test-postgres-docker` does the same for PostgreSQL.
 
 On macOS (Homebrew `mariadb`), or to create the `sbe_test` database for `make test-mariadb`:
 
