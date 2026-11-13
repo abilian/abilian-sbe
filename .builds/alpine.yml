@@ -53,8 +53,8 @@ tasks:
 
   - test-mariadb-docker: |
       cd abilian-sbe
-      make test-mariadb-docker
+      make test-mariadb-docker DOCKER_TESTS_EXTRA="-f tests/docker/compose.host-network.yaml"
 
   - test-postgres-docker: |
       cd abilian-sbe
-      make test-postgres-docker
+      make test-postgres-docker DOCKER_TESTS_EXTRA="-f tests/docker/compose.host-network.yaml"

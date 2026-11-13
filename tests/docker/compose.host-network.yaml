@@ -1,0 +1,16 @@
+# Override for CI (.builds/alpine.yml): on the builds.sr.ht VM, creating a
+# Docker network hangs, so every container uses the host network instead.
+# The databases then listen on the host's 3306 and 5432 ports.
+services:
+  mariadb:
+    network_mode: host
+  postgres:
+    network_mode: host
+  tests-mariadb:
+    network_mode: host
+    environment:
+      SQLALCHEMY_DATABASE_URI: mysql+pymysql://sbe:sbe@127.0.0.1/sbe_test?charset=utf8mb4
+  tests-postgres:
+    network_mode: host
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://sbe:sbe@127.0.0.1/sbe_test

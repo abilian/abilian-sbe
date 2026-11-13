@@ -19,7 +19,8 @@ MARIADB_TEST_URI ?= mysql+pymysql://sbe:sbe@127.0.0.1/sbe_test?charset=utf8mb4
 test-mariadb:
 	SQLALCHEMY_DATABASE_URI="$(MARIADB_TEST_URI)" pytest tests
 
-DOCKER_TESTS = docker compose -f tests/docker/compose.yaml
+# CI adds `-f tests/docker/compose.host-network.yaml` through DOCKER_TESTS_EXTRA.
+DOCKER_TESTS = docker compose -f tests/docker/compose.yaml $(DOCKER_TESTS_EXTRA)
 
 ## Run tests against MariaDB or PostgreSQL, database and tests both in Docker
 test-mariadb-docker test-postgres-docker: test-%-docker:
