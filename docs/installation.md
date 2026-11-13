@@ -4,7 +4,7 @@ This guide provides a detailed walkthrough for installing software on a Ubuntu L
 
 The following instructions are tailored for a bare-metal server setup, specifically for a server named "sbe.example.com."
 
-(For cloud installations, the 'cloud' folder contains configuration examples for Docker, Nua, SlaoOS.)
+(For cloud installations, the `cloud/` folder contains configuration examples for Docker, Nua, SlapOS and Vagrant.)
 
 ## Create a dedicated user
 
@@ -22,7 +22,6 @@ List of packages to install with `apt`:
     default-jre
     libreoffice-java-common
     build-essential
-    python-dev
     libpq-dev
     libxslt1-dev
     libjpeg-dev
@@ -41,51 +40,56 @@ List of packages to install with `apt`:
     honcho
     curl
 
+`libpq-dev` is only needed with PostgreSQL, `mariadb-server` only with MariaDB.
+
+The `clamav` package only enables virus scanning if the optional `clamd` Python package is also installed (`uv add clamd`); otherwise scanning is silently skipped.
+
 Optional (if using Nginx and Letsencrypt like service):
 
     nginx
     certbot
 
 
-## Create a Python virtual env (Python version 3.12)
+## Install `uv`
+
+SBE uses [uv](https://docs.astral.sh/uv/) to manage Python and its dependencies. It requires Python 3.13, which `uv` downloads automatically if the system doesn't provide it.
 
 ```bash
-sudo apt install software-properties-common -y
-sudo add-apt-repository ppa:deadsnakes/ppa
-sudo apt update
-sudo apt install python3.12 python3.12-dev python3.12-venv
-```
-
-
-### Installation of `pip` from sources:
-
-```bash
-sudo curl -sS https://bootstrap.pypa.io/get-pip.py | python3.12
-```
-
-### Virtual environment named "venv":
-
-```bash
-python3.12 -m venv venv
-. venv/bin/activate
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ## Clone SBE source code and install
 
 ```bash
-git clone --depth 1  --branch main https://github.com/abilian/abilian-sbe-monorepo.git
+git clone --depth 1 --branch main https://github.com/abilian/abilian-sbe-monorepo.git
 cd abilian-sbe-monorepo
-pip install -U pip setuptools poetry
-pip install .
+uv sync --no-dev
+. .venv/bin/activate
 ```
 
-## Create a Postgresql database (here named "sbe")
+The commands below assume this virtual env is active (or prefix them with `uv run`).
+
+## Create a PostgreSQL database (here named "sbe")
+
+The PostgreSQL driver is no longer a default dependency, add it first:
+
+```bash
+uv add psycopg2-binary
+```
+
+Then create the database:
 
 ```bash
 sudo -u postgres psql
 create database sbe;
 create user sbe with encrypted password 'sbe';
 grant all privileges on database sbe to sbe;
+```
+
+And configure the SQLAlchemy URI in `.env`:
+
+```bash
+FLASK_SQLALCHEMY_DATABASE_URI="postgresql://sbe:sbe@localhost:5432/sbe"
 ```
 
 ## Or create a MariaDB database (here named "sbe")
@@ -157,11 +161,11 @@ Check that `lessc` is now available (or edit the related `Flask` config variable
 ```bash
 ./node_modules/.bin/lessc --version
 ```
-Expected result: `lessc 4.2.0 (Less Compiler) [JavaScript]`
+Expected result: `lessc 4.x (Less Compiler) [JavaScript]`
 
 ## Nginx proxy
 
-If using Nginx, check you have configured `nginx` with relevant SSL keys. See example file `sbe.example.com` in this directory.
+If using Nginx, check you have configured `nginx` with relevant SSL keys. See the example file `example_config/sbe.example.com`.
 
 Note: The example `nginx` configuration contains a permanent redirect for some static web resources. This can be adapted to the actual site configuration for static files. The other parts of the setup are otherwise pretty standard.
 
@@ -173,11 +177,11 @@ location ~ ^/static/min/abilian/web/resources/(.*) {
 
 ## Create a local '.env' file
 
-See 'dot_env' file in this directory. Of course `FLASK_*` variables can be declared using other Flask configuration methods.
+See the example file `example_config/dot_env`. Of course `FLASK_*` variables can be declared using other Flask configuration methods.
 
 ## First initialization of SBE application
 
-This commands are required only once:
+These commands are required only once:
 
 ```bash
 flask assets build
@@ -192,7 +196,7 @@ Create a local `Procfile` containing those lines (adapt the `gunicorn` configura
 ```
 worker: flask worker
 scheduler: flask scheduler
-web: gunicorn extranet.wsgi:app -b :8000 --workers 4 --log-file -
+web: gunicorn wsgi:app -b :8000 --workers 4 --log-file -
 ```
 
 And finally start the application using `honcho`:
