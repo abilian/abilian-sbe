@@ -11,7 +11,18 @@ from flask_sqlalchemy import SQLAlchemy as SAExtension
 if TYPE_CHECKING:
     from flask import Flask
     from sqlalchemy.engine.url import URL
-    from sqlalchemy.orm import Session
+    from sqlalchemy.orm import Session, scoped_session
+
+    class ScopedSession(scoped_session, Session):
+        """What a `scoped_session` offers, for type checkers.
+
+        SQLAlchemy 1.4 builds its proxy methods at runtime, where no type
+        checker sees them: besides its own methods, it offers what a Session
+        does, and calling it returns the current Session.
+        """
+
+        def __call__(self) -> Session:
+            """Return the current Session."""
 
 
 class SQLAlchemy(SAExtension):
@@ -20,9 +31,7 @@ class SQLAlchemy(SAExtension):
     Add our custom driver hacks.
     """
 
-    # A scoped_session, whose proxy methods SQLAlchemy 1.4 builds at runtime
-    # where no type checker sees them. It offers what a Session does.
-    session: Session
+    session: ScopedSession
 
     def apply_driver_hacks(
         self, app: Flask, info: URL, options: dict[str, Any]
