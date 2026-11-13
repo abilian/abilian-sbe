@@ -26,8 +26,8 @@ tasks:
   - setup: |
       sudo pip3.12 install -U uv
       cd abilian-sbe
-      uv sync
-      npm install
+      uv sync -q
+      npm install -q
       make front
 
   - lint: |
