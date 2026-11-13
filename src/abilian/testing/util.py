@@ -97,6 +97,9 @@ def cleanup_db(db: SQLAlchemy) -> None:
     # Need to run this sequence twice for some reason
     _delete_tables(db)
     _delete_tables(db)
+    # Commit first: drop_all() runs on another connection and, on PostgreSQL,
+    # would wait forever for the locks held by the session's open transaction.
+    db.session.commit()
     # One more time, just in case ?
     db.drop_all()
 

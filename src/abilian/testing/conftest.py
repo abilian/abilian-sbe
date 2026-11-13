@@ -70,8 +70,8 @@ def db(app: Flask, app_context: AppContext) -> Iterator[SQLAlchemy]:
 
     cleanup_db(_db)
     _db.create_all()
-    if _db.engine.name in ("mysql", "mariadb"):
-        _db.session.begin()
+    # cleanup_db() committed: the blob store needs an open transaction.
+    _db.session.begin()
     yield _db
 
     _db.session.remove()
