@@ -78,7 +78,7 @@ class Membership(db.Model):
             f"<Membership user={self.user!r}, "
             f"community={self.community!r}, "
             f"role={self.role!s}>"
-        ).encode()
+        )
 
 
 def community_content(cls: type) -> Any:

@@ -113,7 +113,7 @@ def test_membership(community: Community, db: SQLAlchemy) -> None:
     assert not when_removed.called
 
     # simple member
-    community.set_membership(user, "member")
+    community.set_membership(user, MEMBER)
     db.session.commit()
 
     memberships = community.memberships
@@ -161,14 +161,14 @@ def test_membership(community: Community, db: SQLAlchemy) -> None:
 def test_folder_roles(community: Community, db: SQLAlchemy, app: Application) -> None:
     user = User(email="user@example.com")
     folder = community.folder
-    community.set_membership(user, "member")
+    community.set_membership(user, MEMBER)
     db.session.commit()
 
     assert security_service.get_roles(user, folder) == ["reader"]
 
     # this tests a bug, where local roles whould disappear when setting
     # membership twice
-    community.set_membership(user, "member")
+    community.set_membership(user, MEMBER)
     assert security_service.get_roles(user, folder) == ["reader"]
 
 
@@ -257,3 +257,12 @@ def test_default_view_kw_with_hit(
         hit = index_service.search("community", object_types=obj_types)[0]
         kw = views.default_view_kw({}, hit, hit["object_type"], hit["id"])
         assert kw == {"community_id": community.slug}
+
+
+def test_membership_repr(community: Community, db: SQLAlchemy) -> None:
+    user = User(email="user@example.com")
+    community.set_membership(user, MEMBER)
+    db.session.flush()
+    membership = community.memberships[0]
+
+    assert repr(membership).startswith("<Membership user=")
