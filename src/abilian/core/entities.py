@@ -9,7 +9,7 @@ import collections
 import re
 from datetime import datetime
 from inspect import isclass
-from typing import TYPE_CHECKING, Any, Never, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 import sqlalchemy as sa
 from flask import current_app
@@ -481,7 +481,7 @@ class Entity(Indexable, BaseMixin, Model, metaclass=EntityMeta):
     def _indexable_tag_text(self) -> str:
         return " ".join(str(tag.label) for tag in self._indexable_tags)
 
-    def clone(self) -> Never:
+    def clone(self) -> Self:
         """Copy an entity: copy every field, except the id and sqlalchemy
         internals, without forgetting about the n-n relationships.
 

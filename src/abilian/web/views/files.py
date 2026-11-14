@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Never
 
 from flask import Response, request
 from werkzeug.exceptions import BadRequest
@@ -68,15 +67,15 @@ class BaseFileDownload(View):
         kwargs["attach"] = request.args.get("attach", self.as_attachment, type=bool)
         return args, kwargs
 
-    def make_response(self, *args, **kwargs) -> Never:
+    def make_response(self, *args, **kwargs) -> Response:
         # for example: return flask.make_response(...)
         # or: return flask.send_file(...)
         raise NotImplementedError
 
-    def get_filename(self, *args, **kwargs) -> Never:
+    def get_filename(self, *args, **kwargs) -> str:
         raise NotImplementedError
 
-    def get_content_type(self, *args, **kwargs) -> Never:
+    def get_content_type(self, *args, **kwargs) -> str:
         raise NotImplementedError
 
     def get(self, attach: bool, *args, **kwargs):

@@ -18,7 +18,7 @@ import contextlib
 import os
 from inspect import isclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Never
+from typing import TYPE_CHECKING, Any
 
 import sqlalchemy as sa
 from flask import Flask, appcontext_pushed, current_app, g
@@ -109,13 +109,13 @@ class IndexServiceState(ServiceState):
 class IndexService(Service):
     schemas: dict[str, DefaultSearchSchema]
 
-    def search(self, q: str, index_name: str = "default", **search_args) -> Never:
+    def search(self, q: str, index_name: str = "default", **search_args) -> Any:
         raise NotImplementedError
 
-    def register_search_filter(self, func) -> Never:
+    def register_search_filter(self, func) -> None:
         raise NotImplementedError
 
-    def register_value_provider(self, func) -> Never:
+    def register_value_provider(self, func) -> None:
         raise NotImplementedError
 
 

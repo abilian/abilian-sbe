@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from operator import attrgetter
-from typing import TYPE_CHECKING, Any, Never
+from typing import TYPE_CHECKING, Any
 
 import sqlalchemy as sa
 from whoosh.fields import ID, TEXT, Schema
@@ -38,12 +38,12 @@ class SchemaAdapter(ABC):
         """
 
     @staticmethod
-    def can_adapt(obj_cls) -> Never:
+    def can_adapt(obj_cls) -> bool:
         """Return True if this class can adapt objects of class `obj_cls`."""
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve(self, pk, **data) -> Never:
+    def retrieve(self, pk, **data) -> Any:
         """Returns an object instance given its identifier and optional data
         kwargs.
 
@@ -54,7 +54,7 @@ class SchemaAdapter(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_document(self, obj) -> Never:
+    def get_document(self, obj) -> dict[str, Any]:
         raise NotImplementedError
 
 

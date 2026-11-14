@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import TYPE_CHECKING, Any, ClassVar, Never, Protocol
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 
 import sqlalchemy as sa
 import sqlalchemy.exc
@@ -27,6 +27,8 @@ from abilian.web.action import ButtonAction, Endpoint, actions
 from .base import JSONView, View
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from werkzeug.datastructures import ImmutableMultiDict
 
 
@@ -83,13 +85,15 @@ class BaseObjectView[M: ViewedModel](View):
 
         return args, kwargs
 
-    def breadcrumb(self) -> None:
+    def breadcrumb(
+        self,
+    ) -> nav.BreadcrumbItem | Iterable[nav.BreadcrumbItem] | None:
         """Return :class:`..nav.BreadcrumbItem` instance for this object.
 
         This method may return a list of BreadcrumbItem instances.
         Return `None` if nothing.
         """
-        return
+        return None
 
     def init_object(self, args, kwargs):
         """This method is reponsible for setting :attr:`obj`.
@@ -595,10 +599,10 @@ class JSONBaseSearch(JSONView):
 
         return {"results": results}
 
-    def get_results(self, q, *args, **kwargs) -> Never:
+    def get_results(self, q, *args, **kwargs) -> Iterable[Any]:
         raise NotImplementedError
 
-    def get_item(self, obj) -> Never:
+    def get_item(self, obj) -> dict[str, Any]:
         """Return a result item.
 
         :param obj: Instance object

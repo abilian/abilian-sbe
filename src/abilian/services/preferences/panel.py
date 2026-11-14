@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from typing import Any, Never
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from flask.typing import ResponseReturnValue
 
 
 class PreferencePanel:
@@ -20,8 +23,8 @@ class PreferencePanel:
     def is_accessible(self) -> bool:
         return True
 
-    def get(self) -> Never:
+    def get(self) -> ResponseReturnValue:
         raise NotImplementedError
 
-    def post(self) -> Never:
+    def post(self) -> ResponseReturnValue:
         raise NotImplementedError

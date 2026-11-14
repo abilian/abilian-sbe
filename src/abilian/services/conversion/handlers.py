@@ -102,8 +102,13 @@ class Handler(ABC):
         return match_source and match_target
 
     @abstractmethod
-    def convert(self, blob: bytes, **kw):
-        pass
+    def convert(self, blob: bytes, **kw: Any) -> Any:
+        """Convert `blob` to the type the handler produces.
+
+        Text handlers return a `str`, PDF handlers `bytes`, and image
+        handlers a list of `bytes`, one image per page. The converter picks
+        the handler by what it produces, which no single type can say.
+        """
 
 
 class PdfToTextHandler(Handler):
