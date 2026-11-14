@@ -25,7 +25,7 @@ class WikiPageAction(Action):
 
     def url(self, context=None):
         if self._url:
-            return self._url
+            return super().url(context)
         page = context.get("object")
         kw = self.endpoint.get_kwargs()
         kw["title"] = page.title

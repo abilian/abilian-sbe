@@ -33,13 +33,13 @@ class CommunityEndpoint(Endpoint):
 class CommunityTabAction(Action):
     Endpoint = CommunityEndpoint
 
-    def url(self, context: dict[str, Any] | None = None) -> CommunityEndpoint | str:
+    def url(self, context: dict[str, Any] | None = None) -> str:
         if self._url:
-            return super().url()
+            return super().url(context)
 
         endpoint = self.endpoint
         if endpoint:
-            return endpoint
+            return str(endpoint)
         return url_for(f"{self.name}.index")
 
     def is_current(self) -> bool:
