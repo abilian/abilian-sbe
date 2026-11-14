@@ -5,7 +5,6 @@
 from __future__ import annotations
 
 from flask import current_app
-from werkzeug.exceptions import BadRequest
 
 from abilian.core.entities import Entity
 from abilian.core.models.tag import Tag
@@ -13,8 +12,6 @@ from abilian.i18n import _l
 from abilian.web import url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.views import (
-    BaseObjectView,
-    JSONView,
     ObjectCreate,
     ObjectDelete,
     ObjectEdit,
@@ -63,63 +60,6 @@ bp.route("/manage/<int:object_id>/delete")(delete_view)
 
 # Tags on entities
 entity_bp = AccessControlBlueprint("entity_tags", __name__, url_prefix="/tags/entity")
-
-
-class BaseEntityTagView(BaseTagView):
-    def init_object(self, args, kwargs):
-        args, kwargs = super().init_object(args, kwargs)
-        entity_id = kwargs.pop("entity_id", None)
-
-        if entity_id is not None:
-            self.entity = Entity.query.get(entity_id)
-
-        if self.entity is None:
-            msg = "No entity provided"
-            raise BadRequest(msg)
-
-        return args, kwargs
-
-    def view_url(self):
-        return url_for(self.entity)
-
-    def index_url(self):
-        return self.view_url()
-
-
-class EntityTagList(BaseEntityTagView, BaseObjectView[Tag], JSONView):
-    def get(self, *args, **kwargs):
-        return JSONView.get(self, *args, **kwargs)
-
-    def data(self, *args, **kwargs) -> dict:
-        tags = sorted(self.extension.entity_tags(self.entity))
-        return {"result": tags}
-
-
-entity_bp.route("/<int:object_id>/list")(EntityTagList.as_view("list"))
-
-
-class EntityTagManage(BaseEntityTagView, ObjectEdit[Tag, TagForm]):
-    methods = ["POST"]
-
-    # operation: add or remove
-    mode = None
-
-    def __init__(self, mode, *args, **kwargs) -> None:
-        super(EntityTagManage, *args, **kwargs)
-        assert mode in ("add", "remove")
-        self.mode = mode
-
-    def form_valid(self, redirect_to=None) -> None:
-        ns = self.form.ns.data
-        label = self.form.label.data
-        op = getattr(self.extension, self.mode)
-        op(self.entity, ns=ns, label=label)
-
-
-entity_bp.route("/<int:object_id>/add")(EntityTagManage.as_view("add", mode="add"))
-entity_bp.route("/<int:object_id>/remove")(
-    EntityTagManage.as_view("remove", mode="remove")
-)
 
 
 class EntityTagEdit(ObjectEdit):
