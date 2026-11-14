@@ -17,7 +17,9 @@ from abilian.sbe.apps.communities.models import WRITER, Community
 from abilian.sbe.apps.communities.presenters import CommunityPresenter
 from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.views import util as view_util
+from abilian.services import security_service
 from abilian.services.conversion.handlers import HAS_PDFTOTEXT
+from abilian.services.security import ADMIN
 from abilian.web.util import url_for
 from tests.util import DATA_DIR, client_login, path_from_url
 
@@ -121,6 +123,31 @@ def test_content_outside_the_community_is_not_found(
     with client_login(client, user):
         for url in urls:
             assert client.get(url).status_code == 404, url
+
+
+def test_role_form_with_a_missing_field_is_a_bad_request(
+    app: Application, client: FlaskClient, db: SQLAlchemy, community: Community
+) -> None:
+    # Answer as in production: in debug mode, Flask raises the error instead.
+    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    security_service.start()
+    user = community.test_user
+    security_service.grant_role(user, ADMIN)
+    db.session.commit()
+    folder = community.folder
+    url = url_for(
+        "documents.permissions_update", community_id=community.slug, folder_id=folder.id
+    )
+    incomplete_forms = [
+        {"action": "add-user-role", "user": user.id},
+        {"action": "add-user-role", "role": "reader"},
+        {"action": "add-group-role", "group": 1},
+        {"action": "add-group-role", "role": "reader"},
+    ]
+
+    with client_login(client, user):
+        for data in incomplete_forms:
+            assert client.post(url, data=data).status_code == 400, data
 
 
 def _test_upload(

@@ -390,8 +390,8 @@ def permissions_update(folder_id):
         )
 
     if action == "add-user-role":
-        role = request.form.get("role").lower()
-        user_id = int(request.form.get("user"))
+        role = request.form["role"].lower()
+        user_id = int(request.form["user"])
         user = User.query.get(user_id)
 
         security.grant_role(user, role, folder)
@@ -402,8 +402,8 @@ def permissions_update(folder_id):
         )
 
     if action == "add-group-role":
-        role = request.form.get("role").lower()
-        group_id = int(request.form.get("group"))
+        role = request.form["role"].lower()
+        group_id = int(request.form["group"])
         group = Group.query.get(group_id)
 
         security.grant_role(group, role, folder)
