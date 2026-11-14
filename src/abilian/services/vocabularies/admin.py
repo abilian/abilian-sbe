@@ -22,6 +22,8 @@ from .forms import EditForm
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from .models import BaseVocabulary
+
 _MARKER = object()
 
 
@@ -29,13 +31,12 @@ class ViewBase:
     title = _l("Vocabulary entry")
     base_template = "admin/_base.html"
     Form = EditForm
-    Model = None
+    #: the vocabulary, which the URL names
+    Model: type[BaseVocabulary]
 
     def prepare_args(self, args, kwargs):
-        if self.Model is None:
-            self.Model = kwargs.get("Model")
-            if hasattr(self.Model, "__form__"):
-                self.Form = self.Model.__form__
+        self.Model = kwargs["Model"]
+        self.Form = getattr(self.Model, "__form__", self.Form)
         return args, kwargs
 
     def index_url(self):

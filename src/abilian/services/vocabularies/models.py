@@ -55,7 +55,7 @@ class _VocabularyMeta(_BaseMeta):
         bases: tuple[type[Model], ...],
         d: dict[str, Any],
     ) -> type[BaseVocabulary]:
-        meta = d.get("Meta")
+        meta = d["Meta"]
         group = slugify(meta.group or "", "_")
         if group:
             table_prefix = f"vocabulary_{group}_"

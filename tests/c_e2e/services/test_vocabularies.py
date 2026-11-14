@@ -171,3 +171,14 @@ def test_admin_panel_reorder(app, db, session, client, test_request_context) -> 
     assert r.status_code == 302
     assert path_from_url(r.location) == "/admin/vocabularies"
     assert Voc.query.order_by(Voc.position).all() == [first, third, second]
+
+
+def test_admin_entry_pages_open(client, login_admin, session) -> None:
+    """The edit and create views take the vocabulary from the URL."""
+    item = Voc(label="Entry", position=1)
+    session.add(item)
+    session.commit()
+
+    base = f"/admin/vocabularies/_/{Voc.Meta.name}"
+    for path in (f"{base}/{item.id}", f"{base}/new"):
+        assert client.get(path).status_code == 200, path
