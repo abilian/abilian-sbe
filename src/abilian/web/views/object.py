@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Any, ClassVar, Never, Protocol
+from typing import TYPE_CHECKING, Any, ClassVar, Never, Protocol
 
 import sqlalchemy as sa
 import sqlalchemy.exc
@@ -25,6 +25,9 @@ from abilian.web import csrf, forms, nav
 from abilian.web.action import ButtonAction, Endpoint, actions
 
 from .base import JSONView, View
+
+if TYPE_CHECKING:
+    from werkzeug.datastructures import ImmutableMultiDict
 
 
 class ViewedModel(Protocol):
@@ -205,8 +208,8 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
     #: :class:ButtonAction instance to show on form
     _buttons = ()
 
-    #: submitted form data
-    data = None
+    #: submitted form data, set by `prepare_args()`
+    data: ImmutableMultiDict[str, str]
 
     #: action name from form data
     action = None
@@ -563,16 +566,17 @@ class ObjectDelete[M: ViewedModel, F: Form](ObjectEdit[M, F]):
 
 
 class JSONBaseSearch(JSONView):
-    Model = None
+    #: Model class, set by a subclass or given to `as_view()`
+    Model: type[Any]
     minimum_input_length = 2
 
     def __init__(self, *args, **kwargs) -> None:
-        Model = kwargs.pop("Model", self.Model)
+        if "Model" in kwargs:
+            self.Model = kwargs.pop("Model")
         minimum_input_length = kwargs.pop(
             "minimum_input_length", self.minimum_input_length
         )
         super().__init__(*args, **kwargs)
-        self.Model = Model
         self.minimum_input_length = minimum_input_length
 
     def prepare_args(self, args, kwargs):
