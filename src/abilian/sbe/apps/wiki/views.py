@@ -179,7 +179,7 @@ route("/viewers")(PageViewers.as_view("page_viewers"))
 class PageEdit(BasePageView, ObjectEdit[WikiPage, WikiPageForm]):
     # template = 'wiki/page_edit.html'
     title = _("Edit page")
-    last_revision: int = None
+    last_revision: WikiPageRevision | None = None
     _message_success = _l("Wiki page successfully edited.")
 
     def init_object(

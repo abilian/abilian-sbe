@@ -144,21 +144,14 @@ class BcryptPasswordStrategy(PasswordStrategy):
         return "bcrypt"
 
     def authenticate(self, user: User, password: str) -> bool:
-        assert isinstance(password, str)
-
+        # bcrypt works on bytes, not str
         current_passwd = user.password
-        # crypt work only on bytes, not str (Unicode)
         if isinstance(current_passwd, str):
             current_passwd = current_passwd.encode("utf-8")
-        if isinstance(password, str):
-            password = password.encode("utf-8")
-
-        return bcrypt.hashpw(password, current_passwd) == current_passwd
+        return bcrypt.hashpw(password.encode("utf-8"), current_passwd) == current_passwd
 
     def process(self, user: User, password: str) -> str:
-        if isinstance(password, str):
-            password = password.encode("utf-8")
-        return bcrypt.hashpw(password, bcrypt.gensalt()).decode("utf-8")
+        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 class UserQuery(Query):

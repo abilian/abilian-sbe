@@ -22,11 +22,9 @@ class ServiceManager:
     def get_service(self, name: str) -> Service:
         return self.services[name]
 
-    def start_services(self, services: list[str] | None = None) -> None:
+    def start_services(self) -> None:
         """Start all services. If a service is already running, nothing happens."""
-        if services is None:
-            services = self.services.values()
-        for service in services:
+        for service in self.services.values():
             if not service.running:
                 service.start()
 
