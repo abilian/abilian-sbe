@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [1.2.0] - 2026-11-15
 
 The Tailwind front-end migration, an authorization convergence, MariaDB support and a type cleanup that found a score of bugs. Large, and it changes framework API that downstream applications may import.
 
