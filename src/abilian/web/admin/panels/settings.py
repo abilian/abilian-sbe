@@ -38,7 +38,7 @@ class Key:
         return render_template(self.template, key=self, config=current_app.config)
 
     def value_from_request(self):
-        return request.form.get(self.id).strip()
+        return request.form[self.id].strip()
 
 
 class SessionLifeTimeKey(Key):

@@ -112,3 +112,14 @@ def test_the_audit_log_shows_everything_when_all_contents_is_picked(
     entry = '<li class="flex gap-3'
     assert entry in unfiltered
     assert submitted.get_data(as_text=True).count(entry) == unfiltered.count(entry)
+
+
+def test_saving_settings_with_a_missing_field_is_a_bad_request(
+    app, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    # Answer as in production: in debug mode, Flask raises the error instead.
+    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    with client_login(client, admin_user):
+        response = client.post(url_for("admin.settings"), data={"action": "save"})
+
+    assert response.status_code == 400
