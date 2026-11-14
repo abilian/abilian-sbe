@@ -106,20 +106,7 @@ class IndexServiceState(ServiceState):
         setattr(g, PENDING_INDEXATION_ATTR, values)
 
 
-class IndexService(Service):
-    schemas: dict[str, DefaultSearchSchema]
-
-    def search(self, q: str, index_name: str = "default", **search_args) -> Any:
-        raise NotImplementedError
-
-    def register_search_filter(self, func) -> None:
-        raise NotImplementedError
-
-    def register_value_provider(self, func) -> None:
-        raise NotImplementedError
-
-
-class WhooshIndexService(IndexService):
+class WhooshIndexService(Service):
     """Index documents using whoosh."""
 
     name = "indexing"

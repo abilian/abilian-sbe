@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 import whoosh.fields as wf
 import whoosh.query as wq
@@ -18,7 +18,6 @@ if TYPE_CHECKING:
     from whoosh.query.terms import Term
 
     from abilian.core.models.subjects import User
-    from abilian.services.indexing.service import IndexService
 
 _COMMUNITY_CONTENT_FIELDNAME = "is_community_content"
 _COMMUNITY_CONTENT_FIELD = wf.BOOLEAN()
@@ -37,7 +36,7 @@ _FIELDS = [
 
 def init_app(app: Flask) -> None:
     """Add community fields to indexing service schema."""
-    indexing = cast("IndexService", get_service("indexing"))
+    indexing = get_service("indexing")
     indexing.register_search_filter(filter_user_communities)
     indexing.register_value_provider(mark_non_community_content)
 
@@ -64,8 +63,8 @@ def filter_user_communities(user: User) -> Or | Term:
     Takes its subject rather than reaching for one: it used to read
     `current_user` and `g.is_manager`, so it could not run outside a request,
     and the `g` read was the second place deciding "may this user see
-    everything anyway" -- `IndexService.search` settles that now, before this is
-    called.
+    everything anyway" -- `WhooshIndexService.search` settles that now, before
+    this is called.
     """
     filter_q = wq.Term(_COMMUNITY_CONTENT_FIELDNAME, False)
 
