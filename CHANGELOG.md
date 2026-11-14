@@ -4,17 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-The Tailwind front-end migration and an authorization convergence. Large: ~150 commits, and it changes framework API that downstream applications may import.
+The Tailwind front-end migration, an authorization convergence, MariaDB support and a type cleanup that found a score of bugs. Large, and it changes framework API that downstream applications may import.
 
 ### Upgrade steps
 
 Run in this order. The backfills ship *with* this release, so they cannot run before it is installed — install, backfill, then serve traffic.
 
-1. `flask db current`, then `flask db upgrade` — no new migrations in this release, but run it anyway. A database created by `flask initdb` records no version: `current` prints no revision and `upgrade` fails with `relation "sbe_event" already exists`, leaving the database unchanged. Run `flask db stamp head` once on such a database instead of `upgrade`. The two migrations date from 2017, and `initdb` already creates what they add.
-2. `flask backfill-community-roles` — **required.** Community memberships used to be recorded only on the community's folder; permissions are now asked of the community itself. Until this runs, every existing community manager loses MANAGE on their community. Idempotent, and `--dry-run` lists what it would change.
-3. `flask backfill-creator-memberships` — recommended. Makes each community's creator a MANAGER member. Skips creators who already hold a role, so a deliberate demotion is not undone.
-4. Rebuild assets: the front end is Vite + Tailwind now, and `flask assets build` no longer does anything.
-5. If `TRACKING_CODE` is set, make sure it loads its script by URL from an allowed origin: the Content Security Policy now refuses inline scripts.
+1. Run Python 3.12 or later. On PostgreSQL, install the `postgres` extra (`abilian-sbe[postgres]`): psycopg2 is no longer a required dependency, so without the extra the application has no PostgreSQL driver. MariaDB and MySQL use PyMySQL, which is required.
+2. `flask db current`, then `flask db upgrade` — no new migrations in this release, but run it anyway. A database created by `flask initdb` records no version: `current` prints no revision and `upgrade` fails with `relation "sbe_event" already exists`, leaving the database unchanged. Run `flask db stamp head` once on such a database instead of `upgrade`. The two migrations date from 2017, and `initdb` already creates what they add.
+3. `flask backfill-community-roles` — **required.** Community memberships used to be recorded only on the community's folder; permissions are now asked of the community itself. Until this runs, every existing community manager loses MANAGE on their community. Idempotent, and `--dry-run` lists what it would change.
+4. `flask backfill-creator-memberships` — recommended. Makes each community's creator a MANAGER member. Skips creators who already hold a role, so a deliberate demotion is not undone.
+5. Rebuild assets: the front end is Vite + Tailwind now, and `flask assets build` no longer does anything.
+6. If `TRACKING_CODE` is set, make sure it loads its script by URL from an allowed origin: the Content Security Policy now refuses inline scripts.
 
 ### Security
 
@@ -47,6 +48,11 @@ Run in this order. The backfills ship *with* this release, so they cannot run be
 
 `Community.has_permission(user, permission)` no longer raises for anything but MANAGE; it answers all five permissions. `AttachmentsManager.can_create` and `.can_delete` ask CREATE and DELETE rather than both asking WRITE — the same answer under the default role matrix, but now separable by a `PermissionAssignment`.
 
+### Added
+
+- MariaDB support. Listings sort empty values last without `NULLS LAST`, which MariaDB lacks.
+- Dependencies upgraded: Flask 3.1, WTForms 3.3, Flask-WTF 1.3, Dramatiq 2.2, SQLAlchemy 1.4.54. Python 3.12 to 3.15 are tested.
+
 ### Front end
 
 - Bootstrap and all 115 LESS files replaced by Tailwind v4 and Vite.
@@ -62,12 +68,36 @@ Run in this order. The backfills ship *with* this release, so they cannot run be
 - Selecting rows in a folder offers Download again. The action declared no permission, its check raised on the empty default, and the exception hid the button.
 - A server error inside a community shows the error page again rather than a raw 500.
 - The translation catalogs compile without errors: the French and Dutch SIRET messages used a placeholder that did not match the source.
+- File uploads work again with WTForms 3.3, and downloads are sent without an ETag or a cache lifetime.
+- The document views served a folder or document of another community under any community's URL, and crashed on the repository root. Both are now a 404. Access was still checked on the object itself, so nothing was disclosed.
+- Saving a calendar event with a description crashed: it called bleach with an argument bleach 6 removed.
+- The tag edit page (`/tags/entity/<id>/edit`) crashed on every request.
+- An unknown vocabulary in an admin URL is a 404 rather than a 500.
+- Forms with a missing field are a 400 rather than a 500: the folder role forms, the admin settings, the group admin's add and remove member, and the folder name check.
+- `repr()` of a community membership raised `TypeError`.
+- The security debug panel showed `{g.id}` literally instead of ids and emails.
+- The wiki page and community tab actions resolve their URL like other actions; a wiki action given a callable URL returned the function itself.
+- The antivirus scan of a path given as a string raised `TypeError`.
+
+### Removed
+
+Code that nothing reached, much of it broken:
+
+- The WebDAV interface (`documents/webdav`) and the CMIS AtomPub interface (`documents/cmis`): neither blueprint was registered. CMIS's authentication hook was commented out. `lxml`, used only by CMIS, is no longer a dependency.
+- The invite views (`social/views/invites.py`) and their `Invite` model, never imported.
+- The entity tag list, add and remove views (`/tags/entity/<id>/list|add|remove`), which crashed on every request.
+- Five conversion handlers never registered: Abiword (two), Unoconv, Cloudooo and wvWare.
+- `BaseBlobDownload`, `IndexService` and `WhooshIndexService.search_for_class()`.
+- A Flask-SQLAlchemy 2 driver override, `apply_driver_hacks`, that has not run since Flask-SQLAlchemy 3.0.
+- The GitHub Actions workflow: CI runs on sourcehut.
 
 ### Testing
 
 - Playwright browser suite (97 tests) — `make test-e2e`, which now picks free ports rather than hardcoding 8899 and 6399.
 - `pytest` no longer needs a Redis running on the machine.
 - import-linter contracts keep Flask out of the policy engine and the domain models.
+- `make test-postgres-docker` and `make test-mariadb-docker` run the suite against each database in Docker; run `make front` first.
+- pyrefly checks against Python 3.12: 768 errors down to 348, and what is left is third-party typing.
 
 ## [1.1.16] - 2025-12-4
 
