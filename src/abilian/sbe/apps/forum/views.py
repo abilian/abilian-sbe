@@ -29,7 +29,7 @@ from abilian.web.action import ButtonAction, Endpoint
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import default_view
 
-from .forms import BasePostForm, PostEditForm, PostForm, ThreadForm
+from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
 
@@ -227,7 +227,6 @@ def attachments():
 
 class BaseThreadView:
     Model: type[Thread | Post] = Thread
-    Form: type[BasePostForm] = ThreadForm
     pk = "thread_id"
     base_template = "community/_base.html"
 
@@ -280,6 +279,7 @@ route("/<int:thread_id>/attachments")(
 
 
 class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
+    Form = ThreadForm
     base_template = "community/_forumbase.html"
     template = "forum/thread_create.html"
     POST_BUTTON = ButtonAction(
@@ -396,6 +396,7 @@ route("/<int:thread_id>/viewers")(ThreadViewers.as_view("thread_viewers"))
 
 
 class ThreadDelete(BaseThreadView, views.ObjectDelete[Thread, ThreadForm]):
+    Form = ThreadForm
     methods = ["POST"]
     _message_success = _('Thread "{title}" deleted.')
 

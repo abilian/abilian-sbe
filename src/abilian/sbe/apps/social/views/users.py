@@ -114,10 +114,10 @@ class UserProfileEdit(ObjectEdit[User, UserProfileForm]):
     def view_url(self):
         return url_for(".user", user_id=self.user.id)
 
-    def edit(self):
+    def edit(self, redirect_to=None):
         if not can_edit(self.user):
             return Response(status=403)
-        return super().edit()
+        return super().edit(redirect_to)
 
     def handle_commit_exception(self, exc):
         db.session.rollback()

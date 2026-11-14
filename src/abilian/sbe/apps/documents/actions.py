@@ -33,8 +33,8 @@ class CmisContentAction(Action):
 
         super().__init__(*args, **kwargs)
 
-    def pre_condition(self, ctx: dict[str, Any]) -> bool:
-        obj = ctx["object"]
+    def pre_condition(self, context: dict[str, Any]) -> bool:
+        obj = context["object"]
         ok = obj.sbe_type == self.sbe_type
 
         if ok and self.permission is not None:
@@ -86,10 +86,10 @@ class FolderAction(BaseFolderAction):
 
     sbe_type = "cmis:folder"
 
-    def pre_condition(self, ctx):
+    def pre_condition(self, context):
         return (
-            super().pre_condition(ctx)
-            and ctx["object"] is not content_repository.root_folder
+            super().pre_condition(context)
+            and context["object"] is not content_repository.root_folder
         )
 
 
@@ -98,8 +98,8 @@ class FolderPermisionsAction(BaseFolderAction):
 
     sbe_type = "cmis:folder"
 
-    def pre_condition(self, ctx):
-        return super().pre_condition(ctx) and ctx["object"].depth > 1
+    def pre_condition(self, context):
+        return super().pre_condition(context) and context["object"].depth > 1
 
 
 class FolderModalAction(ModalActionMixin, FolderAction):
@@ -117,8 +117,8 @@ class DocumentModalAction(ModalActionMixin, DocumentAction):
 class RootFolderAction(CmisContentAction):
     """Apply only for root folder."""
 
-    def pre_condition(self, ctx) -> bool:
-        return ctx["object"] is content_repository.root_folder
+    def pre_condition(self, context) -> bool:
+        return context["object"] is content_repository.root_folder
 
 
 _checkin_template_action = """

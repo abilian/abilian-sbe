@@ -15,7 +15,7 @@ from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
 from abilian.web.views import object as views
 
-from .forms import BaseUserAdminForm, UserAdminForm, UserCreateForm
+from .forms import UserAdminForm, UserCreateForm
 
 MUGSHOT_SIZE = 45
 
@@ -24,7 +24,6 @@ MUGSHOT_SIZE = 45
 class UserBase:
     Model = User
     pk = "user_id"
-    Form: type[BaseUserAdminForm] = UserAdminForm
     base_template = "admin/_base.html"
 
     def index_url(self):
@@ -35,6 +34,8 @@ class UserBase:
 
 
 class UserEdit(UserBase, views.ObjectEdit[User, UserAdminForm]):
+    Form = UserAdminForm
+
     def breadcrumb(self):
         label = render_template_string("<em>{{ u.email }}</em>", u=self.obj)
         return BreadcrumbItem(label=label, url="", description=self.obj.name)

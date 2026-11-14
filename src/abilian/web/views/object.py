@@ -346,7 +346,7 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
         """Called after `self.obj` values have been updated, and `self.obj`
         attached to an ORM session."""
 
-    def handle_commit_exception(self, exc) -> None:
+    def handle_commit_exception(self, exc) -> ResponseReturnValue | None:
         """Hook point to handle exception that may happen during commit.
 
         It is the responsability of this method to perform a rollback if it is
