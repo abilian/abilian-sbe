@@ -6,7 +6,9 @@ from datetime import datetime
 
 from flask import url_for
 from pytest import mark
+from werkzeug.datastructures import MultiDict
 
+from abilian.sbe.apps.calendar.forms import EventForm
 from abilian.sbe.apps.calendar.models import Event
 
 
@@ -48,3 +50,11 @@ def test(community1, client) -> None:
 #         assert len(res) == 1
 #         hit = res[0]
 #         assert hit["object_key"] == event2.object_key
+
+
+def test_event_description_is_sanitized(test_request_context) -> None:
+    html = '<p style="text-align: center; color: red">Hi</p><script>alert("x")</script>'
+    form = EventForm(MultiDict({"description": html}))
+    form.validate_description(form.description)
+
+    assert form.description.data == ('<p style="text-align: center;">Hi</p>alert("x")')
