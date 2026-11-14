@@ -94,7 +94,7 @@ class AntiVirusService(Service):
                     return None
 
             case str():
-                file_or_stream = file_or_stream.encode(os.fsencode)
+                file_or_stream = os.fsencode(file_or_stream)
 
         if isinstance(file_or_stream, bytes):
             content = open(file_or_stream, "rb")
