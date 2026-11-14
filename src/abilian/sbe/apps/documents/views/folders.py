@@ -1012,7 +1012,7 @@ def change_owner(folder):
 def check_valid_name():
     """Check if name is valid for content creation in this folder."""
 
-    object_id = int(request.args.get("object_id"))
+    object_id = int(request.args["object_id"])
     action = request.args.get("action")
     title = request.args.get("title")
 

@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING
 import pytest
 from flask import url_for
 
+from abilian.core.models.subjects import Group
 from abilian.web.admin.panels.sysinfo import installed_packages
 from tests.util import client_login
 
@@ -121,5 +122,22 @@ def test_saving_settings_with_a_missing_field_is_a_bad_request(
     app.config["TRAP_BAD_REQUEST_ERRORS"] = False
     with client_login(client, admin_user):
         response = client.post(url_for("admin.settings"), data={"action": "save"})
+
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize("action", ["add_user", "remove_user"])
+def test_group_member_action_without_a_user_is_a_bad_request(
+    action: str, app, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    # Answer as in production: in debug mode, Flask raises the error instead.
+    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    group = Group(name="Editors")
+    db_session.add(group)
+    db_session.commit()
+    url = url_for("admin.groups_group_edit", group_id=group.id)
+
+    with client_login(client, admin_user):
+        response = client.post(url, data={"__action": action})
 
     assert response.status_code == 400

@@ -150,6 +150,18 @@ def test_role_form_with_a_missing_field_is_a_bad_request(
             assert client.post(url, data=data).status_code == 400, data
 
 
+def test_name_check_without_an_object_is_a_bad_request(
+    app: Application, client: FlaskClient, community: Community
+) -> None:
+    # Answer as in production: in debug mode, Flask raises the error instead.
+    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    url = url_for("documents.check_valid_name", community_id=community.slug)
+    with client_login(client, community.test_user):
+        response = client.get(url, query_string={"action": "new", "title": "x"})
+
+    assert response.status_code == 400
+
+
 def _test_upload(
     community: Community,
     client: FlaskClient,
