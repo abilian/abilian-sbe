@@ -4,7 +4,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import relationship
@@ -16,9 +16,12 @@ from abilian.core.context import get_current_principal
 from .base import AUDITABLE, EDITABLE, SEARCHABLE, SYSTEM
 from .subjects import User
 
+if TYPE_CHECKING:
+    from .base import IndexTo
+
 
 class OwnedMixin:
-    __index_to__ = (
+    __index_to__: ClassVar[IndexTo] = (
         ("creator", ("creator",)),
         ("creator_name", (("creator_name", STORED),)),
         ("owner", ("owner",)),

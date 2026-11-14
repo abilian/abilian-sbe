@@ -104,15 +104,15 @@ def gen_random_password(length=15):
 class PasswordStrategy(ABC):
     @property
     @abstractmethod
-    def name(self):
+    def name(self) -> str:
         """Strategy name."""
 
     @abstractmethod
-    def authenticate(self, user, password):
+    def authenticate(self, user: User, password: str) -> bool:
         """Predicate to tell wether password match user's or not."""
 
     @abstractmethod
-    def process(self, user, password):
+    def process(self, user: User, password: str) -> str:
         """Return a string to be stored as user password."""
 
 

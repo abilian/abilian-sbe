@@ -29,6 +29,7 @@ from .base import JSONView, View
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
+    from flask.typing import ResponseReturnValue
     from werkzeug.datastructures import ImmutableMultiDict
 
 
@@ -107,7 +108,7 @@ class BaseObjectView[M: ViewedModel](View):
 
         return args, kwargs
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> ResponseReturnValue:
         bc = self.breadcrumb()
         if bc is not None:
             bc = [bc] if isinstance(bc, nav.BreadcrumbItem) else list(bc)
@@ -409,7 +410,7 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
                 return redirect(redirect_to)
             return self.redirect_to_view()
 
-    def form_invalid(self) -> None:
+    def form_invalid(self) -> ResponseReturnValue | None:
         """When a form doesn't validate this method is called.
 
         It may return a :class:`Flask.Response` instance, to handle specific
@@ -445,7 +446,7 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
         )
 
     @property
-    def activity_target(self) -> None:
+    def activity_target(self) -> Any:
         """Return `target` to use when creating activity."""
         return
 

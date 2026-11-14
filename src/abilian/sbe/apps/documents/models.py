@@ -12,7 +12,7 @@ import mimetypes
 import threading
 import uuid
 from importlib import resources as rso
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
 import sqlalchemy as sa
 import whoosh.fields as wf
@@ -49,6 +49,7 @@ if TYPE_CHECKING:
     from sqlalchemy.orm.attributes import Event
     from sqlalchemy.util.langhelpers import symbol
 
+    from abilian.core.models.base import IndexTo
     from abilian.sbe.apps.communities.models import Community
 
 
@@ -213,7 +214,7 @@ def _cmis_sync_name_title(
 class PathAndSecurityIndexable:
     """Mixin for folder and documents indexation."""
 
-    __index_to__ = (
+    __index_to__: ClassVar[IndexTo] = (
         ("_indexable_parent_ids", ("parent_ids",)),
         ("_indexable_roles_and_users", ("allowed_roles_and_users",)),
     )

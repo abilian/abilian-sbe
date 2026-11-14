@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, ClassVar
 
 from sqlalchemy.schema import Column
 from sqlalchemy.types import DateTime, Integer
@@ -54,11 +54,16 @@ class IdMixin:
     id = Column(Integer, primary_key=True, info=SYSTEM | SEARCHABLE)
 
 
+#: What `__index_to__` holds: (attribute, fields) pairs, each field a field
+#: name or a (name, whoosh field) pair.
+IndexTo = tuple[tuple[str, tuple[str | tuple[str, Any], ...]], ...]
+
+
 class Indexable:
     """Mixin with sensible defaults for indexable objects."""
 
     __indexable__ = True
-    __index_to__ = (
+    __index_to__: ClassVar[IndexTo] = (
         ("object_key", (("object_key", ID(stored=True, unique=True)),)),
         ("object_type", (("object_type", ID(stored=True)),)),
     )
