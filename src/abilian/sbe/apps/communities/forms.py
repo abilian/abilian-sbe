@@ -4,11 +4,11 @@ from __future__ import annotations
 
 import sqlalchemy as sa
 from flask import request
-from flask_babel import gettext as _, lazy_gettext as _l
 from wtforms import BooleanField, StringField, TextAreaField
 from wtforms.validators import ValidationError, data_required, optional
 
 from abilian.core.models.subjects import Group
+from abilian.i18n import _, _l
 from abilian.web.forms import Form
 from abilian.web.forms.fields import ChoiceField, FileField
 from abilian.web.forms.validators import length, open_png_or_jpeg

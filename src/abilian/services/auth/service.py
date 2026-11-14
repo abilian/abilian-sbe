@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 
 from flask import current_app, g, redirect, request, url_for
-from flask_babel import lazy_gettext as _l
 from flask_login import current_user, login_user, user_logged_in, user_logged_out
 from loguru import logger
 from werkzeug.exceptions import Forbidden
@@ -15,6 +14,7 @@ from abilian.core.extensions import db, login_manager
 from abilian.core.models.subjects import User
 from abilian.core.signals import user_loaded
 from abilian.core.util import unwrap
+from abilian.i18n import _l
 from abilian.services import Service, ServiceState, get_service
 from abilian.web.action import DynamicIcon, Endpoint, actions
 from abilian.web.nav import NavGroup, NavItem

@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from flask import g, url_for as url_for_orig
-from flask_babel import lazy_gettext as _l
 from flask_login import current_user
 
 from abilian.core.application import as_application
+from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.web.action import Action, Endpoint, actions
 from abilian.web.nav import NavItem

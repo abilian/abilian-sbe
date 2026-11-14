@@ -6,7 +6,6 @@ from __future__ import annotations
 
 from datetime import datetime
 from functools import total_ordering
-from typing import TYPE_CHECKING
 
 from sqlalchemy import sql
 from sqlalchemy.orm import backref, relationship
@@ -25,9 +24,6 @@ from abilian.core.models import Model
 from abilian.core.models.subjects import Group, User
 from abilian.core.singleton import UniqueName, UniqueNameType
 from abilian.i18n import _l
-
-if TYPE_CHECKING:
-    from flask_babel import LazyString
 
 __all__ = [
     "ADMIN",
@@ -65,7 +61,7 @@ class Permission(UniqueName):
     __slots__ = ("label",)
 
     def __init__(
-        self, name: str, label: str | LazyString | None = None, assignable: bool = True
+        self, name: str, label: str | None = None, assignable: bool = True
     ) -> None:
         super().__init__(name)
         if label is None:
@@ -103,7 +99,7 @@ class Role(UniqueName):
     __slots__ = ("assignable", "label")
 
     def __init__(
-        self, name: str, label: str | LazyString | None = None, assignable: bool = True
+        self, name: str, label: str | None = None, assignable: bool = True
     ) -> None:
         super().__init__(name)
         if label is None:

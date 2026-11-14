@@ -93,8 +93,19 @@ __all__ = [
 
 #: gettext alias
 _ = gettext
-#: lazy_gettext alias
-_l = lazy_gettext
+if TYPE_CHECKING:
+
+    def _l(string: str, **variables: Any) -> str:
+        """lazy_gettext, typed as returning the `str` it stands for.
+
+        Its `LazyString` translates itself when used and passes every string
+        operation through, so it goes wherever a `str` is expected: form labels,
+        titles and the like.
+        """
+
+else:
+    #: lazy_gettext alias
+    _l = lazy_gettext
 #: ngettext alias
 _n = ngettext
 

@@ -21,7 +21,6 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from flask.app import Flask
-    from flask_babel.speaklater import LazyString
 
 __all__ = (
     "ACTIVE",
@@ -253,7 +252,7 @@ class Action:
 
     Endpoint = Endpoint
 
-    _title: LazyString | str
+    _title: str
     _description: str
     _icon: str | Icon | None
     _url: str | Callable
@@ -271,7 +270,7 @@ class Action:
         self,
         category: str,
         name: str,
-        title: LazyString | str = "",
+        title: str = "",
         *,
         description: str = "",
         icon: str | Icon | None = None,
@@ -364,11 +363,11 @@ class Action:
         return value
 
     @property
-    def title(self) -> LazyString | str:
+    def title(self) -> str:
         return self._get_and_call("title")
 
     @title.setter
-    def title(self, title: LazyString | str) -> None:
+    def title(self, title: str) -> None:
         self._title = title
 
     def _build_css_class(self) -> None:
@@ -384,11 +383,11 @@ class Action:
         )
 
     @property
-    def description(self) -> LazyString | str:
+    def description(self) -> str:
         return self._get_and_call("description")
 
     @description.setter
-    def description(self, description: LazyString | str) -> None:
+    def description(self, description: str) -> None:
         self._description = description
 
     @property

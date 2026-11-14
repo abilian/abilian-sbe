@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from flask import url_for
-from flask_babel import lazy_gettext as _l
 
 from abilian.core.application import as_application
+from abilian.i18n import _l
 from abilian.sbe.apps.communities.actions import CommunityEndpoint
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions

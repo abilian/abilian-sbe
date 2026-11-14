@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from flask_babel import lazy_gettext as _l
 from wtforms import StringField, TextAreaField
 from wtforms_alchemy import model_form_factory
 
+from abilian.i18n import _l
 from abilian.sbe.apps.communities.models import Community
 from abilian.web.forms import Form, widgets as abilian_widgets
 from abilian.web.forms.fields import QuerySelectField

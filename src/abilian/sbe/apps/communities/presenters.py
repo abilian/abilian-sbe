@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from flask_babel import lazy_gettext as _l
-
 from abilian.core.util import BasePresenter
+from abilian.i18n import _l
 
 
 class CommunityPresenter(BasePresenter):

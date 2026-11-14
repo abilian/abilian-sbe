@@ -21,8 +21,6 @@ from abilian.i18n import _l
 from .action import ACTIVE, ENABLED, Action, Glyphicon, getset
 
 if typing.TYPE_CHECKING:
-    from flask_babel.speaklater import LazyString
-
     from abilian.web.action import Endpoint, Status
 
 
@@ -173,7 +171,7 @@ class BreadcrumbItem:
 
     def __init__(
         self,
-        label: LazyString | str = "",
+        label: str = "",
         url: str | Endpoint = "#",
         icon: str | None = None,
         description: Any | None = None,

@@ -5,19 +5,15 @@
 from __future__ import annotations
 
 from datetime import timedelta
-from typing import TYPE_CHECKING
 
 from flask import current_app, flash, redirect, render_template, request, url_for
-from flask_babel import gettext as _, lazy_gettext as _l
 from jinja2 import Template
 
 from abilian.core.extensions import db
+from abilian.i18n import _, _l
 from abilian.services import get_service
 from abilian.web import csrf
 from abilian.web.admin import AdminPanel
-
-if TYPE_CHECKING:
-    from flask_babel.speaklater import LazyString
 
 
 class Key:
@@ -30,8 +26,8 @@ class Key:
         self,
         id: str,
         type_: str,
-        label: LazyString | None = None,
-        description: LazyString | None = None,
+        label: str | None = None,
+        description: str | None = None,
     ) -> None:
         self.id = id
         self.type = type_
