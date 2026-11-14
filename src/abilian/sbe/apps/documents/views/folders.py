@@ -157,7 +157,8 @@ def folder_view(folder_id):
 @route("/folder/change_view_style/<int:folder_id>", methods=["GET", "POST"])
 @csrf.protect
 def change_view_style(folder_id):
-    folder = get_folder(folder_id)
+    # The folder is not used, but must be visible here.
+    get_folder(folder_id)
     if request.method == "POST":
         view_style = request.form["view_style"]
         if view_style == "gallery_view":
@@ -165,12 +166,10 @@ def change_view_style(folder_id):
         else:
             session["sbe_doc_view_style"] = "thumbnail_view"
         return redirect(
-            url_for(
-                ".folder_view", folder_id=folder_id, community_id=folder.community.slug
-            )
+            url_for(".folder_view", folder_id=folder_id, community_id=g.community.slug)
         )
     return redirect(
-        url_for(".folder_view", folder_id=folder_id, community_id=folder.community.slug)
+        url_for(".folder_view", folder_id=folder_id, community_id=g.community.slug)
     )
 
 
@@ -205,7 +204,7 @@ def folder_json(folder_id):
 
         data = {
             "id": parent.id,
-            "url": folder_url(folder_id=parent.id, community_id=parent.community.slug),
+            "url": folder_url(folder_id=parent.id, community_id=g.community.slug),
             "title": parent.title,
         }
         bc.append(data)
@@ -221,7 +220,7 @@ def folder_json(folder_id):
     for folder in subfolders:
         data = {
             "id": folder.id,
-            "url": folder_url(folder_id=folder.id, community_id=folder.community.slug),
+            "url": folder_url(folder_id=folder.id, community_id=g.community.slug),
             "title": folder.title,
         }
         folders.append(data)
@@ -354,7 +353,7 @@ def permissions(folder_id):
 @route("/folder/<int:folder_id>/permissions", methods=["POST"])
 @csrf.protect
 def permissions_update(folder_id):
-    folder = content_repository.get_folder_by_id(folder_id)
+    folder = get_folder(folder_id)
     check_manage_access(folder)
     has_permission = security.has_permission
     action = request.form.get("action")
@@ -378,7 +377,7 @@ def permissions_update(folder_id):
                 url_for(
                     ".permissions",
                     folder_id=folder_id,
-                    community_id=folder.community.slug,
+                    community_id=g.community.slug,
                 )
             )
 
@@ -387,9 +386,7 @@ def permissions_update(folder_id):
         reindex_tree(folder)
         db.session.commit()
         return redirect(
-            url_for(
-                ".permissions", folder_id=folder_id, community_id=folder.community.slug
-            )
+            url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
         )
 
     if action == "add-user-role":
@@ -401,9 +398,7 @@ def permissions_update(folder_id):
         reindex_tree(folder)
         db.session.commit()
         return redirect(
-            url_for(
-                ".permissions", folder_id=folder_id, community_id=folder.community.slug
-            )
+            url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
         )
 
     if action == "add-group-role":
@@ -415,9 +410,7 @@ def permissions_update(folder_id):
         reindex_tree(folder)
         db.session.commit()
         return redirect(
-            url_for(
-                ".permissions", folder_id=folder_id, community_id=folder.community.slug
-            )
+            url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
         )
 
     action, args = request.form.items()[0]
@@ -486,14 +479,14 @@ def permissions_update(folder_id):
 
     db.session.commit()
     return redirect(
-        url_for(".permissions", folder_id=folder_id, community_id=folder.community.slug)
+        url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
     )
 
 
 @route("/folder/<int:folder_id>/permissions_export")
 @http.nocache
 def permissions_export(folder_id):
-    folder = content_repository.get_folder_by_id(folder_id)
+    folder = get_folder(folder_id)
     check_manage_access(folder)
 
     wb = Workbook()
@@ -1061,7 +1054,7 @@ def descendants_view(folder_id):
 
     filters = wq.And(
         [
-            wq.Term("community_id", folder.community.id),
+            wq.Term("community_id", g.community.id),
             wq.Term("parent_ids", root_path_ids),
             wq.Or(
                 [

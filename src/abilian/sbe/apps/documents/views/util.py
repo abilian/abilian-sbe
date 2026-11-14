@@ -41,24 +41,29 @@ def breadcrumbs_for(obj: Document) -> list[dict[str, str]]:
 def get_document(id: int) -> Document:
     """Gets a document given its id.
 
-    Will raise appropriates errors in case the document doesn't exist
-    (404), or the current user doesn't have read access on the document
-    (403).
+    Will raise appropriates errors in case the document doesn't exist in the
+    community of the URL (404), or the current user doesn't have read access
+    on the document (403).
     """
     doc = content_repository.get_document_by_id(id)
+    if doc is None:
+        raise NotFound
+    check_in_community(doc)
     check_read_access(doc)
-    assert doc
     return doc
 
 
 def get_folder(id: int) -> Folder:
     """Gets a folder given its id.
 
-    Will raise appropriates errors in case the folder doesn't exist
-    (404), or the current user doesn't have read access on the folder
-    (403).
+    Will raise appropriates errors in case the folder doesn't exist in the
+    community of the URL (404), or the current user doesn't have read access
+    on the folder (403).
     """
     folder = content_repository.get_folder_by_id(id)
+    if folder is None:
+        raise NotFound
+    check_in_community(folder)
     check_read_access(folder)
     return folder
 
@@ -161,6 +166,16 @@ def get_selected_objects(folder: Folder) -> tuple[list[Folder], list[Document]]:
             raise InternalServerError
 
     return folders, docs
+
+
+def check_in_community(obj: BaseContent) -> None:
+    """Raise 404 unless `obj` belongs to the community in the URL.
+
+    The document views run under a community's URL: an object from another
+    community, or from none (the repository root), is not found there.
+    """
+    if obj.community is None or obj.community.id != g.community.id:
+        raise NotFound
 
 
 def check_read_access(obj: BaseContent) -> None:

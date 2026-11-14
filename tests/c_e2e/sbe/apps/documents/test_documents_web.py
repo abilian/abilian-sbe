@@ -94,6 +94,35 @@ def test_home(
         assert path == expected
 
 
+def test_content_outside_the_community_is_not_found(
+    client: FlaskClient,
+    db: SQLAlchemy,
+    community: Community,
+    community2: Community,
+) -> None:
+    user = community.test_user
+    # A member of both: the answer cannot come from access rights.
+    community2.set_membership(user, WRITER)
+    other_doc = community2.folder.create_document("other")
+    db.session.commit()
+    repository_root = Folder.query.filter(Folder._parent_id.is_(None)).first()
+    assert repository_root.community is None
+
+    urls = [
+        url_for(endpoint, community_id=community.slug, folder_id=folder.id)
+        for folder in (community2.folder, repository_root)
+        for endpoint in ("documents.folder_view", "documents.folder_json")
+    ]
+    urls.append(
+        url_for(
+            "documents.document_view", community_id=community.slug, doc_id=other_doc.id
+        )
+    )
+    with client_login(client, user):
+        for url in urls:
+            assert client.get(url).status_code == 404, url
+
+
 def _test_upload(
     community: Community,
     client: FlaskClient,
