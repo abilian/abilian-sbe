@@ -308,8 +308,8 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
         if self.thread.community is None:
             self.thread.community = g.community._model
 
-        self.post = self.thread.create_post(body_html=self.message_body)
-        obj_meta = self.post.meta.setdefault("abilian.sbe.forum", {})
+        self.new_post = self.thread.create_post(body_html=self.message_body)
+        obj_meta = self.new_post.meta.setdefault("abilian.sbe.forum", {})
         obj_meta["origin"] = "web"
         obj_meta["send_by_email"] = self.send_by_email
         session = sa.orm.object_session(self.thread)
@@ -331,7 +331,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
                 continue
 
             attachment = PostAttachment(name=name)
-            attachment.post = self.post
+            attachment.post = self.new_post
 
             with fileobj.open("rb") as f:
                 attachment.set_content(f.read(), mimetype)
@@ -339,13 +339,13 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
 
     def commit_success(self) -> None:
         if self.send_by_email:
-            message = send_post_by_email.send(self.post.id)
-            # task = send_post_by_email.delay(self.post.id)
-            meta = self.post.meta.setdefault("abilian.sbe.forum", {})
+            message = send_post_by_email.send(self.new_post.id)
+            # task = send_post_by_email.delay(self.new_post.id)
+            meta = self.new_post.meta.setdefault("abilian.sbe.forum", {})
             # note: message_id is of type str
             meta["send_post_by_email_task"] = message.message_id
-            self.post.meta.changed()
-            session = sa.orm.object_session(self.post)
+            self.new_post.meta.changed()
+            session = sa.orm.object_session(self.new_post)
             session.commit()
 
     @property
@@ -381,7 +381,7 @@ class ThreadPostCreate(ThreadCreate):
         super().after_populate_obj()
         session = sa.orm.object_session(self.obj)
         session.expunge(self.obj)
-        self.obj = self.post
+        self.obj = self.new_post
 
 
 class ThreadViewers(ThreadView):
