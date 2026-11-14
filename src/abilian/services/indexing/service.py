@@ -376,9 +376,6 @@ class WhooshIndexService(Service):
 
             return results
 
-    def search_for_class(self, query, cls, index="default", **search_args):
-        return self.search(query, Models=(fqcn(cls),), index=index, **search_args)
-
     def register_classes(self) -> None:
         state = self.app_state
         classes = (
