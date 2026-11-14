@@ -63,12 +63,14 @@ class BaseObjectView[M: ViewedModel](View):
         self, Model=None, pk=None, base_template=None, *args, **kwargs
     ) -> None:
         super().__init__(*args, **kwargs)
-        cls = self.__class__
-        self.pk = pk if pk is not None else cls.pk
-        self.Model = Model if Model is not None else cls.Model
-        self.base_template = (
-            base_template if base_template is not None else cls.base_template
-        )
+        # Override the class attributes only with what is given: a view may set
+        # them later, as one that builds its form for each object.
+        if Model is not None:
+            self.Model = Model
+        if pk is not None:
+            self.pk = pk
+        if base_template is not None:
+            self.base_template = base_template
 
     def prepare_args(self, args, kwargs):
         args, kwargs = self.init_object(args, kwargs)
@@ -141,9 +143,10 @@ class ObjectView[M: ViewedModel, F: Form](BaseObjectView[M]):
         self, Model=None, pk=None, Form=None, template=None, *args, **kwargs
     ) -> None:
         super().__init__(Model, pk, *args, **kwargs)
-        cls = self.__class__
-        self.Form = Form if Form is not None else cls.Form
-        self.template = template if template is not None else cls.template
+        if Form is not None:
+            self.Form = Form
+        if template is not None:
+            self.template = template
 
     def prepare_args(self, args, kwargs):
         """
