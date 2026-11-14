@@ -53,18 +53,17 @@ class BaseCommentView:
     Model = Comment
     Form = CommentForm
 
-    #: commented entity
-    entity: Entity | None = None
+    #: commented entity, set by `init_object()`
+    entity: Entity
 
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         entity_id = kwargs.pop("entity_id", None)
-        if entity_id is not None:
-            self.entity = Entity.query.get(entity_id)
-
-        if self.entity is None:
+        entity = Entity.query.get(entity_id) if entity_id is not None else None
+        if entity is None:
             msg = "No entity to comment"
             raise BadRequest(msg)
+        self.entity = entity
 
         if not is_commentable(self.entity):
             msg = "This entity is not commentable"

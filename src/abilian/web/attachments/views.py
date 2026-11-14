@@ -57,19 +57,17 @@ class BaseAttachmentView:
     #: if and only if you may do X to what it hangs off.
     capability = "can_read"
 
-    #: owning entity
-    entity: Entity | None = None
+    #: owning entity, set by `init_object()`
+    entity: Entity
 
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         entity_id = kwargs.pop("entity_id", None)
-
-        if entity_id is not None:
-            self.entity = Entity.query.get(entity_id)
-
-        if self.entity is None:
+        entity = Entity.query.get(entity_id) if entity_id is not None else None
+        if entity is None:
             msg = "No entity provided"
             raise BadRequest(msg)
+        self.entity = entity
 
         if not supports_attachments(self.entity):
             msg = "This entity is doesn't support attachments"
