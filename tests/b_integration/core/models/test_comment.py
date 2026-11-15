@@ -51,6 +51,7 @@ def test_default_ordering(app: Flask, db: SQLAlchemy) -> None:
     c1.created_at = now - timedelta(10)
     c2 = Comment(entity=commentable, body="comment #2")
     c2.created_at = now
+    db.session.add_all([c1, c2])
     db.session.flush()
 
     query = Comment.query.filter(Comment.entity == commentable)
@@ -65,6 +66,7 @@ def test_default_ordering_reverse(app: Flask, db: SQLAlchemy) -> None:
     c1.created_at = now
     c2 = Comment(entity=commentable, body="comment #2")
     c2.created_at = now - timedelta(10)
+    db.session.add_all([c1, c2])
     db.session.flush()
 
     query = Comment.query.filter(Comment.entity == commentable)

@@ -58,16 +58,16 @@ def user3(db):
 @fixture
 def community1(db, user1):
     community = Community(name="Community 1")
-    community.set_membership(user1, READER)
     db.session.add(community)
+    community.set_membership(user1, READER)
     return community
 
 
 @fixture
 def community2(db, user2):
     community = Community(name="Community 2")
-    community.set_membership(user2, READER)
     db.session.add(community)
+    community.set_membership(user2, READER)
     return community
 
 

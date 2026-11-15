@@ -47,6 +47,7 @@ def test_posts_ordering(db: SQLAlchemy, community1) -> None:
     p1 = Post(thread=thread, body_html="post 1", created_at=t1)
     t2 = datetime(2014, 6, 20, 15, 1, 0)
     p2 = Post(thread=thread, body_html="post 2", created_at=t2)
+    db.session.add_all([p1, p2])
     db.session.flush()
     p1_id, p2_id = p1.id, p2.id
     assert [p.id for p in thread.posts] == [p1_id, p2_id]

@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from flask_login import login_user, logout_user
 from hyperlink import URL
 from redis import Redis
+from sqlalchemy import text
 from sqlalchemy.exc import DatabaseError
 
 from abilian.services import get_service
@@ -106,18 +107,22 @@ def cleanup_db(db: SQLAlchemy) -> None:
 
 def _delete_tables(db: SQLAlchemy) -> None:
     if db.engine.name in ("mysql", "mariadb"):
-        db.session.execute("SET FOREIGN_KEY_CHECKS=0;")
+        db.session.execute(text("SET FOREIGN_KEY_CHECKS=0;"))
         for table in reversed(db.metadata.sorted_tables):
             with contextlib.suppress(DatabaseError):
                 db.session.execute(table.delete())
         rows = db.session.execute(
-            "SELECT TABLE_NAME FROM information_schema.TABLES "
-            "WHERE TABLE_SCHEMA = DATABASE() AND AUTO_INCREMENT > 1;"
+            text(
+                "SELECT TABLE_NAME FROM information_schema.TABLES "
+                "WHERE TABLE_SCHEMA = DATABASE() AND AUTO_INCREMENT > 1;"
+            )
         ).fetchall()
         for (tbl_name,) in rows:
             with contextlib.suppress(DatabaseError):
-                db.session.execute(f"ALTER TABLE `{tbl_name}` AUTO_INCREMENT = 1;")
-        db.session.execute("SET FOREIGN_KEY_CHECKS=1;")
+                db.session.execute(
+                    text(f"ALTER TABLE `{tbl_name}` AUTO_INCREMENT = 1;")
+                )
+        db.session.execute(text("SET FOREIGN_KEY_CHECKS=1;"))
         db.session.commit()
         return
 

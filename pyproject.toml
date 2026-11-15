@@ -162,6 +162,10 @@ minversion = "6.0"
 filterwarnings = [
     'ignore::DeprecationWarning',
     'ignore::sqlalchemy.exc.SAWarning',
+    # Later entries win. What SQLAlchemy 2.0 removes is an error, and so is an
+    # object left out of the session, which is never saved.
+    'error::sqlalchemy.exc.RemovedIn20Warning',
+    'error:Object of type .* not in session:sqlalchemy.exc.SAWarning',
 ]
 addopts = "-ra -q --tb=short"
 testpaths = ["tests"]

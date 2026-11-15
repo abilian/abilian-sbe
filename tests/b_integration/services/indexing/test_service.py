@@ -49,7 +49,7 @@ def test_index_only_after_final_commit(
 
     state = svc.app_state
 
-    session.begin(nested=True)
+    savepoint = session.begin(nested=True)
     assert state.to_update == []
 
     session.add(contact)
@@ -58,7 +58,7 @@ def test_index_only_after_final_commit(
     assert state.to_update == [("new", contact)]
 
     # commit but in a sub transaction: model still in wait queue
-    session.commit()
+    savepoint.commit()
     assert state.to_update == [("new", contact)]
 
     # 'final' commit: models sent for indexing update
