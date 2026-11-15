@@ -162,3 +162,7 @@ def test_no_duplicate_name(root: Folder, session: Session) -> None:
     root.create_subfolder("folder_1")
     with pytest.raises(IntegrityError):
         session.flush()
+
+
+def test_a_missing_path_is_none(root: Folder) -> None:
+    assert root.get_object_by_path("/nowhere") is None

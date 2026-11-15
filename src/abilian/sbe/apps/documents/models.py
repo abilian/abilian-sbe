@@ -342,7 +342,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
         try:
             for name in path_segments[:]:
                 obj = first(x for x in obj.children if x.title == name)
-        except IndexError:
+        except StopIteration:  # toolz's `first` on an empty sequence
             return None
         else:
             return obj
