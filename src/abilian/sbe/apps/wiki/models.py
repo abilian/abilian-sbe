@@ -40,6 +40,12 @@ __all__ = ["WikiPage", "WikiPageAttachment", "WikiPageRevision"]
 class WikiPage(Entity):
     __tablename__ = "wiki_page"
 
+    if TYPE_CHECKING:
+        # Set at runtime by backrefs declared below or on the other class;
+        # declared here for type checkers.
+        revisions: Mapped[list[WikiPageRevision]]
+        attachments: Mapped[list[WikiPageAttachment]]
+
     # : The title for this page
     _title: Mapped[str] = Column("title", Unicode(200), nullable=False, index=True)
 

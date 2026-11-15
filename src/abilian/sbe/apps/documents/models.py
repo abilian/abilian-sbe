@@ -12,7 +12,7 @@ import mimetypes
 import threading
 import uuid
 from importlib import resources as rso
-from typing import TYPE_CHECKING, Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar, Self
 
 import sqlalchemy as sa
 import whoosh.fields as wf
@@ -46,6 +46,7 @@ from .lock import Lock
 if TYPE_CHECKING:
     from collections.abc import Collection, Iterator
 
+    from sqlalchemy.orm import Mapped
     from sqlalchemy.orm.attributes import Event
     from sqlalchemy.util.langhelpers import symbol
 
@@ -92,6 +93,10 @@ class CmisObject(InheritSecurity, Entity):
 
     __tablename__ = "cmisobject"
     __indexable__ = False
+
+    if TYPE_CHECKING:
+        # Each subclass maps its own; declared here for type checkers.
+        parent: Mapped[Folder | None]
     __index_to__ = (
         ("community.id", ("community_id",)),
         #
@@ -144,9 +149,7 @@ class CmisObject(InheritSecurity, Entity):
         if self.name != title:
             self.name = title
 
-    def clone(
-        self, title: str | None = None, parent: Folder | None = None
-    ) -> CmisObject:
+    def clone(self, title: str | None = None, parent: Folder | None = None) -> Self:
         if not title:
             title = self.title
         new_obj = self.__class__(title=title, name=title, parent=parent)
@@ -280,6 +283,12 @@ class PathAndSecurityIndexable:
 
 class Folder(PathAndSecurityIndexable, CmisObject):
     __tablename__ = "folder"
+
+    if TYPE_CHECKING:
+        # Set at runtime by backrefs declared below or on the other class;
+        # declared here for type checkers.
+        subfolders: Mapped[list[Folder]]
+        documents: Mapped[list[Document]]
     sbe_type = "cmis:folder"
 
     __indexable__ = True
@@ -302,8 +311,8 @@ class Folder(PathAndSecurityIndexable, CmisObject):
         return icon_url("folder.png")
 
     @property
-    def children(self) -> list[BaseContent]:
-        return self.subfolders + self.documents
+    def children(self) -> list[Folder | Document]:
+        return [*self.subfolders, *self.documents]
 
     @property
     def document_count(self) -> int:
@@ -332,7 +341,7 @@ class Folder(PathAndSecurityIndexable, CmisObject):
         self.documents.append(doc)
         return doc
 
-    def get_object_by_path(self, path: str) -> BaseContent | None:
+    def get_object_by_path(self, path: str) -> Folder | Document | None:
         assert path.startswith("/")
         assert "//" not in path
 

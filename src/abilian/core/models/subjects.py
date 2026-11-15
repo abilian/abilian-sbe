@@ -39,6 +39,7 @@ from abilian.core.util import fqcn
 from .base import SEARCHABLE, SYSTEM, IdMixin, Indexable, TimestampedMixin, db
 
 if TYPE_CHECKING:
+    from sqlalchemy.orm import Mapped
     from sqlalchemy.orm.mapper import Mapper
 
 __all__ = (
@@ -188,6 +189,12 @@ def set_entity_type(cls: type[User | Group]) -> type[User | Group]:
 @set_entity_type
 class User(Principal, UserMixin, db.Model):
     __tablename__ = "user"
+
+    if TYPE_CHECKING:
+        # Set at runtime by backrefs declared below or on the other class;
+        # declared here for type checkers.
+        groups: Mapped[set[Group]]
+        followees: Mapped[list[User]]
     __editable__ = ["first_name", "last_name", "email", "password"]
     __exportable__ = [*__editable__, "created_at", "updated_at", "id"]
 

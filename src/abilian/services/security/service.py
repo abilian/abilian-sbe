@@ -43,7 +43,7 @@ from abilian.services.security.models import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Collection
+    from collections.abc import Callable, Collection, Sequence
 
     from sqlalchemy.sql.selectable import Exists
 
@@ -912,7 +912,7 @@ class SecurityService(Service):
         self,
         user: User,
         permission: Permission | str,
-        obj_list: list[Model],
+        obj_list: Sequence[Model],
         inherit=False,
     ):
         user = unwrap(user)

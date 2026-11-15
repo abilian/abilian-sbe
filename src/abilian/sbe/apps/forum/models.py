@@ -11,7 +11,7 @@ from __future__ import annotations
 from collections import Counter
 from datetime import datetime
 from itertools import chain
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
@@ -27,6 +27,9 @@ from abilian.sbe.apps.communities.models import (
 )
 from abilian.sbe.apps.documents.models import BaseContent
 from abilian.services.indexing.adapter import SAAdapter
+
+if TYPE_CHECKING:
+    from sqlalchemy.orm import Mapped
 
 
 class ThreadClosedError(RuntimeError):
@@ -133,6 +136,11 @@ class Post(Entity):
 
     (= Post in DiscussionMessage in ICOM 1.0).
     """
+
+    if TYPE_CHECKING:
+        # Set at runtime by backrefs declared below or on the other class;
+        # declared here for type checkers.
+        attachments: Mapped[list[PostAttachment]]
 
     __tablename__ = "forum_post"
     __indexable__ = False  # content is indexed at thread level
