@@ -29,6 +29,17 @@ if TYPE_CHECKING:
     from abilian.services.indexing.service import IndexService
 
 
+def test_a_new_post_is_saved(db: SQLAlchemy, community1) -> None:
+    thread = Thread(community=community1, title="saved")
+    db.session.add(thread)
+    db.session.flush()
+
+    thread.create_post(body_html="hello")
+    db.session.commit()
+
+    assert Post.query.filter(Post.thread_id == thread.id).count() == 1
+
+
 def test_posts_ordering(db: SQLAlchemy, community1) -> None:
     thread = Thread(community=community1, title="test ordering")
     db.session.add(thread)

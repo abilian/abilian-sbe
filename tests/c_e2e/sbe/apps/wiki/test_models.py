@@ -9,8 +9,8 @@ import pytest
 from markdown import Markdown
 
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
-from abilian.sbe.apps.wiki.models import WikiPage
-from tests.util import client_login
+from abilian.sbe.apps.wiki.models import WikiPage, WikiPageRevision
+from tests.util import client_login, login
 
 
 @pytest.mark.parametrize("text", ["TOTO", "x 123", "/#$", "/*€("])
@@ -87,3 +87,16 @@ def test_create_revision(user, client) -> None:
         last_revision = page.revisions[1]
         assert last_revision.number == 1
         assert last_revision.author == user
+
+
+def test_a_new_revision_is_saved(db, community1) -> None:
+    with login(community1.test_user):
+        page = WikiPage(title="Saved", body_src="first", community=community1)
+        db.session.add(page)
+        db.session.flush()
+
+        page.create_revision("second", "edit")
+        db.session.commit()
+
+    revisions = WikiPageRevision.query.filter(WikiPageRevision.page_id == page.id)
+    assert revisions.count() == 2

@@ -115,7 +115,13 @@ class ContentRepository:
     def copy_object(
         self, obj: BaseContent, dest_folder: Folder, dest_title: str | None = None
     ) -> Document | Folder:
-        new_obj = obj.clone(title=dest_title, parent=dest_folder)
+        new_obj = obj.clone(title=dest_title)
+        # Appended to the destination's collection, which cascades the copy into
+        # its session: a backref (`parent=dest_folder`) no longer does.
+        if new_obj.is_folder:
+            dest_folder.subfolders.append(new_obj)
+        else:
+            dest_folder.documents.append(new_obj)
         if obj.is_folder:
             for child in obj.children:
                 self.copy_object(child, new_obj)
@@ -125,6 +131,9 @@ class ContentRepository:
         self, obj: BaseContent, dest_folder: Folder, dest_title: str | None = None
     ) -> None:
         obj.parent = dest_folder
+        # Leaving its old folder expunges an object not yet flushed
+        # (delete-orphan), and a backref no longer adds it back: add it.
+        sa.orm.object_session(dest_folder).add(obj)
         if dest_title:
             obj.title = dest_title
 

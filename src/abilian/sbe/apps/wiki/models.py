@@ -90,7 +90,9 @@ class WikiPage(Entity):
         self.body_src = revision.body_src = body_src
         revision.message = message
         revision.author = current_user
-        revision.page = self
+        # Appended rather than given `page=self`: the collection cascades the
+        # revision into the page's session, a backref no longer does.
+        self.revisions.append(revision)
 
     @property
     def last_revision(self) -> WikiPageRevision:

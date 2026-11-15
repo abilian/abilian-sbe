@@ -210,7 +210,9 @@ class Community(Entity):
                 # subfolder, we don't want empty names on folders since they must be
                 # unique among siblings
                 name = f"{self.__class__.__name__}_{self.id!s}-{time.asctime()}"
-            self.folder = content_repository.root_folder.create_subfolder(name)
+            # Given its parent rather than appended to the root's subfolders: the
+            # folder then joins the session with the community, not before it.
+            self.folder = Folder(title=name, parent=content_repository.root_folder)
             # if not self.group:
             #   self.group = Group(name=self.name)
 

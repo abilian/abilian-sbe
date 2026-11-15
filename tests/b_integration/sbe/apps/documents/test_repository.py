@@ -164,5 +164,35 @@ def test_no_duplicate_name(root: Folder, session: Session) -> None:
         session.flush()
 
 
+def test_a_copy_is_saved(
+    root: Folder, repository: ContentRepository, session: Session
+) -> None:
+    folder = root.create_subfolder("folder")
+    folder.create_subfolder("subfolder").create_document("doc")
+    dest = root.create_subfolder("dest")
+    session.flush()
+
+    repository.copy_object(folder, dest)
+    session.commit()
+    session.expire_all()
+
+    assert repository.get_object_by_path("/dest/folder/subfolder/doc") is not None
+
+
 def test_a_missing_path_is_none(root: Folder) -> None:
     assert root.get_object_by_path("/nowhere") is None
+
+
+def test_a_move_is_saved(
+    root: Folder, repository: ContentRepository, session: Session
+) -> None:
+    folder = root.create_subfolder("folder")
+    folder.create_document("doc")
+    dest = root.create_subfolder("dest")
+
+    repository.move_object(folder, dest)
+    session.commit()
+    session.expire_all()
+
+    assert root.get_object_by_path("/dest/folder/doc") is not None
+    assert root.get_object_by_path("/folder") is None

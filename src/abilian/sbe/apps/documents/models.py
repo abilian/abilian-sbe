@@ -319,15 +319,17 @@ class Folder(PathAndSecurityIndexable, CmisObject):
 
         return self.parent.depth + 1
 
+    # Appended to the folder's collection rather than given `parent=self`: the
+    # collection cascades the child into the folder's session, a backref no
+    # longer does (SQLAlchemy 2.0).
     def create_subfolder(self, title: str) -> Folder:
-        subfolder = Folder(title=title, parent=self)
-        assert subfolder in self.children
+        subfolder = Folder(title=title)
+        self.subfolders.append(subfolder)
         return subfolder
 
     def create_document(self, title: str) -> Document:
-        doc = Document(title=title, parent=self)
-        assert doc.parent == self
-        assert doc in self.children
+        doc = Document(title=title)
+        self.documents.append(doc)
         return doc
 
     def get_object_by_path(self, path: str) -> BaseContent | None:

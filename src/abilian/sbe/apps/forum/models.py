@@ -110,7 +110,9 @@ class Thread(Entity):
 
         kw["name"] = self.name
         post = Post(**kw)
-        post.thread = self
+        # Appended rather than given `thread=self`: the collection cascades the
+        # post into the thread's session, a backref no longer does.
+        self.posts.append(post)
         return post
 
 
