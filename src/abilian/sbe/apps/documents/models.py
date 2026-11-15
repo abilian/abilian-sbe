@@ -393,7 +393,8 @@ class Folder(PathAndSecurityIndexable, CmisObject):
         return local_roles_assignments
 
     def get_inherited_roles_assignments(self):
-        if self.parent.is_root_folder:
+        # The repository root has no parent, and its children inherit nothing.
+        if self.parent is None or self.parent.is_root_folder:
             return []
 
         roles = self.parent.get_local_roles_assignments()

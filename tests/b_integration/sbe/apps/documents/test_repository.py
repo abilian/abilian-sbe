@@ -196,3 +196,7 @@ def test_a_move_is_saved(
 
     assert root.get_object_by_path("/dest/folder/doc") is not None
     assert root.get_object_by_path("/folder") is None
+
+
+def test_the_root_inherits_no_roles(root: Folder) -> None:
+    assert root.get_inherited_roles_assignments() == []
