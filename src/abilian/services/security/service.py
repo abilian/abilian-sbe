@@ -225,7 +225,7 @@ class SecurityService(Service):
         assert isinstance(obj, Entity)
 
         obj.inherit_security = inherit_security
-        session = object_session(obj) if obj is not None else db.session
+        session = object_session(obj) if obj is not None else db.session()
         session.add(obj)
 
         manager = self._current_user_manager(session=session)
@@ -542,7 +542,7 @@ class SecurityService(Service):
         assert principal
 
         principal = unwrap(principal)
-        session = object_session(obj) if obj is not None else db.session
+        session = object_session(obj) if obj is not None else db.session()
         manager = self._current_user_manager(session=session)
         args = {
             "role": role,
@@ -605,7 +605,7 @@ class SecurityService(Service):
 
         assert principal
         principal = unwrap(principal)
-        session = object_session(object) if object is not None else db.session
+        session = object_session(object) if object is not None else db.session()
         manager = self._current_user_manager(session=session)
 
         args = {
@@ -646,7 +646,7 @@ class SecurityService(Service):
 
     @require_flush
     def get_role_assignements(self, obj: Model) -> list:
-        session = object_session(obj) if obj is not None else db.session
+        session = object_session(obj) if obj is not None else db.session()
         if not session:
             session = db.session()
         query = session.query(RoleAssignment)

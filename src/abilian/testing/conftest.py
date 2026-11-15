@@ -22,7 +22,8 @@ if TYPE_CHECKING:
     from flask import Flask
     from flask.ctx import AppContext, RequestContext
     from flask.testing import FlaskClient
-    from sqlalchemy.orm import Session
+    from flask_sqlalchemy.session import Session as FlaskSession
+    from sqlalchemy.orm import scoped_session
 
     from abilian.app import Application
     from abilian.core.sqlalchemy import SQLAlchemy
@@ -102,12 +103,12 @@ def test_request_context(app: Flask) -> Iterator[RequestContext]:
 
 
 @fixture
-def session(db: SQLAlchemy) -> Session:
+def session(db: SQLAlchemy) -> scoped_session[FlaskSession]:
     return db.session
 
 
 @fixture
-def db_session(db: SQLAlchemy) -> Session:
+def db_session(db: SQLAlchemy) -> scoped_session[FlaskSession]:
     return db.session
 
 

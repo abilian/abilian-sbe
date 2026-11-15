@@ -20,18 +20,6 @@ class Base(DeclarativeBase):
 
 if TYPE_CHECKING:
     from flask_sqlalchemy.model import Model as FlaskModel
-    from sqlalchemy.orm import Session, scoped_session
-
-    class ScopedSession(scoped_session, Session):
-        """What a `scoped_session` offers, for type checkers.
-
-        SQLAlchemy 1.4 builds its proxy methods at runtime, where no type
-        checker sees them: besides its own methods, it offers what a Session
-        does, and calling it returns the current Session.
-        """
-
-        def __call__(self) -> Session:
-            """Return the current Session."""
 
     class DeclaredModel(Base, FlaskModel):
         """What `db.Model` is, for type checkers: the declarative base, typed
@@ -42,7 +30,6 @@ if TYPE_CHECKING:
 
 
 class SQLAlchemy(SAExtension):
-    """Base subclass of :class:`flask_sqlalchemy.SQLAlchemy`, typing it."""
+    """Base subclass of :class:`flask_sqlalchemy.SQLAlchemy`, typing its models."""
 
-    session: ScopedSession
     Model: type[DeclaredModel]

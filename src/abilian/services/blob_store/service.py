@@ -309,7 +309,7 @@ class SessionBlobStoreService(Service):
         """
         match model_or_session:
             case None:
-                return db.session
+                return db.session()
 
             case Session():
                 return model_or_session
@@ -320,7 +320,7 @@ class SessionBlobStoreService(Service):
         session = sa.orm.object_session(model_or_session)
 
         if session is None:
-            return db.session
+            return db.session()
 
         return session
 
