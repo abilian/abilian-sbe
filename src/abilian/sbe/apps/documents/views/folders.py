@@ -37,7 +37,7 @@ from flask_login import current_user
 from loguru import logger
 from markupsafe import Markup
 from sqlalchemy import func
-from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import BadRequest, InternalServerError
 from xlwt import Workbook, easyxf
 
 from abilian.core.extensions import db
@@ -392,7 +392,7 @@ def permissions_update(folder_id):
     if action == "add-user-role":
         role = request.form["role"].lower()
         user_id = int(request.form["user"])
-        user = User.query.get(user_id)
+        user = User.query.get_or_404(user_id)
 
         security.grant_role(user, role, folder)
         reindex_tree(folder)
@@ -404,7 +404,7 @@ def permissions_update(folder_id):
     if action == "add-group-role":
         role = request.form["role"].lower()
         group_id = int(request.form["group"])
-        group = Group.query.get(group_id)
+        group = Group.query.get_or_404(group_id)
 
         security.grant_role(group, role, folder)
         reindex_tree(folder)
@@ -413,13 +413,20 @@ def permissions_update(folder_id):
             url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
         )
 
-    action, args = request.form.items()[0]
-    role, object_id = args.split(":")
+    # The delete buttons send their action as their name, "role:id" as value.
+    action = next(
+        (a for a in ("delete-user-role", "delete-group-role") if a in request.form),
+        None,
+    )
+    if action is None:
+        msg = f"Unknown action: {request.form.get('action')!r}"
+        raise BadRequest(msg)
+    role, object_id = request.form[action].split(":")
     role = role.lower()
     object_id = int(object_id)
 
     if action == "delete-user-role":
-        user = User.query.get(object_id)
+        user = User.query.get_or_404(object_id)
         # remove role in a subtransaction, to prevent manager shoot himself in the
         # foot
         transaction = db.session.begin_nested()
@@ -449,7 +456,7 @@ def permissions_update(folder_id):
                 "success",
             )
     elif action == "delete-group-role":
-        group = Group.query.get(object_id)
+        group = Group.query.get_or_404(object_id)
         # remove role in a subtransaction, to prevent manager shoot himself in the
         # foot
         transaction = db.session.begin_nested()

@@ -7,6 +7,7 @@ from typing import IO, TYPE_CHECKING
 from zipfile import ZipFile
 
 import flask_mail
+import pytest
 from flask import g, get_flashed_messages
 from PIL import Image
 from pytest import fixture
@@ -19,7 +20,7 @@ from abilian.sbe.apps.documents.models import Folder
 from abilian.sbe.apps.documents.views import util as view_util
 from abilian.services import security_service
 from abilian.services.conversion.handlers import HAS_PDFTOTEXT
-from abilian.services.security import ADMIN
+from abilian.services.security import ADMIN, READER
 from abilian.web.util import url_for
 from tests.util import DATA_DIR, client_login, path_from_url
 
@@ -148,6 +149,57 @@ def test_role_form_with_a_missing_field_is_a_bad_request(
     with client_login(client, user):
         for data in incomplete_forms:
             assert client.post(url, data=data).status_code == 400, data
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {"action": "add-user-role", "role": "reader", "user": 999999},
+        {"action": "add-group-role", "role": "reader", "group": 999999},
+        # The delete buttons: their name is the action, their value role:id.
+        {"delete-user-role": "reader:999999"},
+        {"delete-group-role": "reader:999999"},
+    ],
+)
+def test_a_role_form_for_an_unknown_principal_is_not_found(
+    data: dict,
+    client: FlaskClient,
+    db: SQLAlchemy,
+    community: Community,
+) -> None:
+    security_service.start()
+    user = community.test_user
+    security_service.grant_role(user, ADMIN)
+    db.session.commit()
+    url = url_for(
+        "documents.permissions_update",
+        community_id=community.slug,
+        folder_id=community.folder.id,
+    )
+
+    with client_login(client, user):
+        assert client.post(url, data=data).status_code == 404
+
+
+def test_a_manager_removes_a_role_on_a_folder(
+    client: FlaskClient, db: SQLAlchemy, community: Community, community2: Community
+) -> None:
+    security_service.start()
+    user = community.test_user
+    security_service.grant_role(user, ADMIN)
+    other = community2.test_user
+    folder = community.folder
+    security_service.grant_role(other, READER, folder)
+    db.session.commit()
+    url = url_for(
+        "documents.permissions_update", community_id=community.slug, folder_id=folder.id
+    )
+
+    with client_login(client, user):
+        response = client.post(url, data={"delete-user-role": f"reader:{other.id}"})
+
+    assert response.status_code == 302
+    assert not security_service.has_role(other, READER, folder)
 
 
 def test_name_check_without_an_object_is_a_bad_request(
