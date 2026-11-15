@@ -33,9 +33,11 @@ def object_viewers(entity: Document | WikiPage) -> list:
                 viewers.append(
                     {
                         "user": view.user,
-                        "viewed_at": view.hits.with_entities(
-                            sa.func.max(Hit.viewed_at)
-                        ).scalar(),
+                        # order_by(None): the relationship's ORDER BY has no
+                        # place in an aggregate, and PostgreSQL refuses it.
+                        "viewed_at": view.hits.order_by(None)
+                        .with_entities(sa.func.max(Hit.viewed_at))
+                        .scalar(),
                     }
                 )
         return viewers
