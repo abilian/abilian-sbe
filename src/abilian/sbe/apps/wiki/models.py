@@ -17,7 +17,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, backref, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
 from abilian.core.entities import Entity, db
 from abilian.core.models import SEARCHABLE
@@ -59,7 +59,7 @@ class WikiPage(Entity):
     )
 
     #: The body, using some markup language (Markdown for now)
-    body_src = Column(
+    body_src: Mapped[str] = mapped_column(
         UnicodeText,
         default="",
         nullable=False,
@@ -139,27 +139,29 @@ class WikiPageRevision(db.Model):
     __table_args__ = (UniqueConstraint("page_id", "number"),)
 
     # : Some primary key just in case
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     #: Date and time this revision was created
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
 
     #: The page this revision belongs to
     page = relationship(WikiPage, backref="revisions")
-    page_id = Column(ForeignKey(WikiPage.id))
+    page_id: Mapped[int | None] = mapped_column(ForeignKey(WikiPage.id))
 
     #: The revision number
-    number = Column(Integer, nullable=False)
+    number: Mapped[int] = mapped_column(Integer, nullable=False)
 
     #: The body, using some markup language (Markdown for now)
-    body_src = Column(UnicodeText, default="", nullable=False)
+    body_src: Mapped[str] = mapped_column(UnicodeText, default="", nullable=False)
 
     #: Commit message
-    message = Column(UnicodeText, default="", nullable=False)
+    message: Mapped[str] = mapped_column(UnicodeText, default="", nullable=False)
 
     #: The author of this revision
     author = relationship(User)
-    author_id = Column(ForeignKey(User.id))
+    author_id: Mapped[int | None] = mapped_column(ForeignKey(User.id))
 
 
 class WikiPageAttachment(BaseContent):
@@ -168,7 +170,9 @@ class WikiPageAttachment(BaseContent):
     __mapper_args__ = {"polymorphic_identity": "wikipage_attachment"}
     sbe_type = "wikipage:attachment"
 
-    _wikipage_id = Column(Integer, ForeignKey(WikiPage.id), nullable=True)
+    _wikipage_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(WikiPage.id), nullable=True
+    )
     wikipage = relationship(
         WikiPage,
         primaryjoin=(_wikipage_id == WikiPage.id),

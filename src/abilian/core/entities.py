@@ -331,10 +331,13 @@ class Entity(Indexable, BaseMixin, Model, metaclass=EntityMeta):
 
     #: The name is a string that is shown to the user; it could be a title
     #: for document, a folder name, etc.
-    name = Column("name", UnicodeText())
-    name.info = EDITABLE | SEARCHABLE | {"index_to": ("name", "name_prefix", "text")}
+    name: Mapped[str | None] = mapped_column(
+        "name",
+        UnicodeText(),
+        info=EDITABLE | SEARCHABLE | {"index_to": ("name", "name_prefix", "text")},
+    )
 
-    slug = Column("slug", UnicodeText(), info=SEARCHABLE)
+    slug: Mapped[str | None] = mapped_column("slug", UnicodeText(), info=SEARCHABLE)
     """
     The slug attribute may be used in URLs to reference the entity, but
     uniqueness is not enforced, even within same entity type. For example
@@ -346,10 +349,12 @@ class Entity(Indexable, BaseMixin, Model, metaclass=EntityMeta):
     friendly entity_type with concatenated with entity's id.
     """
 
-    _entity_type = Column("entity_type", String(1000), nullable=False)
+    _entity_type: Mapped[str] = mapped_column(
+        "entity_type", String(1000), nullable=False
+    )
     entity_type = ""
 
-    meta = Column(JSONDict(), nullable=False, default=dict)
+    meta: Mapped[dict] = mapped_column(JSONDict(), nullable=False, default=dict)
     """
     A dictionnary of simple values (JSON-serializable) to conveniently annotate
     the entity.

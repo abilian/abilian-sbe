@@ -13,16 +13,17 @@ from __future__ import annotations
 import random
 import string
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 from typing import TYPE_CHECKING
 
 import bcrypt
 import sqlalchemy as sa
+from babel import Locale
 from flask_login import UserMixin
 from flask_sqlalchemy.query import Query
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import backref, deferred, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import (
     Boolean,
@@ -36,10 +37,9 @@ from sqlalchemy.types import (
 from abilian.core import sqlalchemy as sa_types
 from abilian.core.util import fqcn
 
-from .base import SEARCHABLE, SYSTEM, IdMixin, Indexable, TimestampedMixin, db
+from .base import SEARCHABLE, SYSTEM, IdMixin, Indexable, Model, TimestampedMixin, db
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Mapped
     from sqlalchemy.orm.mapper import Mapper
 
 __all__ = (
@@ -188,7 +188,7 @@ def set_entity_type(cls: type[User | Group]) -> type[User | Group]:
 
 
 @set_entity_type
-class User(Principal, UserMixin, db.Model):
+class User(Principal, UserMixin, Model):
     __tablename__ = "user"
 
     if TYPE_CHECKING:
@@ -202,20 +202,28 @@ class User(Principal, UserMixin, db.Model):
     __password_strategy__ = BcryptPasswordStrategy()
 
     # Basic information
-    first_name = Column(UnicodeText, info=SEARCHABLE)
-    last_name = Column(UnicodeText, info=SEARCHABLE)
+    first_name: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
+    last_name: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
     # Should we add gender, salutation ?
 
     # System information
-    email = Column(Unicode(255), nullable=False)  # for Mariadb set length of varchar
-    can_login = Column(Boolean, nullable=False, default=True)
-    password = Column(UnicodeText, default="*", info={"audit_hide_content": True})
+    email: Mapped[str] = mapped_column(
+        Unicode(255), nullable=False
+    )  # for Mariadb set length of varchar
+    can_login: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    password: Mapped[str | None] = mapped_column(
+        UnicodeText, default="*", info={"audit_hide_content": True}
+    )
 
-    photo = deferred(Column(LargeBinary))
+    photo: Mapped[bytes | None] = mapped_column(LargeBinary, deferred=True)
 
-    last_active = Column(DateTime, info=SYSTEM)
-    locale = Column(sa_types.Locale, nullable=True, default=None)
-    timezone = Column(sa_types.Timezone, nullable=True, default=None)
+    last_active: Mapped[datetime | None] = mapped_column(DateTime, info=SYSTEM)
+    locale: Mapped[Locale | None] = mapped_column(
+        sa_types.Locale, nullable=True, default=None
+    )
+    timezone: Mapped[tzinfo | None] = mapped_column(
+        sa_types.Timezone, nullable=True, default=None
+    )
 
     __table_args__ = (UniqueConstraint("email"),)
 
@@ -319,16 +327,16 @@ def _add_user_indexes(mapper: Mapper, cls: type[User]) -> None:
 
 
 @set_entity_type
-class Group(Principal, db.Model):
+class Group(Principal, Model):
     __indexable__ = False
     __tablename__ = "group"
     __editable__ = ["name", "description"]
     __exportable__ = [*__editable__, "created_at", "updated_at", "id"]
 
-    name = Column(UnicodeText, nullable=False, info=SEARCHABLE)
-    description = Column(UnicodeText, info=SEARCHABLE)
-    photo = deferred(Column(LargeBinary))
-    public = Column(Boolean, default=False, nullable=False)
+    name: Mapped[str] = mapped_column(UnicodeText, nullable=False, info=SEARCHABLE)
+    description: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
+    photo: Mapped[bytes | None] = mapped_column(LargeBinary, deferred=True)
+    public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     members = relationship(
         "User",

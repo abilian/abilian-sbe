@@ -36,8 +36,11 @@ if TYPE_CHECKING:
 class ViewedModel(Protocol):
     """What the object views need of a model: an id, and a query on the class."""
 
-    id: Any
     query: ClassVar[Any]
+
+    @property
+    def id(self) -> Any:
+        """The model's id: read only, so a mapped column fits."""
 
 
 class BaseObjectView[M: ViewedModel](View):

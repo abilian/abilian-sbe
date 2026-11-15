@@ -10,7 +10,7 @@ import sqlalchemy as sa
 import sqlalchemy.event
 import sqlalchemy.orm
 from flask_sqlalchemy.query import Query
-from sqlalchemy import Column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.orm.decl_api import DeclarativeAttributeIntercept
 
 from abilian.core.extensions import db
@@ -78,15 +78,17 @@ class BaseVocabulary(db.Model, metaclass=_VocabularyMeta):
     __abstract__ = True
     query_class = VocabularyQuery
 
-    id = Column(sa.Integer(), primary_key=True, autoincrement=True, nullable=False)
-    label = Column(sa.Unicode(255), nullable=False, unique=True)
-    active = Column(
+    id: Mapped[int] = mapped_column(
+        sa.Integer(), primary_key=True, autoincrement=True, nullable=False
+    )
+    label: Mapped[str] = mapped_column(sa.Unicode(255), nullable=False, unique=True)
+    active: Mapped[bool] = mapped_column(
         sa.Boolean(), nullable=False, server_default=sa.sql.true(), default=True
     )
-    default = Column(
+    default: Mapped[bool] = mapped_column(
         sa.Boolean(), nullable=False, server_default=sa.sql.false(), default=False
     )
-    position = Column(sa.Integer, nullable=False, unique=True)
+    position: Mapped[int] = mapped_column(sa.Integer, nullable=False, unique=True)
 
     __table_args__ = (sa.CheckConstraint(sa.sql.func.trim(sa.sql.text("label")) != ""),)
 

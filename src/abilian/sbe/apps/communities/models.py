@@ -22,7 +22,7 @@ from sqlalchemy import (
     and_,
 )
 from sqlalchemy.event import listens_for
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE, Event
 from sqlalchemy.sql.schema import Column
 
@@ -59,17 +59,23 @@ class Membership(db.Model):
 
     __tablename__ = "community_membership"
 
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    user_id = Column(ForeignKey("user.id"), index=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"), index=True, nullable=False
+    )
     user = relationship(
         User, lazy="joined", backref=backref("communautes_membership", lazy="select")
     )
 
-    community_id = Column(ForeignKey("community.id"), index=True, nullable=False)
+    community_id: Mapped[int] = mapped_column(
+        ForeignKey("community.id"), index=True, nullable=False
+    )
     community = relationship("Community", lazy="joined")
 
-    role = Column(RoleType())  # should be either 'member' or 'manager'
+    role: Mapped[Role | None] = mapped_column(
+        RoleType()
+    )  # should be either 'member' or 'manager'
 
     __table_args__ = (UniqueConstraint("user_id", "community_id"),)
 
@@ -125,14 +131,16 @@ class Community(Entity):
     is_community_content = True
 
     # : A public description.
-    description = Column(Unicode(500), default="", nullable=False, info=SEARCHABLE)
+    description: Mapped[str] = mapped_column(
+        Unicode(500), default="", nullable=False, info=SEARCHABLE
+    )
 
     #: An image or logo for this community.
-    image_id = Column(ForeignKey(Blob.id), index=True)
+    image_id: Mapped[int | None] = mapped_column(ForeignKey(Blob.id), index=True)
     image = relationship(Blob, lazy="joined")
 
     #: The root folder for this community.
-    folder_id = Column(
+    folder_id: Mapped[int | None] = mapped_column(
         Integer,
         ForeignKey(Folder.id, use_alter=True, name="fk_community_root_folder"),
         unique=True,
@@ -147,7 +155,9 @@ class Community(Entity):
 
     #: The group this community is linked to, if any. Memberships are then
     #: reflected
-    group_id = Column(ForeignKey(Group.id), nullable=True, unique=True)
+    group_id: Mapped[int | None] = mapped_column(
+        ForeignKey(Group.id), nullable=True, unique=True
+    )
     group = relationship(Group, foreign_keys=group_id, lazy="select")
 
     #: Memberships for this community.
@@ -162,39 +172,47 @@ class Community(Entity):
     )
 
     #: Number of members in this community.
-    membership_count = Column(Integer, default=0, nullable=False, info=NOT_AUDITABLE)
+    membership_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, info=NOT_AUDITABLE
+    )
 
     #: Number of documents in this community.
-    document_count = Column(Integer, default=0, nullable=False, info=NOT_AUDITABLE)
+    document_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, info=NOT_AUDITABLE
+    )
 
     #: Last time something happened in this community
-    last_active_at = Column(
+    last_active_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False, info=NOT_AUDITABLE
     )
 
     # Various features for this community:
 
     #: True if this community has a document management space
-    has_documents = Column(Boolean, nullable=False, default=True)
+    has_documents: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     #: True if this community has a wiki
-    has_wiki = Column(Boolean, nullable=False, default=True)
+    has_wiki: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     #: True if this community has a forum
-    has_forum = Column(Boolean, nullable=False, default=True)
+    has_forum: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     #: One of 'participative' or 'informative
-    type = Column(String(20), nullable=False, default="informative")
+    type: Mapped[str] = mapped_column(String(20), nullable=False, default="informative")
 
     #: One of 'secret', 'public', 'open' (currently not used)
-    visibility = Column(String(20), nullable=False, default="secret")
+    visibility: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="secret"
+    )
 
     #: Used for segmenting communities. Not used currently.
-    category = Column(String(20), nullable=False, default="")
+    category: Mapped[str] = mapped_column(String(20), nullable=False, default="")
 
     #: True if regular members can send stuff by email to all members
     # Not used anymore.
-    members_can_send_by_email = Column(Boolean, nullable=False, default=False)
+    members_can_send_by_email: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
 
     def __init__(self, **kw) -> None:
         self.has_documents = True

@@ -2,9 +2,11 @@
 
 from __future__ import annotations
 
-from sqlalchemy import Column, DateTime, Unicode, UnicodeText
+from datetime import datetime
+
+from sqlalchemy import DateTime, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
 from abilian.core.entities import SEARCHABLE, Entity
 from abilian.sbe.apps.communities.models import (
@@ -26,16 +28,22 @@ class Event(Entity):
         backref=backref("events", cascade="all, delete-orphan"),
     )
 
-    title = Column(Unicode(255), nullable=False, default="", info=SEARCHABLE)
+    title: Mapped[str] = mapped_column(
+        Unicode(255), nullable=False, default="", info=SEARCHABLE
+    )
 
-    description = Column(UnicodeText, nullable=False, default="", info=SEARCHABLE)
+    description: Mapped[str] = mapped_column(
+        UnicodeText, nullable=False, default="", info=SEARCHABLE
+    )
 
-    location = Column(UnicodeText, nullable=False, default="", info=SEARCHABLE)
+    location: Mapped[str] = mapped_column(
+        UnicodeText, nullable=False, default="", info=SEARCHABLE
+    )
 
-    start = Column(DateTime, nullable=False)
-    end = Column(DateTime)
+    start: Mapped[datetime] = mapped_column(DateTime, nullable=False)
+    end: Mapped[datetime | None] = mapped_column(DateTime)
 
-    url = Column(UnicodeText, nullable=False, default="")
+    url: Mapped[str] = mapped_column(UnicodeText, nullable=False, default="")
 
 
 @listens_for(Event.title, "set", active_history=True)

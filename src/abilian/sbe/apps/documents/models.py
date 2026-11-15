@@ -23,9 +23,9 @@ from flask_login import current_user
 from loguru import logger
 from sqlalchemy.event import listen, listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import backref, foreign, relationship, remote
+from sqlalchemy.orm import Mapped, backref, foreign, mapped_column, relationship, remote
 from sqlalchemy.orm.session import Session
-from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
+from sqlalchemy.schema import ForeignKey, UniqueConstraint
 from sqlalchemy.types import Integer, Text, Unicode, UnicodeText
 from toolz import first
 from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
@@ -46,7 +46,6 @@ from .lock import Lock
 if TYPE_CHECKING:
     from collections.abc import Collection, Iterator
 
-    from sqlalchemy.orm import Mapped
     from sqlalchemy.orm.attributes import Event
     from sqlalchemy.util.langhelpers import symbol
 
@@ -103,15 +102,19 @@ class CmisObject(InheritSecurity, Entity):
         ("community.slug", ("community_slug",)),
     )
 
-    _title = Column("title", Unicode(255), nullable=False, default="")
-    description = Column(
+    _title: Mapped[str] = mapped_column(
+        "title", Unicode(255), nullable=False, default=""
+    )
+    description: Mapped[str] = mapped_column(
         UnicodeText,
         nullable=False,
         default="",
         info=SEARCHABLE | {"index_to": ("description", "text")},
     )
 
-    _parent_id = Column(Integer, ForeignKey("cmisobject.id"), nullable=True)
+    _parent_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("cmisobject.id"), nullable=True
+    )
 
     # no duplicate name in same folder
     __table_args__ = (UniqueConstraint("_parent_id", "title"),)
@@ -439,14 +442,14 @@ class BaseContent(CmisObject):
     """A base class for cmisobject with an attached file."""
 
     __tablename__ = "base_content"
-    _content_id = Column(Integer, db.ForeignKey(Blob.id))
+    _content_id: Mapped[int | None] = mapped_column(Integer, db.ForeignKey(Blob.id))
     content_blob = relationship(Blob, cascade="all, delete", foreign_keys=[_content_id])
 
     #: md5 digest (BTW: not sure they should be part of the public API).
-    content_digest = Column(Text)
+    content_digest: Mapped[str | None] = mapped_column(Text)
 
     #: size (in bytes) of the content blob.
-    content_length = Column(
+    content_length: Mapped[int] = mapped_column(
         Integer,
         default=0,
         nullable=False,
@@ -459,7 +462,7 @@ class BaseContent(CmisObject):
 
     #: MIME type of the content stream.
     # TODO: normalize mime type?
-    content_type = Column(
+    content_type: Mapped[str | None] = mapped_column(
         Text,
         default="application/octet-stream",
         info={"searchable": True, "index_to": (("content_type", wf.ID(stored=True)),)},
@@ -564,24 +567,32 @@ class Document(BaseContent, PathAndSecurityIndexable):
         """Alias for content_digest."""
         return self.content_digest
 
-    _text_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
+    _text_id: Mapped[int | None] = mapped_column(
+        Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE
+    )
     text_blob = relationship(Blob, cascade="all, delete", foreign_keys=[_text_id])
 
-    _pdf_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
+    _pdf_id: Mapped[int | None] = mapped_column(
+        Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE
+    )
     pdf_blob = relationship(Blob, cascade="all, delete", foreign_keys=[_pdf_id])
 
-    _preview_id = Column(Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE)
+    _preview_id: Mapped[int | None] = mapped_column(
+        Integer, db.ForeignKey(Blob.id), info=NOT_AUDITABLE
+    )
     preview_blob = relationship(Blob, cascade="all, delete", foreign_keys=[_preview_id])
 
-    language = Column(
+    language: Mapped[str | None] = mapped_column(
         Text, info={"searchable": True, "index_to": [("language", wf.ID(stored=True))]}
     )
-    size = Column(Integer)
-    page_num = Column(Integer, default=1)
+    size: Mapped[int | None] = mapped_column(Integer)
+    page_num: Mapped[int | None] = mapped_column(Integer, default=1)
 
     # FIXME: use Entity.meta instead
     #: Stores extra metadata as a JSON column
-    extra_metadata_json = Column(UnicodeText, info={"auditable": False})
+    extra_metadata_json: Mapped[str | None] = mapped_column(
+        UnicodeText, info={"auditable": False}
+    )
 
     sbe_type = "cmis:document"
 

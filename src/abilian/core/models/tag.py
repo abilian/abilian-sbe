@@ -8,6 +8,7 @@ from typing import Any
 
 import sqlalchemy as sa
 import sqlalchemy.orm
+from sqlalchemy.orm import Mapped, mapped_column
 
 from abilian.core.entities import Entity
 from abilian.core.extensions import db
@@ -76,12 +77,12 @@ class Tag(IdMixin, Model):
     #: namespace
 
     # for Mariadb set length of varchar:
-    ns = sa.Column(
+    ns: Mapped[str] = mapped_column(
         sa.Unicode(255), nullable=False, default="default", server_default="default"
     )
 
     #: Label visible to the user
-    label = sa.Column(sa.Unicode(255), nullable=False)
+    label: Mapped[str] = mapped_column(sa.Unicode(255), nullable=False)
 
     #: :class:`entities <.Entity>` attached to this tag
     entities = sa.orm.relationship(

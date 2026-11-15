@@ -7,8 +7,8 @@ from datetime import datetime
 from flask import request
 from flask_login import current_user
 from flask_sqlalchemy.query import Query
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
@@ -60,22 +60,26 @@ class LoginSession(db.Model):
     query_class = LoginSessionQuery
     # query: LoginSessionQuery
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    last_active_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    ended_at = Column(DateTime)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    last_active_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    user_id = Column(ForeignKey(User.id), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     user = relationship(User)
 
     #: IP addres, should work with both IPv4 and IPv6.
     # FIXME: define a custom type to use postgres inet when on postgres
     # http://www.postgresql.org/docs/9.1/static/datatype-net-types.html
-    ip_address = Column(String(39), default="", nullable=False)
+    ip_address: Mapped[str] = mapped_column(String(39), default="", nullable=False)
 
     #: Limited (somewhat artbitrarily) to 512 characters.
-    user_agent = Column(String(512), default="", nullable=False)
+    user_agent: Mapped[str] = mapped_column(String(512), default="", nullable=False)
 
     @staticmethod
     def new() -> LoginSession:

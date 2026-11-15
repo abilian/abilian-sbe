@@ -5,8 +5,8 @@ from __future__ import annotations
 import abc
 from typing import Any
 
-from sqlalchemy import CheckConstraint, Column, ForeignKey, Integer, UnicodeText
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy import CheckConstraint, ForeignKey, Integer, UnicodeText
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
 from abilian.core.entities import Entity, EntityQuery
 from abilian.services.security import ANONYMOUS, CREATE, DELETE, OWNER, WRITE
@@ -70,7 +70,9 @@ class Comment(Entity):
     __tablename__ = "comment"
     __default_permissions__ = {WRITE: {OWNER}, DELETE: {OWNER}, CREATE: {ANONYMOUS}}
 
-    entity_id = Column(Integer, ForeignKey(Entity.id), nullable=False)
+    entity_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey(Entity.id), nullable=False
+    )
 
     #: Commented entity
     entity = relationship(
@@ -86,7 +88,9 @@ class Comment(Entity):
     )
 
     #: comment's main content
-    body = Column(UnicodeText(), CheckConstraint("trim(body) != ''"), nullable=False)
+    body: Mapped[str] = mapped_column(
+        UnicodeText(), CheckConstraint("trim(body) != ''"), nullable=False
+    )
 
     query_class = CommentQuery
 

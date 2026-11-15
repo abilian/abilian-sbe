@@ -8,10 +8,9 @@ from datetime import datetime
 from functools import total_ordering
 
 from sqlalchemy import sql
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 from sqlalchemy.schema import (
     CheckConstraint,
-    Column,
     ForeignKey,
     Index,
     UniqueConstraint,
@@ -161,9 +160,11 @@ DELETE = Permission("delete")
 class RoleAssignment(Model):
     __tablename__ = "roleassignment"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    role = Column(RoleType, index=True, nullable=False)
-    anonymous = Column(
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True, nullable=False
+    )
+    role: Mapped[Role] = mapped_column(RoleType, index=True, nullable=False)
+    anonymous: Mapped[bool | None] = mapped_column(
         "anonymous",
         Boolean,
         index=True,
@@ -171,12 +172,18 @@ class RoleAssignment(Model):
         default=False,
         server_default=sql.false(),
     )
-    user_id = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"), index=True)
+    user_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("user.id", ondelete="CASCADE"), index=True
+    )
     user = relationship(User, lazy="joined")
-    group_id = Column(Integer, ForeignKey("group.id", ondelete="CASCADE"), index=True)
+    group_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("group.id", ondelete="CASCADE"), index=True
+    )
     group = relationship(Group, lazy="joined")
 
-    object_id = Column(Integer, ForeignKey(Entity.id, ondelete="CASCADE"), index=True)
+    object_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Entity.id, ondelete="CASCADE"), index=True
+    )
     object = relationship(Entity, lazy="select")
 
     __table_args__ = (
@@ -301,10 +308,14 @@ class PermissionAssignment(db.Model):
         UniqueConstraint("permission", "role", "object_id", name="assignments_unique"),
     )
 
-    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    permission = Column(PermissionType, index=True, nullable=False)
-    role = Column(RoleType, index=True, nullable=False)
-    object_id = Column(
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True, nullable=False
+    )
+    permission: Mapped[Permission] = mapped_column(
+        PermissionType, index=True, nullable=False
+    )
+    role: Mapped[Role] = mapped_column(RoleType, index=True, nullable=False)
+    object_id: Mapped[int | None] = mapped_column(
         Integer, ForeignKey(Entity.id, ondelete="CASCADE"), index=True, nullable=True
     )
     object = relationship(
@@ -381,27 +392,33 @@ class SecurityAudit(db.Model):
 
     __tablename__ = "securityaudit"
 
-    id = Column(Integer, primary_key=True)
-    happened_at = Column(DateTime, default=datetime.utcnow, index=True)
-    op = Column(
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    happened_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.utcnow, index=True
+    )
+    op: Mapped[str | None] = mapped_column(
         Enum(GRANT, REVOKE, SET_INHERIT, UNSET_INHERIT, name="securityaudit_enum_op")
     )
-    role = Column(RoleType)
+    role: Mapped[Role | None] = mapped_column(RoleType)
 
-    manager_id = Column(Integer, ForeignKey(User.id))
+    manager_id: Mapped[int | None] = mapped_column(Integer, ForeignKey(User.id))
     manager = relationship(User, foreign_keys=manager_id)
-    anonymous = Column("anonymous", Boolean, nullable=True, default=False)
-    user_id = Column(Integer, ForeignKey("user.id"))
+    anonymous: Mapped[bool | None] = mapped_column(
+        "anonymous", Boolean, nullable=True, default=False
+    )
+    user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("user.id"))
     user = relationship("User", lazy="joined", foreign_keys=user_id)
-    group_id = Column(Integer, ForeignKey("group.id"))
+    group_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("group.id"))
     group = relationship("Group", lazy="joined")
 
-    _fk_object_id = Column(Integer, ForeignKey(Entity.id, ondelete="SET NULL"))
+    _fk_object_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Entity.id, ondelete="SET NULL")
+    )
     object = relationship(Entity, lazy="select")
 
-    object_id = Column(Integer)
-    object_type = Column(String(1000))
-    object_name = Column(UnicodeText)
+    object_id: Mapped[int | None] = mapped_column(Integer)
+    object_type: Mapped[str | None] = mapped_column(String(1000))
+    object_name: Mapped[str | None] = mapped_column(UnicodeText)
 
     __table_args__ = (
         # constraint: either a inherit/no_inherit op on an object AND no user no group
@@ -443,7 +460,7 @@ class SecurityAudit(db.Model):
 class InheritSecurity:
     """Mixin for objects with a parent relation and security inheritance."""
 
-    inherit_security = Column(
+    inherit_security: Mapped[bool] = mapped_column(
         Boolean, default=True, nullable=False, info={"auditable": False}
     )
 

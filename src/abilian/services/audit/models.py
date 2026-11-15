@@ -18,9 +18,9 @@ from typing import Any
 
 from loguru import logger
 from sqlalchemy import LargeBinary
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.orm.base import NEVER_SET
-from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.schema import ForeignKey
 from sqlalchemy.types import DateTime, Integer, String, UnicodeText
 
 from abilian.core.entities import Entity
@@ -87,24 +87,28 @@ class AuditEntry(db.Model):
 
     __tablename__ = "audit_entry"
 
-    id = Column(Integer, primary_key=True)
-    happened_at = Column(DateTime, default=datetime.utcnow, index=True)
-    type = Column(Integer)  # CREATION / UPDATE / DELETION
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    happened_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.utcnow, index=True
+    )
+    type: Mapped[int | None] = mapped_column(Integer)  # CREATION / UPDATE / DELETION
 
     # 2 entity_id columns: 1 to keep even if entity is deleted, 1 to set up
     # relation (and all audit entries will have it set to null if entity is
     # deleted)
-    _fk_entity_id = Column(Integer, ForeignKey(Entity.id, ondelete="SET NULL"))
+    _fk_entity_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Entity.id, ondelete="SET NULL")
+    )
     entity = relationship(Entity, foreign_keys=[_fk_entity_id], lazy="joined")
 
-    entity_id = Column(Integer)
-    entity_type = Column(String(1000))
-    entity_name = Column(UnicodeText())
+    entity_id: Mapped[int | None] = mapped_column(Integer)
+    entity_type: Mapped[str | None] = mapped_column(String(1000))
+    entity_name: Mapped[str | None] = mapped_column(UnicodeText())
 
-    user_id = Column(Integer, ForeignKey(User.id))
+    user_id: Mapped[int | None] = mapped_column(Integer, ForeignKey(User.id))
     user = relationship(User, foreign_keys=user_id)
 
-    changes_pickle = Column(LargeBinary)
+    changes_pickle: Mapped[bytes | None] = mapped_column(LargeBinary)
 
     # query: BaseQuery
 

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.schema import ForeignKey
 from sqlalchemy.types import DateTime, Integer
 
 from abilian.core.entities import Entity, db
@@ -30,15 +30,21 @@ def _default_from(column):
 class View(db.Model):
     __tablename__ = "view"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True, nullable=False
+    )
 
     #: viewed entity id
-    entity_id = Column(Integer, default=_default_from("_fk_entity_id"), nullable=False)
-    _fk_entity_id = Column(Integer, ForeignKey(Entity.id, ondelete="SET NULL"))
+    entity_id: Mapped[int] = mapped_column(
+        Integer, default=_default_from("_fk_entity_id"), nullable=False
+    )
+    _fk_entity_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Entity.id, ondelete="SET NULL")
+    )
     entity = relationship(Entity, foreign_keys=_fk_entity_id)
 
     #: user id
-    user_id = Column(Integer, ForeignKey(User.id), nullable=False)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
     user = relationship(User, foreign_keys=user_id)
 
     hits = relationship("Hit", backref="view", order_by="Hit.viewed_at", lazy="dynamic")
@@ -47,8 +53,12 @@ class View(db.Model):
 class Hit(db.Model):
     __tablename__ = "hit"
 
-    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
-    view_id = Column(Integer, ForeignKey(View.id))
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True, nullable=False
+    )
+    view_id: Mapped[int | None] = mapped_column(Integer, ForeignKey(View.id))
 
     #: time of view
-    viewed_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+    viewed_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=True
+    )

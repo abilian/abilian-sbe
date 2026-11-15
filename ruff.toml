@@ -107,3 +107,14 @@ max-complexity = 10
 [lint.isort]
 combine-as-imports = true
 required-imports = ["from __future__ import annotations"]
+
+# SQLAlchemy evaluates `Mapped[...]` annotations when it maps a model, so the
+# types they name must be imported at runtime, not under TYPE_CHECKING.
+[lint.flake8-type-checking]
+runtime-evaluated-base-classes = [
+    "sqlalchemy.orm.DeclarativeBase",
+    "abilian.core.sqlalchemy.extension.Base",
+    "abilian.core.extensions.db.Model",
+    "abilian.core.models.base.Model",
+    "abilian.core.entities.Entity",
+]
