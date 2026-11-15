@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from abilian.core.models.subjects import Group, User
+from abilian.core.models.subjects import BcryptPasswordStrategy, Group, User
 
 if TYPE_CHECKING:
     from flask import Flask
@@ -24,6 +24,14 @@ def test_non_ascii_password() -> None:
         user.password = str(user.password)
 
     assert user.authenticate("Hé")
+
+
+def test_a_user_without_password_cannot_log_in() -> None:
+    # Bcrypt itself: the tests otherwise store passwords in clear.
+    user = User()
+    user.password = None
+
+    assert not BcryptPasswordStrategy().authenticate(user, "anything")
 
 
 def test_user(app: Flask, db: SQLAlchemy) -> None:

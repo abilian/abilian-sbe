@@ -145,10 +145,11 @@ class BcryptPasswordStrategy(PasswordStrategy):
         return "bcrypt"
 
     def authenticate(self, user: User, password: str) -> bool:
+        # A user without a password cannot log in with one.
+        if user.password is None:
+            return False
         # bcrypt works on bytes, not str
-        current_passwd = user.password
-        if isinstance(current_passwd, str):
-            current_passwd = current_passwd.encode("utf-8")
+        current_passwd = user.password.encode("utf-8")
         return bcrypt.hashpw(password.encode("utf-8"), current_passwd) == current_passwd
 
     def process(self, user: User, password: str) -> str:
