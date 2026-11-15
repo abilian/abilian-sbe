@@ -194,7 +194,9 @@ def users_json():
             ~Membership.query.filter(
                 Membership.user.expression, Membership.community_id == exclude_community
             )
-            .options(sa.orm.noload("user"), sa.orm.noload("community"))
+            .options(
+                sa.orm.noload(Membership.user), sa.orm.noload(Membership.community)
+            )
             .exists()
         )
         query = query.filter(exclude)

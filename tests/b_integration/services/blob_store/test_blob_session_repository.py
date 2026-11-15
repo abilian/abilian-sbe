@@ -39,8 +39,8 @@ def test_transaction_lifetime(session: Session) -> None:
 
     assert current_transaction is transaction
 
-    # # create subtransaction (sqlalchemy)
-    session.begin(subtransactions=True)
+    # a second, nested sub-transaction
+    session.begin(nested=True)
     current_transaction = state.get_transaction(session)
     assert isinstance(current_transaction, BlobStoreTransaction)
     assert current_transaction._parent is transaction
@@ -113,9 +113,9 @@ def test_transaction(session: Session) -> None:
     session.commit()
     assert blob_store.get(u) is None
 
-    # delete: now test subtransactions (sqlalchemy)
+    # delete: now test a rolled back sub-transaction
     blob_store.set(u, b"first draft")
-    db_tr = session.begin(subtransactions=True)
+    db_tr = session.begin(nested=True)
     session_blob_store.delete(session, u)
     assert session_blob_store.get(session, u) is None
 
@@ -126,7 +126,7 @@ def test_transaction(session: Session) -> None:
 
     session.rollback()
 
-    with session.begin(subtransactions=True):
+    with session.begin(nested=True):
         session_blob_store.delete(session, u)
         assert session_blob_store.get(session, u) is None
 
@@ -177,7 +177,7 @@ def test_transaction_path(session: Session) -> None:
 
     # assert not root_transaction.path.exists()
 
-    with session.begin(subtransactions=True):
+    with session.begin(nested=True):
         transaction = state.get_transaction(session)
         assert not transaction.tmp_folder.exists()
 

@@ -44,7 +44,7 @@ class UsersPanel(AdminPanel):
     def get(self) -> str:
         security = get_security_service()
         query = User.query.options(
-            sa.orm.subqueryload("groups"), sa.orm.undefer("photo")
+            sa.orm.subqueryload(User.groups), sa.orm.undefer(User.photo)
         ).filter(User.id != 0)
         listing, users = Listing.from_query(
             query,

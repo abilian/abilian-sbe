@@ -337,7 +337,7 @@ class Group(Principal, db.Model):
     @members_count.expression
     def members_count(cls):
         return (
-            sa.sql.select([sa.sql.func.count(membership.c.user_id)])
+            sa.sql.select(sa.sql.func.count(membership.c.user_id))
             .where(membership.c.group_id == cls.id)
             .group_by(membership.c.group_id)
             .label("members_count")

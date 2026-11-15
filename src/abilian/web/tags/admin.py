@@ -41,7 +41,7 @@ def get_entities_for_reindex(tags):
     tbl = Entity.__table__
     tag_ids = [t.id for t in tags]
     query = (
-        sa.sql.select([tbl.c.entity_type, tbl.c.id])
+        sa.sql.select(tbl.c.entity_type, tbl.c.id)
         .select_from(tbl.join(entity_tag_tbl, entity_tag_tbl.c.entity_id == tbl.c.id))
         .where(entity_tag_tbl.c.tag_id.in_(tag_ids))
     )
@@ -189,9 +189,7 @@ class NSView(View):
         merge_from_ids = [t.id for t in merge_from]
         tbl = entity_tag_tbl
         entities_to_reindex = get_entities_for_reindex(merge_from)
-        already_tagged = sa.sql.select([tbl.c.entity_id]).where(
-            tbl.c.tag_id == target.id
-        )
+        already_tagged = sa.sql.select(tbl.c.entity_id).where(tbl.c.tag_id == target.id)
         del_dup = tbl.delete().where(
             sa.sql.and_(
                 tbl.c.tag_id.in_(merge_from_ids), tbl.c.entity_id.in_(already_tagged)
@@ -262,10 +260,8 @@ class TagPanel(AdminPanel):
     def get(self):
         obj_count = (
             sa.sql.select(
-                [
-                    Tag.ns,
-                    func.count(entity_tag_tbl.c.entity_id).label("obj_count"),
-                ]
+                Tag.ns,
+                func.count(entity_tag_tbl.c.entity_id).label("obj_count"),
             )
             .select_from(Tag.__table__.join(entity_tag_tbl))
             .group_by(Tag.ns)
@@ -274,9 +270,9 @@ class TagPanel(AdminPanel):
 
         ns_query = (
             sa.sql.select(
-                [Tag.ns, func.count(Tag.id).label("tag_count"), obj_count.c.obj_count],
-                from_obj=[Tag.__table__.outerjoin(obj_count, Tag.ns == obj_count.c.ns)],
+                Tag.ns, func.count(Tag.id).label("tag_count"), obj_count.c.obj_count
             )
+            .select_from(Tag.__table__.outerjoin(obj_count, Tag.ns == obj_count.c.ns))
             .group_by(Tag.ns, obj_count.c.obj_count)
             .order_by(Tag.ns)
         )

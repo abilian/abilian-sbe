@@ -207,8 +207,7 @@ def archives():
 def attachments():
     all_threads = (
         Thread.query.filter(Thread.community_id == g.community.id)
-        .options(joinedload("posts"))
-        .options(joinedload("posts.attachments"))
+        .options(joinedload(Thread.posts).joinedload(Post.attachments))
         .order_by(Thread.created_at.desc())
         .all()
     )

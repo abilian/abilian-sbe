@@ -761,7 +761,7 @@ def _trigger_conversion_tasks(session: Session) -> None:
         # this commit is not from the application session
         session is not db.session()
         # inside a sub-transaction: not yet written in DB
-        or session.transaction.nested
+        or session.in_nested_transaction()
     ):
         return
 

@@ -435,7 +435,7 @@ class WhooshIndexService(Service):
         """
         if (
             not self.running
-            or session.transaction.nested  # inside a sub-transaction:
+            or session.in_nested_transaction()  # inside a sub-transaction:
             # not yet written in DB
             or session is not db.session()
         ):

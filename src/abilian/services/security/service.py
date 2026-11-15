@@ -651,7 +651,7 @@ class SecurityService(Service):
             session = db.session()
         query = session.query(RoleAssignment)
         query = query.filter(RoleAssignment.object == obj).options(
-            subqueryload("user.groups")
+            subqueryload(RoleAssignment.user).subqueryload(User.groups)
         )
 
         role_assignments = query.all()
@@ -801,8 +801,8 @@ class SecurityService(Service):
         if user is not None and user.groups:
             principal_filter |= RA.group_id.in_([grp.id for grp in user.groups])
 
-        RA = sa.sql.select([RA], principal_filter).cte()
-        permission_exists = sa.sql.exists([1]).where(
+        RA = sa.sql.select(RA).where(principal_filter).cte()
+        permission_exists = sa.sql.exists().where(
             sa.sql.and_(
                 PA.permission == permission,
                 PA.object_id == id_column,
@@ -815,7 +815,7 @@ class SecurityService(Service):
         # role, but PermissionAssignment is not involved, thus it can match on
         # entities that don't have *any permission assignment*, whereas previous
         # expressions cannot.
-        is_admin = sa.sql.exists([1]).where(
+        is_admin = sa.sql.exists().where(
             sa.sql.and_(
                 RA.c.role == ADMIN,
                 (RA.c.object_id == id_column) | (RA.c.object_id == None),
@@ -826,7 +826,7 @@ class SecurityService(Service):
         filter_expr = permission_exists | is_admin
 
         if user and not user.is_anonymous:
-            is_owner_or_creator = sa.sql.exists([1]).where(
+            is_owner_or_creator = sa.sql.exists().where(
                 sa.sql.and_(
                     PA.permission == permission,
                     PA.object_id == id_column,

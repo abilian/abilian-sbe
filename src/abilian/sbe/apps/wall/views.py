@@ -16,7 +16,7 @@ from sqlalchemy.orm import joinedload
 from abilian.core.application import as_application
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
 from abilian.sbe.apps.documents.models import Document, icon_for
-from abilian.sbe.apps.forum.models import Thread
+from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.services import get_service
 from abilian.web import url_for
 from abilian.web.action import actions
@@ -83,8 +83,7 @@ class Attachment:
 def get_attachments_from_forum(community):
     all_threads = (
         Thread.query.filter(Thread.community_id == community.id)
-        .options(joinedload("posts"))
-        .options(joinedload("posts.attachments"))
+        .options(joinedload(Thread.posts).joinedload(Post.attachments))
         .order_by(Thread.created_at.desc())
         .all()
     )

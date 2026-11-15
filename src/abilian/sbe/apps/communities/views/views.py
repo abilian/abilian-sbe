@@ -371,7 +371,7 @@ def _members_query() -> UserQuery:
         "last_activity_date"
     )
     memberships = (
-        User.query.options(sa.orm.undefer("photo"))
+        User.query.options(sa.orm.undefer(User.photo))
         .join(Membership)
         .outerjoin(
             ActivityEntry,
