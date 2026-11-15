@@ -15,6 +15,7 @@ from sqlalchemy.sql import functions as func
 from abilian.core.entities import Entity
 from abilian.core.extensions import db
 from abilian.core.models.tag import Tag, entity_tag_tbl
+from abilian.core.sqlalchemy.session import session_of
 from abilian.i18n import _, _l, _n
 from abilian.services import get_service
 from abilian.services.indexing.service import index_update
@@ -236,7 +237,7 @@ class TagEdit(BaseTagView, ObjectEdit[Tag, TagForm]):
     _entities_to_reindex: list[Entity] = []
 
     def after_populate_obj(self) -> None:
-        session = sa.orm.object_session(self.obj)
+        session = session_of(self.obj)
         self.has_changes = self.obj in (session.dirty | session.deleted)
         if self.has_changes:
             # since the tag may be in pending-delete, we must collect them

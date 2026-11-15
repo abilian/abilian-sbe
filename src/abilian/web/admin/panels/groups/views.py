@@ -7,6 +7,7 @@ import sqlalchemy.orm
 from flask import render_template_string, request
 
 from abilian.core.models.subjects import Group, User
+from abilian.core.sqlalchemy.session import session_of
 from abilian.i18n import _l
 from abilian.services import get_security_service
 from abilian.services.security.models import Role
@@ -112,14 +113,14 @@ class GroupEdit(GroupBase, views.ObjectEdit[Group, GroupAdminForm]):
         user_id = int(request.form["user"])
         user = User.query.options(sa.orm.joinedload(User.groups)).get(user_id)
         self.obj.members.add(user)
-        sa.orm.object_session(self.obj).commit()
+        session_of(self.obj).commit()
         return self.redirect_to_view()
 
     def remove_user(self, *args, **kwargs):
         user_id = int(request.form["user"])
         user = User.query.options(sa.orm.joinedload(User.groups)).get(user_id)
         self.obj.members.discard(user)
-        sa.orm.object_session(self.obj).commit()
+        session_of(self.obj).commit()
         return self.redirect_to_view()
 
 

@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import sqlalchemy as sa
-import sqlalchemy.orm
-
+from abilian.core.sqlalchemy.session import session_of
 from abilian.services.security import READ, Permission, security
 
 from .models import BaseContent, CmisObject, Document, Folder
@@ -134,7 +132,7 @@ class ContentRepository:
         obj.parent = dest_folder
         # Leaving its old folder expunges an object not yet flushed
         # (delete-orphan), and a backref no longer adds it back: add it.
-        sa.orm.object_session(dest_folder).add(obj)
+        session_of(dest_folder).add(obj)
         if dest_title:
             obj.title = dest_title
 
@@ -146,7 +144,7 @@ class ContentRepository:
             msg = "Can't delete root folder."
             raise Exception(msg)
 
-        session = sa.orm.object_session(obj)
+        session = session_of(obj)
         obj.__path_before_delete = obj.path  # for audit log.
         parent = obj.parent
         collection = parent.subfolders if obj.is_folder else parent.documents

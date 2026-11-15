@@ -9,13 +9,13 @@ from datetime import date, datetime, timedelta
 from itertools import groupby
 from urllib.parse import quote
 
-import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, render_template, request
 from flask_babel import format_date
 from flask_login import current_user
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
+from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
@@ -311,7 +311,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
         obj_meta = self.new_post.meta.setdefault("abilian.sbe.forum", {})
         obj_meta["origin"] = "web"
         obj_meta["send_by_email"] = self.send_by_email
-        session = sa.orm.object_session(self.thread)
+        session = session_of(self.thread)
         uploads = current_app.extensions["uploads"]
 
         for handle in request.form.getlist("attachments"):
@@ -344,7 +344,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
             # note: message_id is of type str
             meta["send_post_by_email_task"] = message.message_id
             self.new_post.meta.changed()
-            session = sa.orm.object_session(self.new_post)
+            session = session_of(self.new_post)
             session.commit()
 
     @property
@@ -378,7 +378,7 @@ class ThreadPostCreate(ThreadCreate):
 
     def after_populate_obj(self) -> None:
         super().after_populate_obj()
-        session = sa.orm.object_session(self.obj)
+        session = session_of(self.obj)
         session.expunge(self.obj)
         self.obj = self.new_post
 
@@ -426,7 +426,7 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView[Thread]):
     def post(self, action=None):
         is_closed = action == "close"
         self.obj.closed = is_closed
-        sa.orm.object_session(self.obj).commit()
+        session_of(self.obj).commit()
 
         msg = self.CLOSED_MSG if is_closed else self.REOPENED_MSG
         flash(str(msg))
@@ -479,7 +479,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
         del self.form["attachments"]
 
     def after_populate_obj(self) -> None:
-        session = sa.orm.object_session(self.obj)
+        session = session_of(self.obj)
         uploads = current_app.extensions["uploads"]
         self.obj.body_html = self.message_body
         obj_meta = self.obj.meta.setdefault("abilian.sbe.forum", {})

@@ -7,8 +7,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import quote
 
-import sqlalchemy as sa
-import sqlalchemy.orm
 from flask import (
     current_app,
     flash,
@@ -25,6 +23,7 @@ from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.core.extensions import db, mail
 from abilian.core.signals import activity
+from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import unwrap
 from abilian.i18n import _, render_template_i18n
 from abilian.sbe.apps.communities.common import object_viewers
@@ -215,7 +214,7 @@ def checkin_checkout(doc_id):
         msg = f"Unknown action: {action!r}"
         raise BadRequest(msg)
 
-    session = sa.orm.object_session(doc)
+    session = session_of(doc)
 
     if action in ("lock", "checkout"):
         doc.lock = current_user
