@@ -22,6 +22,7 @@ from abilian.sbe.apps.communities.models import (
     community_content,
 )
 from abilian.sbe.apps.documents.models import Folder
+from abilian.sbe.apps.documents.repository import content_repository
 from abilian.services import index_service, security_service
 from tests.util import login
 
@@ -266,3 +267,30 @@ def test_membership_repr(community: Community, db: SQLAlchemy) -> None:
     membership = community.memberships[0]
 
     assert repr(membership).startswith("<Membership user=")
+
+
+def test_a_new_community_folder_is_under_the_root(db: SQLAlchemy) -> None:
+    root = content_repository.root_folder
+    db.session.add(root)
+    db.session.commit()
+
+    community = Community(name="Rooted")
+    db.session.add(community)
+    db.session.commit()
+    db.session.expire_all()
+
+    assert community.folder.parent == content_repository.root_folder
+    assert community.folder in content_repository.root_folder.subfolders
+
+
+def test_the_first_community_saves_the_root_folder(db: SQLAlchemy) -> None:
+    assert Folder.query.count() == 0
+
+    community = Community(name="First")
+    db.session.add(community)
+    db.session.commit()
+    db.session.expire_all()
+
+    root = content_repository.root_folder
+    assert root.id is not None
+    assert community.folder.parent == root

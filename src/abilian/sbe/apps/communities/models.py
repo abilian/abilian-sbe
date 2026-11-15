@@ -210,9 +210,16 @@ class Community(Entity):
                 # subfolder, we don't want empty names on folders since they must be
                 # unique among siblings
                 name = f"{self.__class__.__name__}_{self.id!s}-{time.asctime()}"
-            # Given its parent rather than appended to the root's subfolders: the
-            # folder then joins the session with the community, not before it.
-            self.folder = Folder(title=name, parent=content_repository.root_folder)
+            root = content_repository.root_folder
+            folder = Folder(title=name)
+            if sa.inspect(root).persistent:
+                # By key: through the relationship, the folder would be in the
+                # root's subfolders now, whether the community is saved or not.
+                folder._parent_id = root.id
+            else:
+                # A new database: the root is saved along with the folder.
+                folder.parent = root
+            self.folder = folder
             # if not self.group:
             #   self.group = Group(name=self.name)
 

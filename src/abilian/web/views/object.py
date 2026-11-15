@@ -495,6 +495,13 @@ class ObjectCreate[M: ViewedModel, F: Form](ObjectEdit[M, F]):
         self.obj = self.Model()
         return args, kwargs
 
+    def get(self, *args, **kwargs) -> ResponseReturnValue:
+        # The new object is not saved yet, but it hangs off saved ones (its
+        # community, its parent folder). A flush while the form renders would
+        # find it in their collections and refuse to save it.
+        with db.session.no_autoflush:
+            return super().get(*args, **kwargs)
+
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         if request.method == "GET":

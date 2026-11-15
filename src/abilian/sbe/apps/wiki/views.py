@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
-import sqlalchemy as sa
 from flask import (
     current_app,
     flash,
@@ -291,14 +290,14 @@ class PageCreate(PageEdit, ObjectCreate[WikiPage, WikiPageForm]):
     def init_object(
         self, args: tuple[Any], kwargs: dict[str, Any]
     ) -> tuple[tuple[Any], dict[str, Any]]:
-        args, kwargs = ObjectCreate.init_object(self, args, kwargs)
+        return ObjectCreate.init_object(self, args, kwargs)
+
+    def before_populate_obj(self) -> None:
+        # Attached to its community only now, when it is saved: in the
+        # community's collection, an unsaved page would stay there for the rest
+        # of the session.
         self.obj.community = g.community
-        session = sa.orm.object_session(self.obj)
-        if session:
-            sa.orm.session.make_transient(self.obj)
-            for rev in self.obj.revisions:
-                sa.orm.session.make_transient(rev)
-        return args, kwargs
+        super().before_populate_obj()
 
 
 route("/new")(PageCreate.as_view("page_new", view_endpoint=".page"))
