@@ -66,7 +66,7 @@ def users() -> str:
 @social.route("/users/<int:user_id>")
 @default_view(social, User, "user_id")
 def user(user_id: int) -> str:
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
 
     # FIXME: use user profiles
     view_form = UserProfileViewForm(obj=user)
@@ -135,7 +135,7 @@ social.route("/users/<int:user_id>/edit")(UserProfileEdit.as_view("user_edit"))
 
 @social.route("/users/<int:user_id>", methods=["POST"])
 def user_post(user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     action = request.form.get("action")
     return_url = request.form.get("return_url")
 

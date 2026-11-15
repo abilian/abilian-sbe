@@ -64,14 +64,14 @@ def is_admin(group):
 @social.route("/groups/<int:group_id>")
 @default_view(social, Group, "group_id")
 def group_home(group_id):
-    group = Group.query.get(group_id)
+    group = Group.query.get_or_404(group_id)
     ctx = {"group": group, "is_admin": is_admin(group)}
     return render_template("social/group.html", **ctx)
 
 
 @social.route("/groups/<int:group_id>/json")
 def group_json(group_id):
-    members = Group.query.get(group_id).members
+    members = Group.query.get_or_404(group_id).members
     q = request.args.get("q", "").lower()
     if q:
         members = [
@@ -91,7 +91,7 @@ def group_json(group_id):
 @social.route("/groups/<int:group_id>", methods=["POST"])
 @csrf.protect
 def group_post(group_id):
-    group = Group.query.get(group_id)
+    group = Group.query.get_or_404(group_id)
     action = request.form.get("action")
     return_url = request.form.get("return_url")
     user_id = request.form.get("user", "").strip()
@@ -121,7 +121,7 @@ def group_post(group_id):
             flash(_("Error: No user selected"), "error")
             return redirect(url_for(".group_home", group_id=group_id))
 
-        user = User.query.get(user_id)
+        user = User.query.get_or_404(user_id)
 
         match action:
             case "add":
