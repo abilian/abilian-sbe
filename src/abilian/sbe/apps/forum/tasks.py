@@ -475,6 +475,13 @@ def process_email(message: email.message.Message) -> bool:
     with current_app.test_request_context("/process_email", headers=rq_headers):
         g.user = User.query.get(user_id)
         thread = Thread.query.get(thread_id)
+        if thread is None:
+            # Deleted since the notification went out: retrying cannot help.
+            logger.warning(
+                "Reply to a thread that no longer exists: {thread_id}",
+                thread_id=thread_id,
+            )
+            return False
         community = thread.community
         # FIXME: check membership, send back an informative email in case of an
         # error

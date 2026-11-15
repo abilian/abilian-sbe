@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import email
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, cast
 from unittest import mock
@@ -16,6 +17,7 @@ from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.forum.tasks import (
     build_reply_email_address,
     extract_email_destination,
+    process_email,
     send_post_by_email,
 )
 from abilian.sbe.apps.forum.views import ThreadCreate
@@ -294,3 +296,15 @@ def test_parse_forum_email(mock_process_email, mock_email) -> None:
     do_inject_email()
     assert mock_email.called
     assert not mock_process_email.delay.called
+
+
+def test_a_reply_to_a_deleted_thread_is_dropped(app, db, community1) -> None:
+    """The reply's thread no longer exists: dropped, not retried."""
+    post = mock.Mock(id=1, thread_id=999999)
+    message = email.message_from_string(get_string_from_file("notification.email"))
+    with app.test_request_context():
+        address = build_reply_email_address(
+            "test", post, community1.test_user, "example.com"
+        )
+        message.replace_header("To", address)
+        assert process_email(message) is False
