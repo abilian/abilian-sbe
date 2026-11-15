@@ -11,6 +11,7 @@ import sqlalchemy.event
 import sqlalchemy.orm
 from flask_sqlalchemy.query import Query
 from sqlalchemy import Column
+from sqlalchemy.orm.decl_api import DeclarativeAttributeIntercept
 
 from abilian.core.extensions import db
 from abilian.core.util import slugify
@@ -18,7 +19,8 @@ from abilian.core.util import slugify
 if TYPE_CHECKING:
     from flask_sqlalchemy.model import Model
 
-_BaseMeta = db.Model.__class__
+# The metaclass of `db.Model`, built on a `DeclarativeBase`.
+_BaseMeta = DeclarativeAttributeIntercept
 
 
 class VocabularyQuery(Query):

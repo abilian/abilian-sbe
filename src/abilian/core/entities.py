@@ -16,6 +16,7 @@ from flask import current_app
 from sqlalchemy import event
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import Mapped, Mapper, Session, mapped_column, mapper
+from sqlalchemy.orm.decl_api import DeclarativeAttributeIntercept
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, String, UnicodeText
 
@@ -160,7 +161,8 @@ class _EntityInherit:
         }
 
 
-BaseMeta = db.Model.__class__
+# The metaclass of `db.Model`, built on a `DeclarativeBase`.
+BaseMeta = DeclarativeAttributeIntercept
 
 
 class EntityQuery(db.Model.query_class):
