@@ -11,15 +11,13 @@ from abilian.core.entities import Entity
 from abilian.core.sqlalchemy import UUID, JSONDict, JSONList
 
 if TYPE_CHECKING:
-    from sqlalchemy.orm import Query, Session
+    from sqlalchemy.orm import Session
 
 
 class DummyModel2(Entity):
     list_attr = Column(JSONList())
     dict_attr = Column(JSONDict())
     uuid = Column(UUID())
-
-    query: Query
 
 
 def test_list_attribute(session: Session) -> None:

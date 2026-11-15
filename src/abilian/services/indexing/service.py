@@ -549,7 +549,7 @@ def index_update(index: str, items: list[tuple[str, str, int, dict]]) -> None:
     adapted = service.adapted
 
     # session = safe_session()
-    session = Session(bind=db.session.get_bind(None, None))
+    session = Session(bind=db.session.get_bind())
     updated = set()
     writer = AsyncWriter(index)
     try:

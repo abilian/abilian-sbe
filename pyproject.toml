@@ -26,8 +26,8 @@ dependencies = [
     "itsdangerous>=2.1.2",
     "pytz",
     # Persistence
-    "sqlalchemy>=1.4.35,<2.0",
-    "flask-sqlalchemy>=3.0.1,<3.1",
+    "sqlalchemy>=2.0,<2.1",
+    "flask-sqlalchemy>=3.1,<3.2",
     "pymysql>=1.1.0,<2.0.0",
     # Forms
     "flask-wtf>=1.2.0",
@@ -162,9 +162,7 @@ minversion = "6.0"
 filterwarnings = [
     'ignore::DeprecationWarning',
     'ignore::sqlalchemy.exc.SAWarning',
-    # Later entries win. What SQLAlchemy 2.0 removes is an error, and so is an
-    # object left out of the session, which is never saved.
-    'error::sqlalchemy.exc.RemovedIn20Warning',
+    # Later entries win. An object left out of the session is never saved.
     'error:Object of type .* not in session:sqlalchemy.exc.SAWarning',
 ]
 addopts = "-ra -q --tb=short"

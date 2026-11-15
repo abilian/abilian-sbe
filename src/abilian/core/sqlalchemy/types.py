@@ -228,7 +228,9 @@ class UUID(sa.types.TypeDecorator):
 
     def load_dialect_impl(self, dialect: Dialect) -> CHAR:
         if dialect.name == "postgresql":
-            return dialect.type_descriptor(sa.dialects.postgresql.UUID())
+            # Strings in and out, as this type converts them itself: SQLAlchemy
+            # 2.0's PostgreSQL UUID would hand back uuid.UUID objects.
+            return dialect.type_descriptor(sa.dialects.postgresql.UUID(as_uuid=False))
         return dialect.type_descriptor(sa.types.CHAR(32))
 
     def process_bind_param(

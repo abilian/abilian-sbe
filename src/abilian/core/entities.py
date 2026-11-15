@@ -15,7 +15,7 @@ import sqlalchemy as sa
 from flask import current_app
 from sqlalchemy import event
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import Mapper, Session, mapper
+from sqlalchemy.orm import Mapped, Mapper, Session, mapped_column, mapper
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, String, UnicodeText
 
@@ -141,11 +141,11 @@ class _EntityInherit:
     #     return cls.__name__.lower()
 
     @declared_attr
-    def id(cls) -> Column:
+    def id(cls) -> Mapped[int]:
         # One name per table: MariaDB/MySQL require foreign key names to be
         # unique in the whole database, not just in their table.
         fk_name = f"fk_{cls.__tablename__}_entity_id"
-        return Column(
+        return mapped_column(
             Integer,
             ForeignKey("entity.id", use_alter=True, name=fk_name),
             primary_key=True,

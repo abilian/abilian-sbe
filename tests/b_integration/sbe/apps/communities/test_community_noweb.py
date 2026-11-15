@@ -182,8 +182,7 @@ def test_community_content_decorator(community: Community, db: SQLAlchemy) -> No
     sa.orm.configure_mappers()
     conn = db.session.connection()
     for table in sa.inspect(CommunityContent).tables:
-        if not table.exists(conn):
-            table.create(conn)
+        table.create(conn, checkfirst=True)
 
     cc = CommunityContent(name="my content", community=community)
     db.session.add(cc)
