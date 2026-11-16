@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from itertools import count
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlsplit
 
 import jinja2
 import sqlalchemy as sa
@@ -27,6 +28,8 @@ from .extensions import init_extensions, init_sentry
 from .logging import init_logging
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from abilian.app import Application
 
 
@@ -56,10 +59,9 @@ def setup_app(app: Application, plugins=None) -> None:
 
     if not app.debug:
         # CSP
-        csp = app.config.get("CONTENT_SECURITY_POLICY", DEFAULT_CSP_POLICY)
         Talisman(
             app,
-            content_security_policy=csp,
+            content_security_policy=content_security_policy(app.config),
             force_https=app.config.get("TALISMAN_FORCE_HTTPS", True),
         )
 
@@ -102,6 +104,21 @@ def setup_app(app: Application, plugins=None) -> None:
 def connect_signals() -> None:
     appcontext_pushed.connect(install_id_generator)
     request_started.connect(setup_nav_and_breadcrumbs)
+
+
+def content_security_policy(config: Mapping[str, Any]) -> dict[str, str]:
+    """The configured policy, letting the browser report to Sentry if it does.
+
+    `default-src 'self'` also covers `connect-src`, so the reports the Sentry
+    SDK sends to the DSN's host would be refused.
+    """
+    policy = dict(config.get("CONTENT_SECURITY_POLICY", DEFAULT_CSP_POLICY))
+    dsn = config.get("SENTRY_DSN")
+    if dsn and config.get("SENTRY_SDK_URL"):
+        url = urlsplit(dsn)
+        origin = f"{url.scheme}://{url.netloc.rpartition('@')[2]}"
+        policy["connect-src"] = f"{policy.get('connect-src', "'self'")} {origin}"
+    return policy
 
 
 # TODO: remove
