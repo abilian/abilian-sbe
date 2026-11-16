@@ -36,7 +36,9 @@ if TYPE_CHECKING:
 
 @fixture
 def group(db: SQLAlchemy) -> Group:
-    g = Group(name="A group")
+    # Public, so that what is checked here is the admin rule: who may see a
+    # private group is `test_private_groups.py`'s business.
+    g = Group(name="A group", public=True)
     db.session.add(g)
     db.session.flush()
     return g

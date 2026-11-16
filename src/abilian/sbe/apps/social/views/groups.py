@@ -16,7 +16,7 @@ from flask import (
     url_for,
 )
 from flask_babel import gettext as _
-from werkzeug.exceptions import Forbidden, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated
@@ -41,11 +41,11 @@ DEFAULT_GROUP_MUGSHOT = (
 def groups(user: User) -> str:
     tab = request.args.get("tab", "all_groups")
     if tab == "all_groups":
-        groups = Group.query.order_by(Group.name).all()
-        if not is_site_admin(user):
-            groups = [
-                group for group in groups if group.public or user in group.members
-            ]
+        groups = [
+            group
+            for group in Group.query.order_by(Group.name).all()
+            if can_see(user, group)
+        ]
     else:
         groups = sorted(user.groups, key=lambda group: group.name)
 
@@ -63,18 +63,34 @@ def is_admin(user: User, group: Group) -> bool:
     return "security" in current_app.extensions and is_site_admin(user)
 
 
+def can_see(user: User, group: Group) -> bool:
+    """May `user` see `group`? Anyone a public one; a private one, only its
+    members and administrators."""
+    return group.public or user in group.members or is_admin(user, group)
+
+
+def get_visible_group(user: User, group_id: int) -> Group:
+    """The group, or a 404 if `user` may not see it: the group list does not
+    show it to them either."""
+    group = Group.query.get_or_404(group_id)
+    if not can_see(user, group):
+        raise NotFound
+    return group
+
+
 @social.route("/groups/<int:group_id>")
 @default_view(social, Group, "group_id")
 @authenticated
 def group_home(user: User, group_id: int) -> str:
-    group = Group.query.get_or_404(group_id)
+    group = get_visible_group(user, group_id)
     ctx = {"group": group, "is_admin": is_admin(user, group)}
     return render_template("social/group.html", **ctx)
 
 
 @social.route("/groups/<int:group_id>/json")
-def group_json(group_id):
-    members = Group.query.get_or_404(group_id).members
+@authenticated
+def group_json(user: User, group_id: int) -> Response:
+    members = get_visible_group(user, group_id).members
     q = request.args.get("q", "").lower()
     if q:
         members = [
@@ -95,7 +111,7 @@ def group_json(group_id):
 @csrf.protect
 @authenticated
 def group_post(user: User, group_id: int) -> Response:
-    group = Group.query.get_or_404(group_id)
+    group = get_visible_group(user, group_id)
     action = request.form.get("action")
     return_url = request.form.get("return_url")
     user_id = request.form.get("user", "").strip()
@@ -105,6 +121,10 @@ def group_post(user: User, group_id: int) -> Response:
     if action not in {"join", "leave"} | membership_actions:
         msg = f"Unknown action: {action}"
         raise ValueError(msg)
+
+    # Members of a private group are added by its administrators.
+    if action == "join" and not group.public:
+        raise Forbidden
 
     # Everything but join and leave writes somebody else's membership, and
     # add-admin writes who may do that. This was an `assert`, which `python -O`
@@ -149,16 +169,14 @@ def group_post(user: User, group_id: int) -> Response:
 
 
 @social.route("/groups/<int:group_id>/mugshot")
-def group_mugshot(group_id):
+@authenticated
+def group_mugshot(user: User, group_id: int) -> Response:
     # TODO: duplicated code (with user_mugshot). Extract common method.
-    size = int(request.args.get("s", 55))
+    size = request.args.get("s", 55, type=int)
     if size > 500:
         msg = f"Error, size = {size:d}"
-        raise ValueError(msg)
-    group = Group.query.get(group_id)
-
-    if not group:
-        raise NotFound
+        raise BadRequest(msg)
+    group = get_visible_group(user, group_id)
 
     if group.photo:
         data = group.photo
