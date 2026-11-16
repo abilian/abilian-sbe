@@ -13,9 +13,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from flask import url_for
-
 from abilian.core.models.subjects import Group
+
+from .sweep import request_every_route
 
 if TYPE_CHECKING:
     from flask.testing import FlaskClient
@@ -43,8 +43,6 @@ PUBLIC_ENDPOINTS = frozenset(
     }
 )
 
-IGNORED_METHODS = frozenset({"HEAD", "OPTIONS"})
-
 
 def _is_public(endpoint: str) -> bool:
     return (
@@ -69,24 +67,16 @@ def test_every_private_route_refuses_an_anonymous_visitor(
         "community_id": community.slug,
         "user_id": user.id,
         "group_id": group.id,
-        "stream_name": "all",
         # `forum/1` would be a thread's URL, not the forum's filtered list.
         "filter": "week",
     }
 
     not_refused = {}
-    for rule in app.url_map.iter_rules():
-        if _is_public(rule.endpoint):
-            continue
-        url = url_for(
-            rule.endpoint, **{arg: values.get(arg, 1) for arg in rule.arguments}
+    for request, response in request_every_route(app, client, values, _is_public):
+        sent_to_login = response.status_code == 302 and "/login" in (
+            response.location or ""
         )
-        for method in sorted(rule.methods - IGNORED_METHODS):
-            response = client.open(url, method=method)
-            sent_to_login = response.status_code == 302 and "/login" in (
-                response.location or ""
-            )
-            if not (sent_to_login or response.status_code in {401, 403}):
-                not_refused[f"{method} {url}"] = response.status_code
+        if not (sent_to_login or response.status_code in {401, 403}):
+            not_refused[request] = response.status_code
 
     assert not not_refused, f"answered an anonymous visitor: {not_refused}"
