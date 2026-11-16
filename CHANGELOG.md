@@ -68,6 +68,8 @@ Models declare their columns as `Mapped[...]`, and `db.Model` is built on a type
 - An email reply to a deleted forum thread raised, and was retried twenty times; it is now logged and dropped.
 - Logging in to an account with an empty password column was a 500.
 - The query for a community's last views failed on PostgreSQL.
+- Uploading or deleting a wiki attachment ended on the page's viewers list instead of the page.
+- With Sentry configured for the browser, the Content Security Policy refused the reports sent to the DSN's host.
 
 ## [1.2.0] - 2026-11-15
 
