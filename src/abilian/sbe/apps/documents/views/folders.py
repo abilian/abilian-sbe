@@ -1080,7 +1080,7 @@ def descendants_view(user: User, folder_id):
         ]
     )
 
-    results = index_service.search("", filter=filters, limit=None)
+    results = index_service.search("", filter=filters, limit=None, user=user)
     by_path = {}
     owner_ids = set()
     for hit in results:

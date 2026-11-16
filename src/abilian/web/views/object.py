@@ -17,6 +17,7 @@ from wtforms import Form
 
 from abilian.core.entities import ValidationError
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.signals import activity
 from abilian.i18n import _, _l
 from abilian.services import get_service
@@ -668,7 +669,7 @@ class JSONWhooshSearch(JSONBaseSearch):
     def get_results(self, q, *args, **kwargs):
         svc = get_service("indexing")
         search_kwargs = {"limit": 50, "Models": (self.Model,)}
-        results = svc.search(q, **search_kwargs)
+        results = svc.search(q, user=authenticated_user(), **search_kwargs)
 
         itemkey = None
         try:

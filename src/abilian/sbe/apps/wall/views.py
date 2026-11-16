@@ -53,7 +53,8 @@ def index(user: User) -> str:
 
 
 @route("/files")
-def files():
+@authenticated
+def files(user: User):
     community = g.community._model
     actions.context["object"] = community
 
@@ -62,7 +63,7 @@ def files():
         all_files += get_attachments_from_forum(community)
 
     if community.has_documents:
-        all_files += get_attachments_from_dms(community)
+        all_files += get_attachments_from_dms(user, community)
 
     all_files = sorted(all_files, key=lambda doc: doc.date)
     all_files = islice(reversed(all_files), 0, 50)
@@ -120,7 +121,7 @@ def get_attachments_from_forum(community):
 
 
 # FIXME: significant performance issues here, needs major refactoring
-def get_attachments_from_dms(community):
+def get_attachments_from_dms(user: User, community):
     index_service = get_service("indexing")
     filters = wq.And(
         [
@@ -129,7 +130,9 @@ def get_attachments_from_dms(community):
         ]
     )
     sortedby = whoosh.sorting.FieldFacet("created_at", reverse=True)
-    documents = index_service.search("", filter=filters, sortedby=sortedby, limit=50)
+    documents = index_service.search(
+        "", filter=filters, sortedby=sortedby, limit=50, user=user
+    )
 
     attachments = []
     for doc in documents:

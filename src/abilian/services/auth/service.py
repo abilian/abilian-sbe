@@ -6,11 +6,16 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 
 from flask import current_app, g, redirect, request, url_for
-from flask_login import current_user, login_user, user_logged_in, user_logged_out
+from flask_login import login_user, user_logged_in, user_logged_out
 from loguru import logger
 from werkzeug.exceptions import Forbidden
 
 from abilian.core.extensions import db, login_manager
+from abilian.core.extensions.login import (
+    AnonymousUser,
+    authenticated_user,
+    current_user,
+)
 from abilian.core.models.subjects import User
 from abilian.core.signals import user_loaded
 from abilian.core.util import unwrap
@@ -43,13 +48,13 @@ def is_authenticated(context: dict[str, bool]) -> bool:
 def _user_photo_endpoint() -> str:
     from abilian.web.views import images  # lazy import: avoid circular import
 
-    return images.user_url_args(current_user, 16)[0]
+    return images.user_url_args(authenticated_user(), 16)[0]
 
 
 def _user_photo_icon_args(icon: DynamicIcon, url_args: dict) -> dict[str, Any]:
     from abilian.web.views import images  # lazy import avoid circular import
 
-    return images.user_url_args(current_user, max(icon.width, icon.height))[1]
+    return images.user_url_args(authenticated_user(), max(icon.width, icon.height))[1]
 
 
 def is_admin(context: dict[str, bool]) -> bool:
@@ -72,7 +77,8 @@ def _admin_endpoint(context: dict[str, bool]) -> Endpoint:
 user_menu = NavGroup(
     "user",
     "authenticated",
-    title=lambda c: current_user.name,
+    # Shown to logged-in users only (`condition`), which is when these run.
+    title=lambda c: authenticated_user().name,
     icon=DynamicIcon(
         endpoint=_user_photo_endpoint,
         css="avatar",
@@ -257,7 +263,7 @@ class AuthService(Service):
 
     def update_user_session_data(self) -> None:
         user = current_user
-        if current_user.is_anonymous:
+        if isinstance(user, AnonymousUser):
             return
 
         # Update last_active every 60 seconds only so as to not stress
@@ -281,7 +287,7 @@ def refresh_login_session(user: User) -> None:
 
     if from_now > timedelta(hours=1):
         session.ended_at = session.last_active_at
-        session = LoginSession.new()
+        session = LoginSession.new(user)
         db.session.add(session)
         db.session.commit()
 

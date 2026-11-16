@@ -370,7 +370,7 @@ def send_mail(subject: str, recipient: str, template: str, **context: Any) -> No
 #
 @user_logged_in.connect
 def log_session_start(app: Flask, user: User) -> None:
-    session = LoginSession.new()
+    session = LoginSession.new(user)
     db.session.add(session)
     db.session.commit()
 

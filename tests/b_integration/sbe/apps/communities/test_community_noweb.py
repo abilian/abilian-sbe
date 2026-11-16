@@ -223,17 +223,19 @@ def test_community_indexed(app: Application, db: SQLAlchemy, monkeypatch) -> Non
     db.session.commit()
 
     with login(user_no_community):
-        res = index_service.search("community", object_types=obj_types)
+        res = index_service.search(
+            "community", object_types=obj_types, user=user_no_community
+        )
         assert len(res) == 0
 
     with login(user):
-        res = index_service.search("community", object_types=obj_types)
+        res = index_service.search("community", object_types=obj_types, user=user)
         assert len(res) == 1
         hit = res[0]
         assert hit["object_key"] == community1.object_key
 
     with login(user_c2):
-        res = index_service.search("community", object_types=obj_types)
+        res = index_service.search("community", object_types=obj_types, user=user_c2)
         assert len(res) == 1
         hit = res[0]
         assert hit["object_key"] == community2.object_key
@@ -254,7 +256,7 @@ def test_default_view_kw_with_hit(
     obj_types = (Community.entity_type,)
 
     with login(user):
-        hit = index_service.search("community", object_types=obj_types)[0]
+        hit = index_service.search("community", object_types=obj_types, user=user)[0]
         kw = views.default_view_kw({}, hit, hit["object_type"], hit["id"])
         assert kw == {"community_id": community.slug}
 

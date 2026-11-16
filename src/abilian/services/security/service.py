@@ -463,7 +463,7 @@ class SecurityService(Service):
 
     def has_role(
         self,
-        principal: Principal | Role | None,
+        principal: Principal | Role | AnonymousUser | None,
         role: Collection[Role] | Role | str,
         object: Model | None = None,
     ) -> bool:

@@ -125,18 +125,18 @@ def test_wiki_indexed(
 
     obj_types = (WikiPage.entity_type,)
     with client_login(client, user3):
-        res = svc.search("community", object_types=obj_types)
+        res = svc.search("community", object_types=obj_types, user=user3)
         assert len(res) == 0
 
     with client_login(client, user1):
-        res = svc.search("community", object_types=obj_types)
+        res = svc.search("community", object_types=obj_types, user=user1)
         assert len(res) == 1
 
         hit = res[0]
         assert hit["object_key"] == page1.object_key
 
     with client_login(client, user2):
-        res = svc.search("community", object_types=obj_types)
+        res = svc.search("community", object_types=obj_types, user=user2)
         assert len(res) == 1
 
         hit = res[0]

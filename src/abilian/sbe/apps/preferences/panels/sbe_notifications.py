@@ -12,6 +12,7 @@ from werkzeug.exceptions import Forbidden
 from wtforms import BooleanField
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated_user
 from abilian.i18n import _, _l
 from abilian.services import get_service
 from abilian.services.preferences.panel import PreferencePanel
@@ -44,7 +45,7 @@ class SbeNotificationsPanel(PreferencePanel):
         preferences = cast("PreferenceService", get_service("preferences"))
         # preferences = app.services["preferences"]
         data = {}
-        prefs = preferences.get_preferences()
+        prefs = preferences.get_preferences(authenticated_user())
 
         for k, v in prefs.items():
             if k.startswith("sbe:notifications:"):
@@ -69,7 +70,7 @@ class SbeNotificationsPanel(PreferencePanel):
                     continue
                 key = f"sbe:notifications:{field_name}"
                 value = field.data
-                preferences.set_preferences(**{key: value})
+                preferences.set_preferences(authenticated_user(), **{key: value})
 
             db.session.commit()
             flash(_("Preferences saved."), "info")

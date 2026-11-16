@@ -7,6 +7,7 @@ from __future__ import annotations
 import operator
 from collections import OrderedDict
 from functools import partial
+from typing import TYPE_CHECKING
 
 import whoosh
 import whoosh.highlight
@@ -14,6 +15,7 @@ import whoosh.searching
 import whoosh.sorting
 from flask import current_app, g, render_template, request, url_for
 
+from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.i18n import _
 from abilian.services import get_service
 from abilian.services.security import AUTHENTICATED
@@ -21,6 +23,9 @@ from abilian.web import views
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
+
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
 
 BOOTSTRAP_MARKUP_HIGHLIGHTER = whoosh.highlight.HtmlFormatter(
     tagname="mark", classname="", termclass="term-", between="[…]"
@@ -97,7 +102,8 @@ _COUNT_OBJECT_TYPE_FACET = whoosh.sorting.FieldFacet(
 
 
 @route("")
-def search_main(q="", page=1):
+@authenticated
+def search_main(user: User, q="", page=1):
     svc = get_service("indexing")
     q = q.strip()
     page = int(request.args.get("page", page))
@@ -105,7 +111,7 @@ def search_main(q="", page=1):
     page_url_kw = OrderedDict(q=q)
 
     search_kwargs["groupedby"] = _COUNT_OBJECT_TYPE_FACET
-    results = svc.search(q, **search_kwargs)
+    results = svc.search(q, user=user, **search_kwargs)
 
     filtered_by_type = sorted(request.args.getlist("object_type"))
     if filtered_by_type:
@@ -136,7 +142,9 @@ def search_main(q="", page=1):
 
     if filtered_by_type:
         # FIXME: sanitize input
-        results = svc.search(q, object_types=filtered_by_type, **search_kwargs)
+        results = svc.search(
+            q, object_types=filtered_by_type, user=user, **search_kwargs
+        )
 
     results.formatter = BOOTSTRAP_MARKUP_HIGHLIGHTER
     results.fragmenter = RESULTS_FRAGMENTER
@@ -187,7 +195,7 @@ class Live(views.JSONView):
         svc = get_service("indexing")
         url_for_hit = svc.app_state.url_for_hit
         search_kwargs = {"facet_by_type": True}
-        results = svc.search(q, **search_kwargs)
+        results = svc.search(q, user=authenticated_user(), **search_kwargs)
         datasets = {}
 
         for typename, docs in results.items():

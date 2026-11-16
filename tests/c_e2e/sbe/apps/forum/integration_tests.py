@@ -80,13 +80,17 @@ def test_thread_indexed(
     obj_types = (Thread.entity_type,)
 
     login_user(community1.test_user)
-    res = index_svc.search("community", object_types=obj_types)
+    res = index_svc.search(
+        "community", object_types=obj_types, user=community1.test_user
+    )
     assert len(res) == 1
     hit = res[0]
     assert hit["object_key"] == thread1.object_key
 
     login_user(community2.test_user)
-    res = index_svc.search("community", object_types=obj_types)
+    res = index_svc.search(
+        "community", object_types=obj_types, user=community2.test_user
+    )
     assert len(res) == 1
     hit = res[0]
     assert hit["object_key"] == thread2.object_key

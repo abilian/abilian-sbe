@@ -22,7 +22,6 @@ from typing import TYPE_CHECKING, Any
 
 import sqlalchemy as sa
 from flask import Flask, appcontext_pushed, current_app, g
-from flask_login import current_user
 from loguru import logger
 from sqlalchemy import event
 from sqlalchemy.orm import Session
@@ -38,7 +37,7 @@ from abilian.core.dramatiq.singleton import dramatiq
 from abilian.core.entities import Entity, Indexable
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
-from abilian.core.util import fqcn as base_fqcn, friendly_fqcn, unwrap
+from abilian.core.util import fqcn as base_fqcn, friendly_fqcn
 from abilian.services import Service, ServiceState
 from abilian.services.security import (
     ANONYMOUS,
@@ -262,7 +261,7 @@ class WhooshIndexService(Service):
         object_types: Collection[str] = (),
         prefix: bool = True,
         facet_by_type: bool = False,
-        user: User | None = None,
+        user: User,
         **search_args,
     ):
         """Interface to search indexes.
@@ -298,10 +297,6 @@ class WhooshIndexService(Service):
         filters = search_args.setdefault("filter", None)
         filters = [filters] if filters is not None else []
         del search_args["filter"]
-
-        if user is None:
-            user = current_user
-        user = unwrap(user)
 
         # One decision for every filter below: a site administrator sees
         # everything, so none of them are applied.

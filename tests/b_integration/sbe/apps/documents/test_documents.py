@@ -131,18 +131,18 @@ def test_folder_indexed(
     obj_types = (Folder.entity_type,)
 
     with login(user_no_community):
-        res = svc.search("folder", object_types=obj_types)
+        res = svc.search("folder", object_types=obj_types, user=user_no_community)
         assert len(res) == 0
 
     with login(community1.test_user):
-        res = svc.search("folder", object_types=obj_types)
+        res = svc.search("folder", object_types=obj_types, user=community1.test_user)
         assert len(res) == 1
         hit = res[0]
         assert hit["object_key"] == folder.object_key
         assert hit["community_slug"] == community1.slug
 
     with login(community2.test_user):
-        res = svc.search("folder", object_types=obj_types)
+        res = svc.search("folder", object_types=obj_types, user=community2.test_user)
         assert len(res) == 1
         hit = res[0]
         assert hit["object_key"] == folder_other.object_key

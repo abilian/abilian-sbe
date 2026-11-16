@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import datetime
 
 from flask import request
-from flask_login import current_user
 from flask_sqlalchemy.query import Query
 from sqlalchemy import DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -82,14 +81,12 @@ class LoginSession(db.Model):
     user_agent: Mapped[str] = mapped_column(String(512), default="", nullable=False)
 
     @staticmethod
-    def new() -> LoginSession:
+    def new(user: User) -> LoginSession:
         user_agent = request.environ.get("HTTP_USER_AGENT", "")
         forwared_for = request.headers.getlist("X-Forwarded-For")
         if not forwared_for:
             ip_address = request.remote_addr
         else:
             ip_address = forwared_for[0]
-        session = LoginSession(
-            user=current_user, user_agent=user_agent, ip_address=ip_address
-        )
+        session = LoginSession(user=user, user_agent=user_agent, ip_address=ip_address)
         return session

@@ -230,7 +230,7 @@ def user_url_args(user: User | None, size: int) -> tuple[str, dict[str, Any]]:
     # nullable, so an action taken outside a request -- a migration, the CLI,
     # create_root_user -- has no acting user. The default avatar is exactly
     # what it should get; the admin audit panel used to crash on it.
-    if user is not None and not user.is_anonymous:
+    if user is not None:
         endpoint = "images.user_photo"
         kwargs["user_id"] = user.id
         content = user.photo or (user.name + user.email).encode("utf-8")
