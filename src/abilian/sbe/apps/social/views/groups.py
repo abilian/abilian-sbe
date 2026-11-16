@@ -44,8 +44,7 @@ def groups() -> str:
                 if group.public or current_user in group.members
             ]
     else:
-        groups = current_user.groups
-        groups.sort(key=lambda x: x.name)
+        groups = sorted(current_user.groups, key=lambda group: group.name)
 
     return render_template("social/groups.html", groups=groups)
 
