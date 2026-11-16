@@ -3,17 +3,18 @@
 from __future__ import annotations
 
 import pkgutil
+from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 import sqlalchemy.exc
 import sqlalchemy.orm
 from flask import flash, jsonify, redirect, render_template, request
-from flask_login import current_user
 from loguru import logger
 from sqlalchemy.sql.expression import and_, func, or_
 from werkzeug.exceptions import BadRequest, Forbidden
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.models.subjects import User
 from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.models import Membership
@@ -27,6 +28,9 @@ from abilian.web.listing import Listing
 from abilian.web.views import ObjectEdit, default_view
 
 from .social import social
+
+if TYPE_CHECKING:
+    from werkzeug.wrappers import Response
 
 DEFAULT_USER_MUGSHOT = pkgutil.get_data(
     "abilian.sbe", "static/images/silhouette_unknown.png"
@@ -65,39 +69,37 @@ def users() -> str:
 
 @social.route("/users/<int:user_id>")
 @default_view(social, User, "user_id")
-def user(user_id: int) -> str:
-    user = User.query.get_or_404(user_id)
+@authenticated
+def user(user: User, user_id: int) -> str:
+    shown = User.query.get_or_404(user_id)
 
     # FIXME: use user profiles
-    view_form = UserProfileViewForm(obj=user)
+    view_form = UserProfileViewForm(obj=shown)
 
-    communities = [m.community for m in user.communautes_membership]
-    if current_user != user and (
-        not security_service.has_role(current_user, "manager")
-    ):
+    communities = [m.community for m in shown.communautes_membership]
+    if user != shown and not security_service.has_role(user, "manager"):
         # filter visible communautes (ticket 165)
-        communities = [c for c in communities if c.has_member(current_user)]
+        communities = [c for c in communities if c.has_member(user)]
 
     view_form.communautes._set_data(communities)
 
-    # FIXME
-    contact = user
-    entries = get_recent_entries(user=user)
+    entries = get_recent_entries(user, actor=shown)
     entries = ActivityEntryPresenter.wrap_collection(entries)
     ctx = {
-        "user": user,
-        "contact": contact,
+        "user": shown,
+        "contact": shown,
         "view_form": view_form,
-        "can_edit": can_edit(user),
-        "tabs": make_tabs(user),
+        "can_edit": can_edit(user, shown),
+        "tabs": make_tabs(shown),
         "activity_entries": entries,
     }
     return render_template("social/user.html", **ctx)
 
 
-def can_edit(user: User) -> bool:
+def can_edit(user: User, profile_owner: User) -> bool:
+    """May `user` edit the profile of `profile_owner`?"""
     # TODO: introduce a "self" role?
-    return (user == current_user) or is_site_admin()
+    return user == profile_owner or is_site_admin(user)
 
 
 class UserProfileEdit(ObjectEdit[User, UserProfileForm]):
@@ -110,7 +112,7 @@ class UserProfileEdit(ObjectEdit[User, UserProfileForm]):
         args, kwargs = super().init_object(args, kwargs)
         self.user = self.obj
         # Checked here, not on submit only: the form shows the profile too.
-        if not can_edit(self.user):
+        if not can_edit(authenticated_user(), self.user):
             raise Forbidden
         return args, kwargs
 
@@ -132,16 +134,17 @@ social.route("/users/<int:user_id>/edit")(UserProfileEdit.as_view("user_edit"))
 
 
 @social.route("/users/<int:user_id>", methods=["POST"])
-def user_post(user_id):
-    user = User.query.get_or_404(user_id)
+@authenticated
+def user_post(user: User, user_id: int) -> Response:
+    followed = User.query.get_or_404(user_id)
     action = request.form.get("action")
     return_url = request.form.get("return_url")
 
     match action:
         case "follow":
-            current_user.follow(user)
+            user.follow(followed)
         case "unfollow":
-            current_user.unfollow(user)
+            user.unfollow(followed)
         case _:
             msg = "Should not happen"
             raise Exception(msg)

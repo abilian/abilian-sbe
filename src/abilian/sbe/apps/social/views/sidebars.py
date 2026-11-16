@@ -11,8 +11,8 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 
 from flask import g
-from flask_login import current_user
 
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community, Membership
 from abilian.services.security import is_site_admin
@@ -21,6 +21,9 @@ from .social import social
 
 
 class Sidebars:
+    def __init__(self, user: User) -> None:
+        self.user = user
+
     @property
     def latest_visitors(self) -> list[User]:
         return (
@@ -39,9 +42,9 @@ class Sidebars:
     def my_communities(self) -> list[Community]:
         query = Community.query
         query = query.order_by(Community.last_active_at.desc())
-        if not is_site_admin():
+        if not is_site_admin(self.user):
             # Filter with permissions
-            query = query.join(Membership).filter(Membership.user == current_user)
+            query = query.join(Membership).filter(Membership.user == self.user)
         return query.limit(10).all()
 
     @property
@@ -53,4 +56,4 @@ class Sidebars:
 
 @social.before_request
 def inject_sidebars() -> None:
-    g.sidebars = Sidebars()
+    g.sidebars = Sidebars(authenticated_user())

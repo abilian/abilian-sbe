@@ -4,15 +4,21 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from flask import redirect, render_template, url_for
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated
 from abilian.core.util import get_params
 from abilian.sbe.apps.social.models import Message
 from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
 from abilian.sbe.apps.wall.util import get_recent_entries
 from abilian.services.security import AUTHENTICATED
 from abilian.web.access_blueprint import AccessControlBlueprint
+
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
 
 __all__ = ["social"]
 
@@ -32,9 +38,10 @@ route = social.route
 
 
 @route("/")
-def home() -> str:
+@authenticated
+def home(user: User) -> str:
     ctx = {}
-    entries = get_recent_entries(num=50)
+    entries = get_recent_entries(user, num=50)
     entries = ActivityEntryPresenter.wrap_collection(entries)
     ctx["activity_entries"] = entries
 

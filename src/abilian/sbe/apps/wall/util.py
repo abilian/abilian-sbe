@@ -5,11 +5,10 @@
 # TODO: move to the activity service ?
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import sqlalchemy as sa
 from flask import g
-from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 
 from abilian.core.extensions import db
@@ -25,13 +24,16 @@ if TYPE_CHECKING:
 
 
 def get_recent_entries(
+    user: User,
     num: int = 20,
-    user: User | None = None,
+    actor: User | None = None,
     community: CommunityPresenter | None = None,
-) -> list[Any]:
+) -> list[ActivityEntry]:
+    """What `user` may see of the latest activity, by `actor` or in `community`
+    if given."""
     # Check just in case
-    if not current_user.has_role(ADMIN):
-        if community and not community.has_member(current_user):
+    if not user.has_role(ADMIN):
+        if community and not community.has_member(user):
             raise Forbidden
 
     query = ActivityEntry.query.options(sa.orm.joinedload(ActivityEntry.object))
@@ -43,21 +45,21 @@ def get_recent_entries(
                 ActivityEntry.object == g.community,
             )
         )
-    if user:
-        query = query.filter(ActivityEntry.actor == user)
+    if actor:
+        query = query.filter(ActivityEntry.actor == actor)
 
     # Security check
     #
     # we use communities ids instead of object because as of sqlalchemy 0.8 the
     # 'in_' operator cannot be used with relationships, only foreign keys values
-    if not community and not current_user.has_role(ADMIN):
+    if not community and not user.has_role(ADMIN):
         # `.values()` yields Row tuples, so unpack them: binding a Row into the
         # `in_()` below raises "type 'Row' is not supported".
         # Listed because we need them twice during query filtering.
         community_ids = [
             community_id
             for (community_id,) in Membership.query.filter(
-                Membership.user_id == current_user.id
+                Membership.user_id == user.id
             ).values(Membership.community_id)
         ]
         if not community_ids:
@@ -90,7 +92,7 @@ def get_recent_entries(
                 continue
 
             case Folder() | Document() if not has_permission(
-                current_user, READ, obj=entry.object, inherit=True
+                user, READ, obj=entry.object, inherit=True
             ):
                 continue
 

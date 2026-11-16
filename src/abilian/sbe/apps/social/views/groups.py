@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from flask import (
     current_app,
@@ -15,10 +16,10 @@ from flask import (
     url_for,
 )
 from flask_babel import gettext as _
-from flask_login import current_user
 from werkzeug.exceptions import Forbidden, NotFound
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated
 from abilian.core.models.subjects import Group, User
 from abilian.services.image import CROP, resize
 from abilian.services.security import is_site_admin
@@ -27,44 +28,47 @@ from abilian.web.views import default_view
 
 from .social import social
 
+if TYPE_CHECKING:
+    from werkzeug.wrappers import Response
+
 DEFAULT_GROUP_MUGSHOT = (
     Path(__file__).parent / ".." / ".." / ".." / "static" / "images" / "frog.jpg"
 ).read_bytes()
 
 
 @social.route("/groups/")
-def groups() -> str:
+@authenticated
+def groups(user: User) -> str:
     tab = request.args.get("tab", "all_groups")
     if tab == "all_groups":
         groups = Group.query.order_by(Group.name).all()
-        if not is_site_admin():
+        if not is_site_admin(user):
             groups = [
-                group
-                for group in groups
-                if group.public or current_user in group.members
+                group for group in groups if group.public or user in group.members
             ]
     else:
-        groups = sorted(current_user.groups, key=lambda group: group.name)
+        groups = sorted(user.groups, key=lambda group: group.name)
 
     return render_template("social/groups.html", groups=groups)
 
 
-def is_admin(group):
-    """May the current user administer `group`?
+def is_admin(user: User, group: Group) -> bool:
+    """May `user` administer `group`?
 
     Group administrators are a relationship on `Group`, not role assignments,
     so this cannot be `has_role(user, ADMIN, group)` yet.
     """
-    if current_user in group.admins:
+    if user in group.admins:
         return True
-    return "security" in current_app.extensions and is_site_admin()
+    return "security" in current_app.extensions and is_site_admin(user)
 
 
 @social.route("/groups/<int:group_id>")
 @default_view(social, Group, "group_id")
-def group_home(group_id):
+@authenticated
+def group_home(user: User, group_id: int) -> str:
     group = Group.query.get_or_404(group_id)
-    ctx = {"group": group, "is_admin": is_admin(group)}
+    ctx = {"group": group, "is_admin": is_admin(user, group)}
     return render_template("social/group.html", **ctx)
 
 
@@ -89,7 +93,8 @@ def group_json(group_id):
 
 @social.route("/groups/<int:group_id>", methods=["POST"])
 @csrf.protect
-def group_post(group_id):
+@authenticated
+def group_post(user: User, group_id: int) -> Response:
     group = Group.query.get_or_404(group_id)
     action = request.form.get("action")
     return_url = request.form.get("return_url")
@@ -105,13 +110,13 @@ def group_post(group_id):
     # add-admin writes who may do that. This was an `assert`, which `python -O`
     # compiles out entirely and which raises a 500 rather than refusing when it
     # is compiled in.
-    if action not in ("join", "leave") and not is_admin(group):
+    if action not in ("join", "leave") and not is_admin(user, group):
         raise Forbidden
 
     if action == "join":
-        current_user.join(group)
+        user.join(group)
     elif action == "leave":
-        current_user.leave(group)
+        user.leave(group)
 
     elif action in membership_actions:
         try:
@@ -120,19 +125,19 @@ def group_post(group_id):
             flash(_("Error: No user selected"), "error")
             return redirect(url_for(".group_home", group_id=group_id))
 
-        user = User.query.get_or_404(user_id)
+        member = User.query.get_or_404(user_id)
 
         match action:
             case "add":
-                user.join(group)
+                member.join(group)
             case "remove":
-                user.leave(group)
+                member.leave(group)
             case "add-admin":
-                if user not in group.admins:
-                    group.admins.add(user)
+                if member not in group.admins:
+                    group.admins.add(member)
             case "remove-admin":
-                if user in group.admins:
-                    group.admins.remove(user)
+                if member in group.admins:
+                    group.admins.remove(member)
 
     db.session.commit()
 
