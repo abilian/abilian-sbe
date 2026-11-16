@@ -111,6 +111,9 @@ doc = [
     "mkdocs-material>=9.5.4,<10.0.0",
 ]
 dev = [
+    # The PostgreSQL driver is an extra, which a plain `uv sync` leaves out:
+    # development runs against PostgreSQL, so the dev group asks for it.
+    "abilian-sbe[postgres]",
     "abilian-devtools",
     # "flask-debugtoolbar",
     # "sqlparse>=0.4.4,<0.5.0",

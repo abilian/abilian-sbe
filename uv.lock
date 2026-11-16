@@ -105,6 +105,7 @@ postgres = [
 [package.dev-dependencies]
 dev = [
     { name = "abilian-devtools" },
+    { name = "abilian-sbe", extra = ["postgres"] },
     { name = "auto-type-annotate" },
     { name = "deptry" },
     { name = "flask-linktester" },
@@ -208,6 +209,7 @@ provides-extras = ["postgres"]
 [package.metadata.requires-dev]
 dev = [
     { name = "abilian-devtools" },
+    { name = "abilian-sbe", extras = ["postgres"] },
     { name = "auto-type-annotate", specifier = ">=1.1.1" },
     { name = "deptry" },
     { name = "flask-linktester" },
