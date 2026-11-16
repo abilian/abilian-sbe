@@ -13,6 +13,7 @@ from werkzeug.exceptions import BadRequest, NotFound
 from werkzeug.utils import secure_filename
 
 from abilian.core.util import unwrap
+from abilian.services.security import AUTHENTICATED
 from abilian.web import csrf, url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.forms import Form
@@ -23,7 +24,9 @@ if typing.TYPE_CHECKING:
     from abilian.web.uploads import FileUploadsExtension
 
 
-ac_blueprint = AccessControlBlueprint("uploads", __name__, url_prefix="/upload")
+ac_blueprint = AccessControlBlueprint(
+    "uploads", __name__, url_prefix="/upload", allowed_roles=AUTHENTICATED
+)
 
 
 class UploadForm(Form):
