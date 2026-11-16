@@ -6,8 +6,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from flask_login import current_user
-
 from abilian.services import security_service
 from abilian.services.security import OWNER, WRITE
 
@@ -16,7 +14,7 @@ if TYPE_CHECKING:
     from abilian.sbe.apps.forum.models import Post
 
 
-def can_write(post: Post, user: User | None = None) -> bool:
+def can_write(user: User, post: Post) -> bool:
     """May `user` edit `post`? Its author, or a site admin.
 
     `OWNER` is a real role and `has_role` answers it against `object.owner`, so
@@ -28,6 +26,4 @@ def can_write(post: Post, user: User | None = None) -> bool:
     moderation and theirs (`can_moderate`); rewriting somebody's message is a
     different act, and the UI has never offered it.
     """
-    if user is None:
-        user = current_user
     return security_service.has_permission(user, WRITE, post, roles=OWNER)

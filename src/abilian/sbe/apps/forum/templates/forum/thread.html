@@ -177,7 +177,7 @@
   {#- The rule used to be written out here -- `current_user == post.owner or
       is_site_admin()` -- and nowhere else, while the view behind the link
       enforced nothing at all. #}
-  {%- if not is_closed and can_write_post(post) %}
+  {%- if not is_closed and can_write_post(current_user, post) %}
     <a href="{{ url_for('.post_edit', community_id=post.thread.community.slug, thread_id=post.thread.id, object_id=post.id) }}"
        class="text-blue-600 underline hover:text-blue-800 text-sm ml-2">
       <i class="fa fa-edit"></i>

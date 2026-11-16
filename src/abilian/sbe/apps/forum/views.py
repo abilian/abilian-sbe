@@ -7,14 +7,15 @@ from __future__ import annotations
 from collections import Counter
 from datetime import date, datetime, timedelta
 from itertools import groupby
+from typing import TYPE_CHECKING
 from urllib.parse import quote
 
 from flask import current_app, flash, g, make_response, render_template, request
 from flask_babel import format_date
-from flask_login import current_user
 from sqlalchemy.orm import joinedload
 from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
+from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
@@ -32,6 +33,9 @@ from abilian.web.views import default_view
 from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
+
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
 
 # TODO: move to config
 MAX_THREADS = 30
@@ -76,11 +80,11 @@ def get_nb_viewers(entities):
     return None
 
 
-def get_viewed_posts(entities):
+def get_viewed_posts(user: User, entities):
     if not entities:
         return None
 
-    views = viewtracker.get_views(entities=entities, user=current_user)
+    views = viewtracker.get_views(entities=entities, user=user)
     all_hits = viewtracker.get_hits(views=views)
     nb_viewed_posts = {}
     for view in views:
@@ -125,7 +129,8 @@ def get_viewed_times(entities):
 
 @route("/")
 @route("/<string:filter>")
-def index(filter=None):
+@authenticated
+def index(user: User, filter=None):
     query = Thread.query.filter(Thread.community_id == g.community.id).order_by(
         Thread.last_post_at.desc()
     )
@@ -160,7 +165,7 @@ def index(filter=None):
         threads = query.limit(MAX_THREADS).all()
 
     nb_viewers = get_nb_viewers(threads)
-    nb_viewed_posts = get_viewed_posts(threads)
+    nb_viewed_posts = get_viewed_posts(user, threads)
 
     return render_template(
         "forum/index.html",
@@ -229,10 +234,15 @@ class BaseThreadView:
     pk = "thread_id"
     base_template = "community/_base.html"
 
+    #: the logged-in user, set by `prepare_args()`
+    user: User
+
     def can_send_by_mail(self):
         return g.community.type == "participative" or can_manage(g.community)
 
     def prepare_args(self, args, kwargs):
+        # Before the parent's: it loads the object, which may need the user.
+        self.user = authenticated_user()
         args, kwargs = super().prepare_args(args, kwargs)
         self.send_by_email = False
 
@@ -263,7 +273,7 @@ class ThreadView(BaseThreadView, views.ObjectView[Thread, PostForm]):
         kw["views"] = get_viewed_times([self.obj])
         kw["participants"] = {post.creator for post in self.obj.posts}
         kw["activity_time_format"] = activity_time_format
-        viewtracker.record_hit(entity=self.obj, user=current_user)
+        viewtracker.record_hit(entity=self.obj, user=self.user)
         return kw
 
 
@@ -315,11 +325,11 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
         uploads = current_app.extensions["uploads"]
 
         for handle in request.form.getlist("attachments"):
-            fileobj = uploads.get_file(current_user, handle)
+            fileobj = uploads.get_file(self.user, handle)
             if fileobj is None:
                 continue
 
-            meta = uploads.get_metadata(current_user, handle)
+            meta = uploads.get_metadata(self.user, handle)
             name = meta.get("filename", handle)
             mimetype = meta.get("mimetype")
 
@@ -456,7 +466,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
         # Nothing checked whose post this was. The community blueprint gates
         # the route to members, so any member could edit any other member's
         # post through a URL the template declines to show them.
-        if not can_write(self.obj):
+        if not can_write(self.user, self.obj):
             raise Forbidden
 
         return args, kwargs
@@ -486,8 +496,8 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
         history = obj_meta.setdefault("history", [])
         history.append(
             {
-                "user_id": current_user.id,
-                "user": str(current_user),
+                "user_id": self.user.id,
+                "user": str(self.user),
                 "date": utc_dt(datetime.utcnow()).isoformat(),
                 "reason": self.form.reason.data,
             }
@@ -510,11 +520,11 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
             session.delete(att)
 
         for handle in request.form.getlist("attachments"):
-            fileobj = uploads.get_file(current_user, handle)
+            fileobj = uploads.get_file(self.user, handle)
             if fileobj is None:
                 continue
 
-            meta = uploads.get_metadata(current_user, handle)
+            meta = uploads.get_metadata(self.user, handle)
             name = meta.get("filename", handle)
             mimetype = meta.get("mimetype")
 
