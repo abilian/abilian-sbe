@@ -10,7 +10,7 @@ from markdown import Markdown
 
 from abilian.sbe.apps.wiki.markup import SBEWikiLinkExtension
 from abilian.sbe.apps.wiki.models import WikiPage, WikiPageRevision
-from tests.util import client_login, login
+from tests.util import login
 
 
 @pytest.mark.parametrize("text", ["TOTO", "x 123", "/#$", "/*€("])
@@ -50,18 +50,17 @@ def test_wikilink_extension(text, db) -> None:
     check(False)
 
 
-def test_new_page(user, client) -> None:
-    with client_login(client, user):
-        page = WikiPage(title="Some page", body_src="abc")
-        assert page.title == "Some page"
-        assert page.name == "Some page"
-        assert page.body_src == "abc"
-        assert page.body_html == "<p>abc</p>"
-        assert len(page.revisions) == 1
+def test_new_page(user) -> None:
+    page = WikiPage(title="Some page", body_src="abc", author=user)
+    assert page.title == "Some page"
+    assert page.name == "Some page"
+    assert page.body_src == "abc"
+    assert page.body_html == "<p>abc</p>"
+    assert len(page.revisions) == 1
 
-        revision = page.revisions[0]
-        assert revision.number == 0
-        assert revision.author == user
+    revision = page.revisions[0]
+    assert revision.number == 0
+    assert revision.author == user
 
 
 def test_rename_page(user) -> None:
@@ -78,15 +77,14 @@ def test_rename_page(user) -> None:
     assert page.name == "Name"
 
 
-def test_create_revision(user, client) -> None:
-    with client_login(client, user):
-        page = WikiPage("abc")
-        page.create_revision("def", "page updated")
+def test_create_revision(user) -> None:
+    page = WikiPage("abc")
+    page.create_revision(user, "def", "page updated")
 
-        assert len(page.revisions) == 2
-        last_revision = page.revisions[1]
-        assert last_revision.number == 1
-        assert last_revision.author == user
+    assert len(page.revisions) == 2
+    last_revision = page.revisions[1]
+    assert last_revision.number == 1
+    assert last_revision.author == user
 
 
 def test_a_new_revision_is_saved(db, community1) -> None:
@@ -95,7 +93,7 @@ def test_a_new_revision_is_saved(db, community1) -> None:
         db.session.add(page)
         db.session.flush()
 
-        page.create_revision("second", "edit")
+        page.create_revision(community1.test_user, "second", "edit")
         db.session.commit()
 
     revisions = WikiPageRevision.query.filter(WikiPageRevision.page_id == page.id)

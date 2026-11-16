@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from flask_login import current_user
 from sqlalchemy import (
     Column,
     DateTime,
@@ -68,10 +67,20 @@ class WikiPage(Entity):
 
     __table_args__ = (UniqueConstraint("title", "community_id"),)
 
-    def __init__(self, title="", body_src="", message="", *args, **kwargs) -> None:
+    def __init__(
+        self,
+        title: str = "",
+        body_src: str = "",
+        message: str = "",
+        *args: Any,
+        author: User | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """`author` writes the first revision; None when nobody does, as for
+        a page made outside a request."""
         super().__init__(*args, **kwargs)
         self.title = title
-        self.create_revision(body_src, message)
+        self.create_revision(author, body_src, message)
 
     # title is defined as a hybrid property to allow name <-> title sync
     # (2 way)
@@ -87,7 +96,9 @@ class WikiPage(Entity):
         if self.name != title:
             self.name = title
 
-    def create_revision(self, body_src: str, message: str = "") -> None:
+    def create_revision(
+        self, author: User | None, body_src: str, message: str = ""
+    ) -> None:
         revision = WikiPageRevision()
         if self.revisions:
             revision.number = max(r.number for r in self.revisions) + 1
@@ -95,7 +106,7 @@ class WikiPage(Entity):
             revision.number = 0
         self.body_src = revision.body_src = body_src
         revision.message = message
-        revision.author = current_user
+        revision.author = author
         # Appended rather than given `page=self`: the collection cascades the
         # revision into the page's session, a backref no longer does.
         self.revisions.append(revision)

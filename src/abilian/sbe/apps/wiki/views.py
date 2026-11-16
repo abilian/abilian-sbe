@@ -16,7 +16,6 @@ from flask import (
     render_template,
     request,
 )
-from flask_login import current_user
 from markdown import markdown
 from markupsafe import Markup
 from sqlalchemy.orm.exc import NoResultFound
@@ -24,6 +23,7 @@ from werkzeug.exceptions import NotFound
 from whoosh.searching import Hit
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _l, _n
@@ -44,6 +44,7 @@ from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 if TYPE_CHECKING:
     from werkzeug.wrappers import Response
 
+    from abilian.core.models.subjects import User
     from abilian.sbe.apps.communities.models import Community
     from abilian.sbe.apps.communities.presenters import CommunityPresenter
     from abilian.services.security.models import Permission
@@ -94,6 +95,16 @@ class BasePageView:
     base_template = "wiki/_base.html"
     view_endpoint = ""
 
+    #: the logged-in user, set by `prepare_args()`
+    user: User
+
+    def prepare_args(
+        self, args: tuple[Any], kwargs: dict[str, Any]
+    ) -> tuple[tuple[Any], dict[str, Any]]:
+        # Before the parent's: it loads the page, and may create one.
+        self.user = authenticated_user()
+        return super().prepare_args(args, kwargs)
+
     @property
     def is_home_page(self):
         return self.obj is not None and self.obj.title == "Home"
@@ -119,7 +130,7 @@ class BasePageView:
                 self.obj = get_page_by_title(title)
             except NoResultFound:
                 if title == "Home":
-                    self.obj = create_home_page()
+                    self.obj = create_home_page(self.user)
                 else:
                     flash(
                         _("This page doesn't exit. You must create it first."),
@@ -155,13 +166,13 @@ class PageView(BasePageView, ObjectView[WikiPage, WikiPageForm]):
         if not self.obj:
             title = kwargs["title"]
             if title == "Home":
-                self.obj = create_home_page()
+                self.obj = create_home_page(self.user)
             else:
                 url = url_for(".page_edit", title=title, community_id=g.community.slug)
                 raise Redirect(url)
 
         actions.context["object"] = self.obj
-        viewtracker.record_hit(entity=self.obj, user=current_user)
+        viewtracker.record_hit(entity=self.obj, user=self.user)
         return args, kwargs
 
 
@@ -221,7 +232,7 @@ class PageEdit(BasePageView, ObjectEdit[WikiPage, WikiPageForm]):
     def before_populate_obj(self) -> None:
         self.redirect_if_no_change()
         form = self.form
-        self.obj.create_revision(form.body_src.data, form.message.data)
+        self.obj.create_revision(self.user, form.body_src.data, form.message.data)
 
     # FIXME: does nothing !
     def redirect_if_no_change(self) -> Response | None:
@@ -290,7 +301,8 @@ class PageCreate(PageEdit, ObjectCreate[WikiPage, WikiPageForm]):
     def init_object(
         self, args: tuple[Any], kwargs: dict[str, Any]
     ) -> tuple[tuple[Any], dict[str, Any]]:
-        return ObjectCreate.init_object(self, args, kwargs)
+        self.obj = WikiPage(author=self.user)
+        return args, kwargs
 
     def before_populate_obj(self) -> None:
         # Attached to its community only now, when it is saved: in the
@@ -370,7 +382,8 @@ def page_compare() -> str | Response:
 
 
 @route("/delete/", methods=["POST"])
-def page_delete() -> Response:
+@authenticated
+def page_delete(user: User) -> Response:
     title = request.form["title"].strip()
     try:
         page = get_page_by_title(title)
@@ -382,7 +395,7 @@ def page_delete() -> Response:
 
     app = unwrap(current_app)
     community = g.community._model
-    activity.send(app, actor=current_user, verb="delete", object=page, target=community)
+    activity.send(app, actor=user, verb="delete", object=page, target=community)
 
     db.session.commit()
     flash(_("Page %(title)s deleted.", title=title))
@@ -516,10 +529,10 @@ def get_page_by_title(title: str) -> WikiPage:
     return page
 
 
-def create_home_page() -> WikiPage:
+def create_home_page(user: User) -> WikiPage:
     path = Path(__file__).parent / "data" / "default_page.txt"
     default_src = path.read_text(encoding="utf-8")
-    page = WikiPage(title="Home", body_src=default_src)
+    page = WikiPage(title="Home", body_src=default_src, author=user)
     page.community_id = g.community.id
     db.session.add(page)
     db.session.commit()
