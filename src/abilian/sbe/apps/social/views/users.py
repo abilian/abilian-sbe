@@ -7,11 +7,11 @@ import pkgutil
 import sqlalchemy as sa
 import sqlalchemy.exc
 import sqlalchemy.orm
-from flask import Response, flash, jsonify, redirect, render_template, request
+from flask import flash, jsonify, redirect, render_template, request
 from flask_login import current_user
 from loguru import logger
 from sqlalchemy.sql.expression import and_, func, or_
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, Forbidden
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
@@ -109,15 +109,13 @@ class UserProfileEdit(ObjectEdit[User, UserProfileForm]):
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         self.user = self.obj
+        # Checked here, not on submit only: the form shows the profile too.
+        if not can_edit(self.user):
+            raise Forbidden
         return args, kwargs
 
     def view_url(self):
         return url_for(".user", user_id=self.user.id)
-
-    def edit(self, redirect_to=None):
-        if not can_edit(self.user):
-            return Response(status=403)
-        return super().edit(redirect_to)
 
     def handle_commit_exception(self, exc):
         db.session.rollback()

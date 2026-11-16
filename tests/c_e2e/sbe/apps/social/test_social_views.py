@@ -6,6 +6,7 @@ import pytest
 from flask import url_for
 
 from abilian.core.models.subjects import Group
+from tests.util import client_login
 
 
 def test_home(client, login_admin) -> None:
@@ -60,3 +61,19 @@ def test_my_groups_lists_the_users_groups_by_name(
     assert response.status_code == 200
     page = response.get_data(as_text=True)
     assert page.index("Alpha") < page.index("Zeta")
+
+
+def test_only_the_owner_or_an_admin_edits_a_profile(
+    client, user, admin_user, db_session
+) -> None:
+    url = url_for("social.user_edit", user_id=admin_user.id)
+
+    with client_login(client, user):
+        assert client.get(url).status_code == 403
+        form = {"first_name": "Changed", "__action": "edit"}
+        assert client.post(url, data=form).status_code == 403
+    db_session.expire_all()
+    assert admin_user.first_name != "Changed"
+
+    with client_login(client, admin_user):
+        assert client.get(url).status_code == 200
