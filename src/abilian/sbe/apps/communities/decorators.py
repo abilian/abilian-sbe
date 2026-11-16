@@ -22,9 +22,8 @@ from typing import TYPE_CHECKING, Any
 from flask import g
 from werkzeug.exceptions import Forbidden
 
-from abilian.sbe.apps.communities.security import (
-    can_manage as _can_manage,
-)
+from abilian.core.extensions.login import authenticated_user
+from abilian.sbe.apps.communities.security import can_manage as _can_manage
 from abilian.services.security import is_site_admin as _is_site_admin
 
 if TYPE_CHECKING:
@@ -46,7 +45,7 @@ def is_site_admin(func: Callable) -> Callable:
 def can_manage(func: Callable) -> Callable:
     @wraps(func)
     def decorated_view(*args: Any, **kwargs: Any) -> Response:
-        if not _can_manage(g.community):
+        if not _can_manage(authenticated_user(), g.community):
             raise Forbidden
         return func(*args, **kwargs)
 

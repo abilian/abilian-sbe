@@ -65,7 +65,7 @@ def test_every_membership_role_gives_the_same_answer(
     community1.set_membership(outsider, role)
     db.session.flush()
 
-    assert can_manage(community1, outsider) == _the_old_body(community1, outsider)
+    assert can_manage(outsider, community1) == _the_old_body(community1, outsider)
 
 
 def test_a_non_member_gives_the_same_answer(
@@ -73,7 +73,7 @@ def test_a_non_member_gives_the_same_answer(
 ) -> None:
     ensure_services_started(["security"])
 
-    assert can_manage(community1, outsider) == _the_old_body(community1, outsider)
+    assert can_manage(outsider, community1) == _the_old_body(community1, outsider)
 
 
 def test_a_site_admin_gives_the_same_answer(
@@ -83,7 +83,7 @@ def test_a_site_admin_gives_the_same_answer(
     security_service.grant_role(outsider, ADMIN)
     db.session.flush()
 
-    assert can_manage(community1, outsider) == _the_old_body(community1, outsider)
+    assert can_manage(outsider, community1) == _the_old_body(community1, outsider)
 
 
 def test_no_community_gives_the_same_answer(
@@ -93,12 +93,12 @@ def test_no_community_gives_the_same_answer(
     what the bare admin check did on the same input."""
     ensure_services_started(["security"])
 
-    assert can_manage(None, outsider) == _the_old_body(None, outsider)
+    assert can_manage(outsider, None) == _the_old_body(None, outsider)
 
     security_service.grant_role(outsider, ADMIN)
     db.session.flush()
 
-    assert can_manage(None, outsider) == _the_old_body(None, outsider)
+    assert can_manage(outsider, None) == _the_old_body(None, outsider)
 
 
 def test_an_anonymous_user_gives_the_same_answer(
@@ -112,8 +112,8 @@ def test_an_anonymous_user_gives_the_same_answer(
     ensure_services_started(["security"])
     anonymous = AnonymousUser()
 
-    assert can_manage(community1, anonymous) is False
-    assert can_manage(community1, anonymous) == _the_old_body(community1, anonymous)
+    assert can_manage(anonymous, community1) is False
+    assert can_manage(anonymous, community1) == _the_old_body(community1, anonymous)
 
 
 # --- the two records must not drift ------------------------------------------
@@ -149,10 +149,10 @@ def test_a_demotion_reaches_both(
     ensure_services_started(["security"])
     community1.set_membership(outsider, MANAGER)
     db.session.flush()
-    assert can_manage(community1, outsider)
+    assert can_manage(outsider, community1)
 
     community1.set_membership(outsider, MEMBER)
     db.session.flush()
 
     assert community1.get_role(outsider) == MEMBER
-    assert not can_manage(community1, outsider)
+    assert not can_manage(outsider, community1)

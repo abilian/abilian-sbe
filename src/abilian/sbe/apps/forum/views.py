@@ -238,7 +238,7 @@ class BaseThreadView:
     user: User
 
     def can_send_by_mail(self):
-        return g.community.type == "participative" or can_manage(g.community)
+        return g.community.type == "participative" or can_manage(self.user, g.community)
 
     def prepare_args(self, args, kwargs):
         # Before the parent's: it loads the object, which may need the user.
@@ -269,7 +269,7 @@ class ThreadView(BaseThreadView, views.ObjectView[Thread, PostForm]):
         kw = super().template_kwargs
         kw["thread"] = self.obj
         kw["is_closed"] = self.obj.closed
-        kw["viewers"] = object_viewers(self.obj)
+        kw["viewers"] = object_viewers(self.user, self.obj)
         kw["views"] = get_viewed_times([self.obj])
         kw["participants"] = {post.creator for post in self.obj.posts}
         kw["activity_time_format"] = activity_time_format

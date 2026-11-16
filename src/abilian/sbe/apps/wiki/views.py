@@ -118,7 +118,7 @@ class BasePageView:
         """
         kw = super().template_kwargs
         kw["page"] = self.obj
-        kw["viewers"] = object_viewers(self.obj)
+        kw["viewers"] = object_viewers(self.user, self.obj)
         return kw
 
     def init_object(

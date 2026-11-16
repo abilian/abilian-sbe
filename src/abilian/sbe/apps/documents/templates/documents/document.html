@@ -264,7 +264,7 @@
   </div>
 
   {# Who viewed this: for the people who run the community it is in. #}
-  {% if can_manage(g.community) %}
+  {% if can_manage(current_user, g.community) %}
     <div class="border-l border-r border-b border-gray-200 p-4 bg-white">
       <p class="text-gray-500 font-semibold text-sm mb-2">{{ _('Readers') }}</p>
       {{ show_all_viewers(viewers,_("viewed by")) }}

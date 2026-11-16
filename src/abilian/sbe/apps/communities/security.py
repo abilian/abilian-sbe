@@ -11,7 +11,6 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from flask import g
-from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 
 from abilian.core.util import BasePresenter
@@ -34,16 +33,12 @@ def _unwrap(community: Any) -> Any:
     return community._model if isinstance(community, BasePresenter) else community
 
 
-def check_membership(
-    community: CommunityPresenter | None = None, user: User | None = None
-) -> None:
-    if not is_member(community, user):
+def check_membership(user: User, community: CommunityPresenter | None = None) -> None:
+    if not is_member(user, community):
         raise Forbidden
 
 
-def is_member(
-    community: CommunityPresenter | None = None, user: User | None = None
-) -> bool:
+def is_member(user: User, community: CommunityPresenter | None = None) -> bool:
     """Does `user` hold any role in `community`?
 
     Any of them: MANAGER, MEMBER, READER and WRITER all mean membership, which
@@ -51,14 +46,12 @@ def is_member(
     seeds its valid roles with ADMIN and MANAGER, so a site admin passes
     without being a member -- as it did when that was a separate clause here.
     """
-    if user is None:
-        user = current_user
     if not community:
         community = getattr(g, "community", None)
     return security_service.has_role(user, VALID_ROLES, _unwrap(community))
 
 
-def can_manage(community: Any, user: User | None = None) -> bool:
+def can_manage(user: User, community: Any) -> bool:
     """May `user` manage `community`?
 
     Asked of the policy engine, which is the point: `can_` promises a
@@ -74,6 +67,4 @@ def can_manage(community: Any, user: User | None = None) -> bool:
     case matters -- the route guard falls through to here when `g.community` is
     unset, and an admin must not start getting 403s there.
     """
-    if user is None:
-        user = current_user
     return security_service.has_permission(user, MANAGE, _unwrap(community))

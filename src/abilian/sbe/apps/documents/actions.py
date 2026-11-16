@@ -265,7 +265,7 @@ _actions = (
         "document_viewers",
         _l("Viewers list"),
         icon="user",
-        condition=lambda ctx: can_manage(ctx["object"].community),
+        condition=lambda ctx: can_manage(authenticated_user(), ctx["object"].community),
         url=lambda ctx: url_for(".document_viewers", doc_id=ctx["object"].id),
     ),
     # edit

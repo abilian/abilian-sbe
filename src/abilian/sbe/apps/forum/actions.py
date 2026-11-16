@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from flask import g, request, url_for
 
 from abilian.core.application import as_application
+from abilian.core.extensions.login import authenticated_user
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.web.action import Action, FAIcon, ModalActionMixin, actions
@@ -51,7 +52,7 @@ def can_moderate(context) -> bool:
     spelling: the manager of a community could not moderate its own forum,
     and only a site admin could.
     """
-    return can_manage(context["object"].community)
+    return can_manage(authenticated_user(), context["object"].community)
 
 
 def is_in_thread(context) -> bool:

@@ -129,4 +129,4 @@ def test_both_predicates_are_callable_from_a_template(
 
     with app.test_request_context("/"):
         assert render_template_string("{{ is_site_admin() }}") == "False"
-        assert render_template_string("{{ can_manage(None) }}") == "False"
+        assert render_template_string("{{ can_manage(current_user, None) }}") == "False"

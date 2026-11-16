@@ -17,12 +17,13 @@ from abilian.services.viewtracker import viewtracker
 from abilian.services.viewtracker.models import Hit
 
 if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
     from abilian.sbe.apps.documents.models import Document
     from abilian.sbe.apps.wiki.models import WikiPage
 
 
-def object_viewers(entity: Document | WikiPage) -> list:
-    if can_manage(g.community):
+def object_viewers(user: User, entity: Document | WikiPage) -> list:
+    if can_manage(user, g.community):
         views = viewtracker.get_views(entity=entity)
         community_members_id = [
             user.id for user in g.community.members if user.id != entity.creator.id

@@ -91,7 +91,7 @@ def document_view(user: User, doc_id: int) -> str:
         "breadcrumbs": bc,
         "folder": doc.parent,
         "has_preview": has_preview,
-        "viewers": object_viewers(doc),
+        "viewers": object_viewers(user, doc),
     }
     return render_template("documents/document.html", **ctx)
 
@@ -149,7 +149,7 @@ def document_viewers(user: User, doc_id):
         "breadcrumbs": bc,
         "folder": doc.parent,
         "has_preview": has_preview,
-        "viewers": object_viewers(doc),
+        "viewers": object_viewers(user, doc),
     }
     return render_template("documents/document_viewers.html", **ctx)
 

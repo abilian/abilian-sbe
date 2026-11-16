@@ -26,13 +26,13 @@ from flask import (
     session,
     url_for,
 )
-from flask_login import current_user, login_required
 from openpyxl.cell import WriteOnlyCell
 from werkzeug.exceptions import BadRequest, NotFound
 from werkzeug.local import LocalProxy
 from whoosh.searching import Hit
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.models.subjects import Group, User, UserQuery
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
@@ -94,7 +94,9 @@ def register_context_processors(state: BlueprintSetupState) -> None:
 
 
 def _can_manage_current_community() -> bool:
-    return hasattr(g, "community") and community_security.can_manage(g.community)
+    return hasattr(g, "community") and community_security.can_manage(
+        authenticated_user(), g.community
+    )
 
 
 def tab(tab_name: str) -> Callable:
@@ -151,8 +153,8 @@ def default_view_kw(
 # Routes
 #
 @route("/")
-@login_required
-def index() -> str:
+@authenticated
+def index(user: User) -> str:
     query = Community.query
     sort_order = request.args.get("sort", "").strip()
     if not sort_order:
@@ -169,10 +171,10 @@ def index() -> str:
     # questions there -- site-wide here, group-scoped in `social/group.html` --
     # which is how `g.is_manager` went wrong one layer down. The template asks
     # `is_site_admin()` by name instead.
-    is_admin = site_security.is_site_admin()
+    is_admin = site_security.is_site_admin(user)
     if not is_admin:
         # Filter with permissions
-        query = query.join(Membership).filter(Membership.user == current_user)
+        query = query.join(Membership).filter(Membership.user == user)
 
     ctx = {
         "my_communities": query.all(),

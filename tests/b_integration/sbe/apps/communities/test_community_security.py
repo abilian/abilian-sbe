@@ -51,7 +51,7 @@ def test_a_manager_can_manage(
     community1.set_membership(outsider, MANAGER)
     db.session.flush()
 
-    assert can_manage(community1, outsider)
+    assert can_manage(outsider, community1)
 
 
 @pytest.mark.parametrize("role", [READER, MEMBER])
@@ -63,7 +63,7 @@ def test_lesser_roles_cannot_manage(
     community1.set_membership(outsider, role)
     db.session.flush()
 
-    assert not can_manage(community1, outsider)
+    assert not can_manage(outsider, community1)
 
 
 def test_a_non_member_cannot_manage(
@@ -71,7 +71,7 @@ def test_a_non_member_cannot_manage(
 ) -> None:
     security_service.start()
 
-    assert not can_manage(community1, outsider)
+    assert not can_manage(outsider, community1)
 
 
 def test_a_site_admin_can_manage_any_community(
@@ -81,7 +81,7 @@ def test_a_site_admin_can_manage_any_community(
     security_service.grant_role(outsider, ADMIN)
     db.session.flush()
 
-    assert can_manage(community1, outsider)
+    assert can_manage(outsider, community1)
 
 
 def test_a_site_admin_passes_even_with_no_community(
@@ -93,7 +93,7 @@ def test_a_site_admin_passes_even_with_no_community(
     security_service.grant_role(outsider, ADMIN)
     db.session.flush()
 
-    assert can_manage(None, outsider)
+    assert can_manage(outsider, None)
 
 
 def test_the_model_method_delegates(
@@ -104,7 +104,7 @@ def test_the_model_method_delegates(
     db.session.flush()
 
     assert community1.has_permission(outsider, MANAGE) == can_manage(
-        community1, outsider
+        outsider, community1
     )
 
 
@@ -152,7 +152,7 @@ def test_a_presenter_is_accepted_where_a_community_is(
     community1.set_membership(outsider, MANAGER)
     db.session.flush()
 
-    assert can_manage(CommunityPresenter(community1), outsider)
+    assert can_manage(outsider, CommunityPresenter(community1))
 
 
 def test_being_the_creator_grants_nothing_by_itself(
@@ -173,7 +173,7 @@ def test_being_the_creator_grants_nothing_by_itself(
     community1.creator = outsider
     db.session.flush()
 
-    assert not can_manage(community1, outsider)
+    assert not can_manage(outsider, community1)
 
 
 # --- is_member: what `has_access` became --------------------------------------
@@ -193,7 +193,7 @@ def test_every_membership_role_counts_as_membership(
         community1.set_membership(user, role)
         db.session.flush()
 
-        assert is_member(community1, user), role
+        assert is_member(user, community1), role
 
 
 def test_an_outsider_is_not_a_member(
@@ -201,7 +201,7 @@ def test_an_outsider_is_not_a_member(
 ) -> None:
     security_service.start()
 
-    assert not is_member(community1, outsider)
+    assert not is_member(outsider, community1)
 
 
 def test_a_site_admin_passes_without_being_a_member(
@@ -213,7 +213,7 @@ def test_a_site_admin_passes_without_being_a_member(
     security_service.grant_role(outsider, ADMIN)
     db.session.flush()
 
-    assert is_member(community1, outsider)
+    assert is_member(outsider, community1)
 
 
 def test_an_anonymous_user_is_not_a_member(
@@ -223,4 +223,4 @@ def test_an_anonymous_user_is_not_a_member(
 
     security_service.start()
 
-    assert not is_member(community1, AnonymousUser())
+    assert not is_member(AnonymousUser(), community1)

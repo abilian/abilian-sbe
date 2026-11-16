@@ -340,7 +340,7 @@ class Community(Entity):
     def has_member(self, user) -> bool:
         return self.get_role(user) is not None
 
-    def has_permission(self, user: LocalProxy, permission: Permission) -> bool:
+    def has_permission(self, user: User, permission: Permission) -> bool:
         """Sugar over the policy engine, with no rule of its own.
 
         It used to carry a second role -> permission table (MANAGER: anything,

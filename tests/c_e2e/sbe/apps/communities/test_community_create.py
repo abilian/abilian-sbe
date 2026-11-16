@@ -62,4 +62,4 @@ def test_the_creator_becomes_a_manager_member(
         "the creator is not in the member list, so nothing but a special case "
         "in a predicate could have said they manage it"
     )
-    assert can_manage(community, admin)
+    assert can_manage(admin, community)

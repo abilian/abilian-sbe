@@ -63,13 +63,13 @@ def test_a_creator_who_is_not_a_member_becomes_a_manager(
     ensure_services_started(["security"])
     community1.creator = creator
     db.session.commit()
-    assert not can_manage(community1, creator), "the state the backfill is for"
+    assert not can_manage(creator, community1), "the state the backfill is for"
 
     _run(app)
 
     db.session.expire_all()
     assert community1.get_role(creator) == MANAGER
-    assert can_manage(community1, creator)
+    assert can_manage(creator, community1)
 
 
 def test_a_role_someone_chose_is_not_overwritten(
@@ -199,13 +199,13 @@ def test_the_upgrade_steps_in_the_order_the_changelog_gives(
     db.session.commit()
     _as_before_the_signal(community1)
     db.session.commit()
-    assert not can_manage(community1, manager)
-    assert not can_manage(community1, creator)
+    assert not can_manage(manager, community1)
+    assert not can_manage(creator, community1)
 
     _run_roles(app)
     _run(app)
 
     db.session.expire_all()
-    assert can_manage(community1, manager)
-    assert can_manage(community1, creator)
-    assert not can_manage(community1, community1.test_user)
+    assert can_manage(manager, community1)
+    assert can_manage(creator, community1)
+    assert not can_manage(community1.test_user, community1)

@@ -8,6 +8,7 @@ from flask import g, url_for as url_for_orig
 from flask_login import current_user
 
 from abilian.core.application import as_application
+from abilian.core.extensions.login import authenticated_user
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.web.action import Action, Endpoint, actions
@@ -92,7 +93,7 @@ _actions = (
         # The same question `CommunityEdit` enforces. It used to ask
         # `current_user.has_role("admin")`, so a manager could reach the
         # settings page only by typing its URL.
-        condition=lambda ctx: can_manage(g.community),
+        condition=lambda ctx: can_manage(authenticated_user(), g.community),
         endpoint="communities.settings",
     ),
 )

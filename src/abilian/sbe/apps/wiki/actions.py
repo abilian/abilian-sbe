@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 from flask import url_for
 
 from abilian.core.application import as_application
+from abilian.core.extensions.login import authenticated_user
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.actions import CommunityEndpoint
 from abilian.sbe.apps.communities.security import can_manage
@@ -46,7 +47,7 @@ _actions = (
         "page_viewers",
         _l("Readers list"),
         icon="user",
-        condition=lambda ctx: can_manage(ctx["object"].community),
+        condition=lambda ctx: can_manage(authenticated_user(), ctx["object"].community),
         endpoint=".page_viewers",
     ),
     WikiPageAction(

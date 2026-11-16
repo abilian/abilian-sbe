@@ -7,6 +7,7 @@ from typing import Any
 from flask import Blueprint, g
 from werkzeug.exceptions import NotFound
 
+from abilian.core.extensions.login import authenticated_user
 from abilian.i18n import _l
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
@@ -52,7 +53,7 @@ class CommunityBlueprint(Blueprint):
 def check_membership() -> None:
     if hasattr(g, "community"):
         # communities.index is not inside a community, for example
-        security.check_membership(g.community)
+        security.check_membership(authenticated_user(), g.community)
 
 
 def init_current_tab(endpoint: str, values: dict[str, int]) -> None:
