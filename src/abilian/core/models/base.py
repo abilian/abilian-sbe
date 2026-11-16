@@ -17,6 +17,11 @@ from abilian.core.util import fqcn
 class Model(db.Model):
     __abstract__ = True
 
+    #: What the object's class is known as: in the index, in URLs, in the
+    #: registry of default views. Set on `Entity` subclasses by their
+    #: metaclass, and on `User` and `Group` by `set_entity_type`.
+    entity_type: ClassVar[str]
+
 
 class Info(dict):
     def __init__(self, **kw: Any) -> None:

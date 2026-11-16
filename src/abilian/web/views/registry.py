@@ -18,7 +18,7 @@ if TYPE_CHECKING:
     from flask.blueprints import BlueprintSetupState
 
     from abilian.app import Application
-    from abilian.core.entities import Entity
+    from abilian.core.models.base import Model
 
 
 class Registry:
@@ -30,7 +30,7 @@ class Registry:
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self._map: dict[str, Callable] = {}
 
-    def register(self, entity: Entity | type[Entity], url_func: Callable) -> None:
+    def register(self, entity: Model | type[Model], url_func: Callable) -> None:
         """Associate a `url_func` with entity's type.
 
         :param:entity: an :class:`abilian.core.extensions.db.Model` class or
@@ -97,8 +97,8 @@ class default_view:
     def __init__(
         self,
         app_or_blueprint: Application | Blueprint,
-        entity: Entity,
-        id_attr: str = "object_id",
+        entity: type[Model],
+        id_attr: str | None = "object_id",
         endpoint: Any | None = None,
         kw_func: Any | None = None,
     ) -> None:
@@ -119,7 +119,7 @@ class default_view:
         if endpoint[0] == ".":
             endpoint = self.app_or_blueprint.name + endpoint
 
-        def default_url(obj: Entity, obj_type: str, obj_id: int, **kwargs: Any) -> str:
+        def default_url(obj: Model, obj_type: str, obj_id: int, **kwargs: Any) -> str:
             kw = {}
             kw.update(kwargs)
             if self.id_attr is not None:
