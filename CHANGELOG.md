@@ -14,6 +14,7 @@ SQLAlchemy 2.0, and a pass over who may reach what. Every route now refuses an a
 
 ### Security
 
+- The PDF viewer was a vendored copy of PDF.js 1.1, from 2015, open to CVE-2024-4367: a crafted PDF could run JavaScript in the page of whoever opened it, though only with the Content Security Policy off. It is replaced by the current PDF.js (6.5), built with the front end, running with neither eval nor WebAssembly, and without the PDFs' own scripts.
 - Anyone could fetch any image stored in the database, those of private communities' documents and attachments included, by counting ids at `/images/files/<id>`. The route is gone, and user photos need a login.
 - Anonymous visitors could upload files, into one directory every anonymous visitor shared. Uploads need a login.
 - The attachment, comment and tag views asked for no login.
