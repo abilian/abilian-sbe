@@ -21,7 +21,9 @@ SQLAlchemy 2.0, and a pass over who may reach what. Every route now refuses an a
 - Any logged-in user could edit the tags of any entity. It now takes write permission on the entity.
 - Any logged-in user could open another user's profile editor, prefilled; only saving was refused.
 - The admin pages answered 404 or 403 depending on whether the vocabulary in the URL existed, to anyone.
-- A test now requests every route as an anonymous visitor and fails on any route that is neither refused nor listed as public.
+- Any logged-in user could see a private group's page, member list and photo, and join it by posting `action=join`, which the page does not offer. A private group is now seen only by its members and administrators, and only a public group can be joined.
+- The communities' JSON list (`/communities/json2`) gave anyone, anonymous visitors included, the names of all communities, private ones too; nothing used it, and it is removed. `/communities/doc/<id>` told anyone which community a document is in; it is now a 404 unless the user may read the document. Every route of the community blueprints now needs a login.
+- Two tests now request every route, one as an anonymous visitor and one as a logged-in user with no role and no membership, and fail on any route that does not refuse them and is not listed as open on purpose.
 
 ### Changed
 
@@ -68,6 +70,7 @@ Models declare their columns as `Mapped[...]`, and `db.Model` is built on a type
 - An email reply to a deleted forum thread raised, and was retried twenty times; it is now logged and dropped.
 - Logging in to an account with an empty password column was a 500.
 - The query for a community's last views failed on PostgreSQL.
+- A group or user form posted with a missing or unknown action was a 500, not a 400.
 - Uploading or deleting a wiki attachment ended on the page's viewers list instead of the page.
 - With Sentry configured for the browser, the Content Security Policy refused the reports sent to the DSN's host.
 
