@@ -5,8 +5,8 @@ from __future__ import annotations
 import functools
 from typing import TYPE_CHECKING, Concatenate, cast
 
+from flask import abort
 from flask_login import AnonymousUserMixin, LoginManager, current_user as _current_user
-from werkzeug.exceptions import Unauthorized
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -39,7 +39,8 @@ current_user = cast("User | AnonymousUser", _current_user)
 
 
 def authenticated[**P, R](view: Callable[Concatenate[User, P], R]) -> Callable[P, R]:
-    """Give a view the logged-in user, as its first argument.
+    """Give a view the logged-in user, as its first argument; send an anonymous
+    visitor to the login page, as `login_required` does.
 
     The view's signature then says that it needs one, and type checkers hold
     whatever it calls to a `User`.
@@ -53,12 +54,13 @@ def authenticated[**P, R](view: Callable[Concatenate[User, P], R]) -> Callable[P
 
 
 def authenticated_user() -> User:
-    """The logged-in user, or a 401 for an anonymous visitor.
+    """The logged-in user. An anonymous visitor is sent to the login page, as
+    `login_required` does (a 401 when the app has no login page).
 
     Where a decorator cannot pass the user, as in class-based views and
     `before_request` hooks, call this once and pass its answer down.
     """
     user = current_user
     if isinstance(user, AnonymousUser):
-        raise Unauthorized
+        abort(login_manager.unauthorized())
     return user

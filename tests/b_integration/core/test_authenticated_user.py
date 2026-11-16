@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 import pytest
-from werkzeug.exceptions import Unauthorized
+from werkzeug.exceptions import HTTPException
 
 from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.models.subjects import User
@@ -16,9 +16,15 @@ if TYPE_CHECKING:
     from sqlalchemy.orm import Session
 
 
-def test_an_anonymous_visitor_is_unauthorized(app: Flask) -> None:
-    with app.test_request_context(), pytest.raises(Unauthorized):
+def _is_sent_to_login(error: HTTPException) -> bool:
+    response = error.get_response()
+    return response.status_code == 302 and "/login" in response.location
+
+
+def test_an_anonymous_visitor_is_sent_to_login(app: Flask) -> None:
+    with app.test_request_context(), pytest.raises(HTTPException) as error:
         authenticated_user()
+    assert _is_sent_to_login(error.value)
 
 
 def test_a_logged_in_user_is_returned(app: Flask, session: Session) -> None:
@@ -44,6 +50,7 @@ def test_a_view_gets_the_user_before_its_url_arguments(
         assert _view(item_id=3) == (user, 3)
 
 
-def test_a_view_turns_away_an_anonymous_visitor(app: Flask) -> None:
-    with app.test_request_context(), pytest.raises(Unauthorized):
+def test_a_view_sends_an_anonymous_visitor_to_login(app: Flask) -> None:
+    with app.test_request_context(), pytest.raises(HTTPException) as error:
         _view(item_id=3)
+    assert _is_sent_to_login(error.value)
