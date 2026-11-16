@@ -155,9 +155,6 @@ class BasePageView:
 class PageView(BasePageView, ObjectView[WikiPage, WikiPageForm]):
     template = "wiki/page.html"
     view_endpoint = ".page"
-    decorators = [
-        default_view(wiki, WikiPage, id_attr=None, kw_func=wiki_page_default_view_kw)
-    ]
 
     def init_object(
         self, args: tuple[Any], kwargs: dict[str, Any]
@@ -176,7 +173,13 @@ class PageView(BasePageView, ObjectView[WikiPage, WikiPageForm]):
         return args, kwargs
 
 
-route("/page/")(PageView.as_view("page"))
+# Registered here, not in `decorators`: `PageViewers` would inherit those, and
+# become the default view of a page in its place.
+route("/page/")(
+    default_view(wiki, WikiPage, id_attr=None, kw_func=wiki_page_default_view_kw)(
+        PageView.as_view("page")
+    )
+)
 
 
 class PageViewers(PageView):

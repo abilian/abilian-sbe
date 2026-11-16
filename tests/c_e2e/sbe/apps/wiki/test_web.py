@@ -16,6 +16,7 @@ from abilian.sbe.apps.wiki import views
 from abilian.sbe.apps.wiki.models import WikiPage, WikiPageAttachment
 from abilian.services import get_service, security_service
 from abilian.services.security import ADMIN
+from abilian.web import url_for as abilian_url_for
 from tests.util import client_login
 
 if TYPE_CHECKING:
@@ -235,3 +236,20 @@ def test_an_attachment_of_another_page_is_not_found(
                 attachment=attachment_id,
             )
             assert getattr(client, method)(url).status_code == 404, attachment_id
+
+
+def test_a_page_url_is_the_page_not_its_viewers(
+    app: Application, db: SQLAlchemy, community1: Community
+) -> None:
+    """The viewers view subclasses the page view, and used to inherit its
+    registration as the default view: uploading or deleting an attachment then
+    ended on the viewers page."""
+    page = WikiPage(title="Some page", community=community1)
+    db.session.add(page)
+    db.session.flush()
+
+    with app.test_request_context():
+        url = abilian_url_for(page)
+
+    assert "/wiki/page/" in url
+    assert "title=Some+page" in url
