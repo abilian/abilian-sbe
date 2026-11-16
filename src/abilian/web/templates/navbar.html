@@ -24,7 +24,7 @@
       {# Search and User Menu - Desktop #}
       <div class="flex flex-1 justify-center px-2 lg:ml-6 lg:justify-end">
         {%- if 'abilian.web.search' in app.plugin_manager.registered_plugins %}
-          {%- if not (current_user.is_anonymous and app.private_site) %}
+          {%- if not current_user.is_anonymous %}
             <div class="w-full max-w-lg lg:max-w-xs">
               <form role="search" class="livesearch" method="GET" action="{{ url_for('search.search_main') }}">
                 <input
@@ -78,7 +78,7 @@
 
     <div class="border-t border-gray-200 pt-4 pb-3">
       {%- if 'abilian.web.search' in app.plugin_manager.registered_plugins %}
-        {%- if not (current_user.is_anonymous and app.private_site) %}
+        {%- if not current_user.is_anonymous %}
           <div class="px-2 pb-3">
             <form role="search" class="livesearch" method="GET" action="{{ url_for('search.search_main') }}">
               <input type="text" name="q" id="search-box-mobile"

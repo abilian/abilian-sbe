@@ -1,6 +1,6 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-"""Both search endpoints, for the three kinds of caller.
+"""Both search endpoints, for members and anonymous visitors.
 
 Nothing exercised these before. The live endpoint in particular was only ever
 reached from the navbar, and the typeahead widget that used to drive it bailed
@@ -40,15 +40,16 @@ def test_search_works_for_a_member(
 
 
 @pytest.mark.parametrize("endpoint", ["search.search_main", "search.live"])
-def test_search_works_for_an_anonymous_visitor(
+def test_search_sends_an_anonymous_visitor_to_login(
     endpoint: str, community1: Community, app: Application, client: FlaskClient
 ) -> None:
-    """No session, so nothing has run a user_loaded hook for this request."""
+    """Everything worth finding is members-only, so search is too."""
     ensure_services_started(["security", "indexing"])
 
     response = client.get(url_for(endpoint, q="test"))
 
-    assert response.status_code == 200
+    assert response.status_code == 302
+    assert "/login" in response.location
 
 
 def test_live_search_answers_with_json(

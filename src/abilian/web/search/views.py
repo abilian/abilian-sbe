@@ -12,11 +12,13 @@ import whoosh
 import whoosh.highlight
 import whoosh.searching
 import whoosh.sorting
-from flask import Blueprint, current_app, g, render_template, request, url_for
+from flask import current_app, g, render_template, request, url_for
 
 from abilian.i18n import _
 from abilian.services import get_service
+from abilian.services.security import AUTHENTICATED
 from abilian.web import views
+from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
 
@@ -32,8 +34,12 @@ RESULTS_FRAGMENTER = whoosh.highlight.SentenceFragmenter()
 PAGE_SIZE = 20
 MAX_LIVE_RESULTS_PER_CLASS = 5
 
-search = Blueprint(
-    "search", __name__, url_prefix="/search", template_folder="templates"
+search = AccessControlBlueprint(
+    "search",
+    __name__,
+    url_prefix="/search",
+    template_folder="templates",
+    allowed_roles=AUTHENTICATED,
 )
 route = search.route
 
