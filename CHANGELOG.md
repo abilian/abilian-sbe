@@ -9,8 +9,9 @@ SQLAlchemy 2.0, and a pass over who may reach what. Every route now refuses an a
 ### Upgrade steps
 
 1. Install the new dependencies: SQLAlchemy 2.0 and Flask-SQLAlchemy 3.1. No migration: the schema is unchanged.
-2. Remove `SOCIAL_REST_API` from the configuration, if set: the API it enabled is gone.
-3. Downstream code: see the API changes below. Most of them are a new first parameter, the user.
+2. Rebuild the front end (`make front`, or `npm run build` in `vite/`) before building or installing the package: the PDF viewer is now part of it, with its worker and data files. Without it, a PDF opens on an empty page.
+3. Remove `SOCIAL_REST_API` from the configuration, if set: the API it enabled is gone.
+4. Downstream code: see the API changes below. Most of them are a new first parameter, the user.
 
 ### Security
 
