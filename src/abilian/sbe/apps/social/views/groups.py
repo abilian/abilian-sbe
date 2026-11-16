@@ -120,7 +120,7 @@ def group_post(user: User, group_id: int) -> Response:
 
     if action not in {"join", "leave"} | membership_actions:
         msg = f"Unknown action: {action}"
-        raise ValueError(msg)
+        raise BadRequest(msg)
 
     # Members of a private group are added by its administrators.
     if action == "join" and not group.public:

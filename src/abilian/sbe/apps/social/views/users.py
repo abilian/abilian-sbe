@@ -146,8 +146,8 @@ def user_post(user: User, user_id: int) -> Response:
         case "unfollow":
             user.unfollow(followed)
         case _:
-            msg = "Should not happen"
-            raise Exception(msg)
+            msg = f"Unknown action: {action}"
+            raise BadRequest(msg)
     db.session.commit()
 
     if return_url:

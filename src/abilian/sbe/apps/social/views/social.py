@@ -48,11 +48,6 @@ def home(user: User) -> str:
     return render_template("social/home.html", **ctx)
 
 
-@route("/stream/<stream_name>")
-def stream(stream_name) -> None:
-    pass
-
-
 @route("/", methods=["POST"])
 def share():
     # TODO: better error control / feedback

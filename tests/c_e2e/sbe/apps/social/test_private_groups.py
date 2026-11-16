@@ -92,3 +92,22 @@ def test_anyone_may_join_a_public_group(
     assert response.status_code == 302
     db.session.expire_all()
     assert outsider in group.members
+
+
+@pytest.mark.parametrize("action", [None, "frobnicate"])
+def test_a_missing_or_unknown_action_is_a_bad_request(
+    action: str | None,
+    app: Application,
+    client: FlaskClient,
+    db: SQLAlchemy,
+    outsider: User,
+) -> None:
+    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    group = _group(db, public=True)
+    data = {"action": action} if action else {}
+
+    with client_login(client, outsider):
+        group_url = url_for("social.group_post", group_id=group.id)
+        user_url = url_for("social.user_post", user_id=outsider.id)
+        assert client.post(group_url, data=data).status_code == 400
+        assert client.post(user_url, data=data).status_code == 400
