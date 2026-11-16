@@ -202,6 +202,32 @@ def test_a_manager_removes_a_role_on_a_folder(
     assert not security_service.has_role(other, READER, folder)
 
 
+def test_changing_to_an_unknown_owner_keeps_the_owner(
+    app: Application, client: FlaskClient, db: SQLAlchemy, community: Community
+) -> None:
+    security_service.start()
+    user = community.test_user
+    security_service.grant_role(user, ADMIN)
+    folder = community.folder
+    doc = folder.create_document("owned")
+    doc.owner = user
+    db.session.commit()
+    url = url_for(
+        "documents.folder_post", community_id=community.slug, folder_id=folder.id
+    )
+    data = {
+        "action": "change-owner",
+        "new_owner": 999999,
+        "object-selected": [f"cmis:document:{doc.id:d}"],
+    }
+
+    with client_login(client, user):
+        assert client.post(url, data=data).status_code == 404
+
+    db.session.expire_all()
+    assert doc.owner == user
+
+
 def test_name_check_without_an_object_is_a_bad_request(
     app: Application, client: FlaskClient, community: Community
 ) -> None:

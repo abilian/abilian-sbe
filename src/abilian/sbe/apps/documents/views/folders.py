@@ -1005,7 +1005,12 @@ def change_owner(folder):
     items = itertools.chain(*get_selected_objects(folder))
 
     user_id = request.form.get("new_owner", type=int)
-    user = User.query.get(user_id)
+    if user_id is None:
+        msg = "No new owner given"
+        raise BadRequest(msg)
+    # An unknown id is a 404: it used to set every selected item's owner to
+    # None, and report success.
+    user = User.query.get_or_404(user_id)
 
     for item in items:
         item.owner = user
