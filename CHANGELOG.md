@@ -2,6 +2,73 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+SQLAlchemy 2.0, and a pass over who may reach what. Every route now refuses an anonymous visitor unless it is public on purpose, and the code below the views takes the user as a parameter instead of reading `current_user`, so the type checker can tell where a logged-in user is required.
+
+### Upgrade steps
+
+1. Install the new dependencies: SQLAlchemy 2.0 and Flask-SQLAlchemy 3.1. No migration: the schema is unchanged.
+2. Remove `SOCIAL_REST_API` from the configuration, if set: the API it enabled is gone.
+3. Downstream code: see the API changes below. Most of them are a new first parameter, the user.
+
+### Security
+
+- Anyone could fetch any image stored in the database, those of private communities' documents and attachments included, by counting ids at `/images/files/<id>`. The route is gone, and user photos need a login.
+- Anonymous visitors could upload files, into one directory every anonymous visitor shared. Uploads need a login.
+- The attachment, comment and tag views asked for no login.
+- The tag management views (`/tags/manage/...`) were open to anyone; they are removed, since the admin tags panel does their job.
+- Any logged-in user could edit the tags of any entity. It now takes write permission on the entity.
+- Any logged-in user could open another user's profile editor, prefilled; only saving was refused.
+- The admin pages answered 404 or 403 depending on whether the vocabulary in the URL existed, to anyone.
+- A test now requests every route as an anonymous visitor and fails on any route that is neither refused nor listed as public.
+
+### Changed
+
+- Search needs a login: everything worth finding is members-only.
+- An anonymous visitor reaching a page that needs a user is sent to the login page.
+
+### Removed
+
+- The social REST API and its `SOCIAL_REST_API` setting. It was unused and broken, and, turned on, let any logged-in user change or delete any account.
+
+### Breaking — framework API
+
+| was | is |
+|---|---|
+| `can_manage(community, user=None)` | `can_manage(user, community)` |
+| `is_member(community=None, user=None)` | `is_member(user, community=None)` |
+| `check_membership(community=None, user=None)` | `check_membership(user, community=None)` |
+| `forum.security.can_write(post, user=None)` | `can_write(user, post)` |
+| `Lock.new()`, `lock.is_owner(user=None)`, `doc.set_lock(user=None)` | the user is required |
+| `folder.filtered_children`, `.filtered_subfolders` (properties) | methods taking the user |
+| `WikiPage(...)`, `page.create_revision(body_src, message)` | `WikiPage(..., author=user)`, `create_revision(author, body_src, message)` |
+| `get_recent_entries(num, user=None, community=None)` | `get_recent_entries(user, num, actor=None, community=None)` |
+| comments' and attachments' `can_read(entity)` and the like | `can_read(user, entity)` and the like |
+| `indexing.search(q, ..., user=None)` | `user=` is required |
+| `preferences.get_preferences(user=None)` and the like | the user is required |
+| `LoginSession.new()` | `LoginSession.new(user)` |
+| the document view helpers (`get_document`, `check_read_access`, ...) | the user first |
+| `ScopedSession` | removed; use `db.session()` |
+
+`abilian.core.extensions.login` adds `@authenticated`, which hands a view the logged-in user as its first argument, and `authenticated_user()` for class-based views and hooks. Its `current_user` is typed as the `User | AnonymousUser` it stands for. `security.has_permission` and `filter_with_permission` take a `User`; `has_role` still accepts an anonymous visitor.
+
+Models declare their columns as `Mapped[...]`, and `db.Model` is built on a typed declarative base. `session_of(obj)` gives an object's session. `get_object_by_path` returns None for a missing path, as documented, instead of raising `StopIteration`.
+
+### Fixed
+
+- The "my groups" tab crashed.
+- `Document.set_lock(user)` locked the document for the current user, whoever it was given.
+- Changing the owner of documents to a missing or unknown user cleared their owner and reported success.
+- Downloading or deleting a wiki attachment checked with `assert`s that it belonged to the page in the URL; with asserts disabled, any attachment was reachable through any page.
+- Removing a community member with an unknown id, or a membership that is not the user's, was a 500.
+- An unknown group or user in the social pages was a 500, not a 404.
+- Removing a role on a folder was always a 500, and the role forms crashed on an unknown user or group.
+- Listing the inherited roles of the repository root crashed: it read a parent the root does not have.
+- An email reply to a deleted forum thread raised, and was retried twenty times; it is now logged and dropped.
+- Logging in to an account with an empty password column was a 500.
+- The query for a community's last views failed on PostgreSQL.
+
 ## [1.2.0] - 2026-11-15
 
 The Tailwind front-end migration, an authorization convergence, MariaDB support and a type cleanup that found a score of bugs. Large, and it changes framework API that downstream applications may import.
