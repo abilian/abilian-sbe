@@ -62,7 +62,7 @@
       {%- endif %}
 
       {%- set att_manager = attachments.manager(view.obj) %}
-      {%- if att_manager.supports_attachments(view.obj) and att_manager.can_read(view.obj) %}
+      {%- if att_manager.supports_attachments(view.obj) and att_manager.can_read(current_user, view.obj) %}
         <div x-data="{ open: true }">
           <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900 cursor-pointer select-none"
               @click="open = !open">
@@ -73,7 +73,7 @@
           </h3>
           <div x-show="open" x-collapse class="mt-4">
             {{ m_attachments(view.obj) }}
-            {%- if show_new_attachment_form and att_manager.can_create(view.obj) %}
+            {%- if show_new_attachment_form and att_manager.can_create(current_user, view.obj) %}
               {{ m_attachment_form(view.obj) }}
             {%- endif %}
           </div>

@@ -14,6 +14,7 @@ from werkzeug.utils import redirect
 
 from abilian.core.application import as_application
 from abilian.core.entities import Entity
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.attachment import Attachment, supports_attachments
 from abilian.i18n import _, _l
 from abilian.services.security import AUTHENTICATED
@@ -26,6 +27,8 @@ from .forms import AttachmentForm
 
 if TYPE_CHECKING:
     from flask.blueprints import BlueprintSetupState
+
+    from abilian.core.models.subjects import User
 
 bp = AccessControlBlueprint(
     "attachments", __name__, url_prefix="/attachments", allowed_roles=AUTHENTICATED
@@ -63,6 +66,14 @@ class BaseAttachmentView:
     #: owning entity, set by `init_object()`
     entity: Entity
 
+    #: the logged-in user, set by `prepare_args()`
+    user: User
+
+    def prepare_args(self, args, kwargs):
+        # Before the parent's: it loads the object and checks the capability.
+        self.user = authenticated_user()
+        return super().prepare_args(args, kwargs)
+
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         entity_id = kwargs.pop("entity_id", None)
@@ -84,7 +95,7 @@ class BaseAttachmentView:
         # so every route was open to any authenticated user -- unreachable
         # only because no model is registered attachable. See
         # notes/plan-attachments.md.
-        if not getattr(manager, self.capability)(self.entity):
+        if not getattr(manager, self.capability)(self.user, self.entity):
             raise Forbidden
 
         self.Form = manager.Form

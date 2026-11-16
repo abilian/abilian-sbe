@@ -7,12 +7,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from flask import Blueprint, Flask, g
-from flask_login import current_user
 from loguru import logger
 from werkzeug.exceptions import Forbidden
 from werkzeug.utils import import_string
 
-from abilian.core.extensions.login import AnonymousUser
+from abilian.core.extensions.login import AnonymousUser, current_user
 from abilian.core.util import unwrap
 from abilian.i18n import _l
 from abilian.services.security import ADMIN, is_site_admin, security

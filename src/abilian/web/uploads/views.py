@@ -7,12 +7,11 @@ from __future__ import annotations
 import typing
 
 from flask import current_app, send_file
-from flask_login import current_user
 from flask_wtf.file import FileField, file_required
 from werkzeug.exceptions import BadRequest, NotFound
 from werkzeug.utils import secure_filename
 
-from abilian.core.util import unwrap
+from abilian.core.extensions.login import authenticated_user
 from abilian.services.security import AUTHENTICATED
 from abilian.web import csrf, url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
@@ -40,7 +39,7 @@ class BaseUploadsView:
     def prepare_args(self, args, kwargs):
         args, kwargs = super().prepare_args(args, kwargs)
         self.uploads = current_app.extensions["uploads"]
-        self.user = unwrap(current_user)
+        self.user = authenticated_user()
         return args, kwargs
 
 

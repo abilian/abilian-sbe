@@ -10,11 +10,11 @@ from typing import TYPE_CHECKING
 import sqlalchemy as sa
 import sqlalchemy.orm
 from flask import current_app
-from flask_login import current_user
 from werkzeug.exceptions import BadRequest, Forbidden
 
 from abilian.core.application import as_application
 from abilian.core.entities import Entity
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.comment import Comment, is_commentable
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
@@ -33,6 +33,8 @@ from .forms import CommentForm
 
 if TYPE_CHECKING:
     from flask.blueprints import BlueprintSetupState
+
+    from abilian.core.models.subjects import User
 
 bp = AccessControlBlueprint(
     "comments", __name__, url_prefix="/comments", allowed_roles=AUTHENTICATED
@@ -58,6 +60,14 @@ class BaseCommentView:
 
     #: commented entity, set by `init_object()`
     entity: Entity
+
+    #: the logged-in user, set by `prepare_args()`
+    user: User
+
+    def prepare_args(self, args, kwargs):
+        # Before the parent's: it loads the object and checks the capability.
+        self.user = authenticated_user()
+        return super().prepare_args(args, kwargs)
 
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
@@ -88,7 +98,7 @@ class BaseCommentView:
         Reading is about the commented entity; editing and deleting are about
         the comment, because their rule includes its author.
         """
-        return comments.can_read(self.entity)
+        return comments.can_read(self.user, self.entity)
 
     def view_url(self):
         kw = {}
@@ -108,7 +118,7 @@ class CommentEditView(BaseCommentView, ObjectEdit[Comment, CommentForm]):
     _message_success = _l("Comment edited")
 
     def has_capability(self, comments) -> bool:
-        return comments.can_write(self.obj)
+        return comments.can_write(self.user, self.obj)
 
     def breadcrumb(self):
         label = _('Edit comment on "{title}"').format(title=self.entity.name)
@@ -122,8 +132,8 @@ class CommentEditView(BaseCommentView, ObjectEdit[Comment, CommentForm]):
         history = obj_meta.setdefault("history", [])
         history.append(
             {
-                "user_id": current_user.id,
-                "user": str(current_user),
+                "user_id": self.user.id,
+                "user": str(self.user),
                 "date": utc_dt(datetime.utcnow()).isoformat(),
             }
         )
@@ -143,7 +153,7 @@ class CommentCreateView(BaseCommentView, ObjectCreate[Comment, CommentForm]):
         super().__init__(*args, **kwargs)
 
     def has_capability(self, comments) -> bool:
-        return comments.can_create(self.entity)
+        return comments.can_create(self.user, self.entity)
 
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
@@ -171,7 +181,7 @@ class CommentDeleteView(BaseCommentView, ObjectDelete[Comment, CommentForm]):
     _message_success = _l("Comment deleted")
 
     def has_capability(self, comments) -> bool:
-        return comments.can_delete(self.obj)
+        return comments.can_delete(self.user, self.obj)
 
 
 delete_view = CommentDeleteView.as_view("delete")

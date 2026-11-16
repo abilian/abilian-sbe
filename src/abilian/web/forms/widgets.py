@@ -20,7 +20,6 @@ import sqlalchemy.orm
 import wtforms
 from flask import current_app, render_template, render_template_string
 from flask_babel import format_date, format_datetime, format_number
-from flask_login import current_user
 from flask_wtf.file import FileField
 from markupsafe import Markup
 from wtforms import Field, FieldList, Form, FormField, IntegerField, Label, StringField
@@ -33,6 +32,7 @@ from wtforms.widgets import (
 )
 from wtforms_alchemy import ModelFieldList
 
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.blob import Blob
 from abilian.i18n import _, _l
 from abilian.services import image
@@ -487,13 +487,15 @@ class FileInput:
 
     def build_uploads_list(self, field):
         uploads = current_app.extensions["uploads"]
+        # Uploads belong to a logged-in user: the uploads blueprint requires one.
+        user = authenticated_user()
         uploaded = []
 
         for handle in field.upload_handles:
-            file_ = uploads.get_file(current_user, handle)
+            file_ = uploads.get_file(user, handle)
             if file_ is None:
                 continue
-            meta = uploads.get_metadata(current_user, handle)
+            meta = uploads.get_metadata(user, handle)
             uploaded.append(
                 {
                     "file": file_,

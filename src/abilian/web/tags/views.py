@@ -5,11 +5,10 @@
 from __future__ import annotations
 
 from flask import current_app
-from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 
 from abilian.core.entities import Entity
-from abilian.core.util import unwrap
+from abilian.core.extensions.login import authenticated_user
 from abilian.services.security import AUTHENTICATED
 from abilian.web import url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
@@ -31,7 +30,7 @@ class EntityTagEdit(ObjectEdit):
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         extension = current_app.extensions["tags"]
-        if not extension.can_edit(unwrap(current_user), self.obj):
+        if not extension.can_edit(authenticated_user(), self.obj):
             raise Forbidden
         self.Form = extension.entity_tags_form(self.obj)
         return args, kwargs

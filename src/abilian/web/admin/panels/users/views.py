@@ -5,9 +5,9 @@
 from __future__ import annotations
 
 from flask import render_template_string, request
-from flask_login import current_user
 from werkzeug.datastructures import MultiDict
 
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.subjects import User, gen_random_password
 from abilian.services import get_service
 from abilian.services.security.models import ADMIN, Role
@@ -51,7 +51,7 @@ class UserEdit(UserBase, views.ObjectEdit[User, UserAdminForm]):
         if not super().validate():
             return False
 
-        if current_user == self.obj:
+        if authenticated_user() == self.obj:
             # self edit: don't let user shoot themself in the foot
             self.form.can_login.data = True
             roles = self.form.roles

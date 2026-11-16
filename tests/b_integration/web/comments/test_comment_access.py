@@ -77,13 +77,9 @@ def test_the_author_may_edit_and_delete_their_own(
     _thing, comment = _thing_with_comment(db, author)
     db.session.commit()
 
-    with client_login(client, author), app.test_request_context("/"):
-        from flask import g
-
-        g.user = author
-        comments = app.extensions["comments"]
-        assert comments.can_write(comment)
-        assert comments.can_delete(comment)
+    comments = app.extensions["comments"]
+    assert comments.can_write(author, comment)
+    assert comments.can_delete(author, comment)
 
 
 def test_somebody_else_may_not(
@@ -95,13 +91,9 @@ def test_somebody_else_may_not(
     _thing, comment = _thing_with_comment(db, author)
     db.session.commit()
 
-    with client_login(client, stranger), app.test_request_context("/"):
-        from flask import g
-
-        g.user = stranger
-        comments = app.extensions["comments"]
-        assert not comments.can_write(comment)
-        assert not comments.can_delete(comment)
+    comments = app.extensions["comments"]
+    assert not comments.can_write(stranger, comment)
+    assert not comments.can_delete(stranger, comment)
 
 
 def test_a_site_admin_may(
@@ -115,13 +107,9 @@ def test_a_site_admin_may(
     _thing, comment = _thing_with_comment(db, author)
     db.session.commit()
 
-    with client_login(client, admin), app.test_request_context("/"):
-        from flask import g
-
-        g.user = admin
-        comments = app.extensions["comments"]
-        assert comments.can_write(comment)
-        assert comments.can_delete(comment)
+    comments = app.extensions["comments"]
+    assert comments.can_write(admin, comment)
+    assert comments.can_delete(admin, comment)
 
 
 # --- and the routes enforce it -----------------------------------------------

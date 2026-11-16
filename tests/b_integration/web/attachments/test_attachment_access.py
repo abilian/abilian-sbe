@@ -119,12 +119,7 @@ def test_read_is_not_enough_to_delete(
 def test_the_owner_permissions_are_what_is_asked(
     app: Application, db: SQLAlchemy, client: FlaskClient
 ) -> None:
-    """Not the attachment's own -- an attachment has no separate access rule.
-
-    The capabilities read `current_user` rather than taking a subject, so this
-    needs a logged-in request to ask them at all. That is the ambient-argument
-    problem plan-authorization.md is about, in a module it has not reached.
-    """
+    """Not the attachment's own -- an attachment has no separate access rule."""
     ensure_services_started(["security"])
     thing, _att = _thing_with_attachment(db)
     writer = _user(db, "writer@example.com")
@@ -134,10 +129,6 @@ def test_the_owner_permissions_are_what_is_asked(
     assert security_service.has_permission(writer, READ, thing)
     assert security_service.has_permission(writer, WRITE, thing)
 
-    with client_login(client, writer), app.test_request_context("/"):
-        from flask import g
-
-        g.user = writer
-        manager = app.extensions["attachments"].manager(thing)
-        assert manager.can_read(thing)
-        assert manager.can_write(thing)
+    manager = app.extensions["attachments"].manager(thing)
+    assert manager.can_read(writer, thing)
+    assert manager.can_write(writer, thing)

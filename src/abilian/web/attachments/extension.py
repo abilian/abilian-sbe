@@ -4,8 +4,9 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from flask import Flask, current_app
-from flask_login import current_user
 
 from abilian.core.models import attachment as attachments
 from abilian.services.security import CREATE, DELETE, READ, WRITE, security
@@ -13,6 +14,9 @@ from abilian.web import url_for
 
 from .forms import AttachmentForm
 from .views import UPLOAD_BUTTON, bp as blueprint
+
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
 
 _MANAGER_ATTR = "__attachments_manager__"
 
@@ -123,23 +127,23 @@ class AttachmentsManager:
     #
     # current user capabilities
     #
-    def can_read(self, entity):
-        """True if user can read attachments on entity."""
-        return security.has_permission(current_user, READ, obj=entity)
+    def can_read(self, user: User, entity):
+        """True if `user` can read attachments on entity."""
+        return security.has_permission(user, READ, obj=entity)
 
-    def can_write(self, entity):
-        """True if user can write attachments on entity."""
-        return security.has_permission(current_user, WRITE, obj=entity)
+    def can_write(self, user: User, entity):
+        """True if `user` can write attachments on entity."""
+        return security.has_permission(user, WRITE, obj=entity)
 
     # These asked WRITE, so "may add" and "may remove" were one question while
     # the names said two. CREATE, DELETE and WRITE share a default role set --
     # {ADMIN, MANAGER, WRITER}, service.py:71 -- so asking each its own
     # permission answers the same today, and lets a PermissionAssignment
     # separate them without touching this code.
-    def can_create(self, entity):
-        """True if user can add attachments."""
-        return security.has_permission(current_user, CREATE, obj=entity)
+    def can_create(self, user: User, entity):
+        """True if `user` can add attachments."""
+        return security.has_permission(user, CREATE, obj=entity)
 
-    def can_delete(self, entity):
-        """True if user can delete attachments."""
-        return security.has_permission(current_user, DELETE, obj=entity)
+    def can_delete(self, user: User, entity):
+        """True if `user` can delete attachments."""
+        return security.has_permission(user, DELETE, obj=entity)

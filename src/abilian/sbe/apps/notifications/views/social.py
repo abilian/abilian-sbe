@@ -7,10 +7,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, cast
 
 from flask import request
-from flask_login import current_user
 from werkzeug.exceptions import MethodNotAllowed
 
 from abilian.core.extensions import csrf, db
+from abilian.core.extensions.login import authenticated
 from abilian.core.models.subjects import User
 from abilian.i18n import render_template_i18n
 from abilian.sbe.apps.communities.decorators import is_site_admin
@@ -34,20 +34,18 @@ route = notifications.route
 
 @route("/debug/social/")
 @is_site_admin
-def debug_social():
-    """Send a digest to current user, or user with given email.
+@authenticated
+def debug_social(user: User):
+    """Send a digest to `user`, or to the user with the given email.
 
     Also displays the email in the browser as a result.
     """
     email = request.args.get("email")
-    if email:
-        user = User.query.filter(User.email == email).one()
-    else:
-        user = current_user
+    recipient = User.query.filter(User.email == email).one() if email else user
 
-    msg = make_message(user)
+    msg = make_message(recipient)
 
-    status = send_daily_social_digest_to(user)
+    status = send_daily_social_digest_to(recipient)
 
     if status:
         return msg.html

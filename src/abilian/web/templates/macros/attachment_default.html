@@ -18,8 +18,8 @@
 {% macro m_attachment(attachment) %}
   {%- set entity = attachment.entity %}
   {%- set manager = attachments.manager(entity) %}
-  {%- set can_write = manager.can_write(entity) %}
-  {%- set can_delete = manager.can_delete(entity) %}
+  {%- set can_write = manager.can_write(current_user, entity) %}
+  {%- set can_delete = manager.can_delete(current_user, entity) %}
   <div class="flex items-start gap-x-4 p-3 bg-gray-50 rounded-lg">
     <div class="flex-shrink-0 text-gray-400">
       <i class="fa fa-file fa-2x"></i>

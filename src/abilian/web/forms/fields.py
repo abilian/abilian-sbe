@@ -15,7 +15,6 @@ import sqlalchemy as sa
 import sqlalchemy.exc
 from flask import current_app
 from flask_babel import get_timezone
-from flask_login import current_user
 from flask_wtf.file import FileField as BaseFileField
 from loguru import logger
 from wtforms import (
@@ -36,6 +35,7 @@ from wtforms_sqlalchemy.fields import has_identity_key
 
 from abilian import i18n
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.util import utc_dt
 
 from .widgets import DateInput, DateTimeInput, FileInput, SelectWidget
@@ -236,6 +236,8 @@ class FileField(BaseFileField):
 
     def process_formdata(self, valuelist: list[str]) -> None:
         uploads = current_app.extensions["uploads"]
+        # Uploads belong to a logged-in user: the uploads blueprint requires one.
+        user = authenticated_user()
         if self.delete_files_index:
             self.data = None
             return
@@ -243,14 +245,14 @@ class FileField(BaseFileField):
         if valuelist:
             self.upload_handles = valuelist
             handle = valuelist[0]
-            fileobj = uploads.get_file(current_user, handle)
+            fileobj = uploads.get_file(user, handle)
 
             if fileobj is None:
                 # FIXME: this is a validation task
                 msg = f"File with handle {handle!r} not found"
                 raise ValueError(msg)
 
-            meta = uploads.get_metadata(current_user, handle)
+            meta = uploads.get_metadata(user, handle)
             filename = meta.get("filename", handle)
             mimetype = meta.get("mimetype")
             stream = fileobj.open("rb")

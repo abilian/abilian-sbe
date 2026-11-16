@@ -13,7 +13,7 @@
 
 {# single comment #}
 {% macro m_comment_edit_link(comment) %}
-  {%- if comments.can_write(comment) %}
+  {%- if comments.can_write(current_user, comment) %}
     <a href="{{ url_for('comments.edit', entity_id=comment.entity.id, object_id=comment.id) }}"
        class="inline-flex items-center gap-1 text-sm text-gray-600 hover:text-blue-600">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,7 +25,7 @@
 {% endmacro %}
 
 {% macro m_comment_delete_link(comment) %}
-  {%- if comments.can_delete(comment) %}
+  {%- if comments.can_delete(current_user, comment) %}
     <a class="js-widget inline-flex items-center gap-1 text-sm text-red-600 hover:text-red-800"
         href="{{ url_for('comments.delete', entity_id=comment.entity.id, object_id=comment.id) }}"
         data-init-with="deleteConfirm"
