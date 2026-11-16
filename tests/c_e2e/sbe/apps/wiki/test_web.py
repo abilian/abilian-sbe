@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
+import pytest
 from flask import g, url_for
 from pytest import fixture
 from toolz import first
@@ -12,8 +13,9 @@ from toolz import first
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import READER, Community
 from abilian.sbe.apps.wiki import views
-from abilian.sbe.apps.wiki.models import WikiPage
-from abilian.services import get_service
+from abilian.sbe.apps.wiki.models import WikiPage, WikiPageAttachment
+from abilian.services import get_service, security_service
+from abilian.services.security import ADMIN
 from tests.util import client_login
 
 if TYPE_CHECKING:
@@ -205,3 +207,36 @@ def test_create_page(community1, app, admin_user, client) -> None:
         )
         response = client.get(url)
         assert response.status_code == 200
+
+
+@pytest.mark.parametrize(
+    ("endpoint", "method"),
+    [("wiki.attachment_download", "get"), ("wiki.attachment_delete", "post")],
+)
+def test_an_attachment_of_another_page_is_not_found(
+    app, db, client, community1, user1, endpoint, method
+) -> None:
+    security_service.start()
+    security_service.grant_role(user1, ADMIN)
+    with client_login(client, user1):
+        page = WikiPage(title="Here", body_src="here", community=community1)
+        other = WikiPage(title="There", body_src="there", community=community1)
+        attachment = WikiPageAttachment(name="secret.txt")
+        attachment.set_content(b"secret", "text/plain")
+        other.attachments.append(attachment)
+        db.session.add_all([page, other])
+        db.session.commit()
+
+        for attachment_id in (attachment.id, 999999):
+            url = url_for(
+                endpoint,
+                community_id=community1.slug,
+                title="Here",
+                attachment=attachment_id,
+            )
+            assert getattr(client, method)(url).status_code == 404, attachment_id
+
+        # The test cleanup cannot drop the tables while a wiki attachment is
+        # left: a foreign key it does not untangle (to be found).
+        db.session.delete(attachment)
+        db.session.commit()
