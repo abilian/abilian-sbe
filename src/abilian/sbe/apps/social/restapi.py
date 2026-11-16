@@ -68,7 +68,7 @@ def list_users():
 @restapi.route("/users/<int:user_id>")
 @login_required
 def get_user(user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     return make_json_response(user)
 
 
@@ -76,7 +76,7 @@ def get_user(user_id):
 @restapi.route("/users/<int:user_id>/messages")
 @login_required
 def user_stream(user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     messages = Message.query.by_creator(user).all()
     # messages = list(user.messages)
     return make_json_response(messages)
@@ -86,7 +86,7 @@ def user_stream(user_id):
 @restapi.route("/users/<int:user_id>", methods=["PUT"])
 @login_required
 def update_user(user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     d = get_params(User.__editable__)
     user.update(d)
     db.session.commit()
@@ -97,7 +97,7 @@ def update_user(user_id):
 @restapi.route("/users/<int:user_id>", methods=["DELETE"])
 @login_required
 def delete_user(user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     db.session.delete(user)
     db.session.commit()
     return make_response("", 204)
@@ -112,7 +112,7 @@ def delete_user(user_id):
 @restapi.route("/users/<int:user_id>/followers")
 @login_required
 def get_followers(user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     followers = list(user.followers)
     return make_json_response(followers)
 
@@ -121,7 +121,7 @@ def get_followers(user_id):
 @restapi.route("/users/<int:user_id>/followees")
 @login_required
 def get_followees(user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     followees = list(user.followees)
     return make_json_response(followees)
 
@@ -130,7 +130,7 @@ def get_followees(user_id):
 @restapi.route("/users/<int:user_id>/followers", methods=["POST"])
 @login_required
 def follow(user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     current_user.follow(user)
     db.session.commit()
     return make_json_response("", 204)
@@ -142,7 +142,7 @@ def follow(user_id):
 )
 @login_required
 def unfollow(user_id, contact_user_id):
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
     current_user.unfollow(user)
     db.session.commit()
     return make_json_response("", 204)
@@ -165,7 +165,7 @@ def list_groups():
 @restapi.route("/groups/<int:group_id>")
 @login_required
 def get_group(group_id):
-    group = Group.query.get(group_id)
+    group = Group.query.get_or_404(group_id)
     return make_json_response(group)
 
 
@@ -173,7 +173,7 @@ def get_group(group_id):
 @restapi.route("/groups/<int:group_id>/members")
 @login_required
 def get_group_members(group_id):
-    group = Group.query.get(group_id)
+    group = Group.query.get_or_404(group_id)
     return make_json_response(group.members)
 
 
@@ -225,7 +225,7 @@ def get_messages():
 @restapi.route("/messages/<int:message_id>")
 @login_required
 def get_message(message_id):
-    message = Message.query.get(message_id)
+    message = Message.query.get_or_404(message_id)
     return make_json_response(message)
 
 
@@ -233,7 +233,7 @@ def get_message(message_id):
 @restapi.route("/messages/<int:message_id>", methods=["PUT"])
 @login_required
 def update_message(message_id):
-    message = Message.query.get(message_id)
+    message = Message.query.get_or_404(message_id)
     d = get_params(["content"])
     message.update(d)
     db.session.commit()
@@ -244,7 +244,7 @@ def update_message(message_id):
 @restapi.route("/messages/<int:message_id>", methods=["DELETE"])
 @login_required
 def delete_message(message_id):
-    message = Message.query.get(message_id)
+    message = Message.query.get_or_404(message_id)
     db.session.delete(message)
     db.session.commit()
     return make_response("", 204)
