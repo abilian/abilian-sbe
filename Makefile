@@ -57,7 +57,11 @@ lint-ruff:
 	ruff check src tests
 
 .PHONY: lint
-lint: lint-ruff typecheck lint-py lint-imports
+lint:
+	@make lint-ruff
+	# @make typecheck
+	@make lint-py
+	@make lint-imports
 
 .PHONY: lint-imports
 lint-imports:
@@ -70,8 +74,8 @@ lint-py:
 
 .PHONY: typecheck
 typecheck:
-	# ty check src
-	# pyrefly check src
+	pyrefly check src
+	ty check src
 
 .PHONY: format
 format:
