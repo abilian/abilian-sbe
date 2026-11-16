@@ -5,8 +5,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
+import pytest
 from flask import url_for
 
+from abilian.core.extensions import db
+from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import Community
 from abilian.services import security_service
 from abilian.services.security import ADMIN
@@ -155,3 +158,32 @@ def test_members(
         response = client.post(url, data=data, follow_redirects=True)
         assert response.status_code == 200
         assert user2 not in community.members
+
+
+@pytest.mark.parametrize(
+    ("data", "status"),
+    [
+        ({"action": "add-user-role", "user": 999999, "role": "member"}, 404),
+        ({"action": "delete", "user": "{user}", "membership": 999999}, 404),
+        # A membership that is not the named user's: a bad request, not a 500.
+        ({"action": "delete", "user": 999999, "membership": "{membership}"}, 404),
+        ({"action": "delete", "user": "{admin}", "membership": "{membership}"}, 400),
+    ],
+)
+def test_a_member_form_with_unknown_ids_is_refused(
+    app, client: FlaskClient, community1: Community, data: dict, status: int
+) -> None:
+    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    security_service.start()
+    admin = community1.test_user
+    security_service.grant_role(admin, ADMIN)
+    member = User(email="member@example.com", can_login=True)
+    community1.set_membership(member, "member")
+    db.session.commit()
+    membership = next(m for m in community1.memberships if m.user == member)
+    values = {"user": member.id, "admin": admin.id, "membership": membership.id}
+    form = {k: str(v).format(**values) for k, v in data.items()}
+
+    url = url_for("communities.members", community_id=community1.slug)
+    with client_login(client, admin):
+        assert client.post(url, data=form).status_code == status

@@ -28,7 +28,7 @@ from flask import (
 )
 from flask_login import current_user, login_required
 from openpyxl.cell import WriteOnlyCell
-from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
+from werkzeug.exceptions import BadRequest, NotFound
 from werkzeug.local import LocalProxy
 from whoosh.searching import Hit
 
@@ -433,7 +433,7 @@ def members_post() -> Response:
         flash(_("You must provide a user."), "error")
         return redirect(url_for(".members", community_id=community.slug))
     user_id = int(user_id)
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
 
     match action:
         case "add-user-role" | "set-user-role":
@@ -450,9 +450,10 @@ def members_post() -> Response:
 
         case "delete":
             membership_id = int(request.form["membership"])
-            membership = Membership.query.get(membership_id)
+            membership = Membership.query.get_or_404(membership_id)
             if membership.user_id != user_id:
-                raise InternalServerError
+                msg = "This membership is not the user's"
+                raise BadRequest(msg)
 
             community.remove_membership(user)
 
