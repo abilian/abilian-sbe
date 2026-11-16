@@ -15,7 +15,7 @@ from pathlib import Path
 import abilian
 
 ROOT = Path(abilian.__file__).parent
-VENDORED = {"pdfjs", "font-awesome", "highlightjs", "vite"}
+VENDORED = {"font-awesome", "highlightjs", "vite"}
 
 JINJA_COMMENT = re.compile(r"\{#.*?#\}", re.DOTALL)
 INLINE_SCRIPT = re.compile(

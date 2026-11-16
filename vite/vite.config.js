@@ -20,10 +20,14 @@ export default defineConfig({
         charts: "./src/charts.js",
         // Only the rich text widget loads this one.
         editor: "./src/editor.js",
+        // Only documents/view_pdf.html loads these two.
+        pdfviewer: "./src/pdfviewer.js",
+        "pdfviewer-styles": "./src/pdfviewer-styles.css",
       },
       output: {
         entryFileNames: "[name].js",
-        assetFileNames: "[name].css",
+        // Stable names: the templates load them by name (vite_asset()).
+        assetFileNames: "[name][extname]",
       },
     },
     outDir: "dist",

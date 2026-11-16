@@ -394,6 +394,7 @@ def document_view_pdf(user: User, doc_id):
 
     return render_template(
         "documents/view_pdf.html",
+        doc=doc,
         pdf_url=url_for(
             ".document_download", community_id=g.community.slug, doc_id=doc.id
         ),

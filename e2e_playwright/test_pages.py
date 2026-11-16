@@ -5,10 +5,8 @@
 from __future__ import annotations
 
 import re
-from io import BytesIO
 from typing import TYPE_CHECKING
 
-from PIL import Image
 from playwright.sync_api import expect
 from test_members import _pick
 
@@ -277,22 +275,20 @@ def test_wiki_attachment_is_deleted_after_asking_by_name(
     js_errors.assert_clean("deleting a wiki attachment")
 
 
-def test_pdf_viewer_is_told_what_to_show(
+def test_pdf_viewer_renders_the_document(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
-    """Its settings moved out of an inline script, and pdf.js cannot be misled by
-    a clean console: it has to have actually opened the file."""
+    """PDF.js has to have actually drawn the page: a clean console proves
+    nothing if the viewer never started. The page runs under the Content
+    Security Policy, so a worker, decoder or font it refuses fails the test."""
     page = logged_in
     page.goto(f"{base_url}/communities/{COMMUNITY}/docs/", wait_until="networkidle")
     row = page.locator("#objects-table tbody tr", has_text="E2E Sample")
     selected = row.locator('input[name="object-selected"]').get_attribute("value")
     doc_id = selected.rsplit(":", 1)[1]
 
-    pdf = BytesIO()
-    Image.new("RGB", (40, 40), "white").save(pdf, "PDF")
-
     def serve_pdf(route: Route) -> None:
-        route.fulfill(content_type="application/pdf", body=pdf.getvalue())
+        route.fulfill(content_type="application/pdf", body=_text_pdf("Hello PDF"))
 
     page.route(re.compile(rf"/doc/{doc_id}/download"), serve_pdf)
     page.goto(
@@ -300,9 +296,38 @@ def test_pdf_viewer_is_told_what_to_show(
         wait_until="networkidle",
     )
 
-    page.wait_for_function("PDFViewerApplication.pagesCount === 1")
-    assert "pdf.worker.js" in page.evaluate("PDFJS.workerSrc")
+    expect(page.locator("#pdf-viewer")).to_have_attribute("data-pages", "1")
+    expect(page.locator(".pdfViewer .page canvas")).to_have_count(1)
+    expect(page.locator("[data-page-count]")).to_have_text("1")
+    # Helvetica is not embedded: drawing it takes PDF.js's standard fonts.
+    expect(page.locator(".pdfViewer .textLayer")).to_contain_text("Hello PDF")
     js_errors.assert_clean("the PDF viewer")
+
+
+def _text_pdf(text: str) -> bytes:
+    """A one-page PDF saying `text` in Helvetica, which it does not embed."""
+    stream = f"BT /F1 24 Tf 72 720 Td ({text}) Tj ET".encode()
+    objects = [
+        b"<< /Type /Catalog /Pages 2 0 R >>",
+        b"<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+        (
+            b"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]"
+            b" /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>"
+        ),
+        b"<< /Length %d >>\nstream\n%s\nendstream" % (len(stream), stream),
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+    ]
+    pdf = b"%PDF-1.4\n"
+    offsets = []
+    for number, body in enumerate(objects, start=1):
+        offsets.append(len(pdf))
+        pdf += b"%d 0 obj\n%s\nendobj\n" % (number, body)
+    xref = len(pdf)
+    pdf += b"xref\n0 %d\n0000000000 65535 f \n" % (len(objects) + 1)
+    pdf += b"".join(b"%010d 00000 n \n" % offset for offset in offsets)
+    pdf += b"trailer\n<< /Size %d /Root 1 0 R >>\n" % (len(objects) + 1)
+    pdf += b"startxref\n%d\n%%%%EOF\n" % xref
+    return pdf
 
 
 def test_json_view_highlights_its_output(

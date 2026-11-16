@@ -1,0 +1,10 @@
+/* The PDF viewer's page (documents/view_pdf.html), on top of styles.css. */
+@import "pdfjs-dist/web/pdf_viewer.css";
+
+/* PDF.js requires its container to be absolutely positioned: it scrolls it. */
+.pdf-container {
+  position: absolute;
+  inset: 3rem 0 0 0;
+  overflow: auto;
+  background-color: #525659;
+}

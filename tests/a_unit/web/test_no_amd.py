@@ -12,7 +12,7 @@ import abilian
 
 ROOT = Path(abilian.__file__).parent
 AMD_CALL = re.compile(r"(?<![.\w])(?:require\(\s*\[|define\(\s*[\"'\[])")
-VENDORED = {"pdfjs", "vite"}
+VENDORED = {"vite"}
 
 
 def test_nothing_calls_require_or_define() -> None:
