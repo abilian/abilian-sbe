@@ -51,9 +51,15 @@ class CommunityBlueprint(Blueprint):
 
 
 def check_membership() -> None:
+    """Every route needs a logged-in user, and one inside a community a member.
+
+    The login is asked first, and of every route: the routes outside a
+    community (`communities.index`, for one) are not members-only, but they
+    are not open to anonymous visitors either.
+    """
+    user = authenticated_user()
     if hasattr(g, "community"):
-        # communities.index is not inside a community, for example
-        security.check_membership(authenticated_user(), g.community)
+        security.check_membership(user, g.community)
 
 
 def init_current_tab(endpoint: str, values: dict[str, int]) -> None:

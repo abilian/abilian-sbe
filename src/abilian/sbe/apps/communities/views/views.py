@@ -19,7 +19,6 @@ from flask import (
     current_app,
     flash,
     g,
-    jsonify,
     redirect,
     render_template,
     request,
@@ -44,6 +43,7 @@ from abilian.sbe.apps.communities.decorators import can_manage, is_site_admin
 from abilian.sbe.apps.communities.forms import CommunityForm
 from abilian.sbe.apps.communities.models import MANAGER, Community, Membership
 from abilian.sbe.apps.documents.models import Document
+from abilian.sbe.apps.documents.repository import content_repository
 from abilian.services import security as site_security
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
@@ -187,29 +187,6 @@ def index(user: User) -> str:
 @views.default_view(communities, Community, "community_id", kw_func=default_view_kw)
 def community() -> Response:
     return redirect(url_for("wall.index", community_id=g.community.slug))
-
-
-@route("/json2")
-def list_json2():
-    """JSON endpoint, used for filling select boxes dynamically."""
-    # TODO: make generic ?
-    args = request.args
-
-    q = args.get("q", "").replace("%", " ")
-    if not q or len(q) < 2:
-        raise BadRequest
-
-    query = (
-        db.session.query(Community.id, Community.name)
-        .filter(Community.name.ilike(f"%{q}%"))
-        .distinct()
-        .order_by(Community.name)
-        .limit(50)
-    )
-    query_result = query.all()
-
-    result = {"results": [{"id": r[0], "text": r[1]} for r in query_result]}
-    return jsonify(result)
 
 
 # edit views
@@ -560,11 +537,16 @@ def members_excel_export():
 #
 # Hack to redirect from urls used by the search engine.
 #
+
+
 @route("/doc/<int:doc_id>")
-def doc(doc_id):
+@authenticated
+def doc(user: User, doc_id: int) -> Response:
     doc = Document.query.get(doc_id)
 
-    if doc is None:
+    # Not found either for a user who may not read it: the redirect would
+    # tell them which community the document is in.
+    if doc is None or not content_repository.has_access(user, doc):
         raise NotFound
 
     folder = doc.parent
