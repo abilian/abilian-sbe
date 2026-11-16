@@ -47,6 +47,13 @@ def test_an_absent_file_has_no_stamp(tmp_path) -> None:
     assert _asset_version(str(tmp_path), "nope.js", debug=True) is None
 
 
+def test_a_directory_has_no_stamp(tmp_path) -> None:
+    """A directory's URL is a base that file names are appended to, as the PDF
+    viewer does: `dir/?v=...` + `file` is no URL at all."""
+    (tmp_path / "pdfjs").mkdir()
+    assert _asset_version(str(tmp_path), "pdfjs/", debug=True) is None
+
+
 def test_traversal_is_refused(tmp_path) -> None:
     assert _asset_version(str(tmp_path), "../secret.js", debug=True) is None
 

@@ -85,12 +85,13 @@ def _asset_version(directory: str, filename: str, debug: bool) -> str | None:
     if ".." in filename:
         return None
 
-    try:
-        stat = os.stat(os.path.join(directory, filename))
-    except OSError:
-        # A URL for a file that is not there: let the request 404 rather than
-        # breaking url_for.
+    path = os.path.join(directory, filename)
+    # A URL for a file that is not there: let the request 404 rather than
+    # breaking url_for. Nor is a directory an asset: its URL is a base that
+    # file names are appended to, which a `?v=` would break.
+    if not os.path.isfile(path):
         return None
+    stat = os.stat(path)
 
     version = format(int(stat.st_mtime), "x")
     _ASSET_VERSIONS[key] = version
