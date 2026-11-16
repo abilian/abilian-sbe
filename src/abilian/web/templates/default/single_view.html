@@ -3,7 +3,7 @@
 {% from "macros/comment.html" import m_comments, m_comment_form %}
 {% from "macros/attachment.html" import m_attachments, m_attachment_form %}
 {% from "macros/box.html" import m_box_content %}
-{% from "macros/tag.html" import m_tags_toggle_edit %}
+{% from "macros/tag.html" import m_tags, m_tags_toggle_edit %}
 
 {% block content %}
   {% if title %}<h1 class="text-2xl font-bold text-gray-900 mb-6">{{ title }}</h1>{% endif %}
@@ -13,7 +13,11 @@
   {% if view.mode == 'view' %}
     {%- if tags.supports_tagging(view.obj) %}
       <h3 class="text-lg font-semibold text-gray-900 mt-6 mb-3">{{ _('Tags') }}</h3>
-      {{ m_tags_toggle_edit(view.obj) }}
+      {%- if tags.can_edit(current_user, view.obj) %}
+        {{ m_tags_toggle_edit(view.obj) }}
+      {%- else %}
+        {{ m_tags(view.obj) }}
+      {%- endif %}
     {%- endif %}
 
     <div class="space-y-6 mt-8">

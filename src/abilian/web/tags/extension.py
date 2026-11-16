@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 
 from abilian.core.models.tag import TAGS_ATTR, Tag, supports_tagging
 from abilian.i18n import _l
+from abilian.services.security import WRITE, security
 from abilian.web import url_for
 from abilian.web.forms import Form
 from abilian.web.views.object import EDIT_BUTTON
@@ -20,6 +21,7 @@ if TYPE_CHECKING:
     from flask import Flask
 
     from abilian.core.entities import Entity
+    from abilian.core.models.subjects import User
 
 ENTITY_DEFAULT_NS_ATTR = "__tags_default_ns__"
 
@@ -66,6 +68,10 @@ class TagsExtension:
 
     def supports_tagging(self, entity):
         return supports_tagging(entity)
+
+    def can_edit(self, user: User, entity: Entity) -> bool:
+        """Changing an entity's tags is changing the entity."""
+        return security.has_permission(user, WRITE, obj=entity)
 
     def entity_tags(self, entity):
         return getattr(entity, TAGS_ATTR)
