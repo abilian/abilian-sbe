@@ -235,8 +235,3 @@ def test_an_attachment_of_another_page_is_not_found(
                 attachment=attachment_id,
             )
             assert getattr(client, method)(url).status_code == 404, attachment_id
-
-        # The test cleanup cannot drop the tables while a wiki attachment is
-        # left: a foreign key it does not untangle (to be found).
-        db.session.delete(attachment)
-        db.session.commit()

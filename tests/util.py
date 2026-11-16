@@ -4,14 +4,11 @@
 
 from __future__ import annotations
 
-import contextlib
-from contextlib import AbstractContextManager
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 from flask_login import login_user, logout_user
 from hyperlink import URL
-from sqlalchemy.exc import DatabaseError
 
 from abilian.services import get_service
 from abilian.web import url_for
@@ -20,15 +17,15 @@ from abilian.web import url_for
 DATA_DIR = Path(__file__).parent / "data"
 
 if TYPE_CHECKING:
+    from contextlib import AbstractContextManager
+
     from flask.testing import FlaskClient
 
     from abilian.app import Application
     from abilian.core.models.subjects import User
-    from abilian.core.sqlalchemy import SQLAlchemy
 
 __all__ = (
     "class_fqn",
-    "cleanup_db",
     "client_login",
     "ensure_services_started",
     "login",
@@ -87,22 +84,6 @@ def login(user, remember=False, force=False):
             logout_user()
 
     return LoginContext()
-
-
-def cleanup_db(db: SQLAlchemy) -> None:
-    """Drop all the tables, in a way that doesn't raise integrity errors."""
-
-    # Need to run this sequence twice for some reason
-    _delete_tables(db)
-    _delete_tables(db)
-    # One more time, just in case ?
-    db.drop_all()
-
-
-def _delete_tables(db: SQLAlchemy) -> None:
-    for table in reversed(db.metadata.sorted_tables):
-        with contextlib.suppress(DatabaseError):
-            db.session.execute(table.delete())
 
 
 def ensure_services_started(services: list[str]) -> None:
