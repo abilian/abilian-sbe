@@ -13,17 +13,21 @@ from typing import Any
 
 import sqlalchemy as sa
 import sqlalchemy.orm
-from flask import Blueprint, make_response, render_template, request
+from flask import make_response, render_template, request
 from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.core.models.blob import Blob
 from abilian.core.models.subjects import User
 from abilian.services.image import CROP, RESIZE_MODES, get_format, get_size, resize
+from abilian.services.security import AUTHENTICATED
+from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.util import url_for
 
 from .files import BaseFileDownload
 
-images_bp = Blueprint("images", __name__, url_prefix="/images")
+images_bp = AccessControlBlueprint(
+    "images", __name__, url_prefix="/images", allowed_roles=AUTHENTICATED
+)
 route = images_bp.route
 
 DEFAULT_AVATAR = rso.files("abilian.web") / "resources" / "img" / "avatar-default.png"
@@ -157,10 +161,6 @@ class BlobView(BaseImageView):
         kwargs["filename"] = filename
         kwargs["image"] = blob.file.open("rb")
         return args, kwargs
-
-
-blob_image = BlobView.as_view("blob_image")
-route("/files/<int:object_id>")(blob_image)
 
 
 class UserMugshot(BaseImageView):
