@@ -16,6 +16,7 @@ from abilian.core.application import as_application
 from abilian.core.entities import Entity
 from abilian.core.models.attachment import Attachment, supports_attachments
 from abilian.i18n import _, _l
+from abilian.services.security import AUTHENTICATED
 from abilian.web import nav, url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.action import ButtonAction, actions
@@ -26,7 +27,9 @@ from .forms import AttachmentForm
 if TYPE_CHECKING:
     from flask.blueprints import BlueprintSetupState
 
-bp = AccessControlBlueprint("attachments", __name__, url_prefix="/attachments")
+bp = AccessControlBlueprint(
+    "attachments", __name__, url_prefix="/attachments", allowed_roles=AUTHENTICATED
+)
 
 
 def _default_attachment_view(obj, obj_type, obj_id, **kwargs):

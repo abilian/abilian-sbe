@@ -18,6 +18,7 @@ from abilian.core.entities import Entity
 from abilian.core.models.comment import Comment, is_commentable
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
+from abilian.services.security import AUTHENTICATED
 from abilian.web import nav, url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.action import ButtonAction, actions
@@ -33,7 +34,9 @@ from .forms import CommentForm
 if TYPE_CHECKING:
     from flask.blueprints import BlueprintSetupState
 
-bp = AccessControlBlueprint("comments", __name__, url_prefix="/comments")
+bp = AccessControlBlueprint(
+    "comments", __name__, url_prefix="/comments", allowed_roles=AUTHENTICATED
+)
 
 
 def _default_comment_view(obj, obj_type, obj_id, **kwargs):

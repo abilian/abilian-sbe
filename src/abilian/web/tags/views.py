@@ -7,6 +7,7 @@ from __future__ import annotations
 from flask import current_app
 
 from abilian.core.entities import Entity
+from abilian.services.security import AUTHENTICATED
 from abilian.web import url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.views import ObjectEdit
@@ -16,7 +17,9 @@ bp = AccessControlBlueprint(
     "tags", __name__, url_prefix="/tags", template_folder="templates"
 )
 
-entity_bp = AccessControlBlueprint("entity_tags", __name__, url_prefix="/tags/entity")
+entity_bp = AccessControlBlueprint(
+    "entity_tags", __name__, url_prefix="/tags/entity", allowed_roles=AUTHENTICATED
+)
 
 
 class EntityTagEdit(ObjectEdit):
