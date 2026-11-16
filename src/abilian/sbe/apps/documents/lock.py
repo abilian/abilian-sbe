@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any
 
 import dateutil.parser
 from flask import current_app
-from flask_login import current_user
 
 from abilian.core.util import utcnow
 
@@ -38,8 +37,8 @@ class Lock:
         self.date = date
 
     @staticmethod
-    def new() -> Lock:
-        return Lock(current_user.id, str(current_user), utcnow())
+    def new(user: User) -> Lock:
+        return Lock(user.id, str(user), utcnow())
 
     def as_dict(self) -> dict[str, Any]:
         """Return a dict suitable for serialization to JSON."""
@@ -62,8 +61,5 @@ class Lock:
     def expired(self) -> bool:
         return (utcnow() - self.date) > timedelta(seconds=self.lifetime)
 
-    def is_owner(self, user: User | None = None) -> bool:
-        if user is None:
-            user = current_user
-
+    def is_owner(self, user: User) -> bool:
         return self.user_id == user.id

@@ -5,9 +5,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from flask import g, url_for as url_for_orig
-from flask_login import current_user
 
 from abilian.core.application import as_application
+from abilian.core.extensions.login import authenticated_user
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.services.security import MANAGE, WRITE, Permission, is_site_admin
@@ -43,7 +43,9 @@ class CmisContentAction(Action):
         return ok
 
     def has_access(self, permission: Permission, obj: Any) -> bool:
-        return content_repository.has_permission(current_user, permission, obj)
+        # Actions get no user: their context is built for menus. The documents
+        # pages, where they show, are behind a login.
+        return content_repository.has_permission(authenticated_user(), permission, obj)
 
 
 class BaseFolderAction(CmisContentAction):
@@ -309,7 +311,9 @@ _actions = (
         icon="upload",
         url="#modal-upload-new-version",
         # either not locked, either user is owner
-        condition=lambda ctx: not ctx["object"].lock or ctx["object"].lock.is_owner(),
+        condition=lambda ctx: (
+            not ctx["object"].lock or ctx["object"].lock.is_owner(authenticated_user())
+        ),
         permission=WRITE,
     ),
     # send by email

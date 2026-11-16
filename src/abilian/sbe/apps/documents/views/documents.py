@@ -16,12 +16,12 @@ from flask import (
     render_template,
     request,
 )
-from flask_login import current_user
 from flask_mail import Message
 from PIL import Image
 from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.core.extensions import db, mail
+from abilian.core.extensions.login import authenticated
 from abilian.core.signals import activity
 from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import unwrap
@@ -55,6 +55,8 @@ from .views import community_blueprint
 if TYPE_CHECKING:
     from werkzeug.wrappers.response import Response
 
+    from abilian.core.models.subjects import User
+
 route = community_blueprint.route
 
 MAX_PREVIEW_SIZE = 1000
@@ -64,9 +66,10 @@ __all__ = ()
 
 @default_view(community_blueprint, Document, id_attr="doc_id", kw_func=default_view_kw)
 @route("/doc/<int:doc_id>")
-def document_view(doc_id: int) -> str:
-    doc = get_document(doc_id)
-    check_read_access(doc)
+@authenticated
+def document_view(user: User, doc_id: int) -> str:
+    doc = get_document(user, doc_id)
+    check_read_access(user, doc)
     doc.ensure_antivirus_scheduled()
     db.session.commit()
 
@@ -80,7 +83,7 @@ def document_view(doc_id: int) -> str:
 
     has_preview = doc.has_preview()
     audit_entries = audit_service.entries_for(doc)
-    viewtracker.record_hit(entity=doc, user=current_user)
+    viewtracker.record_hit(entity=doc, user=user)
 
     ctx = {
         "doc": doc,
@@ -100,13 +103,14 @@ def document_view(doc_id: int) -> str:
 @route("/doc/<int:doc_id>/<int:folder_id>/", methods=["POST"])
 @csrf.protect
 # TODO: URL doesn't seem right
-def document_edit(doc_id, folder_id=None):
-    doc = get_document(doc_id)
+@authenticated
+def document_edit(user: User, doc_id, folder_id=None):
+    doc = get_document(user, doc_id)
     if folder_id:
-        folder = get_folder(folder_id)
+        folder = get_folder(user, folder_id)
     else:
         folder = None
-    check_write_access(doc)
+    check_write_access(user, doc)
 
     changed = edit_object(doc)
 
@@ -122,9 +126,10 @@ def document_edit(doc_id, folder_id=None):
 
 
 @route("/doc/<int:doc_id>/viewers", methods=["GET"])
-def document_viewers(doc_id):
-    doc = get_document(doc_id)
-    check_read_access(doc)
+@authenticated
+def document_viewers(user: User, doc_id):
+    doc = get_document(user, doc_id)
+    check_read_access(user, doc)
     doc.ensure_antivirus_scheduled()
     # db.session.commit()
 
@@ -151,9 +156,10 @@ def document_viewers(doc_id):
 
 @route("/doc/<int:doc_id>/delete", methods=["POST"])
 @csrf.protect
-def document_delete(doc_id: int) -> Response:
-    doc = get_document(doc_id)
-    check_write_access(doc)
+@authenticated
+def document_delete(user: User, doc_id: int) -> Response:
+    doc = get_document(user, doc_id)
+    check_write_access(user, doc)
 
     parent_folder = doc.parent
     content_repository.delete_object(doc)
@@ -165,25 +171,27 @@ def document_delete(doc_id: int) -> Response:
 
 @route("/doc/<int:doc_id>/upload", methods=["POST"])
 @csrf.protect
-def document_upload(doc_id):
-    doc = get_document(doc_id)
-    check_write_access(doc)
+@authenticated
+def document_upload(user: User, doc_id):
+    doc = get_document(user, doc_id)
+    check_write_access(user, doc)
 
     fd = request.files["file"]
     doc.set_content(fd.read(), fd.content_type)
     del doc.lock
 
     self = unwrap(current_app)
-    activity.send(self, actor=current_user, verb="update", object=doc)
+    activity.send(self, actor=user, verb="update", object=doc)
     db.session.commit()
     flash(_("New version successfully uploaded"), "success")
     return redirect(url_for(doc))
 
 
 @route("/doc/<int:doc_id>/download")
-def document_download(doc_id: int, attach: bool = False) -> Response:
+@authenticated
+def document_download(user: User, doc_id: int, attach: bool = False) -> Response:
     """Download the file content."""
-    doc = get_document(doc_id)
+    doc = get_document(user, doc_id)
 
     response = make_response(doc.content)
     response.headers["content-length"] = doc.content_length
@@ -205,9 +213,10 @@ def document_download(doc_id: int, attach: bool = False) -> Response:
 
 
 @route("/doc/<int:doc_id>/checkin_checkout", methods=["POST"])
-def checkin_checkout(doc_id):
-    doc = get_document(doc_id)
-    check_write_access(doc)
+@authenticated
+def checkin_checkout(user: User, doc_id):
+    doc = get_document(user, doc_id)
+    check_write_access(user, doc)
     action = request.form.get("action")
 
     if action not in ("checkout", "lock", "unlock"):
@@ -217,7 +226,7 @@ def checkin_checkout(doc_id):
     session = session_of(doc)
 
     if action in ("lock", "checkout"):
-        doc.lock = current_user
+        doc.lock = user
         d = doc.updated_at
         # prevent change of last modification date
         doc.updated_at = datetime.utcnow()
@@ -252,10 +261,11 @@ def preview_missing_image():
 
 
 @route("/doc/<int:doc_id>/preview_image")
-def document_preview_image(doc_id: int) -> Response:
+@authenticated
+def document_preview_image(user: User, doc_id: int) -> Response:
     """Returns a preview (image) for the file given by its id."""
 
-    doc = get_document(doc_id)
+    doc = get_document(user, doc_id)
 
     if not doc.antivirus_ok:
         return preview_missing_image()
@@ -304,9 +314,10 @@ def document_preview_image(doc_id: int) -> Response:
 
 
 @route("/doc/<int:doc_id>/refresh_preview")
-def refresh_preview(doc_id):
+@authenticated
+def refresh_preview(user: User, doc_id):
     """Force to compute a new preview."""
-    doc = get_document(doc_id)
+    doc = get_document(user, doc_id)
     if not doc:
         raise NotFound
 
@@ -315,7 +326,7 @@ def refresh_preview(doc_id):
         doc.content_type = ct
         db.session.commit()
 
-    check_manage_access(doc)
+    check_manage_access(user, doc)
     # convert_document_content.apply([doc_id])
     with contextlib.suppress(ConversionError, OSError):
         convert_document_content(doc_id)
@@ -327,17 +338,18 @@ def refresh_preview(doc_id):
 
 @route("/doc/<int:doc_id>/send", methods=["POST"])
 @csrf.protect
-def document_send(doc_id: int) -> Response:
-    doc = get_document(doc_id)
+@authenticated
+def document_send(user: User, doc_id: int) -> Response:
+    doc = get_document(user, doc_id)
 
     recipient = request.form.get("recipient")
     user_msg = request.form.get("message")
 
     site_name = f"[{current_app.config['SITE_NAME']}] "
-    sender_name = current_user.name
+    sender_name = user.name
     subject = site_name + _("{sender} sent you a file").format(sender=sender_name)
     msg = Message(subject)
-    msg.sender = current_user.email
+    msg.sender = user.email
     msg.recipients = [recipient]
     msg.body = render_template_i18n(
         "documents/mail_file_sent.txt",
@@ -357,8 +369,9 @@ def document_send(doc_id: int) -> Response:
 
 
 @route("/doc/<int:doc_id>/preview")
-def document_preview(doc_id):
-    doc = get_document(doc_id)
+@authenticated
+def document_preview(user: User, doc_id):
+    doc = get_document(user, doc_id)
     if not doc.antivirus_ok:
         return "Waiting for antivirus to finish"
 
@@ -373,8 +386,9 @@ def document_preview(doc_id):
 
 
 @route("/doc/<int:doc_id>/view_pdf")
-def document_view_pdf(doc_id):
-    doc = get_document(doc_id)
+@authenticated
+def document_view_pdf(user: User, doc_id):
+    doc = get_document(user, doc_id)
     if not doc.antivirus_ok:
         return "Waiting for antivirus to finish"
 
@@ -408,7 +422,7 @@ def document_view_pdf(doc_id):
 #
 # @route("/<int:file_id>/tag", methods=['POST'])
 # def tag_post(file_id):
-#     doc = get_document(file_id)
+#     doc = get_document(user, file_id)
 #     tags = request.form.get("tags")
 #
 #     doc.tags = tags

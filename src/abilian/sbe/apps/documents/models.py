@@ -17,7 +17,6 @@ from typing import TYPE_CHECKING, Any, ClassVar, Self
 import sqlalchemy as sa
 import whoosh.fields as wf
 from flask import current_app, json, url_for
-from flask_login import current_user
 
 # from loguru import logger
 from loguru import logger
@@ -373,16 +372,16 @@ class Folder(PathAndSecurityIndexable, CmisObject):
     #
     # Security related methods
     #
-    @property
-    def filtered_children(self) -> list[BaseContent]:
+    def filtered_children(self, user: User) -> list[BaseContent]:
+        """The children `user` may read."""
         return security.filter_with_permission(
-            current_user, "read", self.children, inherit=True
+            user, "read", self.children, inherit=True
         )
 
-    @property
-    def filtered_subfolders(self) -> list[Folder]:
+    def filtered_subfolders(self, user: User) -> list[Folder]:
+        """The subfolders `user` may read."""
         return security.filter_with_permission(
-            current_user, "read", self.subfolders, inherit=True
+            user, "read", self.subfolders, inherit=True
         )
 
     def get_local_roles_assignments(self):
@@ -714,7 +713,7 @@ class Document(BaseContent, PathAndSecurityIndexable):
         return lock
 
     @lock.setter
-    def lock(self, user) -> None:
+    def lock(self, user: User | None) -> None:
         """Allow to do `document.lock = user` to set a lock for user.
 
         If user is None, the lock is released.
@@ -736,17 +735,14 @@ class Document(BaseContent, PathAndSecurityIndexable):
             del meta["lock"]
             self.meta.changed()
 
-    def set_lock(self, user=None) -> None:
-        if user is None:
-            user = current_user
-
+    def set_lock(self, user: User) -> None:
         lock = self.lock
         if lock and not lock.is_owner(user=user):
             msg = "This document is already locked by another user"
             raise RuntimeError(msg)
 
         meta = self.meta.setdefault("abilian.sbe.documents", {})
-        lock = Lock.new()
+        lock = Lock.new(user)
         meta["lock"] = lock.as_dict()
         self.meta.changed()
 

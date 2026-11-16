@@ -95,7 +95,7 @@
                   </a>
                   <div class="gallery-numberCircle absolute top-16 right-1/2 translate-x-8">
                     <span class="inline-flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-blue-600 rounded-full">
-                      {{ obj.filtered_children|length }}
+                      {{ obj.filtered_children(current_user)|length }}
                     </span>
                   </div>
                 </div>

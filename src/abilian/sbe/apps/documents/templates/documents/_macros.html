@@ -105,7 +105,7 @@
                       <i class="fa fa-folder-o text-xl document-folder-icon" aria-hidden="true"></i>
                     </a>
                   </span>
-                  <div class="numberCircle"><span>{{ obj.filtered_children|length }}</span></div>
+                  <div class="numberCircle"><span>{{ obj.filtered_children(current_user)|length }}</span></div>
                 {% else %}
                   {% set icon_src = url_for(".document_preview_image",
                         community_id=g.community.slug, doc_id=obj.id,
@@ -116,7 +116,7 @@
                   </a>
                 {% endif %}
                 {%- if obj.object_type == 'folder' %}
-                  <i class="text-gray-400">{{ obj.filtered_children|length }}</i>
+                  <i class="text-gray-400">{{ obj.filtered_children(current_user)|length }}</i>
                 {%- endif %}
                 <a class="relative top-1 left-14 text-gray-900 hover:text-blue-600" href="{{ url_for(obj) }}">
                   {{ obj.title|truncate(32, False, '...', 0) }}

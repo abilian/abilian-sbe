@@ -6,7 +6,6 @@ from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 from unittest import mock
 
-from flask_login import login_user
 from pytz import UTC
 
 from abilian.core.models.subjects import User
@@ -46,12 +45,10 @@ def test_lock2(app: Flask, session: Session) -> None:
         created_at = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)
         mocked.return_value = created_at
 
-        login_user(user)
-        lock_ = Lock.new()
+        lock_ = Lock.new(user)
         assert lock_.user_id == user.id
         assert lock_.user == "Joe Smith"
         assert lock_.date == created_at
-        assert lock_.is_owner()
         assert lock_.is_owner(user)
         assert not lock_.is_owner(other)
 
@@ -61,6 +58,3 @@ def test_lock2(app: Flask, session: Session) -> None:
 
         mocked.return_value = created_at + timedelta(seconds=20)
         assert not lock_.expired
-
-        login_user(other)
-        assert not lock_.is_owner()

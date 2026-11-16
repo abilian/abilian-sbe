@@ -66,14 +66,14 @@ def test_util_create(
         name = "document"
         fs = FileStorage(BytesIO(b"content"), filename=name, content_type="text/plain")
 
-        doc = view_util.create_document(folder, fs)
+        doc = view_util.create_document(user, folder, fs)
         db.session.flush()
         assert doc.parent == folder
         assert doc.name == name
 
         # test upload with same name: should be renamed
         fs = FileStorage(BytesIO(b"content"), filename=name, content_type="text/plain")
-        doc2 = view_util.create_document(folder, fs)
+        doc2 = view_util.create_document(user, folder, fs)
         db.session.flush()
         assert doc2.parent == folder
         assert len(folder.children) == 2
@@ -238,6 +238,24 @@ def test_name_check_without_an_object_is_a_bad_request(
         response = client.get(url, query_string={"action": "new", "title": "x"})
 
     assert response.status_code == 400
+
+
+def test_name_check_tells_a_taken_name_from_a_free_one(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community: Community
+) -> None:
+    security_service.start()
+    user = community.test_user
+    security_service.grant_role(user, ADMIN)
+    folder = community.folder
+    folder.create_document("taken")
+    db.session.commit()
+    url = url_for("documents.check_valid_name", community_id=community.slug)
+
+    with client_login(client, user):
+        for title, valid in (("taken", False), ("free", True)):
+            query = {"action": "new", "object_id": folder.id, "title": title}
+            response = client.get(url, query_string=query)
+            assert response.get_json()["valid"] is valid, title
 
 
 def _test_upload(

@@ -33,7 +33,6 @@ from flask import (
     send_file,
     session,
 )
-from flask_login import current_user
 from loguru import logger
 from markupsafe import Markup
 from sqlalchemy import func
@@ -41,6 +40,7 @@ from werkzeug.exceptions import BadRequest, InternalServerError
 from xlwt import Workbook, easyxf
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated
 from abilian.core.models.subjects import Group, User
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
@@ -128,11 +128,12 @@ def _user_roles_listing(
 
 @default_view(community_blueprint, Folder, id_attr="folder_id", kw_func=default_view_kw)
 @route("/folder/<int:folder_id>")
-def folder_view(folder_id):
-    folder = get_folder(folder_id)
+@authenticated
+def folder_view(user: User, folder_id):
+    folder = get_folder(user, folder_id)
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
-    children = folder.filtered_children
+    children = folder.filtered_children(user)
     ctx = {"folder": folder, "breadcrumbs": bc}
 
     view_style = session.get("sbe_doc_view_style", "thumbnail_view")
@@ -156,9 +157,10 @@ def folder_view(folder_id):
 
 @route("/folder/change_view_style/<int:folder_id>", methods=["GET", "POST"])
 @csrf.protect
-def change_view_style(folder_id):
+@authenticated
+def change_view_style(user: User, folder_id):
     # The folder is not used, but must be visible here.
-    get_folder(folder_id)
+    get_folder(user, folder_id)
     if request.method == "POST":
         view_style = request.form["view_style"]
         if view_style == "gallery_view":
@@ -174,24 +176,21 @@ def change_view_style(folder_id):
 
 
 @route("/folder/<int:folder_id>/json")
-def folder_json(folder_id):
+@authenticated
+def folder_json(user: User, folder_id):
     """Return parent folder + subfolders."""
 
-    folder = get_folder(folder_id)
+    folder = get_folder(user, folder_id)
     folder_url = partial(url_for, ".folder_json")
     result = {}
     has_permission = security.has_permission
     result["current_folder_selectable"] = has_permission(
-        current_user, WRITE, folder, inherit=True
+        user, WRITE, folder, inherit=True
     )
     folders = result["folders"] = []
     bc = result["breadcrumbs"] = []
     subfolders = sorted(
-        (
-            f
-            for f in folder.subfolders
-            if has_permission(current_user, READ, f, inherit=True)
-        ),
+        (f for f in folder.subfolders if has_permission(user, READ, f, inherit=True)),
         key=lambda f: f.title,
     )
 
@@ -229,8 +228,9 @@ def folder_json(folder_id):
 
 
 @route("/folder/<int:folder_id>/members")
-def members(folder_id):
-    folder = get_folder(folder_id)
+@authenticated
+def members(user: User, folder_id):
+    folder = get_folder(user, folder_id)
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
     members = folder.members()
@@ -240,9 +240,10 @@ def members(folder_id):
 
 @route("/folder/<int:folder_id>/permissions")
 @http.nocache
-def permissions(folder_id):
-    folder = get_folder(folder_id)
-    check_manage_access(folder)
+@authenticated
+def permissions(user: User, folder_id):
+    folder = get_folder(user, folder_id)
+    check_manage_access(user, folder)
 
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
@@ -252,9 +253,9 @@ def permissions(folder_id):
 
     local_listing, users_and_local_roles = _user_roles_listing(
         (
-            (user, role, content_repository.has_access(user, folder))
-            for user, role in local_roles_assignments
-            if isinstance(user, User)
+            (principal, role, content_repository.has_access(principal, folder))
+            for principal, role in local_roles_assignments
+            if isinstance(principal, User)
         ),
         "local_",
     )
@@ -268,9 +269,9 @@ def permissions(folder_id):
     )
     inherited_listing, users_and_inherited_roles = _user_roles_listing(
         (
-            (user, role, False)
-            for user, role in inherited_roles_assignments
-            if isinstance(user, User)
+            (principal, role, False)
+            for principal, role in inherited_roles_assignments
+            if isinstance(principal, User)
         ),
         "inherited_",
     )
@@ -352,9 +353,10 @@ def permissions(folder_id):
 
 @route("/folder/<int:folder_id>/permissions", methods=["POST"])
 @csrf.protect
-def permissions_update(folder_id):
-    folder = get_folder(folder_id)
-    check_manage_access(folder)
+@authenticated
+def permissions_update(user: User, folder_id):
+    folder = get_folder(user, folder_id)
+    check_manage_access(user, folder)
     has_permission = security.has_permission
     action = request.form.get("action")
 
@@ -362,8 +364,7 @@ def permissions_update(folder_id):
         inherit_security = action == "activate_inheritance"
 
         if not (
-            inherit_security
-            or has_permission(current_user, "manage", folder, inherit=False)
+            inherit_security or has_permission(user, "manage", folder, inherit=False)
         ):
             # don't let user shoot himself in the foot
             flash(
@@ -392,9 +393,9 @@ def permissions_update(folder_id):
     if action == "add-user-role":
         role = request.form["role"].lower()
         user_id = int(request.form["user"])
-        user = User.query.get_or_404(user_id)
+        member = User.query.get_or_404(user_id)
 
-        security.grant_role(user, role, folder)
+        security.grant_role(member, role, folder)
         reindex_tree(folder)
         db.session.commit()
         return redirect(
@@ -426,16 +427,16 @@ def permissions_update(folder_id):
     object_id = int(object_id)
 
     if action == "delete-user-role":
-        user = User.query.get_or_404(object_id)
+        member = User.query.get_or_404(object_id)
         # remove role in a subtransaction, to prevent manager shoot himself in the
         # foot
         transaction = db.session.begin_nested()
-        security.ungrant_role(user, role, folder)
+        security.ungrant_role(member, role, folder)
 
         if (
-            user == current_user
+            member == user
             and role == "manager"
-            and not has_permission(current_user, "manage", folder, inherit=True)
+            and not has_permission(user, "manage", folder, inherit=True)
         ):
             transaction.rollback()
             flash(
@@ -451,7 +452,7 @@ def permissions_update(folder_id):
             transaction.commit()
             flash(
                 _("Role {role} for user {user} removed on folder {folder}").format(
-                    role=role, user=user.name, folder=folder.name
+                    role=role, user=member.name, folder=folder.name
                 ),
                 "success",
             )
@@ -463,7 +464,7 @@ def permissions_update(folder_id):
         security.ungrant_role(group, role, folder)
 
         if role == "manager" and not has_permission(
-            current_user, "manage", folder, inherit=True
+            user, "manage", folder, inherit=True
         ):
             transaction.rollback()
             flash(
@@ -492,9 +493,10 @@ def permissions_update(folder_id):
 
 @route("/folder/<int:folder_id>/permissions_export")
 @http.nocache
-def permissions_export(folder_id):
-    folder = get_folder(folder_id)
-    check_manage_access(folder)
+@authenticated
+def permissions_export(user: User, folder_id):
+    folder = get_folder(user, folder_id)
+    check_manage_access(user, folder)
 
     wb = Workbook()
     ws = wb.add_sheet("Sheet 1")
@@ -529,7 +531,7 @@ def permissions_export(folder_id):
         ws.write(0, c, val, header_style)
 
     # data
-    permissions = iter_permissions(folder, current_user)
+    permissions = iter_permissions(folder, user)
     row_offset = 0
     current_community = None
     for r, row in enumerate(permissions, 1):
@@ -634,32 +636,33 @@ def iter_permissions(folder, user):
 #
 @route("/folder/<int:folder_id>", methods=["POST"])
 @csrf.protect
-def folder_post(folder_id: int) -> Response:
+@authenticated
+def folder_post(user: User, folder_id: int) -> Response:
     """A POST on a folder can result on several different actions (depending on
     the `action` parameter)."""
-    folder = get_folder(folder_id)
+    folder = get_folder(user, folder_id)
     action = request.form.get("action")
 
     if action == "edit":
-        return folder_edit(folder)
+        return folder_edit(user, folder)
 
     if action == "upload":
-        return upload_new(folder)
+        return upload_new(user, folder)
 
     if action == "download":
-        return download_multiple(folder)
+        return download_multiple(user, folder)
 
     if action == "delete":
-        return delete_multiple(folder)
+        return delete_multiple(user, folder)
 
     if action == "new":
-        return create_subfolder(folder)
+        return create_subfolder(user, folder)
 
     if action == "move":
-        return move_multiple(folder)
+        return move_multiple(user, folder)
 
     if action == "change-owner":
-        return change_owner(folder)
+        return change_owner(user, folder)
 
     # Probably an error or a hack attempt.
     # Logger will inform sentry if enabled
@@ -670,8 +673,8 @@ def folder_post(folder_id: int) -> Response:
     return redirect(url_for(folder))
 
 
-def folder_edit(folder):
-    check_write_access(folder)
+def folder_edit(user: User, folder):
+    check_write_access(user, folder)
 
     changed = edit_object(folder)
 
@@ -741,8 +744,8 @@ def explore_archive(
             yield filepath, zip_fd
 
 
-def upload_new(folder: Folder) -> Response:
-    check_write_access(folder)
+def upload_new(user: User, folder: Folder) -> Response:
+    check_write_access(user, folder)
     session = db.session()
     base_folder = folder
     uncompress_files = "uncompress_files" in request.form
@@ -775,7 +778,7 @@ def upload_new(folder: Folder) -> Response:
                 session.flush()
                 path_cache[path] = folder
 
-            create_document(folder, fd)
+            create_document(user, folder, fd)
             created_count += 1
 
     flash(
@@ -791,8 +794,8 @@ def upload_new(folder: Folder) -> Response:
     return redirect(url_for(folder))
 
 
-def download_multiple(folder: Folder) -> Response:
-    folders, docs = get_selected_objects(folder)
+def download_multiple(user: User, folder: Folder) -> Response:
+    folders, docs = get_selected_objects(user, folder)
     if not folders:
         folders = [folder]
 
@@ -804,7 +807,7 @@ def download_multiple(folder: Folder) -> Response:
             doc_path = rel_path(path, doc)
             zipfile.writestr(doc_path, doc.content or b"")
 
-        for subfolder in folder.filtered_subfolders:
+        for subfolder in folder.filtered_subfolders(user):
             zip_folder(zipfile, subfolder, rel_path(path, subfolder))
         return zipfile
 
@@ -839,17 +842,15 @@ def download_multiple(folder: Folder) -> Response:
     return resp
 
 
-def delete_multiple(folder):
-    check_write_access(folder)
+def delete_multiple(user: User, folder):
+    check_write_access(user, folder)
 
-    folders, docs = get_selected_objects(folder)
+    folders, docs = get_selected_objects(user, folder)
 
     for obj in docs + folders:
         app = unwrap(current_app)
         community = g.community._model
-        activity.send(
-            app, actor=current_user, verb="delete", object=obj, target=community
-        )
+        activity.send(app, actor=user, verb="delete", object=obj, target=community)
         content_repository.delete_object(obj)
 
     if docs + folders:
@@ -880,8 +881,8 @@ def delete_multiple(folder):
     return redirect(url_for(folder))
 
 
-def move_multiple(folder: Folder) -> Response:
-    folders, docs = get_selected_objects(folder)
+def move_multiple(user: User, folder: Folder) -> Response:
+    folders, docs = get_selected_objects(user, folder)
     objects = folders + docs
 
     count_f = len(folders)
@@ -914,12 +915,12 @@ def move_multiple(folder: Folder) -> Response:
         )
         return redirect(current_folder_url)
 
-    if not security.has_permission(current_user, "write", folder, inherit=True):
+    if not security.has_permission(user, "write", folder, inherit=True):
         # this should not happen: this is just defensive programming
         flash(_("You are not allowed to move elements from this folder"), "error")
         return redirect(current_folder_url)
 
-    if not security.has_permission(current_user, "write", target_folder, inherit=True):
+    if not security.has_permission(user, "write", target_folder, inherit=True):
         flash(
             _('You are not allowed to write in folder "{folder}"').format(
                 folder=target_folder.title
@@ -930,7 +931,7 @@ def move_multiple(folder: Folder) -> Response:
 
     for item in objects:
         # FIXME: maybe too brutal
-        check_write_access(item)
+        check_write_access(user, item)
 
     # verify we are not trying to move a folder inside itself or one of its
     # descendants
@@ -988,8 +989,8 @@ def objects_which_exist_in_dest(objects, dest):
     return exist_in_dest
 
 
-def create_subfolder(folder: Folder) -> Response:
-    check_write_access(folder)
+def create_subfolder(user: User, folder: Folder) -> Response:
+    check_write_access(user, folder)
 
     title = request.form.get("title", "")
     description = request.form.get("description", "")
@@ -1000,9 +1001,9 @@ def create_subfolder(folder: Folder) -> Response:
     return redirect(url_for(folder))
 
 
-def change_owner(folder):
-    check_manage_access(folder)
-    items = itertools.chain(*get_selected_objects(folder))
+def change_owner(user: User, folder):
+    check_manage_access(user, folder)
+    items = itertools.chain(*get_selected_objects(user, folder))
 
     user_id = request.form.get("new_owner", type=int)
     if user_id is None:
@@ -1010,10 +1011,10 @@ def change_owner(folder):
         raise BadRequest(msg)
     # An unknown id is a 404: it used to set every selected item's owner to
     # None, and report success.
-    user = User.query.get_or_404(user_id)
+    new_owner = User.query.get_or_404(user_id)
 
     for item in items:
-        item.owner = user
+        item.owner = new_owner
 
     db.session.commit()
     return redirect(url_for(folder))
@@ -1021,7 +1022,8 @@ def change_owner(folder):
 
 @route("/folder/check_valid_name")
 @http.nocache
-def check_valid_name():
+@authenticated
+def check_valid_name(user: User):
     """Check if name is valid for content creation in this folder."""
 
     object_id = int(request.args["object_id"])
@@ -1029,8 +1031,8 @@ def check_valid_name():
     title = request.args.get("title")
 
     get_object = get_document if action == "document-edit" else get_folder
-    obj = get_object(object_id)
-    check_read_access(obj)
+    obj = get_object(user, object_id)
+    check_read_access(user, obj)
 
     if action == "new":
         parent = obj
@@ -1056,8 +1058,9 @@ def check_valid_name():
 
 
 @route("/folder/<int:folder_id>/descendants")
-def descendants_view(folder_id):
-    folder = get_folder(folder_id)
+@authenticated
+def descendants_view(user: User, folder_id):
+    folder = get_folder(user, folder_id)
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
 
@@ -1118,8 +1121,8 @@ def descendants_view(folder_id):
     owners_query = User.query.filter(User.id.in_(owner_ids)).add_column(
         sa.sql.func.concat("user:", User.id).label("key")
     )
-    for user, key in owners_query:
-        owners[key] = user
+    for owner, key in owners_query:
+        owners[key] = owner
 
     ctx = {
         "folder": folder,
