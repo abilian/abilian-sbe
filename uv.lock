@@ -35,6 +35,15 @@ wheels = [
 ]
 
 [[package]]
+name = "abilian-ds"
+version = "0.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/f5/b6/8434e80b60a5f1cbcf79a8d74222ac70e74a5f36d410148cad4c3e7dfdb4/abilian_ds-0.3.0.tar.gz", hash = "sha256:d93d0fcb773b723aef5e8f500477ca0c9a547af71c613734b4d391d0d87a7e19", size = 98360, upload-time = "2026-11-16T16:49:02.51Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e4/5d/0e45c30c277aa9fdf50d37fc7ed134468eacebec7be5b2e6f21becd1dd71/abilian_ds-0.3.0-py3-none-any.whl", hash = "sha256:1731050761bb0533f9ce736f915b0c64216ad6dfccb741ac32977737cade9f83", size = 104068, upload-time = "2026-11-16T16:49:01.353Z" },
+]
+
+[[package]]
 name = "abilian-sbe"
 version = "1.2.0"
 source = { editable = "." }
@@ -105,6 +114,7 @@ postgres = [
 [package.dev-dependencies]
 dev = [
     { name = "abilian-devtools" },
+    { name = "abilian-ds" },
     { name = "abilian-sbe", extra = ["postgres"] },
     { name = "auto-type-annotate" },
     { name = "deptry" },
@@ -209,6 +219,7 @@ provides-extras = ["postgres"]
 [package.metadata.requires-dev]
 dev = [
     { name = "abilian-devtools" },
+    { name = "abilian-ds", specifier = "==0.3.0" },
     { name = "abilian-sbe", extras = ["postgres"] },
     { name = "auto-type-annotate", specifier = ">=1.1.1" },
     { name = "deptry" },

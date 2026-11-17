@@ -1,0 +1,581 @@
+/* Abilian SBE on top of the Abilian Design System (ADS).
+ *
+ * Two layers, loaded after ads.css:
+ *   1. Knobs: Abilian's brand, as in Abilian Analytics (abilian.com: its logo's
+ *      colours, Figtree for text, Barlow Condensed for figures and the product's name).
+ *   2. A thin app layer, `sbe-*` classes, for what ADS doesn't have yet. Each one that
+ *      waits for ADS says so, with the number of its request in notes/ux/ads-requests.md.
+ *
+ * Direction: dense and calm, not bland. Colour has a job: the brand's navy for the
+ * interface and for strong text, the logo's blue for what's new, its pink for what's
+ * wrong, a deepened cyan for what's right; then three kinds of identity, each from one
+ * small palette: a colour per community, a tint per person, a colour per file type.
+ */
+
+/* --- Fonts: self-hosted (SIL OFL) --- */
+
+@font-face { font-family: "Figtree"; font-weight: 300 900; font-display: swap; src: url("fonts/figtree.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 500; font-display: swap; src: url("fonts/barlow-condensed-500.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 600; font-display: swap; src: url("fonts/barlow-condensed-600.woff2") format("woff2"); }
+
+/* --- 1. Knobs ---------------------------------------------------------------------- */
+
+:root {
+  --ads-brand: #0f3269;          /* the wordmark's navy */
+  --ads-info: #2986ff;           /* the logo's blue: data */
+  --ads-success: #00a3ad;        /* the logo's cyan, deepened to read as text */
+  --ads-danger: #e8305f;         /* the logo's pink (#ff4a77), deepened to carry white text */
+  --ads-warning: #ec8a00;
+  --ads-neutral-hue: 222;        /* greys leaning towards the navy */
+  --ads-neutral-chroma: 1.8;     /* enough that dark text reads navy, not black */
+  --ads-radius-scale: 1.33;
+  --ads-shadow-strength: .35;    /* borders carry the structure, not shadows */
+  --ads-font: "Figtree", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ads-text-base: .9375rem;
+  --ads-weight-normal: 450;
+  --ads-weight-medium: 550;
+  --ads-weight-bold: 600;
+  /* Muted text at AAA (7:1) in light mode; at ADS's default it fails AA. */
+  --ads-contrast: 1.5;
+  /* Sentence case for small labels: Abilian's voice. */
+  --ads-label-case: none;
+  --ads-label-tracking: normal;
+  /* A flat page: surfaces on white rather than cards on grey. */
+  --ads-page-contrast: 0;
+  --ads-font-figures: "Barlow Condensed", var(--ads-font);
+  /* Controls a step denser than ADS's default: buttons and fields about 35 pixels high
+     rather than 44, with less room on their sides. */
+  --ads-control-pad-y: calc(var(--ads-space-2) - 2px);
+  --ads-control-pad-x: var(--ads-space-3);
+  --ads-control: calc(var(--ads-line-control) + 2 * var(--ads-control-pad-y) + 2 * var(--ads-border-width));
+  /* Strong text (headings, bold titles) in the wordmark's navy rather than near-black:
+     the brand where the eye lands, and softer than black on white (12:1). ADS derives
+     it from the neutral ramp, with no knob for its hue (ADS request 7). */
+  --ads-ink-strong: light-dark(var(--ads-brand), var(--ads-n-0));
+  /* A column on the right of the content needs the content to keep 46rem: it fits
+     beside a bar or a rail on a laptop, and goes under the content on a tablet or
+     beside a full menu (ADS's default, 30rem, keeps it beside down to 784 pixels). */
+  --ads-main: 46rem;
+  /* Links in the navy itself: `--ads-contrast` darkens the brand's ink by 37%, which
+     takes a colour already at 12:1 on white to near-black (ADS request 7). */
+  --ads-brand-ink: light-dark(var(--ads-brand),
+      color-mix(in oklab, var(--ads-brand) 25%, white));
+
+  /* Identity: one palette of eight, from the logo's colours outwards. Muted, of
+     similar weight, none of them the semantic colours' exact shades, so that identity
+     never reads as state. Each carries white text (4.5:1 or more). */
+  --sbe-id-1: #2f5fb3;   /* blue */
+  --sbe-id-2: #00808a;   /* teal, the logo's cyan deepened */
+  --sbe-id-3: #c2405b;   /* rose, the logo's pink deepened */
+  --sbe-id-4: #6a4fb8;   /* violet */
+  --sbe-id-5: #a35f10;   /* amber */
+  --sbe-id-6: #3b7d46;   /* green */
+  --sbe-id-7: #8a4a8f;   /* plum */
+  --sbe-id-8: #4a6175;   /* slate */
+}
+
+.sbe-id-1 { --sbe-id: var(--sbe-id-1); }
+.sbe-id-2 { --sbe-id: var(--sbe-id-2); }
+.sbe-id-3 { --sbe-id: var(--sbe-id-3); }
+.sbe-id-4 { --sbe-id: var(--sbe-id-4); }
+.sbe-id-5 { --sbe-id: var(--sbe-id-5); }
+.sbe-id-6 { --sbe-id: var(--sbe-id-6); }
+.sbe-id-7 { --sbe-id: var(--sbe-id-7); }
+.sbe-id-8 { --sbe-id: var(--sbe-id-8); }
+
+/* An avatar keeps its size in a row: ADS's can shrink, and a crowded row squeezed
+   it into an oval (ADS request 25). */
+.ads-avatar { flex: none; }
+
+/* A person: initials on a tint of their colour, in its ink. A photo, when there is
+   one, replaces both. */
+.ads-avatar.sbe-person {
+  /* in light mode, the colour darkened by a fifth: initials at 5.4:1 or more */
+  color: light-dark(color-mix(in srgb, var(--sbe-id) 80%, black), color-mix(in oklab, var(--sbe-id) 45%, white));
+  background: color-mix(in srgb, var(--sbe-id) 16%, var(--ads-surface));
+  box-shadow: none;
+}
+
+/* A community: its initial on its colour, a rounded square, like its image when it
+   has one. Squares for places, circles for people. */
+.sbe-tile {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--ads-control-md);
+  height: var(--ads-control-md);
+  font-weight: var(--ads-weight-bold);
+  color: #fff;
+  background: var(--sbe-id);
+  border-radius: var(--ads-radius);
+}
+.sbe-tile--sm {
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: var(--ads-text-xs);
+  border-radius: var(--ads-radius-sm);
+}
+
+/* A file's type, by the colours office suites use: what a reader recognises before
+   reading the name. */
+.sbe-filetype { display: inline-flex; flex: none; color: var(--ads-ink-muted); }
+.sbe-filetype--pdf { color: light-dark(#c2303f, #f07a85); }
+.sbe-filetype--text { color: light-dark(#2f5fb3, #8fb0ee); }
+.sbe-filetype--sheet { color: light-dark(#2e7d4a, #7fcc96); }
+.sbe-filetype--slides { color: light-dark(#b85c12, #f0a868); }
+.sbe-filetype--image { color: light-dark(#6a4fb8, #b4a2ee); }
+.sbe-filetype--folder { color: light-dark(#a35f10, #e9b46a); }
+
+/* --- 2. App layer -------------------------------------------------------------------- */
+
+/* An icon in a button at the height of its line of text: Tabler draws at 24 pixels,
+   taller than the line, and the button grew by the difference (ADS request 22). */
+.ads-btn .ads-icon { width: 1.25em; height: 1.25em; }
+
+/* Text for screen readers only: the name of a table's column of actions. */
+.sbe-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* A link inside a sentence keeps its underline: ADS removes it from every link in a
+   card's head, which leaves "3 nouveaux messages" told apart by its colour alone
+   (ADS request 24). */
+.ads-card__head .ads-muted a:not(.ads-btn) { text-decoration: underline; }
+
+/* `<strong>` and `<b>` at the theme's bold, not the browser's 700 (ADS request 9). */
+:where(strong, b) { font-weight: var(--ads-weight-bold); }
+
+/* The flat page puts ADS's page colour on the surface: the bar keeps a ground of its
+   own, a wash of the brand's navy rather than a grey (ADS request 2). */
+.ads-sidebar { background: color-mix(in srgb, var(--ads-brand) 6%, var(--ads-surface)); }
+
+/* The product's name, set like Abilian's headings. */
+.sbe-brandname {
+  font-family: var(--ads-font-figures);
+  font-weight: 600;
+  font-size: 1.375rem;
+  color: var(--ads-brand-ink);
+}
+
+/* A table's main cell that truncates rather than wraps, as in a file manager: with
+   `ads-full` it takes the room the other cells leave, and `max-width: 0` stops its
+   content from widening the table (ADS request 10). */
+.ads-table td.sbe-cell-truncate { max-width: 0; }
+
+/* The single bar (`ads-app--horizontal`, its second bar removed), in four zones: who
+   we are, where to go, what to do, the utilities. One rhythm: every control the height
+   of a button; small gaps inside a zone, larger ones between zones. */
+.ads-app--horizontal .sbe-primary { flex: none; }
+/* A lower bar: ADS gives the brand a row of 12 pixels above and below; 10 (ADS
+   request 13). */
+.ads-app--horizontal .ads-brand { padding-block: calc(var(--ads-space-2) + 2px); }
+.sbe-primary .ads-nav__list { flex-wrap: nowrap; gap: var(--ads-space-1); }
+.sbe-primary :is(.ads-nav__link, .ads-dropdown > summary) {
+  position: relative;
+  min-height: var(--ads-control-md);
+  padding: 0 var(--ads-space-3);
+}
+.sbe-primary .ads-dropdown > summary[aria-current] {
+  background: var(--ads-brand-wash);
+  font-weight: var(--ads-weight-medium);
+}
+.sbe-caret { width: 1em; height: 1em; color: var(--ads-ink-muted); }
+
+/* Tooltips in the bar open downwards: above it is the window's edge (ADS request 17).
+   The navigation's own only show once its names are hidden (below). */
+.ads-app--horizontal .ads-sidebar .ads-tip::after { inset-block: calc(100% + var(--ads-space-2)) auto; }
+.sbe-primary .ads-tip:is(:hover, :focus-visible)::after { display: none; }
+
+/* What to do: the search takes the room left; "Créer" stands well apart from it, so
+   that the two don't read as one control. */
+.sbe-bar-do {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ads-space-8);
+  min-width: 0;
+}
+/* Buttons in the bar at the height of its other controls. */
+:is(.sbe-bar-do, .sbe-bar-utilities) .ads-btn { min-height: var(--ads-control-md); padding-block: 0; }
+.sbe-search { flex: 0 1 26rem; flex-wrap: nowrap; min-width: 9rem; }
+.sbe-search > .ads-icon { flex: none; color: var(--ads-ink-muted); }
+.sbe-search > .ads-chip { flex: none; }
+.sbe-search > input { min-width: 0; }
+.sbe-bar-search { display: none; }
+
+/* The utilities: three icons in one group, on a ground of their own (applications,
+   notifications, the theme), then the account. A count sits on the icon's corner,
+   where a named entry has it after its name. */
+.sbe-bar-utilities { display: flex; flex: none; align-items: center; gap: var(--ads-space-3); }
+.sbe-bar-icon {
+  position: relative;
+  justify-content: center;
+  width: var(--ads-control-md);
+  padding: 0;
+}
+.sbe-bar-icons {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  background: var(--ads-sunken);
+  border-radius: var(--ads-radius);
+}
+.sbe-bar-icons .sbe-bar-icon {
+  width: calc(var(--ads-control-md) - 4px);
+  min-height: calc(var(--ads-control-md) - 4px);
+}
+.sbe-bar-icons .sbe-bar-icon:hover { background: var(--ads-surface); }
+.sbe-bar-icon .ads-icon { width: 1.25rem; height: 1.25rem; }
+/* A count of what's new, compact, right after its icon and raised against it, as an
+   exponent: it takes its own room, so that it crowds neither the icon nor what follows. */
+.sbe-count {
+  position: relative;
+  inset-block-start: -.5em;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  margin-inline-start: calc(-1 * var(--ads-space-2) - 3px);
+  padding: 0 .25rem;
+  justify-content: center;
+  font-size: .6875rem;
+  line-height: 1;
+  border-radius: var(--ads-radius-pill);
+}
+/* An icon button with a count widens to hold it. */
+.sbe-bar-icons .sbe-bar-icon:has(.sbe-count) { width: auto; padding-inline: var(--ads-space-2); }
+
+/* The theme button shows the moon in light mode, the sun in dark mode. */
+.sbe-when-dark { display: none; }
+:root[data-theme="dark"] .sbe-when-dark { display: inline-flex; }
+:root[data-theme="dark"] .sbe-when-light { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .sbe-when-dark { display: inline-flex; }
+  :root:not([data-theme="light"]) .sbe-when-light { display: none; }
+}
+
+/* Menus stand apart from the page. With the theme's faint shadows, ADS's overlay
+   shadow barely shows on white: a hairline edge and a shadow of their own. One line
+   per item, the menu as wide as its longest, up to a limit (ADS request 18). */
+.ads-menu {
+  max-width: min(26rem, calc(100vw - 2 * var(--ads-space-2)));
+  box-shadow:
+    0 0 0 var(--ads-border-width) var(--ads-line),
+    0 4px 8px -4px color-mix(in srgb, var(--ads-shadow-color) 12%, transparent),
+    0 14px 32px -8px color-mix(in srgb, var(--ads-shadow-color) 22%, transparent);
+}
+.ads-menu__item { white-space: nowrap; }
+
+/* Menus: the communities' opens under its trigger; headings, a filter, a check for
+   the setting in force. */
+.sbe-primary .ads-menu { inset-inline-start: 0; inset-inline-end: auto; }
+.sbe-menu-wide { min-width: 20rem; }
+.sbe-menu-search { margin: var(--ads-space-2) var(--ads-space-3); }
+.sbe-menu-heading { margin: var(--ads-space-3) var(--ads-space-3) var(--ads-space-1); }
+.sbe-inline { display: inline-flex; align-items: center; vertical-align: middle; }
+.sbe-check { color: var(--ads-brand-ink); }
+.sbe-check-off { visibility: hidden; }
+
+/* "Créer": each kind an icon on a tile of the brand's wash, its name, one line on
+   what it is for. */
+.sbe-menu-create { min-width: 20rem; padding-block-end: var(--ads-space-2); }
+.sbe-kind { gap: var(--ads-space-3); }
+.sbe-kind__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--ads-control-md);
+  height: var(--ads-control-md);
+  color: var(--ads-brand-ink);
+  background: var(--ads-brand-wash);
+  border-radius: var(--ads-radius);
+}
+.sbe-kind__text { display: grid; }
+.sbe-kind__label { font-weight: var(--ads-weight-medium); }
+.sbe-kind .ads-muted { font-size: var(--ads-text-sm); }
+
+/* A toolbar row in a card, under its head: a filter, a count, a choice of view. */
+.sbe-toolbar { display: flex; align-items: center; gap: var(--ads-space-3); }
+.sbe-toolbar > .ads-input-icon { flex: 0 1 15rem; min-width: 0; }
+.sbe-toolbar > .ads-muted { white-space: nowrap; }
+.ads-card > .sbe-toolbar {
+  padding: var(--ads-space-2) var(--ads-space-5);
+  border-block-end: var(--ads-border-width) solid var(--ads-line-soft);
+}
+
+/* The applications launcher: a grid of tiles, an icon over its name. */
+.sbe-apps {
+  display: grid;
+  grid-template-columns: repeat(3, 6rem);
+  gap: var(--ads-space-1);
+  padding: var(--ads-space-2);
+}
+.sbe-apps > a {
+  display: grid;
+  justify-items: center;
+  gap: var(--ads-space-1);
+  padding: var(--ads-space-3) var(--ads-space-1);
+  font-size: var(--ads-text-sm);
+  color: var(--ads-ink);
+  text-align: center;
+  text-decoration: none;
+  border-radius: var(--ads-radius);
+}
+.sbe-apps > a:hover { background: var(--ads-sunken); }
+.sbe-apps__icon { display: inline-flex; color: var(--ads-brand-ink); }
+
+/* Under 1280 pixels the navigation's names don't fit beside the search: each entry
+   keeps its icon, its count moves to the icon's corner, a tooltip gives its name, and
+   the name stays for screen readers. */
+@media (max-width: 79.99em) {
+  /* the product's name goes too, kept for screen readers: it names the logo's link */
+  .sbe-nav-label,
+  .ads-app--horizontal .sbe-brandname {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .sbe-primary :is(.ads-nav__link, .ads-dropdown > summary) { padding-inline: var(--ads-space-2); }
+  .sbe-primary .ads-tip:is(:hover, :focus-visible)::after { display: block; }
+}
+
+/* Under 1024 pixels the labels of buttons that have an icon go ("Créer", the
+   community's actions). A column beside the content moves under it, so the button that
+   hides the column would only hide the comments: it goes too. */
+@media (max-width: 63.99em) {
+  .sbe-wide-only,
+  .sbe-doc .sbe-toggle { display: none; }
+  .sbe-bar-do { gap: var(--ads-space-4); }
+  /* ADS's bar spaces its parts for a laptop (ADS request 13). */
+  .ads-app--horizontal .ads-sidebar__inner { gap: var(--ads-space-3); padding-inline: var(--ads-space-3); }
+}
+
+/* On a phone, where to go moves to a bar at the bottom of the screen, each entry an
+   icon over its name, as in phone applications; the search becomes an icon. */
+@media (max-width: 47.99em) {
+  .sbe-search { display: none; }
+  .sbe-bar-search { display: inline-flex; }
+  .sbe-nav-label { position: static; width: auto; height: auto; overflow: visible; clip-path: none; }
+  .sbe-primary {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    /* under ADS's backdrop (20), so a dialog covers it */
+    z-index: 15;
+    background: var(--ads-surface);
+    box-shadow: 0 calc(-1 * var(--ads-border-width)) 0 0 var(--ads-line);
+  }
+  .sbe-primary .ads-nav__list { justify-content: space-around; }
+  .sbe-primary .ads-nav__list > li { position: relative; }
+  .sbe-primary :is(.ads-nav__link, .ads-dropdown > summary) {
+    flex-direction: column;
+    gap: 0;
+    padding: var(--ads-space-1) var(--ads-space-2);
+    font-size: var(--ads-text-xs);
+  }
+  .sbe-primary .sbe-caret { display: none; }
+  .sbe-primary .sbe-count {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: calc(50% + var(--ads-space-1));
+    margin: 0;
+  }
+  .sbe-primary .ads-tip:is(:hover, :focus-visible)::after { display: none; }
+  /* the communities menu opens upwards, across the screen */
+  .sbe-primary .ads-dropdown { position: static; }
+  .sbe-primary .ads-menu { position: fixed; inset-inline: var(--ads-space-2); inset-block: auto 4.25rem; }
+  .ads-app--horizontal .ads-page-body { padding-block-end: 4.5rem; }
+  /* A file's name may take two lines in a table, which keeps only the date beside it:
+     on one line, the minor columns gone, it was cut to a letter or two. */
+  /* Selecting several files is for a larger screen; a row's ⋯ menu stays. */
+  .ads-datatable .ads-table__select { display: none; }
+  .sbe-cell-truncate .ads-truncate {
+    display: -webkit-box;
+    white-space: normal;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  /* A page's menus too: anchored to their button's end, a wide menu runs off the
+     left of a narrow screen. Fixed, with no top, a menu stays under its button and
+     spans the screen. */
+  :is(.ads-page-header, .ads-page-body) .ads-menu {
+    position: fixed;
+    inset-inline: var(--ads-space-2);
+    inset-block-start: auto;
+    min-width: 0;
+    max-width: none;
+  }
+  /* the bar's other menus open downwards, across the screen */
+  :is(.sbe-bar-do, .sbe-bar-utilities) .ads-menu {
+    position: fixed;
+    inset-inline: var(--ads-space-2);
+    inset-block: 3.5rem auto;
+    min-width: 0;
+    max-width: none;
+  }
+  /* ADS scrolls the bar sideways on a phone, which hides its menus; it fits (ADS
+     request 13). */
+  .ads-app--horizontal .ads-sidebar__inner { gap: var(--ads-space-2); padding-inline: var(--ads-space-2); overflow: visible; }
+  .sbe-bar-do { gap: var(--ads-space-2); }
+}
+
+/* A tree entry with an icon: the icon and the name side by side, centred on one line
+   (ADS request 19). */
+a.ads-tree__label { display: flex; align-items: center; gap: var(--ads-space-2); }
+
+/* A button that switches something on the page: a checkbox inside a label drawn as a
+   button, the page reacting with `:has()`, no script. The box is hidden but keeps the
+   focus, which shows on the button. */
+.sbe-toggle { cursor: pointer; }
+.sbe-toggle > input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.sbe-toggle:has(> input:focus-visible) { outline: 2px solid var(--ads-brand); outline-offset: 2px; }
+.sbe-toggle > input:checked ~ .sbe-toggle__off,
+.sbe-toggle > input:not(:checked) ~ .sbe-toggle__on { display: none; }
+.sbe-toggle > span { display: inline-flex; align-items: center; gap: var(--ads-space-2); }
+
+/* A document's page: its details beside it, until the reader gives the document the
+   whole width. */
+.sbe-doc:has(.sbe-toggle > input:checked) > aside { display: none; }
+
+/* Feeds: where to start a discussion, then entries. An entry's title, a few lines of
+   what it says, the latest replies on one line each. */
+.sbe-composer { display: flex; align-items: center; gap: var(--ads-space-2); }
+.sbe-prompt {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ads-ink-muted);
+  text-decoration: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+.sbe-entry__title { margin: 0; font-size: var(--ads-text-lg); }
+/* A link that reads as text until hovered: a title, a community's name in a byline. */
+a.sbe-quiet { color: inherit; text-decoration: none; }
+a.sbe-quiet:hover { text-decoration: underline; }
+.sbe-excerpt {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+.sbe-replies {
+  padding-inline-start: var(--ads-space-3);
+  border-inline-start: 2px solid var(--ads-line);
+}
+.sbe-replies > li { gap: var(--ads-space-2); }
+
+/* Two lines beside an icon, a tile or an avatar, about as tall as it: a name, then
+   its details, smaller, with no gap between them. */
+.sbe-lines { display: grid; grid-template-columns: minmax(0, 1fr); line-height: 1.3; }
+.sbe-lines > .ads-muted { font-size: var(--ads-text-sm); }
+/* A name on two lines at most, then an ellipsis: file names often differ only at their
+   end ("v1", "v3"), which a one-line ellipsis hides. */
+.sbe-clamp {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* A date as a small calendar leaf: the day over the month. */
+.sbe-date {
+  display: grid;
+  flex: none;
+  place-content: center;
+  width: 3rem;
+  height: 3rem;
+  font-size: var(--ads-text-xs);
+  line-height: 1.1;
+  text-align: center;
+  color: var(--ads-brand-ink);
+  background: var(--ads-brand-wash);
+  border-radius: var(--ads-radius);
+}
+.sbe-date strong { font-family: var(--ads-font-figures); font-size: var(--ads-text-lg); }
+.sbe-date--sm { width: 2.25rem; height: 2.25rem; }
+.sbe-date--sm strong { font-size: var(--ads-text); }
+
+/* The folders' tree: a folder with subfolders opens and closes with the button before
+   its name, a `<details>` that holds only its summary; the list of subfolders follows
+   it and shows when it is open. ADS's tree has no such button (ADS request 21). */
+.sbe-tree__row { display: flex; align-items: center; gap: var(--ads-space-1); }
+.sbe-tree__toggle { flex: none; width: 1.25rem; }
+.sbe-tree__toggle > summary {
+  display: grid;
+  place-items: center;
+  height: 1.25rem;
+  color: var(--ads-ink-muted);
+  list-style: none;
+  cursor: pointer;
+  border-radius: var(--ads-radius-sm);
+}
+.sbe-tree__toggle > summary::-webkit-details-marker { display: none; }
+.sbe-tree__toggle > summary:hover { background: var(--ads-sunken); }
+.sbe-tree__toggle > summary .ads-icon { width: 1rem; height: 1rem; transition: rotate .12s; }
+.sbe-tree__toggle[open] > summary .ads-icon { rotate: 90deg; }
+.sbe-tree .ads-tree__node > .ads-tree--nested { display: none; }
+.sbe-tree .ads-tree__node:has(> .sbe-tree__row > .sbe-tree__toggle[open]) > .ads-tree--nested { display: block; }
+.sbe-tree__row > .ads-tree__label { flex: 1; min-width: 0; }
+
+/* The rich-text editor's frame (Tiptap fills the body): a row of tools, the text. ADS
+   draws the box and leaves the toolbar to the vendor's adapter. */
+.sbe-editor__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: var(--ads-space-1);
+  border-block-end: var(--ads-border-width) solid var(--ads-line-soft);
+  background: var(--ads-sunken);
+}
+.sbe-editor__sep { width: var(--ads-border-width); height: 1.25rem; margin-inline: var(--ads-space-1); background: var(--ads-line); }
+.sbe-editor__body { min-height: 10rem; padding: var(--ads-space-3); }
+.sbe-editor__body:focus { outline: none; }
+
+/* A drop zone inside a form: one line rather than a panel. */
+.ads-dropzone.sbe-dropzone--compact {
+  display: flex;
+  justify-content: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-space-4);
+}
+
+/* Files on their way: a row each, its state under its name. */
+.sbe-uploads > li { gap: var(--ads-space-3); }
+.sbe-uploads .ads-progress { margin-block-start: var(--ads-space-1); }
+.sbe-upload__options { margin-block-start: var(--ads-space-1); font-size: var(--ads-text-sm); }
+.sbe-upload__error { display: inline-flex; align-items: center; gap: var(--ads-space-1); font-size: var(--ads-text-sm); }
+.sbe-ok { color: var(--ads-success-ink); }
+
+/* A group of choices with its legend as a label, without the browser's frame. */
+.sbe-fieldset { margin: 0; padding: 0; border: 0; }
+
+/* A dialog with a list in it: wider than ADS's 32rem. */
+.ads-modal__panel.sbe-modal-wide { max-width: 40rem; }
+/* A note in a dialog's foot takes a line of its own when the buttons leave it no room. */
+.ads-modal__foot > .ads-muted { flex: 1 1 14rem; }
+
+/* Search results: a kind's icon, the title, where it is, the words found marked. */
+.sbe-results > li { align-items: flex-start; gap: var(--ads-space-3); }
+.sbe-result__icon { display: inline-flex; flex: none; padding-block-start: 2px; color: var(--ads-ink-muted); }
+.sbe-result__title { font-weight: var(--ads-weight-bold); }
+.sbe-results mark { color: inherit; background: color-mix(in srgb, var(--ads-warning) 22%, transparent); border-radius: 2px; }
+
+/* A heading over a run of cards, as a card's title is over its body. */
+.sbe-section-title { margin: 0; font-size: var(--ads-text-md); color: var(--ads-ink-strong); }
+
+/* A person's title and organisation under their name in a page's heading. */
+.sbe-profile__title { font-size: var(--ads-text); font-weight: var(--ads-weight-normal); }
