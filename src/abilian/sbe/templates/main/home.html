@@ -24,7 +24,8 @@
             {{ m.tile(c) }}
             <span class="sbe-lines ads-fill">
               <span class="ads-truncate">{{ c.name }}</span>
-              <span class="ads-muted">{{ ngettext("%(num)d member", "%(num)d members", c.membership_count) }} · {{ c.last_active_at | age(date_threshold="day") }}</span>
+              {#- One line: how long ago, the exact date on hover. -#}
+              <span class="ads-muted ads-truncate">{{ ngettext("%(num)d member", "%(num)d members", c.membership_count) }} · <time datetime="{{ c.last_active_at.isoformat() }}" title="{{ c.last_active_at | datetimeformat('medium') }}">{{ c.last_active_at | age }}</time></span>
             </span>
           </a>
         </li>
