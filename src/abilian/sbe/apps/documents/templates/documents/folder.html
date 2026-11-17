@@ -173,7 +173,7 @@
             {{ m.sort_th(listing, "size", _("Size"), "ads-end ads-col--secondary") }}
             {{ m.sort_th(listing, "owner", _("Owner"), "ads-col--secondary") }}
             {{ m.sort_th(listing, "age", _("Added"), "ads-end") }}
-            <th><span class="sbe-sr-only">{{ _("Actions") }}</span></th>
+            <th scope="col" aria-label="{{ _('Actions') }}"></th>
           </tr>
         </thead>
         <tbody>
