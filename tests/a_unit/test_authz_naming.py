@@ -276,6 +276,7 @@ TEMPLATE_NAMES = {
     "may_manage": "documents/views: folder_view, document_view",
     "may_replace": "documents/views/documents.py: document_view",
     "may_comment": "documents/views/documents.py: document_view",
+    "may_edit": "social/views/users.py: user",
     # read, and not authorization at all -- state and form plumbing
     "is_closed": "not authorization: thread state",
     "is_active": "not authorization: search facet",

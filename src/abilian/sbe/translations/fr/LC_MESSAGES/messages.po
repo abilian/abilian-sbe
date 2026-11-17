@@ -2371,3 +2371,60 @@ msgstr "Quand"
 
 msgid "Only in %(name)s"
 msgstr "Seulement dans %(name)s"
+
+# The directory and a profile on the Abilian Design System (social/users.html, user.html)
+msgid "%(num)d person"
+msgid_plural "%(num)d people"
+msgstr[0] "%(num)d personne"
+msgstr[1] "%(num)d personnes"
+
+msgid "Whom to list"
+msgstr "Qui afficher"
+
+msgid "Everyone"
+msgstr "Tout le monde"
+
+msgid "Filter by name"
+msgstr "Filtrer par nom"
+
+msgid "Filter people by name"
+msgstr "Filtrer les personnes par nom"
+
+msgid "Communities in common"
+msgstr "Communautés en commun"
+
+msgid "Last seen"
+msgstr "Vu"
+
+msgid "never"
+msgstr "jamais"
+
+msgid "Send an email"
+msgstr "Envoyer un e-mail"
+
+msgid "Edit the profile"
+msgstr "Modifier le profil"
+
+msgid "Recent activity"
+msgstr "Activité récente"
+
+msgid "Nothing lately in the communities you share."
+msgstr "Rien récemment dans vos communautés en commun."
+
+msgid "Nothing lately."
+msgstr "Rien récemment."
+
+msgid "Contact and communities"
+msgstr "Coordonnées et communautés"
+
+msgid "Contact"
+msgstr "Coordonnées"
+
+msgid "Member since"
+msgstr "Inscrit"
+
+msgid "Seen"
+msgstr "Vu"
+
+msgid "Never seen"
+msgstr "Jamais venu"

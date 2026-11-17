@@ -51,7 +51,8 @@ def all_paths(page: Page, base_url: str) -> list[str]:
         "/admin/groups": ("table a", "E2E Group"),
         "/social/groups/": ("a", "E2E Group"),
         "/admin/users": ("table a", "Paula Picker"),
-        "/social/users/": ("a", "Paula Picker"),
+        # Paula shares no community with the admin: she is among everyone.
+        "/social/users/?who=all": ("#users-table a", "Paula Picker"),
     }
     found = []
     for listing, (selector, text) in links.items():

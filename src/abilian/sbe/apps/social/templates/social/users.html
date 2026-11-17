@@ -1,45 +1,52 @@
-{% extends "social/base.html" %}
-
-{% from "social/macros.html" import m_box %}
-{% from "macros/listing.html" import m_filter, m_sort_th, m_no_rows, m_pagination %}
-
-{% block content %}
-
-  {% call m_box(_("User directory")) %}
-    {%- set th = "px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider" %}
-
-    {{ m_filter(listing) }}
-
-    <div class="overflow-x-auto">
-      <table class="min-w-full divide-y divide-gray-200" id="users-table">
-        <thead class="bg-gray-50">
-          <tr>
-            <th class="{{ th }} w-px"><span class="sr-only">{{ _('Photo') }}</span></th>
-            {{ m_sort_th(listing, "name", _("Name"), th) }}
-            {{ m_sort_th(listing, "created_at", _("Registered"), th ~ " w-1/5") }}
-            {{ m_sort_th(listing, "last_active", _("Last activity"), th ~ " w-1/5") }}
-          </tr>
-        </thead>
-
-        <tbody class="divide-y divide-gray-100">
-          {%- for user in users %}
-            {%- set user_url = url_for('.user', user_id=user.id) %}
-            <tr class="hover:bg-gray-50">
-              <td class="px-4 py-2 pr-0 w-px">
-                <a href="{{ user_url }}"><img src="{{ user_photo_url(user, size=36) }}" width="36" height="36" class="max-w-none" alt="{{ user.name }}"></a>
-              </td>
-              <td class="px-4 py-2"><div class="info"><a href="{{ user_url }}" class="font-medium whitespace-nowrap">{{ user.name }}</a></div></td>
-              <td class="px-4 py-2 text-sm text-gray-600">{{ user.created_at|age }}</td>
-              <td class="px-4 py-2 text-sm text-gray-600">{{ user.last_active|age }}</td>
-            </tr>
-          {%- else %}
-            {{ m_no_rows(4) }}
-          {%- endfor %}
-        </tbody>
-      </table>
-    </div>
-
-    {{ m_pagination(listing) }}
-  {% endcall %}
-
+{#- The directory: people as rows, to find someone by name; whom I share a community
+    with first, and those communities; when each was last seen. Drawn in
+    `mockups/templates/people.html`, without the title and organisation, which SBE does
+    not keep. -#}
+{% extends "ads_base.html" %}
+{% block page_title %}{{ _("Directory") }}{% endblock %}
+{% block heading %}{{ _("Directory") }}{% endblock %}
+{% block body %}
+<div class="ads-card">
+  {% if counts.mine %}
+  <div class="ads-card__head">
+    <ul class="ads-pills" aria-label="{{ _('Whom to list') }}">
+      <li><a class="ads-pill" href="{{ url_for('.users', q=listing.search or none) }}" {{ 'aria-current="page"' | safe if not everyone }}>{{ _("My communities") }} ({{ counts.mine }})</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.users', who='all', q=listing.search or none) }}" {{ 'aria-current="page"' | safe if everyone }}>{{ _("Everyone") }} ({{ counts.all }})</a></li>
+    </ul>
+  </div>
+  {% endif %}
+  <form class="sbe-toolbar" method="get" action="{{ url_for('.users') }}">
+    <span class="ads-input-icon">
+      <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+      <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Filter by name') }}" aria-label="{{ _('Filter people by name') }}">
+    </span>
+    {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+    <span class="ads-muted">{{ ngettext("%(num)d person", "%(num)d people", listing.total) }}</span>
+    {% if listing.search %}<a href="{{ url_for('.users', who=request.args.get('who')) }}">{{ _("Show all") }}</a>{% endif %}
+  </form>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter ads-table--hover" id="users-table">
+      <thead><tr>
+        {{ m.sort_th(listing, "name", _("Name")) }}
+        <th class="ads-col--secondary">{{ _("Communities in common") }}</th>
+        {{ m.sort_th(listing, "last_active", _("Last seen"), "ads-end") }}
+      </tr></thead>
+      <tbody>
+        {% for person in users %}
+        <tr>
+          <td class="ads-full"><span class="ads-cluster ads-gap-sm">{{ m.avatar(person) }}<a class="sbe-quiet" href="{{ url_for('.user', user_id=person.id) }}"><strong>{{ person.name }}</strong></a></span></td>
+          <td class="ads-col--secondary">
+            {% set common = shared[person.id] %}
+            <span class="sbe-inline ads-gap-sm">{% for c in common[:4] %}<span role="img" aria-label="{{ c.name }}" title="{{ c.name }}">{{ m.tile(c, "sbe-tile--sm") }}</span>{% endfor %}{% if common | length > 4 %}<span class="ads-muted">+{{ common | length - 4 }}</span>{% endif %}</span>
+          </td>
+          <td class="ads-end ads-muted">{% if person.last_active %}{{ m.time(person.last_active) }}{% else %}{{ _("never") }}{% endif %}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="ads-muted">{{ _("No matching records found") }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ m.pagination(listing) }}
+</div>
 {% endblock %}

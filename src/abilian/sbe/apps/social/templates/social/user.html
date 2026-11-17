@@ -1,63 +1,43 @@
-{% extends "social/base.html" %}
+{#- A person: who they are and how to reach them; what they did lately in the
+    communities the viewer shares with them; those communities. Drawn in
+    `mockups/templates/profile.html`, without the title and organisation, which SBE does
+    not keep. -#}
+{% extends "ads_base.html" %}
+{% block page_title %}{{ person.name }} · {{ _("Directory") }}{% endblock %}
+{% block pretitle %}<a href="{{ url_for('.users') }}">{{ _("Directory") }}</a>{% endblock %}
+{% block heading %}<span class="ads-cluster ads-gap-sm">{{ m.avatar(person, "ads-avatar--lg") }}<span>{{ person.name }}</span></span>{% endblock %}
+{% block actions %}
+{% if person.email %}<a class="ads-btn ads-btn--primary" href="mailto:{{ person.email }}">{{ icon("mail") }}{{ _("Send an email") }}</a>{% endif %}
+{% if may_edit %}<a class="ads-btn" href="{{ url_for('.user_edit', user_id=person.id) }}">{{ icon("pencil") }}{{ _("Edit the profile") }}</a>{% endif %}
+{% endblock %}
+{% block body %}
+<div class="ads-with-aside">
+  <section class="ads-stack" aria-labelledby="activity">
+    <h2 class="sbe-section-title" id="activity">{{ _("Recent activity") }}</h2>
+    {% for item in items %}{{ m.feed_entry(item) }}{% else %}
+    <p class="ads-muted">{{ _("Nothing lately in the communities you share.") if in_common else _("Nothing lately.") }}</p>
+    {% endfor %}
+  </section>
 
-{% from "macros/box.html" import m_box %}
-{% from "macros/activity.html" import m_activities %}
-
-{% block content %}
-
-  {% call m_box(_("Profile")) %}
-    <div class="flex flex-col sm:flex-row gap-6">
-      <img width="140" height="140"
-           src="{{ user_photo_url(user, size=140) }}"
-           class="rounded-lg flex-shrink-0" alt=""/>
-
-      <div class="flex-1 min-w-0 break-words">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4">{{ user.name }}</h2>
-
-        {%- if user.email %}
-          <div class="mb-2">
-            <a href="mailto:{{ user.email }}" class="text-blue-600 hover:text-blue-800 break-all">
-              <i class="fa fa-envelope text-gray-400 mr-2"></i> {{ user.email }}
-            </a>
-          </div>
-        {%- endif %}
-
-        {%- if user.location %}
-          <div class="flex items-center text-gray-700">
-            <i class="fa fa-map-marker text-gray-400 mr-2"></i>
-            <span class="font-medium mr-2">{{ _("Location:") }}</span>
-            <span>{{ user.location }}</span>
-          </div>
-        {%- endif %}
-      </div>
-    </div>
-  {% endcall %}
-
-  {% call m_box(_("Details")) %}
-
-    {%- if view_form.communautes.data %}
-      <h2 class="text-lg font-semibold text-gray-900 mb-3">{{ _("Communities") }}</h2>
-      <div class="mb-6">{{ view_form.communautes.view_widget.render_view(view_form.communautes)|safe }}</div>
-    {%- endif %}
-
-    <h2 class="text-lg font-semibold text-gray-900 mb-3">{{ _("Stats") }}</h2>
-
-    <p class="text-gray-700 mb-2">
-      <span class="font-medium">{{ _("Joined on:") }}</span> {{ user.created_at|date_age }}.
-    </p>
-
-    <p class="text-gray-700">
-      <span class="font-medium">{{ _("Latest connection:") }}</span>
-      {%- if user.last_active %}
-        {{ user.last_active|date_age }}.
-      {%- else %}
-        {{ _("Never") }}.
-      {%- endif %}
-    </p>
-  {% endcall %}
-
-  {% call m_box(_("Recent activities")) %}
-    {{ m_activities(activity_entries) }}
-  {% endcall %}
-
+  <aside class="ads-stack" aria-label="{{ _('Contact and communities') }}">
+    <section class="ads-card" aria-labelledby="contact">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="contact">{{ _("Contact") }}</h2></div>
+      <ul class="ads-list">
+        {% if person.email %}<li>{{ icon("mail") }}<a class="ads-fill ads-truncate" href="mailto:{{ person.email }}">{{ person.email }}</a></li>{% endif %}
+        <li class="ads-muted">{{ _("Member since") }} {{ m.time(person.created_at) }}</li>
+        <li class="ads-muted">{% if person.last_active %}{{ _("Seen") }} {{ m.time(person.last_active) }}{% else %}{{ _("Never seen") }}{% endif %}</li>
+      </ul>
+    </section>
+    {% if communities %}
+    <section class="ads-card" aria-labelledby="communities">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="communities">{{ _("Communities in common") if in_common else _("Communities") }}</h2></div>
+      <ul class="ads-list">
+        {% for c in communities | sort(attribute="name") %}
+        <li><a class="ads-fill ads-cluster ads-gap-sm sbe-quiet" href="{{ url_for(c) }}">{{ m.tile(c, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ c.name }}</span></a></li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+  </aside>
+</div>
 {% endblock %}

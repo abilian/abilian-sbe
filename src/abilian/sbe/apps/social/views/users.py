@@ -18,8 +18,8 @@ from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.models.subjects import User
 from abilian.i18n import _, _l
 from abilian.sbe.apps.communities.models import Membership
-from abilian.sbe.apps.social.forms import UserProfileForm, UserProfileViewForm
-from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
+from abilian.sbe.apps.main.feed import feed_item
+from abilian.sbe.apps.social.forms import UserProfileForm
 from abilian.sbe.apps.wall.views import get_recent_entries
 from abilian.services import security_service
 from abilian.services.security import is_site_admin
@@ -37,20 +37,6 @@ DEFAULT_USER_MUGSHOT = pkgutil.get_data(
 )
 
 
-def make_tabs(user: User) -> list[dict[str, str]]:
-    return [
-        {"id": "profile", "label": _("Profile"), "link": url_for(user, tab="profile")},
-        # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
-        {
-            "id": "documents",
-            "label": _("Documents"),
-            "link": url_for(user, tab="documents"),
-        },
-        {"id": "images", "label": _("Images"), "link": url_for(user, tab="images")},
-        {"id": "audit", "label": _("Audit"), "link": url_for(user, tab="audit")},
-    ]
-
-
 _NAME = (func.lower(User.last_name), func.lower(User.first_name))
 DIRECTORY_SORT_COLUMNS = {
     "name": _NAME,
@@ -60,40 +46,74 @@ DIRECTORY_SORT_COLUMNS = {
 
 
 @social.route("/users/")
-def users() -> str:
-    listing, users = Listing.from_query(
-        User.query, DIRECTORY_SORT_COLUMNS, "name", (User.first_name, User.last_name)
+@authenticated
+def users(user: User) -> str:
+    """The directory: the people I share a community with, or everyone.
+
+    Mine first, when I am in a community; the communities each one shares with me.
+    """
+    mine = [
+        community_id
+        for (community_id,) in Membership.query.filter(
+            Membership.user_id == user.id
+        ).values(Membership.community_id)
+    ]
+    neighbours = User.query.filter(
+        User.id.in_(
+            db.session.query(Membership.user_id).filter(
+                Membership.community_id.in_(mine)
+            )
+        )
     )
-    return render_template("social/users.html", listing=listing, users=users)
+    everyone = request.args.get("who") == "all" or not mine
+    listing, people = Listing.from_query(
+        User.query if everyone else neighbours,
+        DIRECTORY_SORT_COLUMNS,
+        "name",
+        (User.first_name, User.last_name),
+    )
+    return render_template(
+        "social/users.html",
+        listing=listing,
+        users=people,
+        everyone=everyone,
+        counts={"mine": neighbours.count() if mine else 0, "all": User.query.count()},
+        shared=communities_in_common(people, mine),
+    )
+
+
+def communities_in_common(people: list[User], mine: list[int]) -> dict[int, list]:
+    """For each person, by id, the communities they are in that I am in too."""
+    shared: dict[int, list] = {person.id: [] for person in people}
+    memberships = Membership.query.filter(
+        Membership.user_id.in_(shared), Membership.community_id.in_(mine)
+    )
+    for membership in memberships:
+        shared[membership.user_id].append(membership.community)
+    return shared
 
 
 @social.route("/users/<int:user_id>")
 @default_view(social, User, "user_id")
 @authenticated
 def user(user: User, user_id: int) -> str:
+    """A person: how to reach them, what they did lately where `user` can see it,
+    and their communities."""
     shown = User.query.get_or_404(user_id)
-
-    # FIXME: use user profiles
-    view_form = UserProfileViewForm(obj=shown)
-
     communities = [m.community for m in shown.communautes_membership]
-    if user != shown and not security_service.has_role(user, "manager"):
-        # filter visible communautes (ticket 165)
+    in_common = user != shown and not security_service.has_role(user, "manager")
+    if in_common:
+        # Only those the viewer is in too (ticket 165).
         communities = [c for c in communities if c.has_member(user)]
 
-    view_form.communautes._set_data(communities)
-
-    entries = get_recent_entries(user, actor=shown)
-    entries = ActivityEntryPresenter.wrap_collection(entries)
-    ctx = {
-        "user": shown,
-        "contact": shown,
-        "view_form": view_form,
-        "can_edit": can_edit(user, shown),
-        "tabs": make_tabs(shown),
-        "activity_entries": entries,
-    }
-    return render_template("social/user.html", **ctx)
+    return render_template(
+        "social/user.html",
+        person=shown,
+        communities=communities,
+        in_common=in_common,
+        may_edit=can_edit(user, shown),
+        items=[feed_item(entry) for entry in get_recent_entries(user, actor=shown)],
+    )
 
 
 def can_edit(user: User, profile_owner: User) -> bool:
