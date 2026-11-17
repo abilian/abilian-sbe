@@ -54,28 +54,3 @@
     </div>
   {% endif %}
 {% endmacro %}
-
-{% macro wizard_steps(steps,active_n) %}
-  <div class="mb-8">
-    {# Responsive Arrow Progress Bar #}
-    <div class="flex items-center justify-between">
-      {% for step in steps %}
-        <div class="min-w-0 {% if loop.index == active_n %}flex-none{% else %}flex-1{% endif %} {% if not loop.last %}pr-2{% endif %}">
-          <div class="relative flex items-center">
-            <div class="flex shrink-0 items-center justify-center w-8 h-8 rounded-full text-sm font-medium
-                        {% if loop.index <= active_n %}bg-blue-600 text-white{% else %}bg-gray-200 text-gray-500{% endif %}">
-              {{ loop.index }}
-            </div>
-            {#- On a phone only the current step has room for its name. #}
-            <span class="ml-2 text-sm {% if loop.index != active_n %}hidden sm:inline{% endif %} {% if loop.index <= active_n %}text-blue-600 font-medium{% else %}text-gray-500{% endif %}">
-              {{ step }}
-            </span>
-            {% if not loop.last %}
-              <div class="flex-1 ml-4 h-0.5 {% if loop.index < active_n %}bg-blue-600{% else %}bg-gray-200{% endif %}"></div>
-            {% endif %}
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  </div>
-{% endmacro %}

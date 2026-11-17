@@ -2471,3 +2471,49 @@ msgstr "Retirer %(name)s de la communauté ?"
 
 msgid "They will no longer see its discussions and documents. What they wrote stays."
 msgstr "Cette personne ne verra plus ses discussions ni ses documents. Ce qu’elle a écrit reste."
+
+# Inviting people on the Abilian Design System (community/wizard_*.html)
+msgid "Steps"
+msgstr "Étapes"
+
+msgid "Addresses"
+msgstr "Adresses"
+
+msgid "Who joins"
+msgstr "Qui rejoint"
+
+msgid "New accounts"
+msgstr "Nouveaux comptes"
+
+msgid "Email addresses"
+msgstr "Adresses e-mail"
+
+msgid "One per line, or separated by commas or spaces. The next step says what will happen to each."
+msgstr "Une par ligne, ou séparées par des virgules ou des espaces. L’étape suivante dit ce qui arrivera à chacune."
+
+msgid "Or a spreadsheet"
+msgstr "Ou un tableur"
+
+msgid "A CSV file, one person per line: address; first name; last name; role (member or manager)."
+msgstr "Un fichier CSV, une personne par ligne : adresse ; prénom ; nom ; rôle (member ou manager)."
+
+msgid "Already members: nothing to do"
+msgstr "Déjà membres : rien à faire"
+
+msgid "They have an account: they will be added"
+msgstr "Ils ont un compte : ils seront ajoutés"
+
+msgid "These addresses have no account. Each needs a name; each person will get an email to choose a password."
+msgstr "Ces adresses n’ont pas de compte. Il faut un nom à chacune ; chaque personne recevra un e-mail pour choisir son mot de passe."
+
+msgid "First name"
+msgstr "Prénom"
+
+msgid "Last name"
+msgstr "Nom"
+
+msgid "First name of %(email)s"
+msgstr "Prénom de %(email)s"
+
+msgid "Last name of %(email)s"
+msgstr "Nom de %(email)s"

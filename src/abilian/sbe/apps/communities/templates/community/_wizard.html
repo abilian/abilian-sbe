@@ -1,0 +1,31 @@
+{#- What the three pages of inviting people share: where one is in them, and the frame
+    of a page. `vite/src/wizard.js` keeps the accounts that travel between the steps in
+    line with what is removed or changed. -#}
+
+{% macro frame(step, title) %}
+<div class="ads-card">
+  <div class="ads-card__head">
+    <div class="ads-stack ads-gap-sm ads-fill">
+      <ol class="ads-breadcrumb"><li><a href="{{ url_for('.members', community_id=g.community.slug) }}">{{ _("Members") }}</a></li></ol>
+      <h2 class="ads-card__title">{{ title }}</h2>
+      <ol class="ads-steps" aria-label="{{ _('Steps') }}">
+        {% for label in [_("Addresses"), _("Who joins"), _("New accounts")] %}
+        <li class="ads-step" {{ 'aria-current="step"' | safe if loop.index <= step }}>{{ label }}</li>
+        {%- endfor %}
+      </ol>
+    </div>
+  </div>
+  {{ caller() }}
+</div>
+{% endmacro %}
+
+{% macro role_select(attrs={}, selected="member") %}
+<select class="ads-select sbe-select--sm" name="role" aria-label="{{ _('Role') }}" {{ attrs | xmlattr }}>
+  <option value="member" {{ "selected" if selected != "manager" }}>{{ _("Member") }}</option>
+  <option value="manager" {{ "selected" if selected == "manager" }}>{{ _("Community manager") }}</option>
+</select>
+{% endmacro %}
+
+{% macro remove_button(attrs={}) %}
+<button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ _('Remove') }}" {{ attrs | xmlattr }}>{{ icon("x") }}</button>
+{% endmacro %}

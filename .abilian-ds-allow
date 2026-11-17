@@ -25,3 +25,5 @@ js-file-failed
 js-file-remove
 js-total-progress
 js-upload
+wizard-warning     # wizard.js: says that a new account lacks a name
+wizard-required    # wizard.js: a new account's fields it checks before saving

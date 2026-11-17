@@ -1,123 +1,45 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% import "community/members_macros.html" as macros with context %}
-{%- from "community/macros.html" import wizard_steps -%}
-{% from "macros/user.html" import m_user_link, m_user_photo %}
-
-{% block memberscontent %}
-  {% call m_box_content(_("Members Wizard")) %}
-
-    {{ wizard_steps(steps,3) }}
-    <br>
-
-    <div class="max-w-4xl mx-auto">
-      <div>
-        <div class="space-y-6">
-          <div>
-            <h3 class="text-xl font-semibold text-gray-900">{{ _("New Users Accounts") }}</h3>
-            <h4 class="text-sm text-gray-500 mt-1">
-              {{ _("The members below are not registered on the platform. Please create their accounts so that they can join the community.") }}
-            </h4>
-          </div>
-
-          <div class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-900 mb-1">{{ _("Profile") }}</label>
-              <p class="text-xs text-gray-500 mb-4">
-                {{ _("Complete the information below to create a new user. They will receive a mail instruction to connect.") }}
-              </p>
-            </div>
-
-            <div hidden class="wizard-warning p-4 bg-yellow-50 border border-yellow-200 rounded-md text-yellow-800 text-sm" role="alert">
-              <i class="fa fa-check mr-2"></i>
-              {{ _("You need to complete all the fields") }}
-            </div>
-
-            <div class="overflow-x-auto">
-              <table class="min-w-full divide-y divide-gray-200" data-wizard-new-accounts>
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">First Name <span class="text-red-500">*</span></th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Name <span class="text-red-500">*</span></th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
-                    <th class="px-4 py-3"></th>
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  {% for user in new_accounts %}
-                    <tr data-wizard-row>
-                      <td class="px-4 py-3 text-sm font-medium text-gray-700">
-                        <input value="{{ user.email }}" type="hidden" name="account"/>
-                        {{ user.email }}
-                      </td>
-                      <td class="px-4 py-3">
-                        <input placeholder="First Name" name="first_name"
-                               class="wizard-required block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                               type="text" value="{{ user.first_name }}"/>
-                      </td>
-                      <td class="px-4 py-3">
-                        <input name="last_name" placeholder="Last Name"
-                               class="wizard-required block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                               type="text" value="{{ user.last_name }}"/>
-                      </td>
-                      <td class="px-4 py-3">
-                        <select name="role" aria-label="{{ _('Role') }}"
-                                class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                          <option value="member" {%- if user.role == "member" %} selected{% endif %}>{{ _("Member") }}</option>
-                          <option value="manager" {%- if user.role == "manager" %} selected{% endif %}>{{ _("Manager") }}</option>
-                        </select>
-                      </td>
-                      <td class="px-4 py-3">
-                        <button type="button" data-wizard-remove aria-label="{{ _('Remove') }}"
-                                class="inline-flex items-center justify-center w-8 h-8 text-white bg-red-600 rounded-md hover:bg-red-700">
-                          <i class="fa fa-times"></i>
-                        </button>
-                      </td>
-                    </tr>
-                  {% endfor %}
-                  <tr data-wizard-empty {%- if new_accounts %} hidden{% endif %}>
-                    <td colspan="5" class="px-4 py-3 text-gray-500">
-                      <i class="fa fa-check-circle mr-1"></i> {{ _('There is no new accounts') }}
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            <div class="flex justify-end pt-4">
-              <button type="button" data-wizard-save
-                      class="users-wizard-next inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-700 rounded-md hover:bg-green-800">
-                <i class="fa fa-floppy-o mr-2"></i>
-                {{ _("Save") }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <form method="POST" id="wizard-form" class="inline"
-          action=" {{ url_for('.wizard_saving',community_id=g.community.slug) }}">
-      {{ csrf.field() }}
-      <input id="existing_account" type="hidden" name="existing_account" value="{{ existing_account }}">
-      <input id="new_accounts" type="hidden" name="new_accounts" value='{{ new_accounts|tojson }}'>
-    </form>
-
-
-  {% endcall %}
-{% endblock %}
-
-{% block sidebar %}
-  {%- set actions = actions.for_category('members:menu') %}
-  {%- if actions %}
-    {% call m_box_menu() %}
-      <ul class="menu-actions">
-        {%- for action in actions %}
-          <li>{{ action.render() }}</li>
-        {%- endfor %}
-      </ul>
-    {% endcall %}
-  {%- endif %}
+{#- Inviting people, step 3: accounts for those who have none, a name each, and a role.
+    Each gets an email to choose a password. -#}
+{% extends "ads_community.html" %}
+{% import "community/_wizard.html" as wizard with context %}
+{% block page_title %}{{ _("Invite members") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+{% call wizard.frame(3, _("New accounts")) %}
+<div class="ads-card__body ads-stack">
+  <p class="ads-muted">{{ _("These addresses have no account. Each needs a name; each person will get an email to choose a password.") }}</p>
+  <div class="ads-alert ads-tone-warning wizard-warning" role="alert" hidden>{{ icon("alert-triangle") }}<span>{{ _("You need to complete all the fields") }}</span></div>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter" data-wizard-new-accounts>
+      <thead><tr>
+        <th scope="col">{{ _("Email address") }}</th>
+        <th scope="col">{{ _("First name") }}</th>
+        <th scope="col">{{ _("Last name") }}</th>
+        <th scope="col">{{ _("Role") }}</th>
+        <th scope="col"><span class="sbe-sr-only">{{ _("Remove") }}</span></th>
+      </tr></thead>
+      <tbody>
+        {% for user in new_accounts %}
+        <tr data-wizard-row>
+          <td><input type="hidden" name="account" value="{{ user.email }}">{{ user.email }}</td>
+          <td><input class="ads-input wizard-required" type="text" name="first_name" value="{{ user.first_name }}" required aria-label="{{ _('First name of %(email)s', email=user.email) }}"></td>
+          <td><input class="ads-input wizard-required" type="text" name="last_name" value="{{ user.last_name }}" required aria-label="{{ _('Last name of %(email)s', email=user.email) }}"></td>
+          <td>{{ wizard.role_select(selected=user.role) }}</td>
+          <td class="ads-end">{{ wizard.remove_button({"data-wizard-remove": ""}) }}</td>
+        </tr>
+        {% endfor %}
+        <tr data-wizard-empty {{ "hidden" if new_accounts }}><td colspan="5" class="ads-muted">{{ _("There is no new accounts") }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="ads-cluster ads-gap-sm">
+    <button class="ads-btn ads-btn--primary" type="button" data-wizard-save>{{ icon("user-plus") }}{{ _("Save") }}</button>
+    <a class="ads-btn ads-btn--ghost" href="{{ url_for('.members', community_id=g.community.slug) }}">{{ _("Cancel") }}</a>
+  </div>
+</div>
+{% endcall %}
+<form id="wizard-form" method="post" action="{{ url_for('.wizard_saving', community_id=g.community.slug) }}" hidden>
+  {{ csrf.field() }}
+  <input id="existing_account" type="hidden" name="existing_account" value="{{ existing_account }}">
+  <input id="new_accounts" type="hidden" name="new_accounts" value="{{ new_accounts | tojson }}">
+</form>
 {% endblock %}

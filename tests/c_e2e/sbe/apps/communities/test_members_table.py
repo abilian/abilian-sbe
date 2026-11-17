@@ -1,25 +1,18 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-"""The members table renders as many cells as it has columns.
+"""The members' tables render as many cells as they have columns.
 
-`std_thead` and `std_member_row` each branch on `is_manager`, and they have to
-agree: the manager branch adds a column to the header and cells to the row.
-
-They did not agree. The header asked `{% if is_manager %}` and the row asked
-`{% if is_manager == False %}`, which are the same question only while
-`is_manager` is a real boolean. Undefined -- which it was in all three wizard
-views, none of which passed it -- is falsy but is not equal to False, so the
-header dropped a column while the row kept both cells.
-
-Fixed on both sides: every use now asks the same way, and the community context
-processor defines `is_manager` for every community template, so it cannot be
-undefined in the first place.
+The members table and the invitation's table once came from macros that each
+asked whether the viewer manages the community, and did not ask the same way: the
+header dropped a column while the rows kept its cells. `can_manage_community` is
+defined for every community template, and each page now draws its own table.
 """
 
 from __future__ import annotations
 
 import re
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 import pytest
 from flask import render_template_string, url_for
@@ -159,49 +152,28 @@ def test_the_manager_check_does_not_run_once_per_row(
     assert len(checks) == checks_for_one_member
 
 
-WIZARD_TABLE = """
-{% import "community/members_macros.html" as macros with context %}
-<table><thead>{{ macros.wizard_thead() }}</thead>
-<tbody><tr>{{ macros.wizard_member_row(user) }}</tr></tbody></table>
-"""
-
-
-def _render_wizard_table(app, client, community, viewer) -> tuple[int, list[int]]:
-    with (
-        client_login(client, viewer),
-        app.test_request_context(f"/communities/{community.slug}/members/wizard/step2"),
-    ):
-        from flask import g
-
-        g.community = community
-        g.user = viewer
-        return _columns_and_cells(render_template_string(WIZARD_TABLE, user=viewer))
-
-
-def test_the_manager_column_appears_in_the_header_and_the_row_together(
+def test_inviting_lists_the_accounts_one_cell_per_column(
     community1: Community, db: SQLAlchemy, client: FlaskClient, app: Application
 ) -> None:
-    """Where the defect actually lived.
-
-    The members *view* passes `is_manager` in its own context, so the members
-    page was fine. None of the three wizard views did, and these are the macros
-    they render -- so this is the table whose header dropped the manager column
-    while its rows kept the manager cells.
-
-    Asserted as a delta rather than a total: the wizard's header carries two
-    columns its row has never filled (a hidden last-activity cell and a
-    trailing one, inherited from the members table, whose row macro takes the
-    data this one does not). That is a separate, older defect; this pins the
-    one that was fixed.
-    """
+    """The second step of inviting people lists those who have an account. Its
+    header and its rows came from macros that disagreed about the manager column;
+    the page is its own now, and only managers reach it."""
     ensure_services_started(["security"])
     manager = _member(db, community1, "wizard-manager@example.com", MANAGER)
-    reader = _member(db, community1, "wizard-reader@example.com", READER)
-
-    mgr_columns, mgr_cells = _render_wizard_table(app, client, community1, manager)
-    rdr_columns, rdr_cells = _render_wizard_table(app, client, community1, reader)
-
-    assert mgr_columns - rdr_columns == 1, "the manager branch adds one column"
-    assert mgr_cells[0] - rdr_cells[0] == 1, (
-        "and one cell -- when these disagreed, the row ran past the header"
+    db.session.add(
+        User(email="has.account@example.com", password=uuid4().hex, can_login=True)
     )
+    db.session.flush()
+
+    with client_login(client, manager):
+        response = client.post(
+            url_for("communities.wizard_check_data", community_id=community1.slug),
+            data={"wizard-emails": "has.account@example.com"},
+        )
+
+    html = response.get_data(as_text=True)
+    assert response.status_code == 200
+    columns, _cells = _columns_and_cells(html)
+    rows = re.findall(r"<tr data-wizard-row>.*?</tr>", html, re.DOTALL)
+    assert len(rows) == 1
+    assert len(re.findall(r"<td\b", rows[0])) == columns

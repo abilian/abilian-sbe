@@ -54,8 +54,7 @@ if (saveButton) {
     let missing = 0;
     table.querySelectorAll(".wizard-required").forEach((input) => {
       const empty = input.value.trim() === "";
-      input.classList.toggle("border-2", empty);
-      input.classList.toggle("border-red-400", empty);
+      input.setAttribute("aria-invalid", String(empty));
       if (empty) missing += 1;
     });
     document.querySelector(".wizard-warning").hidden = missing === 0;

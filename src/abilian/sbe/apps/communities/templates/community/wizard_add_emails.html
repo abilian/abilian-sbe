@@ -1,61 +1,26 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% import "community/members_macros.html" as macros with context %}
-{%- from "community/macros.html" import wizard_steps -%}
-
-{% block memberscontent %}
-  {% call m_box_content(_("Members Wizard")) %}
-
-    {{ wizard_steps(steps, 1) }}
-    <br>
-    <br>
-    <br>
-    <div class="border-b border-dashed border-gray-200 relative mb-4"></div>
-
-    <form method="POST" enctype="multipart/form-data" class="max-w-4xl mx-auto"
-          action="{{ url_for('.wizard_check_data', community_id=g.community.slug) }}">
-      {{ csrf.field() }}
-
-      <div class="space-y-6">
-        <div>
-          <h3 class="text-xl font-semibold text-gray-900 text-center">{{ _("Add new members") }}</h3>
-          <h4 class="text-sm text-gray-500 text-center mt-1">{{ _("Insert or import new members into your community") }}</h4>
-        </div>
-
-        <div class="max-w-xl mx-auto space-y-4">
-          <div>
-            <label for="wizard-emails" class="flex items-center text-sm font-medium text-gray-700 mb-2">
-              <i class="fa fa-bookmark text-green-400 mr-2"></i>
-              {{ _("Insert your emails collection") }}
-            </label>
-            <textarea id="wizard-emails" name="wizard-emails" rows="4"
-                      placeholder="{{ _('Emails Collection') }}"
-                      class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-          </div>
-
-          <div class="pt-4">
-            <label for="csv_file" class="block text-sm font-medium text-gray-700 mb-2">{{ _("Import members from CSV file") }}</label>
-            <a href="{{ url_for('abilian_sbe_static', filename='csv/csv_example.csv') }}"
-               download="csv_example.csv"
-               class="inline-flex items-center text-blue-600 hover:text-blue-800 text-sm mb-3">
-              <i class="fa fa-download mr-2"></i>
-              {{ _("Download CSV file model") }}
-            </a>
-            <input type="file" id="csv_file" name="csv_file" accept=".csv"
-                   class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-          </div>
-
-          <hr class="border-gray-200 my-4">
-
-          <div class="flex justify-end">
-            <button type="submit"
-                    class="users-wizard-next inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-700 rounded-md hover:bg-green-800">
-              <i class="fa fa-check-circle mr-2"></i> {{ _('Next step') }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </form>
-  {% endcall %}
+{#- Inviting people, step 1: their addresses, typed or pasted, or a spreadsheet. Drawn
+    in `mockups/templates/members-add.html`. -#}
+{% extends "ads_community.html" %}
+{% import "community/_wizard.html" as wizard with context %}
+{% block page_title %}{{ _("Invite members") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+{% call wizard.frame(1, _("Invite members")) %}
+<form class="ads-card__body ads-stack" method="post" enctype="multipart/form-data" action="{{ url_for('.wizard_check_data', community_id=g.community.slug) }}">
+  {{ csrf.field() }}
+  <div class="ads-field">
+    <label class="ads-label" for="wizard-emails">{{ _("Email addresses") }}</label>
+    <textarea class="ads-textarea" id="wizard-emails" name="wizard-emails" rows="5" aria-describedby="wizard-emails-help"></textarea>
+    <small class="ads-help" id="wizard-emails-help">{{ _("One per line, or separated by commas or spaces. The next step says what will happen to each.") }}</small>
+  </div>
+  <div class="ads-field">
+    <label class="ads-label" for="csv_file">{{ _("Or a spreadsheet") }}</label>
+    <input class="ads-file-input" id="csv_file" type="file" name="csv_file" accept=".csv" aria-describedby="csv-help">
+    <small class="ads-help" id="csv-help">{{ _("A CSV file, one person per line: address; first name; last name; role (member or manager).") }} <a href="{{ url_for('abilian_sbe_static', filename='csv/csv_example.csv') }}">{{ _("Download CSV file model") }}</a></small>
+  </div>
+  <div class="ads-cluster ads-gap-sm">
+    <button class="ads-btn ads-btn--primary" type="submit">{{ _("Next step") }}</button>
+    <a class="ads-btn ads-btn--ghost" href="{{ url_for('.members', community_id=g.community.slug) }}">{{ _("Cancel") }}</a>
+  </div>
+</form>
+{% endcall %}
 {% endblock %}
