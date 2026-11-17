@@ -4,8 +4,6 @@
     header. Drawn in `mockups/templates/members.html`. -#}
 {% extends "ads_community.html" %}
 {% block page_title %}{{ _("Members") }} · {{ g.community.name }}{% endblock %}
-{#- The person picker. -#}
-{% block scripts %}{{ vite_asset("src/main.js") }}{% endblock %}
 {% block content %}
 <div class="ads-card">
   <div class="ads-card__head ads-spread">

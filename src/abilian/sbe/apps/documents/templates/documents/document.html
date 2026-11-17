@@ -5,8 +5,6 @@
 {% import "documents/_dialogs.html" as dialogs with context %}
 {% set doc_kw = {"community_id": g.community.slug, "doc_id": doc.id} %}
 {% block page_title %}{{ doc.title }} · {{ _("Documents") }} · {{ g.community.name }}{% endblock %}
-{#- The dialogs and the preview's pages. -#}
-{% block scripts %}{{ vite_asset("src/main.js") }}{% endblock %}
 
 {% block content %}
 <div class="ads-with-aside sbe-doc">

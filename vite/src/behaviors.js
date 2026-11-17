@@ -19,7 +19,18 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+/* A message's close button: shown here, since only here does it work. */
+document.querySelectorAll("[data-dismiss][hidden]").forEach((button) => {
+  button.hidden = false;
+});
+
 document.addEventListener("click", (event) => {
+  const dismiss = event.target.closest("[data-dismiss]");
+  if (dismiss) {
+    dismiss.closest(".ads-alert").remove();
+    return;
+  }
+
   /* A button that opens a shared dialog tells its form where to post. */
   const opener = event.target.closest("[data-form-action]");
   if (opener) {

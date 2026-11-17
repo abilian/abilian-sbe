@@ -96,8 +96,8 @@
 {% endif %}
 {% endmacro %}
 
-{#- What the last action said (`flash()`): errors as alerts, the rest as a status, each
-    in its tone. They go with the next page. `class` places the whole, when there is
+{#- What the last action said (`flash()`): errors and warnings as alerts, the rest as a
+    status, each in its tone. They go with the next page. `class` places the whole, when there is
     something to say. -#}
 {% macro flashes(class="") %}
 {% with messages = get_flashed_messages(with_categories=true) %}
@@ -105,7 +105,9 @@
 <div class="{{ class }}">
   {% for category, message in messages %}
   {% set tone, glyph = {"error": ("ads-tone-danger", "alert-triangle"), "danger": ("ads-tone-danger", "alert-triangle"), "warning": ("ads-tone-warning", "alert-triangle"), "success": ("ads-tone-success", "circle-check")}.get(category, ("ads-tone-info", "info-circle")) %}
-  <div class="ads-alert {{ tone }}" role="{{ 'alert' if tone == 'ads-tone-danger' else 'status' }}">{{ icon(glyph) }}<span>{{ message }}</span></div>
+  <div class="ads-alert {{ tone }}" role="{{ 'alert' if tone in ('ads-tone-danger', 'ads-tone-warning') else 'status' }}">{{ icon(glyph) }}<span class="ads-fill">{{ message }}</span>
+    {#- Shown by `behaviors.js`, which makes it work: without it, no button that does nothing. -#}
+    <button class="ads-close" type="button" data-dismiss hidden aria-label="{{ _('Dismiss') }}">{{ icon("x") }}</button></div>
   {% endfor %}
 </div>
 {% endif %}

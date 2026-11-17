@@ -15,9 +15,11 @@
 <link rel="stylesheet" href="{{ url_for('abilian_sbe_static', filename='ads/ads.css') }}">
 <link rel="stylesheet" href="{{ url_for('abilian_sbe_static', filename='theme.css') }}">
 {% endblock %}
-{#- What the app's scripts read (CSRF token, API URLs); a page that needs them loads
-    `src/main.js` in its `scripts` block: no stylesheet comes with it. -#}
+{#- What the app's scripts read (CSRF token, API URLs). Every page loads `src/main.js`
+    (a message's close button, the widgets), with no stylesheet; a page that needs more
+    (the editor) replaces the `scripts` block. -#}
 {% block head %}{% include "_js_config.html" %}{% endblock %}
+{% block scripts %}{{ vite_asset("src/main.js") }}{% endblock %}
 {% block icon %}<link rel="icon" href="{{ url_for('abilian_sbe_static', filename='abilian-mark.png') }}" type="image/png">{% endblock %}
 {% block skip %}{{ _("Skip to content") }}{% endblock %}
 {% block menu_label %}{{ _("Menu") }}{% endblock %}

@@ -7,7 +7,6 @@
 {% extends "ads_community.html" %}
 {% set folder_post = url_for(".folder_post", community_id=g.community.slug, folder_id=folder.id) %}
 {% block page_title %}{{ folder.title }} · {{ _("Documents") }} · {{ g.community.name }}{% endblock %}
-{% block scripts %}{{ vite_asset("src/main.js") }}{% endblock %}
 
 {#- What `folder.js` reads to fill a dialog from a row: hidden, unnamed, never sent. -#}
 {% macro item_data(obj) -%}
