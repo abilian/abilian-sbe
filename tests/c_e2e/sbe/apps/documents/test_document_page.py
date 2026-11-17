@@ -1,7 +1,7 @@
 # Copyright (c) 2012-2026, Abilian SAS
 
-"""A document's page on the Abilian Design System: its history, and what is offered
-to whom.
+"""A document's page on the Abilian Design System: its history, what is offered to
+whom, and the lock, which keeps the others from uploading a version.
 
 Who sees its readers is in `test_document_gating.py`.
 """
@@ -31,6 +31,7 @@ if TYPE_CHECKING:
 
 NEW_VERSION = 'data-modal-open="#modal-upload-new-version"'
 LOCK = 'name="action" value="lock"'
+UNLOCK = 'name="action" value="unlock"'
 
 
 @pytest.fixture
@@ -126,3 +127,43 @@ def test_a_reader_may_download_and_nothing_else(
     assert LOCK not in html
     assert 'id="modal-delete"' not in html
     assert "More actions on the document" not in html
+
+
+def test_a_document_locked_by_someone_else_takes_no_version_from_another(
+    community1: Community,
+    document: Document,
+    manager: User,
+    client: FlaskClient,
+    db: SQLAlchemy,
+) -> None:
+    other = _member(db, community1, MANAGER)
+    with client_login(client, manager):
+        assert _post(client, "documents.checkin_checkout", document, action="lock")
+
+    html = _page(client, other, document)
+    with client_login(client, other):
+        new = {"file": (BytesIO(b"theirs"), "minutes.txt", "text/plain")}
+        status = _post(client, "documents.document_upload", document, **new)
+
+    assert NEW_VERSION not in html
+    assert UNLOCK in html
+    assert status == 403
+    db.session.expire(document)
+    assert document.content == b"one"
+
+
+def test_whoever_locked_it_uploads_the_next_version_which_unlocks_it(
+    document: Document, manager: User, client: FlaskClient, db: SQLAlchemy
+) -> None:
+    with client_login(client, manager):
+        assert _post(client, "documents.checkin_checkout", document, action="lock")
+    html = _page(client, manager, document)
+    with client_login(client, manager):
+        new = {"file": (BytesIO(b"mine"), "minutes.txt", "text/plain")}
+        status = _post(client, "documents.document_upload", document, **new)
+
+    assert NEW_VERSION in html
+    assert status == 302
+    db.session.expire(document)
+    assert document.content == b"mine"
+    assert document.lock is None

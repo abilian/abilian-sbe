@@ -19,7 +19,7 @@ from flask import (
 )
 from flask_mail import Message
 from PIL import Image
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from abilian.core.extensions import db, mail
 from abilian.core.extensions.login import authenticated
@@ -229,6 +229,9 @@ def document_delete(user: User, doc_id: int) -> Response:
 def document_upload(user: User, doc_id):
     doc = get_document(user, doc_id)
     check_write_access(user, doc)
+    # Whoever locked it is working on it: a version from someone else would be lost.
+    if doc.lock and not doc.lock.is_owner(user):
+        raise Forbidden
 
     fd = request.files["file"]
     doc.set_content(fd.read(), fd.content_type)
