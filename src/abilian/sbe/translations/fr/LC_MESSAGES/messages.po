@@ -1988,3 +1988,53 @@ msgstr "Documents récents"
 
 msgid "Run by %(names)s"
 msgstr "Animée par %(names)s"
+
+# The discussions on the Abilian Design System (forum/index.html, ads_macros.html)
+msgid "closed"
+msgstr "fermée"
+
+msgid "Latest"
+msgstr "Récentes"
+
+msgid "Most read this week"
+msgstr "Les plus lues de la semaine"
+
+msgid "By month"
+msgstr "Par mois"
+
+msgid "New discussion"
+msgstr "Nouvelle discussion"
+
+msgid "Filter discussions"
+msgstr "Filtrer les discussions"
+
+msgid "Filter discussions by title"
+msgstr "Filtrer les discussions par titre"
+
+msgid "Show all"
+msgstr "Tout afficher"
+
+msgid "Subject"
+msgstr "Sujet"
+
+msgid "Last post"
+msgstr "Dernier message"
+
+msgid "No discussion has these words in its title."
+msgstr "Aucune discussion n’a ces mots dans son titre."
+
+msgid "No discussion has been started in this community yet."
+msgstr "Aucune discussion n’a encore été lancée dans cette communauté."
+
+msgid "All the discussions, by month"
+msgstr "Toutes les discussions, par mois"
+
+msgid "%(num)d new"
+msgid_plural "%(num)d new"
+msgstr[0] "%(num)d nouveau"
+msgstr[1] "%(num)d nouveaux"
+
+msgid "%(num)d participant"
+msgid_plural "%(num)d participants"
+msgstr[0] "%(num)d participant"
+msgstr[1] "%(num)d participants"

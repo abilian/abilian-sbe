@@ -1,131 +1,43 @@
-{% extends "forum/_base.html" %}
-
-{%- from "macros/user.html" import m_user_link, m_user_photo %}
-{% from "macros/box.html" import m_box_menu, m_box_content %}
-{% from "forum/_macros.html" import forum_menu %}
-
-{% block forumcontent %}
-  <div class="w-full">
-    <div class="mb-6">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-gray-500 text-sm">{{ _("Showing :") }}</span>
-        {%- set global_actions = actions.for_category('forum:global') %}
-        {{ forum_menu(global_actions) }}
-      </div>
-    </div>
-
-    {% if threads %}
-      <div class="overflow-x-auto">
-        <table class="min-w-full">
-          <thead>
-            <tr class="border-b-2 border-gray-200">
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {{ _("Topic") }}
-              </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                {{ _("Participants") }}
-              </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
-                {{ _("Replies") }}
-              </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
-                {{ _("Viewers") }}
-              </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
-                {{ _("Views") }}
-              </th>
-              <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
-                {{ _("Activity") }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            {% for thread in threads %}
-              {{ m_thread(thread) }}
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="text-gray-500 py-8 text-center">{{ _("No message has been posted to this community yet.") }}</p>
-    {% endif %}
-
-    {% if has_more or True %}
-      <div class="mt-8 pt-4 border-t border-gray-200">
-        <p class="flex items-center text-sm">
-          <i class="fa fa-th-list text-gray-400 mr-2"></i>
-          <a href="{{ url_for('.archives', community_id=g.community.slug) }}"
-             class="text-blue-600 hover:text-blue-800">{{ _("All conversations") }}</a>
-        </p>
-      </div>
-    {% endif %}
+{#- A community's discussions: the latest active first, the unread ones marked; the
+    filters as pills, a filter on titles, starting a discussion. Drawn in
+    `mockups/templates/forum.html`. -#}
+{% extends "ads_community.html" %}
+{% block page_title %}{{ _("Discussions") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+{% set here = url_for("forum.index", community_id=g.community.slug) %}
+<div class="ads-card">
+  <div class="ads-card__head ads-spread">
+    <ul class="ads-pills">
+      <li><a class="ads-pill" href="{{ here }}" {{ 'aria-current="page"' | safe if not filter }}>{{ _("Latest") }}</a></li>
+      <li><a class="ads-pill" href="{{ url_for('forum.index', community_id=g.community.slug, filter='week') }}" {{ 'aria-current="page"' | safe if filter == "week" }}>{{ _("Most read this week") }}</a></li>
+      <li><a class="ads-pill" href="{{ url_for('forum.archives', community_id=g.community.slug) }}">{{ _("By month") }}</a></li>
+      <li><a class="ads-pill" href="{{ url_for('forum.attachments', community_id=g.community.slug) }}">{{ _("Attachments") }}</a></li>
+    </ul>
+    <a class="ads-btn ads-btn--primary" href="{{ url_for('forum.new_thread', community_id=g.community.slug) }}">{{ icon("message-plus") }}{{ _("New discussion") }}</a>
   </div>
+  {#- Narrows the threads to those whose title has the words, across all of the
+      community's threads, on the server. -#}
+  <div class="sbe-toolbar">
+    <form class="ads-input-icon" method="get" action="{{ request.path }}" role="search">
+      <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+      <input class="ads-input" type="search" name="q" value="{{ q }}" placeholder="{{ _('Filter discussions') }}" aria-label="{{ _('Filter discussions by title') }}">
+    </form>
+    {% if q %}<a href="{{ request.path }}">{{ _("Show all") }}</a>{% endif %}
+  </div>
+  {% if threads %}
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter">
+      <thead><tr><th>{{ _("Subject") }}</th><th class="ads-end ads-col--secondary">{{ _("Replies") }}</th><th class="ads-end ads-col--secondary">{{ _("Last post") }}</th></tr></thead>
+      <tbody>
+        {% for thread in threads %}{{ m.thread_row(thread, unread.get(thread, 0)) }}{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="ads-card__body ads-muted">{% if q %}{{ _("No discussion has these words in its title.") }}{% else %}{{ _("No discussion has been started in this community yet.") }}{% endif %}</div>
+  {% endif %}
+  {% if has_more %}
+  <div class="ads-card__foot"><a href="{{ url_for('forum.archives', community_id=g.community.slug) }}">{{ _("All the discussions, by month") }}</a></div>
+  {% endif %}
+</div>
 {% endblock %}
-
-
-{% macro m_thread(thread) %}
-  {%- set thread_href = url_for(thread) %}
-  {%- set thread_length = thread.posts|length %}
-  <tr class="hover:bg-gray-50">
-    <td class="px-4 py-4">
-      <div>
-        <h2 class="text-base font-medium text-gray-900 mb-1">
-          {%- if thread.closed %}
-            <i class="fa fa-lock text-gray-400 mr-1"></i>
-          {%- endif %}
-          <a href="{{ thread_href }}"
-             title="{{ thread.created_at | age(date_threshold='day') }}"
-             class="text-gray-900 hover:text-blue-600">{{ thread.title }}</a>
-        </h2>
-        <p class="text-sm text-gray-500 line-clamp-2">
-          {{ thread.posts[0].body_html|safe|striptags|truncate(155, False, '...', 0) }}
-        </p>
-      </div>
-    </td>
-    <td class="px-4 py-4">
-      <div class="flex items-center -space-x-2">
-        {% call m_user_link(thread.creator) %}
-          <span class="inline-block ring-2 ring-white rounded-full">
-            {{ m_user_photo(thread.creator, size=40) }}
-          </span>
-        {%- endcall %}
-
-        {% for p in thread.get_frequent_posters(5) %}
-          {% call m_user_link(p) %}
-            <span class="inline-block ring-2 ring-white rounded-full">
-              {{ m_user_photo(p, size=30) }}
-            </span>
-          {%- endcall %}
-        {% endfor %}
-      </div>
-    </td>
-    <td class="px-4 py-4">
-      <div class="text-center">
-        <a class="text-lg font-semibold text-gray-700 hover:text-blue-600" href="{{ thread_href }}">
-          {{ thread_length-1 }}
-        </a>
-        {% if nb_viewed_posts[thread] %}
-          <span class="ml-1 inline-flex items-center px-2 py-0.5 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-            +{{ nb_viewed_posts[thread] }}
-          </span>
-        {% endif %}
-      </div>
-    </td>
-    <td class="px-4 py-4">
-      <div class="text-center text-sm text-gray-600">
-        <i class="fa fa-user text-gray-400 mr-1"></i>
-        {{ nb_viewers[thread] }}
-      </div>
-    </td>
-    <td class="px-4 py-4">
-      <div class="text-center text-sm text-gray-600">
-        {{ nb_viewed_times[thread] or 0 }}
-      </div>
-    </td>
-    <td class="px-4 py-4">
-      <div class="text-center text-sm text-gray-500">
-        {{ activity_time_format(thread.last_post_at) }}
-      </div>
-    </td>
-  </tr>
-{% endmacro %}

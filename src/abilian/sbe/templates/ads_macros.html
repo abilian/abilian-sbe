@@ -52,3 +52,24 @@
 {% macro community_item(community, here=false) -%}
 <a class="ads-menu__item" href="{{ url_for(community) }}" {{ 'aria-current="page"' | safe if here }}>{{ tile(community, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ community.name }}</span>{% if here %}<span class="ads-muted">{{ _("here") }}</span>{% endif %}</a>
 {%- endmacro %}
+
+{#- A thread as a row: the title, in bold with its count of new posts when some are
+    unread; who started it and when, how many took part; replies; the last post. -#}
+{% macro thread_row(thread, new=0) %}
+{% set last = thread.posts[-1] %}
+<tr>
+  <td class="ads-full">
+    <div class="sbe-lines">
+      <span><a class="sbe-quiet" href="{{ url_for(thread) }}">{% if new %}<strong>{{ thread.title }}</strong>{% else %}{{ thread.title }}{% endif %}</a>
+        {%- if new %} <span class="ads-badge ads-tone-info">{{ ngettext("%(num)d new", "%(num)d new", new) }}</span>{% endif %}</span>
+      <span class="ads-muted ads-cluster ads-gap-sm">
+        {{- avatar(thread.creator, "ads-avatar--xs") }}
+        <span>{{ time(thread.created_at) }} · {{ ngettext("%(num)d participant", "%(num)d participants", thread.posts | map(attribute="creator") | unique | list | length) }}
+          {%- if thread.closed %} · {{ icon("lock") }}{{ _("closed") }}{% endif %}</span>
+      </span>
+    </div>
+  </td>
+  <td class="ads-end ads-col--secondary"><span class="ads-muted">{{ thread.posts | length - 1 }}</span></td>
+  <td class="ads-end ads-col--secondary"><span class="sbe-inline ads-gap-sm">{{ avatar(last.creator, "ads-avatar--xs") }}{{ time(thread.last_post_at or thread.created_at) }}</span></td>
+</tr>
+{% endmacro %}

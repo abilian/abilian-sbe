@@ -190,20 +190,33 @@ def test_thread_viewers_panel_opens_and_closes(
     js_errors.assert_clean("the viewers panel")
 
 
-def test_forum_filter_menu_opens_and_filters(
+def test_forum_filters_narrow_the_list(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
+    """The period as a pill, and the filter on titles, which the server applies."""
     page = logged_in
     page.goto(f"{base_url}/communities/{COMMUNITY}/forum/", wait_until="networkidle")
 
-    top = page.get_by_role("button", name="Top")
-    expect(top.locator("[class*=fire]")).to_be_attached()
-    top.click()
-    page.get_by_role("link", name="Month").click()
+    page.get_by_role("link", name="Most read this week").click()
     page.wait_for_load_state("networkidle")
+    assert page.url.endswith("/forum/week"), page.url
 
-    assert "month" in page.url, page.url
-    js_errors.assert_clean("the forum's filter menu")
+    page.goto(f"{base_url}/communities/{COMMUNITY}/forum/", wait_until="networkidle")
+    search = page.get_by_role("searchbox", name="Filter discussions by title")
+    search.fill("welcome")
+    search.press("Enter")
+    page.wait_for_load_state("networkidle")
+    expect(page.get_by_role("link", name="Welcome to the new members")).to_be_visible()
+
+    search = page.get_by_role("searchbox", name="Filter discussions by title")
+    search.fill("no such words")
+    search.press("Enter")
+    page.wait_for_load_state("networkidle")
+    expect(
+        page.get_by_text("No discussion has these words in its title.")
+    ).to_be_visible()
+
+    js_errors.assert_clean("the forum's filters")
 
 
 def test_new_thread_counts_its_title(

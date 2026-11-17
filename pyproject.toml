@@ -316,7 +316,7 @@ allow_indirect_imports = true
 # list as they move to ADS.
 theme = "src/abilian/sbe/static/ads"
 components = "src/abilian/sbe/templates/ads"
-templates = ["mockups/templates", "src/abilian/sbe/templates/ads_base.html", "src/abilian/sbe/templates/ads_macros.html", "src/abilian/sbe/templates/ads_community.html", "src/abilian/sbe/templates/main", "src/abilian/sbe/apps/wall/templates/wall/index.html"]
+templates = ["mockups/templates", "src/abilian/sbe/templates/ads_base.html", "src/abilian/sbe/templates/ads_macros.html", "src/abilian/sbe/templates/ads_community.html", "src/abilian/sbe/templates/main", "src/abilian/sbe/apps/wall/templates/wall/index.html", "src/abilian/sbe/apps/forum/templates/forum/index.html"]
 stylesheet = [
     "src/abilian/sbe/static/ads/ads.css",
     "src/abilian/sbe/static/theme.css",

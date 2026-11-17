@@ -60,24 +60,10 @@ def init_forum_values(endpoint, values) -> None:
 
     g.breadcrumb.append(
         BreadcrumbItem(
-            label=_l("Conversations"),
+            label=_l("Discussions"),
             url=Endpoint("forum.index", community_id=g.community.slug),
         )
     )
-
-
-def get_nb_viewers(entities):
-    if entities:
-        views = viewtracker.get_views(entities=entities)
-        threads = [
-            thread.entity
-            for thread in views
-            if thread.user in g.community.members
-            and thread.user != thread.entity.creator
-        ]
-
-        return Counter(threads)
-    return None
 
 
 def get_viewed_posts(user: User, entities):
@@ -127,54 +113,46 @@ def get_viewed_times(entities):
     return None
 
 
+#: The "most read" filters: how far back each looks.
+PERIODS = {
+    "today": timedelta(days=1),
+    "week": timedelta(days=7),
+    "month": timedelta(days=31),
+    "year": timedelta(days=365),
+}
+
+
 @route("/")
 @route("/<string:filter>")
 @authenticated
 def index(user: User, filter=None):
-    query = Thread.query.filter(Thread.community_id == g.community.id).order_by(
-        Thread.last_post_at.desc()
-    )
-
-    threads = query.all()
-    has_more = False
-
-    nb_viewed_times = get_viewed_times(threads)
-    for thread in threads:
-        thread.nb_views = nb_viewed_times.get(thread, 0)
-
-    dt = None
-    if filter == "today":
-        dt = timedelta(days=1)
-    elif filter == "week":
-        dt = timedelta(days=7)
-    elif filter == "month":
-        dt = timedelta(days=31)
-    elif filter == "year":
-        dt = timedelta(days=365)
-    elif filter:
+    """A community's discussions, the latest active first; or, with a period, the
+    most read started in it. `q` narrows them to those whose title has the words."""
+    if filter and filter not in PERIODS:
         raise BadRequest
+    q = request.args.get("q", "").strip()
+    query = Thread.query.filter(Thread.community_id == g.community.id)
+    if q:
+        query = query.filter(Thread.title.ilike(f"%{q}%"))
 
-    if dt:
-        cutoff_date = datetime.utcnow() - dt
-        threads = [thread for thread in threads if thread.created_at > cutoff_date]
-
-    if dt:
-        threads = sorted(threads, key=lambda thread: -thread.nb_views)
+    if filter:
+        cutoff = datetime.utcnow() - PERIODS[filter]
+        recent = query.filter(Thread.created_at > cutoff).all()
+        views = get_viewed_times(recent) or {}
+        threads = sorted(recent, key=lambda thread: -views.get(thread, 0))
+        has_more = False
     else:
+        query = query.order_by(Thread.last_post_at.desc())
         has_more = query.count() > MAX_THREADS
         threads = query.limit(MAX_THREADS).all()
-
-    nb_viewers = get_nb_viewers(threads)
-    nb_viewed_posts = get_viewed_posts(user, threads)
 
     return render_template(
         "forum/index.html",
         threads=threads,
         has_more=has_more,
-        nb_viewers=nb_viewers,
-        nb_viewed_posts=nb_viewed_posts,
-        nb_viewed_times=nb_viewed_times,
-        activity_time_format=activity_time_format,
+        unread=get_viewed_posts(user, threads) or {},
+        filter=filter,
+        q=q,
     )
 
 
