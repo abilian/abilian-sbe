@@ -312,7 +312,11 @@ class PageCreate(PageEdit, ObjectCreate[WikiPage, WikiPageForm]):
         # community's collection, an unsaved page would stay there for the rest
         # of the session.
         self.obj.community = g.community
-        super().before_populate_obj()
+        # The constructor wrote an empty first revision: the text written is that
+        # revision, not a second one after it.
+        first = self.obj.revisions[0]
+        self.obj.body_src = first.body_src = self.form.body_src.data
+        first.message = self.form.message.data
 
 
 route("/new")(PageCreate.as_view("page_new", view_endpoint=".page"))
