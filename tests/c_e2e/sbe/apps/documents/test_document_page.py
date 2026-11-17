@@ -167,3 +167,26 @@ def test_whoever_locked_it_uploads_the_next_version_which_unlocks_it(
     db.session.expire(document)
     assert document.content == b"mine"
     assert document.lock is None
+
+
+def test_refreshing_the_preview_comes_back_to_the_document(
+    document: Document, manager: User, client: FlaskClient
+) -> None:
+    """The conversion closes the request's session, which detached the document
+    before the redirect to it was built.
+
+    The test shares that session, so the user is detached too, and logging out
+    would fail: the test does not log out.
+    """
+    url = url_for(document)
+    refresh = url_for(
+        "documents.refresh_preview",
+        community_id=document.community.slug,
+        doc_id=document.id,
+    )
+    client_login(client, manager)
+
+    response = client.get(refresh)
+
+    assert response.status_code == 302
+    assert response.location.endswith(url)

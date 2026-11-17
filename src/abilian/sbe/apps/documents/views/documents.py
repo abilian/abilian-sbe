@@ -384,13 +384,15 @@ def refresh_preview(user: User, doc_id):
         db.session.commit()
 
     check_manage_access(user, doc)
+    # Taken first: the tasks close the request's session, detaching the document.
+    url = url_for(doc)
     # convert_document_content.apply([doc_id])
     with contextlib.suppress(ConversionError, OSError):
         convert_document_content(doc_id)
     # preview_document.apply([doc_id])
     with contextlib.suppress(ConversionError, OSError):
         preview_document(doc_id)
-    return redirect(url_for(doc))
+    return redirect(url)
 
 
 @route("/doc/<int:doc_id>/send", methods=["POST"])
