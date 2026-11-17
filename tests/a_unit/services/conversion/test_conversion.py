@@ -52,6 +52,15 @@ def test_pdf_to_text(converter: Converter) -> None:
     assert text
 
 
+@mark.skipif(not HAS_PDFTOTEXT, reason="requires poppler or poppler-util")
+def test_pdf_metadata_is_keyed_by_name(converter: Converter) -> None:
+    """pdfinfo's keys were read as `str(bytes)`: "PDF:b'Pages'", so a document's
+    page count was never found and every PDF had one page."""
+    blob = read_file("rammstein.pdf")
+    metadata = converter.get_metadata("", blob, "application/pdf")
+    assert metadata["PDF:Pages"] == "16"
+
+
 @mark.skipif(not HAS_LIBREOFFICE, reason="requires libreoffice")
 def test_word_to_text(converter: Converter) -> None:
     blob = read_file("test.doc")
