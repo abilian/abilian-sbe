@@ -679,3 +679,63 @@ th[aria-sort="descending"] > .ads-th-sort::after { content: "↓" / ""; opacity:
 .combobox-group { padding: var(--ads-space-2) var(--ads-space-3) var(--ads-space-1); font-size: var(--ads-text-xs); color: var(--ads-ink-muted); }
 .picker-role { float: inline-end; font-size: var(--ads-text-xs); color: var(--ads-ink-muted); }
 .picker-email { font-size: var(--ads-text-xs); color: var(--ads-ink-muted); }
+
+/* --- Drawn in the mockups, for the pages still to move ------------------------------ */
+
+/* Signing in: the brand above the card. */
+.sbe-brand-centered { display: inline-flex; align-items: center; gap: var(--ads-space-2); text-decoration: none; }
+
+/* A wiki link to a page not written yet: dashed, an invitation to write it. */
+.sbe-wikilink--new { color: var(--ads-ink-muted); text-decoration-style: dashed; }
+/* Markdown in a fixed-width font, so its marks line up; its preview framed as the page
+   will be. */
+.sbe-source { font-family: var(--ads-font-mono); font-size: var(--ads-text-sm); }
+.sbe-preview-pane {
+  height: 100%;
+  padding: var(--ads-space-3) var(--ads-space-4);
+  border: var(--ads-border-width) dashed var(--ads-line);
+  border-radius: var(--ads-radius);
+}
+/* Two revisions compared, line by line: a line gone on red, a new one on green, each
+   with its sign for those who do not see the colours. */
+.sbe-diff { margin: 0; padding: 0; list-style: none; font-family: var(--ads-font-mono); font-size: var(--ads-text-sm); }
+.sbe-diff__line { display: flex; gap: var(--ads-space-2); min-height: 1.5em; padding: 0 var(--ads-space-2); }
+.sbe-diff__line > code { padding: 0; background: none; white-space: pre-wrap; overflow-wrap: anywhere; }
+.sbe-diff__op { flex: none; width: 1ch; font-weight: var(--ads-weight-bold); }
+.sbe-diff__line--add > .sbe-diff__op { color: var(--ads-success-ink); }
+.sbe-diff__line--del > .sbe-diff__op { color: var(--ads-danger-ink); }
+.sbe-diff__line--add, .sbe-diff__mark--add { background: var(--ads-success-tint); }
+.sbe-diff__line--del, .sbe-diff__mark--del { background: var(--ads-danger-tint); }
+.sbe-diff__mark { padding: 0 var(--ads-space-2); font-size: var(--ads-text-sm); border-radius: var(--ads-radius-sm); }
+
+/* A month's heading in the list, as a rule across it. */
+.sbe-month { margin-inline: var(--ads-space-4); font-weight: var(--ads-weight-medium); }
+/* The month at a glance, in a column: the days, an event as a dot under its date. */
+.sbe-calendar--mini .ads-calendar__day { align-items: center; min-height: 0; padding: var(--ads-space-1); }
+.sbe-calendar--mini .ads-calendar__date { align-self: center; }
+.sbe-calendar--mini .ads-calendar__event { width: .375rem; height: .375rem; padding: 0; background: var(--ads-tone-solid); border-radius: 50%; }
+/* What, when, where: an icon before each fact. */
+.sbe-facts { display: grid; grid-template-columns: auto 1fr; gap: var(--ads-space-2) var(--ads-space-3); align-items: center; margin: 0; }
+.sbe-facts > dt { display: flex; color: var(--ads-ink-muted); }
+.sbe-facts > dd { margin: 0; }
+
+/* Settings as pairs, in a column: the name, small, over its value. */
+.sbe-pairs { display: grid; gap: var(--ads-space-1); margin: 0; }
+.sbe-pairs > dt { font-size: var(--ads-text-sm); color: var(--ads-ink-muted); }
+.sbe-pairs > dd { margin: 0 0 var(--ads-space-2); }
+.sbe-pairs > dd:last-child { margin-bottom: 0; }
+/* A filter's menus beside its field: as wide as what they say. */
+.sbe-toolbar > .ads-select { width: auto; }
+/* An icon in a line of text, the size of the text. */
+.sbe-icon-text { width: 1em; height: 1em; }
+/* A line of the log: what was done, as an icon in its tone. */
+.sbe-audit-icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--ads-control-md);
+  height: var(--ads-control-md);
+  color: var(--ads-tone);
+  background: var(--ads-tone-tint);
+  border-radius: var(--ads-radius);
+}
