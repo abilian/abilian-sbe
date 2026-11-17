@@ -13,24 +13,7 @@
      throughout, including by action.py's Glyphicon/FAIcon. #}
   <link rel="stylesheet" href="{{ url_for('abilian_static', filename='font-awesome/css/font-awesome.css') }}"/>
 
-  {%- set sentry_url = config.get("SENTRY_SDK_URL") %}
-  {%- set sentry_dsn = config.get("SENTRY_DSN") %}
-  {%- set use_sentry = sentry_url and sentry_dsn %}
-  {#- Data, not a script: the Content Security Policy rules out inline scripts.
-      vite/src/config.js reads it. #}
-  <script type="application/json" id="abilian-config">{{ {
-    'csrf_fieldname': csrf.name(),
-    'csrf_token': csrf.token(),
-    'api': app.js_api,
-    'sentry': {
-      'dsn': sentry_dsn,
-      'app_name': app.name ~ '_front',
-      'server_name': config.get('SERVER_NAME', 'unknown'),
-    } if use_sentry else None,
-  } | tojson }}</script>
-  {%- if use_sentry %}
-    <script src="{{ sentry_url }}" crossorigin="anonymous"></script>
-  {%- endif %}
+  {% include "_js_config.html" %}
 
   <!-- Vite integration for CSS and JS -->
   {{ vite_asset('src/styles.css') }}
