@@ -1,9 +1,10 @@
+{#- A page's text as written, in Markdown. -#}
 {% extends "wiki/_base.html" %}
-
-{% from "macros/box.html" import m_box_content %}
-
-{% block content %}
-  {% call m_box_content(_("(source)")) %}
-    <pre>{{ page.body_src }}</pre>
-  {% endcall %}
+{% import "wiki/macros.html" as w with context %}
+{% block wiki_title %}{{ _("Source") }} · {{ page.title }}{% endblock %}
+{% block wiki_content %}
+<article class="ads-card" aria-labelledby="page-title">
+  <div class="ads-card__head"><div class="ads-stack ads-gap-sm">{{ w.page_head(page, _("Source")) }}</div></div>
+  <div class="ads-card__body"><pre class="sbe-source">{{ page.body_src }}</pre></div>
+</article>
 {% endblock %}

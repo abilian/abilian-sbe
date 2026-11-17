@@ -696,6 +696,9 @@ th[aria-sort="descending"] > .ads-th-sort::after { content: "↓" / ""; opacity:
 /* Markdown in a fixed-width font, so its marks line up; its preview framed as the page
    will be. */
 .sbe-source { font-family: var(--ads-font-mono); font-size: var(--ads-text-sm); }
+pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* The same in a page: the Markdown renderer marks such a link `wikilink new`. */
+.ads-prose a.wikilink.new { color: var(--ads-ink-muted); text-decoration-style: dashed; }
 .sbe-preview-pane {
   height: 100%;
   padding: var(--ads-space-3) var(--ads-space-4);

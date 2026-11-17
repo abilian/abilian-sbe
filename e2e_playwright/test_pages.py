@@ -291,7 +291,8 @@ def test_wiki_attachment_is_deleted_after_asking_by_name(
     page.locator('#edit-form button[value="create"]').click()
     page.wait_for_load_state("networkidle")
 
-    page.locator('[data-modal-open="#upload-files"]').first.click()
+    page.get_by_label("More actions on the page").click()
+    page.locator('[data-modal-open="#upload-files"]').click()
     name = "notes.txt"
     page.locator('#upload-files input[name="attachments"]').set_input_files(
         {"name": name, "mimeType": "text/plain", "buffer": b"hello"}
@@ -301,9 +302,9 @@ def test_wiki_attachment_is_deleted_after_asking_by_name(
     page.goto(f"{wiki}/page/?title=Page+with+an+attachment", wait_until="networkidle")
 
     row = page.locator("#attachments li", has_text=name)
-    row.locator('button[value="delete"]').click()
+    row.get_by_role("button", name=f"Delete {name}").click()
     dialog = page.locator("dialog[open]")
-    expect(dialog.locator("h2")).to_have_text(f'"{name}"')
+    expect(dialog.locator("h2")).to_have_text(f"Delete “{name}”?")
     dialog.get_by_role("button", name="Delete").click()
     page.wait_for_load_state("networkidle")
 

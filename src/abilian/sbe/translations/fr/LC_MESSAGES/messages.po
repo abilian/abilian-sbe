@@ -2517,3 +2517,90 @@ msgstr "Prénom de %(email)s"
 
 msgid "Last name of %(email)s"
 msgstr "Nom de %(email)s"
+
+# The wiki on the Abilian Design System (wiki/*.html)
+msgid "%(num)d revision"
+msgid_plural "%(num)d revisions"
+msgstr[0] "%(num)d révision"
+msgstr[1] "%(num)d révisions"
+
+msgid "Added:"
+msgstr "Ajouté :"
+
+msgid "Removed:"
+msgstr "Retiré :"
+
+msgid "Attach files to the page"
+msgstr "Joindre des fichiers à la page"
+
+msgid "By"
+msgstr "Par"
+
+msgid "Compare"
+msgstr "Comparer"
+
+msgid "Compare revision %(num)d"
+msgstr "Comparer la révision %(num)d"
+
+msgid "Compare two revisions"
+msgstr "Comparer deux révisions"
+
+msgid "Delete %(name)s"
+msgstr "Supprimer %(name)s"
+
+msgid "Delete the page"
+msgstr "Supprimer la page"
+
+msgid "Delete the page “%(title)s”?"
+msgstr "Supprimer la page « %(title)s » ?"
+
+msgid "Edit the page"
+msgstr "Modifier la page"
+
+msgid "Files to attach"
+msgstr "Fichiers à joindre"
+
+msgid "From revision %(old)d to revision %(new)d"
+msgstr "De la révision %(old)d à la révision %(new)d"
+
+msgid "In Markdown: **bold**, ## heading, - list, [[Title of a page]] for a link to another page."
+msgstr "En Markdown : **gras**, ## intertitre, - liste, [[Titre d’une page]] pour un lien vers une autre page."
+
+msgid "Its text and its history go for everyone in the community. This cannot be undone."
+msgstr "Son texte et son historique disparaissent pour tous les membres de la communauté. C’est définitif."
+
+msgid "Modified"
+msgstr "Modifiée"
+
+msgid "Modified by"
+msgstr "Modifiée par"
+
+msgid "More actions on the page"
+msgstr "Autres actions sur la page"
+
+msgid "Nobody has read it yet."
+msgstr "Personne ne l’a encore lue."
+
+msgid "Optional. The page's history shows it, with your name and the date."
+msgstr "Facultatif. L’historique de la page le montre, avec votre nom et la date."
+
+msgid "Pages"
+msgstr "Pages"
+
+msgid "Revision"
+msgstr "Révision"
+
+msgid "Text"
+msgstr "Texte"
+
+msgid "The text, line by line"
+msgstr "Le texte, ligne à ligne"
+
+msgid "The wiki"
+msgstr "Le wiki"
+
+msgid "What changed"
+msgstr "Ce qui a changé"
+
+msgid "current"
+msgstr "actuelle"

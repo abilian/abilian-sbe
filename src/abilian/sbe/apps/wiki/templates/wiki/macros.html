@@ -1,11 +1,44 @@
-{%- set diff_line_attrs= {
-    ' ': '',
-    '+': 'style="background-color: lightgreen;"',
-    '-': 'style="background-color: palevioletred; text-decoration: line-through;"'
-  } %}
+{#- What the wiki's views share. Imported `with context`. -#}
 
-{%- macro m_difflines(diff, line_attrs=diff_line_attrs) %}
-  {%- for line in diff -%}
-    <span {{ line_attrs.get(line[0], '') | safe }}>{{ line[1:] }}</span>
-  {%- endfor %}
-{%- endmacro %}
+{#- The path to a page and its title, at the head of the page and of each of its
+    views; `view` names the view. -#}
+{% macro page_head(page, view="") %}
+<ol class="ads-breadcrumb">
+  <li><a href="{{ url_for('.index', community_id=g.community.slug) }}">{{ _("Wiki") }}</a></li>
+  {% if view %}<li><a href="{{ url_for(page) }}">{{ page.title }}</a></li>{% endif %}
+</ol>
+<h2 class="ads-card__title" id="page-title">{{ view or page.title }}</h2>
+{% endmacro %}
+
+{#- Lines of a comparison (`difflib`): "  " kept, "- " gone, "+ " new, each with its
+    sign for those who do not see the colours. -#}
+{% macro diff_lines(diff, label) %}
+<ol class="sbe-diff" aria-label="{{ label }}">
+  {% for line in diff %}
+  {% set op = line[0] %}
+  <li class="sbe-diff__line {{ 'sbe-diff__line--del' if op == '-' else 'sbe-diff__line--add' if op == '+' else '' }}">
+    {%- if op == "-" %}<span class="sbe-sr-only">{{ _("Removed:") }} </span>{% elif op == "+" %}<span class="sbe-sr-only">{{ _("Added:") }} </span>{% endif -%}
+    <span class="sbe-diff__op" aria-hidden="true">{{ op }}</span><code>{{ line[2:] | trim("\n") }}</code></li>
+  {% endfor %}
+</ol>
+{% endmacro %}
+
+{#- A dialog holding a form: a title, what it says, Cancel and the button that sends it,
+    named `action` with `value` (the attachment views read it). -#}
+{% macro dialog(id, title, action, value="", danger=false) %}
+<dialog class="ads-modal__panel sbe-dialog" id="{{ id }}" aria-labelledby="{{ id }}-title">
+  <form method="post" action="{{ action }}" enctype="multipart/form-data">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="{{ id }}-title">{{ title }}</h2></div>
+    <div class="ads-modal__body ads-stack">{{ caller() }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      {% if danger %}
+      <button class="ads-btn ads-btn--danger" type="submit" name="action" value="{{ value or 'delete' }}">{{ icon("trash") }}{{ _("Delete") }}</button>
+      {% else %}
+      <button class="ads-btn ads-btn--primary" type="submit" name="action" value="{{ value }}">{{ _("Upload") }}</button>
+      {% endif %}
+    </div>
+  </form>
+</dialog>
+{% endmacro %}

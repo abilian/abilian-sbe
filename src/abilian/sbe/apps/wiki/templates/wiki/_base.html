@@ -1,96 +1,29 @@
-{% extends "community/_base.html" %}
+{#- A community's wiki on the Abilian Design System: a page, or one of its views, in a
+    card; the wiki's pages beside it. Drawn in `mockups/templates/wiki-page.html` and
+    its siblings. -#}
+{% extends "ads_community.html" %}
+{% block page_title %}{% block wiki_title %}{% endblock %} · {{ _("Wiki") }} · {{ g.community.name }}{% endblock %}
 
-{% from "macros/box.html" import m_box_menu %}
-
-{% block sidebar %}
-  {% call m_box_menu() %}
-    <ul class="menu-actions">
-      {%- set content_actions = actions.for_category('wiki:page') %}
-      {%- set global_actions = actions.for_category('wiki:global') %}
-
-      {%- for action in content_actions %}
-        <li>{{ action.render() }}</li>
-      {%- endfor %}
-
-      {% if content_actions and global_actions %}
-        <li class="menu-divider"></li>
-      {% endif %}
-
-      {%- for action in global_actions %}
-        <li>{{ action.render() }}</li>
-      {%- endfor %}
-    </ul>
-  {% endcall %}
-{% endblock %}
-
-{% block modals %}
-  {%- if page %}
-    {# Delete page modal #}
-    <dialog class="modal" id="modal-delete">
-      <div class="modal-dialog relative mx-auto my-8 max-w-md">
-        <div class="modal-content bg-white rounded-lg shadow-xl">
-          <form action="{{ url_for(".page_delete", community_id=g.community.slug) }}"
-                method="POST" class="mb-0">
-            {{ csrf.field() }}
-            <input type="hidden" name="title" value="{{ page.title }}">
-
-            <div class="modal-header flex items-center justify-between p-4 border-b border-gray-200">
-              <h3 class="text-lg font-semibold text-gray-900">{{ _("Delete Wiki Page") }}</h3>
-              <button type="button" class="text-gray-400 hover:text-gray-600 text-2xl leading-none" data-modal-close>&times;</button>
-            </div>
-
-            <div class="modal-body p-4">
-              <p class="text-gray-700">{{ _('Are you sure you want to delete the page "{title}" ?').format(title=page.title) }}</p>
-            </div>
-
-            <div class="modal-footer flex justify-end gap-2 p-4 border-t border-gray-200">
-              <button type="button" data-modal-close
-                      class="btn btn-default">
-                {{ _("Cancel") }}
-              </button>
-              <button type="submit"
-                      class="btn btn-danger">
-                {{ _("Really Delete") }}
-              </button>
-            </div>
-          </form>
-        </div>
+{% block content %}
+<div class="ads-with-aside">
+  <div class="ads-stack">{% block wiki_content %}{% endblock %}</div>
+  <aside class="ads-stack" aria-label="{{ _('The wiki') }}">
+    <nav class="ads-card" aria-labelledby="wiki-pages">
+      <div class="ads-card__head ads-spread">
+        <h2 class="ads-card__title" id="wiki-pages">{{ _("Pages") }} ({{ wiki_titles | length }})</h2>
+        <a class="ads-btn ads-btn--sm" href="{{ url_for('.page_new', community_id=g.community.slug) }}">{{ icon("plus") }}{{ _("New page") }}</a>
       </div>
-    </dialog>
-
-    {# Upload files modal #}
-    <dialog class="modal" id="upload-files">
-      <div class="modal-dialog relative mx-auto my-8 max-w-md">
-        <div class="modal-content bg-white rounded-lg shadow-xl">
-          <form method="POST"
-                action="{{ url_for(".attachment_upload", community_id=g.community.slug, title=page.title) }}"
-                enctype="multipart/form-data" class="mb-0">
-            {{ csrf.field() }}
-
-            <div class="modal-header flex items-center justify-between p-4 border-b border-gray-200">
-              <h3 class="text-lg font-semibold text-gray-900">{{ _("Upload new files") }}</h3>
-              <button type="button" class="text-gray-400 hover:text-gray-600 text-2xl leading-none" data-modal-close>&times;</button>
-            </div>
-
-            <div class="modal-body p-4">
-              <input type="file" name="attachments" multiple="multiple" aria-label="{{ _("Upload new files") }}"
-                     class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-            </div>
-
-            <div class="modal-footer flex justify-end gap-2 p-4 border-t border-gray-200">
-              <button type="button" data-modal-close
-                      class="btn btn-default">
-                {{ _("Cancel") }}
-              </button>
-              <button type="submit" name="action" value="upload"
-                      class="btn btn-primary">
-                {{ _("Upload") }}
-              </button>
-            </div>
-          </form>
-        </div>
+      <div class="ads-card__body">
+        <ul class="ads-tree sbe-tree">
+          {% for title in wiki_titles %}
+          <li class="ads-tree__node"><a class="ads-tree__label" href="{{ url_for('.page', community_id=g.community.slug, title=title) }}" {{ 'aria-current="page"' | safe if page is defined and page and page.title == title }}>{{ icon("file-text") }}<span class="ads-truncate">{{ title }}</span></a></li>
+          {% endfor %}
+        </ul>
       </div>
-    </dialog>
-
-  {%- endif %}
+      <div class="ads-card__foot ads-cluster ads-gap-sm">
+        <a href="{{ url_for('.wiki_help', community_id=g.community.slug) }}">{{ _("Syntax help") }}</a>
+      </div>
+    </nav>
+  </aside>
+</div>
 {% endblock %}

@@ -55,6 +55,12 @@ wiki = CommunityBlueprint(
 route = wiki.route
 
 
+@wiki.context_processor
+def wiki_titles() -> dict[str, list[str]]:
+    """Every page of the wiki has the titles of its pages beside it."""
+    return {"wiki_titles": [page.title for page in community_pages()]}
+
+
 @wiki.url_value_preprocessor
 def init_wiki_values(endpoint: str, values: dict[Any, Any]) -> None:
     g.current_tab = "wiki"
@@ -190,7 +196,7 @@ route("/viewers")(PageViewers.as_view("page_viewers"))
 
 
 class PageEdit(BasePageView, ObjectEdit[WikiPage, WikiPageForm]):
-    # template = 'wiki/page_edit.html'
+    template = "wiki/page_edit.html"
     title = _("Edit page")
     last_revision: WikiPageRevision | None = None
     _message_success = _l("Wiki page successfully edited.")
@@ -504,12 +510,7 @@ def attachment_delete():
 #
 @route("/pages")
 def wiki_pages():
-    pages = (
-        WikiPage.query.filter(WikiPage.community_id == g.community.id)
-        .order_by(WikiPage.title)
-        .all()
-    )
-    return render_template("wiki/all_pages.html", pages=pages)
+    return render_template("wiki/all_pages.html", pages=community_pages())
 
 
 @route("/help")
@@ -528,6 +529,15 @@ def wiki_export() -> str:
 #
 # Util
 #
+def community_pages() -> list[WikiPage]:
+    """The community's wiki pages, by title."""
+    return (
+        WikiPage.query.filter(WikiPage.community_id == g.community.id)
+        .order_by(WikiPage.title)
+        .all()
+    )
+
+
 def get_page_by_title(title: str) -> WikiPage:
     title = title.strip()
     page = WikiPage.query.filter(

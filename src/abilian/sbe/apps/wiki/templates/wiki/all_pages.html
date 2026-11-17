@@ -1,16 +1,13 @@
+{#- The wiki's pages, by title. -#}
 {% extends "wiki/_base.html" %}
-
-{% from "macros/box.html" import m_box_content %}
-
-{% block content %}
-  {% call m_box_content(_("All pages")) %}
-    <ul class="space-y-1">
-      {% for page in pages %}
-        <li class="px-3 py-2 hover:bg-gray-50 rounded">
-          <a href="{{ url_for(".page", community_id=g.community.slug, title=page.title) }}"
-             class="text-blue-600 hover:text-blue-800">{{ page.title }}</a>
-        </li>
-      {% endfor %}
-    </ul>
-  {% endcall %}
+{% block wiki_title %}{{ _("All pages") }}{% endblock %}
+{% block wiki_content %}
+<section class="ads-card" aria-labelledby="all-pages">
+  <div class="ads-card__head"><h2 class="ads-card__title" id="all-pages">{{ _("All pages") }}</h2></div>
+  <ul class="ads-list">
+    {% for page in pages %}
+    <li>{{ icon("file-text") }}<a class="ads-fill sbe-quiet" href="{{ url_for(page) }}">{{ page.title }}</a><span class="ads-muted">{{ m.time(page.updated_at) }}</span></li>
+    {% endfor %}
+  </ul>
+</section>
 {% endblock %}

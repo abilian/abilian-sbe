@@ -45,7 +45,6 @@ AUTHZ_MODULES = [
     "sbe/apps/communities/decorators.py",
     "sbe/apps/forum/actions.py",
     "sbe/apps/forum/security.py",
-    "sbe/apps/wiki/actions.py",
     "sbe/apps/calendar/actions.py",
     "sbe/apps/documents/actions.py",
     "web/attachments/extension.py",

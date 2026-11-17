@@ -1,20 +1,18 @@
+{#- Who has read a page, and when last: for the community's managers. -#}
 {% extends "wiki/_base.html" %}
-
-{% from "macros/box.html" import m_box_menu, m_box_content %}
-{%- from "community/macros.html" import show_all_viewers -%}
-
-{% block content %}
-  {% call m_box_content() %}
-    <div class="wiki-page">
-      <h1>{{ page.title }}</h1>
-
-      <div class="wiki-page-info">
-        <span class="last-modified">
-          {{ _("Last modified by") }} {{ page.last_modified_by }}
-          {{ _("on") }} {{ page.updated_at | datetimeformat }}</span>
-      </div>
-      <br>
-      {{ show_all_viewers(viewers) }}
-    </div>
-  {% endcall %}
+{% import "wiki/macros.html" as w with context %}
+{% block wiki_title %}{{ _("Readers list") }} · {{ page.title }}{% endblock %}
+{% block wiki_content %}
+<section class="ads-card" aria-labelledby="page-title">
+  <div class="ads-card__head"><div class="ads-stack ads-gap-sm">{{ w.page_head(page, _("Readers list")) }}</div></div>
+  {% if viewers %}
+  <ul class="ads-list">
+    {% for v in viewers | sort(attribute="viewed_at", reverse=true) %}
+    <li><span class="ads-media ads-gap-sm ads-fill">{{ m.avatar(v.user, "ads-avatar--xs") }}<a class="sbe-quiet" href="{{ url_for('social.user', user_id=v.user.id) }}">{{ v.user.name }}</a></span><span class="ads-muted">{{ m.time(v.viewed_at) }}</span></li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="ads-card__body ads-muted">{{ _("Nobody has read it yet.") }}</p>
+  {% endif %}
+</section>
 {% endblock %}
