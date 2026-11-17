@@ -34,8 +34,6 @@ PUBLIC_ENDPOINTS = frozenset(
         "abilian_static",
         "abilian_sbe_static",
         "vite.static",
-        # The landing page.
-        "main.home",
         # The login form fetches its token.
         "csrf.json_token",
         # Followed from a notification email; the token says who.

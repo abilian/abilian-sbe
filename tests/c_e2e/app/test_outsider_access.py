@@ -34,6 +34,7 @@ OPEN_TO_ANY_USER = frozenset(
     {
         # The user's own communities, and their own home page and settings.
         "communities.index",
+        "main.home",
         "social.home",
         "preferences.index",
         "preferences.user",

@@ -36,7 +36,7 @@ COMMUNITY_PAGES = [
 #: Pages that don't need a community.
 GLOBAL_PAGES = [
     "communities.index",
-    "social.home",
+    "main.home",
     "preferences.index",
 ]
 

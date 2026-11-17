@@ -47,6 +47,8 @@ EXPECTED_STATUS = {
     "images.user_default": 400,
     # Redirects to the first panel.
     "preferences.index": 302,
+    # The feed moved to the home page, Mon fil.
+    "social.home": 302,
 }
 
 #: What an anonymous visitor may get: the page, the login page, or a refusal.

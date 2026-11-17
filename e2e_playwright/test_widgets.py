@@ -143,7 +143,7 @@ def test_navbar_renders_the_search_box(logged_in: Page, base_url: str) -> None:
     It tested `app.APP_PLUGINS`, an attribute that exists nowhere in the
     codebase, so the box never rendered on any page.
     """
-    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/communities/", wait_until="networkidle")
 
     box = logged_in.locator("#search-box")
     assert box.count() > 0, "the navbar search box did not render"
@@ -161,7 +161,7 @@ def test_navbar_search_offers_suggestions(logged_in: Page, base_url: str) -> Non
     has no reason to have, so what is asserted here is the wiring. Whether the
     endpoint behind it answers is test_live_search_endpoint_is_broken, below.
     """
-    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/communities/", wait_until="networkidle")
 
     box = logged_in.locator("#search-box")
     assert box.get_attribute("role") == "combobox", "livesearch.js did not attach"
@@ -199,7 +199,7 @@ def test_the_live_search_box_reaches_its_endpoint(
     logged_in: Page, base_url: str
 ) -> None:
     """End to end: typing in the box produces a request the server answers."""
-    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/communities/", wait_until="networkidle")
 
     with logged_in.expect_response("**/search/live?*") as caught:
         logged_in.fill("#search-box", "welcome")
@@ -239,7 +239,7 @@ def test_live_search_renders_suggestions(logged_in: Page, base_url: str) -> None
             body=json.dumps(SUGGESTIONS),
         ),
     )
-    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/communities/", wait_until="networkidle")
     logged_in.fill("#search-box", "report")
 
     results = logged_in.locator("#search-box-results")
@@ -271,7 +271,7 @@ def test_live_search_closes_on_escape(logged_in: Page, base_url: str) -> None:
             body=json.dumps(SUGGESTIONS),
         ),
     )
-    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/communities/", wait_until="networkidle")
     logged_in.fill("#search-box", "report")
 
     results = logged_in.locator("#search-box-results")

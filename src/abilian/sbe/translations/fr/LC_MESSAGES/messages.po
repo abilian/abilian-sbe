@@ -1392,7 +1392,7 @@ msgstr "Le nom est requis."
 
 #: abilian/sbe/apps/social/templates/social/_sidebar.html:6
 msgid "My feed"
-msgstr "Flux d'activité"
+msgstr "Mon fil"
 
 #: abilian/sbe/apps/social/templates/social/_sidebar.html:7
 msgid "My profile"
@@ -1852,3 +1852,108 @@ msgstr "Accueil"
 
 msgid "Main"
 msgstr "Principale"
+
+# Pages on the Abilian Design System (ads_base.html, main/home.html, main/feed.py)
+msgid "Skip to content"
+msgstr "Aller au contenu"
+
+msgid "Main menu"
+msgstr "Menu principal"
+
+msgid "Recent"
+msgstr "Récentes"
+
+msgid "All my communities"
+msgstr "Toutes mes communautés"
+
+msgid "Directory"
+msgstr "Annuaire"
+
+msgid "Search"
+msgstr "Rechercher"
+
+msgid "Create"
+msgstr "Créer"
+
+msgid "Start a discussion in…"
+msgstr "Lancer une discussion dans…"
+
+msgid "You are not a member of any community yet."
+msgstr "Vous n’êtes encore membre d’aucune communauté."
+
+msgid "Applications"
+msgstr "Applications"
+
+msgid "Administration"
+msgstr "Administration"
+
+msgid "Light or dark theme"
+msgstr "Thème clair ou sombre"
+
+msgid "My account"
+msgstr "Mon compte"
+
+msgid "Preferences"
+msgstr "Préférences"
+
+msgid "Log out"
+msgstr "Se déconnecter"
+
+msgid "here"
+msgstr "ici"
+
+msgid "Hello %(name)s"
+msgstr "Bonjour %(name)s"
+
+msgid "News of my communities"
+msgstr "Les nouvelles de mes communautés"
+
+msgid "Nothing has happened in your communities yet."
+msgstr "Rien ne s’est encore passé dans vos communautés."
+
+msgid "All my communities (%(num)d)"
+msgstr "Toutes mes communautés (%(num)d)"
+
+msgid "started a discussion"
+msgstr "a lancé une discussion"
+
+msgid "replied to a discussion"
+msgstr "a répondu à une discussion"
+
+msgid "posted a document"
+msgstr "a déposé un document"
+
+msgid "updated a document"
+msgstr "a mis à jour un document"
+
+msgid "created a wiki page"
+msgstr "a créé une page de wiki"
+
+msgid "updated a wiki page"
+msgstr "a modifié une page de wiki"
+
+msgid "added an event"
+msgstr "a ajouté un événement"
+
+msgid "created the community"
+msgstr "a créé la communauté"
+
+msgid "updated the community"
+msgstr "a modifié la communauté"
+
+msgid "joined the community"
+msgstr "a rejoint la communauté"
+
+msgid "left the community"
+msgstr "a quitté la communauté"
+
+msgid "Discussions"
+msgstr "Discussions"
+
+msgid "posted something"
+msgstr "a publié quelque chose"
+
+msgid "%(num)d member"
+msgid_plural "%(num)d members"
+msgstr[0] "%(num)d membre"
+msgstr[1] "%(num)d membres"

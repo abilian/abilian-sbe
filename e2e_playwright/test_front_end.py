@@ -29,7 +29,8 @@ def test_home_page_has_no_js_errors(
 @pytest.mark.parametrize(
     "path",
     [
-        "/social/",
+        # Mon fil, on the Abilian Design System; the others are still on Tailwind.
+        "/",
         "/communities/",
         "/preferences/",
         # The dashboard is the only page that loads the uPlot chart entry.
@@ -48,7 +49,7 @@ def test_main_pages_have_no_js_errors(
 
 def test_the_javascript_layer_is_loaded(logged_in: Page, base_url: str) -> None:
     """The bundle ran, and nothing still brings jQuery back in."""
-    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/communities/", wait_until="networkidle")
 
     assert logged_in.evaluate("typeof window.jQuery") == "undefined"
     assert logged_in.evaluate("typeof window.$") == "undefined"
@@ -71,7 +72,7 @@ def test_buttons_show_a_pointer_cursor(logged_in: Page, base_url: str) -> None:
 
 def test_icon_font_is_applied(logged_in: Page, base_url: str) -> None:
     """`fa fa-*` is used ~147 times; without the font every icon is a blank box."""
-    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/communities/", wait_until="networkidle")
 
     icon = logged_in.locator("i.fa").first
     assert icon.count() > 0, "no FontAwesome icon on the page to check"
@@ -82,7 +83,7 @@ def test_icon_font_is_applied(logged_in: Page, base_url: str) -> None:
 
 def test_stylesheet_is_applied(logged_in: Page, base_url: str) -> None:
     """Catches the unstyled page an asset-path mismatch produces."""
-    logged_in.goto(f"{base_url}/social/", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/communities/", wait_until="networkidle")
 
     body_bg = logged_in.evaluate("getComputedStyle(document.body).backgroundColor")
     # Tailwind's preflight sets a background; an unstyled page stays transparent.

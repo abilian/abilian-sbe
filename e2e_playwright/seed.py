@@ -20,6 +20,7 @@ from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.sbe.apps.communities.models import MANAGER, Community
 from abilian.sbe.apps.forum.models import Thread
+from abilian.services.activity.models import ActivityEntry
 
 COMMUNITY_NAME = "E2E Community"
 EXISTING_FOLDER = "Existing Folder"
@@ -73,6 +74,23 @@ if existing is None:
     post.creator = post.owner = admin
     db.session.add(thread)
     db.session.add(Group(name="E2E Group"))
+    db.session.commit()
+
+    # What the views record when a document is posted or a thread started: Mon fil
+    # (`/`) lists these, so the sweeps that visit it (axe, no sideways scroll)
+    # cover a feed with entries rather than an empty one.
+    # Built as the activity service writes them, types included.
+    db.session.add_all(
+        ActivityEntry(
+            actor=admin,
+            verb="post",
+            object=obj,
+            object_type=obj.entity_type,
+            target=community,
+            target_type=community.entity_type,
+        )
+        for obj in (doc, thread)
+    )
     db.session.commit()
 
     # Accounts that are not members of anything: one for each test that adds

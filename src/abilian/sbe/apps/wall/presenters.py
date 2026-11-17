@@ -157,6 +157,12 @@ class ActivityEntryPresenter(BasePresenter):
         return get_body(self.object)
 
 
+def excerpt(html: str, limit: int = 400) -> str:
+    """The text of user-written HTML, without its markup, cut at `limit` characters."""
+    text = Markup(bleach.clean(html, tags=set(), strip=True)).unescape()
+    return f"{text[:limit]}…" if len(text) > limit else text
+
+
 @singledispatch
 def get_body(object) -> str:
     return ""
@@ -164,10 +170,7 @@ def get_body(object) -> str:
 
 @get_body.register(Thread)
 def get_body_thread(object: Thread) -> Markup:
-    body = bleach.clean(object.posts[0].body_html, tags=set(), strip=True)
-    body = Markup(body).unescape()
-    if len(body) > 400:
-        body = f"{body[0:400]}…"
+    body = excerpt(object.posts[0].body_html)
     body = render_template_string(
         POST_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object.posts[0]
     )
@@ -176,10 +179,7 @@ def get_body_thread(object: Thread) -> Markup:
 
 @get_body.register(Post)
 def get_body_post(object: Post) -> Markup:
-    body = bleach.clean(object.body_html, tags=set(), strip=True)
-    body = Markup(body).unescape()
-    if len(body) > 400:
-        body = f"{body[0:400]}…"
+    body = excerpt(object.body_html)
     body = render_template_string(
         POST_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object
     )
@@ -188,10 +188,7 @@ def get_body_post(object: Post) -> Markup:
 
 @get_body.register(Document)
 def get_body_document(object: Document) -> Markup:
-    body = bleach.clean(object.body_html, tags=set(), strip=True)
-    body = Markup(body).unescape()
-    if len(body) > 400:
-        body = f"{body[0:400]}…"
+    body = excerpt(object.body_html)
     body = render_template_string(
         DOCUMENT_BODY_TEMPLATE, object_url=url_for(object), body=body, post=object
     )

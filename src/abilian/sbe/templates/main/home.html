@@ -1,0 +1,39 @@
+{#- Mon fil: the news of my communities, newest first; beside it, my communities, the
+    most active first. Drawn in `mockups/templates/home.html`. -#}
+{% extends "ads_base.html" %}
+{% block page_title %}{{ _("My feed") }}{% endblock %}
+{% block pretitle %}{{ _("Hello %(name)s", name=current_user.first_name or current_user.name) }}{% endblock %}
+{% block heading %}{{ _("My feed") }}{% endblock %}
+{% block body %}
+<div class="ads-with-aside">
+  <div class="ads-stack" aria-label="{{ _('News of my communities') }}">
+    {% for item in items %}
+    {{ m.feed_entry(item) }}
+    {% else %}
+    <div class="ads-card"><div class="ads-card__body ads-muted">{{ _("Nothing has happened in your communities yet.") }}</div></div>
+    {% endfor %}
+  </div>
+
+  <aside class="ads-stack" aria-label="{{ _('My communities') }}">
+    <section class="ads-card" aria-labelledby="mine">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="mine">{{ _("My communities") }}</h2></div>
+      <ul class="ads-list">
+        {% for c in communities %}
+        <li>
+          <a class="ads-fill ads-cluster ads-gap-sm" href="{{ url_for(c) }}">
+            {{ m.tile(c) }}
+            <span class="sbe-lines ads-fill">
+              <span class="ads-truncate">{{ c.name }}</span>
+              <span class="ads-muted">{{ ngettext("%(num)d member", "%(num)d members", c.membership_count) }} · {{ c.last_active_at | age(date_threshold="day") }}</span>
+            </span>
+          </a>
+        </li>
+        {% else %}
+        <li class="ads-muted">{{ _("You are not a member of any community yet.") }}</li>
+        {% endfor %}
+      </ul>
+      <div class="ads-card__foot"><a href="{{ url_for('communities.index') }}">{{ _("All my communities (%(num)d)", num=communities_count) }}</a></div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

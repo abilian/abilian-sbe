@@ -23,6 +23,9 @@ if TYPE_CHECKING:
     from abilian.core.sqlalchemy import SQLAlchemy
 
 ADMIN_ENTRY = b"action-navigation-user-admin"
+#: A page still on the old frame: `/` has moved to the Abilian Design System,
+#: whose bar `tests/c_e2e/sbe/apps/main/test_home.py` covers.
+LEGACY_PAGE = "/communities/"
 
 
 def _navbar(response) -> str:
@@ -51,7 +54,7 @@ def logged_in_admin(logged_in: FlaskClient, user: User, db: SQLAlchemy) -> Flask
 
 
 def test_an_admin_sees_the_admin_entry(logged_in_admin: FlaskClient) -> None:
-    response = logged_in_admin.get("/")
+    response = logged_in_admin.get(LEGACY_PAGE)
 
     assert response.status_code == 200
     assert ADMIN_ENTRY in response.data
@@ -59,7 +62,7 @@ def test_an_admin_sees_the_admin_entry(logged_in_admin: FlaskClient) -> None:
 
 
 def test_an_ordinary_user_does_not(logged_in: FlaskClient) -> None:
-    response = logged_in.get("/")
+    response = logged_in.get(LEGACY_PAGE)
 
     assert response.status_code == 200
     assert ADMIN_ENTRY not in response.data
@@ -73,7 +76,7 @@ def test_the_user_name_is_not_shown_beside_the_avatar(
     It stays as the button's accessible name, because the avatar <img> has no
     alt text and the menu would otherwise be unnamed for a screen reader.
     """
-    navbar = _navbar(logged_in.get("/"))
+    navbar = _navbar(logged_in.get(LEGACY_PAGE))
     hidden = f'<span class="sr-only">{user.name}</span>'
 
     # Rendered twice -- the desktop bar and the mobile menu -- and every
@@ -84,7 +87,7 @@ def test_the_user_name_is_not_shown_beside_the_avatar(
 
 def test_the_avatar_carries_no_chevron(logged_in: FlaskClient) -> None:
     """The avatar is affordance enough; the wedge beside it was noise."""
-    navbar = _navbar(logged_in.get("/"))
+    navbar = _navbar(logged_in.get(LEGACY_PAGE))
     # The hamburger button comes first in the markup and legitimately has an
     # svg, so match the one holding the avatar.
     triggers = [
@@ -100,6 +103,6 @@ def test_the_avatar_carries_no_chevron(logged_in: FlaskClient) -> None:
 
 def test_the_admin_dropdown_is_gone(logged_in_admin: FlaskClient) -> None:
     """The whole `navigation:admin` group is no longer rendered in the bar."""
-    response = logged_in_admin.get("/")
+    response = logged_in_admin.get(LEGACY_PAGE)
 
     assert b"action-navigation-admin" not in response.data

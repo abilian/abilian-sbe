@@ -1,0 +1,100 @@
+{#- The frame of the pages on the Abilian Design System: one bar, no menu column
+    (`notes/ux/design-principles.md`, section 3; drawn in `mockups/templates/base.html`).
+    A page moves to ADS when its template extends this one; until then it keeps
+    `base.html` and Tailwind, so the two stylesheets never meet on one page. -#}
+{% extends "ads/shell.html" %}
+{% import "ads_macros.html" as m with context %}
+{% set layout_class = "ads-app--horizontal" %}
+{% set shell_script = url_for("abilian_sbe_static", filename="ads/shell.js") %}
+{% set restore_script = url_for("abilian_sbe_static", filename="ads/restore.js") %}
+{% set here = g.get("community") %}
+{% set communities_menu = communities_of(current_user)[:8] %}
+{% block lang %}{{ get_locale().language }}{% endblock %}
+{% block title %}{% block page_title %}{% endblock %} · {{ config.SITE_NAME }}{% endblock %}
+{% block stylesheet %}
+<link rel="stylesheet" href="{{ url_for('abilian_sbe_static', filename='ads/ads.css') }}">
+<link rel="stylesheet" href="{{ url_for('abilian_sbe_static', filename='theme.css') }}">
+{% endblock %}
+{% block icon %}<link rel="icon" href="{{ url_for('abilian_sbe_static', filename='abilian-mark.png') }}" type="image/png">{% endblock %}
+{% block skip %}{{ _("Skip to content") }}{% endblock %}
+{% block menu_label %}{{ _("Menu") }}{% endblock %}
+{% block brand_href %}{{ url_for("main.home") }}{% endblock %}
+{% block brand_mark %}<span class="ads-brand__mark"><img src="{{ url_for('abilian_sbe_static', filename='abilian-mark.png') }}" alt=""></span>{% endblock %}
+{% block brand_name %}<span class="sbe-brandname">{{ config.SITE_NAME }}</span>{% endblock %}
+
+{% block nav %}
+{#- Four zones: who we are (the logo); where to go; what to do (search, create);
+    the utilities. On a phone, where to go moves to a bar at the bottom. -#}
+<nav class="ads-nav sbe-primary" aria-label="{{ _('Main menu') }}">
+  <ul class="ads-nav__list">
+    <li><a class="ads-nav__link ads-tip" data-tip="{{ _('My feed') }}" href="{{ url_for('main.home') }}" {{ 'aria-current="page"' | safe if request.endpoint == "main.home" }}>
+      <span class="ads-nav__icon">{{ icon("inbox") }}</span><span class="sbe-nav-label">{{ _("My feed") }}</span></a></li>
+    <li><details class="ads-dropdown">
+      <summary class="ads-nav__link ads-tip" data-tip="{{ _('Communities') }}" {{ 'aria-current="true"' | safe if here }}>
+        <span class="ads-nav__icon">{{ icon("users") }}</span><span class="sbe-nav-label">{{ _("Communities") }}</span>{{ icon("chevron-down", "ads-icon sbe-caret") }}</summary>
+      <div class="ads-menu sbe-menu-wide">
+        {% if communities_menu %}
+        <p class="ads-subheader sbe-menu-heading">{{ _("Recent") }}</p>
+        {% for c in communities_menu %}{{ m.community_item(c, here=here and c.id == here.id) }}{% endfor %}
+        <div class="ads-menu__sep"></div>
+        {% endif %}
+        <a class="ads-menu__item" href="{{ url_for('communities.index') }}">{{ icon("users") }}{{ _("All my communities") }}</a>
+      </div>
+    </details></li>
+    <li><a class="ads-nav__link ads-tip" data-tip="{{ _('Directory') }}" href="{{ url_for('social.users') }}" {{ 'aria-current="page"' | safe if request.endpoint == "social.users" }}>
+      <span class="ads-nav__icon">{{ icon("user") }}</span><span class="sbe-nav-label">{{ _("Directory") }}</span></a></li>
+  </ul>
+</nav>
+
+<div class="sbe-bar-do">
+  <form class="ads-chips ads-chips--input sbe-search" role="search" method="get" action="{{ url_for('search.search_main') }}">
+    {{ icon("search") }}
+    <input type="search" name="q" placeholder="{{ _('Search') }}" aria-label="{{ _('Search') }}">
+  </form>
+  <a class="ads-btn ads-btn--ghost sbe-bar-icon sbe-bar-search" href="{{ url_for('search.search_main') }}" aria-label="{{ _('Search') }}">{{ icon("search") }}</a>
+  {#- Create: a discussion, in one of my communities; the other kinds follow as their
+      forms move to ADS. -#}
+  <details class="ads-dropdown">
+    <summary class="ads-btn ads-btn--primary" aria-label="{{ _('Create') }}">{{ icon("plus") }}<span class="sbe-wide-only">{{ _("Create") }}</span></summary>
+    <div class="ads-menu sbe-menu-create">
+      <p class="ads-subheader sbe-menu-heading">{{ _("Start a discussion in…") }}</p>
+      {% for c in communities_menu %}
+      <a class="ads-menu__item" href="{{ url_for('forum.new_thread', community_id=c.slug) }}">{{ m.tile(c, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ c.name }}</span></a>
+      {% else %}
+      <p class="ads-muted sbe-menu-heading">{{ _("You are not a member of any community yet.") }}</p>
+      {% endfor %}
+    </div>
+  </details>
+</div>
+
+<div class="sbe-bar-utilities">
+  <div class="sbe-bar-icons">
+    <details class="ads-dropdown">
+      <summary class="ads-btn ads-btn--ghost sbe-bar-icon ads-tip" data-tip="{{ _('Applications') }}" aria-label="{{ _('Applications') }}">{{ icon("layout-grid") }}</summary>
+      <div class="ads-menu">
+        <div class="sbe-apps">
+          <a href="{{ url_for('main.home') }}"><span class="sbe-apps__icon">{{ icon("inbox") }}</span>{{ _("My feed") }}</a>
+          <a href="{{ url_for('communities.index') }}"><span class="sbe-apps__icon">{{ icon("users") }}</span>{{ _("Communities") }}</a>
+          <a href="{{ url_for('social.users') }}"><span class="sbe-apps__icon">{{ icon("user") }}</span>{{ _("Directory") }}</a>
+          <a href="{{ url_for('search.search_main') }}"><span class="sbe-apps__icon">{{ icon("search") }}</span>{{ _("Search") }}</a>
+          {% if is_site_admin() %}<a href="{{ url_for('admin.dashboard') }}"><span class="sbe-apps__icon">{{ icon("shield-lock") }}</span>{{ _("Administration") }}</a>{% endif %}
+        </div>
+      </div>
+    </details>
+    <button class="ads-btn ads-btn--ghost sbe-bar-icon ads-tip" type="button" data-ads-theme data-tip="{{ _('Light or dark theme') }}" aria-label="{{ _('Light or dark theme') }}">{{ icon("moon", "ads-icon sbe-when-light") }}{{ icon("sun", "ads-icon sbe-when-dark") }}</button>
+  </div>
+  <details class="ads-dropdown">
+    <summary class="ads-btn ads-btn--ghost sbe-bar-icon" aria-label="{{ _('My account') }}">{{ m.avatar(current_user) }}</summary>
+    <div class="ads-menu">
+      <p class="ads-subheader sbe-menu-heading">{{ current_user.name }}</p>
+      <a class="ads-menu__item" href="{{ url_for('social.user', user_id=current_user.id) }}">{{ icon("user") }}{{ _("My profile") }}</a>
+      <a class="ads-menu__item" href="{{ url_for('preferences.index') }}">{{ icon("settings") }}{{ _("Preferences") }}</a>
+      <div class="ads-menu__sep"></div>
+      <a class="ads-menu__item" href="{{ url_for('login.logout') }}">{{ icon("logout") }}{{ _("Log out") }}</a>
+    </div>
+  </details>
+</div>
+{% endblock %}
+
+{#- One bar: the shell's second bar goes. -#}
+{% block topbar %}{% endblock %}

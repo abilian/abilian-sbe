@@ -1,0 +1,54 @@
+{#- Pieces the pages on the Abilian Design System share. The mockups in `mockups/`
+    draw them first; `notes/ux/design-principles.md` says why they look so. -#}
+
+{#- A person: their initials on a tint of their colour, their name on hover and for
+    screen readers. -#}
+{% macro avatar(user, size_class="ads-avatar--sm") -%}
+<span class="ads-avatar {{ size_class }} sbe-person {{ identity_class(user.name) }}" role="img" aria-label="{{ user.name }}" title="{{ user.name }}">{{ initials(user.name) }}</span>
+{%- endmacro %}
+
+{#- A community: its initial on its colour. Squares for places, circles for people. -#}
+{% macro tile(community, size_class="") -%}
+<span class="sbe-tile {{ size_class }} {{ identity_class(community.id) }}" aria-hidden="true">{{ initials(community.name)[:1] }}</span>
+{%- endmacro %}
+
+{#- A moment: how long ago, the exact date on hover. -#}
+{% macro time(moment) -%}
+<time datetime="{{ moment.isoformat() }}" title="{{ moment | datetimeformat('medium') }}">{{ moment | age(date_threshold="day") }}</time>
+{%- endmacro %}
+
+{#- A file in a feed entry or a post: its name, its size, a link. -#}
+{% macro file(f) -%}
+<div class="ads-file">
+  <span class="ads-file__icon">{{ file_icon(f.name or "") }}</span>
+  <span class="ads-file__meta"><a class="ads-file__name" href="{{ f.url }}">{{ f.name }}</a>
+    <span class="ads-muted">{{ f.size | filesize }}</span></span>
+</div>
+{%- endmacro %}
+
+{#- An entry of a feed (`abilian.sbe.apps.main.feed.FeedItem`): who did what, where and
+    when, then the thing itself. -#}
+{% macro feed_entry(item, show_community=true) %}
+<article class="ads-card">
+  <div class="ads-card__body ads-stack">
+    <div class="ads-media">
+      {{ avatar(item.actor) }}
+      <div class="ads-fill sbe-lines">
+        <span><strong>{{ item.actor.name }}</strong> {{ item.action }}</span>
+        <span class="ads-muted ads-cluster ads-gap-sm">
+          {%- if show_community and item.community %}{{ tile(item.community, "sbe-tile--sm") }}<a class="sbe-quiet" href="{{ url_for(item.community) }}">{{ item.community.name }}</a> ·{% endif %}
+          <span>{% if item.section %}{{ item.section }} · {% endif %}{{ time(item.happened_at) }}</span>
+        </span>
+      </div>
+    </div>
+    {% if item.title %}<h2 class="sbe-entry__title"><a class="sbe-quiet" href="{{ item.url }}">{{ item.title }}</a></h2>{% endif %}
+    {% if item.excerpt %}<p class="sbe-excerpt">{{ item.excerpt }}</p>{% endif %}
+    {% for f in item.files %}{{ file(f) }}{% endfor %}
+  </div>
+</article>
+{% endmacro %}
+
+{#- A community in a menu or a list: its tile and name; the one I am in, marked. -#}
+{% macro community_item(community, here=false) -%}
+<a class="ads-menu__item" href="{{ url_for(community) }}" {{ 'aria-current="page"' | safe if here }}>{{ tile(community, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ community.name }}</span>{% if here %}<span class="ads-muted">{{ _("here") }}</span>{% endif %}</a>
+{%- endmacro %}

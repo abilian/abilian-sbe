@@ -363,8 +363,8 @@ def test_dynamic_rows_add_and_remove(
             body=response.text().replace("</body>", f"{table}</body>"),
         )
 
-    page.route(f"{base_url}/social/", inject)
-    page.goto(f"{base_url}/social/", wait_until="networkidle")
+    page.route(f"{base_url}/communities/", inject)
+    page.goto(f"{base_url}/communities/", wait_until="networkidle")
 
     rows = page.locator("#phones tbody tr")
     page.locator('#phones thead button[aria-label="Add"]').click()
@@ -465,8 +465,8 @@ def test_form_tabs_switch(logged_in: Page, base_url: str, js_errors: JSErrors) -
             body=response.text().replace("</body>", f"{panel}</body>"),
         )
 
-    page.route(f"{base_url}/social/", inject)
-    page.goto(f"{base_url}/social/", wait_until="networkidle")
+    page.route(f"{base_url}/communities/", inject)
+    page.goto(f"{base_url}/communities/", wait_until="networkidle")
 
     expect(page.locator("#first-panel")).to_be_visible()
     expect(page.locator("#second-panel")).to_be_hidden()
@@ -498,7 +498,8 @@ def test_no_inline_script_runs_or_is_refused(
         "/admin/audit",
         "/admin/dashboard",
         "/preferences/",
-        "/social/",
+        # Mon fil, on the Abilian Design System, whose shell has no inline script.
+        "/",
     ):
         page.goto(f"{base_url}{path}", wait_until="networkidle")
     js_errors.assert_clean("pages under the policy")

@@ -1,27 +1,42 @@
-# Copyright (c) 2012-2024, Abilian SAS
+# Copyright (c) 2012-2026, Abilian SAS
 
 """Main views."""
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from flask import Blueprint, render_template
+
+from abilian.core.extensions.login import authenticated
+from abilian.sbe.apps.communities.models import communities_of
+from abilian.sbe.apps.wall.util import get_recent_entries
+
+from .feed import feed_item
+
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
 
 __all__ = ("blueprint",)
 
 blueprint = Blueprint("main", __name__, url_prefix="")
 route = blueprint.route
 
+#: How many entries Mon fil shows.
+FEED_LENGTH = 30
 
-#
-# Basic navigation
-#
+#: How many communities the column beside the feed lists, the most active first.
+COMMUNITIES_SHOWN = 8
+
+
 @route("/")
-def home() -> str:
-    return render_template("index.html")
-
-
-# TODO
-# @route("/help/")
-# def help():
-#   return render_template('help.html')
-#
+@authenticated
+def home(user: User) -> str:
+    """Mon fil: the news of the user's communities, newest first."""
+    communities = communities_of(user)
+    return render_template(
+        "main/home.html",
+        items=[feed_item(entry) for entry in get_recent_entries(user, FEED_LENGTH)],
+        communities=communities[:COMMUNITIES_SHOWN],
+        communities_count=len(communities),
+    )

@@ -9,9 +9,9 @@ from abilian.core.models.subjects import Group
 from tests.util import client_login
 
 
-def test_home(client, login_admin) -> None:
+def test_home_moved_to_my_feed(client, login_admin) -> None:
     response = client.get(url_for("social.home"))
-    assert response.status_code == 200
+    assert response.status_code == 302
 
 
 def test_users(client, login_admin) -> None:

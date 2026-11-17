@@ -24,7 +24,8 @@ PATHS = (
     f"{_C}/members/wizard/step1",
     f"{_C}/settings",
     "/communities/new",
-    "/social/",
+    # Mon fil, the home page: on the Abilian Design System.
+    "/",
     "/social/users/",
     "/social/groups/",
     "/preferences/",

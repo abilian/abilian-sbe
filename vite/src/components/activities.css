@@ -22,7 +22,8 @@
 }
 
 .activities li .entry .datetime {
-  @apply float-right text-gray-500;
+  /* gray-500 on the entry's gray-100 is 4.2:1, under WCAG AA. */
+  @apply float-right text-gray-600;
 }
 
 .activities li .entry .message {
