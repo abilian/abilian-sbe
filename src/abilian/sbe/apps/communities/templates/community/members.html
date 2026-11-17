@@ -55,7 +55,7 @@
         {{ m.sort_th(listing, "role", _("Role")) }}
         {{ m.sort_th(listing, "posts", _("Discussions started"), "ads-end ads-col--secondary") }}
         {{ m.sort_th(listing, "activity", _("Last active here"), "ads-end ads-col--secondary") }}
-        {% if can_manage_community %}<th scope="col" aria-label="{{ _('Actions') }}"></th>{% endif %}
+        {% if can_manage_community %}<th scope="col"><span class="sbe-sr-only">{{ _("Actions") }}</span></th>{% endif %}
       </tr></thead>
       <tbody>
         {% for user, m_id, role, last_activity_date in memberships %}

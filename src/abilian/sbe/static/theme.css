@@ -739,6 +739,10 @@ th[aria-sort="descending"] > .ads-th-sort::after { content: "↓" / ""; opacity:
 /* A person's name in a table keeps room for itself: on a phone the table scrolls
    rather than the name being cut to a letter. */
 .sbe-cell-person { min-width: 10rem; }
+/* A table's scroll container holds what is positioned inside it: a header's text said
+   only to screen readers, absolutely positioned, escaped it and widened a phone's page
+   (ADS request 28). */
+.ads-table-scroll { position: relative; }
 /* A choice in a table's row, as tall as the row's buttons. */
 .sbe-select--sm { width: auto; padding-block: var(--ads-space-1); font-size: var(--ads-text-sm); }
 /* An icon in a line of text, the size of the text. */
