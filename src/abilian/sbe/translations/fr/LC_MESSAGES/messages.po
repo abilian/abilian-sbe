@@ -2038,3 +2038,71 @@ msgid "%(num)d participant"
 msgid_plural "%(num)d participants"
 msgstr[0] "%(num)d participant"
 msgstr[1] "%(num)d participants"
+
+# A thread on the Abilian Design System (forum/thread.html)
+msgid "Reply"
+msgstr "Répondre"
+
+msgid "More actions on the discussion"
+msgstr "Autres actions sur la discussion"
+
+msgid "Re-open the discussion"
+msgstr "Rouvrir la discussion"
+
+msgid "Close the discussion"
+msgstr "Fermer la discussion"
+
+msgid "Delete the discussion"
+msgstr "Supprimer la discussion"
+
+msgid "Messages"
+msgstr "Messages"
+
+msgid "New messages"
+msgstr "Nouveaux messages"
+
+msgid "Edited by %(user)s, %(date)s"
+msgstr "Modifié par %(user)s, %(date)s"
+
+msgid "This discussion is closed: it takes no more replies."
+msgstr "Cette discussion est fermée : elle ne reçoit plus de réponses."
+
+msgid "Your reply"
+msgstr "Votre réponse"
+
+msgid "Attach files"
+msgstr "Joindre des fichiers"
+
+msgid "Also send it to the members by email"
+msgstr "L’envoyer aussi aux membres par e-mail"
+
+msgid "About this discussion"
+msgstr "À propos de cette discussion"
+
+msgid "Delete the discussion?"
+msgstr "Supprimer la discussion ?"
+
+msgid "It goes, with its message and its attachments. This cannot be undone."
+msgid_plural "It goes, with its %(num)d messages and their attachments. This cannot be undone."
+msgstr[0] "Elle disparaît, avec son message et ses pièces jointes. C’est définitif."
+msgstr[1] "Elle disparaît, avec ses %(num)d messages et leurs pièces jointes. C’est définitif."
+
+msgid "%(num)d reply"
+msgid_plural "%(num)d replies"
+msgstr[0] "%(num)d réponse"
+msgstr[1] "%(num)d réponses"
+
+msgid "%(num)d new message"
+msgid_plural "%(num)d new messages"
+msgstr[0] "%(num)d nouveau message"
+msgstr[1] "%(num)d nouveaux messages"
+
+msgid "%(num)d participant will be told by email."
+msgid_plural "%(num)d participants will be told by email."
+msgstr[0] "%(num)d participant sera prévenu par e-mail."
+msgstr[1] "%(num)d participants seront prévenus par e-mail."
+
+msgid "Read by %(num)d member"
+msgid_plural "Read by %(num)d members"
+msgstr[0] "Lue par %(num)d membre"
+msgstr[1] "Lue par %(num)d membres"

@@ -28,6 +28,8 @@ ATTACHMENT_NAME = "e2e-attachment.txt"
 ATTACHMENT_BODY = b"attached through the browser"
 UPLOAD_URL = re.compile(r"/upload/(\?|$)")
 EDITOR = ".richtext-content .ProseMirror"
+#: A post's text on a thread's page.
+POST_BODY = '[id^="post_"] .ads-prose'
 
 
 def test_a_thread_with_an_attachment(
@@ -124,7 +126,7 @@ def test_the_editor_toolbar_survives_saving_and_editing(
             page.locator(f'{root} a[href="https://example.com/page"]')
         ).to_be_visible()
 
-    assert_formatted(".post .body")
+    assert_formatted(POST_BODY)
 
     page.locator('a[href$="/edit"]').first.click()
     page.wait_for_load_state("networkidle")
@@ -140,8 +142,8 @@ def test_the_editor_toolbar_survives_saving_and_editing(
     page.locator('#edit-form button[type="submit"]').first.click()
     page.wait_for_load_state("networkidle")
 
-    assert_formatted(".post .body")
-    expect(page.locator(".post .body")).to_contain_text("Added later.")
+    assert_formatted(POST_BODY)
+    expect(page.locator(POST_BODY)).to_contain_text("Added later.")
     js_errors.assert_clean("formatting a post")
 
 
@@ -208,7 +210,7 @@ def test_a_message_can_be_posted_without_the_editor(
     page.locator('#edit-form button[value="create"]').click()
     page.wait_for_load_state("networkidle")
 
-    expect(page.locator(".post .body em")).to_have_text("here")
+    expect(page.locator(f"{POST_BODY} em")).to_have_text("here")
 
 
 def test_a_wiki_page_is_created_then_edited(

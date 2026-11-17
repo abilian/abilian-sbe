@@ -251,6 +251,10 @@ class ThreadView(BaseThreadView, views.ObjectView[Thread, PostForm]):
         kw["views"] = get_viewed_times([self.obj])
         kw["participants"] = {post.creator for post in self.obj.posts}
         kw["activity_time_format"] = activity_time_format
+        # Counted before this visit is recorded, which marks them read.
+        kw["new_posts"] = (get_viewed_posts(self.user, [self.obj]) or {}).get(
+            self.obj, 0
+        )
         viewtracker.record_hit(entity=self.obj, user=self.user)
         return kw
 

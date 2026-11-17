@@ -11,6 +11,8 @@ from playwright.sync_api import expect
 from test_members import _pick
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from conftest import JSErrors
     from playwright.sync_api import Page, Route
 
@@ -171,23 +173,34 @@ def test_community_home_sort_submits_itself(
     js_errors.assert_clean("sorting communities")
 
 
-def test_thread_viewers_panel_opens_and_closes(
-    logged_in: Page, base_url: str, js_errors: JSErrors
+def test_a_reply_is_written_in_the_editor_and_posted(
+    logged_in: Page, base_url: str, js_errors: JSErrors, tmp_path: Path
 ) -> None:
+    """The thread's page is on the design system; its reply form keeps the app's
+    editor and uploader, loaded without Tailwind, under the Content Security
+    Policy."""
     page = logged_in
     page.goto(f"{base_url}/communities/{COMMUNITY}/forum/", wait_until="networkidle")
     page.get_by_role("link", name="Welcome to the new members").first.click()
     page.wait_for_load_state("networkidle")
 
-    toggle = page.locator("[data-viewers-toggle]")
-    content = page.locator(".viewers-panel-content")
-    expect(content).to_be_hidden()
-    toggle.click()
-    expect(content).to_be_visible()
-    toggle.click()
-    expect(content).to_be_hidden()
+    editor = page.locator("#reply .richtext-content .ProseMirror")
+    editor.click()
+    page.locator('#reply [data-command="toggleBold"]').click()
+    editor.press_sequentially("A bold reply")
+    note = tmp_path / "minutes.txt"
+    note.write_text("Minutes.")
+    page.set_input_files("#reply .js-file-button input", note)
+    # Uploaded straight away: its handle goes with the form.
+    expect(page.locator("#reply .selected-files input[type=hidden]")).to_have_count(1)
+    page.get_by_role("button", name="Send").click()
+    page.wait_for_load_state("networkidle")
 
-    js_errors.assert_clean("the viewers panel")
+    expect(page.locator('[id^="post_"] .ads-prose strong').last).to_have_text(
+        "A bold reply"
+    )
+    expect(page.locator(".ads-file__name", has_text="minutes.txt")).to_be_visible()
+    js_errors.assert_clean("replying in a thread")
 
 
 def test_forum_filters_narrow_the_list(

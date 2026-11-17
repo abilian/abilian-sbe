@@ -544,6 +544,8 @@ a.sbe-quiet:hover { text-decoration: underline; }
 .sbe-editor__sep { width: var(--ads-border-width); height: 1.25rem; margin-inline: var(--ads-space-1); background: var(--ads-line); }
 .sbe-editor__body { min-height: 10rem; padding: var(--ads-space-3); }
 .sbe-editor__body:focus { outline: none; }
+/* Tiptap's own box: the editor's frame shows the focus already (`.ads-editor:focus-within`). */
+.sbe-editor__body .ProseMirror { min-height: 8rem; outline: none; }
 
 /* A drop zone inside a form: one line rather than a panel. */
 .ads-dropzone.sbe-dropzone--compact {
@@ -579,3 +581,26 @@ a.sbe-quiet:hover { text-decoration: underline; }
 
 /* A person's title and organisation under their name in a page's heading. */
 .sbe-profile__title { font-size: var(--ads-text); font-weight: var(--ads-weight-normal); }
+
+/* A native <dialog> (opened by vite/src/modals.js) drawn as ADS's modal panel: the
+   browser supplies the backdrop, focus trapping and Escape. */
+dialog.sbe-dialog { padding: 0; border: 0; }
+dialog.sbe-dialog::backdrop { background: color-mix(in srgb, var(--ads-n-950) 45%, transparent); }
+
+/* Adapter: the app's upload widget (vite/src/widgets/file.js), which builds each
+   file's row itself, with its own class names, until the forms move to ADS. */
+.sbe-uploader { display: grid; gap: var(--ads-space-2); justify-items: start; }
+.sbe-uploader__list { display: grid; gap: var(--ads-space-1); width: 100%; }
+.sbe-uploader__list .file-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-space-2) var(--ads-space-3);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+}
+.sbe-uploader__list .file-info { flex: 1; min-width: 0; }
+.sbe-uploader__list .close { color: var(--ads-ink-muted); text-decoration: none; }
+.sbe-uploader__list .progress { flex-basis: 100%; overflow: hidden; background: var(--ads-line); border-radius: var(--ads-radius-sm); }
+.sbe-uploader__list .progress-bar { height: 100%; background: var(--ads-brand); }
