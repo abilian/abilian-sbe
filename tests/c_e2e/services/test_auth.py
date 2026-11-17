@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 from functools import partial
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 from flask import request, url_for
 
@@ -116,3 +117,21 @@ def test_forgotten_pw(app: Application, session: Session, client: FlaskClient) -
         assert msg.subject == "Password reset instruction for Abilian Test"
         assert msg.recipients == ["User@domain.tld"]
         assert msg.cc == []
+
+
+def test_a_new_password_has_at_least_eight_characters(
+    app: Application, session: Session, client: FlaskClient
+) -> None:
+    """Seven were accepted, while the message asked for eight."""
+    user = User(email="user@domain.tld", password=uuid4().hex, can_login=True)
+    session.add(user)
+    session.flush()
+    token = views.generate_reset_password_token(user)
+    url = url_for("login.reset_password_post", token=token)
+
+    refused = client.post(url, data={"password": "Abcdef1"})
+    accepted = client.post(url, data={"password": "Abcdefg1"})
+
+    assert refused.location.endswith(url)
+    assert accepted.location.startswith(url_for("login.login_form"))
+    assert user.authenticate("Abcdefg1")

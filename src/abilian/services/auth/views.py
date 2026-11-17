@@ -242,7 +242,7 @@ def reset_password_post(token: str) -> Response:
         return redirect(url_for("login.reset_password_post", token=token))
 
     # TODO: check entropy
-    if len(password) < 7:
+    if len(password) < 8:
         flash(_("Your new password must be at least 8 characters long"), "error")
         return redirect(url_for("login.reset_password_post", token=token))
 
