@@ -56,8 +56,15 @@ _actions = (
         url=lambda context: url_for_orig("communities.index"),
         condition=lambda ctx: current_user.is_authenticated,
     ),
-    # Tabs
-    CommunityTabAction("communities:tabs", "wall", _l("Activities")),
+    # Tabs, the most used first: the forum carries the application. One name per
+    # thing, everywhere: "Discussions" (`notes/ux/design-principles.md`).
+    CommunityTabAction("communities:tabs", "wall", _l("Home")),
+    CommunityTabAction(
+        "communities:tabs",
+        "forum",
+        _l("Discussions"),
+        condition=lambda ctx: g.community.has_forum,
+    ),
     CommunityTabAction(
         "communities:tabs",
         "documents",
@@ -69,12 +76,6 @@ _actions = (
         "wiki",
         _l("Wiki"),
         condition=lambda ctx: g.community.has_wiki,
-    ),
-    CommunityTabAction(
-        "communities:tabs",
-        "forum",
-        _l("Conversations"),
-        condition=lambda ctx: g.community.has_forum,
     ),
     CommunityTabAction(
         "communities:tabs",

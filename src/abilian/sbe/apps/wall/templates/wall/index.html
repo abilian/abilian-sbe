@@ -1,10 +1,49 @@
-{% extends "wall/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% from "macros/activity.html" import m_activities %}
-
+{#- A community's home: its feed; beside it, its recent documents and its members.
+    Drawn in `mockups/templates/community.html`. -#}
+{% extends "ads_community.html" %}
+{% set tab_home = true %}
+{% block page_title %}{{ g.community.name }}{% endblock %}
 {% block content %}
-  {%- call m_box_content(_("Activity stream")) %}
-    {{ m_activities(entries, ignore_communities=True) }}
-  {%- endcall %}
+<div class="ads-with-aside">
+  <div class="ads-stack" aria-label="{{ _('News of the community') }}">
+    {% for item in items %}
+    {{ m.feed_entry(item, show_community=false) }}
+    {% else %}
+    <div class="ads-card"><div class="ads-card__body ads-muted">{{ _("Nothing has happened in this community yet.") }}</div></div>
+    {% endfor %}
+  </div>
+
+  <aside class="ads-stack" aria-label="{{ _('The community') }}">
+    {% if documents %}
+    <section class="ads-card" aria-labelledby="docs">
+      <div class="ads-card__head ads-spread">
+        <h2 class="ads-card__title" id="docs">{{ _("Recent documents") }}</h2>
+        <a href="{{ url_for('wall.files', community_id=g.community.slug) }}">{{ _("All") }}</a>
+      </div>
+      <ul class="ads-list">
+        {% for d in documents %}
+        <li>
+          {{ file_icon(d.name) }}
+          <span class="ads-fill sbe-lines">
+            <a class="sbe-clamp sbe-quiet" href="{{ url_for(d) }}" title="{{ d.name }}">{{ d.name }}</a>
+            <span class="ads-muted ads-cluster ads-gap-sm">{% if d.owner %}{{ m.avatar(d.owner, "ads-avatar--xs") }}{% endif %}<span>{{ m.time(d.updated_at) }} · {{ d.content_length | filesize }}</span></span>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+
+    <section class="ads-card" aria-labelledby="people">
+      <div class="ads-card__head ads-spread">
+        <h2 class="ads-card__title" id="people">{{ _("Members") }}</h2>
+        <a href="{{ url_for('communities.members', community_id=g.community.slug) }}">{{ g.community.membership_count }}</a>
+      </div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <span class="ads-avatars">{% for user in members %}{{ m.avatar(user) }}{% endfor %}</span>
+        {% if managers %}<span class="ads-muted">{{ _("Run by %(names)s", names=managers | map(attribute="name") | join(", ")) }}</span>{% endif %}
+      </div>
+    </section>
+  </aside>
+</div>
 {% endblock %}

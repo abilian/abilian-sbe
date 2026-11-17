@@ -1,6 +1,6 @@
 # Copyright (c) 2012-2026, Abilian SAS
 
-"""Mon fil: the site's home page, the news of the user's communities."""
+"""Mon fil, the news of the user's communities, and a community's home, its own."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from flask import url_for
 
-from abilian.sbe.apps.communities.models import Community
+from abilian.sbe.apps.communities.models import MANAGER, Community
 from abilian.sbe.apps.forum.models import Thread
 from abilian.services.activity.models import ActivityEntry
 from abilian.services.security import ADMIN, security
@@ -113,3 +113,40 @@ def test_the_bar_offers_administration_to_an_admin_only(
     db.session.commit()
     with client_login(client, member):
         assert admin_link in client.get(url_for("main.home")).get_data(as_text=True)
+
+
+def test_a_community_home_shows_its_news_and_its_tools(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    ensure_services_started(["security"])
+    member = community1.test_user
+    _started(db, community1, member, "A thread in this community")
+
+    with client_login(client, member):
+        response = client.get(url_for("wall.index", community_id=community1.slug))
+
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert "A thread in this community" in html
+    # The tabs, the forum first; the settings are not a tab.
+    assert html.index(">Home<") < html.index(">Discussions<")
+    assert ">Settings<" not in html
+    # A member doesn't run the community.
+    assert url_for("communities.settings", community_id=community1.slug) not in html
+
+
+def test_a_manager_finds_the_settings_in_the_header(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    ensure_services_started(["security"])
+    manager = community1.test_user
+    community1.set_membership(manager, MANAGER)
+    db.session.commit()
+
+    with client_login(client, manager):
+        html = client.get(url_for("wall.index", community_id=community1.slug)).get_data(
+            as_text=True
+        )
+
+    assert url_for("communities.settings", community_id=community1.slug) in html
+    assert "Invite members" in html

@@ -1957,3 +1957,34 @@ msgid "%(num)d member"
 msgid_plural "%(num)d members"
 msgstr[0] "%(num)d membre"
 msgstr[1] "%(num)d membres"
+
+# A community's pages on the Abilian Design System (ads_community.html, wall/index.html)
+msgid "Community"
+msgstr "Communauté"
+
+msgid "Invite members"
+msgstr "Inviter des membres"
+
+msgid "More actions on the community"
+msgstr "Autres actions sur la communauté"
+
+msgid "Running the community"
+msgstr "Animation"
+
+msgid "Members and roles"
+msgstr "Membres et rôles"
+
+msgid "News of the community"
+msgstr "Les nouvelles de la communauté"
+
+msgid "Nothing has happened in this community yet."
+msgstr "Rien ne s’est encore passé dans cette communauté."
+
+msgid "The community"
+msgstr "La communauté"
+
+msgid "Recent documents"
+msgstr "Documents récents"
+
+msgid "Run by %(names)s"
+msgstr "Animée par %(names)s"

@@ -93,19 +93,29 @@ def test_referenced_assets_resolve_in_production_mode(
     monkeypatch.setitem(app.config, "DEBUG", False)
     security_service.start()
 
-    with client_login(client, community1.test_user):
-        response = client.get(
-            url_for("wall.index", community_id=community1.slug), follow_redirects=True
+    def static_urls(endpoint: str) -> list[str]:
+        with client_login(client, community1.test_user):
+            response = client.get(
+                url_for(endpoint, community_id=community1.slug), follow_redirects=True
+            )
+        html = response.get_data(as_text=True)
+        # Static URLs carry a `?v=` cache-busting stamp, so the extension is not
+        # the end of the URL.
+        return sorted(
+            set(
+                re.findall(
+                    r'(?:href|src)="(/static/[^"]+\.(?:css|js)(?:\?[^"]*)?)"', html
+                )
+            )
         )
-    html = response.get_data(as_text=True)
 
-    # Static URLs carry a `?v=` cache-busting stamp, so the extension is not
-    # the end of the URL.
-    urls = sorted(
-        set(re.findall(r'(?:href|src)="(/static/[^"]+\.(?:css|js)(?:\?[^"]*)?)"', html))
-    )
-    assert any("/vite/" in url for url in urls), "page linked no Vite assets"
-    assert any("font-awesome" in url for url in urls), "page linked no icon font"
+    # A page still on Tailwind (the forum), and one on the Abilian Design System
+    # (the community's home).
+    legacy = static_urls("forum.index")
+    assert any("/vite/" in url for url in legacy), "page linked no Vite assets"
+    assert any("font-awesome" in url for url in legacy), "page linked no icon font"
+    ads = static_urls("wall.index")
+    assert any("/ads/ads.css" in url for url in ads), "page linked no ADS stylesheet"
 
-    broken = [url for url in urls if client.get(url).status_code != 200]
+    broken = [url for url in legacy + ads if client.get(url).status_code != 200]
     assert not broken, f"referenced but not served: {broken}"

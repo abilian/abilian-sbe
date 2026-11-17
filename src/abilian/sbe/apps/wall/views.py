@@ -16,18 +16,19 @@ from sqlalchemy.orm import joinedload
 from abilian.core.application import as_application
 from abilian.core.extensions.login import authenticated
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.communities.models import MANAGER
 from abilian.sbe.apps.documents.models import Document, icon_for
 from abilian.sbe.apps.forum.models import Post, Thread
+from abilian.sbe.apps.main.feed import feed_item
 from abilian.services import get_service
 from abilian.web import url_for
 from abilian.web.action import actions
 
-from .page import Page
-from .presenters import ActivityEntryPresenter
 from .util import get_recent_entries
 
 if TYPE_CHECKING:
     from abilian.core.models.subjects import User
+    from abilian.services.activity.models import ActivityEntry
 
 wall = CommunityBlueprint(
     "wall", __name__, url_prefix="/wall", template_folder="templates"
@@ -40,16 +41,37 @@ def set_current_tab(endpoint: str, values: dict[Any, Any]) -> None:
     g.current_tab = "wall"
 
 
+#: What a community's home shows: its latest news, then beside it a few documents and
+#: a row of its members.
+FEED_LENGTH = 20
+DOCUMENTS_SHOWN = 4
+MEMBERS_SHOWN = 12
+
+
 @route("/")
 @authenticated
 def index(user: User) -> str:
-    actions.context["object"] = g.community._model
-    entries = get_recent_entries(user, 20, community=g.community)
-    entries = ActivityEntryPresenter.wrap_collection(entries)
-    ctx = {"entries": entries}
-    page = Page(ctx)
-    return page.render()
-    # return render_template("wall/index.html", entries=entries)
+    """A community's home: its feed, its recent documents, its members."""
+    community = g.community._model
+    actions.context["object"] = community
+    entries = get_recent_entries(user, FEED_LENGTH, community=g.community)
+    memberships = community.get_memberships()
+    return render_template(
+        "wall/index.html",
+        items=[feed_item(entry) for entry in entries],
+        documents=recent_documents(entries)[:DOCUMENTS_SHOWN],
+        members=[m.user for m in memberships[:MEMBERS_SHOWN]],
+        managers=[m.user for m in memberships if m.role == MANAGER],
+    )
+
+
+def recent_documents(entries: list[ActivityEntry]) -> list[Document]:
+    """The documents the latest entries posted or updated, each once, newest first.
+
+    The entries are those `user` may read, so the documents are too.
+    """
+    documents = (e.object for e in entries if isinstance(e.object, Document))
+    return list(dict.fromkeys(documents))
 
 
 @route("/files")
