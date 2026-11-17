@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 from flask import url_for
 
-from abilian.sbe.apps.forum.models import Thread
+from tests.forum_util import started_thread
 from tests.util import client_login, ensure_services_started
 
 if TYPE_CHECKING:
@@ -18,16 +18,6 @@ if TYPE_CHECKING:
     from abilian.core.models.subjects import User
     from abilian.core.sqlalchemy import SQLAlchemy
     from abilian.sbe.apps.communities.models import Community
-
-
-def _thread(db: SQLAlchemy, community: Community, author: User, title: str) -> Thread:
-    thread = Thread(title=title, community=community)
-    thread.creator = thread.owner = author
-    post = thread.create_post(body_html="<p>Hello.</p>")
-    post.creator = post.owner = author
-    db.session.add(thread)
-    db.session.commit()
-    return thread
 
 
 def _list(client: FlaskClient, community: Community, user: User, **args) -> str:
@@ -43,7 +33,7 @@ def test_the_list_shows_the_threads_with_their_unread_posts(
     app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
 ) -> None:
     ensure_services_started(["security"])
-    _thread(db, community1, community1.test_user, "Budget 2027")
+    started_thread(db, community1, community1.test_user, "Budget 2027")
 
     html = _list(client, community1, community1.test_user)
 
@@ -57,11 +47,7 @@ def test_a_thread_never_opened_counts_its_replies_as_new(
 ) -> None:
     ensure_services_started(["security"])
     author = community1.test_user
-    thread = _thread(db, community1, author, "Budget 2027")
-    for _ in range(2):
-        reply = thread.create_post(body_html="<p>Agreed.</p>")
-        reply.creator = reply.owner = author
-    db.session.commit()
+    started_thread(db, community1, author, "Budget 2027", replies=2)
 
     html = _list(client, community1, author)
 
@@ -72,8 +58,8 @@ def test_the_filter_keeps_the_threads_with_the_words_in_their_title(
     app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
 ) -> None:
     ensure_services_started(["security"])
-    _thread(db, community1, community1.test_user, "Budget 2027")
-    _thread(db, community1, community1.test_user, "General assembly")
+    started_thread(db, community1, community1.test_user, "Budget 2027")
+    started_thread(db, community1, community1.test_user, "General assembly")
 
     html = _list(client, community1, community1.test_user, q="budget")
 
@@ -97,7 +83,7 @@ def test_the_most_read_this_week_lists_the_recent_threads(
     app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
 ) -> None:
     ensure_services_started(["security"])
-    _thread(db, community1, community1.test_user, "Budget 2027")
+    started_thread(db, community1, community1.test_user, "Budget 2027")
 
     html = _list(client, community1, community1.test_user, filter="week")
 
