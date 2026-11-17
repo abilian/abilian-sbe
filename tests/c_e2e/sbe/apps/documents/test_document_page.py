@@ -260,3 +260,27 @@ def test_the_author_edits_then_deletes_their_comment(
     assert deleted.status_code == 302
     db.session.expire(document)
     assert document.__comments__ == []
+
+
+def test_what_an_action_says_shows_on_the_page_it_leads_to(
+    document: Document, manager: User, client: FlaskClient
+) -> None:
+    """Pages on the design system showed no flashed message: they waited in the
+    session for a page that did."""
+    edit = url_for(
+        "documents.document_edit",
+        community_id=document.community.slug,
+        doc_id=document.id,
+    )
+    with client_login(client, manager):
+        response = client.post(
+            edit, data={"title": "minutes-2026.txt"}, follow_redirects=True
+        )
+
+    html = response.get_data(as_text=True)
+    assert response.status_code == 200
+    alerts = [
+        part.split("</div>")[0]
+        for part in html.split('class="ads-alert ads-tone-success"')[1:]
+    ]
+    assert any("Document properties successfully edited." in a for a in alerts)

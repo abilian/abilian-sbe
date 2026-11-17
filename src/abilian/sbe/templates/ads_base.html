@@ -101,3 +101,9 @@
 
 {#- One bar: the shell's second bar goes. -#}
 {% block topbar %}{% endblock %}
+
+{#- What the last action said, under the page's title. -#}
+{% block page_header %}
+{{ super() }}
+{{ m.flashes("ads-container") }}
+{% endblock %}
