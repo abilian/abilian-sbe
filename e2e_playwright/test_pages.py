@@ -232,21 +232,31 @@ def test_forum_filters_narrow_the_list(
     js_errors.assert_clean("the forum's filters")
 
 
-def test_new_thread_counts_its_title(
+def test_a_new_discussion_is_laid_out_and_checked(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
+    """The subject stops at the server's length; without one, the form comes back
+    with the error under it, the message kept."""
     page = logged_in
     page.goto(
         f"{base_url}/communities/{COMMUNITY}/forum/new_thread/",
         wait_until="networkidle",
     )
+    subject = page.get_by_label("Subject")
+    expect(subject).to_have_attribute("maxlength", "150")
 
-    counter = page.locator(".thread-title-counter")
-    expect(counter).to_have_text("0/150")
-    page.fill("#title", "Hello")
-    expect(counter).to_have_text("5/150")
+    editor = page.locator(".richtext-content .ProseMirror")
+    editor.click()
+    editor.press_sequentially("Kept through the error.")
+    # The browser would refuse an empty required field before the server does.
+    subject.evaluate("input => input.removeAttribute('required')")
+    page.get_by_role("button", name="Publish the discussion").click()
+    page.wait_for_load_state("networkidle")
 
-    js_errors.assert_clean("the new thread form")
+    expect(subject).to_have_attribute("aria-invalid", "true")
+    expect(page.locator("#title-error")).to_be_visible()
+    expect(editor).to_have_text("Kept through the error.")
+    js_errors.assert_clean("the new discussion form")
 
 
 def test_community_settings_save_their_native_selects(

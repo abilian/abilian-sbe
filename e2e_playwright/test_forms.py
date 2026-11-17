@@ -48,7 +48,7 @@ def test_a_thread_with_an_attachment(
     editor.click()
     editor.press_sequentially("Typed into the rich text editor.")
 
-    page.locator('.file-input input[type="file"]').set_input_files(
+    page.locator('.js-file-button input[type="file"]').set_input_files(
         {
             "name": ATTACHMENT_NAME,
             "mimeType": "text/plain",
@@ -203,7 +203,7 @@ def test_a_message_can_be_posted_without_the_editor(
         f"{base_url}/communities/{COMMUNITY}/forum/new_thread/",
         wait_until="networkidle",
     )
-    expect(page.locator(".richtext")).to_be_hidden()
+    expect(page.locator(".ads-editor")).to_be_hidden()
 
     page.fill("#title", "Posted through the plain field")
     page.fill("#message", "<p>No editor <em>here</em>.</p>")
@@ -324,7 +324,7 @@ def _open_thread_form(page: Page, base_url: str) -> Locator:
         f"{base_url}/communities/{COMMUNITY}/forum/new_thread/",
         wait_until="networkidle",
     )
-    return page.locator('.file-input input[type="file"]')
+    return page.locator('.js-file-button input[type="file"]')
 
 
 def test_an_attachment_reports_its_progress(logged_in: Page, base_url: str) -> None:

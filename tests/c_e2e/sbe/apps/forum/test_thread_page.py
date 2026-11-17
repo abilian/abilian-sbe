@@ -98,3 +98,24 @@ def test_a_closed_thread_takes_no_reply(
 
     assert 'id="reply"' not in html
     assert "it takes no more replies" in html
+
+
+def test_an_empty_reply_comes_back_on_the_thread_with_its_error(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    """It used to come back on the new discussion's form, which has a subject this
+    form has not: the page failed."""
+    ensure_services_started(["security"])
+    thread = started_thread(db, community1, community1.test_user, "Budget 2027", 1)
+
+    with client_login(client, community1.test_user):
+        response = client.post(
+            url_for(thread), data={"message": "", "__action": "create"}
+        )
+
+    html = response.get_data(as_text=True)
+    assert response.status_code == 200
+    assert "Budget 2027" in html
+    reply = html.split('id="reply"')[1]
+    assert 'class="ads-error" id="message-error"' in reply
+    assert len(thread.posts) == 2

@@ -1,0 +1,35 @@
+{#- Editing a message: its text, its files (each can be removed), and what changed,
+    which the thread shows under the message. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_post_fields.html" as fields %}
+{% set thread_url = url_for(thread) %}
+{% block page_title %}{{ _("Edit the message") }} · {{ thread.title }}{% endblock %}
+{#- The widgets (the uploader) and the rich-text editor; no stylesheet comes with them. -#}
+{% block scripts %}{{ vite_asset("src/main.js") }}{{ vite_asset("src/editor.js") }}{% endblock %}
+{% block content %}
+<form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" enctype="multipart/form-data" aria-labelledby="edit-title">
+  {{ form.csrf_token }}
+  <div class="ads-card__head">
+    <div class="sbe-lines">
+      <ol class="ads-breadcrumb">
+        <li><a href="{{ url_for('forum.index', community_id=g.community.slug) }}">{{ _("Discussions") }}</a></li>
+        <li><a href="{{ thread_url }}">{{ thread.title }}</a></li>
+      </ol>
+      <h2 class="ads-card__title" id="edit-title">{{ _("Edit the message") }}</h2>
+    </div>
+  </div>
+  <div class="ads-card__body ads-stack">
+    {{ fields.message_field(form.message, _("Message"), rows=10) }}
+    {{ fields.attachments_field(form.attachments, post.attachments) }}
+    <div class="ads-field">
+      <label class="ads-label" for="{{ form.reason.id }}">{{ _("What you changed") }}</label>
+      <input class="ads-input" id="{{ form.reason.id }}" name="{{ form.reason.name }}" type="text" value="{{ form.reason.data or '' }}" aria-describedby="reason-help">
+      <small class="ads-help" id="reason-help">{{ _("Optional. Shown under the message, with your name and the date.") }}</small>
+    </div>
+  </div>
+  <div class="ads-card__foot ads-cluster ads-gap-sm">
+    <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="edit">{{ _("Save changes") }}</button>
+    <a class="ads-btn ads-btn--ghost" href="{{ thread_url }}#post_{{ post.id }}">{{ _("Cancel") }}</a>
+  </div>
+</form>
+{% endblock %}

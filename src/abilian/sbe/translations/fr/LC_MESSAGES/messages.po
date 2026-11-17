@@ -2271,3 +2271,36 @@ msgstr "Supprimer le commentaire ?"
 
 msgid "This cannot be undone."
 msgstr "C’est définitif."
+
+# The forum's forms on the Abilian Design System (forum/thread_create.html, post_edit.html)
+msgid "Seen by the community's only member."
+msgid_plural "Seen by the %(num)d members of the community, and by them alone."
+msgstr[0] "Visible par le seul membre de la communauté."
+msgstr[1] "Visible par les %(num)d membres de la communauté, et par eux seuls."
+
+msgid "Remove %(name)s"
+msgstr "Retirer %(name)s"
+
+msgid "A sentence that says what it is about: the members read it in their feed and in the email."
+msgstr "Une phrase qui dit de quoi il s’agit : c’est ce que les membres liront dans leur fil et dans l’e-mail."
+
+msgid "Publish the discussion"
+msgstr "Publier la discussion"
+
+msgid "You can edit it afterwards."
+msgstr "Vous pourrez la modifier ensuite."
+
+msgid "Where it is published"
+msgstr "Où elle sera publiée"
+
+msgid "Where"
+msgstr "Où"
+
+msgid "Edit the message"
+msgstr "Modifier le message"
+
+msgid "What you changed"
+msgstr "Ce que vous avez changé"
+
+msgid "Optional. Shown under the message, with your name and the date."
+msgstr "Facultatif. Affiché sous le message, avec votre nom et la date."

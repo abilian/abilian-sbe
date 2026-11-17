@@ -316,7 +316,7 @@ allow_indirect_imports = true
 # list as they move to ADS.
 theme = "src/abilian/sbe/static/ads"
 components = "src/abilian/sbe/templates/ads"
-templates = ["mockups/templates", "src/abilian/sbe/templates/ads_base.html", "src/abilian/sbe/templates/ads_macros.html", "src/abilian/sbe/templates/ads_community.html", "src/abilian/sbe/templates/main", "src/abilian/sbe/apps/wall/templates/wall/index.html", "src/abilian/sbe/apps/forum/templates/forum/index.html", "src/abilian/sbe/apps/forum/templates/forum/thread.html", "src/abilian/sbe/apps/documents/templates/documents/folder.html", "src/abilian/sbe/apps/documents/templates/documents/_dialogs.html", "src/abilian/sbe/apps/documents/templates/documents/document.html"]
+templates = ["mockups/templates", "src/abilian/sbe/templates/ads_base.html", "src/abilian/sbe/templates/ads_macros.html", "src/abilian/sbe/templates/ads_community.html", "src/abilian/sbe/templates/main", "src/abilian/sbe/apps/wall/templates/wall/index.html", "src/abilian/sbe/apps/forum/templates/forum/index.html", "src/abilian/sbe/apps/forum/templates/forum/thread.html", "src/abilian/sbe/apps/forum/templates/forum/thread_create.html", "src/abilian/sbe/apps/forum/templates/forum/post_edit.html", "src/abilian/sbe/apps/forum/templates/forum/_post_fields.html", "src/abilian/sbe/apps/documents/templates/documents/folder.html", "src/abilian/sbe/apps/documents/templates/documents/_dialogs.html", "src/abilian/sbe/apps/documents/templates/documents/document.html"]
 stylesheet = [
     "src/abilian/sbe/static/ads/ads.css",
     "src/abilian/sbe/static/theme.css",

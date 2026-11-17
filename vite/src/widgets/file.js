@@ -67,19 +67,19 @@ export class FileInput {
     marker.name = button.dataset.name;
     marker.value = button.dataset.value;
 
-    if (JSON.parse(button.dataset.deleted)) {
-      item.append(marker);
-      button.classList.add("active");
-    }
-
-    button.addEventListener("click", () => {
-      const deleting = !button.classList.contains("active");
+    const mark = (deleting) => {
       button.classList.toggle("active", deleting);
       button.classList.toggle("btn-danger", deleting);
       button.classList.toggle("btn-default", !deleting);
+      button.setAttribute("aria-pressed", String(deleting));
       if (deleting) item.append(marker);
       else marker.remove();
-    });
+    };
+
+    if (JSON.parse(button.dataset.deleted)) mark(true);
+    button.addEventListener("click", () =>
+      mark(!button.classList.contains("active")),
+    );
   }
 
   setupRemoveLink(item) {

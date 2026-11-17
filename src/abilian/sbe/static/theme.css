@@ -624,6 +624,8 @@ dialog.sbe-dialog::backdrop { background: color-mix(in srgb, var(--ads-n-950) 45
 .sbe-uploader__list .close { color: var(--ads-ink-muted); text-decoration: none; }
 .sbe-uploader__list .progress { flex-basis: 100%; overflow: hidden; background: var(--ads-line); border-radius: var(--ads-radius-sm); }
 .sbe-uploader__list .progress-bar { height: 100%; background: var(--ads-brand); }
+/* A file already saved, marked to be removed when the message is. */
+.sbe-uploader__list .file-item:has([aria-pressed="true"]) .file-info { color: var(--ads-ink-muted); text-decoration: line-through; }
 
 /* A sorted column says which way in its header (`aria-sort`, where assistive technology
    reads it); ADS draws the arrow from the link's own attribute. The arrow is decoration,

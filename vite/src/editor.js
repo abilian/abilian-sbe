@@ -89,6 +89,9 @@ function mount(textarea) {
   }
   showActiveTools(editor, buttons);
 
+  // Hidden, the field could not show the browser's message, and an empty one would
+  // stop the form without a word: the server checks it and says so under it.
+  textarea.required = false;
   textarea.hidden = true;
   root.hidden = false;
 }

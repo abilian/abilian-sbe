@@ -1,113 +1,47 @@
-{% extends base_template %}
-{% from "macros/box.html" import m_box_content with context %}
-{% from "forum/_macros.html" import forum_menu %}
-
-
-{%- macro m_field(field, horizontal=False, label_width=2, field_width=8) %}
-  {%- set is_hidden = field.is_hidden or field.type in ('CSRFTokenField', 'HiddenField') %}
-  {%- set with_label = kwargs.pop('with_label', not is_hidden) %}
-  {%- set placeholder = '' %}
-
-  {%- if not with_label %}
-    {%- set placeholder = field.label.text %}
-  {%- endif %}
-
-  {%- set css_class = kwargs.pop('class_', '') %}
-  {%- set standard_field = field.type not in ('CSRFTokenField',) %}
-  {%- if standard_field and field.type not in ('BooleanField',) %}
-    {%- set css_class = 'block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ' + css_class %}
-  {%- endif %}
-
-  {%- if field.flags.required %}
-    {%- set css_class = css_class + ' required' %}
-  {%- endif %}
-
-  {%- if is_hidden %}
-    {{ field(**kwargs) }}
-  {%- else %}
-    <div class="mb-4 {% if field.errors and not field.form %}border-l-4 border-red-500 pl-4{% endif %}">
-      {%- if with_label and not is_hidden %}
-        <label class="block text-sm font-medium text-gray-700 mb-1 {% if field.flags.required %}after:content-['*'] after:ml-0.5 after:text-red-500{% endif %}"
-               for="{{ field.id }}">{{ field.label.text }}</label>
-      {%- endif %}
-
-      {%- if field.type == 'CSRFTokenField' %}
-        {{ field(**kwargs) }}
-
-      {%- elif field.type == 'BooleanField' %}
-        <label class="flex items-center">
-          {{ field(class_=css_class + ' h-4 w-4 text-blue-600 border-gray-300 rounded', **kwargs) }}
-          <span class="ml-2 text-sm text-gray-700">{{ field.label.text }}</span>
-        </label>
-
-      {%- else %}
-        {%- if field.type == 'FileField' %}
-          {%- set css_class = css_class + ' file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700' %}
-        {%- endif %}
-        {{ field(class_=css_class, placeholder=placeholder, **kwargs)|safe }}
-      {%- endif %}
-
-      {%- if field.errors and not field.form %}
-        {%- if 'FieldList' in field.type %}
-          <p class="mt-1 text-sm text-red-600">
-          {% for error in field.errors %}
-            {% if 'dict' in error.__class__.__name__ %}
-              {% if not loop.first %}<br/>{% endif %}
-              {% for key, val in error.items() %}
-                {{ field._field_nameTolabel[key] }}&nbsp;:&nbsp;{{ val|join(', ') }}
-              {% endfor %}
-            {% else %}
-              {{ error |safe }}
-            {% endif %}
-          {% endfor %}
-          </p>
-        {%- else %}
-          <p class="mt-1 text-sm text-red-600">{{ field.errors|join('<br />'|safe) }}</p>
-        {%- endif %}
-      {%- endif %}
-
-      {%- if field.description %}
-        <p class="mt-1 text-sm text-gray-500">{{ field.description|safe }}</p>
-      {%- endif %}
-    </div>
-  {%- endif %}
-{%- endmacro %}
-
-{%- macro m_form(form, fields=(), action="", method="POST", enctype="multipart/form-data",
-                 horizontal=False, id=None, role="form",
-                 label_width=2, field_width=6) %}
-  <form action="{{ action }}" method="{{ method }}" enctype="{{ enctype }}"
-        {%- if id %} id="{{ id }}" {%- endif %}
-        role="{{ role }}" novalidate class="space-y-4">
-
-    {%- for field in (fields or form) %}
-      {{ m_field(field, horizontal=horizontal, label_width=label_width, field_width=field_width) }}
-    {%- endfor %}
-
-    <div class="flex gap-2 pt-4 mt-4 border-t border-gray-200">
-      {%- for button in g.view.buttons %}
-        {{ button.render() }}
-      {%- endfor %}
-    </div>
-
-  </form>
-{%- endmacro %}
-
+{#- Starting a discussion: its subject, the message in rich text, files, and whether to
+    send it by email; beside it, where it goes and who will see it. Drawn in
+    `mockups/templates/new-thread.html`. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_post_fields.html" as fields %}
+{% block page_title %}{{ _("New discussion") }} · {{ g.community.name }}{% endblock %}
+{#- The widgets (the uploader) and the rich-text editor; no stylesheet comes with them. -#}
+{% block scripts %}{{ vite_asset("src/main.js") }}{{ vite_asset("src/editor.js") }}{% endblock %}
 {% block content %}
-  {%- block before_form %}
-  {%- endblock %}
-
-  {%- call m_box_content(view.title) %}
-    {%- block sidebar %}
-
-    {%- endblock %}
-
-    <div data-title-counter="150">
-      {{ m_form(form, horizontal=True, action=request.path, id="edit-form") }}
+<div class="ads-with-aside">
+  <form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" enctype="multipart/form-data" aria-labelledby="new-title">
+    {{ form.csrf_token }}
+    <div class="ads-card__head">
+      <div class="sbe-lines">
+        <ol class="ads-breadcrumb"><li><a href="{{ url_for('forum.index', community_id=g.community.slug) }}">{{ _("Discussions") }}</a></li></ol>
+        <h2 class="ads-card__title" id="new-title">{{ _("New discussion") }}</h2>
+      </div>
     </div>
-  {%- endcall %}
+    <div class="ads-card__body ads-stack">
+      <div class="ads-field">
+        <label class="ads-label ads-label--required" for="{{ form.title.id }}">{{ _("Subject") }}</label>
+        <input class="ads-input" id="{{ form.title.id }}" name="{{ form.title.name }}" type="text" value="{{ form.title.data or '' }}" maxlength="150" required aria-describedby="subject-help" {{ fields.invalid(form.title) }}>
+        <small class="ads-help" id="subject-help">{{ _("A sentence that says what it is about: the members read it in their feed and in the email.") }}</small>
+        {{ fields.errors(form.title) }}
+      </div>
+      {{ fields.message_field(form.message, _("Message"), rows=10) }}
+      {{ fields.attachments_field(form.attachments) }}
+      {{ fields.send_by_email(form) }}
+    </div>
+    <div class="ads-card__foot ads-cluster ads-gap-sm">
+      <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="create">{{ icon("send") }}{{ _("Publish the discussion") }}</button>
+      <a class="ads-btn ads-btn--ghost" href="{{ url_for('forum.index', community_id=g.community.slug) }}">{{ _("Cancel") }}</a>
+      <span class="ads-muted ads-push">{{ _("You can edit it afterwards.") }}</span>
+    </div>
+  </form>
 
-  {%- block after_form %}
-  {%- endblock %}
-
+  <aside class="ads-stack" aria-label="{{ _('Where it is published') }}">
+    <section class="ads-card" aria-labelledby="where">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="where">{{ _("Where") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <span class="ads-cluster ads-gap-sm">{{ m.tile(g.community) }}<span class="sbe-lines"><strong>{{ g.community.name }}</strong><span class="ads-muted">{{ _("Discussions") }}</span></span></span>
+        <span class="ads-muted">{{ ngettext("Seen by the community's only member.", "Seen by the %(num)d members of the community, and by them alone.", g.community.membership_count) }}</span>
+      </div>
+    </section>
+  </aside>
+</div>
 {% endblock %}

@@ -2,6 +2,7 @@
     with the editor and attachments; closing and deleting for the community's managers.
     Drawn in `mockups/templates/thread.html`. -#}
 {% extends "ads_community.html" %}
+{% import "forum/_post_fields.html" as fields %}
 {#- Closing and deleting are for the community's managers; the dialog needs it too. -#}
 {% set moderator = can_manage(current_user, g.community) %}
 {% block page_title %}{{ thread.title }}{% endblock %}
@@ -70,39 +71,11 @@
     {% if is_closed %}
     <div class="ads-card__body ads-muted">{{ _("This discussion is closed: it takes no more replies.") }}</div>
     {% else %}
-    {#- Without its scripts, the textarea is the field and the file input posts nothing:
-        editor.js replaces the one, widgets/file.js uploads through the other. -#}
     <form class="ads-card__body ads-stack" id="reply" method="post" action="." enctype="multipart/form-data">
       {{ form.csrf_token }}
-      <div class="ads-field">
-        <label class="ads-label" for="{{ form.message.id }}">{{ _("Your reply") }}</label>
-        <textarea class="ads-textarea" id="{{ form.message.id }}" name="{{ form.message.name }}" rows="6" data-richtext required>{{ form.message.data or "" }}</textarea>
-        <div class="ads-editor" hidden>
-          <div class="sbe-editor__toolbar richtext-toolbar" role="toolbar" aria-label="{{ _('Formatting') }}">
-            {% for command, label, glyph, active, level in [
-                 ("toggleBold", _("Bold"), "bold", "bold", none),
-                 ("toggleItalic", _("Italic"), "italic", "italic", none),
-                 ("toggleHeading", _("Heading"), "heading", "heading", 2),
-                 ("toggleBulletList", _("Bulleted list"), "list", "bulletList", none),
-                 ("toggleOrderedList", _("Numbered list"), "list-numbers", "orderedList", none),
-                 ("toggleBlockquote", _("Quote"), "quote", "blockquote", none)] %}
-            <button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ label }}" title="{{ label }}" data-command="{{ command }}" data-active="{{ active }}" aria-pressed="false" {% if level %}data-level="{{ level }}"{% endif %}>{{ icon(glyph) }}</button>
-            {% endfor %}
-            <button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ _('Link') }}" title="{{ _('Link') }}" data-link-prompt="{{ _('Link address') }}" data-active="link" aria-pressed="false">{{ icon("link") }}</button>
-          </div>
-          <div class="sbe-editor__body ads-prose richtext-content"></div>
-        </div>
-      </div>
-      <div class="ads-field">
-        <span class="ads-label">{{ _("Attachments") }}</span>
-        <div class="js-widget sbe-uploader" data-init-with="fileInput">
-          <label class="ads-btn js-file-button">{{ icon("paperclip") }}{{ _("Attach files") }}<input class="sbe-sr-only" type="file" name="{{ form.attachments.name }}" multiple></label>
-          <div class="selected-files sbe-uploader__list"></div>
-        </div>
-      </div>
-      {% if "send_by_email" in form %}
-      <label class="ads-check"><input type="checkbox" name="{{ form.send_by_email.name }}" {{ "checked" if form.send_by_email.data }}> {{ _("Also send it to the members by email") }}</label>
-      {% endif %}
+      {{ fields.message_field(form.message, _("Your reply")) }}
+      {{ fields.attachments_field(form.attachments) }}
+      {{ fields.send_by_email(form) }}
       <div class="ads-cluster ads-gap-sm">
         <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="create">{{ icon("send") }}{{ _("Send") }}</button>
         <span class="ads-muted ads-push">{{ ngettext("%(num)d participant will be told by email.", "%(num)d participants will be told by email.", participants | length) }}</span>

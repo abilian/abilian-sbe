@@ -245,18 +245,25 @@ class ThreadView(BaseThreadView, views.ObjectView[Thread, PostForm]):
     @property
     def template_kwargs(self):
         kw = super().template_kwargs
-        kw["thread"] = self.obj
-        kw["is_closed"] = self.obj.closed
-        kw["viewers"] = object_viewers(self.user, self.obj)
-        kw["views"] = get_viewed_times([self.obj])
-        kw["participants"] = {post.creator for post in self.obj.posts}
-        kw["activity_time_format"] = activity_time_format
-        # Counted before this visit is recorded, which marks them read.
-        kw["new_posts"] = (get_viewed_posts(self.user, [self.obj]) or {}).get(
-            self.obj, 0
-        )
+        kw.update(thread_page_kwargs(self.user, self.obj))
         viewtracker.record_hit(entity=self.obj, user=self.user)
         return kw
+
+
+def thread_page_kwargs(user: User, thread: Thread) -> dict:
+    """What a thread's page shows around its reply form.
+
+    The unread posts are counted before the visit is recorded, which marks them read.
+    """
+    return {
+        "thread": thread,
+        "is_closed": thread.closed,
+        "viewers": object_viewers(user, thread),
+        "views": get_viewed_times([thread]),
+        "participants": {post.creator for post in thread.posts},
+        "activity_time_format": activity_time_format,
+        "new_posts": (get_viewed_posts(user, [thread]) or {}).get(thread, 0),
+    }
 
 
 thread_view = ThreadView.as_view("thread")
@@ -351,11 +358,21 @@ route("/new_thread/")(ThreadCreate.as_view("new_thread", view_endpoint=".thread"
 
 
 class ThreadPostCreate(ThreadCreate):
-    """Add a new post to a thread."""
+    """Add a new post to a thread.
+
+    A reply the server refuses comes back on the thread's page, its error under it.
+    """
 
     methods = ["POST"]
     Form = PostForm
     Model = Post
+    template = "forum/thread.html"
+
+    @property
+    def template_kwargs(self):
+        kw = super().template_kwargs
+        kw.update(thread_page_kwargs(self.user, self.thread))
+        return kw
 
     def init_object(self, args, kwargs):
         # we DO want to skip ThreadCreate.init_object. hence super is not based on
@@ -432,6 +449,7 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
     Form = PostEditForm
     Model = Post
     pk = "object_id"
+    template = "forum/post_edit.html"
 
     def can_send_by_mail(self) -> bool:
         # post edit: don't notify every time
@@ -457,6 +475,13 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
         kwargs = super().get_form_kwargs()
         kwargs["message"] = self.obj.body_html
         return kwargs
+
+    @property
+    def template_kwargs(self):
+        kw = super().template_kwargs
+        kw["post"] = self.obj
+        kw["thread"] = self.thread
+        return kw
 
     def before_populate_obj(self) -> None:
         self.message_body = self.form.message.data
