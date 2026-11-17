@@ -1,0 +1,131 @@
+{#- The dialogs of a folder's page, on the Abilian Design System. Those that act on one
+    row are filled from it by `vite/src/documents/folder.js`; the move and change-owner
+    dialogs act on the selection. -#}
+
+{#- A dialog holding a form: a title, the fields, Cancel and the button that sends it. -#}
+{% macro form_dialog(id, title, submit, action="", value=none, attrs={}, form_id=none) -%}
+<dialog class="ads-modal__panel sbe-dialog" id="{{ id }}" aria-labelledby="{{ id }}-title" {{ attrs | xmlattr }}>
+  <form method="post" action="{{ action }}" enctype="multipart/form-data" {% if form_id %}id="{{ form_id }}"{% endif %}>
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="{{ id }}-title">{{ title }}</h2></div>
+    <div class="ads-modal__body">{{ caller() }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--primary" type="submit" {% if value %}name="action" value="{{ value }}"{% endif %}>{{ submit }}</button>
+    </div>
+  </form>
+</dialog>
+{%- endmacro %}
+
+{#- A name, checked for uniqueness in the folder as it is typed (`name-check.js`), and a
+    description. -#}
+{% macro name_fields(prefix, title="", description="", title_class="", description_class="") %}
+{% set check_url = url_for(".check_valid_name", community_id=g.community.slug) %}
+<div class="ads-field">
+  <label class="ads-label" for="{{ prefix }}-title">{{ _("Name") }}</label>
+  <input class="ads-input {{ title_class }}" id="{{ prefix }}-title" type="text" name="title" value="{{ title }}" data-check-url="{{ check_url }}" required>
+  <span class="ads-error help-block" hidden></span>
+</div>
+<div class="ads-field">
+  <label class="ads-label" for="{{ prefix }}-description">{{ _("Description") }}</label>
+  <textarea class="ads-textarea {{ description_class }}" id="{{ prefix }}-description" name="description" rows="4">{{ description }}</textarea>
+</div>
+{% endmacro %}
+
+{% set folder_post = url_for(".folder_post", community_id=g.community.slug, folder_id=folder.id) %}
+
+{% if may_write %}
+{#- Files are sent one at a time as soon as "Upload" is pressed (`upload-dialog.js`). -#}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-upload-files" aria-labelledby="modal-upload-files-title"
+        data-error-upload="{{ _('Error - File not uploaded') }}"
+        data-error-too-large="{{ _('Error: maximum file size exceeded') }}">
+  <form method="post" action="{{ folder_post }}" enctype="multipart/form-data">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-upload-files-title">{{ _("Upload files into “%(name)s”", name=folder.title) }}</h2></div>
+    <div class="ads-modal__body ads-stack">
+      <div><label class="ads-btn">{{ icon("plus") }}{{ _("Add files to selection") }}<input class="sbe-sr-only" type="file" name="file" multiple></label></div>
+      <template class="js-file-tpl">
+        <li>
+          <img class="js-file-preview sbe-upload__preview" alt="" hidden>
+          <span class="ads-fill sbe-lines">
+            <span class="js-file-name ads-truncate"></span>
+            <span class="js-file-size ads-muted"></span>
+            <span class="js-file-error ads-error" hidden></span>
+            <span class="js-file-progress ads-progress" hidden><span class="ads-progress__bar" role="progressbar" aria-label="{{ _('Sent') }}"></span></span>
+          </span>
+          <span class="js-file-sent" hidden>{{ icon("circle-check", "ads-icon sbe-ok") }}</span>
+          <span class="js-file-failed ads-error" hidden>{{ icon("alert-triangle") }}</span>
+          <button class="js-file-remove ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ _('Remove') }}">{{ icon("x") }}</button>
+        </li>
+      </template>
+      <ul class="js-files ads-list sbe-uploads"></ul>
+      <span class="js-total-progress ads-progress" hidden><span class="ads-progress__bar" role="progressbar" aria-label="{{ _('Sent') }}"></span></span>
+      <label class="ads-check"><input type="checkbox" name="uncompress_files" value="true"> {{ _("Uncompress ZIP files") }}</label>
+    </div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="js-upload ads-btn ads-btn--primary" type="button" hidden>{{ icon("upload") }}{{ _("Upload") }}</button>
+    </div>
+  </form>
+</dialog>
+
+{% call form_dialog("modal-new-folder", _("New folder in “%(name)s”", name=folder.title), _("Create folder"), folder_post, "new",
+                    {"data-no-enter": "", "data-name-check-action": "new", "data-renames": folder.id}) %}
+{{ name_fields("new-folder") }}
+{% endcall %}
+
+{#- Opened on the folder shown, or on a subfolder, which it is filled from. -#}
+{% call form_dialog("modal-edit-folder", _("Edit folder properties"), _("Save changes"), folder_post, "edit",
+                    {"data-no-enter": "", "data-name-check-action": "folder-edit", "data-renames": folder.id}, "modal-editfolder-form") %}
+{{ name_fields("edit-folder", folder.title, folder.description or "", "form-folder-title", "form-folder-description") }}
+{% endcall %}
+
+{% call form_dialog("modal-edit", _("Edit document properties"), _("Save changes"), "", "edit",
+                    {"data-no-enter": "", "data-name-check-action": "document-edit"}, "modal-edit-form") %}
+{{ name_fields("edit-document", title_class="form-document-title", description_class="form-document-description") }}
+{% endcall %}
+
+{% call form_dialog("modal-upload-new-version", _("Upload new version"), _("Upload"), form_id="modal-replace-form") %}
+<input class="ads-file-input" type="file" name="file" required aria-label="{{ _('The new version') }}">
+{% endcall %}
+
+{% call form_dialog("modal-send-by-email", _("Send by email"), _("Send"), form_id="modal-email-form") %}
+<div class="ads-field">
+  <label class="ads-label" for="email-recipient">{{ _("Recipient") }}</label>
+  <input class="ads-input" id="email-recipient" type="email" name="recipient" required>
+</div>
+<div class="ads-field">
+  <label class="ads-label" for="email-message">{{ _("Message") }}</label>
+  <textarea class="ads-textarea" id="email-message" name="message" rows="5"></textarea>
+</div>
+{% endcall %}
+
+{#- Lists the folders to move into (`folder.js` fetches them). -#}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-move-files" aria-labelledby="modal-move-files-title"
+        data-listing-url="{{ url_for('.folder_json', folder_id=folder.id, community_id=g.community.slug) }}">
+  <form method="post" action="{{ folder_post }}" id="modal-folder-move">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-move-files-title">{{ _("Move to another folder") }}</h2></div>
+    <div class="ads-modal__body ads-stack" id="modal-move-files-directory-listing">
+      <ol class="ads-breadcrumb breadcrumb"></ol>
+      <div class="ads-table-scroll"><table class="ads-table ads-table--hover"><tbody></tbody></table></div>
+    </div>
+    <div class="ads-modal__foot">
+      <div id="modal-move-files-inputs" hidden></div>
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--primary" id="modal-move-button-submit" type="submit" name="action" value="move">{{ _("Move to selected folder") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+
+{% if may_manage %}
+{% call form_dialog("modal-change-owner", _("Change owner of selected files"), _("Change owner"), folder_post, "change-owner") %}
+<div class="ads-field">
+  <label class="ads-label" for="new_owner">{{ _("New owner") }}</label>
+  <input class="ads-input" id="new_owner" type="text" name="new_owner" required
+         data-picker="{{ url_for('social.users_json', with_membership=g.community.id) }}">
+</div>
+<div class="selected-items" hidden></div>
+{% endcall %}
+{% endif %}

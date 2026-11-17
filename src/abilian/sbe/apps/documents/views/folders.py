@@ -10,6 +10,7 @@ import re
 import sys
 import tempfile
 import traceback
+from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
 from io import StringIO
@@ -50,7 +51,7 @@ from abilian.sbe.apps.documents.models import Document, Folder, icon_for, icon_u
 from abilian.sbe.apps.documents.repository import content_repository
 from abilian.sbe.apps.documents.search import reindex_tree
 from abilian.services import get_service
-from abilian.services.security import READ, WRITE, Role, security
+from abilian.services.security import MANAGE, READ, WRITE, Role, security
 from abilian.web import csrf, http, url_for
 from abilian.web.action import actions
 from abilian.web.listing import Listing, by_name
@@ -126,33 +127,66 @@ def _user_roles_listing(
     )
 
 
+@dataclass(frozen=True)
+class TreeNode:
+    """A folder in the tree beside a folder's page."""
+
+    folder: Folder
+    children: tuple[TreeNode, ...]
+    #: On the way to the folder shown: its subfolders are listed open.
+    expanded: bool
+    current: bool
+
+
+def folder_tree(top: Folder, user: User, current: Folder) -> tuple[TreeNode, ...]:
+    """`top` and the folders under it that `user` may read, open down to `current`."""
+    on_path = {folder.id for folder in current._iter_to_root()}
+
+    # ponytail: one permission check per folder of the community; load the tree in
+    # one query if a community's folders run into the thousands.
+    def nodes(folders: Iterable[Folder]) -> tuple[TreeNode, ...]:
+        return tuple(
+            TreeNode(
+                folder,
+                nodes(folder.filtered_subfolders(user)),
+                expanded=folder.id in on_path,
+                current=folder is current,
+            )
+            for folder in folders
+        )
+
+    return nodes([top])
+
+
 @default_view(community_blueprint, Folder, id_attr="folder_id", kw_func=default_view_kw)
 @route("/folder/<int:folder_id>")
 @authenticated
 def folder_view(user: User, folder_id):
     folder = get_folder(user, folder_id)
-    bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
-    children = folder.filtered_children(user)
-    ctx = {"folder": folder, "breadcrumbs": bc}
-
-    view_style = session.get("sbe_doc_view_style", "thumbnail_view")
-    if view_style == "thumbnail_view":
-        listing, children = Listing.from_rows(
-            children, FOLDER_SORT_KEYS, "title", text=lambda content: content.title
-        )
-        resp = render_template(
-            "documents/folder.html", listing=listing, children=children, **ctx
-        )
-    elif view_style == "gallery_view":
-        resp = render_template(
-            "documents/folder_gallery_view.html", children=children, **ctx
-        )
-    else:
-        msg = "Unknown value for sbe_doc_view_style"
-        raise InternalServerError(msg)
-
-    return resp
+    listing, children = Listing.from_rows(
+        folder.filtered_children(user),
+        FOLDER_SORT_KEYS,
+        "title",
+        text=lambda content: content.title,
+    )
+    return render_template(
+        "documents/folder.html",
+        folder=folder,
+        breadcrumbs=breadcrumbs_for(folder),
+        listing=listing,
+        children=children,
+        gallery=session.get("sbe_doc_view_style") == "gallery_view",
+        # What each subfolder holds, for its size.
+        counts={
+            child.id: len(child.filtered_children(user))
+            for child in children
+            if child.is_folder
+        },
+        tree=folder_tree(g.community.folder, user, folder),
+        may_write=security.has_permission(user, WRITE, folder, inherit=True),
+        may_manage=security.has_permission(user, MANAGE, folder, inherit=True),
+    )
 
 
 @route("/folder/change_view_style/<int:folder_id>", methods=["GET", "POST"])

@@ -73,3 +73,25 @@
   <td class="ads-end ads-col--secondary"><span class="sbe-inline ads-gap-sm">{{ avatar(last.creator, "ads-avatar--xs") }}{{ time(thread.last_post_at or thread.created_at) }}</span></td>
 </tr>
 {% endmacro %}
+
+{#- A column a `abilian.web.listing.Listing` sorts by: a link that sorts by it, ascending
+    first; the header says which way it is sorted. -#}
+{% macro sort_th(listing, key, label, class="") -%}
+<th class="{{ class }}" aria-sort="{{ ('descending' if listing.descending else 'ascending') if listing.sort == key else 'none' }}"><a class="ads-th-sort" href="{{ listing.sort_url(key) }}">{{ label }}</a></th>
+{%- endmacro %}
+
+{#- The pages of a `Listing`, when there is more than one. -#}
+{% macro pagination(listing) %}
+{% if listing.pages > 1 %}
+<nav class="ads-card__foot ads-spread" aria-label="{{ _('Pagination') }}">
+  <span class="ads-muted">{{ _("Showing {start} to {end} of {total} entries").format(start=listing.start + 1, end=listing.stop, total=listing.total) }}</span>
+  <ul class="ads-pagination">
+    {% if listing.page > 1 %}<li><a class="ads-page-link" rel="prev" href="{{ listing.page_url(listing.page - 1) }}" aria-label="{{ _('Previous') }}">{{ icon("chevron-left") }}</a></li>{% endif %}
+    {% for page in listing.page_links %}
+    <li><a class="ads-page-link" href="{{ listing.page_url(page) }}" {{ 'aria-current="page"' | safe if page == listing.page }}>{{ page }}</a></li>
+    {% endfor %}
+    {% if listing.page < listing.pages %}<li><a class="ads-page-link" rel="next" href="{{ listing.page_url(listing.page + 1) }}" aria-label="{{ _('Next') }}">{{ icon("chevron-right") }}</a></li>{% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endmacro %}

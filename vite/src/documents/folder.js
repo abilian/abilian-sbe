@@ -1,5 +1,5 @@
 /* The folder listing, in its table and gallery forms: selection, the actions on
- * each row, delete confirmation, and the move and change-owner dialogs.
+ * each item, delete confirmation, and the move and change-owner dialogs.
  *
  * A document's page has a `folder-listing` form too, holding only that document,
  * so that the move dialog works from there the same way.
@@ -24,24 +24,10 @@ function copySelectionInto(container) {
   );
 }
 
+/* What the selection's buttons apply to shows by itself (a CSS `:has()` on the
+ * ticked boxes); this only ticks them all at once. */
 function setUpSelection() {
   const checkboxes = () => listing.querySelectorAll('input[type="checkbox"]');
-  const menu = document.getElementById("horizontal-doc-menu");
-
-  function setSelected(checked) {
-    listing.querySelectorAll('input[name="object-selected"]').forEach((box) => {
-      box.checked = checked;
-    });
-  }
-
-  listing.querySelector("a[href='#select-all']")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    setSelected(true);
-  });
-  listing.querySelector("a[href='#unselect-all']")?.addEventListener("click", (e) => {
-    e.preventDefault();
-    setSelected(false);
-  });
 
   listing.addEventListener("change", (event) => {
     if (!event.target.matches('input[type="checkbox"]')) return;
@@ -49,10 +35,6 @@ function setUpSelection() {
       checkboxes().forEach((box) => {
         box.checked = event.target.checked;
       });
-    }
-    if (menu) {
-      const anyChecked = [...checkboxes()].some((box) => box.checked);
-      menu.style.display = anyChecked ? "" : "none";
     }
   });
 }
@@ -74,8 +56,23 @@ function setFieldValue(selector, value) {
   });
 }
 
-function setText(selector, text) {
-  document.querySelector(selector).textContent = text;
+/* Tick this one item alone, for the selection's buttons and dialogs to act on. */
+function selectOnly(objectId) {
+  listing.querySelectorAll('input[type="checkbox"]').forEach((box) => {
+    box.checked = false;
+  });
+  document.getElementById(`check_${objectId}`).checked = true;
+}
+
+function clickSelectionButton(action) {
+  listing.querySelector(`button[name="action"][value="${action}"]`).click();
+}
+
+function openRenameDialog(id, objectId) {
+  const dialog = document.getElementById(id);
+  // name-check.js leaves the object being renamed out of the uniqueness check.
+  dialog.dataset.renames = objectId;
+  dialog.showModal();
 }
 
 const ROW_ACTIONS = {
@@ -83,37 +80,30 @@ const ROW_ACTIONS = {
     setFormAction("#modal-edit-form", rowValue("edit_url", objectId));
     setFieldValue(".form-document-title", rowValue("title", objectId));
     setFieldValue(".form-document-description", rowValue("description", objectId));
-    document.getElementById("modal-edit").showModal();
+    openRenameDialog("modal-edit", objectId);
   },
   "edit-folder"({ objectId }) {
     setFormAction("#modal-editfolder-form", rowValue("editfolder_url", objectId));
     setFieldValue(".form-folder-title", rowValue("title", objectId));
     setFieldValue(".form-folder-description", rowValue("description", objectId));
-    document.getElementById("modal-edit-folder").showModal();
+    openRenameDialog("modal-edit-folder", objectId);
   },
   "send-by-email"({ objectId }) {
     setFormAction("#modal-email-form", rowValue("email_url", objectId));
   },
   "replace-document"({ objectId }) {
-    setFormAction(".modal-replacedoc-form", rowValue("replace_url", objectId));
+    setFormAction("#modal-replace-form", rowValue("replace_url", objectId));
   },
-  "delete-document"({ objectId }) {
-    setFormAction("#modal-delete-document", rowValue("delete_url", objectId));
-    setText("#delete-doc-title", rowValue("title", objectId));
+  download({ objectId }) {
+    selectOnly(objectId);
+    clickSelectionButton("download");
   },
-  "delete-folder"({ folderUrl, folderTitle }) {
-    setFormAction("#modal-delete-folders", folderUrl);
-    setText("#delete-folder-title", folderTitle);
+  move({ objectId }) {
+    selectOnly(objectId);
   },
-  "download-folder"({ folderUrl }) {
-    setFormAction("#folder_content_download", folderUrl);
-    document.getElementById("document-folder-download").click();
-  },
-  "move"({ objectId }) {
-    listing.querySelectorAll('input[type="checkbox"]').forEach((box) => {
-      box.checked = false;
-    });
-    document.getElementById(`check_${objectId}`).checked = true;
+  delete({ objectId }) {
+    selectOnly(objectId);
+    clickSelectionButton("delete");
   },
 };
 
@@ -129,19 +119,16 @@ function setUpRowActions() {
 function setUpDeleteSelected() {
   const { deleteConfirm, deleteLabel, cancelLabel } = listing.dataset;
 
-  listing.querySelectorAll('button.btn-danger[value="delete"]').forEach((button) => {
+  listing.querySelectorAll('button[name="action"][value="delete"]').forEach((button) => {
     button.addEventListener("click", (event) => {
       event.preventDefault();
 
       const names = document.createElement("ul");
       names.className = "folder-items";
       for (const item of selectedItems()) {
-        const titleCell = item.closest("td")?.nextElementSibling;
-        if (titleCell) {
-          const name = document.createElement("li");
-          name.textContent = titleCell.textContent.trim();
-          names.append(name);
-        }
+        const name = document.createElement("li");
+        name.textContent = item.dataset.title;
+        names.append(name);
       }
 
       const message = document.createElement("div");
@@ -200,10 +187,7 @@ function setUpMoveDialog(modal) {
       ...data.folders.map((folder) => {
         const row = document.createElement("tr");
         const cell = document.createElement("td");
-        const divider = document.createElement("span");
-        divider.className = "divider";
-        divider.textContent = "/";
-        cell.append(folderLink(folder), divider);
+        cell.append(folderLink(folder));
         row.append(cell);
         return row;
       }),
@@ -245,19 +229,6 @@ function setUpChangeOwnerDialog(modal) {
   });
 }
 
-function setUpGalleryFilter(filter) {
-  filter.addEventListener("input", () => {
-    const wanted = filter.value.toLowerCase();
-    document.querySelectorAll(".gallery_element").forEach((element) => {
-      const name = element
-        .querySelector(".document-gallery-infos p:nth-child(1)")
-        .textContent.toLowerCase()
-        .split(".")[0];
-      element.style.display = name.includes(wanted) ? "" : "none";
-    });
-  });
-}
-
 if (listing) {
   setUpSelection();
   setUpRowActions();
@@ -269,6 +240,4 @@ if (listing) {
   const changeOwnerDialog = document.getElementById("modal-change-owner");
   if (changeOwnerDialog) setUpChangeOwnerDialog(changeOwnerDialog);
 
-  const galleryFilter = document.getElementById("filter");
-  if (galleryFilter) setUpGalleryFilter(galleryFilter);
 }

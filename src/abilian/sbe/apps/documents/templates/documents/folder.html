@@ -1,30 +1,218 @@
-{% extends "community/_base.html" %}
+{#- A folder: its path, its subfolders and documents in one table (or as tiles), a bar
+    for what applies to the selection; the community's folders beside it. Drawn in
+    `mockups/templates/folder.html`.
 
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% from "macros/recent.html" import m_recent_items with context %}
+    The card is the selection's form: what is ticked goes with Download, Move, Delete.
+    The filter and the view switch belong to forms of their own, outside it. -#}
+{% extends "ads_community.html" %}
+{% set folder_post = url_for(".folder_post", community_id=g.community.slug, folder_id=folder.id) %}
+{% block page_title %}{{ folder.title }} · {{ _("Documents") }} · {{ g.community.name }}{% endblock %}
+{% block scripts %}{{ vite_asset("src/main.js") }}{% endblock %}
 
-{% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
+{#- What `folder.js` reads to fill a dialog from a row: hidden, unnamed, never sent. -#}
+{% macro item_data(obj) -%}
+<input type="hidden" id="title{{ obj.id }}" value="{{ obj.title }}">
+<input type="hidden" id="description{{ obj.id }}" value="{{ obj.description or '' }}">
+{% if obj.is_folder -%}
+<input type="hidden" id="editfolder_url{{ obj.id }}" value="{{ url_for('.folder_post', folder_id=obj.id, community_id=g.community.slug) }}">
+{%- else -%}
+<input type="hidden" id="edit_url{{ obj.id }}" value="{{ url_for('.document_edit', doc_id=obj.id, folder_id=folder.id, community_id=g.community.slug) }}">
+<input type="hidden" id="replace_url{{ obj.id }}" value="{{ url_for('.document_upload', doc_id=obj.id, community_id=g.community.slug) }}">
+<input type="hidden" id="email_url{{ obj.id }}" value="{{ url_for('.document_send', doc_id=obj.id, community_id=g.community.slug) }}">
+{%- endif %}
+{%- endmacro %}
 
-{% block documentcontent %}
-  <div class="w-full">
-
-  <div class="flex items-center gap-2 my-2">
-    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
-    </svg>
-    {{ m_breadcrumbs2(breadcrumbs) }}
+{#- What can be done to one item. Download, Move and Delete tick it alone and do what
+    the selection's buttons do. -#}
+{% macro item_menu(obj) %}
+<details class="ads-dropdown">
+  <summary class="ads-btn ads-btn--ghost ads-btn--sm" aria-label="{{ _('Actions on %(name)s', name=obj.title) }}">{{ icon("dots") }}</summary>
+  <div class="ads-menu">
+    {% if obj.is_folder %}
+    <button class="ads-menu__item" type="button" data-row-action="download" data-object-id="{{ obj.id }}">{{ icon("download") }}{{ _("Download") }}</button>
+    <a class="ads-menu__item" href="{{ url_for('.descendants_view', community_id=g.community.slug, folder_id=obj.id) }}">{{ icon("folders") }}{{ _("View descendants") }}</a>
+    {% if may_manage %}<a class="ads-menu__item" href="{{ url_for('.permissions', community_id=g.community.slug, folder_id=obj.id) }}">{{ icon("shield-lock") }}{{ _("Permissions") }}</a>{% endif %}
+    {% if may_write %}<button class="ads-menu__item" type="button" data-row-action="edit-folder" data-object-id="{{ obj.id }}">{{ icon("pencil") }}{{ _("Edit properties") }}</button>{% endif %}
+    {% else %}
+    <a class="ads-menu__item" href="{{ url_for('.document_download', community_id=g.community.slug, doc_id=obj.id, attach=True) }}">{{ icon("download") }}{{ _("Download") }}</a>
+    {% if may_write %}
+    <button class="ads-menu__item" type="button" data-row-action="replace-document" data-object-id="{{ obj.id }}" data-modal-open="#modal-upload-new-version">{{ icon("upload") }}{{ _("Upload new version") }}</button>
+    <button class="ads-menu__item" type="button" data-row-action="send-by-email" data-object-id="{{ obj.id }}" data-modal-open="#modal-send-by-email">{{ icon("mail") }}{{ _("Send by email") }}</button>
+    <button class="ads-menu__item" type="button" data-row-action="edit-document" data-object-id="{{ obj.id }}">{{ icon("pencil") }}{{ _("Edit properties") }}</button>
+    {% endif %}
+    {% endif %}
+    {% if may_write %}
+    <button class="ads-menu__item" type="button" data-row-action="move" data-object-id="{{ obj.id }}" data-modal-open="#modal-move-files">{{ icon("arrows-move") }}{{ _("Move") }}</button>
+    <div class="ads-menu__sep"></div>
+    <button class="ads-menu__item ads-menu__item--danger" type="button" data-row-action="delete" data-object-id="{{ obj.id }}">{{ icon("trash") }}{{ _("Delete") }}</button>
+    {% endif %}
   </div>
+</details>
+{{ item_data(obj) }}
+{% endmacro %}
 
-  <hr class="border-gray-200 my-4">
+{% macro select_box(obj) -%}
+<input class="ads-check" id="check_{{ obj.id }}" type="checkbox" name="object-selected" value="{{ obj.sbe_type }}:{{ obj.id }}" data-title="{{ obj.title }}" aria-label="{{ _('Select %(name)s', name=obj.title) }}">
+{%- endmacro %}
 
-  {%- if folder.description %}
-    <p class="text-gray-700 mb-4">{{ folder.description }}</p>
-  {%- endif %}
+{#- A folder's size is what it holds. -#}
+{% macro size(obj) -%}
+{% if obj.is_folder %}{{ ngettext("%(num)d item", "%(num)d items", counts[obj.id]) }}{% else %}{{ obj.content_length | filesize }}{% endif %}
+{%- endmacro %}
 
-  {{ m_docs_table(children, listing, True) }}
+{#- The tree: a folder with subfolders has a button that shows or hides them (a
+    `<details>` holding only its summary; `theme.css` shows the list that follows). -#}
+{% macro tree_nodes(nodes) %}
+{% for node in nodes %}
+<li class="ads-tree__node">
+  <span class="sbe-tree__row">
+    {%- if node.children %}<details class="sbe-tree__toggle" {{ 'open' if node.expanded }}><summary aria-label="{{ _('Subfolders of %(name)s', name=node.folder.title) }}">{{ icon("chevron-right") }}</summary></details>
+    {%- else %}<span class="sbe-tree__toggle"></span>{% endif -%}
+    <a class="ads-tree__label" href="{{ url_for(node.folder) }}" {{ 'aria-current="page"' | safe if node.current }}>{{ folder_icon() }}<span class="ads-truncate">{{ node.folder.title }}</span></a>
+  </span>
+  {% if node.children %}<ul class="ads-tree ads-tree--nested">{{ tree_nodes(node.children) }}</ul>{% endif %}
+</li>
+{% endfor %}
+{% endmacro %}
+
+{% block content %}
+<div class="ads-with-aside">
+  <form class="ads-card ads-datatable" name="folder-listing" method="post" action="{{ folder_post }}"
+        data-delete-confirm="{{ _('Delete selected elements?') }}" data-delete-label="{{ _('Delete') }}" data-cancel-label="{{ _('Cancel') }}">
+    {{ csrf.field() }}
+    {#- The folder, and what to do in it or to it. -#}
+    <div class="ads-card__head ads-spread">
+      <div class="ads-stack ads-gap-sm">
+        {% if breadcrumbs | length > 1 %}
+        <ol class="ads-breadcrumb">{% for crumb in breadcrumbs[:-1] %}<li><a href="{{ crumb.path }}">{{ crumb.label }}</a></li>{% endfor %}</ol>
+        {% endif %}
+        <h2 class="ads-card__title ads-cluster ads-gap-sm">{{ folder_icon() }}{{ folder.title }}</h2>
+        {% if folder.description %}<p class="ads-muted">{{ folder.description }}</p>{% endif %}
+      </div>
+      <div class="ads-cluster ads-gap-sm">
+        {% if may_write %}
+        <button class="ads-btn ads-btn--primary" type="button" data-modal-open="#modal-upload-files" aria-label="{{ _('Upload files') }}">{{ icon("upload") }}<span class="sbe-wide-only">{{ _("Upload files") }}</span></button>
+        <button class="ads-btn" type="button" data-modal-open="#modal-new-folder" aria-label="{{ _('New folder') }}">{{ icon("folder-plus") }}<span class="sbe-wide-only">{{ _("New folder") }}</span></button>
+        {% endif %}
+        <details class="ads-dropdown">
+          <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the folder “%(name)s”', name=folder.title) }}">{{ icon("dots-vertical") }}</summary>
+          <div class="ads-menu">
+            <button class="ads-menu__item" type="submit" form="folder-download">{{ icon("download") }}{{ _("Download the folder") }}</button>
+            <a class="ads-menu__item" href="{{ url_for('.descendants_view', community_id=g.community.slug, folder_id=folder.id) }}">{{ icon("folders") }}{{ _("View descendants") }}</a>
+            {% if may_write %}<button class="ads-menu__item" type="button" data-row-action="edit-folder" data-object-id="{{ folder.id }}">{{ icon("pencil") }}{{ _("Edit properties") }}</button>{% endif %}
+            {% if may_manage and breadcrumbs | length > 1 %}<a class="ads-menu__item" href="{{ url_for('.permissions', community_id=g.community.slug, folder_id=folder.id) }}">{{ icon("shield-lock") }}{{ _("Permissions") }}</a>{% endif %}
+          </div>
+        </details>
+        {{ item_data(folder) }}
+      </div>
+    </div>
+
+    {#- At rest: filter the folder, choose how to see it. Once something is ticked, what
+        applies to the selection takes their place (ADS's datatable does the switch). -#}
+    <div class="ads-datatable__idle sbe-toolbar">
+      <span class="ads-input-icon">
+        <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+        <input class="ads-input" type="search" form="folder-filter" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Filter this folder') }}" aria-label="{{ _('Filter this folder by name') }}">
+      </span>
+      <span class="ads-muted">{{ ngettext("%(num)d item", "%(num)d items", listing.total) }}</span>
+      {% if listing.search %}<a href="{{ request.path }}">{{ _("Show all") }}</a>{% endif %}
+      <span class="ads-segmented ads-segmented--sm ads-push" role="group" aria-label="{{ _('Display') }}">
+        <button class="ads-segmented__item" type="submit" form="folder-view" name="view_style" value="thumbnail_view" aria-pressed="{{ 'false' if gallery else 'true' }}" aria-label="{{ _('List view') }}">{{ icon("list") }}</button>
+        <button class="ads-segmented__item" type="submit" form="folder-view" name="view_style" value="gallery_view" aria-pressed="{{ 'true' if gallery else 'false' }}" aria-label="{{ _('Gallery view') }}">{{ icon("layout-grid") }}</button>
+      </span>
+    </div>
+    <div class="ads-bulkbar">
+      <strong>{{ _("Selection") }}</strong>
+      <button class="ads-btn ads-btn--sm" type="submit" name="action" value="download">{{ icon("download") }}{{ _("Download") }}</button>
+      {% if may_write %}
+      <button class="ads-btn ads-btn--sm" type="button" data-modal-open="#modal-move-files">{{ icon("arrows-move") }}{{ _("Move") }}</button>
+      {% endif %}
+      {% if may_manage %}
+      <button class="ads-btn ads-btn--sm" type="button" data-modal-open="#modal-change-owner">{{ icon("user") }}{{ _("Change owner") }}</button>
+      {% endif %}
+      {% if may_write %}
+      <button class="ads-btn ads-btn--sm ads-btn--danger" type="submit" name="action" value="delete">{{ icon("trash") }}{{ _("Delete") }}</button>
+      {% endif %}
+    </div>
+
+    {% if not children %}
+    <div class="ads-card__body ads-muted">
+      {%- if listing.search %}{{ _("Nothing in this folder has these words in its name.") }}
+      {%- elif may_write %}{{ _("This folder is empty. Upload files into it, or create a folder.") }}
+      {%- else %}{{ _("This folder is empty.") }}{% endif -%}
+    </div>
+    {% elif gallery %}
+    <div class="ads-card__body">
+      <label class="ads-check"><input class="doc-check-all" type="checkbox"> {{ _("Select all") }}</label>
+      <ul class="ads-grid sbe-gallery">
+        {% for obj in children %}
+        <li class="ads-card sbe-gallery__item">
+          <span class="ads-table__select sbe-gallery__select">{{ select_box(obj) }}</span>
+          <a class="sbe-gallery__preview" href="{{ url_for(obj) }}" tabindex="-1" aria-hidden="true">
+            {%- if obj.is_folder %}{{ folder_icon() }}
+            {%- else %}<img src="{{ url_for('.document_preview_image', community_id=g.community.slug, doc_id=obj.id, size=obj.preview_size) }}" alt="" loading="lazy">{% endif -%}
+          </a>
+          <div class="ads-card__body ads-media">
+            <div class="ads-fill sbe-lines sbe-cell-truncate">
+              <a class="sbe-quiet ads-truncate" href="{{ url_for(obj) }}" title="{{ obj.title }}">{{ obj.title }}</a>
+              <span class="ads-muted">{{ size(obj) }} · {{ m.time(obj.created_at) }}</span>
+            </div>
+            {{ item_menu(obj) }}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% else %}
+    <div class="ads-table-scroll">
+      <table class="ads-table ads-table--vcenter ads-table--hover ads-table--nowrap" id="objects-table">
+        <thead>
+          <tr>
+            <th class="ads-table__select"><input class="ads-check doc-check-all" type="checkbox" aria-label="{{ _('Select all') }}"></th>
+            {{ m.sort_th(listing, "title", _("Name")) }}
+            {{ m.sort_th(listing, "size", _("Size"), "ads-end ads-col--secondary") }}
+            {{ m.sort_th(listing, "owner", _("Owner"), "ads-col--secondary") }}
+            {{ m.sort_th(listing, "age", _("Added"), "ads-end") }}
+            <th><span class="sbe-sr-only">{{ _("Actions") }}</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for obj in children %}
+          <tr>
+            <td class="ads-table__select">{{ select_box(obj) }}</td>
+            <td class="ads-full sbe-cell-truncate">
+              <span class="ads-media">
+                {%- if obj.is_folder %}{{ folder_icon() }}<a class="ads-fill ads-truncate" href="{{ url_for(obj) }}" title="{{ obj.title }}"><strong>{{ obj.title }}</strong></a>
+                {%- else %}{{ file_icon(obj.title) }}<a class="ads-fill ads-truncate" href="{{ url_for(obj) }}" title="{{ obj.title }}">{{ obj.title }}</a>{% endif -%}
+              </span>
+            </td>
+            <td class="ads-end ads-col--secondary ads-muted">{{ size(obj) }}</td>
+            <td class="ads-col--secondary">{% if obj.owner %}{{ m.avatar(obj.owner, "ads-avatar--xs") }}{% endif %}</td>
+            <td class="ads-end">{{ m.time(obj.created_at) }}</td>
+            <td class="ads-end">{{ item_menu(obj) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+    {{ m.pagination(listing) }}
+  </form>
+
+  <nav class="ads-card" aria-labelledby="tree-title">
+    <div class="ads-card__head"><h2 class="ads-card__title" id="tree-title">{{ _("Folders") }}</h2></div>
+    <div class="ads-card__body">
+      <ul class="ads-tree sbe-tree">{{ tree_nodes(tree) }}</ul>
+    </div>
+  </nav>
+</div>
+
+{#- The forms that controls of the card belong to through their `form` attribute. -#}
+<form id="folder-filter" method="get" action="{{ request.path }}" role="search" hidden>
+  {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+</form>
+<form id="folder-view" method="post" action="{{ url_for('.change_view_style', folder_id=folder.id, community_id=g.community.slug) }}" hidden>{{ csrf.field() }}</form>
+<form id="folder-download" method="post" action="{{ folder_post }}" hidden>{{ csrf.field() }}<input type="hidden" name="action" value="download"></form>
 {% endblock %}
 
-{% block modals %}
-  {% include "documents/_modals_folder.html" %}
-  </div>
-{% endblock %}
+{% block overlays %}{% include "documents/_dialogs.html" %}{% endblock %}

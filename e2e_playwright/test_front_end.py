@@ -130,11 +130,12 @@ def test_folder_listing_filters_sorts_and_keeps_its_selection_tools(
 
     assert folder_before_document()
 
-    logged_in.get_by_role("link", name="Title").click()
+    # Exactly: the sort arrow, drawn in CSS, is not part of the link's name.
+    logged_in.get_by_role("link", name="Name", exact=True).click()
     logged_in.wait_for_url(re.compile(r"[?&]sort=-title"))
     assert not folder_before_document()
 
-    search = logged_in.get_by_role("searchbox")
+    search = logged_in.get_by_role("searchbox", name="Filter this folder by name")
     search.fill("sample")
     search.press("Enter")
     logged_in.wait_for_url(re.compile(r"[?&]q=sample"))
@@ -144,7 +145,7 @@ def test_folder_listing_filters_sorts_and_keeps_its_selection_tools(
 
     # The form around the rows still works: picking a row shows its actions.
     rows.first.locator("input[name='object-selected']").check()
-    assert logged_in.locator("#horizontal-doc-menu").is_visible()
+    assert logged_in.locator(".ads-bulkbar").is_visible()
 
     js_errors.assert_clean("the folder listing")
 

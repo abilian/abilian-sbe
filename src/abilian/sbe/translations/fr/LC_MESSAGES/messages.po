@@ -2106,3 +2106,72 @@ msgid "Read by %(num)d member"
 msgid_plural "Read by %(num)d members"
 msgstr[0] "Lue par %(num)d membre"
 msgstr[1] "Lue par %(num)d membres"
+
+# A folder on the Abilian Design System (documents/folder.html, _dialogs.html)
+msgid "Upload files"
+msgstr "Déposer des fichiers"
+
+msgid "Upload files into “%(name)s”"
+msgstr "Déposer des fichiers dans « %(name)s »"
+
+msgid "New folder in “%(name)s”"
+msgstr "Nouveau dossier dans « %(name)s »"
+
+msgid "More actions on the folder “%(name)s”"
+msgstr "Autres actions sur le dossier « %(name)s »"
+
+msgid "Download the folder"
+msgstr "Télécharger le dossier"
+
+msgid "Filter this folder"
+msgstr "Filtrer ce dossier"
+
+msgid "Filter this folder by name"
+msgstr "Filtrer ce dossier par nom"
+
+msgid "%(num)d item"
+msgid_plural "%(num)d items"
+msgstr[0] "%(num)d élément"
+msgstr[1] "%(num)d éléments"
+
+msgid "Display"
+msgstr "Affichage"
+
+msgid "Selection"
+msgstr "Sélection"
+
+msgid "Select %(name)s"
+msgstr "Sélectionner %(name)s"
+
+msgid "Actions on %(name)s"
+msgstr "Actions sur %(name)s"
+
+msgid "Actions"
+msgstr "Actions"
+
+msgid "Added"
+msgstr "Ajouté"
+
+msgid "Folders"
+msgstr "Dossiers"
+
+msgid "Subfolders of %(name)s"
+msgstr "Sous-dossiers de %(name)s"
+
+msgid "Nothing in this folder has these words in its name."
+msgstr "Rien dans ce dossier ne porte ces mots dans son nom."
+
+msgid "This folder is empty."
+msgstr "Ce dossier est vide."
+
+msgid "This folder is empty. Upload files into it, or create a folder."
+msgstr "Ce dossier est vide. Déposez-y des fichiers, ou créez un dossier."
+
+msgid "Sent"
+msgstr "Envoyé"
+
+msgid "The new version"
+msgstr "La nouvelle version"
+
+msgid "Pagination"
+msgstr "Pagination"

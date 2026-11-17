@@ -123,11 +123,8 @@ def test_a_reader_can_download_a_selection_from_a_folder(
     client: FlaskClient,
     app: Application,
 ) -> None:
-    """An action declared without a permission means anyone who can see the folder.
-
-    It used to mean no one: the check raised on the empty permission, and
-    `Action.available` took the exception for a no.
-    """
+    """Downloading needs nothing but seeing the folder; moving and deleting need
+    the right to write in it."""
     ensure_services_started(["security"])
     reader = _member(db, community1, "reader@example.com", READER)
 
@@ -141,8 +138,10 @@ def test_a_reader_can_download_a_selection_from_a_folder(
         )
     assert response.status_code == 200
     html = response.get_data(as_text=True)
-    menu = html.split('id="horizontal-doc-menu"')[1].split("</span>")[0]
-    assert 'value="download"' in menu
+    bar = html.split('class="ads-bulkbar"')[1].split("</div>")[0]
+    assert 'value="download"' in bar
+    assert 'value="delete"' not in bar
+    assert "#modal-move-files" not in bar
 
 
 def test_a_manager_can_check_out(

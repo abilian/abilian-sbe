@@ -454,8 +454,8 @@ def test_a_filter_matching_nothing_is_not_an_empty_folder(
     """Otherwise the filter box goes, and there is no way back but the URL."""
     folder, owner = folder_content
     html = _get(client, owner, _folder_url(folder, q="no such file"))
-    assert "No matching records found" in html
-    assert "currently empty" not in html
+    assert "Nothing in this folder has these words" in html
+    assert "This folder is empty" not in html
     assert 'value="no such file"' in html
 
 
@@ -468,4 +468,4 @@ def test_an_empty_folder_says_so(
     db.session.commit()
 
     html = _get(client, owner, _folder_url(community1.folder))
-    assert "currently empty" in html
+    assert "This folder is empty" in html

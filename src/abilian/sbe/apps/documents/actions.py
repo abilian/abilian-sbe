@@ -54,35 +54,6 @@ class BaseFolderAction(CmisContentAction):
     sbe_type = "cmis:folder"
 
 
-class FolderButtonAction(BaseFolderAction):
-    _std_template_string = (
-        '<button class="btn {{ action.css_class }}" name="action" '
-        'value="{{ action.name }}" title="{{ action.title }}">'
-        "{{ action.icon }}</button>"
-    )
-
-    _modal_template_string = (
-        '<button type="button" class="btn {{ action.css_class }}" '
-        'data-modal-open="{{ url }}" title="{{ action.title }}">'
-        "{{ action.icon }}</button>"
-    )
-
-    def __init__(self, *args, **kwargs) -> None:
-        self.modal = False
-
-        if "modal" in kwargs:
-            self.modal = kwargs.pop("modal")
-
-        css_class = kwargs.pop("css_class", "btn-default")
-        self.CSS_CLASS = f"{self.CSS_CLASS} {css_class}"
-
-        super().__init__(*args, **kwargs)
-
-    @property
-    def template_string(self):
-        return self._modal_template_string if self.modal else self._std_template_string
-
-
 class FolderAction(BaseFolderAction):
     """Apply to all folders except root folder."""
 
@@ -147,36 +118,6 @@ _lock_template_action = """
 """
 
 _actions = (
-    # Folder listing action buttons ##########
-    FolderButtonAction(
-        "documents:folder-listing", "download", _l("Download"), icon="download"
-    ),
-    FolderButtonAction(
-        "documents:folder-listing",
-        "move-files",
-        _l("Move to another folder"),
-        icon="arrows",
-        url="#modal-move-files",
-        modal=True,
-        permission=WRITE,
-    ),
-    FolderButtonAction(
-        "documents:folder-listing",
-        "delete",
-        _l("Delete"),
-        permission=WRITE,
-        icon="trash",
-        css_class="btn-danger",
-    ),
-    FolderButtonAction(
-        "documents:folder-listing",
-        "change-owner",
-        _l("Change owner"),
-        icon="user",
-        url="#modal-change-owner",
-        modal=True,
-        permission=MANAGE,
-    ),
     # Folder left bar actions ##########
     # view
     RootFolderAction(

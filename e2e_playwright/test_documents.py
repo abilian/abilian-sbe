@@ -25,9 +25,7 @@ def _open_folder(page: Page, base_url: str) -> None:
 def _row_menu(page: Page, title: str) -> Locator:
     """The row of `title`, with its action menu open."""
     row = page.locator("#objects-table tbody tr", has_text=title)
-    row.locator("td").last.locator("xpath=preceding-sibling::td[1]").locator(
-        "button"
-    ).first.click()
+    row.locator("td").last.locator("summary").click()
     return row
 
 
@@ -70,10 +68,10 @@ def test_a_title_with_markup_stays_text_through_move_and_delete(
 
     # Delete asks about this folder by name, written as text.
     _row_menu(page, title).get_by_role("button", name="Delete").click()
-    dialog = page.locator("#modal-delete-folder")
-    expect(dialog.locator("#delete-folder-title")).to_have_text(title)
-    assert dialog.locator("#delete-folder-title b").count() == 0
-    dialog.get_by_role("button", name="Cancel").click()
+    confirm = page.locator("dialog[open]")
+    expect(confirm.locator("ul.folder-items li")).to_have_text([title])
+    assert confirm.locator("ul.folder-items b").count() == 0
+    confirm.get_by_role("button", name="Cancel").click()
 
     # Move it into the seeded folder. The move dialog lists folders by title, so
     # it is opened from inside, where its own name appears in the breadcrumbs.
@@ -94,11 +92,10 @@ def test_a_title_with_markup_stays_text_through_move_and_delete(
     row = page.locator("#objects-table tbody tr", has_text=title)
     expect(row).to_be_visible()
 
-    # Delete for real, by the selection this time.
+    # Delete for real. A subfolder's own Delete used to post to the subfolder
+    # with nothing selected, and deleted nothing.
     _row_menu(page, title).get_by_role("button", name="Delete").click()
-    page.locator("#modal-delete-folder").get_by_role(
-        "button", name="Really Delete"
-    ).click()
+    page.locator("dialog[open]").get_by_role("button", name="Delete").click()
     page.wait_for_load_state("networkidle")
     expect(page.locator("#objects-table tbody tr", has_text=title)).to_have_count(0)
 
@@ -126,7 +123,7 @@ def test_selection_shows_and_hides_the_actions(
 ) -> None:
     page = logged_in
     _open_folder(page, base_url)
-    menu = page.locator("#horizontal-doc-menu")
+    menu = page.locator(".ads-bulkbar")
     rows = page.locator('input[name="object-selected"]')
 
     page.locator(".doc-check-all").check()
@@ -147,7 +144,7 @@ def test_the_download_button_zips_the_selection(logged_in: Page, base_url: str) 
 
     page.locator(".doc-check-all").check()
     with page.expect_download() as download:
-        page.locator('#horizontal-doc-menu button[value="download"]').click()
+        page.locator('.ads-bulkbar button[value="download"]').click()
 
     with ZipFile(download.value.path()) as archive:
         assert "E2E Sample.png" in archive.namelist()
@@ -160,8 +157,8 @@ def test_change_owner_posts_the_person_picked(
     _open_folder(page, base_url)
 
     row = page.locator("#objects-table tbody tr", has_text="E2E Sample")
-    owner = row.locator("a[href*='/users/']").first
-    previous_owner = owner.get_attribute("href")
+    owner = row.locator(".sbe-person")
+    previous_owner = owner.get_attribute("title")
     row.locator('input[name="object-selected"]').check()
     page.locator('[data-modal-open="#modal-change-owner"]').click()
     dialog = page.locator("#modal-change-owner")
@@ -173,30 +170,37 @@ def test_change_owner_posts_the_person_picked(
     dialog.get_by_role("button", name="Change owner").click()
     page.wait_for_load_state("networkidle")
 
-    assert owner.get_attribute("href") != previous_owner
+    assert owner.get_attribute("title") != previous_owner
     js_errors.assert_clean("changing the owner")
 
 
-def test_gallery_filter_hides_what_does_not_match(
+def test_the_gallery_selects_and_acts_like_the_table(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
+    """The tiles are the same form as the rows: ticking one shows what applies to
+    the selection, and its menu fills the same dialogs."""
     page = logged_in
     _open_folder(page, base_url)
     page.locator('button[name="view_style"][value="gallery_view"]').first.click()
     page.wait_for_load_state("networkidle")
 
-    elements = page.locator(".gallery_element")
-    expect(elements.first).to_be_visible()
-    count = elements.count()
+    tile = page.locator(".sbe-gallery__item", has_text="E2E Sample")
+    expect(page.locator(".ads-bulkbar")).to_be_hidden()
+    tile.locator('input[name="object-selected"]').check()
+    expect(page.locator(".ads-bulkbar")).to_be_visible()
 
-    page.fill("#filter", "no-document-has-this-name")
-    expect(elements.locator("visible=true")).to_have_count(0)
-    page.fill("#filter", "")
-    expect(elements.locator("visible=true")).to_have_count(count)
+    tile.locator("summary").click()
+    tile.get_by_role("button", name="Edit").click()
+    expect(page.locator("#modal-edit input[name='title']")).to_have_value(
+        "E2E Sample.png"
+    )
+    page.locator("#modal-edit").get_by_role("button", name="Cancel").click()
 
+    # While something is ticked, the selection's bar takes the view switch's place.
+    tile.locator('input[name="object-selected"]').uncheck()
     page.locator('button[name="view_style"][value="thumbnail_view"]').first.click()
     page.wait_for_load_state("networkidle")
-    js_errors.assert_clean("the gallery filter")
+    js_errors.assert_clean("the gallery")
 
 
 def test_permissions_page(logged_in: Page, base_url: str, js_errors: JSErrors) -> None:

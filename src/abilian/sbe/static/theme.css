@@ -529,6 +529,13 @@ a.sbe-quiet:hover { text-decoration: underline; }
 .sbe-tree .ads-tree__node > .ads-tree--nested { display: none; }
 .sbe-tree .ads-tree__node:has(> .sbe-tree__row > .sbe-tree__toggle[open]) > .ads-tree--nested { display: block; }
 .sbe-tree__row > .ads-tree__label { flex: 1; min-width: 0; }
+/* The folder shown. ADS's tree marks nothing current (ADS request 27). */
+.sbe-tree .ads-tree__label[aria-current] {
+  color: var(--ads-ink-strong);
+  font-weight: var(--ads-weight-medium);
+  background: var(--ads-brand-wash);
+  border-radius: var(--ads-radius-sm);
+}
 
 /* The rich-text editor's frame (Tiptap fills the body): a row of tools, the text. ADS
    draws the box and leaves the toolbar to the vendor's adapter. */
@@ -561,6 +568,7 @@ a.sbe-quiet:hover { text-decoration: underline; }
 .sbe-upload__options { margin-block-start: var(--ads-space-1); font-size: var(--ads-text-sm); }
 .sbe-upload__error { display: inline-flex; align-items: center; gap: var(--ads-space-1); font-size: var(--ads-text-sm); }
 .sbe-ok { color: var(--ads-success-ink); }
+.sbe-upload__preview { width: 2.5rem; height: 2.5rem; object-fit: cover; border-radius: var(--ads-radius-sm); }
 
 /* A group of choices with its legend as a label, without the browser's frame. */
 .sbe-fieldset { margin: 0; padding: 0; border: 0; }
@@ -604,3 +612,56 @@ dialog.sbe-dialog::backdrop { background: color-mix(in srgb, var(--ads-n-950) 45
 .sbe-uploader__list .close { color: var(--ads-ink-muted); text-decoration: none; }
 .sbe-uploader__list .progress { flex-basis: 100%; overflow: hidden; background: var(--ads-line); border-radius: var(--ads-radius-sm); }
 .sbe-uploader__list .progress-bar { height: 100%; background: var(--ads-brand); }
+
+/* A sorted column says which way in its header (`aria-sort`, where assistive technology
+   reads it); ADS draws the arrow from the link's own attribute. The arrow is decoration,
+   with an empty alternative text: otherwise it is read as part of the link's name
+   ("Name up down arrow"). ADS request 26. */
+.ads-th-sort::after { content: "↕" / ""; }
+th[aria-sort="ascending"] > .ads-th-sort::after { content: "↑" / ""; opacity: 1; }
+th[aria-sort="descending"] > .ads-th-sort::after { content: "↓" / ""; opacity: 1; }
+
+/* A folder as tiles: a preview of each document, the box to tick it in a corner. */
+/* auto-fill, not ADS's auto-fit: two tiles keep a tile's width instead of sharing the row. */
+.sbe-gallery {
+  grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
+  list-style: none;
+  margin: var(--ads-space-3) 0 0;
+  padding: 0;
+}
+.sbe-gallery__item { position: relative; overflow: hidden; }
+.sbe-gallery__select { position: absolute; inset: var(--ads-space-2) auto auto var(--ads-space-2); width: auto; }
+.sbe-gallery__preview {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  background: var(--ads-sunken);
+  border-block-end: var(--ads-border-width) solid var(--ads-line);
+}
+.sbe-gallery__preview img { width: 100%; height: 100%; object-fit: cover; }
+.sbe-gallery__preview .ads-icon { width: 3rem; height: 3rem; }
+
+/* Adapter: the user picker (vite/src/picker.js, combobox.js), which builds its list of
+   suggestions itself, until ADS's combobox takes its place. */
+.picker { position: relative; display: block; }
+.combobox-results {
+  position: absolute;
+  z-index: 30;
+  inset-inline-start: 0;
+  top: 100%;
+  width: 100%;
+  max-height: 20rem;
+  margin: var(--ads-space-1) 0 0;
+  padding: var(--ads-space-1) 0;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-overlay);
+}
+.combobox-hit { padding: var(--ads-space-1) var(--ads-space-3); cursor: pointer; }
+.combobox-hit:hover, .combobox-hit.is-active { background: var(--ads-brand-wash); }
+.combobox-group { padding: var(--ads-space-2) var(--ads-space-3) var(--ads-space-1); font-size: var(--ads-text-xs); color: var(--ads-ink-muted); }
+.picker-role { float: inline-end; font-size: var(--ads-text-xs); color: var(--ads-ink-muted); }
+.picker-email { font-size: var(--ads-text-xs); color: var(--ads-ink-muted); }
