@@ -138,14 +138,6 @@ install:
 test-e2e:  ## Run the Playwright browser tests
 	cd e2e_playwright && eval "$$(sh pick-ports.sh)" && honcho start
 
-.PHONY: test-screenshots
-test-screenshots:  ## Compare screenshots with the approved ones (needs Docker)
-	cd e2e_playwright && eval "$$(sh pick-ports.sh)" && honcho start -f Procfile.screenshots
-
-.PHONY: update-screenshots
-update-screenshots:  ## Approve the current screenshots (needs Docker)
-	E2E_UPDATE_SCREENSHOTS=1 $(MAKE) test-screenshots
-
 .PHONY: front
 front:  ## Build the front-end assets (CSS/JS) into the package
 	cd vite && npm install && npm run build

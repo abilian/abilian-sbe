@@ -29,26 +29,10 @@ if ! curl -fsS "$BASE_URL/" >/dev/null 2>&1; then
     exit 1
 fi
 
-# Pinned, because the screenshot tests' browser container must run the same
-# version as this client (see browser.sh).
+# Pinned, so that every run, here or in a scratch script, drives the same browser.
 WITH="--with pytest-playwright --with playwright==$(cat e2e_playwright/playwright-version)"
 
-if [ -n "$PW_WS_ENDPOINT" ]; then
-    # The first run pulls the image and fetches Playwright, hence the long wait.
-    BROWSER_URL="$(echo "$PW_WS_ENDPOINT" | sed 's|^ws:|http:|')"
-    echo "Waiting for the browser at $PW_WS_ENDPOINT ..."
-    i=0
-    until curl -s -o /dev/null "$BROWSER_URL"; do
-        i=$((i + 1))
-        if [ "$i" -ge 300 ]; then
-            echo "No browser at $PW_WS_ENDPOINT after 300s -- see the browser process above." >&2
-            exit 1
-        fi
-        sleep 1
-    done
-else
-    uv run $WITH playwright install "$BROWSER" >/dev/null 2>&1 || true
-fi
+uv run $WITH playwright install "$BROWSER" >/dev/null 2>&1 || true
 
 exec uv run $WITH pytest "${E2E_TESTS:-e2e_playwright}" \
     -v --browser "$BROWSER" --base-url "$BASE_URL"

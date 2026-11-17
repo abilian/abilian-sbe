@@ -38,19 +38,6 @@ port is shared by two sibling processes, so neither can pick it for itself.
 Setting `E2E_PORT` or `E2E_REDIS_PORT` still pins that one; a bare
 `cd e2e_playwright && honcho start` falls back to the old defaults.
 
-## Screenshots
-
-```bash
-make test-screenshots    # compare with the approved images
-make update-screenshots  # approve what the pages look like now
-```
-
-`test_screenshots.py` compares a few stable regions (the login page, the navbar, a folder listing, a modal) with the images in `screenshots/`. A failure writes the screenshot and a diff to `screenshot-results/`.
-
-Fonts, antialiasing and scrollbars differ between macOS and Linux, so the browser for these runs in Playwright's Docker image, as linux/amd64 (`browser.sh`, started by `Procfile.screenshots`), on the current Docker context. A remote context over SSH works too: `browser.sh` then bridges the two loopbacks with one SSH connection. The image tag and the Python client are both pinned by `playwright-version`; bump it, then run `make update-screenshots`, since a new Chromium may render differently. Rendering in the container is identical from run to run, so the comparison allows no change at all.
-
-In `make test-e2e` the screenshot tests skip. Nothing is masked, so an approved image looks like the page. Text that changes between runs (how long ago the data was seeded) is set to a fixed value before the capture, and the seeded document is a PNG, whose thumbnail does not depend on which converters the machine has.
-
 ## Why it runs with debug off
 
 Debug mode would point `vite_asset` at a Vite dev server that isn't running, so

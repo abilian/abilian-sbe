@@ -1,6 +1,0 @@
-# `make test-screenshots`: the Procfile's three processes, plus a Linux browser
-# in a container (browser.sh) that the screenshot tests connect to.
-redis: mkdir -p ${E2E_DIR:-/tmp/abilian-sbe-e2e} && exec redis-server --port ${E2E_REDIS_PORT:-6399} --save '' --dir ${E2E_DIR:-/tmp/abilian-sbe-e2e}
-web: sh serve.sh
-browser: sh browser.sh
-tests: PW_WS_ENDPOINT=ws://127.0.0.1:${E2E_BROWSER_PORT:-3123}/ E2E_TESTS=e2e_playwright/test_screenshots.py sh run_tests.sh

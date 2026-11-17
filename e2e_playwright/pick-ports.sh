@@ -1,6 +1,5 @@
 #!/bin/sh
-# Print `export E2E_PORT=... E2E_REDIS_PORT=... E2E_BROWSER_PORT=...` for a
-# caller to eval.
+# Print `export E2E_PORT=... E2E_REDIS_PORT=...` for a caller to eval.
 #
 # The suite used to hardcode 8899 and 6399. Any other project of yours holding
 # one of them made the run die with "Address already in use" -- and the port is
@@ -9,11 +8,6 @@
 #
 # A port already set in the environment is passed through untouched, so
 # `E2E_PORT=8899 make test-e2e` still pins it.
-#
-# Drawn below 61000 rather than left to the kernel: macOS hands out ports up to
-# 65535, and the screenshot run forwards the same numbers to a remote Docker
-# host over SSH (browser.sh), where sshd may refuse to listen above Linux's
-# ephemeral range (Fedora does).
 set -e
 
 python3 - "$@" <<'PY'
@@ -21,7 +15,7 @@ import os
 import random
 import socket
 
-WANTED = ("E2E_PORT", "E2E_REDIS_PORT", "E2E_BROWSER_PORT")
+WANTED = ("E2E_PORT", "E2E_REDIS_PORT")
 PORTS = range(20000, 61000)
 
 

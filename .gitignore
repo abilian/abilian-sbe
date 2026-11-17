@@ -76,4 +76,3 @@ dump.rdb
 
 # Playwright e2e scratch instance
 /tmp/abilian-sbe-e2e/
-/e2e_playwright/screenshot-results/
