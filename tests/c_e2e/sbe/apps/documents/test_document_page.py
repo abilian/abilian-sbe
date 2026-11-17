@@ -1,7 +1,7 @@
 # Copyright (c) 2012-2026, Abilian SAS
 
-"""A document's page on the Abilian Design System: its history, what is offered to
-whom, and the lock, which keeps the others from uploading a version.
+"""A document's page on the Abilian Design System: its history and comments, what is
+offered to whom, and the lock, which keeps the others from uploading a version.
 
 Who sees its readers is in `test_document_gating.py`.
 """
@@ -190,3 +190,73 @@ def test_refreshing_the_preview_comes_back_to_the_document(
 
     assert response.status_code == 302
     assert response.location.endswith(url)
+
+
+COMMENT_FORM = 'name="body"'
+COMMENT_ACTIONS = 'aria-label="Actions on the comment"'
+
+
+def _comment(client: FlaskClient, doc: Document, body: str):
+    url = url_for("comments.create", entity_id=doc.id)
+    return client.post(url, data={"body": body, "__action": "edit"})
+
+
+def test_a_writer_comments_on_the_document(
+    document: Document, manager: User, client: FlaskClient
+) -> None:
+    with client_login(client, manager):
+        response = _comment(client, document, "Approved.\nSee page 2.")
+    html = _page(client, manager, document)
+
+    assert response.status_code == 302
+    (comment,) = document.__comments__
+    assert response.location.endswith(f"{url_for(document)}#comment-{comment.id}")
+    assert "1 comment" in html
+    assert "Approved.\nSee page 2." in html
+    assert COMMENT_ACTIONS in html
+
+
+def test_a_reader_reads_the_comments_and_does_not_comment(
+    community1: Community,
+    document: Document,
+    manager: User,
+    client: FlaskClient,
+    db: SQLAlchemy,
+) -> None:
+    reader = _member(db, community1, MEMBER)
+    with client_login(client, manager):
+        _comment(client, document, "Approved.")
+
+    html = _page(client, reader, document)
+    with client_login(client, reader):
+        response = _comment(client, document, "Me too.")
+
+    assert "Approved." in html
+    assert COMMENT_FORM not in html
+    assert COMMENT_ACTIONS not in html
+    assert response.status_code == 403
+    assert [c.body for c in document.__comments__] == ["Approved."]
+
+
+def test_the_author_edits_then_deletes_their_comment(
+    document: Document, manager: User, client: FlaskClient, db: SQLAlchemy
+) -> None:
+    with client_login(client, manager):
+        _comment(client, document, "Aproved.")
+        (comment,) = document.__comments__
+        kw = {"entity_id": document.id, "object_id": comment.id}
+        edited = client.post(
+            url_for("comments.edit", **kw),
+            data={"body": "Approved.", "__action": "edit"},
+        )
+        db.session.expire(comment)
+        body = comment.body
+        deleted = client.post(
+            url_for("comments.delete", **kw), data={"__action": "delete"}
+        )
+
+    assert edited.status_code == 302
+    assert body == "Approved."
+    assert deleted.status_code == 302
+    db.session.expire(document)
+    assert document.__comments__ == []

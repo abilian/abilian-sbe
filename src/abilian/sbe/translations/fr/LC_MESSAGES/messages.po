@@ -2232,3 +2232,42 @@ msgstr "Supprimer « %(name)s » ?"
 
 msgid "It goes for everyone in the community. This cannot be undone."
 msgstr "Il disparaît pour tous les membres de la communauté. C’est définitif."
+
+# Comments on a document (documents/document.html)
+msgid "%(num)d comment"
+msgid_plural "%(num)d comments"
+msgstr[0] "%(num)d commentaire"
+msgstr[1] "%(num)d commentaires"
+
+msgid "Details and comments"
+msgstr "Détails et commentaires"
+
+msgid "Comments"
+msgstr "Commentaires"
+
+msgid "Actions on the comment"
+msgstr "Actions sur le commentaire"
+
+msgid "Add a comment…"
+msgstr "Ajouter un commentaire…"
+
+msgid "Your comment on the document"
+msgstr "Votre commentaire sur le document"
+
+msgid "Post the comment"
+msgstr "Commenter"
+
+msgid "No comments yet."
+msgstr "Pas encore de commentaire."
+
+msgid "Edit the comment"
+msgstr "Modifier le commentaire"
+
+msgid "The comment"
+msgstr "Le commentaire"
+
+msgid "Delete the comment?"
+msgstr "Supprimer le commentaire ?"
+
+msgid "This cannot be undone."
+msgstr "C’est définitif."

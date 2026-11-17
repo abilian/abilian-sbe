@@ -1,6 +1,7 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-"""The actions on a folder's rows, its dialogs, and the permissions page."""
+"""The actions on a folder's rows, its dialogs, comments on a document, and the
+permissions page."""
 
 from __future__ import annotations
 
@@ -201,6 +202,37 @@ def test_the_gallery_selects_and_acts_like_the_table(
     page.locator('button[name="view_style"][value="thumbnail_view"]').first.click()
     page.wait_for_load_state("networkidle")
     js_errors.assert_clean("the gallery")
+
+
+def test_a_comment_is_posted_edited_and_deleted(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    """On the document's page; each of the comment's dialogs is its own, filled by
+    the server."""
+    page = logged_in
+    _open_folder(page, base_url)
+    page.locator("#objects-table tbody a", has_text="E2E Sample").first.click()
+    comments = page.locator("section", has=page.locator("#comments"))
+
+    comments.get_by_label("Your comment on the document").fill("Looks good.")
+    comments.get_by_role("button", name="Post the comment").click()
+    comment = comments.locator("li", has_text="Looks good.")
+    expect(comment).to_be_visible()
+
+    comment.get_by_label("Actions on the comment").click()
+    comment.get_by_role("button", name="Edit").click()
+    dialog = page.locator("dialog[open]")
+    dialog.get_by_role("textbox").fill("Looks good to me.")
+    dialog.get_by_role("button", name="Save changes").click()
+    comment = comments.locator("li", has_text="Looks good to me.")
+    expect(comment).to_be_visible()
+
+    comment.get_by_label("Actions on the comment").click()
+    comment.get_by_role("button", name="Delete").click()
+    page.locator("dialog[open]").get_by_role("button", name="Delete").click()
+    expect(comments.locator("li", has_text="Looks good")).to_have_count(0)
+
+    js_errors.assert_clean("commenting on a document")
 
 
 def test_permissions_page(logged_in: Page, base_url: str, js_errors: JSErrors) -> None:

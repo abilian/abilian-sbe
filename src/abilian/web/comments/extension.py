@@ -51,13 +51,15 @@ class CommentExtension:
     # against `object.owner`, so passing it as an additional valid role says
     # "whoever may write this, plus whoever wrote it".
 
+    # On the entity, inherited: a document's roles are its folders'.
+
     def can_read(self, user: User, entity):
         """True if `user` can read comments on entity."""
-        return security.has_permission(user, READ, obj=entity)
+        return security.has_permission(user, READ, obj=entity, inherit=True)
 
     def can_create(self, user: User, entity):
         """True if `user` can comment on entity."""
-        return security.has_permission(user, CREATE, obj=entity)
+        return security.has_permission(user, CREATE, obj=entity, inherit=True)
 
     def can_write(self, user: User, comment):
         """True if `user` can edit this comment."""

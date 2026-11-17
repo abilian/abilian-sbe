@@ -90,6 +90,8 @@ def document_view(user: User, doc_id: int) -> str:
     viewtracker.record_hit(entity=doc, user=user)
     lock = doc.lock
     may_write = content_repository.has_permission(user, WRITE, doc)
+    comments = current_app.extensions["comments"]
+    doc_comments = comments.for_entity(doc)
 
     ctx = {
         "doc": doc,
@@ -102,6 +104,15 @@ def document_view(user: User, doc_id: int) -> str:
         # A lock keeps the others from uploading a version (`document_upload`).
         "may_replace": may_write and (lock is None or lock.is_owner(user)),
         "may_manage": content_repository.has_permission(user, MANAGE, doc),
+        "doc_comments": doc_comments,
+        "may_comment": comments.can_create(user, doc),
+        # Their authors', and whoever may write them.
+        "editable_comments": frozenset(
+            c.id for c in doc_comments if comments.can_write(user, c)
+        ),
+        "deletable_comments": frozenset(
+            c.id for c in doc_comments if comments.can_delete(user, c)
+        ),
     }
     return render_template("documents/document.html", **ctx)
 

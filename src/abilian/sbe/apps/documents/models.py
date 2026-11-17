@@ -31,7 +31,7 @@ from whoosh.analysis import CharsetFilter, LowercaseFilter, RegexTokenizer
 from whoosh.support.charset import accent_map
 
 from abilian.core.entities import Entity, db
-from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
+from abilian.core.models import NOT_AUDITABLE, SEARCHABLE, comment
 from abilian.core.models.blob import Blob
 from abilian.core.models.subjects import Group, User
 from abilian.core.util import md5
@@ -530,8 +530,9 @@ class BaseContent(CmisObject):
         return icon_for(self.content_type)
 
 
+@comment.register
 class Document(BaseContent, PathAndSecurityIndexable):
-    """A document, in the CMIS sense."""
+    """A document, in the CMIS sense, commented on as a whole."""
 
     __tablename__ = "document"
     __indexable__ = True

@@ -1,6 +1,6 @@
-{#- A document: what it is, its preview and what to do with it; beside it, its history
-    and, for the community's managers, who has read it. A button gives the document the
-    whole width. Drawn in `mockups/templates/document.html`. -#}
+{#- A document: what it is, its preview and what to do with it; beside it, the comments
+    on it, its history and, for the community's managers, who has read it. A button
+    gives the document the whole width. Drawn in `mockups/templates/document.html`. -#}
 {% extends "ads_community.html" %}
 {% import "documents/_dialogs.html" as dialogs with context %}
 {% set doc_kw = {"community_id": g.community.slug, "doc_id": doc.id} %}
@@ -21,7 +21,8 @@
         <h2 class="ads-card__title ads-cluster ads-gap-sm" id="doc-title">{{ file_icon(doc.title) }}{{ doc.title }}</h2>
         <span class="ads-muted ads-cluster ads-gap-sm">
           {{- doc.content_length | filesize }}
-          {%- if doc.page_num and doc.page_num > 1 %} · {{ ngettext("%(num)d page", "%(num)d pages", doc.page_num) }}{% endif %} · {{ m.avatar(doc.creator, "ads-avatar--xs") }}{{ m.time(doc.created_at) -}}
+          {%- if doc.page_num and doc.page_num > 1 %} · {{ ngettext("%(num)d page", "%(num)d pages", doc.page_num) }}{% endif %} · {{ m.avatar(doc.creator, "ads-avatar--xs") }}{{ m.time(doc.created_at) }}
+          {%- if doc_comments %} · <a href="#comments">{{ ngettext("%(num)d comment", "%(num)d comments", doc_comments | length) }}</a>{% endif -%}
         </span>
       </div>
       <div class="ads-cluster ads-gap-sm">
@@ -93,7 +94,7 @@
         <label class="ads-btn ads-btn--sm sbe-toggle ads-push">
           <input type="checkbox" aria-controls="doc-details">
           <span class="sbe-toggle__off">{{ icon("arrows-maximize") }}{{ _("Full width") }}</span>
-          <span class="sbe-toggle__on">{{ icon("arrows-minimize") }}{{ _("Details") }}</span>
+          <span class="sbe-toggle__on">{{ icon("arrows-minimize") }}{{ _("Details and comments") }}</span>
         </label>
       </div>
       {#- An image is its own preview. -#}
@@ -109,6 +110,43 @@
   </article>
 
   <aside class="ads-stack" id="doc-details" aria-label="{{ _('About the document') }}">
+    {#- Comments on the document as a whole, oldest first; then where to add one. -#}
+    <section class="ads-card" aria-labelledby="comments">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="comments">{{ _("Comments") }}{% if doc_comments %} ({{ doc_comments | length }}){% endif %}</h2></div>
+      {% if doc_comments %}
+      <ul class="ads-list">
+        {% for c in doc_comments %}
+        <li id="comment-{{ c.id }}">
+          <div class="ads-media ads-fill">
+            {{ m.avatar(c.creator, "ads-avatar--xs") }}
+            <div class="ads-fill ads-stack ads-gap-sm">
+              <span class="ads-cluster ads-gap-sm"><strong>{{ c.creator.name }}</strong><span class="ads-muted">{{ m.time(c.created_at) }}</span></span>
+              <span class="sbe-comment">{{ c.body }}</span>
+            </div>
+            {% if c.id in editable_comments or c.id in deletable_comments %}
+            <details class="ads-dropdown">
+              <summary class="ads-btn ads-btn--ghost ads-btn--sm" aria-label="{{ _('Actions on the comment') }}">{{ icon("dots") }}</summary>
+              <div class="ads-menu">
+                {% if c.id in editable_comments %}<button class="ads-menu__item" type="button" data-modal-open="#modal-edit-comment-{{ c.id }}">{{ icon("pencil") }}{{ _("Edit") }}</button>{% endif %}
+                {% if c.id in deletable_comments %}<button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-delete-comment-{{ c.id }}">{{ icon("trash") }}{{ _("Delete") }}</button>{% endif %}
+              </div>
+            </details>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% if may_comment %}
+      <form class="ads-card__body ads-stack ads-gap-sm" method="post" action="{{ url_for('comments.create', entity_id=doc.id) }}">
+        {{ csrf.field() }}
+        <textarea class="ads-textarea" name="body" rows="2" required placeholder="{{ _('Add a comment…') }}" aria-label="{{ _('Your comment on the document') }}"></textarea>
+        <div><button class="ads-btn ads-btn--sm ads-btn--primary" type="submit" name="__action" value="edit">{{ _("Post the comment") }}</button></div>
+      </form>
+      {% elif not doc_comments %}
+      <p class="ads-card__body ads-muted">{{ _("No comments yet.") }}</p>
+      {% endif %}
+    </section>
     <section class="ads-card" aria-labelledby="history">
       <div class="ads-card__head"><h2 class="ads-card__title" id="history">{{ _("History") }}</h2></div>
       <ul class="ads-list">
@@ -141,6 +179,34 @@
 {% endblock %}
 
 {% block overlays %}
+{% for c in doc_comments %}
+{% if c.id in editable_comments %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-edit-comment-{{ c.id }}" aria-labelledby="modal-edit-comment-{{ c.id }}-title">
+  <form method="post" action="{{ url_for('comments.edit', entity_id=doc.id, object_id=c.id) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-edit-comment-{{ c.id }}-title">{{ _("Edit the comment") }}</h2></div>
+    <div class="ads-modal__body"><textarea class="ads-textarea" name="body" rows="5" required aria-label="{{ _('The comment') }}">{{ c.body }}</textarea></div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="edit">{{ _("Save changes") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+{% if c.id in deletable_comments %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-delete-comment-{{ c.id }}" aria-labelledby="modal-delete-comment-{{ c.id }}-title">
+  <form method="post" action="{{ url_for('comments.delete', entity_id=doc.id, object_id=c.id) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-delete-comment-{{ c.id }}-title">{{ _("Delete the comment?") }}</h2></div>
+    <div class="ads-modal__body">{{ _("This cannot be undone.") }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit" name="__action" value="delete">{{ icon("trash") }}{{ _("Delete") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+{% endfor %}
 {% if may_write %}
 {{ dialogs.document_dialogs(doc) }}
 {{ dialogs.move_dialog(doc.parent) }}
