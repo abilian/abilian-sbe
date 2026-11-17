@@ -17,6 +17,13 @@ document.addEventListener("click", (event) => {
   if (opener) {
     event.preventDefault();
     const dialog = document.querySelector(opener.dataset.modalOpen);
+    // Opened from a menu, which has done its work: it closes, and its button
+    // takes the focus, for the dialog to give it back to when it closes.
+    const menu = opener.closest("details[open]");
+    if (menu) {
+      menu.open = false;
+      menu.querySelector("summary").focus();
+    }
     dialog.showModal();
     // <dialog> has no "opened" event. Widgets that fill a modal from the page
     // it was opened over -- the document mover's folder listing -- need one.
