@@ -215,4 +215,8 @@
 <form id="folder-download" method="post" action="{{ folder_post }}" hidden>{{ csrf.field() }}<input type="hidden" name="action" value="download"></form>
 {% endblock %}
 
-{% block overlays %}{% include "documents/_dialogs.html" %}{% endblock %}
+{% block overlays %}
+{% import "documents/_dialogs.html" as dialogs with context %}
+{% if may_write %}{{ dialogs.folder_dialogs(folder) }}{{ dialogs.document_dialogs() }}{{ dialogs.move_dialog(folder) }}{% endif %}
+{% if may_manage %}{{ dialogs.change_owner_dialog(folder) }}{% endif %}
+{% endblock %}

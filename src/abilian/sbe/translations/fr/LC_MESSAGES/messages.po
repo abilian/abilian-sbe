@@ -2175,3 +2175,60 @@ msgstr "La nouvelle version"
 
 msgid "Pagination"
 msgstr "Pagination"
+
+# A document on the Abilian Design System (documents/document.html)
+msgid "%(num)d page"
+msgid_plural "%(num)d pages"
+msgstr[0] "%(num)d page"
+msgstr[1] "%(num)d pages"
+
+msgid "New version"
+msgstr "Nouvelle version"
+
+msgid "Lock"
+msgstr "Verrouiller"
+
+msgid "The others will not be able to upload a version while you work on it"
+msgstr "Les autres ne pourront pas déposer de version tant que vous travaillez dessus"
+
+msgid "More actions on the document"
+msgstr "Autres actions sur le document"
+
+msgid "Locked by %(user)s, who is working on it (%(age)s)."
+msgstr "Verrouillé par %(user)s, qui travaille dessus (%(age)s)."
+
+msgid "Previous page"
+msgstr "Page précédente"
+
+msgid "Next page"
+msgstr "Page suivante"
+
+msgid "Page"
+msgstr "Page"
+
+msgid "Full width"
+msgstr "Pleine largeur"
+
+msgid "Preview of %(name)s"
+msgstr "Aperçu de %(name)s"
+
+msgid "About the document"
+msgstr "À propos du document"
+
+msgid "History"
+msgstr "Historique"
+
+msgid "Uploaded"
+msgstr "Déposé"
+
+msgid "Properties edited"
+msgstr "Propriétés modifiées"
+
+msgid "See the dates"
+msgstr "Voir les dates"
+
+msgid "Delete “%(name)s”?"
+msgstr "Supprimer « %(name)s » ?"
+
+msgid "It goes for everyone in the community. This cannot be undone."
+msgstr "Il disparaît pour tous les membres de la communauté. C’est définitif."

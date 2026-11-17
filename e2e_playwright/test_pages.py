@@ -455,21 +455,23 @@ def test_a_flash_message_can_be_dismissed(
     js_errors.assert_clean("dismissing a message")
 
 
-def test_document_sidebar_toggle_flips_its_icon(
+def test_a_document_takes_the_whole_width_and_gives_it_back(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
-    """A ternary in :class, which the CSP build's parser has to handle."""
+    """The button is a checkbox in a label; the column goes by a CSS `:has()`."""
     page = logged_in
     page.goto(f"{base_url}/communities/{COMMUNITY}/docs/", wait_until="networkidle")
     page.locator("#objects-table tbody a", has_text="E2E Sample").first.click()
     page.wait_for_load_state("networkidle")
+    details = page.locator("#doc-details")
+    expect(details).to_be_visible()
 
-    icon = page.locator("#view_info i")
-    expect(icon).to_have_class(re.compile("fa-chevron-right"))
-    page.locator("#view_info").click()
-    expect(icon).to_have_class(re.compile("fa-chevron-left"))
+    page.locator("label", has_text="Full width").click()
+    expect(details).to_be_hidden()
+    page.locator("label", has_text="Details").click()
+    expect(details).to_be_visible()
 
-    js_errors.assert_clean("the document sidebar")
+    js_errors.assert_clean("the document's width")
 
 
 def test_form_tabs_switch(logged_in: Page, base_url: str, js_errors: JSErrors) -> None:

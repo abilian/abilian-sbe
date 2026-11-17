@@ -28,9 +28,4 @@ document.addEventListener("click", (event) => {
       form.action = formAction;
     });
   }
-
-  /* A form that posts to a new tab leaves this one out of date. */
-  if (event.target.closest("[data-reload-after-submit]")) {
-    setTimeout(() => window.location.reload(), 500);
-  }
 });

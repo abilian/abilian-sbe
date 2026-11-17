@@ -271,9 +271,10 @@ TEMPLATE_NAMES = {
     "can_manage_community": "context processor, communities/views/views.py",
     # read: supplied by the single view that renders social/group.html
     "is_admin": "social/views/groups.py: group_home",
-    # read: supplied by the single view that renders documents/folder.html
-    "may_write": "documents/views/folders.py: folder_view",
-    "may_manage": "documents/views/folders.py: folder_view",
+    # read: supplied by the views that render a folder and a document
+    "may_write": "documents/views: folder_view, document_view",
+    "may_manage": "documents/views: folder_view, document_view",
+    "may_replace": "documents/views/documents.py: document_view",
     # read, and not authorization at all -- state and form plumbing
     "is_closed": "not authorization: thread state",
     "is_active": "not authorization: search facet",

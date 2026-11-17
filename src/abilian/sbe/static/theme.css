@@ -444,6 +444,16 @@ a.ads-tree__label { display: flex; align-items: center; gap: var(--ads-space-2);
 /* A document's page: its details beside it, until the reader gives the document the
    whole width. */
 .sbe-doc:has(.sbe-toggle > input:checked) > aside { display: none; }
+/* Its preview: a page on a sunken ground, as a sheet on a desk. */
+.sbe-preview {
+  display: grid;
+  place-items: center;
+  padding: var(--ads-space-4);
+  min-height: 12rem;
+  background: var(--ads-sunken);
+  border-radius: var(--ads-radius);
+}
+.sbe-preview > img { max-width: 100%; height: auto; box-shadow: var(--ads-shadow-sm); }
 
 /* Feeds: where to start a discussion, then entries. An entry's title, a few lines of
    what it says, the latest replies on one line each. */

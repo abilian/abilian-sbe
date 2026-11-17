@@ -255,8 +255,8 @@ def test_document_actions_open_their_modals(
     href = page.locator('a[href*="/docs/doc/"]').first.get_attribute("href")
     page.goto(f"{base_url}{href}", wait_until="networkidle")
 
-    page.locator("button:has(.fa-ellipsis-h)").first.click()
-    page.locator('button[title*="Move"]').first.click()
+    page.get_by_label("More actions on the document").click()
+    page.get_by_role("button", name="Move").click()
 
     js_errors.assert_clean("the document page")
     modal = page.locator("#modal-move-files")

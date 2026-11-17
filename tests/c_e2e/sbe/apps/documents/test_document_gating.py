@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from abilian.sbe.apps.communities.models import Community
 
 #: The panel `can_manage(g.community)` gates.
-READERS_PANEL = "Readers"
+READERS_PANEL = 'id="readers"'
 
 
 @fixture

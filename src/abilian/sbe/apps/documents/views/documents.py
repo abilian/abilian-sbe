@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
 from urllib.parse import quote
@@ -32,8 +33,10 @@ from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import content_repository
 from abilian.sbe.apps.documents.tasks import convert_document_content, preview_document
 from abilian.services import audit_service
+from abilian.services.audit.models import CREATION
 from abilian.services.conversion import ConversionError, converter
 from abilian.services.image import FIT, get_format, resize
+from abilian.services.security import MANAGE, WRITE
 from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf, url_for
 from abilian.web.action import actions
@@ -53,9 +56,12 @@ from .util import (
 from .views import community_blueprint
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from werkzeug.wrappers.response import Response
 
     from abilian.core.models.subjects import User
+    from abilian.services.audit.models import AuditEntry
 
 route = community_blueprint.route
 
@@ -81,19 +87,67 @@ def document_view(user: User, doc_id: int) -> str:
     else:
         add_to_recent_items(doc, "document")
 
-    has_preview = doc.has_preview()
-    audit_entries = audit_service.entries_for(doc)
     viewtracker.record_hit(entity=doc, user=user)
+    lock = doc.lock
+    may_write = content_repository.has_permission(user, WRITE, doc)
 
     ctx = {
         "doc": doc,
-        "audit_entries": audit_entries,
         "breadcrumbs": bc,
-        "folder": doc.parent,
-        "has_preview": has_preview,
+        "lock": lock,
+        "history": document_history(audit_service.entries_for(doc)),
+        "has_preview": doc.has_preview(),
         "viewers": object_viewers(user, doc),
+        "may_write": may_write,
+        # A lock keeps the others from uploading a version (`document_upload`).
+        "may_replace": may_write and (lock is None or lock.is_owner(user)),
+        "may_manage": content_repository.has_permission(user, MANAGE, doc),
     }
     return render_template("documents/document.html", **ctx)
+
+
+#: What a new version changes, and what editing a document's properties changes.
+CONTENT_COLUMNS = frozenset({"_content_id", "content_digest"})
+PROPERTY_COLUMNS = frozenset({"_title", "name", "description"})
+
+
+@dataclass(frozen=True)
+class Change:
+    """A step in a document's history: who did what, and when.
+
+    `kind` is "created", "new-version" or "edited".
+    """
+
+    kind: str
+    user: User | None
+    at: datetime
+
+
+def document_history(entries: Iterable[AuditEntry]) -> tuple[Change, ...]:
+    """The steps of a document's audit trail its readers care about, in its order.
+
+    What they do not see changing (the conversion's results, the metadata) is left
+    out.
+    """
+    kinds = ((entry, _change_kind(entry)) for entry in entries)
+    # `happened_at` is set on insert by the column's default; the model types it
+    # as nullable.
+    return tuple(
+        Change(kind, entry.user, entry.happened_at)
+        for entry, kind in kinds
+        if kind and entry.happened_at
+    )
+
+
+def _change_kind(entry: AuditEntry) -> str | None:
+    if entry.type == CREATION:
+        return "created"
+    columns = entry.get_changes().columns.keys()
+    if columns & CONTENT_COLUMNS:
+        return "new-version"
+    if columns & PROPERTY_COLUMNS:
+        return "edited"
+    return None
 
 
 #

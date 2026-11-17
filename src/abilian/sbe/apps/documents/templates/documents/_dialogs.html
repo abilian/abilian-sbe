@@ -1,6 +1,8 @@
-{#- The dialogs of a folder's page, on the Abilian Design System. Those that act on one
-    row are filled from it by `vite/src/documents/folder.js`; the move and change-owner
-    dialogs act on the selection. -#}
+{#- The dialogs of the documents' pages, on the Abilian Design System. Imported `with
+    context`: they read `g.community`, `csrf` and `url_for`. On a folder's page, those
+    that act on one item are filled from its row by `vite/src/documents/folder.js`; on
+    a document's page, from the document. The move and change-owner dialogs act on the
+    selection: on a document's page, the document alone. -#}
 
 {#- A dialog holding a form: a title, the fields, Cancel and the button that sends it. -#}
 {% macro form_dialog(id, title, submit, action="", value=none, attrs={}, form_id=none) -%}
@@ -32,9 +34,9 @@
 </div>
 {% endmacro %}
 
+{#- What is done in a folder: uploading, a new folder, editing it or a subfolder. -#}
+{% macro folder_dialogs(folder) %}
 {% set folder_post = url_for(".folder_post", community_id=g.community.slug, folder_id=folder.id) %}
-
-{% if may_write %}
 {#- Files are sent one at a time as soon as "Upload" is pressed (`upload-dialog.js`). -#}
 <dialog class="ads-modal__panel sbe-dialog" id="modal-upload-files" aria-labelledby="modal-upload-files-title"
         data-error-upload="{{ _('Error - File not uploaded') }}"
@@ -79,17 +81,22 @@
                     {"data-no-enter": "", "data-name-check-action": "folder-edit", "data-renames": folder.id}, "modal-editfolder-form") %}
 {{ name_fields("edit-folder", folder.title, folder.description or "", "form-folder-title", "form-folder-description") }}
 {% endcall %}
+{% endmacro %}
 
-{% call form_dialog("modal-edit", _("Edit document properties"), _("Save changes"), "", "edit",
-                    {"data-no-enter": "", "data-name-check-action": "document-edit"}, "modal-edit-form") %}
-{{ name_fields("edit-document", title_class="form-document-title", description_class="form-document-description") }}
+{#- What is done to a document: editing it, a new version, sending it. Given `doc`, they
+    act on it; without, on the row they are opened from. -#}
+{% macro document_dialogs(doc=none) %}
+{% set kw = {"community_id": g.community.slug, "doc_id": doc.id} if doc else none %}
+{% call form_dialog("modal-edit", _("Edit document properties"), _("Save changes"), url_for(".document_edit", **kw) if doc else "", "edit",
+                    {"data-no-enter": "", "data-name-check-action": "document-edit", "data-renames": doc.id if doc else none}, "modal-edit-form") %}
+{{ name_fields("edit-document", doc.title if doc else "", doc.description or "" if doc else "", "form-document-title", "form-document-description") }}
 {% endcall %}
 
-{% call form_dialog("modal-upload-new-version", _("Upload new version"), _("Upload"), form_id="modal-replace-form") %}
+{% call form_dialog("modal-upload-new-version", _("Upload new version"), _("Upload"), url_for(".document_upload", **kw) if doc else "", form_id="modal-replace-form") %}
 <input class="ads-file-input" type="file" name="file" required aria-label="{{ _('The new version') }}">
 {% endcall %}
 
-{% call form_dialog("modal-send-by-email", _("Send by email"), _("Send"), form_id="modal-email-form") %}
+{% call form_dialog("modal-send-by-email", _("Send by email"), _("Send"), url_for(".document_send", **kw) if doc else "", form_id="modal-email-form") %}
 <div class="ads-field">
   <label class="ads-label" for="email-recipient">{{ _("Recipient") }}</label>
   <input class="ads-input" id="email-recipient" type="email" name="recipient" required>
@@ -99,11 +106,14 @@
   <textarea class="ads-textarea" id="email-message" name="message" rows="5"></textarea>
 </div>
 {% endcall %}
+{% endmacro %}
 
-{#- Lists the folders to move into (`folder.js` fetches them). -#}
+{#- Lists the folders to move into (`folder.js` fetches them), starting from `folder`,
+    and posts the selection to it. -#}
+{% macro move_dialog(folder) %}
 <dialog class="ads-modal__panel sbe-dialog" id="modal-move-files" aria-labelledby="modal-move-files-title"
         data-listing-url="{{ url_for('.folder_json', folder_id=folder.id, community_id=g.community.slug) }}">
-  <form method="post" action="{{ folder_post }}" id="modal-folder-move">
+  <form method="post" action="{{ url_for('.folder_post', community_id=g.community.slug, folder_id=folder.id) }}" id="modal-folder-move">
     {{ csrf.field() }}
     <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-move-files-title">{{ _("Move to another folder") }}</h2></div>
     <div class="ads-modal__body ads-stack" id="modal-move-files-directory-listing">
@@ -117,10 +127,11 @@
     </div>
   </form>
 </dialog>
-{% endif %}
+{% endmacro %}
 
-{% if may_manage %}
-{% call form_dialog("modal-change-owner", _("Change owner of selected files"), _("Change owner"), folder_post, "change-owner") %}
+{% macro change_owner_dialog(folder) %}
+{% call form_dialog("modal-change-owner", _("Change owner of selected files"), _("Change owner"),
+                    url_for(".folder_post", community_id=g.community.slug, folder_id=folder.id), "change-owner") %}
 <div class="ads-field">
   <label class="ads-label" for="new_owner">{{ _("New owner") }}</label>
   <input class="ads-input" id="new_owner" type="text" name="new_owner" required
@@ -128,4 +139,4 @@
 </div>
 <div class="selected-items" hidden></div>
 {% endcall %}
-{% endif %}
+{% endmacro %}

@@ -1,282 +1,159 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu with context %}
-{% from "documents/_macros_audit.html" import m_audit_log %}
-{% from "macros/table.html" import m_table %}
-{%- from "community/macros.html" import show_all_viewers -%}
-{% from "documents/_macros.html" import m_breadcrumbs2 with context %}
-{%- from "community/macros.html" import viewers_snapshot -%}
-
-{% macro user_markup(user) %}
-  <a href="{{ url_for('social.user', user_id=user.id) }}" class="inline-flex items-center text-blue-600 hover:text-blue-800">
-    <img class="w-4 h-4 rounded-full mr-1" alt="" src="{{ user_photo_url(user, size=16) }}"/>
-    {{ user }}
-  </a>
-{% endmacro %}
-
-{% macro m_breadcrumbs_path(breadcrumbs) %}
-  {% for obj in breadcrumbs[0:-1] %}
-    <a href="{{ obj.path }}" class="text-blue-600 hover:text-blue-800">{{ obj.label }}</a>
-    <span class="text-gray-400 mx-1">/</span>
-  {% endfor %}
-
-  <span class="text-lg text-gray-500">
-    {% if doc.lock %}<i class="fa fa-lock text-gray-900 mr-1"></i>{% endif %}
-    {{ doc.title }}
-  </span>
-{% endmacro %}
+{#- A document: what it is, its preview and what to do with it; beside it, its history
+    and, for the community's managers, who has read it. A button gives the document the
+    whole width. Drawn in `mockups/templates/document.html`. -#}
+{% extends "ads_community.html" %}
+{% import "documents/_dialogs.html" as dialogs with context %}
+{% set doc_kw = {"community_id": g.community.slug, "doc_id": doc.id} %}
+{% block page_title %}{{ doc.title }} · {{ _("Documents") }} · {{ g.community.name }}{% endblock %}
+{#- The dialogs and the preview's pages. -#}
+{% block scripts %}{{ vite_asset("src/main.js") }}{% endblock %}
 
 {% block content %}
-  <div x-data="{ showMetadata: false, sidebarVisible: true }">
-
-  {%- if doc.antivirus_required %}
-    <div class="my-2">
-      <i class="fa fa-file-o fa-lg text-gray-500"></i>
-      {{ m_breadcrumbs2(breadcrumbs) }}
-    </div>
-
-    <hr class="border-gray-200 my-4"/>
-
-    <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md text-sm text-yellow-800">
-      <span class="fa-stack mr-2">
-        <i class="fa fa-search fa-stack-2x"></i>
-        <i class="fa fa-bug fa-stack-1x text-red-600"></i>
-      </span>
-      {% trans %}Waiting for virus check...{% endtrans %}
-    </div>
-
-  {%- elif not doc.antivirus_ok %}
-    <div class="p-4 bg-red-50 border border-red-200 rounded-md text-red-800">
-      <i class="fa fa-exclamation-triangle mr-2"></i>
-      {%- trans %}Virus found. Access disabled.{%- endtrans %}
-    </div>
-  {%- endif %}
-
-  <form name="folder-listing" class="mb-0" method="POST">
-    <input id="check_{{ doc.id }}" class="hidden" type="checkbox" name="object-selected"
-           value="{{ doc.sbe_type }}:{{ doc.id }}" checked>
-  </form>
-
-  <div>
-    <h2 class="text-xl font-semibold text-gray-900">
-      {{ m_breadcrumbs_path(breadcrumbs) }}
-    </h2>
-    <br>
-    <a class="inline-flex items-center text-gray-600 hover:text-blue-600" href="{{ url_for('.index', community_id=g.community.slug) }}">
-      <i class="fa fa-arrow-left mr-2"></i> {{ _("Back to document list") }}
-    </a>
-
-    <div id="horizontal-doc-menu" class="document-horizontal-menu inline-flex items-center gap-x-2 float-right">
-      <div>
-        {%- if doc.antivirus_ok %}
-          <a class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-green-700 rounded-md hover:bg-green-800"
-             href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
-            <i class="fa fa-download mr-2"></i>
-            {{ _('Download') }}
-            <small class="ml-1 text-green-100">({{ doc.content_length|filesize }})</small>
-          </a>
-        {%- endif %}
+<div class="ads-with-aside sbe-doc">
+  <article class="ads-card" aria-labelledby="doc-title">
+    {#- The document, and what to do with it: download first; a new version and the
+        lock, which working together depends on, in sight; the rest behind ⋮. -#}
+    <div class="ads-card__head ads-spread">
+      <div class="ads-stack ads-gap-sm">
+        <ol class="ads-breadcrumb">
+          {% for crumb in breadcrumbs[:-1] %}<li><a href="{{ crumb.path }}">{{ crumb.label }}</a></li>{% endfor %}
+        </ol>
+        <h2 class="ads-card__title ads-cluster ads-gap-sm" id="doc-title">{{ file_icon(doc.title) }}{{ doc.title }}</h2>
+        <span class="ads-muted ads-cluster ads-gap-sm">
+          {{- doc.content_length | filesize }}
+          {%- if doc.page_num and doc.page_num > 1 %} · {{ ngettext("%(num)d page", "%(num)d pages", doc.page_num) }}{% endif %} · {{ m.avatar(doc.creator, "ads-avatar--xs") }}{{ m.time(doc.created_at) -}}
+        </span>
       </div>
-      <div>
-        <button data-modal-open="#modal-edit"
-           data-form-target="#modal-edit-form" data-form-action="{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}"
-           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-           type="button" title="{{ _('Edit') }}">
-          <i class="fa fa-pencil"></i>
-        </button>
-      </div>
-      <div>
-        <button data-modal-open="#modal-send-by-email"
-           data-form-target="#modal-email-form" data-form-action="{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}"
-           class="inline-flex items-center justify-center w-10 h-10 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-           type="button" title="{{ _('Send by email') }}">
-          <i class="fa fa-envelope"></i>
-        </button>
-      </div>
-      <div>
-        <button data-modal-open="#modal-delete"
-           class="inline-flex items-center justify-center w-10 h-10 text-white bg-red-600 rounded-md hover:bg-red-700"
-           type="button" title="{{ _('Delete') }}">
-          <i class="fa fa-trash"></i>
-        </button>
-      </div>
-      <div x-data="{ open: false }" class="relative" @keydown.escape="open = false">
-        <button @click="open = !open"
-                class="inline-flex items-center justify-center w-10 h-10 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                type="button" aria-label="{{ _('Action') }}" aria-haspopup="true" :aria-expanded="open">
-          <span class="fa fa-ellipsis-h" aria-hidden="true"></span>
-        </button>
-        <ul x-show="open"
-            @click.away="open = false"
-            x-transition
-            class="absolute right-0 z-10 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black/5 py-1">
-          <li>
-            <button @click="open = false" data-modal-open="#modal-move-files"
-               class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-               type="button" title="{{ _('Move to another folder') }}">
-              <i class="fa fa-arrows mr-2"></i>
-              {{ _("Move") }}
-            </button>
-          </li>
-          <li>
-            <button @click="open = false" data-modal-open="#modal-upload-new-version"
-               data-form-target=".modal-replacedoc-form" data-form-action="{{ url_for('.document_upload', doc_id=doc.id, community_id=doc.community.slug) }}"
-               class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-               type="button" title="{{ _('Replace document') }}">
-              <i class="fa fa-refresh mr-2"></i>
-              {{ _("Replace") }}
-            </button>
-          </li>
-          <li>
-            <form id="document_checkout"
-                  action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}"
-                  method="POST" target="_new">
-              {{ csrf.field() }}
-              {% if doc.lock == None %}
-                <input type="hidden" name="action" value="checkout"/>
-                <button type="submit"
-                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        data-reload-after-submit>
-                  <i class="fa fa-download mr-2"></i>
-                  {{ _("Checkout") }}
-                </button>
-              {% else %}
-                <input type="hidden" name="action" value="unlock"/>
-                <button type="submit"
-                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                  <i class="fa fa-unlock mr-2"></i>
-                  {{ _("Unlock") }}
-                </button>
-              {% endif %}
-            </form>
-          </li>
-          <li>
-            <a href="{{ url_for(doc) }}"
-               class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-               title="{{ _('Refresh preview') }}">
-              <i class="fa fa-refresh mr-2"></i>
-              {{ _("Refresh preview") }}
-            </a>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <button @click="sidebarVisible = !sidebarVisible"
-            class="float-right text-2xl text-gray-400 hover:text-gray-600 cursor-pointer relative -top-16 z-10"
-            id="view_info"
-            type="button"
-            aria-label="{{ _('Toggle sidebar') }}">
-      <i class="fa" :class="sidebarVisible ? 'fa-chevron-right' : 'fa-chevron-left'"></i>
-    </button>
-
-    <br><br>
-    <div></div>
-  </div>
-
-  {%- if doc.description %}
-    <p class="text-gray-700 mb-4">{{ doc.description }}</p>
-  {%- endif %}
-
-  <br>
-
-  <div class="border border-gray-300 rounded-lg w-full py-3">
-    <div class="preview-container" data-page-num="{{ doc.page_num }}">
-      <img src="{{ url_for('.document_preview_image',
-                        community_id=g.community.slug, doc_id=doc.id,
-                        size=doc.preview_size) }}"
-           alt="" class="preview mx-auto" data-page="0"/>
-
-      {%- if has_preview %}
-        <a class="preview-nav-button preview-prev" title="{{ _('Previous') }}">
-          <i class="fa fa-chevron-circle-left fa-5x"></i>
-          <span class="sr-only">{{ _('Previous') }}</span>
-        </a>
-        <a class="preview-nav-button preview-next" title="{{ _('Next') }}">
-          <i class="fa fa-chevron-circle-right fa-5x"></i>
-          <span class="sr-only">{{ _('Next') }}</span>
-        </a>
-
-      {%- else %}
-        <p class="text-center text-gray-500 py-8">{{ _("Document preview not yet available") }}</p>
-      {%- endif %}
-    </div>
-  </div>
-
-  {%- if doc.extra_metadata %}
-    <h3 @click="showMetadata = !showMetadata"
-        class="mt-6 mb-2 text-lg font-semibold text-gray-900 cursor-pointer flex items-center">
-      <svg class="w-4 h-4 mr-2 text-gray-400 transition-transform" :class="{ 'rotate-90': showMetadata }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-      </svg>
-      Extra Metadata
-    </h3>
-
-    <div x-show="showMetadata" x-collapse x-cloak>
-      {%- set sorted = doc.extra_metadata|dictsort %}
-      {{ m_table(sorted) }}
-    </div>
-  {%- endif %}
-
-  {# The move dialog moves whatever the folder listing has selected. This page
-     has no listing, so it declares the one document as the selection. #}
-  <form name="folder-listing" hidden>
-    <input type="checkbox" name="object-selected"
-           value="{{ doc.sbe_type }}:{{ doc.id }}" checked>
-  </form>
-
-  {%- set folder_post_url = url_for(".folder_post", folder_id=folder.id, community_id=folder.community.slug) %}
-  {% include "documents/_modals_document.html" %}
-  {% include "documents/_modals_folder_move.html" %}
-
-  </div>
-{% endblock %}
-
-
-{% block sidebar %}
-  <br><br>
-  <div class="border border-gray-200 rounded-t-lg p-4 bg-white">
-    <div class="text-sm space-y-2">
-      <p class="font-semibold text-gray-900">{{ doc.title|truncate(32, False, '...', 0) }}</p>
-      <p>
-        <span class="font-semibold text-gray-700">{{ _("Owner") }}</span>:
-        {{ user_markup(doc.creator) }}
-      </p>
-      <p>
-        <span class="font-semibold text-gray-700">{{ _("Uploaded") }}:</span>
-        {{ doc.created_at | datetimeformat('short') }}
-        <span class="text-gray-500">({{ doc.created_at | age(add_direction=False) }})</span>
-      </p>
-      {%- if doc.updated_at != doc.created_at %}
-        <p>
-          <span class="font-semibold text-gray-700">{{ _("Modified") }}:</span>
-          {{ doc.updated_at|age(add_direction=False, date_threshold='day') }}
-        </p>
-        {%- set lock = doc.lock %}
-        {%- if lock %}
-          <div class="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-xs">
-            <i class="fa fa-lock mr-1"></i>
-            {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
-                  user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
+      <div class="ads-cluster ads-gap-sm">
+        {% if doc.antivirus_ok %}
+        <a class="ads-btn ads-btn--primary" href="{{ url_for('.document_download', attach=True, **doc_kw) }}">{{ icon("download") }}{{ _("Download") }}</a>
+        {% endif %}
+        {% if may_replace %}
+        <button class="ads-btn" type="button" data-modal-open="#modal-upload-new-version" aria-label="{{ _('Upload new version') }}">{{ icon("upload") }}<span class="sbe-wide-only">{{ _("New version") }}</span></button>
+        {% endif %}
+        {% if may_write and not lock %}
+        <form method="post" action="{{ url_for('.checkin_checkout', **doc_kw) }}">
+          {{ csrf.field() }}
+          <button class="ads-btn ads-tip" type="submit" name="action" value="lock" aria-label="{{ _('Lock') }}"
+                  data-tip="{{ _('The others will not be able to upload a version while you work on it') }}">{{ icon("lock") }}<span class="sbe-wide-only">{{ _("Lock") }}</span></button>
+        </form>
+        {% endif %}
+        {% if may_write or may_manage %}
+        <details class="ads-dropdown">
+          <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the document') }}">{{ icon("dots-vertical") }}</summary>
+          <div class="ads-menu">
+            {% if may_write %}
+            {% if doc.antivirus_ok %}<button class="ads-menu__item" type="button" data-modal-open="#modal-send-by-email">{{ icon("mail") }}{{ _("Send by email") }}</button>{% endif %}
+            <button class="ads-menu__item" type="button" data-modal-open="#modal-edit">{{ icon("pencil") }}{{ _("Edit properties") }}</button>
+            <button class="ads-menu__item" type="button" data-modal-open="#modal-move-files">{{ icon("arrows-move") }}{{ _("Move") }}</button>
+            {% endif %}
+            {% if may_manage and doc.antivirus_ok %}<a class="ads-menu__item" href="{{ url_for('.refresh_preview', **doc_kw) }}">{{ icon("refresh") }}{{ _("Refresh preview") }}</a>{% endif %}
+            {% if may_write %}
+            <div class="ads-menu__sep"></div>
+            <button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-delete">{{ icon("trash") }}{{ _("Delete") }}</button>
+            {% endif %}
           </div>
-        {%- endif %}
-      {%- endif %}
+        </details>
+        {% endif %}
+      </div>
     </div>
-  </div>
 
-  {# Who viewed this: for the people who run the community it is in. #}
-  {% if can_manage(current_user, g.community) %}
-    <div class="border-l border-r border-b border-gray-200 p-4 bg-white">
-      <p class="text-gray-500 font-semibold text-sm mb-2">{{ _('Readers') }}</p>
-      {{ show_all_viewers(viewers,_("viewed by")) }}
+    <div class="ads-card__body ads-stack">
+      {% if doc.antivirus_required %}
+      <div class="ads-alert ads-tone-info" role="status">{{ icon("clock") }}<span>{{ _("Waiting for virus check...") }}</span></div>
+      {% elif not doc.antivirus_ok %}
+      <div class="ads-alert ads-tone-danger" role="alert">{{ icon("alert-triangle") }}<span>{{ _("Virus found. Access disabled.") }}</span></div>
+      {% endif %}
+
+      {% if lock %}
+      <div class="ads-alert ads-tone-warning ads-spread">
+        <span class="ads-cluster ads-gap-sm">{{ icon("lock") }}<span>{{ _("Locked by %(user)s, who is working on it (%(age)s).", user=lock.user, age=lock.date | age) }}</span></span>
+        {% if may_write %}
+        <form method="post" action="{{ url_for('.checkin_checkout', **doc_kw) }}">
+          {{ csrf.field() }}
+          <button class="ads-btn ads-btn--sm" type="submit" name="action" value="unlock">{{ icon("lock-open") }}{{ _("Unlock") }}</button>
+        </form>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {% if doc.description %}<p>{{ doc.description }}</p>{% endif %}
+
+      {% if doc.antivirus_ok %}
+      <div class="sbe-toolbar">
+        {% if has_preview and doc.page_num and doc.page_num > 1 %}
+        <span class="ads-btn-group">
+          <button class="ads-btn ads-btn--sm" type="button" data-preview-step="-1" aria-label="{{ _('Previous page') }}" disabled>{{ icon("chevron-left") }}</button>
+          <button class="ads-btn ads-btn--sm" type="button" data-preview-step="1" aria-label="{{ _('Next page') }}">{{ icon("chevron-right") }}</button>
+        </span>
+        <span class="ads-muted" aria-live="polite">{{ _("Page") }} <span data-preview-page>1</span> / {{ doc.page_num }}</span>
+        {% endif %}
+        {#- A checkbox drawn as a button: the page hides the column when it is ticked
+            (`:has()`), with no script. -#}
+        <label class="ads-btn ads-btn--sm sbe-toggle ads-push">
+          <input type="checkbox" aria-controls="doc-details">
+          <span class="sbe-toggle__off">{{ icon("arrows-maximize") }}{{ _("Full width") }}</span>
+          <span class="sbe-toggle__on">{{ icon("arrows-minimize") }}{{ _("Details") }}</span>
+        </label>
+      </div>
+      {#- An image is its own preview. -#}
+      <div class="sbe-preview" data-preview-pages="{{ doc.page_num or 1 }}">
+        {% if has_preview or doc.content_type.startswith("image/") %}
+        <img src="{{ url_for('.document_preview_image', size=doc.preview_size, **doc_kw) }}" alt="{{ _('Preview of %(name)s', name=doc.title) }}">
+        {% else %}
+        <p class="ads-muted">{{ _("Document preview not yet available") }}</p>
+        {% endif %}
+      </div>
+      {% endif %}
     </div>
-  {% endif %}
+  </article>
 
-  <div class="border-l border-r border-b border-gray-200 rounded-b-lg p-4 bg-white">
-    <p class="text-gray-500 font-semibold text-sm mb-2">{{ _('Last Changes') }}</p>
-    {{ m_audit_log(audit_entries) }}
-  </div>
+  <aside class="ads-stack" id="doc-details" aria-label="{{ _('About the document') }}">
+    <section class="ads-card" aria-labelledby="history">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="history">{{ _("History") }}</h2></div>
+      <ul class="ads-list">
+        {% for change in history %}
+        <li>
+          <span class="ads-fill sbe-lines">
+            <span>{% if change.kind == "created" %}{{ _("Uploaded") }}{% elif change.kind == "new-version" %}{{ _("New version") }}{% else %}{{ _("Properties edited") }}{% endif %}</span>
+            <span class="ads-cluster ads-gap-sm ads-muted">{% if change.user %}{{ m.avatar(change.user, "ads-avatar--xs") }}{% endif %}{{ m.time(change.at) }}</span>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% if viewers %}
+    <section class="ads-card" aria-labelledby="readers">
+      <div class="ads-card__head ads-spread">
+        <h2 class="ads-card__title" id="readers">{{ ngettext("Read by %(num)d member", "Read by %(num)d members", viewers | length) }}</h2>
+        <a href="{{ url_for('.document_viewers', **doc_kw) }}">{{ _("See the dates") }}</a>
+      </div>
+      <div class="ads-card__body"><span class="ads-avatars">{% for v in viewers %}{{ m.avatar(v.user) }}{% endfor %}</span></div>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+
+{#- The move dialog moves the folder listing's selection: here, this document. -#}
+<form name="folder-listing" hidden>
+  <input type="checkbox" name="object-selected" value="{{ doc.sbe_type }}:{{ doc.id }}" aria-label="{{ doc.title }}" checked>
+</form>
 {% endblock %}
 
-{% block modals %}
-  {# Included from the content block, where `folder_post_url` is in scope. #}
+{% block overlays %}
+{% if may_write %}
+{{ dialogs.document_dialogs(doc) }}
+{{ dialogs.move_dialog(doc.parent) }}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-delete" aria-labelledby="delete-title">
+  <form method="post" action="{{ url_for('.document_delete', **doc_kw) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="delete-title">{{ _("Delete “%(name)s”?", name=doc.title) }}</h2></div>
+    <div class="ads-modal__body">{{ _("It goes for everyone in the community. This cannot be undone.") }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit">{{ icon("trash") }}{{ _("Delete") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
 {% endblock %}

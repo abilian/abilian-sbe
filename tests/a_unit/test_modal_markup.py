@@ -28,6 +28,9 @@ DEAD = {
 
 TRIGGER = re.compile(r'data-modal-open="#(?P<id>[^"]+)"')
 DIALOG = re.compile(r'<dialog\b[^>]*\bid="(?P<id>[^"]+)"')
+#: The documents' dialogs are built by a macro, given their id first
+#: (`documents/_dialogs.html`).
+DIALOG_MACRO = re.compile(r'form_dialog\(\s*"(?P<id>[^"]+)"')
 
 
 def _templates() -> list[Path]:
@@ -64,6 +67,7 @@ def test_every_modal_trigger_has_a_dialog() -> None:
         for m in TRIGGER.finditer(text):
             triggers.setdefault(m.group("id"), str(path.relative_to(SRC.parent)))
         dialogs.update(m.group("id") for m in DIALOG.finditer(text))
+        dialogs.update(m.group("id") for m in DIALOG_MACRO.finditer(text))
 
     missing = {name: where for name, where in triggers.items() if name not in dialogs}
 
