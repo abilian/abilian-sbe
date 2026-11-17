@@ -208,7 +208,7 @@ def forgotten_pw(new_user: bool = False) -> str | Response | tuple[str, int]:
 
 @route("/reset_password/<token>")
 def reset_password(token: str) -> str | Response:
-    expired, invalid, _user = reset_password_token_status(token)
+    expired, invalid, user = reset_password_token_status(token)
     if invalid:
         flash(_("Invalid reset password token."), "error")
     elif expired:
@@ -216,7 +216,7 @@ def reset_password(token: str) -> str | Response:
     if invalid or expired:
         return redirect(url_for("login.forgotten_pw"))
 
-    return render_template_i18n("login/password_reset.html")
+    return render_template("login/password_reset.html", user=user)
 
 
 @route("/reset_password/<token>", methods=["POST"])

@@ -2304,3 +2304,34 @@ msgstr "Ce que vous avez changé"
 
 msgid "Optional. Shown under the message, with your name and the date."
 msgstr "Facultatif. Affiché sous le message, avec votre nom et la date."
+
+# Signing in on the Abilian Design System (login/*.html)
+msgid "Signing in"
+msgstr "Connexion"
+
+msgid "Email address"
+msgstr "Adresse e-mail"
+
+msgid "No account yet? The managers of your communities invite you: the invitation comes by email."
+msgstr "Pas encore de compte ? Les animateurs de vos communautés vous invitent : l’invitation arrive par e-mail."
+
+msgid "Your address: a link to choose a new password is sent to it."
+msgstr "Votre adresse : un lien pour choisir un nouveau mot de passe y est envoyé."
+
+msgid "Send me the link"
+msgstr "M’envoyer le lien"
+
+msgid "Back to signing in"
+msgstr "Retour à la connexion"
+
+msgid "New password"
+msgstr "Nouveau mot de passe"
+
+msgid "For %(name)s (%(email)s)."
+msgstr "Pour %(name)s (%(email)s)."
+
+msgid "At least 8 characters, with an upper case letter, a lower case letter and a digit."
+msgstr "Au moins 8 caractères, dont une majuscule, une minuscule et un chiffre."
+
+msgid "This link is valid for 24 hours."
+msgstr "Ce lien est valable 24 heures."

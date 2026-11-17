@@ -1175,3 +1175,6 @@ msgstr "Rétablir"
 
 #~ msgid "Total users"
 #~ msgstr "utilisateurs actifs"
+
+msgid "Your password must be at least 8 characters including one uppercase, one lowercase and a number."
+msgstr "Votre mot de passe doit contenir au moins 8 caractères, dont au moins une majuscule, une minuscule et un chiffre."

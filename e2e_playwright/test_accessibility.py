@@ -78,10 +78,18 @@ def test_a_dropdown_works_from_the_keyboard(logged_in: Page, base_url: str) -> N
     expect(button).to_have_attribute("aria-expanded", "false")
 
 
-def test_skip_link_shows_on_focus(page: Page, base_url: str) -> None:
-    page.goto(f"{base_url}/user/login", wait_until="networkidle")
+def test_skip_link_shows_on_focus(logged_in: Page, base_url: str) -> None:
+    """On a page with the bar to skip; signing in has none. ADS moves the link above
+    the screen until it has the focus."""
+    page = logged_in
+    page.goto(f"{base_url}/", wait_until="networkidle")
     link = page.get_by_role("link", name="Skip to content")
 
-    assert link.bounding_box()["width"] <= 1
+    hidden = link.bounding_box()
     link.focus()
-    assert link.bounding_box()["width"] > 10
+    shown = link.bounding_box()
+
+    assert hidden
+    assert shown
+    assert hidden["y"] + hidden["height"] <= 0
+    assert shown["y"] >= 0

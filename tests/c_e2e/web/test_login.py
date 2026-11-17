@@ -26,17 +26,18 @@ def test_test(app: Flask, client, login_user) -> None:
 
 
 @pytest.mark.parametrize(
-    ("site_name", "heading"),
-    [("Acme Intranet", "Login to Acme Intranet"), ("", "Login")],
+    ("site_name", "title"),
+    [("Acme Intranet", "Signing in · Acme Intranet"), ("", "Signing in")],
 )
-def test_the_login_heading_names_the_site_only_when_there_is_one(
-    site_name: str, heading: str, app: Flask, client
+def test_the_sign_in_page_names_the_site_only_when_there_is_one(
+    site_name: str, title: str, app: Flask, client
 ) -> None:
     """An empty SITE_NAME used to leave the heading reading "Login to"."""
     app.config["SITE_NAME"] = site_name
 
     html = client.get(url_for("login.login_form")).get_data(as_text=True)
 
-    h2 = re.search(r"<h2[^>]*>\s*(.*?)\s*</h2>", html, re.DOTALL)
-    assert h2 is not None
-    assert h2.group(1) == heading
+    found = re.search(r"<title>(.*?)</title>", html, re.DOTALL)
+    assert found is not None
+    assert found.group(1) == title
+    assert ('class="sbe-brandname"' in html) == bool(site_name)

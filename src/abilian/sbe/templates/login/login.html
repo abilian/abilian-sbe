@@ -1,0 +1,23 @@
+{#- Signing in: an address and a password, and the way back in when it is forgotten.
+    Accounts are not opened here: a community's managers invite people. Overrides
+    Abilian Core's page; drawn in `mockups/templates/login.html`. -#}
+{% extends "ads_centered.html" %}
+{% block page_title %}{{ _("Signing in") }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  <form class="ads-card__body ads-stack" name="login" method="post" action="{{ url_for('login.login_post') }}">
+    <h1 class="ads-page-title ads-center">{{ _("Signing in") }}</h1>
+    <div class="ads-field">
+      <label class="ads-label" for="email">{{ _("Email address") }}</label>
+      <input class="ads-input" id="email" name="email" type="email" value="{{ email | default('') }}" autocomplete="username" required autofocus>
+    </div>
+    <div class="ads-field">
+      <span class="ads-spread"><label class="ads-label" for="password">{{ _("Password") }}</label><a href="{{ url_for('login.forgotten_pw_form') }}">{{ _("Forgot password?") }}</a></span>
+      <input class="ads-input" id="password" name="password" type="password" autocomplete="current-password" required>
+    </div>
+    <input type="hidden" name="next" value="{{ next_url or '' }}">
+    <button class="ads-btn ads-btn--primary ads-full" type="submit">{{ _("Sign in") }}</button>
+  </form>
+</div>
+<p class="ads-center ads-muted">{{ _("No account yet? The managers of your communities invite you: the invitation comes by email.") }}</p>
+{% endblock %}
