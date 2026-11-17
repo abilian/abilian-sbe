@@ -732,6 +732,15 @@ th[aria-sort="descending"] > .ads-th-sort::after { content: "↓" / ""; opacity:
 .sbe-pairs > dd:last-child { margin-bottom: 0; }
 /* A filter's menus beside its field: as wide as what they say. */
 .sbe-toolbar > .ads-select { width: auto; }
+/* A toolbar whose fields may go to the next line on a narrow screen; a field in it
+   that takes what room there is. */
+.sbe-toolbar--wrap { flex-wrap: wrap; }
+.sbe-toolbar > .sbe-grow, .sbe-toolbar > .picker { flex: 1 1 15rem; min-width: 0; }
+/* A person's name in a table keeps room for itself: on a phone the table scrolls
+   rather than the name being cut to a letter. */
+.sbe-cell-person { min-width: 10rem; }
+/* A choice in a table's row, as tall as the row's buttons. */
+.sbe-select--sm { width: auto; padding-block: var(--ads-space-1); font-size: var(--ads-text-sm); }
 /* An icon in a line of text, the size of the text. */
 .sbe-icon-text { width: 1em; height: 1em; }
 /* A line of the log: what was done, as an icon in its tone. */

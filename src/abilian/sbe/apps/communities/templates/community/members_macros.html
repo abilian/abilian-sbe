@@ -1,16 +1,7 @@
-{% import "community/members_std_macros.html" as std with context %}
 {% import "community/wizard_users_std_macros.html" as w_std with context %}
-
-{% macro thead(listing) %}
-  {{ std.std_thead(listing) }}
-{% endmacro %}
 
 {% macro wizard_thead() %}
   {{ w_std.std_thead() }}
-{% endmacro %}
-
-{% macro member_row(user, m_id, role, last_activity_date) %}
-  {{ std.std_member_row(user, m_id, role, last_activity_date) }}
 {% endmacro %}
 
 

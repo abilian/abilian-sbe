@@ -385,8 +385,11 @@ def members() -> str:
         "activity": lambda row: (row[3] is not None, row[3]),
         "role": lambda row: (str(row[2]), by_name(row[0])),
     }
+    rows = _members_query().all()
+    managers = [row for row in rows if str(row[2]) == "manager"]
+    only_managers = request.args.get("role") == "manager"
     listing, memberships = Listing.from_rows(
-        _members_query().all(),
+        managers if only_managers else rows,
         sort_keys,
         "name",
         text=lambda row: f"{row[0].name} {row[0].email}",
@@ -396,6 +399,8 @@ def members() -> str:
         "listing": listing,
         "memberships": memberships,
         "threads_count": threads_count,
+        "only_managers": only_managers,
+        "counts": {"all": len(rows), "managers": len(managers)},
     }
     return render_template("community/members.html", **ctx)
 

@@ -1,96 +1,129 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% from "macros/listing.html" import m_filter, m_no_rows, m_pagination %}
-{% import "community/members_macros.html" as macros with context %}
-
-{% block memberscontent %}
-  <div class="w-full">
-    {% call m_box_content(_("Members")) %}
-      {%- if can_manage_community %}
-        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
-          <div class="flex-1">
-            {{ add_member() }}
-          </div>
-          <div class="flex items-center gap-2">
-            <a href="{{ url_for('.wizard_data_insertion', community_id=g.community.slug) }}"
-               class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-300 rounded-md hover:bg-gray-100">
-              <i class="fa fa-rocket mr-2"></i>{{ _("Add members") }}
-            </a>
-            <a href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}"
-               class="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
-              <i class="fa fa-download mr-2"></i>{{ _('Download list') }}
-            </a>
-          </div>
-        </div>
-      {%- endif %}
-
-      <div class="border-b border-dashed border-gray-200 mb-6"></div>
-
-      {{ m_filter(listing) }}
-
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 members-table" id="members-table">
-          <thead class="bg-gray-50">
-            {{ macros.thead(listing) }}
-          </thead>
-          <tbody class="divide-y divide-gray-100">
-            {% for user, m_id, role, last_activity_date in memberships %}
-              <tr class="hover:bg-gray-50">
-                {{ macros.member_row(user, m_id, role, last_activity_date) }}
-              </tr>
-            {% else %}
-              {{ m_no_rows(5) }}
-            {% endfor %}
-          </tbody>
-        </table>
+{#- A community's members: who, their role, their posts, when they were last active
+    here. Its managers add someone who has an account, change a role in place, remove
+    someone after saying so; inviting new people is the community's action, in its
+    header. Drawn in `mockups/templates/members.html`. -#}
+{% extends "ads_community.html" %}
+{% block page_title %}{{ _("Members") }} · {{ g.community.name }}{% endblock %}
+{#- The person picker. -#}
+{% block scripts %}{{ vite_asset("src/main.js") }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  <div class="ads-card__head ads-spread">
+    <ul class="ads-pills" aria-label="{{ _('Whom to list') }}">
+      <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug) }}" {{ 'aria-current="page"' | safe if not only_managers }}>{{ _("All") }} ({{ counts.all }})</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug, role='manager') }}" {{ 'aria-current="page"' | safe if only_managers }}>{{ _("Managers") }} ({{ counts.managers }})</a></li>
+    </ul>
+    {% if can_manage_community %}
+    <details class="ads-dropdown">
+      <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the members') }}">{{ icon("dots-vertical") }}</summary>
+      <div class="ads-menu">
+        <a class="ads-menu__item" href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">{{ icon("file-spreadsheet") }}{{ _("Export the list (spreadsheet)") }}</a>
       </div>
-
-      {{ m_pagination(listing) }}
-    {% endcall %}
-  </div>
-{% endblock %}
-
-{% block sidebar %}
-  {%- set actions = actions.for_category('members:menu') %}
-  {%- if actions %}
-    {% call m_box_menu() %}
-      <ul class="menu-actions">
-        {%- for action in actions %}
-          <li>{{ action.render() }}</li>
-        {%- endfor %}
-      </ul>
-    {% endcall %}
-  {%- endif %}
-{% endblock %}
-
-
-{% macro add_member() %}
-  <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ _("Add a member") }}</h2>
-
-  <div id="add-user-role">
-    <form method="POST" class="flex flex-wrap items-end gap-4" enctype="multipart/form-data" role="form">
-      {{ csrf.field() }}
-
-      <div>
-        <label for="user-select" class="block text-sm font-medium text-gray-700 mb-1">{{ _('User') }}</label>
-        <input class="block w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-               type="text" id="user-select" name="user" required
-               data-picker="{{ url_for('social.users_json', with_membership=g.community.id) }}"/>
-      </div>
-
-      <div>
-        <label for="role-select" class="block text-sm font-medium text-gray-700 mb-1">{{ _('Role') }}</label>
-        <select id="role-select" name="role"
-                class="block w-auto px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-          <option value="member" default="default">{{ _("Member") }}</option>
-          <option value="manager">{{ _("Manager") }}</option>
-        </select>
-      </div>
-
-      <button class="btn btn-primary"
-              type="submit" name="action" value="add-user-role">{{ _("Add") }}</button>
-    </form>
+    </details>
+    {% endif %}
   </div>
 
-{% endmacro %}
+  {% if can_manage_community %}
+  {#- Someone who has an account already; new people go through the invitation. -#}
+  <form class="ads-card__body sbe-toolbar sbe-toolbar--wrap" id="add-user-role" method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+    {{ csrf.field() }}
+    {#- No icon beside it: the picker wraps the field in its own box. -#}
+    <input class="ads-input sbe-grow" id="user-select" type="text" name="user" required placeholder="{{ _('Add someone who has an account') }}" aria-label="{{ _('Add someone who has an account') }}"
+           data-picker="{{ url_for('social.users_json', with_membership=g.community.id) }}">
+    <select class="ads-select" id="role-select" name="role" aria-label="{{ _('Role') }}">
+      <option value="member" selected>{{ _("Member") }}</option>
+      <option value="manager">{{ _("Community manager") }}</option>
+    </select>
+    <button class="ads-btn" type="submit" name="action" value="add-user-role">{{ _("Add") }}</button>
+  </form>
+  {% endif %}
+
+  <form class="sbe-toolbar" method="get" action="{{ url_for('.members', community_id=g.community.slug) }}">
+    <span class="ads-input-icon">
+      <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+      <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Filter the members') }}" aria-label="{{ _('Filter the members by name or address') }}">
+    </span>
+    {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+    <span class="ads-muted">{{ ngettext("%(num)d member", "%(num)d members", listing.total) }}</span>
+    {% if listing.search %}<a href="{{ url_for('.members', community_id=g.community.slug, role=request.args.get('role')) }}">{{ _("Show all") }}</a>{% endif %}
+  </form>
+
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter ads-table--hover" id="members-table">
+      <thead><tr>
+        {{ m.sort_th(listing, "name", _("Name")) }}
+        {{ m.sort_th(listing, "role", _("Role")) }}
+        {{ m.sort_th(listing, "posts", _("Discussions started"), "ads-end ads-col--secondary") }}
+        {{ m.sort_th(listing, "activity", _("Last active here"), "ads-end ads-col--secondary") }}
+        {% if can_manage_community %}<th scope="col" aria-label="{{ _('Actions') }}"></th>{% endif %}
+      </tr></thead>
+      <tbody>
+        {% for user, m_id, role, last_activity_date in memberships %}
+        <tr>
+          <td class="ads-full sbe-cell-person">
+            <span class="ads-media ads-gap-sm">{{ m.avatar(user) }}
+              <span class="sbe-lines">
+                <span class="ads-cluster ads-gap-sm"><a class="sbe-quiet" href="{{ url_for('social.user', user_id=user.id) }}"><strong>{{ user.name }}</strong></a></span>
+                <span class="ads-muted ads-truncate">{{ user.email }}</span>
+              </span>
+            </span>
+          </td>
+          <td>
+            {% if can_manage_community %}
+            <form method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+              {{ csrf.field() }}
+              <input type="hidden" name="user" value="{{ user.id }}">
+              <input type="hidden" name="action" value="set-user-role">
+              <select class="ads-select sbe-select--sm" name="role" data-autosubmit aria-label="{{ _('Role of %(name)s', name=user.name) }}">
+                <option value="member" {{ "selected" if role == "member" }}>{{ _("Member") }}</option>
+                <option value="manager" {{ "selected" if role == "manager" }}>{{ _("Community manager") }}</option>
+              </select>
+            </form>
+            {% elif role == "manager" %}<span class="ads-badge ads-tone-brand">{{ _("Community manager") }}</span>
+            {% else %}<span class="ads-muted">{{ _("Member") }}</span>{% endif %}
+          </td>
+          <td class="ads-end ads-col--secondary">{{ threads_count[user] }}</td>
+          <td class="ads-end ads-col--secondary ads-muted">{% if last_activity_date %}{{ m.time(last_activity_date) }}{% else %}{{ _("never") }}{% endif %}</td>
+          {% if can_manage_community %}
+          <td class="ads-end">
+            <details class="ads-dropdown">
+              <summary class="ads-btn ads-btn--ghost ads-btn--sm" aria-label="{{ _('Actions on %(name)s', name=user.name) }}">{{ icon("dots") }}</summary>
+              <div class="ads-menu">
+                <a class="ads-menu__item" href="mailto:{{ user.email }}">{{ icon("mail") }}{{ _("Write") }}</a>
+                <div class="ads-menu__sep"></div>
+                <button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-remove-{{ m_id }}">{{ icon("trash") }}{{ _("Remove from the community") }}</button>
+              </div>
+            </details>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="ads-muted">{{ _("No matching records found") }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ m.pagination(listing) }}
+</div>
+{% endblock %}
+
+{% block overlays %}
+{% if can_manage_community %}
+{#- One per member shown, filled by the server: no script needed. -#}
+{% for user, m_id, role, last_activity_date in memberships %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-remove-{{ m_id }}" aria-labelledby="modal-remove-{{ m_id }}-title">
+  <form method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+    {{ csrf.field() }}
+    <input type="hidden" name="user" value="{{ user.id }}">
+    <input type="hidden" name="membership" value="{{ m_id }}">
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-remove-{{ m_id }}-title">{{ _("Remove %(name)s from the community?", name=user.name) }}</h2></div>
+    <div class="ads-modal__body">{{ _("They will no longer see its discussions and documents. What they wrote stays.") }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit" name="action" value="delete">{{ icon("trash") }}{{ _("Remove") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endfor %}
+{% endif %}
+{% endblock %}

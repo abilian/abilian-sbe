@@ -2428,3 +2428,46 @@ msgstr "Vu"
 
 msgid "Never seen"
 msgstr "Jamais venu"
+
+# A community's members on the Abilian Design System (community/members.html)
+msgid "Managers"
+msgstr "Animateurs"
+
+msgid "Community manager"
+msgstr "Animateur"
+
+msgid "More actions on the members"
+msgstr "Autres actions sur les membres"
+
+msgid "Export the list (spreadsheet)"
+msgstr "Exporter la liste (tableur)"
+
+msgid "Add someone who has an account"
+msgstr "Ajouter une personne qui a un compte"
+
+msgid "Filter the members"
+msgstr "Filtrer les membres"
+
+msgid "Filter the members by name or address"
+msgstr "Filtrer les membres par nom ou adresse"
+
+msgid "Discussions started"
+msgstr "Discussions lancées"
+
+msgid "Last active here"
+msgstr "Actif ici"
+
+msgid "Role of %(name)s"
+msgstr "Rôle de %(name)s"
+
+msgid "Write"
+msgstr "Écrire"
+
+msgid "Remove from the community"
+msgstr "Retirer de la communauté"
+
+msgid "Remove %(name)s from the community?"
+msgstr "Retirer %(name)s de la communauté ?"
+
+msgid "They will no longer see its discussions and documents. What they wrote stays."
+msgstr "Cette personne ne verra plus ses discussions ni ses documents. Ce qu’elle a écrit reste."
