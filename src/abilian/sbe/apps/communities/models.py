@@ -557,3 +557,13 @@ def _on_group_members_replace(group, value, oldvalue, initiator) -> None:
             continue
         setattr(u, _PROCESSED_ATTR, OP_APPEND)
         community.set_membership(u, MEMBER)
+
+
+def communities_of(user: User) -> list[Community]:
+    """The communities `user` is a member of, the most recently active first."""
+    return (
+        Community.query.join(Membership)
+        .filter(Membership.user_id == user.id)
+        .order_by(Community.last_active_at.desc())
+        .all()
+    )

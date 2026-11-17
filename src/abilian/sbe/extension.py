@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from loguru import logger
 
 from abilian.core.util import fqcn
+from abilian.sbe import ui
 
 # Asset management now handled by Vite
 
@@ -49,6 +50,7 @@ class AbilianSBE:
         # Jinja
         logger.info("Register jinja context processors")
         app.context_processor(inject_template_utils)
+        ui.register(app)
 
 
 FQCN = fqcn(AbilianSBE)
