@@ -115,7 +115,7 @@ class UserPreferencesPanel(PreferencePanel):
         form = UserPreferencesForm(request.form, prefix=self.id)
 
         if form.validate():
-            if request.csrf_failed:
+            if csrf.has_failed():
                 current_app.extensions["csrf-handler"].flash_csrf_failed_message()
                 return render_template("preferences/user.html", form=form)
 

@@ -312,3 +312,21 @@ def test_a_reply_to_a_deleted_thread_is_dropped(app, db, community1) -> None:
         )
         message.replace_header("To", address)
         assert process_email(message) is False
+
+
+def test_a_thread_without_a_title_comes_back_to_its_form(
+    db: SQLAlchemy, client, community1
+) -> None:
+    """A refused form came back through `request.csrf_failed`, which is only set
+    where CSRF is checked: in tests, the page failed instead."""
+    user = community1.test_user
+    community1.set_membership(user, MEMBER)
+    db.session.commit()
+    url = url_for("forum.new_thread", community_id=community1.slug)
+    data = {"title": "", "message": "<p>Hello.</p>", "__action": "create"}
+
+    with client_login(client, user):
+        response = client.post(url, data=data)
+
+    assert response.status_code == 200
+    assert Thread.query.count() == 0

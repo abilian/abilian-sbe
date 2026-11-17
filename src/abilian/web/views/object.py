@@ -315,7 +315,7 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
     def edit(self, redirect_to=None):
         if self.validate():
             return self.form_valid(redirect_to=redirect_to)
-        if request.csrf_failed:
+        if csrf.has_failed():
             errors = self.form.errors
             csrf_failed = errors.pop("csrf_token", False)
             if csrf_failed and not errors:
