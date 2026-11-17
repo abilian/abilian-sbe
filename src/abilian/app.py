@@ -52,6 +52,10 @@ db = extensions.db
 
 
 def create_app(config: type | None = None, plugins=None, **kw: Any) -> Application:
+    # The instance (files, search index, caches) lives next to the project unless
+    # the environment says otherwise: a test server keeps its own.
+    if os.environ.get("FLASK_INSTANCE_PATH"):
+        kw.setdefault("instance_path", os.environ["FLASK_INSTANCE_PATH"])
     app = Application(**kw)
 
     # 1: Ensure app.config is properly set up

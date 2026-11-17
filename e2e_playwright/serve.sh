@@ -25,6 +25,9 @@ mkdir -p "$E2E_DIR"
 export FLASK_DEBUG=0
 export FLASK_SECRET_KEY=e2e-secret
 export FLASK_SQLALCHEMY_DATABASE_URI="sqlite:///$E2E_DIR/e2e.db"
+# The instance too (stored files, search index, caches): by default it is the
+# project's own, shared with a development server and whatever data it holds.
+export FLASK_INSTANCE_PATH="$E2E_DIR/instance"
 export FLASK_REDIS_URI="redis://localhost:$E2E_REDIS_PORT/0"
 export FLASK_DRAMATIQ_BROKER_URL="redis://localhost:$E2E_REDIS_PORT/0"
 export FLASK_SERVER_NAME="127.0.0.1:$E2E_PORT"
@@ -43,8 +46,10 @@ while [ "$i" -lt 30 ]; do
     sleep 1
 done
 
-# A fresh database each run, so tests never inherit state from the last one.
+# A fresh database and instance each run, so tests never inherit state from the
+# last one: an index kept from it would answer with another run's objects.
 rm -f "$E2E_DIR/e2e.db"
+rm -rf "${E2E_DIR:?}/instance"
 uv run flask initdb
 uv run flask createuser --role admin --name Admin "$E2E_EMAIL" "$E2E_PASSWORD"
 uv run flask script e2e_playwright/seed.py
