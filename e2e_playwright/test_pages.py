@@ -529,3 +529,22 @@ def test_no_inline_script_runs_or_is_refused(
     ):
         page.goto(f"{base_url}{path}", wait_until="networkidle")
     js_errors.assert_clean("pages under the policy")
+
+
+def test_a_folded_sidebar_remembered_leaves_the_bar_alone(
+    logged_in: Page, base_url: str
+) -> None:
+    """Folding is a sidebar's, remembered per origin: another ADS application on the
+    same host can leave it set. Applied to the horizontal bar, it squeezed the bar
+    into a rail's width and the search lay over the navigation."""
+    page = logged_in
+    page.goto(f"{base_url}/", wait_until="networkidle")
+    page.evaluate("localStorage.setItem('ads-sidebar-folded', '1')")
+    page.reload(wait_until="networkidle")
+
+    expect(page.locator(".ads-app")).not_to_have_class(re.compile("ads-app--folded"))
+    nav = page.locator(".sbe-primary").bounding_box()
+    search = page.locator(".sbe-search").bounding_box()
+    assert nav
+    assert search
+    assert nav["x"] + nav["width"] <= search["x"], (nav, search)

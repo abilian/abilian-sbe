@@ -14,8 +14,13 @@
   try {
     var here = document.currentScript && document.currentScript.parentNode;
     if (here && here.classList && here.classList.contains("ads-app")) {
+      // Only a sidebar folds. The choice is kept per origin, so it may come from
+      // another application on the same host; applied to a horizontal bar, the
+      // folded layout squeezed it into a rail's width and its parts overlapped.
       var folded = localStorage.getItem("ads-sidebar-folded");
-      if (folded) here.classList.toggle("ads-app--folded", folded === "1");
+      if (folded && !here.classList.contains("ads-app--horizontal")) {
+        here.classList.toggle("ads-app--folded", folded === "1");
+      }
     } else {
       var theme = localStorage.getItem("ads-theme");
       if (theme) document.documentElement.setAttribute("data-theme", theme);
