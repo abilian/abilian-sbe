@@ -50,8 +50,13 @@
 </nav>
 
 <div class="sbe-bar-do">
+  {#- Inside a community, the search looks there first: its name is a ticked box in
+      the field, unticked to search everywhere. -#}
   <form class="ads-chips ads-chips--input sbe-search" role="search" method="get" action="{{ url_for('search.search_main') }}">
     {{ icon("search") }}
+    {% if here %}
+    <label class="ads-chip ads-tone-neutral sbe-scope" title="{{ _('Only in %(name)s', name=here.name) }}"><input class="sbe-sr-only" type="checkbox" name="community" value="{{ here.slug }}" checked aria-label="{{ _('Only in %(name)s', name=here.name) }}"><span class="ads-truncate">{{ here.name }}</span>{{ icon("x") }}</label>
+    {% endif %}
     <input type="search" name="q" placeholder="{{ _('Search') }}" aria-label="{{ _('Search') }}">
   </form>
   <a class="ads-btn ads-btn--ghost sbe-bar-icon sbe-bar-search" href="{{ url_for('search.search_main') }}" aria-label="{{ _('Search') }}">{{ icon("search") }}</a>

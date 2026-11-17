@@ -1178,3 +1178,16 @@ msgstr "Rétablir"
 
 msgid "Your password must be at least 8 characters including one uppercase, one lowercase and a number."
 msgstr "Votre mot de passe doit contenir au moins 8 caractères, dont au moins une majuscule, une minuscule et un chiffre."
+
+# The search page's kinds and periods (web/search/views.py)
+msgid "People"
+msgstr "Personnes"
+
+msgid "In the last 30 days"
+msgstr "Ces 30 derniers jours"
+
+msgid "In the last year"
+msgstr "Cette année écoulée"
+
+msgid "Any time"
+msgstr "N’importe quand"

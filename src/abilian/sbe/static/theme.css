@@ -206,6 +206,12 @@
 .sbe-search { flex: 0 1 26rem; flex-wrap: nowrap; min-width: 9rem; }
 .sbe-search > .ads-icon { flex: none; color: var(--ads-ink-muted); }
 .sbe-search > .ads-chip { flex: none; }
+/* The search's scope, a ticked box drawn as a chip: unticked, it reads as set aside. */
+.sbe-scope { max-width: 10rem; cursor: pointer; }
+.sbe-scope:has(> input:not(:checked)) { text-decoration: line-through; opacity: .6; }
+.sbe-scope:has(> input:focus-visible) { outline: 2px solid var(--ads-brand); outline-offset: 2px; }
+/* The search page's own field, as wide as it can be. */
+.sbe-search-field { flex: 1 1 auto; }
 .sbe-search > input { min-width: 0; }
 .sbe-bar-search { display: none; }
 

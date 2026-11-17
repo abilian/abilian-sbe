@@ -2335,3 +2335,39 @@ msgstr "Au moins 8 caractères, dont une majuscule, une minuscule et un chiffre.
 
 msgid "This link is valid for 24 hours."
 msgstr "Ce lien est valable 24 heures."
+
+# Search on the Abilian Design System (search/search.html, the bar)
+msgid "%(num)d result"
+msgid_plural "%(num)d results"
+msgstr[0] "%(num)d résultat"
+msgstr[1] "%(num)d résultats"
+
+msgid "Results for “%(q)s”"
+msgstr "Résultats pour « %(q)s »"
+
+msgid "in"
+msgstr "dans"
+
+msgid "Search everywhere"
+msgstr "Chercher partout"
+
+msgid "Kind of result"
+msgstr "Type de résultat"
+
+msgid "Nothing matches these words here."
+msgstr "Rien ne correspond à ces mots ici."
+
+msgid "Narrow the search"
+msgstr "Affiner la recherche"
+
+msgid "Also elsewhere"
+msgstr "Aussi ailleurs"
+
+msgid "By community"
+msgstr "Par communauté"
+
+msgid "When"
+msgstr "Quand"
+
+msgid "Only in %(name)s"
+msgstr "Seulement dans %(name)s"

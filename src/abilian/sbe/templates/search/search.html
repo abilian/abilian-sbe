@@ -1,0 +1,107 @@
+{#- Search results: where the search looked (a community, which can be set aside), the
+    kinds as pills with their counts, one result per row with where it is, the words
+    found marked, who and when; beside it, the same words in other communities, and
+    when. Overrides Abilian Core's page; drawn in `mockups/templates/search.html`. -#}
+{% extends "ads_base.html" %}
+{% block page_title %}« {{ q }} » · {{ _("Search") }}{% endblock %}
+{% block pretitle %}{{ _("Search") }}{% endblock %}
+{% block heading %}{% if q %}{{ _("Results for “%(q)s”", q=q) }}{% else %}{{ _("Search") }}{% endif %}{% endblock %}
+
+{#- What a result is, as an icon: a file by its type, the rest by their kind. -#}
+{% macro kind_icon(hit) -%}
+{% set kind = friendly_fqcn(hit["object_type"]) %}
+{%- if kind == "Document" %}{{ file_icon(hit["name"]) }}
+{%- elif kind == "Folder" %}{{ folder_icon() }}
+{%- elif kind == "WikiPage" %}{{ icon("book") }}
+{%- elif kind == "User" %}{{ icon("user") }}
+{%- elif kind == "Community" %}{{ icon("users") }}
+{%- else %}{{ icon("message-circle") }}{% endif -%}
+{%- endmacro %}
+
+{% block body %}
+<div class="ads-with-aside">
+  <div class="ads-stack">
+    <form class="sbe-toolbar" role="search" method="get" action="{{ url_for('search.search_main') }}">
+      <span class="ads-input-icon sbe-search-field">
+        <span class="ads-input-icon__addon">{{ icon("search") }}</span>
+        <input class="ads-input" type="search" name="q" value="{{ q }}" aria-label="{{ _('Search') }}">
+      </span>
+      {% if scope %}<input type="hidden" name="community" value="{{ scope.slug }}">{% endif %}
+      <button class="ads-btn" type="submit">{{ _("Search") }}</button>
+    </form>
+    {% if q %}
+    <div class="ads-cluster ads-gap-sm">
+      <span>{{ ngettext("%(num)d result", "%(num)d results", results_count) }}{% if scope %} {{ _("in") }}{% endif %}</span>
+      {% if scope %}
+      <span class="ads-chip ads-tone-neutral">{{ m.tile(scope, "sbe-tile--sm") }}{{ scope.name }}<a class="ads-chip__x" href="{{ everywhere_url }}" aria-label="{{ _('Search everywhere') }}">{{ icon("x") }}</a></span>
+      {% if everywhere_count > results_count %}<a class="ads-push" href="{{ everywhere_url }}">{{ _("Search everywhere") }} ({{ everywhere_count }})</a>{% endif %}
+      {% endif %}
+    </div>
+    {% if kinds | length > 2 %}
+    <ul class="ads-pills" aria-label="{{ _('Kind of result') }}">
+      {% for kind in kinds %}
+      <li><a class="ads-pill" href="{{ kind.url }}" {{ 'aria-current="page"' | safe if kind.active }}>{{ kind.label }} ({{ kind.count }})</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <div class="ads-card">
+      {% if results_count %}
+      <ul class="ads-list sbe-results">
+        {% for hit in results %}
+        {% set community = communities.get(hit.get("community_id")) %}
+        <li>
+          <span class="sbe-result__icon">{{ kind_icon(hit) }}</span>
+          <div class="ads-fill ads-stack ads-gap-sm">
+            <a class="sbe-quiet sbe-result__title" href="{{ url_for_hit(hit) }}">{{ hit.highlights("name") | safe or hit["name"] }}</a>
+            {% if community %}<span class="ads-muted ads-media ads-gap-sm">{{ m.tile(community, "sbe-tile--sm") }}<span>{{ community.name }}</span></span>{% endif %}
+            {% if hit.get("description") %}<p class="sbe-excerpt">{{ hit.highlights("description") | safe or hit["description"] }}</p>{% endif %}
+            {% if hit.get("creator_name") or hit.get("updated_at") %}
+            <span class="ads-muted">{{ hit.get("creator_name") or "" }}{% if hit.get("creator_name") and hit.get("updated_at") %} · {% endif %}{% if hit.get("updated_at") %}{{ m.time(hit["updated_at"]) }}{% endif %}</span>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="ads-card__body ads-muted">{{ _("Nothing matches these words here.") }}{% if scope and everywhere_count %} <a href="{{ everywhere_url }}">{{ _("Search everywhere") }} ({{ everywhere_count }})</a>{% endif %}</p>
+      {% endif %}
+      {% if prev_page or next_page %}
+      <nav class="ads-card__foot ads-spread" aria-label="{{ _('Pagination') }}">
+        <span class="ads-muted">{{ ngettext("%(num)d result", "%(num)d results", results_count) }}</span>
+        <ul class="ads-pagination">
+          {% if prev_page %}<li><a class="ads-page-link" rel="prev" href="{{ prev_page }}" aria-label="{{ _('Previous') }}">{{ icon("chevron-left") }}</a></li>{% endif %}
+          {% for n, link in pages %}
+          <li><a class="ads-page-link" href="{{ link }}" {{ 'aria-current="page"' | safe if n == results.pagenum }}>{{ n }}</a></li>
+          {% endfor %}
+          {% if next_page %}<li><a class="ads-page-link" rel="next" href="{{ next_page }}" aria-label="{{ _('Next') }}">{{ icon("chevron-right") }}</a></li>{% endif %}
+        </ul>
+      </nav>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  {% if q %}
+  <aside class="ads-stack" aria-label="{{ _('Narrow the search') }}">
+    {% if elsewhere %}
+    <section class="ads-card" aria-labelledby="elsewhere">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="elsewhere">{{ _("Also elsewhere") if scope else _("By community") }}</h2></div>
+      <ul class="ads-list">
+        {% for community, count, link in elsewhere %}
+        <li><a class="ads-fill ads-cluster ads-gap-sm sbe-quiet" href="{{ link }}">{{ m.tile(community, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ community.name }}</span><span class="ads-muted">{{ count }}</span></a></li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% endif %}
+    <nav class="ads-card" aria-labelledby="when">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="when">{{ _("When") }}</h2></div>
+      <ul class="ads-list">
+        {% for period in periods %}
+        <li><a class="ads-fill sbe-quiet" href="{{ period.url }}" {{ 'aria-current="page"' | safe if period.active }}>{{ period.label }}</a></li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </aside>
+  {% endif %}
+</div>
+{% endblock %}

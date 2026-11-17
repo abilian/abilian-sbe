@@ -560,3 +560,27 @@ def test_a_folded_sidebar_remembered_leaves_the_bar_alone(
     assert nav
     assert search
     assert nav["x"] + nav["width"] <= search["x"], (nav, search)
+
+
+def test_the_search_looks_in_the_community_first_unless_told_otherwise(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    """The community's name is a ticked box in the bar's field: no script."""
+    page = logged_in
+    page.goto(f"{base_url}/communities/{COMMUNITY}/forum/", wait_until="networkidle")
+    field = page.locator(".sbe-search input[name=q]")
+
+    field.fill("budget")
+    field.press("Enter")
+    page.wait_for_load_state("networkidle")
+    assert f"community={COMMUNITY}" in page.url
+    expect(page.locator(".ads-chip", has_text="E2E Community")).to_be_visible()
+
+    page.goto(f"{base_url}/communities/{COMMUNITY}/forum/", wait_until="networkidle")
+    page.locator(".sbe-scope").click()
+    field.fill("budget")
+    field.press("Enter")
+    page.wait_for_load_state("networkidle")
+    assert "community=" not in page.url
+
+    js_errors.assert_clean("the search's scope")
