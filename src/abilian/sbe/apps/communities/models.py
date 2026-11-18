@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -32,7 +32,7 @@ from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.blob import Blob
 from abilian.core.models.subjects import Group, User
 from abilian.i18n import _l
-from abilian.sbe.apps.documents.models import Folder
+from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.documents.repository import content_repository
 from abilian.services.indexing import indexable_role
 from abilian.services.security import (
@@ -569,6 +569,26 @@ def communities_of(user: User) -> list[Community]:
         .order_by(Community.last_active_at.desc())
         .all()
     )
+
+
+def site_figures() -> dict[str, int]:
+    """The communities, those active this week, the documents and their bytes:
+    the site at a glance, for its administrators."""
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    documents, size = db.session.execute(
+        sa.select(
+            sa.func.count(Document.id),
+            sa.func.coalesce(sa.func.sum(Document.content_length), 0),
+        ).select_from(Document)
+    ).one()
+    return {
+        "communities": Community.query.count(),
+        "active_communities": Community.query.filter(
+            Community.last_active_at > week_ago
+        ).count(),
+        "documents": documents,
+        "bytes": size,
+    }
 
 
 def community_counts(users: Iterable[User]) -> dict[int, int]:

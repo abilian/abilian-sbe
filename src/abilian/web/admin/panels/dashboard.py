@@ -28,6 +28,10 @@ if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
 
 
+#: How many of the last people to sign in the dashboard shows.
+LAST_SEEN = 5
+
+
 class DashboardPanel(AdminPanel):
     id = "dashboard"
     path = ""
@@ -89,11 +93,31 @@ class DashboardPanel(AdminPanel):
             "this_month": stats_since(timedelta(days=30)),
         }
 
+        month_ago = datetime.utcnow() - timedelta(days=30)
+        this_month = [
+            user_id for started_at, user_id in sessions if started_at > month_ago
+        ]
+        everyone = User.query.filter(User.id != ROOT_USER_ID)
+        accounts = {
+            "all": everyone.count(),
+            "never_signed_in": everyone.filter(User.last_active.is_(None)).count(),
+            "sign_ins": len(this_month),
+            "people": len(set(this_month)),
+        }
+        last_seen = (
+            everyone.filter(User.last_active.is_not(None))
+            .order_by(User.last_active.desc())
+            .limit(LAST_SEEN)
+            .all()
+        )
+
         return render_template(
             "admin/dashboard.html",
             stats=stats,
             users=users,
             connections=connections,
+            accounts=accounts,
+            last_seen=last_seen,
         )
 
 

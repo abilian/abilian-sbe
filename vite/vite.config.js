@@ -18,6 +18,9 @@ export default defineConfig({
         styles: "./src/styles.css",
         // Only admin/dashboard.html loads this one.
         charts: "./src/charts.js",
+        // uPlot's stylesheet, for the dashboard on the design system, which
+        // does not load styles.css.
+        "charts-styles": "./src/charts-styles.css",
         // Only the rich text widget loads this one.
         editor: "./src/editor.js",
         // Only documents/view_pdf.html loads these two.

@@ -1,0 +1,3 @@
+/* uPlot's stylesheet alone, for the dashboard on the design system: the theme
+   (theme.css) styles the charts in its tokens. */
+@import "uplot/dist/uPlot.min.css";

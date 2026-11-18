@@ -1,11 +1,12 @@
 # Copyright (c) 2012-2026, Abilian SAS
 
-"""The accounts in the administration: listed by state, one account's page, and
-signing in as someone."""
+"""The accounts in the administration: listed by state, one account's page,
+signing in as someone, and the overview that counts them."""
 
 from __future__ import annotations
 
 import datetime as dt
+import re
 from html import unescape
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -23,6 +24,7 @@ if TYPE_CHECKING:
     from flask.testing import FlaskClient
 
     from abilian.core.sqlalchemy import SQLAlchemy
+    from abilian.sbe.apps.communities.models import Community
 
 
 def _account(db: SQLAlchemy, last: str, **kw) -> User:
@@ -177,3 +179,23 @@ def test_a_refused_account_says_why_under_the_field(
     assert 'aria-invalid="true"' in field
     assert 'aria-describedby="password-help password-error"' in field
     assert 'id="password-error"' in html
+
+
+def test_the_overview_counts_the_accounts_and_the_communities(
+    client: FlaskClient,
+    admin_user: User,
+    accounts: dict[str, User],
+    community1: Community,
+) -> None:
+    html = _page(client, admin_user, url_for("admin.dashboard"))
+
+    tiles = re.findall(
+        r'<span class="ads-metric">([^<]+)</span><span>([^<]+)</span>', html
+    )
+    figures = {label: value for value, label in tiles}
+    everyone = User.query.filter(User.id != 0)
+    assert figures["accounts"] == str(everyone.count())
+    assert figures["communities"] == "1"
+    never = everyone.filter(User.last_active.is_(None)).count()
+    assert f"{never} never signed in" in html
+    assert url_for("admin.users_user", user_id=accounts["active"].id) in html

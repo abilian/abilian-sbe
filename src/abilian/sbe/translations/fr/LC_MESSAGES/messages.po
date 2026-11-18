@@ -2677,3 +2677,63 @@ msgstr "Navigateur inconnu"
 
 msgid "Which accounts"
 msgstr "Quels comptes"
+
+msgid "accounts"
+msgstr "comptes"
+
+msgid "%(num)d never signed in"
+msgid_plural "%(num)d never signed in"
+msgstr[0] "%(num)d jamais connecté"
+msgstr[1] "%(num)d jamais connectés"
+
+msgid "sign-ins in 30 days"
+msgstr "connexions en 30 jours"
+
+msgid "communities"
+msgstr "communautés"
+
+msgid "%(num)d active this week"
+msgid_plural "%(num)d active this week"
+msgstr[0] "%(num)d active cette semaine"
+msgstr[1] "%(num)d actives cette semaine"
+
+msgid "of files"
+msgstr "de fichiers"
+
+msgid "%(num)d document"
+msgid_plural "%(num)d documents"
+msgstr[0] "%(num)d document"
+msgstr[1] "%(num)d documents"
+
+msgid "Today"
+msgstr "Aujourd’hui"
+
+msgid "7 days"
+msgstr "7 jours"
+
+msgid "30 days"
+msgstr "30 jours"
+
+msgid "Active accounts"
+msgstr "Comptes actifs"
+
+msgid "New documents"
+msgstr "Nouveaux documents"
+
+msgid "Overview"
+msgstr "Vue d’ensemble"
+
+msgid "Unique connections"
+msgstr "Personnes connectées"
+
+msgid "Last sign-ins"
+msgstr "Dernières connexions"
+
+msgid "Nobody has signed in yet."
+msgstr "Personne ne s’est encore connecté."
+
+msgid "All the accounts"
+msgstr "Tous les comptes"
+
+msgid "Measure"
+msgstr "Mesure"

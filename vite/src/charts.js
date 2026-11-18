@@ -168,12 +168,14 @@ function connectionsChart() {
 
 function grainSwitch(grains, onPick) {
   const group = document.createElement("div");
-  group.className = "chart-grains";
+  // Both names: the Tailwind page styles the first, the design system the rest.
+  group.className = "chart-grains ads-btn-group";
   group.setAttribute("role", "group");
 
   const buttons = grains.map((grain, i) => {
     const button = document.createElement("button");
     button.type = "button";
+    button.className = "ads-btn ads-btn--sm";
     button.textContent = grain.label;
     button.setAttribute("aria-pressed", String(i === 0));
     button.addEventListener("click", () => {

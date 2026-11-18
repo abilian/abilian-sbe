@@ -764,3 +764,32 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   background: var(--ads-tone-tint);
   border-radius: var(--ads-radius);
 }
+
+/* The dashboard's charts (uPlot draws them; its markup is fixed, hence its classes):
+   the legend, which follows the cursor, in the type of the page; the switch between
+   day, week and month at the end of the line. */
+.chart { width: 100%; }
+.chart .u-legend { margin-block-start: var(--ads-space-2); font-size: var(--ads-text-sm); color: var(--ads-ink); }
+/* uPlot sets the marker's border inline, its middle transparent: half the box on each
+   side makes it a solid swatch, and only `!important` beats an inline style. */
+.chart .u-legend .u-marker { margin-inline-end: var(--ads-space-1); border-width: 0.5em !important; }
+.chart .u-legend .u-series:first-child .u-marker { display: none; }
+.chart .u-legend .u-series { cursor: pointer; }
+.chart .u-legend .u-series.u-off { color: var(--ads-ink-muted); }
+.chart .u-legend .u-value { font-weight: var(--ads-weight-medium); font-variant-numeric: tabular-nums; color: var(--ads-ink-strong); }
+.chart .u-select { background: var(--ads-brand-wash); }
+.chart-grains { display: flex; justify-content: flex-end; margin-block-end: var(--ads-space-2); }
+
+/* A row's header reads as the row's first cell, not as a column's header (ADS request 30). */
+.ads-table tbody th {
+  --ads-row-pad: calc(var(--ads-space-3) * var(--ads-row-scale));
+  padding-block: var(--ads-row-pad);
+  color: var(--ads-ink);
+  font-size: inherit;
+  font-weight: var(--ads-weight-normal);
+  text-transform: none;
+  letter-spacing: normal;
+  background: none;
+  border-bottom: 0;
+  border-top: var(--ads-border-width) solid var(--ads-line-soft);
+}
