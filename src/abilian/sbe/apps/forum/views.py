@@ -275,7 +275,6 @@ route("/<int:thread_id>/")(thread_view)
 
 class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
     Form = ThreadForm
-    base_template = "community/_forumbase.html"
     template = "forum/thread_create.html"
     POST_BUTTON = ButtonAction(
         "form", "create", btn_class="primary", title=_l("Post this message")

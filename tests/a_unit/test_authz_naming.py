@@ -43,10 +43,8 @@ AUTHZ_MODULES = [
     "services/auth/service.py",
     "sbe/apps/communities/security.py",
     "sbe/apps/communities/decorators.py",
-    "sbe/apps/forum/actions.py",
     "sbe/apps/forum/security.py",
     "sbe/apps/calendar/actions.py",
-    "sbe/apps/documents/actions.py",
     "web/attachments/extension.py",
     "web/comments/extension.py",
 ]
@@ -55,9 +53,9 @@ AUTHZ_MODULES = [
 SCOPE_PREFIXES = ("site_",)
 
 #: What makes a function an *authorization* predicate rather than a state one.
-#: `is_closed` and `is_filtered` share a module with `can_moderate` and are not
-#: governed by this rule; what separates them is that they ask nobody. A
-#: predicate is in scope when its body reaches one of these, directly.
+#: A state predicate (`is_closed`) is not governed by this rule; what separates
+#: it is that it asks nobody. A predicate is in scope when its body reaches one
+#: of these, directly.
 AUTHZ_PRIMITIVES = frozenset(
     {
         "has_role",
@@ -74,7 +72,6 @@ AUTHZ_PRIMITIVES = frozenset(
 #: working, and a rule that silently governs nothing is worse than no rule.
 MUST_BE_IN_SCOPE = {
     ("sbe/apps/communities/security.py", "can_manage"),
-    ("sbe/apps/forum/actions.py", "can_moderate"),
     ("sbe/apps/forum/security.py", "can_write"),
     ("sbe/apps/communities/security.py", "is_member"),
     ("web/attachments/extension.py", "can_delete"),
@@ -85,9 +82,7 @@ MUST_BE_IN_SCOPE = {
 #: Capabilities named before their permission exists. Each entry names the
 #: capability it currently stands in for, so introducing the real permission is
 #: one line rather than a hunt. An entry that never resolves is visible debt.
-PENDING_PERMISSIONS = {
-    "moderate": "manage",  # forum moderation; body is can_manage(thread.community)
-}
+PENDING_PERMISSIONS: dict[str, str] = {}
 
 #: Predicates that do not satisfy the rule yet. This list only shrinks; every
 #: row says what it should become. Deleting a row is the definition of done.

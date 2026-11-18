@@ -8,7 +8,6 @@ from flask import g
 
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
-from abilian.sbe.apps.documents.actions import register_actions
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
 
@@ -18,7 +17,6 @@ community_blueprint = CommunityBlueprint(
     "documents", __name__, url_prefix="/docs", template_folder="../templates"
 )
 route = community_blueprint.route
-community_blueprint.record_once(register_actions)
 
 
 @community_blueprint.url_value_preprocessor

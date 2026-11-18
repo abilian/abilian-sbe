@@ -23,7 +23,7 @@ def can_write(user: User, post: Post) -> bool:
     is in every permission's role set.
 
     Deliberately not the community's managers. Closing and deleting a thread is
-    moderation and theirs (`can_moderate`); rewriting somebody's message is a
+    moderation and theirs (`can_manage` on the community); rewriting somebody's message is a
     different act, and the UI has never offered it.
     """
     return security_service.has_permission(user, WRITE, post, roles=OWNER)
