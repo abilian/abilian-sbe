@@ -16,6 +16,7 @@ everyone else's.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 from flask import url_for
 
@@ -62,3 +63,48 @@ def test_the_creator_becomes_a_manager_member(
         "in a predicate could have said they manage it"
     )
     assert can_manage(admin, community)
+
+
+def test_the_manager_picked_runs_it_and_not_its_maker(
+    app: Application, db: SQLAlchemy, client: FlaskClient
+) -> None:
+    ensure_services_started(["security"])
+    admin = _site_admin(db)
+    picked = User(email="picked@example.com", password=uuid4().hex, can_login=True)
+    db.session.add(picked)
+    db.session.flush()
+
+    with client_login(client, admin):
+        response = client.post(
+            url_for("communities.new"), data={**FORM, "manager": picked.id}
+        )
+
+    assert response.status_code == 302
+    community = Community.query.filter(Community.name == FORM["name"]).one()
+    assert community.get_role(picked) == MANAGER
+    assert community.get_role(admin) is None
+
+
+def test_a_new_community_takes_part_with_discussions_and_documents(
+    app: Application, db: SQLAlchemy, client: FlaskClient
+) -> None:
+    """What the form offers ticked before anything is typed."""
+    ensure_services_started(["security"])
+    admin = _site_admin(db)
+
+    with client_login(client, admin):
+        html = client.get(url_for("communities.new")).get_data(as_text=True)
+
+    assert 'value="participative" checked' in html
+    assert 'name="has_forum" value="y" checked' in html
+    assert 'name="has_wiki" value="y" >' in html
+    assert 'name="manager"' in html
+
+
+def _site_admin(db: SQLAlchemy) -> User:
+    admin = User(email="admin@example.com", password=uuid4().hex, can_login=True)
+    db.session.add(admin)
+    db.session.flush()
+    security_service.grant_role(admin, ADMIN)
+    db.session.flush()
+    return admin

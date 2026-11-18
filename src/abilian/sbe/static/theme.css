@@ -109,6 +109,11 @@
   background: var(--sbe-id);
   border-radius: var(--ads-radius);
 }
+.sbe-tile--lg {
+  width: var(--ads-control-lg);
+  height: var(--ads-control-lg);
+  font-size: var(--ads-text-lg);
+}
 .sbe-tile--sm {
   width: 1.25rem;
   height: 1.25rem;

@@ -88,17 +88,30 @@ def capture(base_url: str, out_dir: pathlib.Path, viewport_name: str) -> None:
 #: Interaction states a page-level screenshot never reaches. Each entry is
 #: (name, path, list of steps); a step is a (action, selector) pair.
 STATES = [
-    ("modal-new-folder", f"/communities/{COMMUNITY}/docs/",
-     [("click", '[href="#modal-new-folder"]')]),
-    ("modal-upload", f"/communities/{COMMUNITY}/docs/",
-     [("click", '[href="#modal-upload-files"]')]),
-    ("confirm-delete", f"/communities/{COMMUNITY}/docs/",
-     [("check", 'input[name="object-selected"]'),
-      ("click", 'button[value="delete"]')]),
-    ("menu-user", "/social/",
-     [("click", ".action-navigation-user button")]),
-    ("menu-row-actions", f"/communities/{COMMUNITY}/docs/",
-     [("click", ".document-thumbnail-menu, td button, .fa-ellipsis-h")]),
+    (
+        "modal-new-folder",
+        f"/communities/{COMMUNITY}/docs/",
+        [("click", '[href="#modal-new-folder"]')],
+    ),
+    (
+        "modal-upload",
+        f"/communities/{COMMUNITY}/docs/",
+        [("click", '[href="#modal-upload-files"]')],
+    ),
+    (
+        "confirm-delete",
+        f"/communities/{COMMUNITY}/docs/",
+        [
+            ("check", 'input[name="object-selected"]'),
+            ("click", 'button[value="delete"]'),
+        ],
+    ),
+    ("menu-user", "/social/", [("click", ".action-navigation-user button")]),
+    (
+        "menu-row-actions",
+        f"/communities/{COMMUNITY}/docs/",
+        [("click", ".document-thumbnail-menu, td button, .fa-ellipsis-h")],
+    ),
 ]
 
 

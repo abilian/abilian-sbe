@@ -1,0 +1,47 @@
+{#- A community's fields, shared by making one and by its settings: its name, what it is
+    for, whether its members take part or mostly read, its tools. Imported `with
+    context`. -#}
+{% import "forum/_post_fields.html" as fields %}
+
+{% macro name(form) %}
+<div class="ads-field">
+  <label class="ads-label ads-label--required" for="{{ form.name.id }}">{{ _("Name") }}</label>
+  <input class="ads-input" id="{{ form.name.id }}" name="{{ form.name.name }}" type="text" value="{{ form.name.data or '' }}" required {{ fields.invalid(form.name) }}>
+  {{ fields.errors(form.name) }}
+</div>
+{% endmacro %}
+
+{% macro description(form) %}
+{% set field = form.description %}
+<div class="ads-field">
+  <label class="ads-label ads-label--required" for="{{ field.id }}">{{ _("What it is for") }}</label>
+  <textarea class="ads-textarea" id="{{ field.id }}" name="{{ field.name }}" rows="3" maxlength="500" required aria-describedby="description-help{% if field.errors %} {{ field.id }}-error{% endif %}" {% if field.errors %}aria-invalid="true"{% endif %}>{{ field.data or "" }}</textarea>
+  <small class="ads-help" id="description-help">{{ _("A sentence, under its name, on its home page and in the list of communities.") }}</small>
+  {{ fields.errors(field) }}
+</div>
+{% endmacro %}
+
+{#- `kind` is the one ticked: the form's own, or a new community's. -#}
+{% macro members(form, kind) %}
+<fieldset class="ads-stack ads-gap-sm sbe-fieldset">
+  <legend class="ads-label">{{ _("Its members") }}</legend>
+  {% for value, label, note in [
+    ("participative", _("Take part"), _("They add documents, start discussions and may send them to everyone by e-mail.")),
+    ("informative", _("Mostly read"), _("They read the documents and discuss; only the managers add documents and write to everyone by e-mail.")),
+  ] %}
+  <label class="ads-choice"><input type="radio" name="{{ form.type.name }}" value="{{ value }}" {{ "checked" if kind == value }}>
+    <span>{{ label }}<span class="ads-choice__note">{{ note }}</span></span></label>
+  {% endfor %}
+</fieldset>
+{% endmacro %}
+
+{#- `on` says, by field, which are ticked. -#}
+{% macro tools(form, on) %}
+<fieldset class="ads-stack ads-gap-sm sbe-fieldset">
+  <legend class="ads-label">{{ _("Its tools") }}</legend>
+  {% for field, label in [(form.has_forum, _("Discussions")), (form.has_documents, _("Documents")), (form.has_wiki, _("Wiki"))] %}
+  <label class="ads-check"><input type="checkbox" name="{{ field.name }}" value="y" {{ "checked" if on[field.name] }}> <span>{{ label }}</span></label>
+  {% endfor %}
+  <small class="ads-help">{{ _("A tool taken away leaves the tabs; what it holds is kept, and comes back with it.") }}</small>
+</fieldset>
+{% endmacro %}

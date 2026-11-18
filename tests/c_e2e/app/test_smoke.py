@@ -110,10 +110,10 @@ def test_referenced_assets_resolve_in_production_mode(
             )
         )
 
-    # A page still on Tailwind (making a community, for a site administrator),
-    # and one on the Abilian Design System (the community's home).
+    # A page still on Tailwind (Core's groups, which a site administrator may
+    # still reach), and one on the Abilian Design System (the community's home).
     security_service.grant_role(community1.test_user, ADMIN)
-    legacy = static_urls("communities.new")
+    legacy = static_urls("admin.groups")
     assert any("/vite/" in url for url in legacy), "page linked no Vite assets"
     assert any("font-awesome" in url for url in legacy), "page linked no icon font"
     ads = static_urls("wall.index")

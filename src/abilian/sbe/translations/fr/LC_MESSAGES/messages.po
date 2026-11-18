@@ -3096,3 +3096,41 @@ msgstr "Mot de passe"
 
 msgid "Password changed"
 msgstr "Mot de passe changé"
+
+msgid "New community"
+msgstr "Nouvelle communauté"
+
+msgid "Order"
+msgstr "Ordre"
+
+msgid "By name"
+msgstr "Par nom"
+
+msgid "By activity"
+msgstr "Par activité"
+
+msgid "%(num)d community"
+msgid_plural "%(num)d communities"
+msgstr[0] "%(num)d communauté"
+msgstr[1] "%(num)d communautés"
+
+msgid "The new community"
+msgstr "La nouvelle communauté"
+
+msgid "Its manager"
+msgstr "Son animateur"
+
+msgid "Someone who has an account; they can name other managers. Left empty, it is you."
+msgstr "Une personne qui a déjà un compte ; elle pourra nommer d’autres animateurs. Laissé vide, c’est vous."
+
+msgid "Create the community"
+msgstr "Créer la communauté"
+
+msgid "The community is made empty, open to its members only. Its manager finds it among their communities and invites the others."
+msgstr "La communauté est créée vide, réservée à ses membres. Son animateur la trouve parmi ses communautés et y invite les autres."
+
+msgid "All this can be changed later in its settings, except its address."
+msgstr "Tout cela se change ensuite dans ses paramètres, sauf son adresse."
+
+msgid "What happens next"
+msgstr "Ensuite"

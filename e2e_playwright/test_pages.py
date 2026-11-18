@@ -121,14 +121,17 @@ def test_audit_filters_submit_themselves(
     js_errors.assert_clean("the audit filters")
 
 
-def test_community_home_sort_submits_itself(
+def test_the_communities_are_sorted_by_activity(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
     page = logged_in
     page.goto(f"{base_url}/communities/", wait_until="networkidle")
     with page.expect_navigation():
-        page.locator('select[name="sort"]').select_option("activity")
+        page.get_by_role("link", name="By activity").click()
     assert "sort=activity" in page.url
+    expect(page.get_by_role("link", name="By activity")).to_have_attribute(
+        "aria-current", "page"
+    )
     js_errors.assert_clean("sorting communities")
 
 

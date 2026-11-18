@@ -257,14 +257,26 @@ add_url(
 class CommunityCreate(views.ObjectCreate[Community, CommunityForm], CommunityEdit):
     title = _l("Create community")
     decorators = (*views.ObjectCreate.decorators, is_site_admin)
-    template = views.ObjectCreate.template
-    base_template = views.ObjectCreate.base_template
+    template = "community/new.html"
+    #: Who will run it: the person picked, or else whoever makes it.
+    manager: User | None = None
+
+    def validate(self) -> bool:
+        if not super().validate():
+            return False
+        manager_id = request.form.get("manager", type=int)
+        if manager_id is not None:
+            self.manager = User.query.get(manager_id)
+            if self.manager is None:
+                msg = f"Unknown manager: {manager_id}"
+                raise BadRequest(msg)
+        return True
 
     def breadcrumb(self) -> BreadcrumbItem:
         return BreadcrumbItem(label=_("Create new community"))
 
     def commit_success(self) -> None:
-        """Whoever creates a community manages it.
+        """The person picked manages it, or else whoever creates it.
 
         Recorded as a membership like anyone else's rather than as a special
         case in a predicate. It used to be the latter -- `is_manager` alone
@@ -277,8 +289,9 @@ class CommunityCreate(views.ObjectCreate[Community, CommunityForm], CommunityEdi
         folder, and inside `no_autoflush` that folder has no id yet.
         """
         super().commit_success()
-        if self.obj.creator:
-            self.obj.set_membership(self.obj.creator, MANAGER)
+        manager = self.manager or self.obj.creator
+        if manager:
+            self.obj.set_membership(manager, MANAGER)
             db.session.commit()
 
     def message_success(self):

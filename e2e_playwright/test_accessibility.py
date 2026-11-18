@@ -12,6 +12,7 @@ import pathlib
 from typing import TYPE_CHECKING
 
 import pytest
+from conftest import OLD_FRAME
 from playwright.sync_api import expect
 from surfaces import all_paths
 
@@ -58,7 +59,7 @@ def test_no_page_has_wcag_violations(
 
 def test_a_dropdown_works_from_the_keyboard(logged_in: Page, base_url: str) -> None:
     page = logged_in
-    page.goto(f"{base_url}/communities/", wait_until="networkidle")
+    page.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
     # There is a second copy of the menu in the mobile navbar.
     menu = page.locator(".action-navigation-user-authenticated").locator("visible=true")
     button = menu.locator("button")

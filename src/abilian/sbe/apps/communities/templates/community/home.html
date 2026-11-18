@@ -1,66 +1,39 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box, m_box_menu with context %}
-
-{% block header %}{% endblock %}
-
-{% block content %}
-  {%- call m_box(title=_("My communities")) %}
-    <div class="flex justify-end mb-4">
-      <form action="." class="inline-flex">
-        <select name="sort" aria-label="{{ _('Sort by activity') }}"
-                class="block w-auto px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                data-autosubmit>
-          <option value="alpha"
-                  {% if not sort_order=='activity' %}selected{% endif %}>{{ _("Sort alphabetically") }}</option>
-          <option value="activity"
-                  {% if sort_order=='activity' %}selected{% endif %}>{{ _("Sort by activity") }}</option>
-        </select>
-      </form>
-    </div>
-
-    {%- if my_communities %}
-      <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200">
-          <tbody class="divide-y divide-gray-100">
-            {%- for community in my_communities %}
-              <tr class="hover:bg-gray-50">
-                <td class="py-4 pr-4 w-20">
-                  <a href="{{ url_for(community) }}">
-                    <img src="{{ community_image_url(community, s=65) }}" alt="{{ community.name }}"
-                         class="rounded-lg"/>
-                  </a>
-                </td>
-                <td class="py-4">
-                  <a href="{{ url_for(community) }}" class="block">
-                    <div class="font-medium text-gray-900 hover:text-blue-600">{{ community.name }}</div>
-                    <div class="text-sm text-gray-500 mt-1">{{ community.description }}</div>
-                    <div class="text-sm text-gray-500 mt-2 flex items-center gap-4">
-                      <span><i class="fa fa-user mr-1"></i>{{ community.membership_count }}</span>
-                      <span><i class="fa fa-file mr-1"></i>{{ community.document_count }}</span>
-                      <span><i class="fa fa-clock-o mr-1"></i>{{ community.last_active_at | age }}</span>
-                    </div>
-                  </a>
-                </td>
-              </tr>
-            {%- endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <p class="text-gray-500 py-8 text-center">{{ _("You're not a member of a community yet.") }}</p>
-    {% endif %}
-
-  {% endcall %}
-{% endblock %}
-
-{% block sidebar %}
-  {% if is_site_admin() %}
-    {% call m_box_menu() %}
-      <div class="p-4">
-        <a class="inline-block px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-           href="{{ url_for(".new") }}">{{ _("Create new community") }}</a>
-      </div>
-    {% endcall %}
+{#- The communities: mine, or all of them for a site administrator, by name or by
+    activity; each with its image or initial, what it is for, its members and
+    documents, when it last moved. A site administrator makes a new one from here. -#}
+{% extends "ads_base.html" %}
+{% set admin = is_site_admin() %}
+{% block page_title %}{{ _("Communities") if admin else _("My communities") }}{% endblock %}
+{% block heading %}{{ _("Communities") if admin else _("My communities") }}{% endblock %}
+{% block actions %}{% if admin %}<a class="ads-btn ads-btn--primary" href="{{ url_for('.new') }}">{{ icon("plus") }}{{ _("New community") }}</a>{% endif %}{% endblock %}
+{% block body %}
+<div class="ads-card">
+  <div class="ads-card__head ads-spread">
+    <ul class="ads-pills" aria-label="{{ _('Order') }}">
+      <li><a class="ads-pill" href="{{ url_for('.index', sort='alpha') }}" {{ 'aria-current="page"' | safe if sort_order != "activity" }}>{{ _("By name") }}</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.index', sort='activity') }}" {{ 'aria-current="page"' | safe if sort_order == "activity" }}>{{ _("By activity") }}</a></li>
+    </ul>
+    <span class="ads-muted">{{ ngettext("%(num)d community", "%(num)d communities", my_communities | length) }}</span>
+  </div>
+  {% if my_communities %}
+  <ul class="ads-list">
+    {% for community in my_communities %}
+    <li>
+      {{ m.tile(community, "sbe-tile--lg") }}
+      <span class="ads-fill sbe-lines">
+        <a class="sbe-quiet" href="{{ url_for(community) }}"><strong>{{ community.name }}</strong></a>
+        {% if community.description %}<span class="ads-muted">{{ community.description }}</span>{% endif %}
+        <span class="ads-muted ads-cluster ads-gap-sm">
+          <span>{{ ngettext("%(num)d member", "%(num)d members", community.membership_count) }}</span>
+          <span>{{ ngettext("%(num)d document", "%(num)d documents", community.document_count) }}</span>
+          <span>{{ _("Active") }} {{ m.time(community.last_active_at) }}</span>
+        </span>
+      </span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="ads-card__body ads-muted">{{ _("You're not a member of a community yet.") }}</p>
   {% endif %}
+</div>
 {% endblock %}
