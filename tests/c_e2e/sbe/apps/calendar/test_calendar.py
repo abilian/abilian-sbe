@@ -162,3 +162,71 @@ def test_event_description_is_sanitized(test_request_context) -> None:
     form.validate_description(form.description)
 
     assert form.description.data == ('<p style="text-align: center;">Hi</p>alert("x")')
+
+
+def test_an_event_goes_to_ones_own_calendar(
+    client: FlaskClient, community1: Community, member: User, events: dict
+) -> None:
+    event = events["coming"]
+    with client_login(client, member):
+        response = client.get(
+            url_for(
+                "calendar.event_file", community_id=community1.slug, event_id=event.id
+            )
+        )
+
+    assert response.mimetype == "text/calendar"
+    assert "attachment" in response.headers["Content-Disposition"]
+    body = response.get_data(as_text=True)
+    assert f"DTSTART:{event.start:%Y%m%dT%H%M%S}\r\n" in body
+    assert "SUMMARY:General meeting\r\n" in body
+    assert "LOCATION:Room 2\r\n" in body
+    assert "DESCRIPTION:What it is.\r\n" in body
+
+
+def test_who_posted_an_event_deletes_it(
+    client: FlaskClient,
+    community1: Community,
+    member: User,
+    events: dict,
+    db: SQLAlchemy,
+) -> None:
+    event = events["coming"]
+    event.creator = member
+    db.session.commit()
+    url = url_for("calendar.event", community_id=community1.slug, event_id=event.id)
+
+    assert 'id="modal-delete"' in _page(client, member, url)
+    with client_login(client, member):
+        response = client.post(
+            url_for(
+                "calendar.event_delete", community_id=community1.slug, event_id=event.id
+            ),
+            data={"__action": "delete"},
+        )
+
+    assert response.status_code == 302
+    assert db.session.get(Event, event.id) is None
+
+
+def test_another_member_does_not_delete_an_event(
+    client: FlaskClient,
+    community1: Community,
+    member: User,
+    events: dict,
+    db: SQLAlchemy,
+) -> None:
+    event = events["coming"]
+    url = url_for("calendar.event", community_id=community1.slug, event_id=event.id)
+
+    assert 'id="modal-delete"' not in _page(client, member, url)
+    with client_login(client, member):
+        response = client.post(
+            url_for(
+                "calendar.event_delete", community_id=community1.slug, event_id=event.id
+            ),
+            data={"__action": "delete"},
+        )
+
+    assert response.status_code == 403
+    assert db.session.get(Event, event.id) is not None

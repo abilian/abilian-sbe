@@ -1,10 +1,26 @@
 {#- An event: when and where first, who posted it, then what it is and where to read
-    more; changing it in sight; the other events to come beside it. Drawn in
-    `mockups/templates/event.html`. -#}
+    more; adding it to one's own calendar in sight, changing and deleting it behind
+    ⋮; the other events to come beside it. Drawn in `mockups/templates/event.html`. -#}
 {% extends "ads_community.html" %}
 {% import "calendar/_events.html" as ev with context %}
 {% set kw = {"community_id": g.community.slug} %}
 {% block page_title %}{{ event.title }} · {{ _("Calendar") }} · {{ g.community.name }}{% endblock %}
+
+{% block overlays %}
+{% if may_delete %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-delete" aria-labelledby="delete-title">
+  <form method="post" action="{{ url_for('.event_delete', event_id=event.id, **kw) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="delete-title">{{ _("Delete “%(title)s”?", title=event.title) }}</h2></div>
+    <div class="ads-modal__body">{{ _("It goes from the community's calendar. This cannot be undone.") }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit" name="__action" value="delete">{{ icon("trash") }}{{ _("Delete") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+{% endblock %}
 {% block content %}
 <div class="ads-with-aside">
   <article class="ads-card" aria-labelledby="event-title">
@@ -16,7 +32,18 @@
           <h2 class="ads-card__title" id="event-title">{{ event.title }}</h2>
         </div>
       </div>
-      <a class="ads-btn" href="{{ url_for('.event_edit', event_id=event.id, **kw) }}">{{ icon("pencil") }}{{ _("Edit") }}</a>
+      <div class="ads-cluster ads-gap-sm">
+        <a class="ads-btn" href="{{ url_for('.event_file', event_id=event.id, **kw) }}" download>{{ icon("calendar-plus") }}{{ _("Add to my calendar") }}</a>
+        <details class="ads-dropdown">
+          <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the event') }}">{{ icon("dots-vertical") }}</summary>
+          <div class="ads-menu">
+            <a class="ads-menu__item" href="{{ url_for('.event_edit', event_id=event.id, **kw) }}">{{ icon("pencil") }}{{ _("Edit") }}</a>
+            {% if may_delete %}
+            <button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-delete">{{ icon("trash") }}{{ _("Delete the event") }}</button>
+            {% endif %}
+          </div>
+        </details>
+      </div>
     </div>
     <div class="ads-card__body ads-stack">
       <dl class="sbe-facts">

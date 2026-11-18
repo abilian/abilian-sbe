@@ -78,7 +78,7 @@ def test_another_communitys_event_is_not_found_here(
     db.session.commit()
     here = {"community_id": community1.slug, "event_id": event.id}
 
-    for endpoint in ("calendar.event", "calendar.event_edit"):
+    for endpoint in ("calendar.event", "calendar.event_edit", "calendar.event_file"):
         assert _get(client, member, endpoint, **here) == 404, endpoint
 
 

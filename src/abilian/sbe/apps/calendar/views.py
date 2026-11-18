@@ -1,25 +1,35 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
 """A community's calendar: its events to come or past, by month, the month at a
-glance beside them; an event; making and changing one."""
+glance beside them; an event, and adding it to one's own calendar; making,
+changing and deleting one."""
 
 from __future__ import annotations
 
 import calendar
 from datetime import date, datetime
+from typing import TYPE_CHECKING
 
 from flask import g, render_template, request
 from toolz import groupby
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, Forbidden
+from werkzeug.wrappers import Response
 
+from abilian.core.extensions.login import authenticated_user
+from abilian.core.util import utcnow
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint, in_community
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction
 
 from .forms import EventForm
+from .ics import event_ics
 from .models import Event
+
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
 
 blueprint = CommunityBlueprint(
     "calendar", __name__, url_prefix="/calendar", template_folder="templates"
@@ -83,6 +93,11 @@ def _shift(month: date, by: int) -> date:
     return date(index // 12, index % 12 + 1, 1)
 
 
+def can_delete(user: User, event: Event) -> bool:
+    """May `user` delete `event`? Who posted it, or the community's managers."""
+    return event.creator == user or can_manage(user, event.community)
+
+
 def month_weeks(month: date, events: list[Event]) -> list[list[tuple[date, list]]]:
     """The weeks of `month`, Monday first, each day with the events that start on
     it; days of the months around it fill the first and last weeks."""
@@ -104,6 +119,8 @@ class BaseEventView:
 
 
 class EventView(BaseEventView, views.ObjectView[Event, EventForm]):
+    """An event's page."""
+
     methods = ["GET", "HEAD"]
     Form = EventForm
     template = "calendar/event.html"
@@ -112,6 +129,7 @@ class EventView(BaseEventView, views.ObjectView[Event, EventForm]):
     def template_kwargs(self):
         kw = super().template_kwargs
         kw["event"] = self.obj
+        kw["may_delete"] = can_delete(authenticated_user(), self.obj)
         kw["others"] = (
             _events()
             .filter(Event.end > datetime.now(), Event.id != self.obj.id)
@@ -125,6 +143,18 @@ class EventView(BaseEventView, views.ObjectView[Event, EventForm]):
 event_view = EventView.as_view("event")
 views.default_view(blueprint, Event, "event_id", kw_func=default_view_kw)(event_view)
 route("/<int:event_id>/")(event_view)
+
+
+@route("/<int:event_id>/event.ics")
+def event_file(event_id: int) -> Response:
+    """The event as a file one's own calendar takes in."""
+    event = _events().filter(Event.id == event_id).first_or_404()
+    body = event_ics(event, url_for(event, _external=True), request.host, utcnow())
+    return Response(
+        body,
+        mimetype="text/calendar",
+        headers={"Content-Disposition": f'attachment; filename="event-{event.id}.ics"'},
+    )
 
 
 class EventCreateView(BaseEventView, views.ObjectCreate[Event, EventForm]):
@@ -164,3 +194,22 @@ class EventEditView(BaseEventView, views.ObjectEdit[Event, EventForm]):
 
 event_edit_view = EventEditView.as_view("event_edit", view_endpoint=".event")
 route("/<int:event_id>/edit")(event_edit_view)
+
+
+class EventDelete(BaseEventView, views.ObjectDelete[Event, EventForm]):
+    """Deleting an event, by who posted it or the community's managers."""
+
+    _message_success = _l("The event is deleted.")
+
+    def init_object(self, args, kwargs):
+        args, kwargs = super().init_object(args, kwargs)
+        if not can_delete(authenticated_user(), self.obj):
+            raise Forbidden
+        return args, kwargs
+
+    @property
+    def activity_target(self):
+        return self.obj.community
+
+
+route("/<int:event_id>/delete")(EventDelete.as_view("event_delete"))

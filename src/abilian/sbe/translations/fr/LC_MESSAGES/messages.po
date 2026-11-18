@@ -3226,3 +3226,21 @@ msgstr "fermer"
 
 msgid "To search without the mouse"
 msgstr "Pour chercher sans la souris"
+
+msgid "Add to my calendar"
+msgstr "Ajouter à mon agenda"
+
+msgid "More actions on the event"
+msgstr "Autres actions sur l’événement"
+
+msgid "Delete the event"
+msgstr "Supprimer l’événement"
+
+msgid "Delete “%(title)s”?"
+msgstr "Supprimer « %(title)s » ?"
+
+msgid "It goes from the community's calendar. This cannot be undone."
+msgstr "Il disparaît de l’agenda de la communauté. C’est définitif."
+
+msgid "The event is deleted."
+msgstr "L’événement est supprimé."
