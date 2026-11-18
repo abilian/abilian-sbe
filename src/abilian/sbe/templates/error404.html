@@ -1,0 +1,5 @@
+{#- Overrides Abilian Core's page. -#}
+{% extends "_error.html" %}
+{% block code %}404{% endblock %}
+{% block title %}{{ _("This page does not exist") }}{% endblock %}
+{% block message %}{{ _("Or no longer: what it showed may have been deleted, or moved.") }}{% endblock %}

@@ -1,0 +1,15 @@
+{#- A page that could not be shown, on the Abilian Design System: what happened, in
+    words, and the way back. On the centred frame, with no bar: the bar asks the
+    database, which may be what failed. Each error's page fills the blocks. -#}
+{% extends "ads_centered.html" %}
+{% block page_title %}{{ self.title() }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  <div class="ads-empty">
+    <div class="ads-empty__header">{% block code %}{% endblock %}</div>
+    <h1 class="ads-empty__title">{% block title %}{% endblock %}</h1>
+    <p class="ads-empty__subtitle">{% block message %}{% endblock %}</p>
+    <a class="ads-btn ads-btn--primary" href="{{ url_for('main.home') }}">{{ _("Back to my feed") }}</a>
+  </div>
+</div>
+{% endblock %}

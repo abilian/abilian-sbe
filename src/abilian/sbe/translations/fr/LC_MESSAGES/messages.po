@@ -2881,3 +2881,24 @@ msgstr "Paquets"
 
 msgid "Configuration"
 msgstr "Configuration"
+
+msgid "Back to my feed"
+msgstr "Revenir à mon fil"
+
+msgid "You may not see this page"
+msgstr "Vous n’avez pas accès à cette page"
+
+msgid "If you think you should, ask the people who run its community, or the site."
+msgstr "Si vous pensez devoir y avoir accès, demandez-le aux animateurs de sa communauté, ou aux administrateurs du site."
+
+msgid "This page does not exist"
+msgstr "Cette page n’existe pas"
+
+msgid "Or no longer: what it showed may have been deleted, or moved."
+msgstr "Ou plus : ce qu’elle montrait a peut-être été supprimé, ou déplacé."
+
+msgid "Something went wrong"
+msgstr "Quelque chose s’est mal passé"
+
+msgid "The fault is ours, not yours. Try again in a moment; if it keeps happening, tell the people who run the site."
+msgstr "L’erreur vient de nous, pas de vous. Réessayez dans un instant ; si elle se répète, prévenez les administrateurs du site."

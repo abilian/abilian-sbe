@@ -1,0 +1,5 @@
+{#- Overrides Abilian Core's page. -#}
+{% extends "_error.html" %}
+{% block code %}500{% endblock %}
+{% block title %}{{ _("Something went wrong") }}{% endblock %}
+{% block message %}{{ _("The fault is ours, not yours. Try again in a moment; if it keeps happening, tell the people who run the site.") }}{% endblock %}
