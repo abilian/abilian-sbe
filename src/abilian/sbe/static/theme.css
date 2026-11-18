@@ -809,3 +809,7 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 /* A switch whose label wraps keeps its track whole: in a flex row it shrank to a sliver
    (ADS request 31). */
 .ads-switch__track { flex: none; }
+
+/* A photo in an avatar, an image in a community's tile: the whole round or square,
+   cropped (ADS request 32 for the avatar). */
+.ads-avatar > img, .sbe-tile > img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }

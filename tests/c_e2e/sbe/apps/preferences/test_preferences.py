@@ -75,3 +75,17 @@ def test_a_weak_new_password_is_refused_under_its_field(
     html = unescape(response.get_data(as_text=True))
     assert 'id="password-error"' in html
     assert "at least 8 characters" in html
+
+
+def test_a_photo_takes_the_place_of_the_initials(
+    client: FlaskClient, user: User, db: SQLAlchemy
+) -> None:
+    photo = url_for("users.photo", user_id=user.id)
+    with client_login(client, user):
+        before = client.get(url_for("preferences.user")).get_data(as_text=True)
+        user.photo = b"a photo, as far as this page goes"
+        db.session.commit()
+        after = client.get(url_for("preferences.user")).get_data(as_text=True)
+
+    assert photo not in before
+    assert f'<img src="{photo}"' in after

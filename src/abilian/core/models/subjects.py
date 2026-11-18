@@ -23,7 +23,13 @@ from flask_login import UserMixin
 from flask_sqlalchemy.query import Query
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    backref,
+    column_property,
+    mapped_column,
+    relationship,
+)
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
 from sqlalchemy.types import (
     Boolean,
@@ -312,6 +318,11 @@ class User(Principal, UserMixin, Model):
     def __repr__(self) -> str:
         cls = self.__class__
         return f"<{cls.__module__}.{cls.__name__} id={self.id!r} email={self.email!r} at 0x{id(self):x}>"
+
+
+#: Whether the person has a photo, asked in the query that loads them: the photo
+#: itself is deferred, and reading it for each avatar of a list cost a query each.
+User.has_photo = column_property(User.__table__.c.photo.is_not(None))
 
 
 @listens_for(User, "mapper_configured", propagate=True)

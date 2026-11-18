@@ -37,14 +37,14 @@
       <div class="ads-card__head"><h2 class="ads-card__title" id="who">{{ _("Who I am") }}</h2></div>
       <div class="ads-card__body ads-stack">
         <div class="ads-media">
-          {% if user.photo %}<img class="ads-avatar ads-avatar--lg" src="{{ url_for('users.photo', user_id=user.id) }}" alt="">{% else %}{{ m.avatar(user, "ads-avatar--lg") }}{% endif %}
+          {{ m.avatar(user, "ads-avatar--lg") }}
           <div class="ads-stack ads-gap-sm">
             {#- Sent as soon as it is picked (`widgets/image.js`). -#}
             <div class="js-widget sbe-uploader" data-init-with="imageInput" data-init-params='{"width": 55, "height": 55, "resize_mode": "CROP"}'>
               <label class="ads-btn js-file-button">{{ icon("photo") }}{{ _("Change the photo") }}<input class="sbe-sr-only" type="file" name="{{ form.photo.name }}" accept="image/png, image/jpeg"></label>
               <div class="selected-files sbe-uploader__list"></div>
             </div>
-            {% if user.photo %}<label class="ads-check"><input type="checkbox" name="__{{ form.photo.name }}_delete__" value="0"> <span>{{ _("Remove the photo") }}</span></label>{% endif %}
+            {% if user.has_photo %}<label class="ads-check"><input type="checkbox" name="__{{ form.photo.name }}_delete__" value="0"> <span>{{ _("Remove the photo") }}</span></label>{% endif %}
             <small class="ads-help">{{ _("A square photo, in JPEG or PNG. Without one, your initials.") }}</small>
             {{ fields.errors(form.photo) }}
           </div>

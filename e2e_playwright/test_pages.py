@@ -239,7 +239,7 @@ def test_community_settings_save_a_choice_and_an_image(
 
     page.goto(settings, wait_until="networkidle")
     expect(page.locator('input[name="type"][value="participative"]')).to_be_checked()
-    expect(page.locator("#edit-form img.sbe-tile")).to_have_count(1)
+    expect(page.locator("#edit-form .sbe-tile img")).to_have_count(1)
     js_errors.assert_clean("the community settings")
 
 

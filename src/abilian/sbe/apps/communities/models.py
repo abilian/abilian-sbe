@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -53,6 +54,12 @@ if TYPE_CHECKING:
     from werkzeug.local import LocalProxy
 
 MEMBER = Role("member", label=_l("role_member"), assignable=False)
+
+#: The image a community is given when it is made, until it has its own.
+DEFAULT_IMAGE = Path(__file__).parent / "views" / "data" / "community.png"
+DEFAULT_IMAGE_MD5 = hashlib.md5(
+    DEFAULT_IMAGE.read_bytes(), usedforsecurity=False
+).hexdigest()
 VALID_ROLES = frozenset([READER, WRITER, MANAGER, MEMBER])
 
 
@@ -244,8 +251,15 @@ class Community(Entity):
             #   self.group = Group(name=self.name)
 
         if not self.image:
-            fn = Path(__file__).parent / "views" / "data" / "community.png"
-            self.image = Blob(fn.read_bytes())
+            self.image = Blob(DEFAULT_IMAGE.read_bytes())
+
+    @property
+    def own_image(self) -> Blob | None:
+        """Its image, unless it is the default one every community is given when
+        it is made: a community without its own shows its initial."""
+        if self.image and self.image.md5 != DEFAULT_IMAGE_MD5:
+            return self.image
+        return None
 
     @property
     def has_calendar(self) -> bool:

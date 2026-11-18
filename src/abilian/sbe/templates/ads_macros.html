@@ -1,15 +1,21 @@
 {#- Pieces the pages on the Abilian Design System share. The mockups in `mockups/`
     draw them first; `notes/ux/design-principles.md` says why they look so. -#}
 
-{#- A person: their initials on a tint of their colour, their name on hover and for
-    screen readers. -#}
+{#- A person: their photo, or else their initials on a tint of their colour; their
+    name on hover and for screen readers. `has_photo` is asked with the person, the
+    photo itself only by the browser. -#}
 {% macro avatar(user, size_class="ads-avatar--sm") -%}
-<span class="ads-avatar {{ size_class }} sbe-person {{ identity_class(user.name) }}" role="img" aria-label="{{ user.name }}" title="{{ user.name }}">{{ initials(user.name) }}</span>
+<span class="ads-avatar {{ size_class }} sbe-person {{ identity_class(user.name) }}" role="img" aria-label="{{ user.name }}" title="{{ user.name }}">
+  {%- if user.has_photo %}<img src="{{ url_for('users.photo', user_id=user.id) }}" alt="" loading="lazy">{% else %}{{ initials(user.name) }}{% endif -%}
+</span>
 {%- endmacro %}
 
-{#- A community: its initial on its colour. Squares for places, circles for people. -#}
+{#- A community: its image, or else its initial on its colour. Squares for places,
+    circles for people. -#}
 {% macro tile(community, size_class="") -%}
-<span class="sbe-tile {{ size_class }} {{ identity_class(community.id) }}" aria-hidden="true">{{ initials(community.name)[:1] }}</span>
+<span class="sbe-tile {{ size_class }} {{ identity_class(community.id) }}" aria-hidden="true">
+  {%- if community.own_image %}<img src="{{ community_image_url(community, s=64) }}" alt="" loading="lazy">{% else %}{{ initials(community.name)[:1] }}{% endif -%}
+</span>
 {%- endmacro %}
 
 {#- A moment: how long ago, the exact date on hover. -#}

@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import contextlib
-import hashlib
 from collections import Counter
 from functools import cache, wraps
 from io import BytesIO
 from operator import attrgetter
-from pathlib import Path
 from time import gmtime, strftime
 from typing import TYPE_CHECKING, Any
 
@@ -41,7 +39,13 @@ from abilian.sbe.apps.communities.actions import register_actions
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
 from abilian.sbe.apps.communities.decorators import can_manage, is_site_admin
 from abilian.sbe.apps.communities.forms import CommunityForm
-from abilian.sbe.apps.communities.models import MANAGER, Community, Membership
+from abilian.sbe.apps.communities.models import (
+    DEFAULT_IMAGE,
+    DEFAULT_IMAGE_MD5,
+    MANAGER,
+    Community,
+    Membership,
+)
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import content_repository
 from abilian.services import security as site_security
@@ -297,13 +301,9 @@ add_url(
 )
 
 # Community Image
-_DEFAULT_IMAGE = Path(__file__).parent / "data" / "community.png"
-_DEFAULT_IMAGE_MD5 = hashlib.md5(  # noqa: S324
-    _DEFAULT_IMAGE.read_bytes()
-).hexdigest()
 route("/_default_image")(
     image_views.StaticImageView.as_view(
-        "community_default_image", set_expire=True, image=_DEFAULT_IMAGE
+        "community_default_image", set_expire=True, image=DEFAULT_IMAGE
     )
 )
 
@@ -328,7 +328,7 @@ route("/<string:community_id>/image")(image)
 def image_url(community: Community | CommunityPresenter, **kwargs: Any) -> str:
     """Return proper URL for image url."""
     if not community or not community.image:
-        kwargs["md5"] = _DEFAULT_IMAGE_MD5
+        kwargs["md5"] = DEFAULT_IMAGE_MD5
         return url_for("communities.community_default_image", **kwargs)
 
     kwargs["community_id"] = community.slug

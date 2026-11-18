@@ -191,3 +191,37 @@ def test_back_to_the_initial_removes_the_image(
     db.session.expire_all()
     assert response.status_code == 302, response.get_data(as_text=True)[:500]
     assert community1.image is None
+
+
+def test_a_communitys_image_takes_the_place_of_its_initial(
+    community1: Community,
+    manager: User,
+    db: SQLAlchemy,
+    client: FlaskClient,
+    app: Application,
+) -> None:
+    ensure_services_started(["security"])
+    community1.image = Blob(b"an image, as far as this page goes")
+    db.session.commit()
+
+    with client_login(client, manager):
+        html = client.get(_settings_url(community1)).get_data(as_text=True)
+
+    tile = html.split('class="sbe-tile')[1].split("</span>")[0]
+    assert "<img" in tile
+    assert url_for("communities.image", community_id=community1.slug) in tile
+
+
+def test_the_default_image_leaves_the_initial(
+    community1: Community, manager: User, client: FlaskClient, app: Application
+) -> None:
+    """Every community is given the same image when it is made: not its own."""
+    ensure_services_started(["security"])
+    assert community1.image is not None
+
+    with client_login(client, manager):
+        html = client.get(_settings_url(community1)).get_data(as_text=True)
+
+    tile = html.split('class="sbe-tile')[1].split("</span>")[0]
+    assert "<img" not in tile
+    assert 'name="__image_delete__"' not in html
