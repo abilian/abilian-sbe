@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import base64
 import re
 from typing import TYPE_CHECKING
 
@@ -17,6 +18,12 @@ if TYPE_CHECKING:
     from playwright.sync_api import Page, Route
 
 COMMUNITY = "e2e-community"
+
+
+#: A one-pixel transparent PNG, for an image picked in a form.
+TINY_PNG = base64.b64decode(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
+)
 
 
 def _admin_group(page: Page, base_url: str) -> None:
@@ -211,24 +218,28 @@ def test_a_new_discussion_is_laid_out_and_checked(
     js_errors.assert_clean("the new discussion form")
 
 
-def test_community_settings_save_their_native_selects(
+def test_community_settings_save_a_choice_and_an_image(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
+    """The image is sent as soon as it is picked, and saved with the form."""
     page = logged_in
     settings = f"{base_url}/communities/{COMMUNITY}/settings"
     page.goto(settings, wait_until="networkidle")
 
     page.fill('textarea[name="description"]', "Described in a browser test.")
-    kind = page.locator('select[name="type"]')
-    kind.select_option(label="participative")
-    wanted = kind.input_value()
-    page.locator(
-        '#edit-form button[type="submit"], button[name="__action"]'
-    ).first.click()
+    page.locator('input[name="type"][value="participative"]').check()
+    page.locator(".js-file-button input").set_input_files(
+        {"name": "tile.png", "mimeType": "image/png", "buffer": TINY_PNG}
+    )
+    expect(page.locator('#edit-form input[type="hidden"][name="image"]')).to_have_count(
+        1
+    )
+    page.locator('#edit-form button[name="__action"]').click()
     page.wait_for_load_state("networkidle")
 
     page.goto(settings, wait_until="networkidle")
-    expect(page.locator('select[name="type"]')).to_have_value(wanted)
+    expect(page.locator('input[name="type"][value="participative"]')).to_be_checked()
+    expect(page.locator("#edit-form img.sbe-tile")).to_have_count(1)
     js_errors.assert_clean("the community settings")
 
 
@@ -374,26 +385,25 @@ def test_dynamic_rows_add_and_remove(
 def test_community_delete_asks_first_then_posts(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
-    """The one Alpine expression that calls a method, on a form found by x-ref."""
+    """Deleting a community is behind a dialog that names it."""
     page = logged_in
     page.goto(f"{base_url}/communities/{COMMUNITY}/settings", wait_until="networkidle")
 
-    destroy = page.locator("button", has_text="Destroy community")
-    confirm = page.get_by_role("button", name="Destroy", exact=True)
-    destroy.click()
-    expect(confirm).to_be_visible()
-    page.get_by_role("button", name="Cancel").last.click()
-    expect(confirm).to_be_hidden()
+    dialog = page.locator("#modal-delete")
+    page.locator('[data-modal-open="#modal-delete"]').click()
+    expect(dialog).to_be_visible()
+    dialog.get_by_role("button", name="Cancel").click()
+    expect(dialog).to_be_hidden()
 
     # The community stays: the suite needs it, so the post goes no further.
-    action = page.locator('form[x-ref="deleteForm"]').get_attribute("action")
+    action = dialog.locator("form").get_attribute("action")
     page.route(
         f"{base_url}{action}",
         lambda route: route.fulfill(status=200, body="stopped by the test"),
     )
-    destroy.click()
+    page.locator('[data-modal-open="#modal-delete"]').click()
     with page.expect_request(f"{base_url}{action}") as posted:
-        confirm.click()
+        dialog.get_by_role("button", name="Delete the community").click()
     assert posted.value.method == "POST"
 
     js_errors.assert_clean("the community delete dialog")

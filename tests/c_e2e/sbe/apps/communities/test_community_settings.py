@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 from flask import url_for
 from pytest import fixture
 
+from abilian.core.models.blob import Blob
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, READER
 from abilian.services import security_service
@@ -79,7 +80,6 @@ def test_a_manager_can_rename_their_community(
                 "name": "Renamed By Its Manager",
                 "description": "Renamed by a manager, not an admin",
                 "type": community1.type,
-                "linked_group": "",
                 "__action": "edit",
             },
         )
@@ -117,3 +117,77 @@ def test_a_site_admin_still_can(
         response = client.get(_settings_url(community1))
 
     assert response.status_code == 200
+
+
+def test_the_settings_page_says_what_each_choice_does(
+    community1: Community, manager: User, client: FlaskClient, app: Application
+) -> None:
+    ensure_services_started(["security"])
+
+    with client_login(client, manager):
+        html = client.get(_settings_url(community1)).get_data(as_text=True)
+
+    assert f'value="{community1.type}" checked' in html
+    assert 'name="has_wiki"' in html
+    assert 'id="modal-delete"' in html
+    assert "group" not in html.lower()
+
+
+def test_a_tool_left_unticked_is_taken_away(
+    community1: Community,
+    manager: User,
+    db: SQLAlchemy,
+    client: FlaskClient,
+    app: Application,
+) -> None:
+    """A box left unticked posts nothing, which turns the tool off."""
+    ensure_services_started(["security"])
+    community1.has_wiki = True
+    db.session.commit()
+
+    with client_login(client, manager):
+        response = client.post(
+            _settings_url(community1),
+            data={
+                "name": community1.name,
+                "description": "Still the same",
+                "type": "informative",
+                "has_forum": "y",
+                "has_documents": "y",
+                "__action": "edit",
+            },
+        )
+
+    db.session.expire_all()
+    assert response.status_code == 302, response.get_data(as_text=True)[:500]
+    assert not community1.has_wiki
+    assert community1.has_forum
+    assert community1.type == "informative"
+
+
+def test_back_to_the_initial_removes_the_image(
+    community1: Community,
+    manager: User,
+    db: SQLAlchemy,
+    client: FlaskClient,
+    app: Application,
+) -> None:
+    ensure_services_started(["security"])
+    community1.image = Blob(b"an image, as far as this test goes")
+    db.session.commit()
+
+    with client_login(client, manager):
+        response = client.post(
+            _settings_url(community1),
+            data={
+                "name": community1.name,
+                "description": "Still the same",
+                "type": community1.type,
+                "__image_delete__": "0",
+                "__action": "edit",
+            },
+        )
+
+    db.session.expire_all()
+    assert response.status_code == 302, response.get_data(as_text=True)[:500]
+    assert community1.image is None

@@ -97,7 +97,6 @@ def test_community_settings(
             "__action": "edit",
             "name": "edited community",
             "description": "my community",
-            "linked_group": "",
             "type": "participative",
         }
         response = client.post(url, data=data, follow_redirects=True)

@@ -1,91 +1,98 @@
-{% extends "default/object_edit.html" %}
-
-{% from "macros/box.html" import m_box_content with context %}
-{% from "macros/form.html" import  m_field with context %}
-
-{% block after_form %}
-  {# Alpine.js component replacing bootbox #}
-  <div x-data="{ showModal: false }">
-    {% call m_box_content(_("Delete community"), color="danger") %}
-
-      <p class="text-gray-700 mb-4">Supprimer la communauté (attention, action irréversible!)</p>
-
-      <form action="{{ url_for(".delete", community_id=g.community.slug) }}"
-            method="POST" enctype="multipart/form-data" x-ref="deleteForm">
-        {{ form.csrf_token }}
-        <input type="hidden" name="__action" value="delete" />
-        <div class="flex gap-2">
-          <button type="button" @click="showModal = true"
-                  class="btn btn-danger">
-            {{ _("Destroy community") }}
-          </button>
-        </div>
-      </form>
-
-    {%- endcall %}
-
-    {# Confirmation modal #}
-    <div x-show="showModal"
-         x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto"
-         aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        {# Background overlay #}
-        <div x-show="showModal"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             class="fixed inset-0 bg-gray-500/75 transition-opacity"
-             @click="showModal = false"></div>
-
-        {# Modal panel #}
-        <div x-show="showModal"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:max-w-lg sm:w-full">
-
-          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div class="sm:flex sm:items-start">
-              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                <h3 class="text-lg leading-6 font-medium text-red-600" id="modal-title">
-                  La suppression est irréversible
-                </h3>
-                <div class="mt-2">
-                  <p class="text-gray-700">
-                    Voulez-vous vraiment supprimer la communauté «{{ g.community.name }}»?
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-            <button type="button"
-                    @click="$refs.deleteForm.submit()"
-                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:w-auto sm:text-sm">
-              {{ _('Destroy') }}
-            </button>
-            <button type="button"
-                    @click="showModal = false"
-                    class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm">
-              {{ _('Cancel') }}
-            </button>
-          </div>
-        </div>
+{#- A community's settings, for its managers: its name, what it is for and its image;
+    whether its members write or mostly read; its tools. Beside it, its address, which
+    stays, and deleting it, behind a dialog that names it. Drawn in
+    `mockups/templates/community-settings.html`. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_post_fields.html" as fields %}
+{% set community = g.community %}
+{% block page_title %}{{ _("Settings") }} · {{ community.name }}{% endblock %}
+{% block content %}
+<div class="ads-with-aside">
+  <form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" enctype="multipart/form-data" aria-labelledby="settings">
+    {{ form.csrf_token }}
+    <div class="ads-card__head"><h2 class="ads-card__title" id="settings">{{ _("The community's settings") }}</h2></div>
+    <div class="ads-card__body ads-stack">
+      <div class="ads-field">
+        <label class="ads-label ads-label--required" for="{{ form.name.id }}">{{ _("Name") }}</label>
+        <input class="ads-input" id="{{ form.name.id }}" name="{{ form.name.name }}" type="text" value="{{ form.name.data or '' }}" required {{ fields.invalid(form.name) }}>
+        {{ fields.errors(form.name) }}
       </div>
+      <div class="ads-field">
+        <label class="ads-label ads-label--required" for="{{ form.description.id }}">{{ _("What it is for") }}</label>
+        <textarea class="ads-textarea" id="{{ form.description.id }}" name="{{ form.description.name }}" rows="3" maxlength="500" required aria-describedby="description-help{% if form.description.errors %} {{ form.description.id }}-error{% endif %}" {% if form.description.errors %}aria-invalid="true"{% endif %}>{{ form.description.data or "" }}</textarea>
+        <small class="ads-help" id="description-help">{{ _("A sentence, under its name, on its home page and in the list of communities.") }}</small>
+        {{ fields.errors(form.description) }}
+      </div>
+      <div class="ads-field">
+        <span class="ads-label">{{ _("Its image") }}</span>
+        <div class="ads-media">
+          {% if community.image %}<img class="sbe-tile" src="{{ community_image_url(community, s=64) }}" alt="">{% else %}{{ m.tile(community) }}{% endif %}
+          <div class="ads-stack ads-gap-sm">
+            {#- Sent as soon as it is picked (`widgets/image.js`). -#}
+            <div class="js-widget sbe-uploader" data-init-with="imageInput" data-init-params='{"width": 64, "height": 64, "resize_mode": "CROP"}'>
+              <label class="ads-btn js-file-button">{{ icon("photo") }}{{ _("Change the image") }}<input class="sbe-sr-only" type="file" name="{{ form.image.name }}" accept="image/png, image/jpeg"></label>
+              <div class="selected-files sbe-uploader__list"></div>
+            </div>
+            {#- The field's own marker: the image saved is removed. -#}
+            {% if community.image %}<label class="ads-check"><input type="checkbox" name="__{{ form.image.name }}_delete__" value="0"> <span>{{ _("Back to the initial") }}</span></label>{% endif %}
+          </div>
+        </div>
+        {{ fields.errors(form.image) }}
+      </div>
+      <fieldset class="ads-stack ads-gap-sm sbe-fieldset">
+        <legend class="ads-label">{{ _("Its members") }}</legend>
+        {% for value, label, note in [
+          ("participative", _("Take part"), _("They add documents, start discussions and may send them to everyone by e-mail.")),
+          ("informative", _("Mostly read"), _("They read the documents and discuss; only the managers add documents and write to everyone by e-mail.")),
+        ] %}
+        <label class="ads-choice"><input type="radio" name="{{ form.type.name }}" value="{{ value }}" {{ "checked" if form.type.data == value }}>
+          <span>{{ label }}<span class="ads-choice__note">{{ note }}</span></span></label>
+        {% endfor %}
+      </fieldset>
+      <fieldset class="ads-stack ads-gap-sm sbe-fieldset">
+        <legend class="ads-label">{{ _("Its tools") }}</legend>
+        {% for field, label in [(form.has_forum, _("Discussions")), (form.has_documents, _("Documents")), (form.has_wiki, _("Wiki"))] %}
+        <label class="ads-check"><input type="checkbox" name="{{ field.name }}" value="y" {{ "checked" if field.data }}> <span>{{ label }}</span></label>
+        {% endfor %}
+        <small class="ads-help">{{ _("A tool taken away leaves the tabs; what it holds is kept, and comes back with it.") }}</small>
+      </fieldset>
     </div>
-  </div>
+    <div class="ads-card__foot ads-cluster ads-gap-sm">
+      <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="edit">{{ _("Save") }}</button>
+      <a class="ads-btn ads-btn--ghost" href="{{ url_for('wall.index', community_id=community.slug) }}">{{ _("Cancel") }}</a>
+    </div>
+  </form>
 
+  <aside class="ads-stack" aria-label="{{ _('Its address, and deleting it') }}">
+    <section class="ads-card" aria-labelledby="address">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="address">{{ _("Its address") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <code class="sbe-wrap">{{ url_for('wall.index', community_id=community.slug) }}</code>
+        <p class="ads-muted">{{ _("It does not change with the name: the links already sent stay good.") }}</p>
+      </div>
+    </section>
+    <section class="ads-card" aria-labelledby="delete">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="delete">{{ _("Delete the community") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <p class="ads-muted">{{ _("Its discussions, its documents and its wiki go for all its members. This cannot be undone.") }}</p>
+        <button class="ads-btn ads-btn--danger" type="button" data-modal-open="#modal-delete">{{ icon("trash") }}{{ _("Delete “%(name)s”", name=community.name) }}</button>
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}
+
+{% block overlays %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-delete" aria-labelledby="modal-delete-title">
+  <form method="post" action="{{ url_for('.delete', community_id=community.slug) }}">
+    {{ form.csrf_token }}
+    <input type="hidden" name="__action" value="delete">
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-delete-title">{{ _("Delete “%(name)s”?", name=community.name) }}</h2></div>
+    <div class="ads-modal__body"><p>{{ _("Its discussions, its documents and its wiki go for its %(num)d members. This cannot be undone.", num=community.membership_count) }}</p></div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit">{{ _("Delete the community") }}</button>
+    </div>
+  </form>
+</dialog>
 {% endblock %}

@@ -2985,3 +2985,63 @@ msgstr "Un lecteur le voit ; un contributeur peut aussi ajouter et modifier ; un
 
 msgid "You cannot take the manager role away from yourself here: you would no longer manage this folder."
 msgstr "Vous ne pouvez pas vous retirer le rôle de manager ici : vous ne géreriez plus ce dossier."
+
+msgid "The community's settings"
+msgstr "Paramètres de la communauté"
+
+msgid "What it is for"
+msgstr "À quoi elle sert"
+
+msgid "A sentence, under its name, on its home page and in the list of communities."
+msgstr "Une phrase, sous son nom, sur sa page d’accueil et dans la liste des communautés."
+
+msgid "Its image"
+msgstr "Son image"
+
+msgid "Change the image"
+msgstr "Changer l’image"
+
+msgid "Back to the initial"
+msgstr "Revenir à l’initiale"
+
+msgid "Its members"
+msgstr "Ses membres"
+
+msgid "Take part"
+msgstr "Participent"
+
+msgid "They add documents, start discussions and may send them to everyone by e-mail."
+msgstr "Ils déposent des documents, lancent des discussions et peuvent les envoyer par e-mail à tous."
+
+msgid "Mostly read"
+msgstr "Lisent surtout"
+
+msgid "They read the documents and discuss; only the managers add documents and write to everyone by e-mail."
+msgstr "Ils lisent les documents et discutent ; seuls les animateurs déposent des documents et écrivent à tous par e-mail."
+
+msgid "Its tools"
+msgstr "Ses outils"
+
+msgid "A tool taken away leaves the tabs; what it holds is kept, and comes back with it."
+msgstr "Un outil retiré disparaît des onglets ; ce qu’il contient est gardé, et revient avec lui."
+
+msgid "Its address, and deleting it"
+msgstr "Son adresse, et sa suppression"
+
+msgid "Its address"
+msgstr "Son adresse"
+
+msgid "It does not change with the name: the links already sent stay good."
+msgstr "Elle ne change pas avec le nom : les liens déjà envoyés restent bons."
+
+msgid "Delete the community"
+msgstr "Supprimer la communauté"
+
+msgid "Its discussions, its documents and its wiki go for all its members. This cannot be undone."
+msgstr "Ses discussions, ses documents et son wiki disparaissent pour tous ses membres. C’est définitif."
+
+msgid "Delete “%(name)s”"
+msgstr "Supprimer « %(name)s »"
+
+msgid "Its discussions, its documents and its wiki go for its %(num)d members. This cannot be undone."
+msgstr "Ses discussions, ses documents et son wiki disparaissent pour ses %(num)d membres. C’est définitif."
