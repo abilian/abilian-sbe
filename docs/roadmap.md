@@ -39,7 +39,7 @@
 
 1. **UI Modernization** (see [the Sept 2026 plan](../notes/plan-2026-09.md)):
 
-   - [x] Transition to modern UI frameworks: [Flask-Vite](https://github.com/abilian/flask-vite), [Tailwind CSS](https://tailwindcss.com/) and [Alpine.js](https://alpinejs.dev/). htmx was not adopted (see: ADR 006).
+   - [x] Transition to modern UI frameworks: [Flask-Vite](https://github.com/abilian/flask-vite), [Tailwind CSS](https://tailwindcss.com/) and [Alpine.js](https://alpinejs.dev/). htmx was not adopted (see: ADR 006). Tailwind was then replaced by the Abilian Design System (ADR 012).
    - [x] Streamline the front-end development process: `make front` builds the assets, and they ship in the wheel.
    - [x] Remove the LESS/Closure/flask-assets pipeline and the Bootstrap compatibility layer.
    - [x] Remove jQuery, its plugins, and every inline script and event handler.
