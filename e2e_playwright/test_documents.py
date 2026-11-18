@@ -252,7 +252,7 @@ def test_permissions_page(logged_in: Page, base_url: str, js_errors: JSErrors) -
     expect(dialog).to_be_visible()
     _pick(page, "#user-select", "Rolf", "rolf.roleholder@example.com")
     dialog.locator("#role-select").select_option("writer")
-    dialog.get_by_role("button", name="Add local role").click()
+    dialog.get_by_role("button", name="Give the role").click()
     page.wait_for_load_state("networkidle")
 
     expect(page.get_by_role("link", name="Rolf Roleholder").first).to_be_visible()

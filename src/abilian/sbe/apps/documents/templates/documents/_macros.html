@@ -1,7 +1,0 @@
-{% macro m_breadcrumbs2(breadcrumbs) %}
-  {% for obj in breadcrumbs[0:-1] %}
-    <a href="{{ obj.path }}" class="text-blue-600 hover:text-blue-800">{{ obj.label }}</a>
-    <span class="mx-2 text-gray-400">/</span>
-  {% endfor %}
-  <span class="text-gray-700">{{ breadcrumbs[-1].label }}</span>
-{% endmacro %}

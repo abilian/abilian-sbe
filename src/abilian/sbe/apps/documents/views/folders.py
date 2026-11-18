@@ -36,13 +36,12 @@ from flask import (
 )
 from loguru import logger
 from markupsafe import Markup
-from sqlalchemy import func
 from werkzeug.exceptions import BadRequest, InternalServerError
 from xlwt import Workbook, easyxf
 
 from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated
-from abilian.core.models.subjects import Group, User
+from abilian.core.models.subjects import User
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _n
@@ -293,11 +292,6 @@ def permissions(user: User, folder_id):
         ),
         "local_",
     )
-    groups_and_local_roles = [
-        t for t in local_roles_assignments if isinstance(t[0], Group)
-    ]
-
-    groups_and_inherited_roles = ()
     inherited_roles_assignments = (
         folder.get_inherited_roles_assignments() if folder.inherit_security else ()
     )
@@ -309,23 +303,11 @@ def permissions(user: User, folder_id):
         ),
         "inherited_",
     )
-    if folder.inherit_security:
-        groups_and_inherited_roles = [
-            t for t in inherited_roles_assignments if isinstance(t[0], Group)
-        ]
-
-    query = Group.query
-    query = query.order_by(func.lower(Group.name))
-    all_groups = query.all()
 
     class EntryPresenter:
         _USER_FMT = (
             '<a href="{{ url_for("social.user", user_id=user.id) }}">'
             "{{ user.name }}</a>"
-        )
-        _GROUP_FMT = (
-            '<a href="{{ url_for("social.group_home", group_id=group.id)'
-            ' }}">{{ group.name }}</a>'
         )
 
         def __init__(self, e) -> None:
@@ -357,7 +339,7 @@ def permissions(user: User, folder_id):
             if self.entry.user:
                 principal = render(self._USER_FMT, user=self.entry.user)
             elif self.entry.group:
-                principal = render(self._GROUP_FMT, group=self.entry.group)
+                principal = self.entry.group.name
 
             self.msg = Markup(
                 msg.format(
@@ -376,10 +358,7 @@ def permissions(user: User, folder_id):
         "users_and_local_roles": users_and_local_roles,
         "inherited_listing": inherited_listing,
         "users_and_inherited_roles": users_and_inherited_roles,
-        "groups_and_local_roles": groups_and_local_roles,
-        "groups_and_inherited_roles": groups_and_inherited_roles,
         "audit_entries": audit_entries,
-        "all_groups": all_groups,
         "breadcrumbs": bc,
     }
     return render_template("documents/permissions.html", **ctx)
@@ -436,88 +415,42 @@ def permissions_update(user: User, folder_id):
             url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
         )
 
-    if action == "add-group-role":
-        role = request.form["role"].lower()
-        group_id = int(request.form["group"])
-        group = Group.query.get_or_404(group_id)
-
-        security.grant_role(group, role, folder)
-        reindex_tree(folder)
-        db.session.commit()
-        return redirect(
-            url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
-        )
-
     # The delete buttons send their action as their name, "role:id" as value.
-    action = next(
-        (a for a in ("delete-user-role", "delete-group-role") if a in request.form),
-        None,
-    )
-    if action is None:
+    if "delete-user-role" not in request.form:
         msg = f"Unknown action: {request.form.get('action')!r}"
         raise BadRequest(msg)
-    role, object_id = request.form[action].split(":")
+    role, object_id = request.form["delete-user-role"].split(":")
     role = role.lower()
     object_id = int(object_id)
 
-    if action == "delete-user-role":
-        member = User.query.get_or_404(object_id)
-        # remove role in a subtransaction, to prevent manager shoot himself in the
-        # foot
-        transaction = db.session.begin_nested()
-        security.ungrant_role(member, role, folder)
+    member = User.query.get_or_404(object_id)
+    # remove role in a subtransaction, to prevent manager shoot himself in the
+    # foot
+    transaction = db.session.begin_nested()
+    security.ungrant_role(member, role, folder)
 
-        if (
-            member == user
-            and role == "manager"
-            and not has_permission(user, "manage", folder, inherit=True)
-        ):
-            transaction.rollback()
-            flash(
-                _(
-                    'Cannot remove "manager" local role for yourself: you '
-                    'don\'t have "manager" role (either by security inheritance '
-                    "or by group membership)"
-                ),
-                "error",
-            )
-        else:
-            reindex_tree(folder)
-            transaction.commit()
-            flash(
-                _("Role {role} for user {user} removed on folder {folder}").format(
-                    role=role, user=member.name, folder=folder.name
-                ),
-                "success",
-            )
-    elif action == "delete-group-role":
-        group = Group.query.get_or_404(object_id)
-        # remove role in a subtransaction, to prevent manager shoot himself in the
-        # foot
-        transaction = db.session.begin_nested()
-        security.ungrant_role(group, role, folder)
-
-        if role == "manager" and not has_permission(
-            user, "manage", folder, inherit=True
-        ):
-            transaction.rollback()
-            flash(
-                _(
-                    'Cannot remove "manager" local role for group "{group}": you'
-                    ' don\'t have "manager" role by security inheritance or by '
-                    "local role"
-                ).format(group=group.name),
-                "error",
-            )
-        else:
-            flash(
-                _("Role {role} for group {group} removed on folder {folder}").format(
-                    role=role, group=group.name, folder=folder.name
-                ),
-                "success",
-            )
-            reindex_tree(folder)
-            transaction.commit()
+    if (
+        member == user
+        and role == "manager"
+        and not has_permission(user, "manage", folder, inherit=True)
+    ):
+        transaction.rollback()
+        flash(
+            _(
+                "You cannot take the manager role away from yourself here: you "
+                "would no longer manage this folder."
+            ),
+            "error",
+        )
+    else:
+        reindex_tree(folder)
+        transaction.commit()
+        flash(
+            _("Role {role} for user {user} removed on folder {folder}").format(
+                role=role, user=member.name, folder=folder.name
+            ),
+            "success",
+        )
 
     db.session.commit()
     return redirect(

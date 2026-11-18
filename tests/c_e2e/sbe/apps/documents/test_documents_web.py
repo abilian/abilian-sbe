@@ -142,8 +142,6 @@ def test_role_form_with_a_missing_field_is_a_bad_request(
     incomplete_forms = [
         {"action": "add-user-role", "user": user.id},
         {"action": "add-user-role", "role": "reader"},
-        {"action": "add-group-role", "group": 1},
-        {"action": "add-group-role", "role": "reader"},
     ]
 
     with client_login(client, user):
@@ -155,10 +153,8 @@ def test_role_form_with_a_missing_field_is_a_bad_request(
     "data",
     [
         {"action": "add-user-role", "role": "reader", "user": 999999},
-        {"action": "add-group-role", "role": "reader", "group": 999999},
         # The delete buttons: their name is the action, their value role:id.
         {"delete-user-role": "reader:999999"},
-        {"delete-group-role": "reader:999999"},
     ],
 )
 def test_a_role_form_for_an_unknown_principal_is_not_found(

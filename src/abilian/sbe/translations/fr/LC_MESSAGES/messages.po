@@ -2916,3 +2916,72 @@ msgstr "Aucun fichier dans cette communauté pour l’instant."
 
 msgid "Everything in it"
 msgstr "Tout son contenu"
+
+msgid "Filter by name or address"
+msgstr "Filtrer par nom ou adresse"
+
+msgid "They may not open a folder on the way to this one"
+msgstr "Un des dossiers qui y mènent ne lui est pas ouvert"
+
+msgid "Cannot reach it"
+msgstr "N’y accède pas"
+
+msgid "Take the role away from %(name)s"
+msgstr "Retirer son rôle à %(name)s"
+
+msgid "Who has access"
+msgstr "Qui y a accès"
+
+msgid "Export (spreadsheet)"
+msgstr "Exporter (tableur)"
+
+msgid "The community's members, as on the folder above"
+msgstr "Les membres de la communauté, comme pour le dossier parent"
+
+msgid "And the people given a role here."
+msgstr "Et les personnes qui ont un rôle ici."
+
+msgid "Keep it to the people listed here"
+msgstr "Le réserver aux personnes listées ici"
+
+msgid "Only the people given a role here"
+msgstr "Seulement les personnes qui ont un rôle ici"
+
+msgid "The community's other members do not see it."
+msgstr "Les autres membres de la communauté ne le voient pas."
+
+msgid "Open it to the community's members"
+msgstr "L’ouvrir aux membres de la communauté"
+
+msgid "People given a role here"
+msgstr "Les personnes qui ont un rôle ici"
+
+msgid "Give someone a role"
+msgstr "Donner un rôle à quelqu’un"
+
+msgid "Nobody yet."
+msgstr "Personne pour l’instant."
+
+msgid "Through the folder above"
+msgstr "Par le dossier parent"
+
+msgid "Nobody."
+msgstr "Personne."
+
+msgid "Changes to the permissions"
+msgstr "Les changements de droits"
+
+msgid "None yet."
+msgstr "Aucun pour l’instant."
+
+msgid "Give someone a role on “%(name)s”"
+msgstr "Donner un rôle sur « %(name)s »"
+
+msgid "Give the role"
+msgstr "Donner le rôle"
+
+msgid "A reader sees it; a writer also adds and changes; a manager also decides who has access."
+msgstr "Un lecteur le voit ; un contributeur peut aussi ajouter et modifier ; un manager décide aussi de qui y a accès."
+
+msgid "You cannot take the manager role away from yourself here: you would no longer manage this folder."
+msgstr "Vous ne pouvez pas vous retirer le rôle de manager ici : vous ne géreriez plus ce dossier."
