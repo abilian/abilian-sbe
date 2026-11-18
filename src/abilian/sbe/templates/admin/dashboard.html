@@ -1,5 +1,6 @@
 {#- The administration's first page: the site at a glance (its accounts, its sign-ins,
-    its communities, its files), the accounts and the sign-ins over time, what was
+    its communities, its files), what it depends on and whether it answers
+    (`admin/panels/health.py`), the accounts and the sign-ins over time, what was
     made lately; beside it, who signed in last. Overrides Abilian Core's page; drawn
     in `mockups/templates/admin.html`, which has no charts. -#}
 {% extends "admin/_ads.html" %}
@@ -23,6 +24,18 @@
   </div>
   <div class="ads-with-aside">
     <div class="ads-stack">
+      <section class="ads-card" aria-labelledby="system">
+        <div class="ads-card__head"><h2 class="ads-card__title" id="system">{{ _("What the site depends on") }}</h2></div>
+        <ul class="ads-list">
+          {% for check in health %}
+          <li>
+            <span class="ads-fill sbe-lines"><strong>{{ check.name }}</strong><span class="ads-muted">{{ check.note }}</span></span>
+            {% if check.ok %}<span class="ads-status ads-status--success"><span class="ads-status__dot"></span>{{ _("Running") }}</span>
+            {% else %}<span class="ads-status ads-tone-warning"><span class="ads-status__dot"></span>{{ _("To look at") }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
       <section class="ads-card" aria-labelledby="chart-users-title">
         <div class="ads-card__head"><h2 class="ads-card__title" id="chart-users-title">{{ _("Accounts") }}</h2></div>
         <div class="ads-card__body"><div id="chart-users" class="chart"></div></div>

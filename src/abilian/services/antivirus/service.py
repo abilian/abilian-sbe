@@ -11,6 +11,7 @@ import pathlib
 from loguru import logger
 
 from abilian.core.models.blob import Blob
+from abilian.i18n import _
 from abilian.services.base import Service
 
 try:
@@ -62,6 +63,16 @@ class AntiVirusService(Service):
     """Antivirus service."""
 
     name = "antivirus"
+
+    def problem(self) -> str | None:
+        """Why files are not scanned, or None when ClamAV answers."""
+        if not clamd:
+            return _("ClamAV is not installed")
+        try:
+            clamd.ping()
+        except ClamdError as e:
+            return str(e)
+        return None
 
     def scan(self, file_or_stream):
         """

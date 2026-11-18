@@ -3275,3 +3275,57 @@ msgstr "Tapez pour chercher partout"
 
 msgid "from any page"
 msgstr "depuis n’importe quelle page"
+
+msgid "What the site depends on"
+msgstr "Ce dont le site dépend"
+
+msgid "Running"
+msgstr "En marche"
+
+msgid "To look at"
+msgstr "À voir"
+
+msgid "Database"
+msgstr "Base de données"
+
+msgid "Task queue"
+msgstr "File de tâches"
+
+msgid "Redis is not configured."
+msgstr "Redis n’est pas configuré."
+
+msgid "Redis answers."
+msgstr "Redis répond."
+
+msgid "Document conversion"
+msgstr "Conversion des documents"
+
+msgid "Missing: %(tools)s."
+msgstr "Manque : %(tools)s."
+
+msgid "Antivirus"
+msgstr "Antivirus"
+
+msgid "ClamAV is not installed"
+msgstr "ClamAV n’est pas installé"
+
+msgid "Files are not scanned: %(why)s."
+msgstr "Les fichiers ne sont pas analysés : %(why)s."
+
+msgid "ClamAV answers."
+msgstr "ClamAV répond."
+
+msgid "Search index"
+msgstr "Index de recherche"
+
+msgid "The index is not open."
+msgstr "L’index n’est pas ouvert."
+
+msgid "%(count)d objects."
+msgstr "%(count)d objets."
+
+msgid "Sending e-mails"
+msgstr "Envoi des e-mails"
+
+msgid "Sending is turned off."
+msgstr "L’envoi est désactivé."

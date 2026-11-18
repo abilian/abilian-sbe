@@ -69,6 +69,8 @@ def test_dashboard_chart_zooms_on_a_drag(logged_in: Page, base_url: str) -> None
     logged_in.goto(f"{base_url}/admin/dashboard", wait_until="networkidle")
     plot = logged_in.locator("#chart-users .u-over")
     plot.wait_for(state="visible", timeout=15_000)
+    # Under the overview's first cards: the mouse only reaches what is on screen.
+    plot.scroll_into_view_if_needed()
 
     span = "() => { const s = document.getElementById('chart-users').uplot.scales.x; return s.max - s.min; }"
     before = logged_in.evaluate(span)

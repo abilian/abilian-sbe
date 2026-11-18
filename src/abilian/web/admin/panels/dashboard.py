@@ -1,6 +1,6 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-"""Admin dashboard: user growth and connection activity.
+"""Admin dashboard: what the site depends on, user growth and connection activity.
 
 The charts are drawn by uPlot, which wants columnar data -- one shared array of
 timestamps per chart, then one array of values per series -- so that is the
@@ -23,6 +23,7 @@ from abilian.i18n import _, _l
 from abilian.services.audit import CREATION, AuditEntry
 from abilian.services.auth.models import LoginSession
 from abilian.web.admin import AdminPanel
+from abilian.web.admin.panels.health import site_health
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
@@ -113,6 +114,7 @@ class DashboardPanel(AdminPanel):
 
         return render_template(
             "admin/dashboard.html",
+            health=site_health(),
             stats=stats,
             users=users,
             connections=connections,
