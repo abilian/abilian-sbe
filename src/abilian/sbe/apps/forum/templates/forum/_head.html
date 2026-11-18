@@ -1,0 +1,18 @@
+{#- The head of a community's discussions, on each of their views: the views as pills,
+    the one shown current, and starting a discussion. -#}
+{% macro head(current) %}
+{% set kw = {"community_id": g.community.slug} %}
+<div class="ads-card__head ads-spread">
+  <ul class="ads-pills" aria-label="{{ _('Which discussions') }}">
+    {% for view, url, label in [
+      ("latest", url_for("forum.index", **kw), _("Latest")),
+      ("week", url_for("forum.index", filter="week", **kw), _("Most read this week")),
+      ("archives", url_for("forum.archives", **kw), _("By month")),
+      ("attachments", url_for("forum.attachments", **kw), _("Attachments")),
+    ] %}
+    <li><a class="ads-pill" href="{{ url }}" {{ 'aria-current="page"' | safe if view == current }}>{{ label }}</a></li>
+    {% endfor %}
+  </ul>
+  <a class="ads-btn ads-btn--primary" href="{{ url_for('forum.new_thread', **kw) }}">{{ icon("message-plus") }}{{ _("New discussion") }}</a>
+</div>
+{% endmacro %}

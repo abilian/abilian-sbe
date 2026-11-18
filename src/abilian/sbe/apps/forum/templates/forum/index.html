@@ -2,19 +2,11 @@
     filters as pills, a filter on titles, starting a discussion. Drawn in
     `mockups/templates/forum.html`. -#}
 {% extends "ads_community.html" %}
+{% import "forum/_head.html" as f with context %}
 {% block page_title %}{{ _("Discussions") }} · {{ g.community.name }}{% endblock %}
 {% block content %}
-{% set here = url_for("forum.index", community_id=g.community.slug) %}
 <div class="ads-card">
-  <div class="ads-card__head ads-spread">
-    <ul class="ads-pills">
-      <li><a class="ads-pill" href="{{ here }}" {{ 'aria-current="page"' | safe if not filter }}>{{ _("Latest") }}</a></li>
-      <li><a class="ads-pill" href="{{ url_for('forum.index', community_id=g.community.slug, filter='week') }}" {{ 'aria-current="page"' | safe if filter == "week" }}>{{ _("Most read this week") }}</a></li>
-      <li><a class="ads-pill" href="{{ url_for('forum.archives', community_id=g.community.slug) }}">{{ _("By month") }}</a></li>
-      <li><a class="ads-pill" href="{{ url_for('forum.attachments', community_id=g.community.slug) }}">{{ _("Attachments") }}</a></li>
-    </ul>
-    <a class="ads-btn ads-btn--primary" href="{{ url_for('forum.new_thread', community_id=g.community.slug) }}">{{ icon("message-plus") }}{{ _("New discussion") }}</a>
-  </div>
+  {{ f.head("week" if filter == "week" else "latest") }}
   {#- Narrows the threads to those whose title has the words, across all of the
       community's threads, on the server. -#}
   <div class="sbe-toolbar">

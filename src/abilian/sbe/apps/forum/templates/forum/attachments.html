@@ -1,50 +1,29 @@
-{% extends "forum/_base.html" %}
-
-{% from "macros/box.html" import m_box_menu, m_box_content %}
-{% from "forum/_macros.html" import m_postattachments %}
-{% from "forum/_macros.html" import forum_menu %}
-
-{% block forumcontent %}
-  <div class="w-full">
-    <div class="mb-6">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="text-gray-500 text-sm">{{ _("Showing :") }}</span>
-        {%- set global_actions = actions.for_category('forum:global') %}
-        {{ forum_menu(global_actions) }}
-      </div>
-    </div>
-
-    {% for month, posts in grouped_posts %}
-      <div class="mb-8">
-        <h2 class="text-xl font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">{{ month }}</h2>
-        <div class="overflow-x-auto">
-          <table class="min-w-full">
-            <thead>
-              <tr class="border-b-2 border-gray-200">
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider w-1/3">
-                  {{ _("Topic") }}
-                </th>
-                <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider w-20">
-                  {{ _("Owner") }}
-                </th>
-                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  {{ _("Document") }}
-                </th>
-                <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider w-24">
-                  {{ _("Size") }}
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              {% for post in posts %}
-                {{ m_postattachments(post) }}
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    {% else %}
-      <p class="text-gray-500 py-8 text-center">{{ _("No attachment has been posted to this community yet") }}</p>
-    {% endfor %}
-  </div>
+{#- The files attached to a community's discussions, by month, newest first: each with
+    its size, who attached it, when, and in which discussion. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_head.html" as f with context %}
+{% block page_title %}{{ _("Attachments") }} · {{ _("Discussions") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  {{ f.head("attachments") }}
+  {% for month, posts in grouped_posts %}
+  <section aria-labelledby="month-{{ loop.index }}">
+    <h2 class="ads-card__body sbe-section-title" id="month-{{ loop.index }}">{{ month }}</h2>
+    <ul class="ads-list">
+      {% for post in posts %}{% for attachment in post.attachments %}
+      <li>
+        {{ file_icon(attachment.name) }}
+        <span class="ads-fill sbe-lines">
+          <span><a class="sbe-quiet" href="{{ url_for(attachment) }}">{{ attachment.name }}</a> <span class="ads-muted">{{ attachment.content_length | filesize }}</span></span>
+          <span class="ads-muted ads-cluster ads-gap-sm">{{ m.avatar(post.creator, "ads-avatar--xs") }}<span>{{ post.creator.name }} · {{ _("in") }} <a href="{{ url_for(post.thread) }}">{{ post.thread.title }}</a></span></span>
+        </span>
+        <span class="ads-muted">{{ m.time(post.created_at) }}</span>
+      </li>
+      {% endfor %}{% endfor %}
+    </ul>
+  </section>
+  {% else %}
+  <p class="ads-card__body ads-muted">{{ _("No file has been attached to a discussion in this community yet.") }}</p>
+  {% endfor %}
+</div>
 {% endblock %}

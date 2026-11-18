@@ -109,9 +109,9 @@ def test_referenced_assets_resolve_in_production_mode(
             )
         )
 
-    # A page still on Tailwind (the forum's archives), and one on the Abilian Design
+    # A page still on Tailwind (one's preferences), and one on the Abilian Design
     # System (the community's home).
-    legacy = static_urls("forum.archives")
+    legacy = static_urls("preferences.user")
     assert any("/vite/" in url for url in legacy), "page linked no Vite assets"
     assert any("font-awesome" in url for url in legacy), "page linked no icon font"
     ads = static_urls("wall.index")

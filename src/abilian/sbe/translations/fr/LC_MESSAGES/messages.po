@@ -2902,3 +2902,15 @@ msgstr "Quelque chose s’est mal passé"
 
 msgid "The fault is ours, not yours. Try again in a moment; if it keeps happening, tell the people who run the site."
 msgstr "L’erreur vient de nous, pas de vous. Réessayez dans un instant ; si elle se répète, prévenez les administrateurs du site."
+
+msgid "Which discussions"
+msgstr "Quelles discussions"
+
+msgid "No file has been attached to a discussion in this community yet."
+msgstr "Aucun fichier n’a encore été joint à une discussion de cette communauté."
+
+msgid "All the files"
+msgstr "Tous les fichiers"
+
+msgid "No file in this community yet."
+msgstr "Aucun fichier dans cette communauté pour l’instant."

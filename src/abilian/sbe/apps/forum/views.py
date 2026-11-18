@@ -271,9 +271,6 @@ default_view(forum, Post, None, kw_func=post_kw_view_func)(thread_view)
 default_view(forum, Thread, "thread_id", kw_func=default_view_kw)(thread_view)
 
 route("/<int:thread_id>/")(thread_view)
-route("/<int:thread_id>/attachments")(
-    ThreadView.as_view("thread_attachments", template="forum/thread_attachments.html")
-)
 
 
 class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
