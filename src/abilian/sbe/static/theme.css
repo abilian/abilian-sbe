@@ -740,7 +740,11 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 .sbe-toolbar--wrap { flex-wrap: wrap; }
 .sbe-toolbar > .sbe-grow, .sbe-toolbar > .picker { flex: 1 1 15rem; min-width: 0; }
 /* A field as wide as what it holds (a date), not as the line. */
-.sbe-toolbar > .sbe-fit { flex: none; width: auto; }
+.sbe-fit { flex: none; width: auto; }
+/* A number's own width follows its `max`, and a field with none is as wide as a line. */
+.sbe-fit[type="number"] { width: 6rem; }
+/* A long value with no spaces (a path, a URI) breaks where it must, not out of its box. */
+.sbe-wrap { overflow-wrap: anywhere; }
 /* A person's name in a table keeps room for itself: on a phone the table scrolls
    rather than the name being cut to a letter. */
 .sbe-cell-person { min-width: 10rem; }

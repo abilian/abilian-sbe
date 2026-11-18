@@ -2839,3 +2839,45 @@ msgstr "%(who)s a cessé de faire hériter %(target)s de ses droits"
 
 msgid "on %(target)s"
 msgstr "sur %(target)s"
+
+msgid "Sign-ins"
+msgstr "Connexions"
+
+msgid "The last sign-ins"
+msgstr "Les dernières connexions"
+
+msgid "Person"
+msgstr "Personne"
+
+msgid "Signed in"
+msgstr "Connexion"
+
+msgid "Signed out"
+msgstr "Déconnexion"
+
+msgid "Length"
+msgstr "Durée"
+
+msgid "From"
+msgstr "Depuis"
+
+msgid "Still signed in"
+msgstr "Toujours connecté"
+
+msgid "The site"
+msgstr "Le site"
+
+msgid "System"
+msgstr "Système"
+
+msgid "System information"
+msgstr "Informations système"
+
+msgid "What the site runs on"
+msgstr "Ce sur quoi le site tourne"
+
+msgid "Packages"
+msgstr "Paquets"
+
+msgid "Configuration"
+msgstr "Configuration"
