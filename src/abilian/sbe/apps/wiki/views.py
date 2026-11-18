@@ -210,7 +210,11 @@ class PageEdit(BasePageView, ObjectEdit[WikiPage, WikiPageForm]):
         page_id = request.form.get("page_id") or None
         if page_id is not None:
             page_id = int(page_id)
-            self.obj = WikiPage.query.get_or_404(page_id)
+            # In this community: the number is the form's, and any number may be
+            # posted.
+            self.obj = WikiPage.query.filter(
+                WikiPage.id == page_id, WikiPage.community_id == g.community.id
+            ).first_or_404()
             actions.context["object"] = self.obj
 
         return args, kwargs

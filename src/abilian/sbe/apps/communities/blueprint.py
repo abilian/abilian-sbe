@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from flask import Blueprint, g
+from flask import Blueprint, g, request
 from werkzeug.exceptions import NotFound
 
+from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated_user
 from abilian.i18n import _l
 from abilian.web.action import Endpoint
@@ -15,6 +16,9 @@ from abilian.web.nav import BreadcrumbItem
 from . import security
 from .models import Community
 from .presenters import CommunityPresenter
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class CommunityBlueprint(Blueprint):
@@ -86,3 +90,20 @@ def pull_community(endpoint: str, values: dict[str, Any]) -> None:
             raise NotFound
     except KeyError:
         pass
+
+
+def in_community(param: str, model: type) -> Callable[[], None]:
+    """A guard for a blueprint's routes that name an object of `model` by `param`:
+    not found unless it belongs to the community in the URL. Membership of one
+    community is checked by the blueprint; without this, its URL would show, and
+    act on, any other community's object given its number."""
+
+    def check() -> None:
+        object_id = (request.view_args or {}).get(param)
+        if object_id is None:
+            return
+        obj = db.session.get(model, object_id)
+        if obj is None or obj.community_id != g.community.id:
+            raise NotFound
+
+    return check

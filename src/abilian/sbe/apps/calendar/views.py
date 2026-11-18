@@ -13,7 +13,7 @@ from toolz import groupby
 from werkzeug.exceptions import BadRequest
 
 from abilian.i18n import _l
-from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.communities.blueprint import CommunityBlueprint, in_community
 from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction
@@ -25,6 +25,7 @@ blueprint = CommunityBlueprint(
     "calendar", __name__, url_prefix="/calendar", template_folder="templates"
 )
 route = blueprint.route
+blueprint.before_request(in_community("event_id", Event))
 
 #: How many of the events to come an event's page shows beside it.
 OTHERS = 4

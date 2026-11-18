@@ -20,7 +20,7 @@ from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
 from abilian.sbe.apps.communities import decorators as guard
-from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.communities.blueprint import CommunityBlueprint, in_community
 from abilian.sbe.apps.communities.common import activity_time_format, object_viewers
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.sbe.apps.communities.views import default_view_kw
@@ -45,6 +45,7 @@ forum = CommunityBlueprint(
     "forum", __name__, url_prefix="/forum", template_folder="templates"
 )
 route = forum.route
+forum.before_request(in_community("thread_id", Thread))
 
 
 def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
