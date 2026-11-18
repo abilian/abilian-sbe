@@ -839,7 +839,9 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 /* On a phone the field hides behind the bar's magnifier; open, the search takes the
    bar's whole width, the suggestions the screen's under it. */
 @media (max-width: 47.99em) {
-  .sbe-suggest:has(.sbe-suggest__panel) { position: fixed; inset: 0 0 auto 0; z-index: 20; padding: var(--ads-space-2); background: var(--ads-surface); }
-  .sbe-suggest:has(.sbe-suggest__panel) > .sbe-search { display: flex; flex: 1 1 auto; }
+  .sbe-suggest { display: none; }
+  .sbe-suggest.is-open, .sbe-suggest:has(.sbe-suggest__panel) { display: flex; position: fixed; inset: 0 0 auto 0; z-index: 20; padding: var(--ads-space-2); background: var(--ads-surface); }
+  .sbe-suggest.is-open > .sbe-search, .sbe-suggest:has(.sbe-suggest__panel) > .sbe-search { display: flex; flex: 1 1 auto; }
+  .sbe-search__key { display: none; }
   .sbe-suggest__panel { position: fixed; inset: 3.5rem 0 0 0; width: auto; max-height: none; border-radius: 0; }
 }

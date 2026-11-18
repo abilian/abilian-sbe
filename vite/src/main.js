@@ -4,6 +4,7 @@
 import "./alpine.js";
 import "./sentry.js";
 import "./modals.js";
+import "./suggest.js";
 import "./picker.js";
 import "./behaviors.js";
 import "./widgets/index.js";

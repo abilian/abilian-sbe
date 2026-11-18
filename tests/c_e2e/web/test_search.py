@@ -35,7 +35,9 @@ if TYPE_CHECKING:
     from abilian.sbe.apps.communities.models import Community
 
 
-@pytest.mark.parametrize("endpoint", ["search.search_main", "search.live"])
+@pytest.mark.parametrize(
+    "endpoint", ["search.search_main", "search.live", "search.suggest"]
+)
 def test_search_works_for_a_member(
     endpoint: str, community1: Community, app: Application, client: FlaskClient
 ) -> None:
@@ -47,7 +49,9 @@ def test_search_works_for_a_member(
     assert response.status_code == 200
 
 
-@pytest.mark.parametrize("endpoint", ["search.search_main", "search.live"])
+@pytest.mark.parametrize(
+    "endpoint", ["search.search_main", "search.live", "search.suggest"]
+)
 def test_search_sends_an_anonymous_visitor_to_login(
     endpoint: str, community1: Community, app: Application, client: FlaskClient
 ) -> None:
@@ -193,3 +197,36 @@ def test_a_search_with_nothing_in_its_community_still_says_where_it_looked(
     html = unescape(response.get_data(as_text=True))
     assert "0 results in" in html
     assert community1.name in html.split('class="ads-chip')[1]
+
+
+def _suggestions(client: FlaskClient, user: User, **args) -> str:
+    with client_login(client, user):
+        response = client.get(url_for("search.suggest", **args))
+    assert response.status_code == 200
+    return unescape(response.get_data(as_text=True))
+
+
+def test_the_bar_suggests_each_kind_with_where_it_is(
+    indexed: User, community1: Community, client: FlaskClient
+) -> None:
+    html = _suggestions(client, indexed, q="budg")
+
+    assert html.index("Discussions") < html.index("Documents")
+    assert "Budget 2027.txt" in html
+    assert community1.name in html
+    assert "All the results for “budg” (3)" in html
+
+
+def test_suggestions_in_a_community_count_what_is_elsewhere(
+    indexed: User, community1: Community, client: FlaskClient
+) -> None:
+    html = _suggestions(client, indexed, q="budget", community=community1.slug)
+
+    assert "Budget vote" not in html
+    assert "1 result in your other communities" in html
+
+
+def test_an_empty_field_suggests_nothing(indexed: User, client: FlaskClient) -> None:
+    html = _suggestions(client, indexed, q="  ")
+
+    assert 'role="option"' not in html

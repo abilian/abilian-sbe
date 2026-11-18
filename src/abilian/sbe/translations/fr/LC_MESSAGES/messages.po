@@ -3194,3 +3194,35 @@ msgstr "L’événement est publié."
 
 msgid "The event is changed."
 msgstr "L’événement est modifié."
+
+msgid "Suggestions"
+msgstr "Suggestions"
+
+msgid "Nothing matches “%(q)s”."
+msgstr "Rien ne correspond à « %(q)s »."
+
+msgid "Type to search."
+msgstr "Tapez pour chercher."
+
+msgid "%(num)d result in your other communities"
+msgid_plural "%(num)d results in your other communities"
+msgstr[0] "%(num)d résultat dans vos autres communautés"
+msgstr[1] "%(num)d résultats dans vos autres communautés"
+
+msgid "All the results for “%(q)s”"
+msgstr "Tous les résultats pour « %(q)s »"
+
+msgid "choose"
+msgstr "choisir"
+
+msgid "open"
+msgstr "ouvrir"
+
+msgid "Esc"
+msgstr "Échap"
+
+msgid "close"
+msgstr "fermer"
+
+msgid "To search without the mouse"
+msgstr "Pour chercher sans la souris"

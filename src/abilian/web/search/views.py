@@ -290,3 +290,57 @@ class Live(views.JSONView):
 
 
 route("/live")(Live.as_view("live"))
+
+
+#: How many suggestions of each kind the bar's search shows as one types.
+SUGGESTIONS = 3
+
+#: The kinds the suggestions show first, in this order; the others follow.
+SUGGESTED_KINDS = ("Thread", "Document", "WikiPage", "Folder", "Community", "User")
+
+
+@route("/suggest")
+@authenticated
+def suggest(user: User, q: str = "", page: int = 1) -> str:
+    """What the bar's search suggests as one types `q`: the first matches of each
+    kind, in the community searched (`community`) when there is one, and how many
+    results there are, here and elsewhere. A piece of a page, which the bar's script
+    puts under the field. `q` and `page` come from the blueprint's preprocessor,
+    which gives them to every view of its; the suggestions have no page."""
+    q = q.strip()
+    scope = request.args.get("community", "")
+    if not q:
+        return render_template("search/_suggestions.html", q=q, groups=[])
+
+    svc = get_service("indexing")
+    in_scope = wq.Term("community_slug", scope) if scope else None
+    # Grouped, the index keeps five of each kind, whatever the limit asked.
+    by_type = svc.search(q, user=user, facet_by_type=True, filter=in_scope)
+    groups = sorted(
+        (
+            (friendly_fqcn(fqcn), hits[:SUGGESTIONS])
+            for fqcn, hits in by_type.items()
+            if hits
+        ),
+        key=lambda group: (
+            SUGGESTED_KINDS.index(group[0])
+            if group[0] in SUGGESTED_KINDS
+            else len(SUGGESTED_KINDS)
+        ),
+    )
+    total = len(svc.search(q, user=user, limit=1, filter=in_scope))
+    elsewhere = len(svc.search(q, user=user, limit=1)) - total if scope else 0
+
+    ids = {hit.get("community_id") for _kind, hits in groups for hit in hits}
+    communities = {
+        c.id: c for c in Entity.query.filter(Entity.id.in_(ids - {None})).all()
+    }
+    return render_template(
+        "search/_suggestions.html",
+        q=q,
+        scope=scope,
+        groups=[(KIND_LABELS.get(kind, kind), kind, hits) for kind, hits in groups],
+        communities=communities,
+        total=total,
+        elsewhere=elsewhere,
+    )

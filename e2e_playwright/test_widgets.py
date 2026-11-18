@@ -257,3 +257,52 @@ def test_the_audit_log_jumps_to_the_day_picked(logged_in: Page, base_url: str) -
     page.locator("#date-chooser").fill(today)
     page.wait_for_url(re.compile(r"before=(?!2000-)"))
     expect(todays_heading).to_be_visible()
+
+
+#: What the server answers as one types, for a test that needs no index.
+SUGGESTIONS = """
+<div class="ads-combobox__list sbe-suggest__panel" id="suggestions" role="listbox">
+  <a class="ads-combobox__option sbe-suggest__option" role="option" id="s-1"
+     href="/communities/e2e-community/forum/" aria-selected="false">First</a>
+  <a class="ads-combobox__option sbe-suggest__option" role="option" id="s-2"
+     href="/communities/" aria-selected="false">Second</a>
+</div>"""
+
+
+def test_the_bar_suggests_as_one_types(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    """Typing asks the server, the arrows move, Escape closes, Enter opens, and
+    `/` reaches the field from the page."""
+    page = logged_in
+    page.route(
+        "**/search/suggest?*",
+        lambda route: route.fulfill(
+            status=200, body=SUGGESTIONS, content_type="text/html"
+        ),
+    )
+    page.goto(f"{base_url}/", wait_until="networkidle")
+    field = page.locator('.sbe-suggest input[name="q"]')
+
+    page.keyboard.press("/")
+    expect(field).to_be_focused()
+    field.press_sequentially("we")
+    expect(page.locator("#suggestions")).to_be_visible()
+    expect(field).to_have_attribute("aria-expanded", "true")
+    expect(page.locator("#s-1")).to_have_attribute("aria-selected", "true")
+
+    field.press("ArrowDown")
+    expect(page.locator("#s-2")).to_have_attribute("aria-selected", "true")
+    expect(field).to_have_attribute("aria-activedescendant", "s-2")
+
+    field.press("Escape")
+    expect(page.locator("#suggestions")).to_have_count(0)
+    expect(field).to_have_value("we")
+
+    field.press_sequentially("l")
+    expect(page.locator("#s-1")).to_have_attribute("aria-selected", "true")
+    with page.expect_navigation():
+        field.press("Enter")
+    assert page.url.endswith("/communities/e2e-community/forum/"), page.url
+
+    js_errors.assert_clean("the bar's suggestions")

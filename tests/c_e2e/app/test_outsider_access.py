@@ -42,6 +42,7 @@ OPEN_TO_ANY_USER = frozenset(
         # Results are filtered by what the user may read.
         "search.live",
         "search.search_main",
+        "search.suggest",
         # The people directory, profiles and photos: an enterprise social
         # network shows its members to each other.
         "social.users",
