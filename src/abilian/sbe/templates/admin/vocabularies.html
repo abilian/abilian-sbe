@@ -1,0 +1,61 @@
+{#- Core's vocabularies, for a site administrator: by group, each with its values, which
+    is the default, which are in use, their order changed a step at a time; adding a
+    value. SBE defines none, so no tab leads here. Overrides Abilian Core's page. -#}
+{% extends "admin/_ads.html" %}
+{% block page_title %}{{ _("Vocabularies") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("Vocabularies") }}{% endblock %}
+{% block content %}
+<div class="ads-stack">
+  {% for group in vocabularies | sort %}
+  <h2 class="sbe-section-title"><a class="sbe-quiet" href="{{ url_for('.vocabularies_group', group=group or '_') }}">{{ group or _("Global") }}</a></h2>
+  {% for voc in vocabularies[group] %}
+  {% set items = voc.query.all() %}
+  {% set head_id = "voc-" ~ voc.Meta.name %}
+  <section class="ads-card" aria-labelledby="{{ head_id }}">
+    <div class="ads-card__head ads-spread">
+      <h3 class="ads-card__title" id="{{ head_id }}"><a class="sbe-quiet" href="{{ url_for('.vocabularies_model', group=voc.Meta.group or '_', Model=voc.Meta.name) }}">{{ voc.Meta.label }}</a></h3>
+      <a class="ads-btn ads-btn--sm" href="{{ url_for('.vocabularies_new', group=group or '_', Model=voc.Meta.name) }}">{{ icon("plus") }}{{ _("Add a value") }}</a>
+    </div>
+    {% if items %}
+    <form method="post" action="{{ url_for('.vocabularies') }}">
+      {{ csrf.field() }}
+      {% if voc.Meta.group %}<input type="hidden" name="group" value="{{ voc.Meta.group }}">{% endif %}
+      <input type="hidden" name="Model" value="{{ voc.Meta.name }}">
+      {% if edit_return_to %}<input type="hidden" name="return_to" value="{{ edit_return_to }}">{% endif %}
+      <div class="ads-table-scroll">
+        <table class="ads-table ads-table--vcenter">
+          <thead><tr>
+            <th scope="col">{{ _("Label") }}</th>
+            <th scope="col">{{ _("Default") }}</th>
+            <th scope="col">{{ _("Active") }}</th>
+            <th scope="col"><span class="sbe-sr-only">{{ _("Order") }}</span></th>
+          </tr></thead>
+          <tbody>
+            {% for item in items %}
+            <tr>
+              {#- Labels may hold the few tags the form keeps (`vocabularies/forms.py`). -#}
+              <td class="ads-full"><a class="sbe-quiet" href="{{ url_for_voc_edit(item) }}">{{ item.label | safe }}</a></td>
+              <td>{% if item.default %}{{ icon("check") }}<span class="sbe-sr-only">{{ _("Yes") }}</span>{% endif %}</td>
+              <td>{% if item.active %}{{ icon("check") }}<span class="sbe-sr-only">{{ _("Yes") }}</span>{% endif %}</td>
+              <td class="ads-end">
+                <span class="ads-btn-group">
+                  <button class="ads-btn ads-btn--sm" type="submit" name="up" value="{{ item.id }}" aria-label="{{ _('Move %(label)s up', label=item.label | striptags) }}" {{ "disabled" if loop.first }}>{{ icon("chevron-up") }}</button>
+                  <button class="ads-btn ads-btn--sm" type="submit" name="down" value="{{ item.id }}" aria-label="{{ _('Move %(label)s down', label=item.label | striptags) }}" {{ "disabled" if loop.last }}>{{ icon("chevron-down") }}</button>
+                </span>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+    {% else %}
+    <p class="ads-card__body ads-muted">{{ _("No item in this vocabulary") }}</p>
+    {% endif %}
+  </section>
+  {% endfor %}
+  {% else %}
+  <p class="ads-muted">{{ _("No vocabularies are defined. Vocabularies are declared in code, by subclassing BaseVocabulary; this page lists the ones an application registers.") }}</p>
+  {% endfor %}
+</div>
+{% endblock %}

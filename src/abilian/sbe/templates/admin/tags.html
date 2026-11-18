@@ -1,0 +1,31 @@
+{#- Core's tags, for a site administrator: their namespaces, each with how many tags
+    and how many objects tagged. SBE uses none, so no tab leads here. Overrides Abilian
+    Core's page. -#}
+{% extends "admin/_ads.html" %}
+{% block page_title %}{{ _("Tags") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("Tags") }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  <p class="ads-card__body ads-muted">{{ _("Tags are grouped by namespaces, so that different set of tags can be defined for different type of objects, or for a different purpose.") }}</p>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter">
+      <thead><tr>
+        <th scope="col">{{ _("Namespace") }}</th>
+        <th scope="col" class="ads-end">{{ _("Tags") }}</th>
+        <th scope="col" class="ads-end">{{ _("Objects tagged") }}</th>
+      </tr></thead>
+      <tbody>
+        {% for info in namespaces %}
+        <tr>
+          <td class="ads-full"><a class="sbe-quiet" href="{{ url_for('.tags_ns', ns=info.ns) }}">{{ info.ns }}</a></td>
+          <td class="ads-end">{{ info.tag_count or 0 }}</td>
+          <td class="ads-end">{{ info.obj_count or 0 }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3" class="ads-muted">{{ _("No tags have been created yet.") }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

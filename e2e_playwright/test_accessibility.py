@@ -12,8 +12,6 @@ import pathlib
 from typing import TYPE_CHECKING
 
 import pytest
-from conftest import OLD_FRAME
-from playwright.sync_api import expect
 from surfaces import all_paths
 
 if TYPE_CHECKING:
@@ -55,28 +53,6 @@ def test_no_page_has_wcag_violations(
         ]
 
     assert not found, "\n".join(found)
-
-
-def test_a_dropdown_works_from_the_keyboard(logged_in: Page, base_url: str) -> None:
-    page = logged_in
-    page.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
-    # There is a second copy of the menu in the mobile navbar.
-    menu = page.locator(".action-navigation-user-authenticated").locator("visible=true")
-    button = menu.locator("button")
-    item = menu.locator("ul a").first
-
-    expect(button).to_have_attribute("aria-expanded", "false")
-    button.focus()
-    page.keyboard.press("Enter")
-    expect(button).to_have_attribute("aria-expanded", "true")
-    expect(item).to_be_visible()
-
-    page.keyboard.press("Tab")
-    expect(item).to_be_focused()
-
-    page.keyboard.press("Escape")
-    expect(item).to_be_hidden()
-    expect(button).to_have_attribute("aria-expanded", "false")
 
 
 def test_skip_link_shows_on_focus(logged_in: Page, base_url: str) -> None:

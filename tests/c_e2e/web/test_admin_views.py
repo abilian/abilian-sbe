@@ -156,3 +156,19 @@ def test_group_member_action_without_a_user_is_a_bad_request(
         response = client.post(url, data={"__action": action})
 
     assert response.status_code == 400
+
+
+@pytest.mark.parametrize(
+    "endpoint", ["admin.vocabularies", "admin.tags", "admin.groups", "admin.groups_new"]
+)
+def test_cores_other_pages_render_on_the_design_system(
+    endpoint: str, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    """No tab leads to them, but a site administrator still reaches them."""
+    with client_login(client, admin_user):
+        response = client.get(url_for(endpoint))
+
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert "/ads/ads.css" in html
+    assert "font-awesome" not in html

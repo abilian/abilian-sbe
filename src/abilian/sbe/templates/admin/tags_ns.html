@@ -1,0 +1,56 @@
+{#- A namespace's tags: each with how many objects it tags; those ticked merged into
+    one, or deleted once the deletion is confirmed. Overrides Abilian Core's page. -#}
+{% extends "admin/_ads.html" %}
+{% block page_title %}{{ ns }} · {{ _("Tags") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ ns }}{% endblock %}
+{% block content %}
+<form class="ads-stack" method="post" action="">
+  {{ csrf.field() }}
+  <section class="ads-card" aria-labelledby="tags">
+    <div class="ads-card__head"><h2 class="ads-card__title" id="tags">{{ _("Tags") }}</h2></div>
+    <div class="ads-table-scroll">
+      <table class="ads-table ads-table--vcenter">
+        <thead><tr>
+          <th scope="col"><span class="sbe-sr-only">{{ _("Select") }}</span></th>
+          <th scope="col">{{ _("Tag") }}</th>
+          <th scope="col" class="ads-end">{{ _("Objects tagged") }}</th>
+        </tr></thead>
+        <tbody>
+          {% for tag in tags %}
+          <tr>
+            <td><input type="checkbox" name="selected" value="{{ tag.tag_id }}" aria-label="{{ _('Select %(name)s', name=tag.tag_label) }}" {{ "checked" if tag.tag_id in selected_tags }}></td>
+            <td class="ads-full"><a class="sbe-quiet" href="{{ url_for('.tags_tag_edit', ns=tag.tag_ns, object_id=tag.tag_id) }}">{{ tag.tag_label }}</a></td>
+            <td class="ads-end">{{ tag.obj_count or 0 }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="3" class="ads-muted">{{ _("No tags have been created yet.") }}</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="ads-grid ads-col-lg">
+    <section class="ads-card" aria-labelledby="merge">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="merge">{{ _("Merge tags") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <div class="ads-field">
+          <label class="ads-label" for="merge_to">{{ _("Target tag") }}</label>
+          <select class="ads-select" id="merge_to" name="merge_to">
+            <option></option>
+            {% for tag in tags %}<option value="{{ tag.tag_id }}" {{ "selected" if tag.tag_id == merge_to }}>{{ tag.tag_label }}</option>{% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="ads-card__foot"><button class="ads-btn" type="submit" name="__action" value="merge">{{ _("Merge tags") }}</button></div>
+    </section>
+    <section class="ads-card" aria-labelledby="delete">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="delete">{{ _("Delete selected tags") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <label class="ads-check"><input type="checkbox" name="confirm_delete" {% if 'confirm_delete' in errors %}aria-invalid="true" aria-describedby="confirm-error"{% endif %}> <span>{{ _("Check to confirm definitive deletion of selected tags") }}</span></label>
+        {% if 'confirm_delete' in errors %}<span class="ads-error" id="confirm-error">{{ errors['confirm_delete'] }}</span>{% endif %}
+      </div>
+      <div class="ads-card__foot"><button class="ads-btn ads-btn--danger" type="submit" name="__action" value="delete">{{ icon("trash") }}{{ _("Delete selected tags") }}</button></div>
+    </section>
+  </div>
+</form>
+{% endblock %}

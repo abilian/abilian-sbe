@@ -24,11 +24,6 @@ E2E_PASSWORD = os.environ.get("E2E_PASSWORD", "e2e-password")
 
 LOGIN_PATH = "/user/login"
 
-#: Core's groups, for a site administrator: the last pages on the old frame, where
-#: Tailwind, FontAwesome and the old bar (its menus, its live search) are checked
-#: until they go.
-OLD_FRAME = "/admin/groups"
-
 #: Console noise that says nothing about our own JavaScript.
 IGNORED_CONSOLE = (
     "favicon",

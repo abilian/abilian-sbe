@@ -818,3 +818,6 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 /* A photo in an avatar, an image in a community's tile: the whole round or square,
    cropped (ADS request 32 for the avatar). */
 .ads-avatar > img, .sbe-tile > img { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
+
+/* A list of several choices does not drop down: no chevron (ADS request 33). */
+.ads-select[multiple] { background-image: none; padding-inline-end: var(--ads-space-4); }

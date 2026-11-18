@@ -9,12 +9,10 @@ textarea, and a chart as an empty div, with the console perfectly clean.
 
 from __future__ import annotations
 
-import json
 import re
 from typing import TYPE_CHECKING
 
 import pytest
-from conftest import OLD_FRAME
 from playwright.sync_api import expect
 
 if TYPE_CHECKING:
@@ -138,40 +136,6 @@ def test_page_scripts_set_up_their_widgets(
     js_errors.assert_clean("pages with their own scripts")
 
 
-def test_navbar_renders_the_search_box(logged_in: Page, base_url: str) -> None:
-    """The navbar gates its search box on the search plugin being registered.
-
-    It tested `app.APP_PLUGINS`, an attribute that exists nowhere in the
-    codebase, so the box never rendered on any page.
-    """
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
-
-    box = logged_in.locator("#search-box")
-    assert box.count() > 0, "the navbar search box did not render"
-    # Two of them: the desktop navbar and the mobile menu.
-    form = logged_in.locator('form[role="search"]').first
-    assert "search" in (form.get_attribute("action") or ""), (
-        "the search box does not submit to the search endpoint"
-    )
-
-
-def test_navbar_search_offers_suggestions(logged_in: Page, base_url: str) -> None:
-    """livesearch.js replaced twitter typeahead driven by Hogan.
-
-    Suggestions themselves need a populated index, which a throwaway instance
-    has no reason to have, so what is asserted here is the wiring. Whether the
-    endpoint behind it answers is test_live_search_endpoint_is_broken, below.
-    """
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
-
-    box = logged_in.locator("#search-box")
-    assert box.get_attribute("role") == "combobox", "livesearch.js did not attach"
-    assert box.get_attribute("aria-controls") == "search-box-results"
-    assert logged_in.evaluate("typeof window.Hogan") == "undefined", (
-        "Hogan is still being loaded"
-    )
-
-
 def test_search_endpoints_answer(logged_in: Page, base_url: str) -> None:
     """Both endpoints, over HTTP, from a browser that carries no session.
 
@@ -194,92 +158,6 @@ def test_search_endpoints_answer(logged_in: Page, base_url: str) -> None:
 
     page = logged_in.request.get(f"{base_url}/search?q=welcome")
     assert page.ok, f"the search page returned HTTP {page.status}"
-
-
-def test_the_live_search_box_reaches_its_endpoint(
-    logged_in: Page, base_url: str
-) -> None:
-    """End to end: typing in the box produces a request the server answers."""
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
-
-    with logged_in.expect_response("**/search/live?*") as caught:
-        logged_in.fill("#search-box", "welcome")
-    response = caught.value
-
-    assert response.ok, f"the box's own request returned HTTP {response.status}"
-    assert "results" in response.json()
-
-
-SUGGESTIONS = {
-    "results": {
-        "abilian.sbe.apps.documents.models.Document": [
-            {"name": "Quarterly report.pdf", "url": "/doc/1"},
-            # A name is whatever the user called their file. Hogan escaped it;
-            # livesearch.js writes it with textContent instead.
-            {"name": "<script>alert(1)</script>", "url": "/doc/2"},
-        ],
-        "abilian.core.models.subjects.User": [
-            {"name": "Ada Lovelace", "url": "/user/1"},
-        ],
-    }
-}
-
-
-def test_live_search_renders_suggestions(logged_in: Page, base_url: str) -> None:
-    """The dropdown, its grouping, its keyboard handling and its escaping.
-
-    The endpoint is stubbed: it is broken today (above), and even fixed it
-    would return nothing against a throwaway index. What is under test is the
-    widget, and the widget only needs the response shape.
-    """
-    logged_in.route(
-        "**/search/live?*",
-        lambda route: route.fulfill(
-            status=200,
-            content_type="application/json",
-            body=json.dumps(SUGGESTIONS),
-        ),
-    )
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
-    logged_in.fill("#search-box", "report")
-
-    results = logged_in.locator("#search-box-results")
-    results.wait_for(state="visible", timeout=5_000)
-    assert results.locator(".combobox-hit").count() == 3
-    # One header per object type, labelled by class name until the index knows
-    # a friendlier one.
-    assert results.locator(".combobox-group").count() == 2
-    # text_content, not inner_text: the CSS renders these headers uppercased.
-    assert "Document" in results.locator(".combobox-group").first.text_content()
-
-    # The markup in that second name is text, not markup.
-    assert results.locator("script").count() == 0, "a result name was parsed as HTML"
-    assert "<script>" in results.locator(".combobox-hit").nth(1).text_content()
-
-    # Arrow keys move the selection, Enter follows it.
-    logged_in.press("#search-box", "ArrowDown")
-    assert results.locator(".combobox-hit.is-active").count() == 1
-    logged_in.press("#search-box", "Enter")
-    logged_in.wait_for_url("**/doc/1", timeout=5_000)
-
-
-def test_live_search_closes_on_escape(logged_in: Page, base_url: str) -> None:
-    logged_in.route(
-        "**/search/live?*",
-        lambda route: route.fulfill(
-            status=200,
-            content_type="application/json",
-            body=json.dumps(SUGGESTIONS),
-        ),
-    )
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
-    logged_in.fill("#search-box", "report")
-
-    results = logged_in.locator("#search-box-results")
-    results.wait_for(state="visible", timeout=5_000)
-    logged_in.press("#search-box", "Escape")
-    results.wait_for(state="hidden", timeout=5_000)
-    assert logged_in.locator("#search-box").get_attribute("aria-expanded") == "false"
 
 
 def test_file_input_widget_initialises(logged_in: Page, base_url: str) -> None:

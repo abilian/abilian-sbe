@@ -13,7 +13,6 @@ import re
 from typing import TYPE_CHECKING
 
 import pytest
-from conftest import OLD_FRAME
 
 if TYPE_CHECKING:
     from conftest import JSErrors
@@ -50,44 +49,19 @@ def test_main_pages_have_no_js_errors(
 
 def test_the_javascript_layer_is_loaded(logged_in: Page, base_url: str) -> None:
     """The bundle ran, and nothing still brings jQuery back in."""
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/", wait_until="networkidle")
 
     assert logged_in.evaluate("typeof window.jQuery") == "undefined"
     assert logged_in.evaluate("typeof window.$") == "undefined"
     assert logged_in.evaluate("typeof window.Alpine") != "undefined", "Alpine missing"
 
 
-def test_buttons_show_a_pointer_cursor(logged_in: Page, base_url: str) -> None:
-    """Tailwind v4's preflight sets `cursor: default` on buttons.
-
-    Only `.btn` re-declared it, so every button outside that component read as
-    unclickable. The fix is a base rule, so any button will do as the check.
-    """
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
-
-    trigger = logged_in.locator("nav button:has(img.avatar)").first
-    cursor = trigger.evaluate("el => getComputedStyle(el).cursor")
-
-    assert cursor == "pointer", f"menu trigger cursor is {cursor!r}"
-
-
-def test_icon_font_is_applied(logged_in: Page, base_url: str) -> None:
-    """`fa fa-*` is used ~147 times; without the font every icon is a blank box."""
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
-
-    icon = logged_in.locator("i.fa").first
-    assert icon.count() > 0, "no FontAwesome icon on the page to check"
-
-    font = icon.evaluate("el => getComputedStyle(el).fontFamily")
-    assert "FontAwesome" in font, f"icon font not applied, got {font!r}"
-
-
 def test_stylesheet_is_applied(logged_in: Page, base_url: str) -> None:
     """Catches the unstyled page an asset-path mismatch produces."""
-    logged_in.goto(f"{base_url}{OLD_FRAME}", wait_until="networkidle")
+    logged_in.goto(f"{base_url}/", wait_until="networkidle")
 
     body_bg = logged_in.evaluate("getComputedStyle(document.body).backgroundColor")
-    # Tailwind's preflight sets a background; an unstyled page stays transparent.
+    # The design system sets a background; an unstyled page stays transparent.
     assert body_bg not in ("", "rgba(0, 0, 0, 0)"), (
         f"no stylesheet applied to body, background is {body_bg!r}"
     )

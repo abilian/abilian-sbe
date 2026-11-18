@@ -17,7 +17,6 @@ import pytest
 from flask import url_for
 
 from abilian.services import security_service
-from abilian.services.security import ADMIN
 from tests.util import client_login
 
 if TYPE_CHECKING:
@@ -110,14 +109,10 @@ def test_referenced_assets_resolve_in_production_mode(
             )
         )
 
-    # A page still on Tailwind (Core's groups, which a site administrator may
-    # still reach), and one on the Abilian Design System (the community's home).
-    security_service.grant_role(community1.test_user, ADMIN)
-    legacy = static_urls("admin.groups")
-    assert any("/vite/" in url for url in legacy), "page linked no Vite assets"
-    assert any("font-awesome" in url for url in legacy), "page linked no icon font"
+    # Every page is on the Abilian Design System now: the community's home will do.
     ads = static_urls("wall.index")
     assert any("/ads/ads.css" in url for url in ads), "page linked no ADS stylesheet"
+    assert any("/vite/" in url for url in ads), "page linked no Vite assets"
 
-    broken = [url for url in legacy + ads if client.get(url).status_code != 200]
+    broken = [url for url in ads if client.get(url).status_code != 200]
     assert not broken, f"referenced but not served: {broken}"
