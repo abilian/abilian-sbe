@@ -16,6 +16,7 @@ CORE_PLUGINS = [
     "abilian.web.comments",
     "abilian.web.uploads",
     "abilian.web.attachments",
+    "abilian.web.preferences",
 ]
 
 
