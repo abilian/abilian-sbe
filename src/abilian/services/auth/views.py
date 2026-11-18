@@ -43,6 +43,7 @@ from abilian.core.models.subjects import User
 from abilian.core.signals import auth_failed
 from abilian.core.util import md5, unwrap
 from abilian.i18n import _, render_template_i18n
+from abilian.services.auth.passwords import weakness
 from abilian.services.security import ANONYMOUS
 from abilian.web.access_blueprint import AccessControlBlueprint
 
@@ -241,20 +242,9 @@ def reset_password_post(token: str) -> Response:
         flash(_("You must provide a password."), "error")
         return redirect(url_for("login.reset_password_post", token=token))
 
-    # TODO: check entropy
-    if len(password) < 8:
-        flash(_("Your new password must be at least 8 characters long"), "error")
-        return redirect(url_for("login.reset_password_post", token=token))
-
-    if password.lower() == password:
-        flash(
-            _("Your new password must contain upper case and lower case letters"),
-            "error",
-        )
-        return redirect(url_for("login.reset_password_post", token=token))
-
-    if not len([x for x in password if x.isdigit()]) > 0:
-        flash(_("Your new password must contain at least one digit"), "error")
+    problem = weakness(password)
+    if problem:
+        flash(problem, "error")
         return redirect(url_for("login.reset_password_post", token=token))
 
     user.set_password(password)
