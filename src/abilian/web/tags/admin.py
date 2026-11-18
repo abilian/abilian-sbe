@@ -232,6 +232,7 @@ class BaseTagView:
 
 
 class TagEdit(BaseTagView, ObjectEdit[Tag, TagForm]):
+    template = "admin/object_edit.html"
     _message_success = _l("Tag edited")
     has_changes = False
     _entities_to_reindex: list[Entity] = []

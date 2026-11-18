@@ -76,6 +76,8 @@ class GroupView(GroupBase, views.ObjectView[Group, GroupAdminForm]):
 
 
 class GroupEdit(GroupBase, views.ObjectEdit[Group, GroupAdminForm]):
+    template = "admin/object_edit.html"
+
     def breadcrumb(self):
         label = render_template_string("<em>{{ g }}</em>", g=self.obj.name)
         return BreadcrumbItem(label=label, url="", description=self.obj.name)
@@ -125,4 +127,5 @@ class GroupEdit(GroupBase, views.ObjectEdit[Group, GroupAdminForm]):
 
 
 class GroupCreate(GroupBase, views.ObjectCreate[Group, GroupAdminForm]):
+    template = "admin/object_edit.html"
     chain_create_allowed = True
