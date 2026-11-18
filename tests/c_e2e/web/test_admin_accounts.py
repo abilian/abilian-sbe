@@ -199,3 +199,15 @@ def test_the_overview_counts_the_accounts_and_the_communities(
     never = everyone.filter(User.last_active.is_(None)).count()
     assert f"{never} never signed in" in html
     assert url_for("admin.users_user", user_id=accounts["active"].id) in html
+
+
+def test_the_administration_shows_no_groups_vocabularies_or_tags(
+    client: FlaskClient, admin_user: User, db: SQLAlchemy
+) -> None:
+    """People see communities, never groups; SBE uses no vocabularies and no tags."""
+    html = _page(client, admin_user, url_for("admin.dashboard"))
+
+    tabs = html.split('class="ads-tabs"')[1].split("</ul>")[0]
+    assert url_for("admin.users") in tabs
+    for hidden in ("admin.groups", "admin.vocabularies", "admin.tags"):
+        assert url_for(hidden) not in tabs
