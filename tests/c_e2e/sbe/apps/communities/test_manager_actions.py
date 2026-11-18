@@ -175,3 +175,53 @@ def test_only_a_site_admin_is_offered_a_new_community(
 
     with client_login(client, admin):
         assert new_url in _page(client, url_for("communities.index"))
+
+
+def _post(client: FlaskClient, user: User, endpoint: str, thread: Thread, **data):
+    url = url_for(endpoint, community_id=thread.community.slug, thread_id=thread.id)
+    with client_login(client, user):
+        return client.post(url, data=data)
+
+
+def test_a_plain_member_cannot_delete_a_thread_by_its_url(
+    db: SQLAlchemy, thread: Thread, reader: User, client: FlaskClient, app: Application
+) -> None:
+    """The page offers no way to; the route took the request all the same."""
+    response = _post(client, reader, "forum.thread_delete", thread, __action="delete")
+
+    assert response.status_code == 403
+    db.session.expire_all()
+    assert db.session.get(Thread, thread.id) is not None
+
+
+def test_a_plain_member_cannot_close_a_thread_by_its_url(
+    db: SQLAlchemy,
+    community1: Community,
+    thread: Thread,
+    reader: User,
+    client: FlaskClient,
+    app: Application,
+) -> None:
+    """In a participative community the route took it; elsewhere it failed by
+    accident, on a form the view does not have."""
+    community1.type = "participative"
+    db.session.commit()
+
+    response = _post(client, reader, "forum.thread_close", thread, action="close")
+
+    assert response.status_code == 403
+    db.session.expire_all()
+    assert not db.session.get(Thread, thread.id).closed
+
+
+def test_a_manager_closes_and_deletes_a_thread(
+    db: SQLAlchemy, thread: Thread, manager: User, client: FlaskClient, app: Application
+) -> None:
+    tid = thread.id
+
+    closed = _post(client, manager, "forum.thread_close", thread, action="close")
+    deleted = _post(client, manager, "forum.thread_delete", thread, __action="delete")
+
+    assert (closed.status_code, deleted.status_code) == (302, 302)
+    db.session.expire_all()
+    assert db.session.get(Thread, tid) is None

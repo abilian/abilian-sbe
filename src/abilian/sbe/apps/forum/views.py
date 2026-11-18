@@ -19,6 +19,7 @@ from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
+from abilian.sbe.apps.communities import decorators as guard
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
 from abilian.sbe.apps.communities.common import activity_time_format, object_viewers
 from abilian.sbe.apps.communities.security import can_manage
@@ -399,8 +400,11 @@ route("/<int:thread_id>/viewers")(ThreadViewers.as_view("thread_viewers"))
 
 
 class ThreadDelete(BaseThreadView, views.ObjectDelete[Thread, ThreadForm]):
+    """Moderation: the community's managers', as the thread's page offers it."""
+
     Form = ThreadForm
     methods = ["POST"]
+    decorators = (*views.ObjectDelete.decorators, guard.can_manage)
     _message_success = _('Thread "{title}" deleted.')
 
     def message_success(self):
@@ -411,9 +415,10 @@ route("/<int:thread_id>/delete")(ThreadDelete.as_view("thread_delete"))
 
 
 class ThreadCloseView(BaseThreadView, views.object.BaseObjectView[Thread]):
-    """Close / Re-open a thread."""
+    """Close / Re-open a thread: moderation, the community's managers'."""
 
     methods = ["POST"]
+    decorators = (*views.object.BaseObjectView.decorators, guard.can_manage)
     _VALID_ACTIONS = {"close", "reopen"}
     CLOSED_MSG = _l("The thread is now closed for edition and new contributions.")
     REOPENED_MSG = _l("The thread is now re-opened for edition and new contributions.")
