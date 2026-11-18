@@ -99,7 +99,7 @@ def register(app: Flask) -> None:
     """Make the helpers available to every template, with the user's communities,
     which the bar lists on every page."""
     # Here rather than at the top: the mockups import this module without the models.
-    from abilian.sbe.apps.communities.models import communities_of
+    from abilian.sbe.apps.communities.models import communities_of, community_counts
 
     for helper in (
         icon,
@@ -108,5 +108,6 @@ def register(app: Flask) -> None:
         identity_class,
         initials,
         communities_of,
+        community_counts,
     ):
         app.add_template_global(helper)

@@ -2604,3 +2604,76 @@ msgstr "Ce qui a changé"
 
 msgid "current"
 msgstr "actuelle"
+
+# The administration on the Abilian Design System (admin/*.html)
+msgid "Accounts"
+msgstr "Comptes"
+
+msgid "Actions on the account of %(name)s"
+msgstr "Actions sur le compte de %(name)s"
+
+msgid "Administrator"
+msgstr "Administrateur"
+
+msgid "Administrators"
+msgstr "Administrateurs"
+
+msgid "Disabled"
+msgstr "Désactivé"
+
+msgid "Filter the accounts by name or address"
+msgstr "Filtrer les comptes par nom ou adresse"
+
+msgid "In no community."
+msgstr "Dans aucune communauté."
+
+msgid "Last sign-in"
+msgstr "Dernière connexion"
+
+msgid "May sign in"
+msgstr "Peut se connecter"
+
+msgid "Name or address"
+msgstr "Nom ou adresse"
+
+msgid "Never signed in"
+msgstr "Jamais connecté"
+
+msgid "Never signed in."
+msgstr "Ne s’est jamais connecté."
+
+msgid "New account"
+msgstr "Nouveau compte"
+
+msgid "Sign in as %(name)s"
+msgstr "Se connecter en tant que %(name)s"
+
+msgid "Site administrator: creates communities, manages accounts"
+msgstr "Administrateur du site : crée les communautés, gère les comptes"
+
+msgid "State"
+msgstr "État"
+
+msgid "The account"
+msgstr "Le compte"
+
+msgid "The new password again"
+msgstr "Le nouveau mot de passe, à nouveau"
+
+msgid "Their activity"
+msgstr "Son activité"
+
+msgid "Their changes, in the log"
+msgstr "Ses modifications, dans le journal"
+
+msgid "Their communities"
+msgstr "Ses communautés"
+
+msgid "Their sign-ins"
+msgstr "Ses connexions"
+
+msgid "Unknown browser"
+msgstr "Navigateur inconnu"
+
+msgid "Which accounts"
+msgstr "Quels comptes"

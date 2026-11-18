@@ -48,6 +48,8 @@ from abilian.services.security import (
 from . import signals
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from werkzeug.local import LocalProxy
 
 MEMBER = Role("member", label=_l("role_member"), assignable=False)
@@ -567,3 +569,15 @@ def communities_of(user: User) -> list[Community]:
         .order_by(Community.last_active_at.desc())
         .all()
     )
+
+
+def community_counts(users: Iterable[User]) -> dict[int, int]:
+    """How many communities each of `users` is a member of, by user id; in one
+    query, for a table of accounts."""
+    ids = [user.id for user in users]
+    rows = db.session.execute(
+        sa.select(Membership.user_id, sa.func.count())
+        .where(Membership.user_id.in_(ids))
+        .group_by(Membership.user_id)
+    )
+    return dict(rows.tuples().all())

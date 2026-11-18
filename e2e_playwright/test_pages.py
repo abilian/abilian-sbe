@@ -72,7 +72,7 @@ def test_admin_users_shows_the_email_under_the_name_and_filters_on_it(
     page.goto(f"{base_url}/admin/users", wait_until="networkidle")
 
     row = page.locator("#users-table tbody tr", has_text="Paula Picker")
-    expect(row.locator("td").nth(1)).to_contain_text("paula.picker@example.com")
+    expect(row.locator("td").first).to_contain_text("paula.picker@example.com")
 
     page.fill('main input[type="search"]', "paula.picker")
     page.keyboard.press("Enter")

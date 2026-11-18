@@ -4,12 +4,15 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from flask import render_template_string, request
 from werkzeug.datastructures import MultiDict
 
 from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.subjects import User, gen_random_password
 from abilian.services import get_service
+from abilian.services.auth.models import LoginSession
 from abilian.services.security.models import ADMIN, Role
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
@@ -19,12 +22,16 @@ from .forms import UserAdminForm, UserCreateForm
 
 MUGSHOT_SIZE = 45
 
+#: How many of an account's sign-ins its page shows.
+LAST_SESSIONS = 5
+
 
 # User edit / create views
 class UserBase:
     Model = User
     pk = "user_id"
     base_template = "admin/_base.html"
+    template = "admin/user_edit.html"
 
     def index_url(self):
         return url_for(".users")
@@ -39,6 +46,18 @@ class UserEdit(UserBase, views.ObjectEdit[User, UserAdminForm]):
     def breadcrumb(self):
         label = render_template_string("<em>{{ u.email }}</em>", u=self.obj)
         return BreadcrumbItem(label=label, url="", description=self.obj.name)
+
+    @property
+    def template_kwargs(self) -> dict[str, Any]:
+        """The account's last sign-ins, beside its form."""
+        kw = super().template_kwargs
+        kw["sessions"] = (
+            LoginSession.query.filter(LoginSession.user_id == self.obj.id)
+            .order_by(LoginSession.started_at.desc())
+            .limit(LAST_SESSIONS)
+            .all()
+        )
+        return kw
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()

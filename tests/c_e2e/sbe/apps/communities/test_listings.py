@@ -198,19 +198,21 @@ def test_a_name_is_escaped(
         assert "<script>x</script>" not in raw
 
 
-def test_the_admin_table_lists_groups_and_login_state(
-    client: FlaskClient, admin_user: User, people: dict[str, User], db: SQLAlchemy
+def test_the_admin_table_counts_communities_and_says_the_accounts_state(
+    client: FlaskClient,
+    admin_user: User,
+    people: dict[str, User],
+    community1: Community,
+    db: SQLAlchemy,
 ) -> None:
-    group = Group(name="The Testers")
-    db.session.add(group)
-    db.session.flush()
-    people["ann"].groups.add(group)
+    community1.set_membership(people["ann"], MEMBER)
     db.session.commit()
 
     html = _get(client, admin_user, url_for("admin.users", q="young"))
-    assert "The Testers" in _body(html)
+    counts = re.findall(r'<td class="ads-end ads-col--secondary">(\d+)</td>', html)
+    assert counts == ["1"]
     assert url_for("admin.users_user", user_id=people["ann"].id) in _body(html)
-    assert "✓" in _body(html)
+    assert "Active" in _body(html)
 
 
 def test_people_are_paged(

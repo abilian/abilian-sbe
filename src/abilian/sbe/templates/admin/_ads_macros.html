@@ -1,0 +1,17 @@
+{#- Pieces the administration's pages on the Abilian Design System share. -#}
+
+{#- Whether an account may sign in, and whether it ever has. -#}
+{% macro state(user) -%}
+{% if not user.can_login %}<span class="ads-status ads-status--danger"><span class="ads-status__dot"></span>{{ _("Disabled") }}</span>
+{%- elif user.last_active %}<span class="ads-status ads-status--success"><span class="ads-status__dot"></span>{{ _("Active") }}</span>
+{%- else %}<span class="ads-status ads-tone-neutral"><span class="ads-status__dot"></span>{{ _("Never signed in") }}</span>{% endif %}
+{%- endmacro %}
+
+{#- Signing in as someone, to see what they see. A POST: it changes who is signed in. -#}
+{% macro sign_in_as(user, class="ads-btn") -%}
+<form method="post" action="{{ url_for('admin.impersonate_post') }}">
+  {{ csrf.field() }}
+  <input type="hidden" name="user" value="{{ user.id }}">
+  <button class="{{ class }}" type="submit">{{ icon("user") }}{{ _("Sign in as %(name)s", name=user.name) }}</button>
+</form>
+{%- endmacro %}
