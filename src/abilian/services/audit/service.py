@@ -121,7 +121,11 @@ class AuditService(Service):
         state.model_class_names[entity_class.__name__] = entity_class
 
         mapper = sa.orm.class_mapper(entity_class)
+        # A `column_property` (an SQL expression) is no column of the table: it is
+        # computed, never set, and nothing to audit.
         for column in mapper.columns:
+            if not isinstance(column, sa.Column):
+                continue
             props = mapper.get_property_by_column(column)
             attr = getattr(entity_class, props.key)
             info = column.info

@@ -142,8 +142,11 @@ class SAAdapter(SchemaAdapter):
             for field_name in field_names:
                 setup_field(name, field_name)
 
-        # per column definitions
+        # per column definitions; a `column_property` (an SQL expression) is no
+        # column of the table, and nothing to index
         for col in mapper.columns:
+            if not isinstance(col, sa.Column):
+                continue
             name = col.name
             info = col.info
 
