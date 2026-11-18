@@ -57,8 +57,6 @@ OPEN_TO_ANY_USER = frozenset(
         # Following someone, and posting to the user's own stream.
         "social.user_post",
         "social.share",
-        # The groups the user may see; a private one is checked inside.
-        "social.groups",
         # The user's own uploads: a handle is looked up in their directory.
         "uploads.new_file",
         "uploads.handle",

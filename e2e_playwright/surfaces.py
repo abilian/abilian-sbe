@@ -27,7 +27,6 @@ PATHS = (
     # Mon fil, the home page: on the Abilian Design System.
     "/",
     "/social/users/",
-    "/social/groups/",
     "/preferences/",
     "/search/?q=e2e",
     "/admin/dashboard",
@@ -49,7 +48,6 @@ def all_paths(page: Page, base_url: str) -> list[str]:
         f"{_C}/docs/": ("#objects-table tbody a", "E2E Sample"),
         f"{_C}/forum/": ("main a, a", "Welcome to the new members"),
         "/admin/groups": ("table a", "E2E Group"),
-        "/social/groups/": ("a", "E2E Group"),
         "/admin/users": ("table a", "Paula Picker"),
         # Paula shares no community with the admin: she is among everyone.
         "/social/users/?who=all": ("#users-table a", "Paula Picker"),

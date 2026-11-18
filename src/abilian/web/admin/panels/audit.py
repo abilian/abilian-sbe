@@ -251,10 +251,8 @@ class BaseEntryPresenter:
     _USER_FMT = (
         '<a href="{{ url_for("social.user", user_id=user.id) }}"> {{ user.name }}</a>'
     )
-    _GROUP_FMT = (
-        '<a href="{{ url_for("social.group_home", group_id=group.id)'
-        ' }}">{{ group.name }}</a>'
-    )
+    #: A group has no page of its own any more: its name alone.
+    _GROUP_FMT = "{{ group.name }}"
 
     def __init__(self, user, date) -> None:
         self.user = user

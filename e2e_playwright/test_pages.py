@@ -83,27 +83,6 @@ def test_admin_users_shows_the_email_under_the_name_and_filters_on_it(
     js_errors.assert_clean("the users table")
 
 
-def test_social_group_pickers(
-    logged_in: Page, base_url: str, js_errors: JSErrors
-) -> None:
-    """The admin picker offers members only, so the member goes first."""
-    page = logged_in
-    page.goto(f"{base_url}/social/groups", wait_until="networkidle")
-    page.get_by_role("link", name="E2E Group").first.click()
-    page.wait_for_load_state("networkidle")
-
-    _pick(page, "#user-select", "Greta", "greta.groupadmin@example.com")
-    page.locator('button[name="action"][value="add"]').click()
-    page.wait_for_load_state("networkidle")
-    expect(page.get_by_role("link", name="Greta Groupadmin").first).to_be_visible()
-
-    _pick(page, "#admin-select", "Greta", "Greta")
-    page.locator('button[name="action"][value="add-admin"]').click()
-    page.wait_for_load_state("networkidle")
-
-    js_errors.assert_clean("the social group page")
-
-
 def test_audit_filters_submit_themselves(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:

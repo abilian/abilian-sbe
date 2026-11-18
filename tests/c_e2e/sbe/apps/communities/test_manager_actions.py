@@ -153,8 +153,8 @@ def test_only_a_site_admin_is_offered_a_new_community(
 ) -> None:
     """`community/home.html` asks `is_site_admin()` by name.
 
-    It read a passed-in `is_admin` before, which was also the name
-    `social/group.html` used for a *group-scoped* question -- one name, two
+    It read a passed-in `is_admin` before, which was also the name a group's
+    page, gone since, used for a *group-scoped* question -- one name, two
     producers, two meanings, which is exactly how `g.is_manager` went wrong.
     """
     from abilian.services import security_service

@@ -268,8 +268,6 @@ TEMPLATE_NAMES = {
     "can_write_post": "context processor, sbe/extension.py: inject_template_utils",
     # read: supplied app-wide by a context processor, so never undefined
     "can_manage_community": "context processor, communities/views/views.py",
-    # read: supplied by the single view that renders social/group.html
-    "is_admin": "social/views/groups.py: group_home",
     # read: supplied by the views that render a folder and a document
     "may_write": "documents/views: folder_view, document_view",
     "may_manage": "documents/views: folder_view, document_view",

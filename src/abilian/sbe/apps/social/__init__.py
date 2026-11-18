@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 
 
 def register_plugin(app: Application) -> None:
-    from .views import groups, sidebars, users
+    from .views import users
     from .views.social import social
 
     app.register_blueprint(social)

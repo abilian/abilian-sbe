@@ -168,9 +168,9 @@ def index(user: User) -> str:
     session["sort_communities_order"] = sort_order
 
     # Not passed to the template: `is_admin` was one name for two different
-    # questions there -- site-wide here, group-scoped in `social/group.html` --
-    # which is how `g.is_manager` went wrong one layer down. The template asks
-    # `is_site_admin()` by name instead.
+    # questions there -- site-wide here, group-scoped on a group's page, gone
+    # since -- which is how `g.is_manager` went wrong one layer down. The
+    # template asks `is_site_admin()` by name instead.
     is_admin = site_security.is_site_admin(user)
     if not is_admin:
         # Filter with permissions
