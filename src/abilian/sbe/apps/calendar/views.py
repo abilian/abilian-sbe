@@ -93,8 +93,9 @@ def _shift(month: date, by: int) -> date:
     return date(index // 12, index % 12 + 1, 1)
 
 
-def can_delete(user: User, event: Event) -> bool:
-    """May `user` delete `event`? Who posted it, or the community's managers."""
+def can_change(user: User, event: Event) -> bool:
+    """May `user` change or delete `event`? Who posted it, or the community's
+    managers."""
     return event.creator == user or can_manage(user, event.community)
 
 
@@ -129,7 +130,7 @@ class EventView(BaseEventView, views.ObjectView[Event, EventForm]):
     def template_kwargs(self):
         kw = super().template_kwargs
         kw["event"] = self.obj
-        kw["may_delete"] = can_delete(authenticated_user(), self.obj)
+        kw["may_change"] = can_change(authenticated_user(), self.obj)
         kw["others"] = (
             _events()
             .filter(Event.end > datetime.now(), Event.id != self.obj.id)
@@ -182,7 +183,18 @@ event_create_view = EventCreateView.as_view("new_event", view_endpoint=".event")
 route("/new_event/")(event_create_view)
 
 
-class EventEditView(BaseEventView, views.ObjectEdit[Event, EventForm]):
+class ChangingAnEvent(BaseEventView):
+    """What changes an event, or deletes it: refused unless `can_change`."""
+
+    def init_object(self, args, kwargs):
+        args, kwargs = super().init_object(args, kwargs)
+        if not can_change(authenticated_user(), self.obj):
+            raise Forbidden
+        return args, kwargs
+
+
+class EventEditView(ChangingAnEvent, views.ObjectEdit[Event, EventForm]):
+
     template = "calendar/event_form.html"
     _message_success = _l("The event is changed.")
     POST_BUTTON = ButtonAction(
@@ -196,16 +208,8 @@ event_edit_view = EventEditView.as_view("event_edit", view_endpoint=".event")
 route("/<int:event_id>/edit")(event_edit_view)
 
 
-class EventDelete(BaseEventView, views.ObjectDelete[Event, EventForm]):
-    """Deleting an event, by who posted it or the community's managers."""
-
+class EventDelete(ChangingAnEvent, views.ObjectDelete[Event, EventForm]):
     _message_success = _l("The event is deleted.")
-
-    def init_object(self, args, kwargs):
-        args, kwargs = super().init_object(args, kwargs)
-        if not can_delete(authenticated_user(), self.obj):
-            raise Forbidden
-        return args, kwargs
 
     @property
     def activity_target(self):

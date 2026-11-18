@@ -268,7 +268,7 @@ TEMPLATE_NAMES = {
     "may_replace": "documents/views/documents.py: document_view",
     "may_comment": "documents/views/documents.py: document_view",
     "may_edit": "social/views/users.py: user",
-    "may_delete": "calendar/views.py: EventView, from can_delete",
+    "may_change": "calendar/views.py: EventView, from can_change",
     # read, and not authorization at all -- state and form plumbing
     "is_closed": "not authorization: thread state",
 }

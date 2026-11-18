@@ -16,7 +16,7 @@ from werkzeug.datastructures import MultiDict
 from abilian.sbe.apps.calendar.forms import EventForm
 from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.calendar.views import month_weeks
-from abilian.sbe.apps.communities.models import MEMBER
+from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.web.util import url_for
 from tests.util import client_login, ensure_services_started
 
@@ -209,7 +209,7 @@ def test_who_posted_an_event_deletes_it(
     assert db.session.get(Event, event.id) is None
 
 
-def test_another_member_does_not_delete_an_event(
+def test_another_member_neither_changes_nor_deletes_an_event(
     client: FlaskClient,
     community1: Community,
     member: User,
@@ -217,16 +217,34 @@ def test_another_member_does_not_delete_an_event(
     db: SQLAlchemy,
 ) -> None:
     event = events["coming"]
-    url = url_for("calendar.event", community_id=community1.slug, event_id=event.id)
+    here = {"community_id": community1.slug, "event_id": event.id}
+    edit_url = url_for("calendar.event_edit", **here)
 
-    assert 'id="modal-delete"' not in _page(client, member, url)
+    html = _page(client, member, url_for("calendar.event", **here))
+    assert 'id="modal-delete"' not in html
+    assert edit_url not in html
     with client_login(client, member):
-        response = client.post(
-            url_for(
-                "calendar.event_delete", community_id=community1.slug, event_id=event.id
-            ),
-            data={"__action": "delete"},
+        edit = client.get(edit_url)
+        delete = client.post(
+            url_for("calendar.event_delete", **here), data={"__action": "delete"}
         )
 
-    assert response.status_code == 403
+    assert (edit.status_code, delete.status_code) == (403, 403)
     assert db.session.get(Event, event.id) is not None
+
+
+def test_a_manager_changes_any_event(
+    client: FlaskClient,
+    community1: Community,
+    member: User,
+    events: dict,
+    db: SQLAlchemy,
+) -> None:
+    community1.set_membership(member, MANAGER)
+    db.session.commit()
+    here = {"community_id": community1.slug, "event_id": events["coming"].id}
+
+    html = _page(client, member, url_for("calendar.event", **here))
+
+    assert url_for("calendar.event_edit", **here) in html
+    assert 'id="modal-delete"' in html

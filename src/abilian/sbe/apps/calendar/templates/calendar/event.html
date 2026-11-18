@@ -1,13 +1,13 @@
 {#- An event: when and where first, who posted it, then what it is and where to read
     more; adding it to one's own calendar in sight, changing and deleting it behind
-    ⋮; the other events to come beside it. Drawn in `mockups/templates/event.html`. -#}
+    ⋮, for who posted it and the community's managers; the other events to come beside it. Drawn in `mockups/templates/event.html`. -#}
 {% extends "ads_community.html" %}
 {% import "calendar/_events.html" as ev with context %}
 {% set kw = {"community_id": g.community.slug} %}
 {% block page_title %}{{ event.title }} · {{ _("Calendar") }} · {{ g.community.name }}{% endblock %}
 
 {% block overlays %}
-{% if may_delete %}
+{% if may_change %}
 <dialog class="ads-modal__panel sbe-dialog" id="modal-delete" aria-labelledby="delete-title">
   <form method="post" action="{{ url_for('.event_delete', event_id=event.id, **kw) }}">
     {{ csrf.field() }}
@@ -34,15 +34,15 @@
       </div>
       <div class="ads-cluster ads-gap-sm">
         <a class="ads-btn" href="{{ url_for('.event_file', event_id=event.id, **kw) }}" download>{{ icon("calendar-plus") }}{{ _("Add to my calendar") }}</a>
+        {% if may_change %}
         <details class="ads-dropdown">
           <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the event') }}">{{ icon("dots-vertical") }}</summary>
           <div class="ads-menu">
             <a class="ads-menu__item" href="{{ url_for('.event_edit', event_id=event.id, **kw) }}">{{ icon("pencil") }}{{ _("Edit") }}</a>
-            {% if may_delete %}
             <button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-delete">{{ icon("trash") }}{{ _("Delete the event") }}</button>
-            {% endif %}
           </div>
         </details>
+        {% endif %}
       </div>
     </div>
     <div class="ads-card__body ads-stack">
