@@ -36,7 +36,6 @@ FORM = {
     "name": "Brand New",
     "description": "A community made by a test",
     "type": "informative",
-    "linked_group": "",
     "__action": "create",
 }
 

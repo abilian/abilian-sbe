@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-import sqlalchemy as sa
 from flask import request
 from wtforms import BooleanField, StringField, TextAreaField
 from wtforms.validators import ValidationError, data_required, optional
 
-from abilian.core.models.subjects import Group
 from abilian.i18n import _, _l
 from abilian.web.forms import Form
 from abilian.web.forms.fields import ChoiceField, FileField
@@ -24,45 +22,12 @@ def strip(s: str) -> str:
     return s.strip()
 
 
-def _group_choices() -> list[tuple[str, str]]:
-    m_prop = Group.members.property
-    membership = m_prop.secondary
-    query = Group.query.session.query(
-        Group.id,
-        Group.name,
-        Community.name.label("community"),
-        sa.sql.func.count(membership.c.user_id).label("members_count"),
-    )
-    query = (
-        query.outerjoin(m_prop.secondary, m_prop.primaryjoin)
-        .outerjoin(Community, Community.group.property.primaryjoin)
-        .group_by(Group.id, Group.name, Community.name)
-        .order_by(sa.sql.func.lower(Group.name))
-        .autoflush(False)
-    )
-    choices = [("", "")]
-
-    for g in query:
-        label = f"{g.name} ({g.members_count:d} membres)"
-        if g.community:
-            label += f" — Communauté: {g.community}"
-        choices.append((str(g.id), label))
-
-    return choices
-
-
 class CommunityForm(Form):
     name = StringField(label=_l("Name"), validators=[data_required()])
     description = TextAreaField(
         label=_l("Description"),
         validators=[data_required(), length(max=500)],
         widget=TextArea(resizeable="vertical"),
-    )
-
-    linked_group = ChoiceField(
-        label=_l("Linked to group"),
-        description=_l("Manages a group of users through this community members."),
-        choices=_group_choices,
     )
 
     image = FileField(

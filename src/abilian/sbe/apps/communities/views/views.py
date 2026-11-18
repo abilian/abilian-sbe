@@ -32,7 +32,7 @@ from whoosh.searching import Hit
 
 from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated, authenticated_user
-from abilian.core.models.subjects import Group, User, UserQuery
+from abilian.core.models.subjects import User, UserQuery
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _l
@@ -238,14 +238,6 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit[Community, CommunityForm
             self.obj.type = type
             self.obj.update_roles_on_folder()
         del form.type
-
-        self.linked_group = form.linked_group.data or None
-        if self.linked_group:
-            self.linked_group = Group.query.get(int(self.linked_group))
-        del form.linked_group
-
-    def after_populate_obj(self) -> None:
-        self.obj.group = self.linked_group
 
 
 add_url(
