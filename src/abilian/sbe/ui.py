@@ -117,6 +117,7 @@ def register(app: Flask) -> None:
         community_counts,
         site_figures,
     )
+    from abilian.sbe.apps.main.recent import recently_opened
 
     for helper in (
         icon,
@@ -128,5 +129,6 @@ def register(app: Flask) -> None:
         communities_of,
         community_counts,
         site_figures,
+        recently_opened,
     ):
         app.add_template_global(helper)

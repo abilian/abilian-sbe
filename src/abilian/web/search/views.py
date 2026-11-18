@@ -18,6 +18,7 @@ from flask import current_app, g, render_template, request, url_for
 from whoosh import query as wq
 
 from abilian.core.entities import Entity
+from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.util import utcnow
 from abilian.i18n import _, _l
@@ -144,6 +145,8 @@ def search_main(user: User, q="", page=1):
     """Results for `q`, narrowed by kind, community and period, a page at a time."""
     svc = get_service("indexing")
     q = q.strip()
+    if q:
+        remember_search(user, q)
     scope = request.args.get("community", "")
     since = request.args.get("since", "")
     object_types = sorted(request.args.getlist("object_type"))
@@ -292,6 +295,26 @@ class Live(views.JSONView):
 route("/live")(Live.as_view("live"))
 
 
+#: Where a person's last searches are kept, among their preferences, and how many.
+RECENT_SEARCHES_KEY = "search:recent"
+RECENT_SEARCHES = 3
+
+
+def recent_searches(user: User) -> list[str]:
+    """What `user` searched last, latest first."""
+    preferences = get_service("preferences").get_preferences(user)
+    return preferences.get(RECENT_SEARCHES_KEY, [])
+
+
+def remember_search(user: User, q: str) -> None:
+    """`q` first among `user`'s last searches, once."""
+    searches = [q, *(s for s in recent_searches(user) if s != q)]
+    get_service("preferences").set_preferences(
+        user, **{RECENT_SEARCHES_KEY: searches[:RECENT_SEARCHES]}
+    )
+    db.session.commit()
+
+
 #: How many suggestions of each kind the bar's search shows as one types.
 SUGGESTIONS = 3
 
@@ -310,7 +333,13 @@ def suggest(user: User, q: str = "", page: int = 1) -> str:
     q = q.strip()
     scope = request.args.get("community", "")
     if not q:
-        return render_template("search/_suggestions.html", q=q, groups=[])
+        return render_template(
+            "search/_suggestions.html",
+            q=q,
+            groups=[],
+            user=user,
+            recent_searches=recent_searches(user),
+        )
 
     svc = get_service("indexing")
     in_scope = wq.Term("community_slug", scope) if scope else None

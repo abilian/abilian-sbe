@@ -3201,8 +3201,6 @@ msgstr "Suggestions"
 msgid "Nothing matches “%(q)s”."
 msgstr "Rien ne correspond à « %(q)s »."
 
-msgid "Type to search."
-msgstr "Tapez pour chercher."
 
 msgid "%(num)d result in your other communities"
 msgid_plural "%(num)d results in your other communities"
@@ -3265,3 +3263,15 @@ msgstr "Le compte de %(name)s est désactivé."
 
 msgid "The account of %(name)s is enabled again."
 msgstr "Le compte de %(name)s est réactivé."
+
+msgid "Recent searches"
+msgstr "Recherches récentes"
+
+msgid "Opened lately"
+msgstr "Ouverts récemment"
+
+msgid "Type to search everywhere"
+msgstr "Tapez pour chercher partout"
+
+msgid "from any page"
+msgstr "depuis n’importe quelle page"

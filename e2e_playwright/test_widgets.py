@@ -237,8 +237,8 @@ SUGGESTIONS = """
 def test_the_bar_suggests_as_one_types(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
-    """Typing asks the server, the arrows move, Escape closes, Enter opens, and
-    `/` reaches the field from the page."""
+    """`/` reaches the field from the page, which opens on what is recent; typing
+    asks the server, the arrows move, Escape closes, Enter opens."""
     page = logged_in
     page.route(
         "**/search/suggest?*",
@@ -251,6 +251,8 @@ def test_the_bar_suggests_as_one_types(
 
     page.keyboard.press("/")
     expect(field).to_be_focused()
+    # On an empty field: what one searched and opened lately.
+    expect(page.locator("#suggestions")).to_be_visible()
     field.press_sequentially("we")
     expect(page.locator("#suggestions")).to_be_visible()
     expect(field).to_have_attribute("aria-expanded", "true")

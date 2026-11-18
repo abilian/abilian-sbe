@@ -1,7 +1,8 @@
 // The bar's search: as one types, the server's suggestions open under the field
-// (search/_suggestions.html); the arrows move among them, Enter opens the current
-// one, Escape closes them; `/` reaches the field from any page. On a phone, the
-// bar's magnifier opens the field over the bar.
+// (search/_suggestions.html), and on an empty field what one searched and opened
+// lately; the arrows move among them, Enter opens the current one, Escape closes
+// them; `/` reaches the field from any page. On a phone, the bar's magnifier opens
+// the field over the bar.
 
 const box = document.querySelector("[data-suggest]");
 if (box) {
@@ -34,7 +35,8 @@ if (box) {
 
   const suggest = async () => {
     const q = input.value.trim();
-    if (q.length < 2) {
+    // One letter matches too much to say anything.
+    if (q.length === 1) {
       close();
       return;
     }
@@ -46,15 +48,24 @@ if (box) {
     const response = await fetch(`${box.dataset.suggest}?${query}`, {
       headers: { Accept: "text/html" },
     });
-    const html = response.ok ? await response.text() : "";
+    const html = response.ok ? (await response.text()).trim() : "";
     // A later keystroke asked again meanwhile: its answer wins.
-    if (asked !== query || !html) return;
+    if (asked !== query) return;
+    // Nothing to suggest: an empty field with nothing searched or opened yet.
+    if (!html) {
+      close();
+      return;
+    }
     panel()?.remove();
     box.insertAdjacentHTML("beforeend", html);
     input.setAttribute("aria-expanded", "true");
     box.classList.add("is-open");
     choose(options()[0]);
   };
+
+  input.addEventListener("focus", () => {
+    if (!input.value.trim() && !panel()) suggest();
+  });
 
   input.addEventListener("input", () => {
     clearTimeout(timer);

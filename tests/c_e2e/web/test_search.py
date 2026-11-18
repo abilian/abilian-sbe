@@ -24,6 +24,8 @@ from abilian.sbe.apps.communities.models import MEMBER
 from abilian.sbe.apps.communities.search import filter_user_communities
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.forum.models import Thread
+from abilian.services.viewtracker import viewtracker
+from tests.forum_util import started_thread
 from tests.util import client_login, ensure_services_started
 
 if TYPE_CHECKING:
@@ -230,3 +232,34 @@ def test_an_empty_field_suggests_nothing(indexed: User, client: FlaskClient) -> 
     html = _suggestions(client, indexed, q="  ")
 
     assert 'role="option"' not in html
+
+
+def test_an_empty_field_suggests_the_last_searches(
+    indexed: User, client: FlaskClient
+) -> None:
+    for q in ("budget", "vote", "budget"):
+        with client_login(client, indexed):
+            client.get(url_for("search.search_main", q=q))
+
+    html = _suggestions(client, indexed, q="")
+
+    assert "Recent searches" in html
+    assert html.count(">budget<") == 1
+    assert html.index(">budget<") < html.index(">vote<")
+
+
+def test_an_empty_field_suggests_what_one_may_still_read_of_what_one_opened(
+    db: SQLAlchemy, client: FlaskClient, community1: Community, community2: Community
+) -> None:
+    ensure_services_started(["security"])
+    user = community1.test_user
+    here = started_thread(db, community1, user, "Our meeting")
+    gone = started_thread(db, community2, community2.test_user, "Their meeting")
+    for thread in (here, gone):
+        viewtracker.record_hit(entity=thread, user=user)
+
+    html = _suggestions(client, user, q="")
+
+    assert "Opened lately" in html
+    assert "Our meeting" in html
+    assert "Their meeting" not in html
