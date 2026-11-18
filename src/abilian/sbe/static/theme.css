@@ -805,3 +805,7 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   border-bottom: 0;
   border-top: var(--ads-border-width) solid var(--ads-line-soft);
 }
+
+/* A switch whose label wraps keeps its track whole: in a flex row it shrank to a sliver
+   (ADS request 31). */
+.ads-switch__track { flex: none; }
