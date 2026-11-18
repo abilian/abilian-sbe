@@ -11,6 +11,18 @@ from flask import current_app, render_template
 
 from abilian.web.admin import AdminPanel
 
+#: What a setting's name holds when its value is a secret: a key, a password, or
+#: an address that may carry one (a database's, a broker's).
+SECRET_MARKS = ("SECRET", "PASSWORD", "TOKEN", "KEY", "URI")
+
+#: What the page shows in a secret's place.
+HIDDEN = "••••••••"
+
+
+def is_secret(name: str) -> bool:
+    """Whether a setting's value must not be shown, even to an administrator."""
+    return any(mark in name.upper() for mark in SECRET_MARKS)
+
 
 def installed_packages() -> list[dict[str, str]]:
     packages = [
@@ -31,7 +43,10 @@ class SysinfoPanel(AdminPanel):
 
         packages = installed_packages()
 
-        config_values = [(k, repr(v)) for k, v in sorted(current_app.config.items())]
+        config_values = [
+            (k, HIDDEN if is_secret(k) else repr(v))
+            for k, v in sorted(current_app.config.items())
+        ]
 
         ctx = {
             "python_version": python_version,

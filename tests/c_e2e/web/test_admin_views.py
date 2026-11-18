@@ -13,12 +13,13 @@ for the first time.
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from uuid import uuid4
 
 import pytest
 from flask import url_for
 
 from abilian.core.models.subjects import Group
-from abilian.web.admin.panels.sysinfo import installed_packages
+from abilian.web.admin.panels.sysinfo import HIDDEN, installed_packages
 from tests.util import client_login
 
 if TYPE_CHECKING:
@@ -39,6 +40,20 @@ PANELS = [
 def test_list_packages() -> None:
     packages = installed_packages()
     assert isinstance(packages, list)
+
+
+def test_the_system_page_hides_the_secrets(
+    app, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    secret = uuid4().hex
+    app.config["MAIL_PASSWORD"] = secret
+    app.config["BROKER_URI"] = f"redis://:{secret}@cache/0"
+    with client_login(client, admin_user):
+        html = client.get(url_for("admin.sysinfo")).get_data(as_text=True)
+
+    assert secret not in html
+    assert HIDDEN in html
+    assert "SITE_NAME" in html
 
 
 @pytest.mark.parametrize("endpoint", PANELS)
