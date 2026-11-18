@@ -41,6 +41,12 @@ class UsersPanel(AdminPanel):
     def install_additional_rules(self, add_url_rule: Callable) -> None:
         add_url_rule("/new", view_func=views.UserCreate.as_view("new"))
         add_url_rule("/<int:user_id>", view_func=views.UserEdit.as_view("user"))
+        add_url_rule(
+            "/<int:user_id>/account",
+            "account",
+            view_func=views.account_action,
+            methods=["POST"],
+        )
 
     def get(self) -> str:
         admin_ids = sa.select(RoleAssignment.user_id).where(

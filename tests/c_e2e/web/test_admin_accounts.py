@@ -15,6 +15,7 @@ import pytest
 from flask import url_for
 from flask_login import current_user
 
+from abilian.core.extensions import mail
 from abilian.core.models.subjects import User
 from abilian.services import security_service
 from abilian.services.security import ADMIN
@@ -211,3 +212,57 @@ def test_the_administration_shows_no_groups_vocabularies_or_tags(
     assert url_for("admin.users") in tabs
     for hidden in ("admin.groups", "admin.vocabularies", "admin.tags"):
         assert url_for(hidden) not in tabs
+
+
+def _act(client: FlaskClient, viewer: User, user: User, action: str):
+    url = url_for("admin.users_account", user_id=user.id)
+    with client_login(client, viewer):
+        return client.post(url, data={"action": action})
+
+
+def test_an_account_is_disabled_and_enabled_from_its_row(
+    client: FlaskClient, accounts: dict[str, User], db: SQLAlchemy
+) -> None:
+    admin, user = accounts["admin"], accounts["active"]
+    html = _page(client, admin, url_for("admin.users"))
+    assert url_for("admin.users_account", user_id=user.id) in html
+
+    assert _act(client, admin, user, "disable").status_code == 302
+    db.session.refresh(user)
+    assert not user.can_login
+
+    assert _act(client, admin, user, "enable").status_code == 302
+    db.session.refresh(user)
+    assert user.can_login
+
+
+def test_an_administrator_does_not_disable_their_own_account(
+    client: FlaskClient, accounts: dict[str, User], db: SQLAlchemy
+) -> None:
+    admin = accounts["admin"]
+
+    assert _act(client, admin, admin, "disable").status_code == 400
+    db.session.refresh(admin)
+    assert admin.can_login
+
+
+def test_a_password_link_is_sent_from_an_accounts_row(
+    client: FlaskClient, accounts: dict[str, User]
+) -> None:
+    with mail.record_messages() as outbox:
+        response = _act(client, accounts["admin"], accounts["invited"], "send-link")
+
+    assert response.status_code == 302
+    assert [m.recipients for m in outbox] == [[accounts["invited"].email]]
+
+
+def test_only_an_administrator_acts_on_an_account(
+    client: FlaskClient, accounts: dict[str, User], db: SQLAlchemy
+) -> None:
+    user = accounts["active"]
+
+    response = _act(client, accounts["invited"], user, "disable")
+
+    assert response.status_code == 403
+    db.session.refresh(user)
+    assert user.can_login

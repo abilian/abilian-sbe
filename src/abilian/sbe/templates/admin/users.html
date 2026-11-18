@@ -54,7 +54,25 @@
               <summary class="ads-btn ads-btn--ghost ads-btn--sm" aria-label="{{ _('Actions on the account of %(name)s', name=user.name) }}">{{ icon("dots") }}</summary>
               <div class="ads-menu">
                 <a class="ads-menu__item" href="{{ user_url }}">{{ icon("pencil") }}{{ _("Edit") }}</a>
-                {% if user.can_login %}{{ a.sign_in_as(user, "ads-menu__item") }}{% endif %}
+                {% set account_url = url_for('.users_account', user_id=user.id) %}
+                {% if user.can_login %}
+                <form method="post" action="{{ account_url }}">
+                  {{ csrf.field() }}
+                  <button class="ads-menu__item" type="submit" name="action" value="send-link">{{ icon("mail") }}{{ _("Resend the invitation") if not user.last_active else _("Send a link to change the password") }}</button>
+                </form>
+                {{ a.sign_in_as(user, "ads-menu__item") }}
+                {% endif %}
+                {% if user != current_user %}
+                <div class="ads-menu__sep"></div>
+                <form method="post" action="{{ account_url }}">
+                  {{ csrf.field() }}
+                  {% if user.can_login %}
+                  <button class="ads-menu__item ads-menu__item--danger" type="submit" name="action" value="disable">{{ icon("trash") }}{{ _("Disable the account") }}</button>
+                  {% else %}
+                  <button class="ads-menu__item" type="submit" name="action" value="enable">{{ icon("check") }}{{ _("Enable the account again") }}</button>
+                  {% endif %}
+                </form>
+                {% endif %}
               </div>
             </details>
           </td>

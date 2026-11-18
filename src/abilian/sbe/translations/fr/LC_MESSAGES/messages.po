@@ -3244,3 +3244,24 @@ msgstr "Il disparaît de l’agenda de la communauté. C’est définitif."
 
 msgid "The event is deleted."
 msgstr "L’événement est supprimé."
+
+msgid "Resend the invitation"
+msgstr "Renvoyer l’invitation"
+
+msgid "Send a link to change the password"
+msgstr "Envoyer un lien pour changer de mot de passe"
+
+msgid "Disable the account"
+msgstr "Désactiver le compte"
+
+msgid "Enable the account again"
+msgstr "Réactiver le compte"
+
+msgid "A link to choose a password is sent to %(email)s."
+msgstr "Un lien pour choisir un mot de passe est envoyé à %(email)s."
+
+msgid "The account of %(name)s is disabled."
+msgstr "Le compte de %(name)s est désactivé."
+
+msgid "The account of %(name)s is enabled again."
+msgstr "Le compte de %(name)s est réactivé."

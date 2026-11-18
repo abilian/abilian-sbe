@@ -6,13 +6,17 @@ from __future__ import annotations
 
 from typing import Any
 
-from flask import render_template_string, request
+from flask import flash, redirect, render_template_string, request
 from werkzeug.datastructures import MultiDict
+from werkzeug.exceptions import BadRequest
 
+from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.subjects import User, gen_random_password
+from abilian.i18n import _
 from abilian.services import get_service
 from abilian.services.auth.models import LoginSession
+from abilian.services.auth.views import send_reset_password_instructions
 from abilian.services.security.models import ADMIN, Role
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
@@ -122,3 +126,34 @@ class UserCreate(UserBase, views.ObjectCreate[User, UserCreateForm]):
         self.obj.set_password(self.form.password.data)
         del self.form.password
         return super().form_valid()
+
+
+def account_action(user_id: int):
+    """What the accounts' list does to one from its row: send a link to choose a
+    password (an invitation, again, to whoever never signed in), disable it, enable
+    it again. Not to one's own account, whose access an administrator keeps."""
+    user = db.get_or_404(User, user_id)
+    action = request.form.get("action")
+    if user == authenticated_user() and action == "disable":
+        msg = "One's own account stays enabled"
+        raise BadRequest(msg)
+
+    match action:
+        case "send-link" if user.can_login:
+            send_reset_password_instructions(user)
+            flash(
+                _("A link to choose a password is sent to %(email)s.", email=user.email)
+            )
+        case "disable":
+            user.can_login = False
+            db.session.commit()
+            flash(_("The account of %(name)s is disabled.", name=user.name))
+        case "enable":
+            user.can_login = True
+            db.session.commit()
+            flash(_("The account of %(name)s is enabled again.", name=user.name))
+        case _:
+            msg = f"Not an action on this account: {action!r}"
+            raise BadRequest(msg)
+
+    return redirect(url_for("admin.users"))
