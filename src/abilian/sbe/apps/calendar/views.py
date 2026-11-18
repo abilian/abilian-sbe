@@ -1,13 +1,16 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-"""Forum views."""
+"""A community's calendar: its events to come or past, by month, the month at a
+glance beside them; an event; making and changing one."""
 
 from __future__ import annotations
 
+import calendar
 from datetime import date, datetime
 
-from flask import g, render_template
+from flask import g, render_template, request
 from toolz import groupby
+from werkzeug.exceptions import BadRequest
 
 from abilian.i18n import _l
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
@@ -23,44 +26,74 @@ blueprint = CommunityBlueprint(
 )
 route = blueprint.route
 
+#: How many of the events to come an event's page shows beside it.
+OTHERS = 4
+
 
 @route("/")
-def index():
-    events = Event.query.filter(Event.end > datetime.now()).order_by(Event.start).all()
-
-    def get_month(event):
-        year = event.start.year
-        month = event.start.month
-        return date(year, month, 1)
-
-    groups = sorted(groupby(get_month, events).items())
-    ctx = {"groups": groups}
-    return render_template("calendar/index.html", **ctx)
+def index() -> str:
+    """The events to come, soonest first."""
+    events = _events().filter(Event.end > datetime.now()).order_by(Event.start)
+    return _calendar(events.all(), past=False)
 
 
 @route("/archives/")
-def archives():
-    events = (
-        Event.query.filter(Event.end <= datetime.now())
-        .order_by(Event.start.desc())
-        .all()
+def archives() -> str:
+    """The events past, latest first."""
+    events = _events().filter(Event.end <= datetime.now())
+    return _calendar(events.order_by(Event.start.desc()).all(), past=True)
+
+
+def _events():
+    """The community's events, and no other community's."""
+    return Event.query.filter(Event.community_id == g.community.id)
+
+
+def _calendar(events: list[Event], past: bool) -> str:
+    by_month = groupby(lambda e: date(e.start.year, e.start.month, 1), events)
+    months = sorted(by_month.items(), reverse=past)
+    shown = _month_shown()
+    return render_template(
+        "calendar/index.html",
+        months=months,
+        past=past,
+        month=shown,
+        today=datetime.now().date(),
+        weeks=month_weeks(shown, _events().all()),
+        previous=_shift(shown, -1),
+        following=_shift(shown, 1),
     )
 
-    def get_month(event):
-        year = event.start.year
-        month = event.start.month
-        return date(year, month, 1)
 
-    groups = sorted(groupby(get_month, events).items(), reverse=True)
-    ctx = {"groups": groups}
-    return render_template("calendar/archives.html", **ctx)
+def _month_shown() -> date:
+    """The month beside the list: `?month=2026-11`, or this month."""
+    asked = request.args.get("month")
+    if not asked:
+        return datetime.now().date().replace(day=1)
+    try:
+        return datetime.strptime(asked, "%Y-%m").date()
+    except ValueError as e:
+        msg = f"Not a month: {asked!r}"
+        raise BadRequest(msg) from e
+
+
+def _shift(month: date, by: int) -> date:
+    index = month.year * 12 + month.month - 1 + by
+    return date(index // 12, index % 12 + 1, 1)
+
+
+def month_weeks(month: date, events: list[Event]) -> list[list[tuple[date, list]]]:
+    """The weeks of `month`, Monday first, each day with the events that start on
+    it; days of the months around it fill the first and last weeks."""
+    by_day = groupby(lambda e: e.start.date(), events)
+    weeks = calendar.Calendar().monthdatescalendar(month.year, month.month)
+    return [[(day, by_day.get(day, [])) for day in week] for week in weeks]
 
 
 class BaseEventView:
     Model = Event
     Form = EventForm
     pk = "event_id"
-    base_template = "community/_base.html"
 
     def index_url(self):
         return url_for(".index", community_id=g.community.slug)
@@ -78,6 +111,13 @@ class EventView(BaseEventView, views.ObjectView[Event, EventForm]):
     def template_kwargs(self):
         kw = super().template_kwargs
         kw["event"] = self.obj
+        kw["others"] = (
+            _events()
+            .filter(Event.end > datetime.now(), Event.id != self.obj.id)
+            .order_by(Event.start)
+            .limit(OTHERS)
+            .all()
+        )
         return kw
 
 
@@ -87,6 +127,8 @@ route("/<int:event_id>/")(event_view)
 
 
 class EventCreateView(BaseEventView, views.ObjectCreate[Event, EventForm]):
+    template = "calendar/event_form.html"
+    _message_success = _l("The event is posted.")
     POST_BUTTON = ButtonAction(
         "form", "create", btn_class="primary", title=_l("Post this event")
     )
@@ -110,6 +152,8 @@ route("/new_event/")(event_create_view)
 
 
 class EventEditView(BaseEventView, views.ObjectEdit[Event, EventForm]):
+    template = "calendar/event_form.html"
+    _message_success = _l("The event is changed.")
     POST_BUTTON = ButtonAction(
         "form", "create", btn_class="primary", title=_l("Post this event")
     )

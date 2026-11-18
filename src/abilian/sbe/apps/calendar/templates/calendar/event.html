@@ -1,37 +1,51 @@
-{% extends "calendar/_base.html" %}
-
-{%- from "macros/box.html" import m_box_content, m_box_menu -%}
-{%- from "macros/form.html" import m_field -%}
-
-{%- block content %}
-  {% call m_box_content() %}
-    {#  TODO #}
-    <p>
-      <a href="{{ url_for('.index', community_id=g.community.slug) }}">
-        <i class="fa fa-arrow-left"></i> {{ _("Back to calendar") }}</a>
-    </p>
-
-    <article>
-      <h2>{{ event.title }}</h2>
-
-      <p>
-        {{ _("Start") }}: {{ event.start | datetimeformat }}
-      </p>
-      <p>
-        {{ _("End") }}: {{ event.end | datetimeformat }}
-      </p>
-
-      {% if event.location %}
-        <p>{{ event.location }}</p>
-      {% endif %}
-
-      <div style="font-style: italic;">
-        {{ event.description|safe }}
+{#- An event: when and where first, who posted it, then what it is and where to read
+    more; changing it in sight; the other events to come beside it. Drawn in
+    `mockups/templates/event.html`. -#}
+{% extends "ads_community.html" %}
+{% import "calendar/_events.html" as ev with context %}
+{% set kw = {"community_id": g.community.slug} %}
+{% block page_title %}{{ event.title }} · {{ _("Calendar") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+<div class="ads-with-aside">
+  <article class="ads-card" aria-labelledby="event-title">
+    <div class="ads-card__head ads-spread">
+      <div class="ads-media">
+        {{ ev.date_tile(event.start) }}
+        <div class="ads-stack ads-gap-sm">
+          <ol class="ads-breadcrumb"><li><a href="{{ url_for('.index', **kw) }}">{{ _("Calendar") }}</a></li></ol>
+          <h2 class="ads-card__title" id="event-title">{{ event.title }}</h2>
+        </div>
       </div>
+      <a class="ads-btn" href="{{ url_for('.event_edit', event_id=event.id, **kw) }}">{{ icon("pencil") }}{{ _("Edit") }}</a>
+    </div>
+    <div class="ads-card__body ads-stack">
+      <dl class="sbe-facts">
+        <dt>{{ icon("clock") }}<span class="sbe-sr-only">{{ _("When") }}</span></dt>
+        <dd>{{ ev.first_up(event.start | dateformat("full", rebase=false)) }}, {{ ev.hours(event) }}</dd>
+        {% if event.location %}
+        <dt>{{ icon("pin") }}<span class="sbe-sr-only">{{ _("Where") }}</span></dt>
+        <dd>{{ event.location }}</dd>
+        {% endif %}
+        {% if event.creator %}
+        <dt>{{ icon("user") }}<span class="sbe-sr-only">{{ _("Posted by") }}</span></dt>
+        <dd class="ads-cluster ads-gap-sm">{{ m.avatar(event.creator, "ads-avatar--xs") }}{{ event.creator.name }}</dd>
+        {% endif %}
+      </dl>
+      {#- Sanitised when saved (`calendar/forms.py`). -#}
+      <div class="ads-prose">{{ event.description | safe }}</div>
+      {#- A link only to the web: an address typed in may be anything. -#}
+      {% if event.url %}<p>{{ _("More information") }}: {% if event.url.startswith(("http://", "https://")) %}<a href="{{ event.url }}" rel="noopener">{{ event.url }}</a>{% else %}{{ event.url }}{% endif %}</p>{% endif %}
+    </div>
+  </article>
 
-      {% if event.url %}
-        {{ _('More information') }}: <a href="{{ event.url }}">{{ event.url }}</a>
-      {% endif %}
-    </article>
-  {% endcall %}
-{%- endblock %}
+  <aside class="ads-stack" aria-label="{{ _('The other events') }}">
+    <section class="ads-card" aria-labelledby="others">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="others">{{ _("Also to come") }}</h2></div>
+      {% if others %}
+      <ul class="ads-list">{% for e in others %}{{ ev.event_row(e) }}{% endfor %}</ul>
+      {% else %}<p class="ads-card__body ads-muted">{{ _("Nothing else for now.") }}</p>{% endif %}
+      <div class="ads-card__foot"><a href="{{ url_for('.index', **kw) }}">{{ _("The whole calendar") }}</a></div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

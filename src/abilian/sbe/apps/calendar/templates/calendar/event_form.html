@@ -1,0 +1,57 @@
+{#- Making an event, or changing one: its title, when it starts and ends (a time is
+    suggested, the day left blank), where, a link to read more, what it is in rich
+    text. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_post_fields.html" as fields %}
+{% set creating = not view.obj.id %}
+{% set kw = {"community_id": g.community.slug} %}
+{% block page_title %}{{ _("New event") if creating else view.obj.title }} · {{ _("Calendar") }} · {{ g.community.name }}{% endblock %}
+{#- The rich-text editor; no stylesheet comes with it. -#}
+{% block scripts %}{{ vite_asset("src/main.js") }}{{ vite_asset("src/editor.js") }}{% endblock %}
+
+{#- A date and a time under one name, as the field reads them back; a time not given
+    yet is `suggested` (office hours), the day left to the person. -#}
+{% macro moment(field, label, suggested) %}
+{% set day, _sep, time = field._value().partition(" ") %}
+<fieldset class="ads-field sbe-fieldset">
+  <legend class="ads-label ads-label--required">{{ label }}</legend>
+  <div class="ads-cluster ads-gap-sm">
+    <input class="ads-input sbe-fit" type="date" id="{{ field.id }}" name="{{ field.name }}" value="{{ day }}" required aria-label="{{ _('Day') }}" {{ fields.invalid(field) }}>
+    <input class="ads-input sbe-fit" type="time" id="{{ field.id }}-time" name="{{ field.name }}" value="{{ time or suggested }}" required aria-label="{{ _('Time') }}">
+  </div>
+  {{ fields.errors(field) }}
+</fieldset>
+{% endmacro %}
+
+{% block content %}
+<form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" aria-labelledby="event-form">
+  {{ form.csrf_token }}
+  <div class="ads-card__head"><h2 class="ads-card__title" id="event-form">{{ _("New event") if creating else _("Edit event") }}</h2></div>
+  <div class="ads-card__body ads-stack">
+    <div class="ads-field">
+      <label class="ads-label ads-label--required" for="{{ form.title.id }}">{{ _("Title") }}</label>
+      <input class="ads-input" id="{{ form.title.id }}" name="{{ form.title.name }}" type="text" value="{{ form.title.data or '' }}" required {{ fields.invalid(form.title) }}>
+      {{ fields.errors(form.title) }}
+    </div>
+    <div class="ads-grid ads-col-sm">
+      {{ moment(form.start, _("Starts"), "09:00") }}
+      {{ moment(form.end, _("Ends"), "18:00") }}
+    </div>
+    <div class="ads-field">
+      <label class="ads-label" for="{{ form.location.id }}">{{ _("Where") }}</label>
+      <input class="ads-input" id="{{ form.location.id }}" name="{{ form.location.name }}" type="text" value="{{ form.location.data or '' }}" {{ fields.invalid(form.location) }}>
+      {{ fields.errors(form.location) }}
+    </div>
+    <div class="ads-field">
+      <label class="ads-label" for="{{ form.url.id }}">{{ _("A link to read more") }}</label>
+      <input class="ads-input" id="{{ form.url.id }}" name="{{ form.url.name }}" type="url" value="{{ form.url.data or '' }}" placeholder="https://" {{ fields.invalid(form.url) }}>
+      {{ fields.errors(form.url) }}
+    </div>
+    {{ fields.message_field(form.description, _("What it is")) }}
+  </div>
+  <div class="ads-card__foot ads-cluster ads-gap-sm">
+    <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="{{ 'create' if creating else 'edit' }}">{{ _("Post this event") if creating else _("Save") }}</button>
+    <a class="ads-btn ads-btn--ghost" href="{{ url_for('.index', **kw) if creating else url_for(view.obj) }}">{{ _("Cancel") }}</a>
+  </div>
+</form>
+{% endblock %}

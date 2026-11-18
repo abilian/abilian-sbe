@@ -263,8 +263,8 @@ class Community(Entity):
 
     @property
     def has_calendar(self) -> bool:
-        config = current_app.config
-        return bool(config.get("ENABLE_CALENDAR"))
+        """The calendar is every community's tool, unless the site turns it off."""
+        return bool(current_app.config.get("ENABLE_CALENDAR", True))
 
     def rename(self, name: str) -> None:
         self.name = name

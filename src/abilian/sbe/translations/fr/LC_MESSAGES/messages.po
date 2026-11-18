@@ -3134,3 +3134,63 @@ msgstr "Tout cela se change ensuite dans ses paramètres, sauf son adresse."
 
 msgid "What happens next"
 msgstr "Ensuite"
+
+msgid "The other events"
+msgstr "Les autres événements"
+
+msgid "Also to come"
+msgstr "À venir aussi"
+
+msgid "Nothing else for now."
+msgstr "Rien d’autre pour l’instant."
+
+msgid "The whole calendar"
+msgstr "Tout l’agenda"
+
+msgid "Day"
+msgstr "Jour"
+
+msgid "Time"
+msgstr "Heure"
+
+msgid "Starts"
+msgstr "Début"
+
+msgid "Ends"
+msgstr "Fin"
+
+msgid "A link to read more"
+msgstr "Un lien pour en savoir plus"
+
+msgid "What it is"
+msgstr "De quoi il s’agit"
+
+msgid "Which events"
+msgstr "Quels événements"
+
+msgid "To come"
+msgstr "À venir"
+
+msgid "Past"
+msgstr "Passés"
+
+msgid "The events past"
+msgstr "Les événements passés"
+
+msgid "The events to come"
+msgstr "Les événements à venir"
+
+msgid "The month"
+msgstr "Le mois"
+
+msgid "Previous month"
+msgstr "Mois précédent"
+
+msgid "Next month"
+msgstr "Mois suivant"
+
+msgid "The event is posted."
+msgstr "L’événement est publié."
+
+msgid "The event is changed."
+msgstr "L’événement est modifié."

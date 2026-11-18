@@ -81,8 +81,3 @@ class EventForm(Form):
     def validate_end(self, field) -> None:
         if self.start.data > self.end.data:
             raise ValidationError(_l("End date/time must be after start"))
-
-
-# A new event suggests office hours and leaves the day to the user.
-EventForm.start.kwargs["raw_data"] = ["", "09:00"]
-EventForm.end.kwargs["raw_data"] = ["", "18:00"]

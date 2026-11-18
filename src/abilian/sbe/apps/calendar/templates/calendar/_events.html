@@ -1,0 +1,30 @@
+{#- What the calendar's pages share: a date as a leaf, an event's hours, an event as a
+    row. Dates and times in the reader's language, by Babel, and not shifted: an
+    event's moments are kept as local times, with no zone (`rebase=false`). -#}
+
+{#- A text with its first letter up and the rest as it is: `capitalize` lowers the
+    rest, "Saturday, november 21" in English. -#}
+{% macro first_up(text) -%}
+{{ text[:1] | upper }}{{ text[1:] }}
+{%- endmacro %}
+
+{#- A calendar leaf: the day over the month. -#}
+{% macro date_tile(moment) -%}
+<span class="sbe-date" aria-hidden="true"><strong>{{ moment.day }}</strong>{{ moment | dateformat("MMM", rebase=false) }}</span>
+{%- endmacro %}
+
+{#- "09:00 – 18:00"; an event over several days gives its end's date too. -#}
+{% macro hours(e) -%}
+{{ e.start | timeformat("short", rebase=false) }}{% if e.end %} – {% if e.end.date() != e.start.date() %}{{ e.end | dateformat("d MMM", rebase=false) }}, {% endif %}{{ e.end | timeformat("short", rebase=false) }}{% endif %}
+{%- endmacro %}
+
+{#- An event as a row: its date, its title, when and where. -#}
+{% macro event_row(e) %}
+<li>
+  {{ date_tile(e.start) }}
+  <span class="ads-fill sbe-lines">
+    <a class="sbe-quiet" href="{{ url_for(e) }}"><strong>{{ e.title }}</strong></a>
+    <span class="ads-muted"><span class="sbe-sr-only">{{ e.start | dateformat("full", rebase=false) }}, </span><span aria-hidden="true">{{ e.start | dateformat("EEE", rebase=false) }}</span> {{ hours(e) }}{% if e.location %} · {{ e.location }}{% endif %}</span>
+  </span>
+</li>
+{% endmacro %}
