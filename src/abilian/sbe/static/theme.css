@@ -821,3 +821,25 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
 
 /* A list of several choices does not drop down: no chevron (ADS request 33). */
 .ads-select[multiple] { background-image: none; padding-inline-end: var(--ads-space-4); }
+
+/* The bar's search and its suggestions: the panel as wide as it needs, under the
+   field; the current suggestion marked by its tint alone, no tick, since it is not a
+   choice (ADS request 34); the keys at the foot. */
+.sbe-suggest { flex: 0 1 26rem; min-width: 9rem; display: flex; }
+.sbe-suggest > .sbe-search { flex: 1 1 auto; }
+.sbe-search__key { flex: none; }
+.sbe-suggest__panel { inset-inline: auto 0; width: min(34rem, 90vw); max-height: min(32rem, 70vh); }
+.sbe-suggest__option { color: inherit; text-decoration: none; }
+.sbe-suggest__option[aria-selected="true"]::after { content: none; }
+.sbe-suggest__option[aria-selected="true"] { background: var(--ads-brand-wash); }
+.sbe-suggest__option mark { background: none; color: inherit; font-weight: var(--ads-weight-bold); }
+.sbe-suggest__elsewhere { margin-block-start: var(--ads-space-1); border-block-start: var(--ads-border-width) solid var(--ads-line-soft); border-radius: 0; }
+.sbe-suggest__foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--ads-space-2); padding: var(--ads-space-2) var(--ads-space-3); margin-block-start: var(--ads-space-1); border-block-start: var(--ads-border-width) solid var(--ads-line-soft); font-size: var(--ads-text-sm); }
+.sbe-suggest__keys .ads-kbd { padding: 0 var(--ads-space-1); }
+/* On a phone the field hides behind the bar's magnifier; open, the search takes the
+   bar's whole width, the suggestions the screen's under it. */
+@media (max-width: 47.99em) {
+  .sbe-suggest:has(.sbe-suggest__panel) { position: fixed; inset: 0 0 auto 0; z-index: 20; padding: var(--ads-space-2); background: var(--ads-surface); }
+  .sbe-suggest:has(.sbe-suggest__panel) > .sbe-search { display: flex; flex: 1 1 auto; }
+  .sbe-suggest__panel { position: fixed; inset: 3.5rem 0 0 0; width: auto; max-height: none; border-radius: 0; }
+}
