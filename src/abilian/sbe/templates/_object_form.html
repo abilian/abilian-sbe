@@ -1,0 +1,50 @@
+{#- An object's form, whatever its fields, on the Abilian Design System: each field
+    drawn by its kind, its help and its errors under it; the view's own buttons at the
+    foot. Shared by the administration's forms and the generic one. Imported `with
+    context`. -#}
+{% import "forum/_post_fields.html" as fields %}
+
+{#- One field, by its kind. -#}
+{% macro field_of(field) %}
+{% set described = ([field.id ~ "-help"] if field.description else []) + ([field.id ~ "-error"] if field.errors else []) %}
+{% set aria %}{% if field.errors %}aria-invalid="true"{% endif %} {% if described %}aria-describedby="{{ described | join(' ') }}"{% endif %}{% endset %}
+{% if field.type == "BooleanField" %}
+<div class="ads-field">
+  <label class="ads-switch"><input type="checkbox" id="{{ field.id }}" name="{{ field.name }}" value="y" {{ "checked" if field.data }} {{ aria }}><span class="ads-switch__track"></span><span>{{ field.label.text }}</span></label>
+  {% if field.description %}<small class="ads-help" id="{{ field.id }}-help">{{ field.description }}</small>{% endif %}
+  {{ fields.errors(field) }}
+</div>
+{% else %}
+<div class="ads-field">
+  <label class="ads-label {{ 'ads-label--required' if field.flags.required }}" for="{{ field.id }}">{{ field.label.text }}</label>
+  {% if field.type == "TextAreaField" %}
+  <textarea class="ads-textarea" id="{{ field.id }}" name="{{ field.name }}" rows="4" {{ "required" if field.flags.required }} {{ aria }}>{{ field.data or "" }}</textarea>
+  {% elif field.type in ("SelectField", "SelectMultipleField", "MultipleChoiceField", "QuerySelectField") %}
+  {% set many = field.type in ("SelectMultipleField", "MultipleChoiceField") or field.widget.multiple %}
+  <select class="ads-select" id="{{ field.id }}" name="{{ field.name }}" {{ "multiple" if many }} {{ "required" if field.flags.required }} {{ aria }}>
+    {% for choice in field.iter_choices() %}<option value="{{ choice[0] }}" {{ "selected" if choice[2] }}>{{ choice[1] }}</option>{% endfor %}
+  </select>
+  {% else %}
+  <input class="ads-input" id="{{ field.id }}" name="{{ field.name }}" type="text" value="{{ field._value() }}" {{ "required" if field.flags.required }} {{ aria }}>
+  {% endif %}
+  {% if field.description %}<small class="ads-help" id="{{ field.id }}-help">{{ field.description }}</small>{% endif %}
+  {{ fields.errors(field) }}
+</div>
+{% endif %}
+{% endmacro %}
+
+{#- The whole form, for `view` and its `form`. -#}
+{% macro object_form(form, view, title) %}
+<form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" aria-label="{{ title }}">
+  {{ form.csrf_token }}
+  <div class="ads-card__body ads-stack">
+    {% for field in form if field.type not in ("CSRFTokenField", "HiddenField") and field.widget.input_type != "hidden" %}{{ field_of(field) }}{% endfor %}
+    {% for field in form if field.type == "HiddenField" or field.widget.input_type == "hidden" %}{% if field.type != "CSRFTokenField" %}<input type="hidden" name="{{ field.name }}" value="{{ field._value() }}">{% endif %}{% endfor %}
+  </div>
+  <div class="ads-card__foot ads-cluster ads-gap-sm">
+    {% for button in view.buttons %}
+    <button class="ads-btn {{ 'ads-btn--primary' if button.btn_class == 'primary' else 'ads-btn--danger' if button.btn_class == 'danger' else 'ads-btn--ghost' if button.name == 'cancel' }}" type="submit" name="__action" value="{{ button.name }}" {{ "formnovalidate" if button.name == "cancel" }}>{{ button.title }}</button>
+    {% endfor %}
+  </div>
+</form>
+{% endmacro %}

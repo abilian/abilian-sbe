@@ -1,0 +1,9 @@
+{#- An object's form where no page draws it on purpose (a comment refused, an
+    attachment): the generic one on the Abilian Design System. Overrides Abilian
+    Core's, which stood on the old frame. -#}
+{% extends "ads_base.html" %}
+{% import "_object_form.html" as of with context %}
+{% set title = view.title or (view.obj.name if view.obj else "") %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block body %}{{ of.object_form(form, view, title) }}{% endblock %}
