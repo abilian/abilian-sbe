@@ -1609,9 +1609,8 @@ msgstr "Tous les documents de cette communauté"
 msgid "Files"
 msgstr "Documents"
 
-#: abilian/sbe/apps/wiki/actions.py:47
 msgid "Readers list"
-msgstr ""
+msgstr "Liste des lecteurs"
 
 #: abilian/sbe/apps/wiki/actions.py:52
 msgid "View"
@@ -2914,3 +2913,6 @@ msgstr "Tous les fichiers"
 
 msgid "No file in this community yet."
 msgstr "Aucun fichier dans cette communauté pour l’instant."
+
+msgid "Everything in it"
+msgstr "Tout son contenu"

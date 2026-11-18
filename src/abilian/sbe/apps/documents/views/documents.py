@@ -195,25 +195,9 @@ def document_edit(user: User, doc_id, folder_id=None):
 def document_viewers(user: User, doc_id):
     doc = get_document(user, doc_id)
     check_read_access(user, doc)
-    doc.ensure_antivirus_scheduled()
-    # db.session.commit()
-
-    bc = breadcrumbs_for(doc)
-    actions.context["object"] = doc
-    """if doc.content_type.startswith("image/"):
-        add_to_recent_items(doc, "image")
-    else:
-        add_to_recent_items(doc, "document")"""
-
-    has_preview = doc.has_preview()
-    audit_entries = audit_service.entries_for(doc)
-
     ctx = {
         "doc": doc,
-        "audit_entries": audit_entries,
-        "breadcrumbs": bc,
-        "folder": doc.parent,
-        "has_preview": has_preview,
+        "breadcrumbs": breadcrumbs_for(doc),
         "viewers": object_viewers(user, doc),
     }
     return render_template("documents/document_viewers.html", **ctx)

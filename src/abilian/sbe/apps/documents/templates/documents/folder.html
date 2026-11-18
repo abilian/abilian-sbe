@@ -29,7 +29,7 @@
   <div class="ads-menu">
     {% if obj.is_folder %}
     <button class="ads-menu__item" type="button" data-row-action="download" data-object-id="{{ obj.id }}">{{ icon("download") }}{{ _("Download") }}</button>
-    <a class="ads-menu__item" href="{{ url_for('.descendants_view', community_id=g.community.slug, folder_id=obj.id) }}">{{ icon("folders") }}{{ _("View descendants") }}</a>
+    <a class="ads-menu__item" href="{{ url_for('.descendants_view', community_id=g.community.slug, folder_id=obj.id) }}">{{ icon("folders") }}{{ _("Everything in it") }}</a>
     {% if may_manage %}<a class="ads-menu__item" href="{{ url_for('.permissions', community_id=g.community.slug, folder_id=obj.id) }}">{{ icon("shield-lock") }}{{ _("Permissions") }}</a>{% endif %}
     {% if may_write %}<button class="ads-menu__item" type="button" data-row-action="edit-folder" data-object-id="{{ obj.id }}">{{ icon("pencil") }}{{ _("Edit properties") }}</button>{% endif %}
     {% else %}
@@ -97,7 +97,7 @@
           <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the folder “%(name)s”', name=folder.title) }}">{{ icon("dots-vertical") }}</summary>
           <div class="ads-menu">
             <button class="ads-menu__item" type="submit" form="folder-download">{{ icon("download") }}{{ _("Download the folder") }}</button>
-            <a class="ads-menu__item" href="{{ url_for('.descendants_view', community_id=g.community.slug, folder_id=folder.id) }}">{{ icon("folders") }}{{ _("View descendants") }}</a>
+            <a class="ads-menu__item" href="{{ url_for('.descendants_view', community_id=g.community.slug, folder_id=folder.id) }}">{{ icon("folders") }}{{ _("Everything in it") }}</a>
             {% if may_write %}<button class="ads-menu__item" type="button" data-row-action="edit-folder" data-object-id="{{ folder.id }}">{{ icon("pencil") }}{{ _("Edit properties") }}</button>{% endif %}
             {% if may_manage and breadcrumbs | length > 1 %}<a class="ads-menu__item" href="{{ url_for('.permissions', community_id=g.community.slug, folder_id=folder.id) }}">{{ icon("shield-lock") }}{{ _("Permissions") }}</a>{% endif %}
           </div>

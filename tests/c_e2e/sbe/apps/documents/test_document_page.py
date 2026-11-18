@@ -284,3 +284,49 @@ def test_what_an_action_says_shows_on_the_page_it_leads_to(
         for part in html.split('class="ads-alert ads-tone-success"')[1:]
     ]
     assert any("Document properties successfully edited." in a for a in alerts)
+
+
+def test_the_readers_page_lists_who_read_it(
+    document: Document, manager: User, client: FlaskClient
+) -> None:
+    _page(client, manager, document)
+    url = url_for(
+        "documents.document_viewers",
+        community_id=document.community.slug,
+        doc_id=document.id,
+    )
+    with client_login(client, manager):
+        html = unescape(client.get(url).get_data(as_text=True))
+
+    # The page lists the members who read it, its author aside.
+    assert "Read by 0 members" in html
+    assert "Nobody has read it yet." in html
+
+
+def test_everything_in_a_folder_is_a_tree(
+    community1: Community,
+    manager: User,
+    client: FlaskClient,
+    db: SQLAlchemy,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """From the search index, filled as the objects are saved."""
+    monkeypatch.setenv("TESTING_DIRECT_FUNCTION_CALL", "testing")
+    ensure_services_started(["indexing"])
+    folder = community1.folder.create_subfolder("Minutes")
+    folder.create_document(title="2026.txt").set_content(b"one", "text/plain")
+    db.session.commit()
+    url = url_for(
+        "documents.descendants_view",
+        community_id=community1.slug,
+        folder_id=community1.folder.id,
+    )
+    with client_login(client, manager):
+        response = client.get(url)
+
+    assert response.status_code == 200
+    html = unescape(response.get_data(as_text=True))
+    assert "Everything in it" in html
+    nested = html.split(">Minutes</span>")[1].split("</li>")[0]
+    assert 'class="ads-tree ads-tree--nested"' in nested
+    assert "2026.txt" in nested

@@ -1,65 +1,35 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% from "macros/recent.html" import m_recent_items with context %}
-{% from "macros/user.html" import m_user_avatar as m_user %}
-
-{% from "documents/_macros.html" import m_breadcrumbs2 with context %}
-
+{#- All that a folder holds, at every depth, as a tree: its folders first, then its
+    documents, each with when it came and whose it is. From the search index, so it
+    shows what the person may read. Reached from a folder's ⋮ menu. -#}
+{% extends "ads_community.html" %}
+{% block page_title %}{{ _("Everything in it") }} · {{ folder.title }} · {{ g.community.name }}{% endblock %}
 {% block content %}
-  {% call m_box_content(title=_('Folder descendants')) %}
-    <div style="margin: 5px 0;">
-      <i class="fa fa-folder-open-o fa-large"></i>
-      {{ m_breadcrumbs2(breadcrumbs) }}
+<section class="ads-card" aria-labelledby="folder-title">
+  <div class="ads-card__head">
+    <div class="ads-stack ads-gap-sm">
+      <ol class="ads-breadcrumb">
+        {% for crumb in breadcrumbs %}<li><a href="{{ crumb.path }}">{{ crumb.label }}</a></li>{% endfor %}
+      </ol>
+      <h2 class="ads-card__title" id="folder-title">{{ _("Everything in it") }}</h2>
     </div>
-
-    <hr>
-
-    {%- if folder.description %}
-      <p>{{ folder.description }}</p>
-      <p>&nbsp;</p>
-    {%- endif %}
-
-    <ul style="list-style: none; padding-left: 0;">
-      {% for level, type, obj in descendants %}
-        <li style="margin-left: {{ level*1.5 }}em; padding-top: 3px; padding-bottom: 3px;">
-          <a href="{{ url_for(obj) }}">
-            <img src="{{ get_icon(obj) }}" style="height: 16px; width: 16px;" alt="">
-            {% if type == 'F' %}
-              <b>{{ obj['name'] }}</b>
-            {% else %}
-              {{ obj['name'] }}
-            {% endif %}
-          </a>
-          <small>
-            {{ obj['created_at'] |datetimeformat(format='short') }}
-            {%- set owner = owners.get(obj['owner']) %}
-            {%- if owner %}
-              {{ _('Owner') }}: {{ m_user(owner) }}
-            {%- endif %}
-          </small>
-
-        </li>
+  </div>
+  <div class="ads-card__body">
+    {% if tree %}
+    <ul class="ads-tree">
+      {% for hit, kind, children in tree recursive %}
+      {% set owner = owners.get(hit.owner) %}
+      <li class="ads-tree__node">
+        <span class="ads-cluster ads-gap-sm">
+          <a class="sbe-quiet ads-cluster ads-gap-sm" href="{{ url_for(hit) }}">{{ folder_icon() if kind == "folder" else file_icon(hit.name) }}<span>{{ hit.name }}</span></a>
+          <span class="ads-muted">{{ m.time(hit.created_at) }}{% if owner %} · {{ owner.name }}{% endif %}</span>
+        </span>
+        {% if children %}<ul class="ads-tree ads-tree--nested">{{ loop(children) }}</ul>{% endif %}
+      </li>
       {% endfor %}
     </ul>
-
-  {% endcall %}
-{% endblock %}
-
-{% block sidebar %}
-  {%- set content_actions = actions.for_category('documents:content') %}
-  {%- if content_actions %}
-    {% call m_box_menu() %}
-      <ul class="menu-actions">
-        {%- for action in content_actions %}
-          <li>{{ action.render() }}</li>
-        {%- endfor %}
-      </ul>
-    {% endcall %}
-  {%- endif %}
-{% endblock %}
-
-
-{% block modals %}
-  {% include "documents/_modals_folder.html" %}
+    {% else %}
+    <p class="ads-muted">{{ _("This folder is empty.") }}</p>
+    {% endif %}
+  </div>
+</section>
 {% endblock %}

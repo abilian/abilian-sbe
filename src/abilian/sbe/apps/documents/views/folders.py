@@ -47,7 +47,7 @@ from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _n
 from abilian.sbe.apps.communities.views import default_view_kw
-from abilian.sbe.apps.documents.models import Document, Folder, icon_for, icon_url
+from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.documents.repository import content_repository
 from abilian.sbe.apps.documents.search import reindex_tree
 from abilian.services import get_service
@@ -1136,21 +1136,17 @@ def descendants_view(user: User, folder_id):
             )
         )
 
-    descendants = []
-
-    def visit(path_id, level=0) -> None:
-        children = by_path.get(path_id, ())
-
-        for child in children:
-            is_folder = child["object_type"] == Folder.entity_type
-            type_letter = "F" if is_folder else "D"
-            descendants.append((level, type_letter, child))
-
-            if is_folder:
-                path_id = f"{child['parent_ids']}/{child['id']}"
-                visit(path_id, level + 1)
-
-    visit(root_path_ids, 0)
+    def children_of(path_id: str) -> list[tuple[Any, str, list]]:
+        """The hits under `path_id`, folders first: each, its kind ("folder" or
+        "document"), and what it holds."""
+        tree = []
+        for child in by_path.get(path_id, ()):
+            if child["object_type"] == Folder.entity_type:
+                below = f"{child['parent_ids']}/{child['id']}"
+                tree.append((child, "folder", children_of(below)))
+            else:
+                tree.append((child, "document", []))
+        return tree
 
     owners = {}
     owners_query = User.query.filter(User.id.in_(owner_ids)).add_column(
@@ -1161,18 +1157,8 @@ def descendants_view(user: User, folder_id):
 
     ctx = {
         "folder": folder,
-        "descendants": descendants,
+        "tree": children_of(root_path_ids),
         "owners": owners,
         "breadcrumbs": bc,
-        "get_icon": get_icon_for_hit,
     }
     return render_template("documents/descendants.html", **ctx)
-
-
-def get_icon_for_hit(hit):
-    if hit["object_type"] == Folder.entity_type:
-        return icon_url("folder.png")
-
-    content_type = hit["content_type"]
-    icon = icon_for(content_type)
-    return icon
