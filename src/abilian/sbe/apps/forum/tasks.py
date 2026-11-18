@@ -29,6 +29,7 @@ from abilian.core.models.subjects import User
 from abilian.core.signals import activity
 from abilian.core.util import md5, unwrap
 from abilian.i18n import _l, render_template_i18n
+from abilian.sbe.apps.communities.security import is_member
 from abilian.web import url_for
 
 from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
@@ -483,8 +484,15 @@ def process_email(message: email.message.Message) -> bool:
             )
             return False
         community = thread.community
-        # FIXME: check membership, send back an informative email in case of an
-        # error
+        # The address is signed, but it outlives a membership: whoever left the
+        # community, or was removed from it, still has the e-mails it came in.
+        # TODO: tell them, by e-mail, that the reply was not posted.
+        if g.user is None or not is_member(g.user, community):
+            logger.warning(
+                "Reply by a non-member to thread {thread_id}, dropped",
+                thread_id=thread_id,
+            )
+            return False
         post = thread.create_post(body_html=newpost)
         obj_meta = post.meta.setdefault("abilian.sbe.forum", {})
         obj_meta["origin"] = "email"

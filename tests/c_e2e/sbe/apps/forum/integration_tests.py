@@ -22,7 +22,7 @@ from abilian.sbe.apps.forum.tasks import (
 )
 from abilian.sbe.apps.forum.views import ThreadCreate
 from abilian.services import get_service, security_service
-from tests.forum_util import get_string_from_file
+from tests.forum_util import get_string_from_file, started_thread
 from tests.util import client_login
 
 if TYPE_CHECKING:
@@ -312,6 +312,42 @@ def test_a_reply_to_a_deleted_thread_is_dropped(app, db, community1) -> None:
         )
         message.replace_header("To", address)
         assert process_email(message) is False
+
+
+def _reply_by_email(app, thread: Thread, user) -> bool:
+    message = email.message_from_string(get_string_from_file("notification.email"))
+    post = mock.Mock(id=1, thread_id=thread.id)
+    with app.test_request_context():
+        address = build_reply_email_address("test", post, user, "example.com")
+    message.replace_header("To", address)
+    return process_email(message)
+
+
+def test_a_reply_by_email_from_a_member_is_posted(app, db, community1) -> None:
+    user = community1.test_user
+    community1.set_membership(user, MEMBER)
+    thread = started_thread(db, community1, user, "Budget 2027")
+
+    with mock.patch("abilian.sbe.apps.forum.tasks.send_post_by_email"):
+        assert _reply_by_email(app, thread, user) is True
+
+    db.session.expire_all()
+    assert len(thread.posts) == 2
+
+
+def test_a_reply_by_email_from_someone_no_longer_a_member_is_dropped(
+    app, db, community1
+) -> None:
+    """The reply address is signed, and still works once its holder has left."""
+    user = community1.test_user
+    thread = started_thread(db, community1, user, "Budget 2027")
+    community1.remove_membership(user)
+    db.session.commit()
+
+    assert _reply_by_email(app, thread, user) is False
+
+    db.session.expire_all()
+    assert len(thread.posts) == 1
 
 
 def test_a_thread_without_a_title_comes_back_to_its_form(
