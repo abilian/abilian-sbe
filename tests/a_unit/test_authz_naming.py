@@ -270,7 +270,6 @@ TEMPLATE_NAMES = {
     "may_edit": "social/views/users.py: user",
     # read, and not authorization at all -- state and form plumbing
     "is_closed": "not authorization: thread state",
-    "is_active": "not authorization: search facet",
 }
 
 TEMPLATE_NAME_RE = re.compile(r"(?<![.\w])((?:is|can|may)_[a-z_]+)")

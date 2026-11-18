@@ -21,8 +21,7 @@ from .extension import sbe
 __all__ = ["create_app"]
 
 SBE_PLUGINS = [
-    # One's account is SBE's own page (`apps/preferences`), in place of Core's.
-    *(plugin for plugin in CORE_PLUGINS if plugin != "abilian.web.preferences"),
+    *CORE_PLUGINS,
     "abilian.sbe.apps.main",
     "abilian.sbe.apps.notifications",
     "abilian.sbe.apps.preferences",

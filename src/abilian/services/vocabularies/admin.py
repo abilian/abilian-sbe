@@ -29,7 +29,6 @@ _MARKER = object()
 
 class ViewBase:
     title = _l("Vocabulary entry")
-    base_template = "admin/_base.html"
     Form = EditForm
     #: the vocabulary, which the URL names
     Model: type[BaseVocabulary]

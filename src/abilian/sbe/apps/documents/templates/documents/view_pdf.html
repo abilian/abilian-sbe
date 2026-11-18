@@ -7,28 +7,30 @@
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>{{ doc.title }}</title>
-  {{ vite_asset('src/styles.css') }}
+  <link rel="stylesheet" href="{{ url_for('abilian_sbe_static', filename='ads/ads.css') }}">
+  <link rel="stylesheet" href="{{ url_for('abilian_sbe_static', filename='theme.css') }}">
   {{ vite_asset('src/pdfviewer-styles.css') }}
+  {#- The theme chosen on this device, before anything is drawn. -#}
+  <script src="{{ url_for('abilian_sbe_static', filename='ads/restore.js') }}"></script>
   {{ vite_asset('src/pdfviewer.js') }}
 </head>
 <body>
   <main id="pdf-viewer"
         data-pdf-url="{{ pdf_url }}"
         data-vite-url="{{ url_for('abilian_sbe_static', filename='vite/') }}">
-    <h1 class="sr-only">{{ doc.title }}</h1>
-    <div class="fixed inset-x-0 top-0 flex h-12 items-center gap-3 border-b border-gray-200 bg-white px-4 text-sm">
-      <a href="{{ url_for(doc) }}" class="truncate font-medium text-gray-900 hover:underline">{{ doc.title }}</a>
-      <span class="ml-auto flex items-center gap-1">
-        <label for="pdf-page-number" class="sr-only">{{ _("Page") }}</label>
-        <input id="pdf-page-number" type="number" min="1" value="1" data-page-number
-               class="w-16 rounded border-gray-300 py-1 text-right text-sm"/>
+    <h1 class="sbe-sr-only">{{ doc.title }}</h1>
+    <div class="pdf-bar">
+      <a class="sbe-quiet ads-truncate" href="{{ url_for(doc) }}"><strong>{{ doc.title }}</strong></a>
+      <span class="ads-push ads-cluster ads-gap-sm">
+        <label class="sbe-sr-only" for="pdf-page-number">{{ _("Page") }}</label>
+        <input class="ads-input sbe-fit" id="pdf-page-number" type="number" min="1" value="1" data-page-number>
         <span>/ <span data-page-count></span></span>
       </span>
-      <button type="button" data-zoom-out
-              class="rounded px-2 py-1 hover:bg-gray-100" aria-label="{{ _('Zoom out') }}">&minus;</button>
-      <button type="button" data-zoom-in
-              class="rounded px-2 py-1 hover:bg-gray-100" aria-label="{{ _('Zoom in') }}">+</button>
-      <a href="{{ pdf_url }}?attach=1" class="rounded px-2 py-1 hover:bg-gray-100">{{ _("Download") }}</a>
+      <span class="ads-btn-group">
+        <button class="ads-btn ads-btn--sm" type="button" data-zoom-out aria-label="{{ _('Zoom out') }}">&minus;</button>
+        <button class="ads-btn ads-btn--sm" type="button" data-zoom-in aria-label="{{ _('Zoom in') }}">+</button>
+      </span>
+      <a class="ads-btn ads-btn--sm" href="{{ pdf_url }}?attach=1">{{ icon("download") }}{{ _("Download") }}</a>
     </div>
     <div class="pdf-container">
       <div class="pdfViewer"></div>

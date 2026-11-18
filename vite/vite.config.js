@@ -1,8 +1,6 @@
 import { defineConfig } from "vite";
-import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
-  plugins: [tailwindcss()],
   // Pinned, and strict on purpose: without strictPort Vite silently moves to
   // the next free port when this one is taken, while Flask keeps emitting
   // VITE_DEV_SERVER -- so every asset tag points at whatever else is running
@@ -15,11 +13,10 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "./src/main.js",
-        styles: "./src/styles.css",
         // Only admin/dashboard.html loads this one.
         charts: "./src/charts.js",
-        // uPlot's stylesheet, for the dashboard on the design system, which
-        // does not load styles.css.
+        // uPlot's stylesheet, for the dashboard: the pages' own styles are the
+        // design system's, served as static files.
         "charts-styles": "./src/charts-styles.css",
         // Only the rich text widget loads this one.
         editor: "./src/editor.js",

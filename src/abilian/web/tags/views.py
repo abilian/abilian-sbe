@@ -15,9 +15,7 @@ from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.views import ObjectEdit
 
 #: No views of its own: it carries the templates of the admin tags panel.
-bp = AccessControlBlueprint(
-    "tags", __name__, url_prefix="/tags", template_folder="templates"
-)
+bp = AccessControlBlueprint("tags", __name__, url_prefix="/tags")
 
 entity_bp = AccessControlBlueprint(
     "entity_tags", __name__, url_prefix="/tags/entity", allowed_roles=AUTHENTICATED

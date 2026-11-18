@@ -198,7 +198,6 @@ class BaseCommunityView:
     Model = Community
     pk = "community_id"
     Form = CommunityForm
-    base_template = "community/_base.html"
     decorators = [is_site_admin]
     view_endpoint = ""
 

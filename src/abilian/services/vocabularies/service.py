@@ -7,8 +7,6 @@ from __future__ import annotations
 import typing
 from inspect import isclass
 
-import jinja2
-
 from abilian.services.base import Service
 
 from .models import BaseVocabulary
@@ -49,8 +47,6 @@ class VocabularyService(Service):
 
     def init_app(self, app: Application) -> None:
         super().init_app(app)
-        loader = jinja2.PackageLoader("abilian.services.vocabularies")
-        app.register_jinja_loaders(loader)
 
     @property
     def vocabularies(self) -> set[type[BaseVocabulary]]:

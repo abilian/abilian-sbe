@@ -24,7 +24,6 @@ class GroupBase:
     Model = Group
     Form = GroupAdminForm
     pk = "group_id"
-    base_template = "admin/_base.html"
 
     def index_url(self):
         return url_for(".groups")

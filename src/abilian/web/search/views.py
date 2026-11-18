@@ -47,7 +47,6 @@ search = AccessControlBlueprint(
     "search",
     __name__,
     url_prefix="/search",
-    template_folder="templates",
     allowed_roles=AUTHENTICATED,
 )
 route = search.route

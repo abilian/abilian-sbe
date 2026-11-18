@@ -1,9 +1,9 @@
 {
-  "name": "abilian-sbe-tailwind-vite",
+  "name": "abilian-sbe-front",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "Tailwind CSS build for Abilian SBE Flask templates",
+  "description": "The scripts of Abilian SBE's pages, and the few stylesheets that come with their libraries",
   "scripts": {
     "dev": "vite",
     "build": "vite build && npm run copy-assets",
@@ -14,11 +14,6 @@
   "devDependencies": {
     "@alpinejs/collapse": "^3.17.1",
     "@alpinejs/csp": "^3.17.1",
-    "@tailwindcss/aspect-ratio": "^0.4.2",
-    "@tailwindcss/forms": "^0.5.9",
-    "@tailwindcss/line-clamp": "^0.4.0",
-    "@tailwindcss/typography": "^0.5.15",
-    "@tailwindcss/vite": "^4.1.13",
     "@tiptap/core": "^3.32.2",
     "@tiptap/extension-image": "^3.32.2",
     "@tiptap/pm": "^3.32.2",
@@ -26,14 +21,7 @@
     "axe-core": "^4.11.0",
     "cross-env": "^7.0.3",
     "pdfjs-dist": "^6.5.438",
-    "postcss": "^8.4.47",
-    "postcss-cli": "^11.0.0",
-    "postcss-each": "^1.1.0",
-    "postcss-import": "^16.1.0",
-    "postcss-nested": "^7.0.2",
-    "postcss-simple-vars": "^7.0.1",
     "rimraf": "^6.0.1",
-    "tailwindcss": "^4.1.13",
     "uplot": "^1.6.32",
     "vite": "^7.1.2"
   }

@@ -210,7 +210,6 @@ def attachments():
 class BaseThreadView:
     Model: type[Thread | Post] = Thread
     pk = "thread_id"
-    base_template = "community/_base.html"
 
     #: the logged-in user, set by `prepare_args()`
     user: User

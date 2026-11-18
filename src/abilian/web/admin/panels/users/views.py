@@ -30,7 +30,6 @@ LAST_SESSIONS = 5
 class UserBase:
     Model = User
     pk = "user_id"
-    base_template = "admin/_base.html"
     template = "admin/user_edit.html"
 
     def index_url(self):

@@ -8,15 +8,11 @@ from io import BytesIO
 from typing import TYPE_CHECKING
 
 import babel.dates
-from flask import current_app, flash, g, redirect, render_template, request, url_for
-from werkzeug.exceptions import InternalServerError
+from flask import request
 from wtforms import StringField
 from wtforms.validators import ValidationError
 
-from abilian.core.extensions import db
 from abilian.i18n import _, _l, get_default_locale
-from abilian.services.preferences.panel import PreferencePanel
-from abilian.web import csrf
 from abilian.web.forms import Form, fields, required, widgets
 from abilian.web.forms.validators import open_png_or_jpeg
 
@@ -70,64 +66,3 @@ class UserPreferencesForm(Form):
         jpeg = BytesIO()
         im.convert("RGB").save(jpeg, "JPEG")
         field.data = jpeg.getvalue()
-
-
-class UserPreferencesPanel(PreferencePanel):
-    id = "user"
-    label = _l("About me")
-
-    def is_accessible(self) -> bool:
-        return True
-
-    def get(self):
-        # Manual security check, should be done by the framework instead.
-        if not self.is_accessible():
-            raise InternalServerError
-
-        data = {}
-        photo = g.user.photo
-        if photo:
-            # subclass str/bytes to set additional 'url' attribute
-
-            photo = type(
-                "Photo",
-                (bytes,),
-                {"object": photo, "url": url_for("users.photo", user_id=g.user.id)},
-            )
-            data["photo"] = photo
-
-        form = UserPreferencesForm(obj=g.user, formdata=None, prefix=self.id, **data)
-        if form["locale"].data is None:
-            form["locale"].data = get_default_locale()
-
-        ctx = {"form": form, "title": self.label}
-        return render_template("preferences/user.html", **ctx)
-
-    @csrf.support_graceful_failure
-    def post(self):
-        # Manual security check, should be done by the framework instead.
-        if not self.is_accessible():
-            raise InternalServerError
-
-        if request.form["_action"] == "cancel":
-            return redirect(url_for(".user"))
-
-        form = UserPreferencesForm(request.form, prefix=self.id)
-
-        if form.validate():
-            if csrf.has_failed():
-                current_app.extensions["csrf-handler"].flash_csrf_failed_message()
-                return render_template("preferences/user.html", form=form)
-
-            del form.confirm_password
-            if form.password.data:
-                g.user.set_password(form.password.data)
-                flash(_("Password changed"), "success")
-            del form.password
-
-            form.populate_obj(g.user)
-
-            db.session.commit()
-            flash(_("Preferences saved."), "info")
-            return redirect(url_for(".user"))
-        return render_template("preferences/user.html", form=form)

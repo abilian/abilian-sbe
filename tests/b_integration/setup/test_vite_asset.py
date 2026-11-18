@@ -22,10 +22,10 @@ if TYPE_CHECKING:
 def test_dev_mode_points_at_the_vite_dev_server(app: Application) -> None:
     with app.test_request_context():
         app.config["DEBUG"] = True
-        tag = vite_asset("src/styles.css")
+        tag = vite_asset("src/charts-styles.css")
 
     assert VITE_DEV_SERVER in tag
-    assert "src/styles.css" in tag
+    assert "src/charts-styles.css" in tag
 
 
 def test_dev_server_address_is_configurable(app: Application) -> None:
@@ -41,21 +41,21 @@ def test_dev_server_address_is_configurable(app: Application) -> None:
 def test_production_mode_uses_the_served_static_route(app: Application) -> None:
     with app.test_request_context():
         app.config["DEBUG"] = False
-        css = vite_asset("src/styles.css")
+        css = vite_asset("src/charts-styles.css")
         js = vite_asset("src/main.js")
         app.config["DEBUG"] = True
 
     # Must match where `make front` writes and what abilian_sbe_static serves.
     # The trailing `?v=` is the cache-busting stamp added to every static URL.
-    assert 'href="/static/abilian/sbe/vite/styles.css?v=' in css
+    assert 'href="/static/abilian/sbe/vite/charts-styles.css?v=' in css
     assert 'src="/static/abilian/sbe/vite/main.js?v=' in js
 
 
 def test_css_and_js_get_the_right_tag(app: Application) -> None:
     with app.test_request_context():
         app.config["DEBUG"] = False
-        assert vite_asset("src/styles.css").startswith("<link")
-        assert 'rel="stylesheet"' in vite_asset("src/styles.css")
+        assert vite_asset("src/charts-styles.css").startswith("<link")
+        assert 'rel="stylesheet"' in vite_asset("src/charts-styles.css")
         assert vite_asset("src/main.js").startswith("<script")
         assert 'type="module"' in vite_asset("src/main.js")
         app.config["DEBUG"] = True
@@ -72,16 +72,16 @@ def test_dev_css_is_requested_as_plain_css(app: Application) -> None:
     refuses for a stylesheet -- the whole page then renders unstyled."""
     with app.test_request_context():
         app.config["DEBUG"] = True
-        tag = vite_asset("src/styles.css")
+        tag = vite_asset("src/charts-styles.css")
 
-    assert "src/styles.css?direct" in tag
+    assert "src/charts-styles.css?direct" in tag
     assert 'rel="stylesheet"' in tag
 
 
 def test_production_css_has_no_dev_query(app: Application) -> None:
     with app.test_request_context():
         app.config["DEBUG"] = False
-        tag = vite_asset("src/styles.css")
+        tag = vite_asset("src/charts-styles.css")
         app.config["DEBUG"] = True
 
     assert "?direct" not in tag
