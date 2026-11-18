@@ -6,7 +6,14 @@ from __future__ import annotations
 
 import pytest
 
-from abilian.sbe.ui import ID_COLOURS, file_icon, icon, identity_class, initials
+from abilian.sbe.ui import (
+    ID_COLOURS,
+    file_icon,
+    icon,
+    identity_class,
+    initials,
+    shown_fields,
+)
 
 
 def test_an_icon_is_decorative_and_carries_its_classes() -> None:
@@ -60,3 +67,16 @@ def test_a_file_icon_takes_its_type_colour(name: str, colour: str) -> None:
 
 def test_a_file_of_unknown_type_has_the_plain_icon() -> None:
     assert file_icon("notes").startswith('<span class="sbe-filetype">')
+
+
+def test_the_log_shows_the_fields_a_person_reads() -> None:
+    recorded = [
+        "name",
+        "_entity_type",
+        "folder_id",
+        "_content_id",
+        "content_digest",
+        "description",
+    ]
+
+    assert shown_fields(recorded) == ["description", "name"]

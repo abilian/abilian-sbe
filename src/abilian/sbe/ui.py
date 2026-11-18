@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 import json
+import re
 import zlib
 from functools import cache
 from pathlib import Path
@@ -17,6 +18,8 @@ from typing import TYPE_CHECKING
 from markupsafe import Markup
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from flask import Flask
 
 #: Tabler's icons (MIT), the subset `mockups/extract_icons.py` writes.
@@ -95,6 +98,16 @@ def initials(name: str) -> str:
     return "".join(word[0] for word in words[:2]).upper() or "?"
 
 
+#: Fields the audit records for the application's own use: a document's history
+#: reads its content's id, the log shows none of them. A key, a type, a digest.
+TECHNICAL_FIELDS = re.compile(r"^_|_id$|_digest$")
+
+
+def shown_fields(names: Iterable[str]) -> list[str]:
+    """The fields of a change a person reads, in order: not the technical ones."""
+    return sorted(name for name in names if not TECHNICAL_FIELDS.search(name))
+
+
 def register(app: Flask) -> None:
     """Make the helpers available to every template, with the user's communities,
     which the bar lists on every page."""
@@ -111,6 +124,7 @@ def register(app: Flask) -> None:
         folder_icon,
         identity_class,
         initials,
+        shown_fields,
         communities_of,
         community_counts,
         site_figures,

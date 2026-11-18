@@ -33,11 +33,14 @@
 {% if entry.verb == "update" and e.changes %}{{ field_changes(e.changes) }}{% endif %}
 {%- endmacro %}
 
-{#- What a change changed: each field, its old value struck out, then its new one; what
-    was added to a list and what was taken from it. Long values are cut short. -#}
+{#- What a change changed: each field a person reads (`shown_fields`), its old value
+    struck out, then its new one; what was added to a list and what was taken from it.
+    Long values are cut short. -#}
 {% macro field_changes(changes) -%}
+{% set keys = shown_fields(changes.columns) %}
+{% if keys or changes.collections %}
 <ul class="sbe-changes ads-muted">
-  {% for key in changes.columns | sort %}
+  {% for key in keys %}
   {% set values = changes.columns[key] %}
   <li><strong>{{ key }}</strong> :
     {% if values.columns is defined %}{{ field_changes(values) }}
@@ -48,6 +51,7 @@
   <li><strong>{{ key }}</strong> :{% for label in added %} <ins>+ {{ label }}</ins>{% endfor %}{% for label in removed %} <del>− {{ label }}</del>{% endfor %}</li>
   {% endfor %}
 </ul>
+{% endif %}
 {%- endmacro %}
 
 {#- Who did something, in a line of the log: their account, or the system itself (a
