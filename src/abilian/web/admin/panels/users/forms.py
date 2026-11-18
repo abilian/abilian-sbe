@@ -4,17 +4,15 @@
 
 from __future__ import annotations
 
-import sqlalchemy as sa
 from wtforms import BooleanField, StringField
 from wtforms.validators import ValidationError
 
-from abilian.core.models.subjects import Group
 from abilian.i18n import _, _l
 from abilian.services.security.models import Role
 from abilian.web.forms import Form, widgets
-from abilian.web.forms.fields import MultipleChoiceField, QuerySelectField
+from abilian.web.forms.fields import MultipleChoiceField
 from abilian.web.forms.filters import strip
-from abilian.web.forms.validators import optional, required
+from abilian.web.forms.validators import required
 
 
 class BaseUserAdminForm(Form):
@@ -42,15 +40,6 @@ class BaseUserAdminForm(Form):
         _l("Login enabled"),
         description=_l("If unchecked, user will not be able to connect."),
         widget=widgets.BooleanWidget(),
-    )
-
-    groups = QuerySelectField(
-        _l("Groups"),
-        validators=(optional(),),
-        multiple=True,
-        collection_class=set,
-        query_factory=lambda: Group.query.order_by(sa.sql.func.lower(Group.name).asc()),
-        get_label="name",
     )
 
     roles = MultipleChoiceField(

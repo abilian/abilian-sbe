@@ -83,33 +83,6 @@ def test_admin_users_shows_the_email_under_the_name_and_filters_on_it(
     js_errors.assert_clean("the users table")
 
 
-def test_user_form_saves_groups_from_a_native_select(
-    logged_in: Page, base_url: str, js_errors: JSErrors
-) -> None:
-    """The groups come from a query and the labels are model objects', unlike the
-    roles above. A blank row would be a choice in its own right in a native list,
-    so there must not be one."""
-    page = logged_in
-    page.goto(f"{base_url}/admin/users", wait_until="networkidle")
-    page.locator("table a", has_text="Rolf Roleholder").first.click()
-    page.wait_for_load_state("networkidle")
-    edit_url = page.url
-
-    groups = page.locator('select[name="groups"]')
-    expect(groups).to_have_attribute("multiple", "")
-    assert groups.locator("option").all_text_contents() == ["E2E Group"]
-    groups.select_option(label="E2E Group")
-    page.get_by_role("button", name="Save").click()
-    page.wait_for_load_state("networkidle")
-
-    page.goto(edit_url, wait_until="networkidle")
-    selected = page.locator('select[name="groups"]').evaluate(
-        "s => [...s.selectedOptions].map(o => o.textContent.trim())"
-    )
-    assert selected == ["E2E Group"]
-    js_errors.assert_clean("saving a user's groups")
-
-
 def test_social_group_pickers(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
