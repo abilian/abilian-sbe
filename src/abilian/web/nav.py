@@ -78,37 +78,22 @@ class NavItem(Action):
 
 
 class NavGroup(NavItem):
-    """A navigation group renders a list of items using Alpine.js."""
+    """A navigation group: a disclosure, its items in a list."""
 
     template_string = """
-    <div x-data="{ open: false }" class="relative {{ action.css_class }}" @keydown.escape="open = false">
-      <button type="button" @click="open = !open" aria-haspopup="true" :aria-expanded="open"
-              class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium
-                     text-current opacity-90 hover:opacity-100">
-        {#- The icon speaks for the group when there is one: the user menu shows
-            the avatar, which needs neither the name nor a chevron to read as a
-            menu. The title stays as the button's accessible name -- the avatar's
-            alt is empty, so dropping it outright would leave the menu unnamed
-            for a screen reader. A group with no icon has only its
-            label, so it keeps the chevron to show there is more behind it. #}
-        {%- if action.icon %}
-          {{ action.icon }}<span class="sr-only">{{ action.title }}</span>
-        {%- else %}
-          {{ action.title }}
-          <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
-        {%- endif %}
-      </button>
-      <ul x-show="open" @click.away="open = false" x-transition
-          class="nav-menu absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md
-                 bg-white text-gray-700 shadow-lg ring-1 ring-black/5 py-1">
+    <details class="{{ action.css_class }}">
+      {#- The icon speaks for the group when there is one (the user menu's avatar);
+          the title stays as its accessible name, the avatar's alt being empty. #}
+      <summary>
+        {%- if action.icon %}{{ action.icon }}<span class="sbe-sr-only">{{ action.title }}</span>
+        {%- else %}{{ action.title }}{%- endif %}
+      </summary>
+      <ul class="nav-menu">
         {%- for item in action_items %}
-        {%- if item.divider %}<li class="border-t border-gray-100 my-1"></li>{%- endif %}
-        <li class="px-4 py-2 hover:bg-gray-100 {% if item.status == 'active' %}bg-gray-100{% endif %}">{{ item.render() }}</li>
+        <li{% if item.status == 'active' %} aria-current="page"{% endif %}>{{ item.render() }}</li>
         {%- endfor %}
       </ul>
-    </div>
+    </details>
     """
 
     def __init__(

@@ -201,41 +201,6 @@ def test_delete_confirmation_opens(logged_in: Page, base_url: str) -> None:
     )
 
 
-def test_alpine_collapse_plugin_is_registered(logged_in: Page, base_url: str) -> None:
-    """x-collapse is used in four templates, and did nothing for a while.
-
-    @alpinejs/collapse was never installed, so Alpine silently ignored the
-    directive. An unregistered directive is inert rather than noisy, so ask
-    Alpine directly instead of waiting for an error that never comes.
-    """
-    logged_in.goto(
-        f"{base_url}/communities/{COMMUNITY}/docs/", wait_until="networkidle"
-    )
-
-    assert logged_in.evaluate("typeof window.Alpine") != "undefined", "Alpine missing"
-    registered = logged_in.evaluate(
-        "() => !!window.Alpine.directives || "
-        "typeof window.Alpine.directive === 'function'"
-    )
-    assert registered, "Alpine exposes no directive registry"
-    # Build the probe with the DOM API: an x-collapse element Alpine has not
-    # been taught about keeps its inline height untouched.
-    took_effect = logged_in.evaluate("""() => {
-      const host = document.createElement("div");
-      host.setAttribute("x-data", "{ open: false }");
-      const inner = document.createElement("span");
-      inner.setAttribute("x-show", "open");
-      inner.setAttribute("x-collapse", "");
-      host.appendChild(inner);
-      document.body.appendChild(host);
-      window.Alpine.initTree(host);
-      const styled = inner.style.height !== "" || inner.style.display === "none";
-      host.remove();
-      return styled;
-    }""")
-    assert took_effect, "x-collapse had no effect: @alpinejs/collapse is not registered"
-
-
 def test_the_audit_log_jumps_to_the_day_picked(logged_in: Page, base_url: str) -> None:
     """A native date input, shown and sent as YYYY-MM-DD whatever the locale.
 

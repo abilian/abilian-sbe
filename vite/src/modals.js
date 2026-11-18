@@ -8,8 +8,7 @@
  *
  * This replaces a 311-line re-implementation of Bootstrap 3's modal, dropdown,
  * collapse, tab and alert plugins. Only the modal part of it was ever reached;
- * it drove visibility by writing `style.display`, which CSS then matched on,
- * and it competed with Alpine's `x-show` for the same elements.
+ * it drove visibility by writing `style.display`, which CSS then matched on.
  */
 
 document.addEventListener("click", (event) => {

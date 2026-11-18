@@ -27,7 +27,6 @@ __all__ = (
     "DISABLED",
     "ENABLED",
     "Action",
-    "ActionDropDown",
     "ActionGroup",
     "ActionGroupItem",
     "ButtonAction",
@@ -588,33 +587,6 @@ class ActionGroup(Action):
         params = super().get_render_args(**kwargs)
         params["action_items"] = [a for a in self.items if a.available(params)]
         return params
-
-
-class ActionDropDown(ActionGroup):
-    """Renders as a button dropdown using Alpine.js."""
-
-    template_string = """
-    <div x-data="{ open: false }" class="relative inline-block text-left" @keydown.escape="open = false">
-        <button type="button" @click="open = !open"
-                class="{{ action.css_class }} inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                :aria-expanded="open" aria-haspopup="true">
-        {%- if action.icon %}{{ action.icon }} {% endif %}
-        {{ action.title }}
-        <svg class="ml-2 -mr-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-        </svg>
-        </button>
-        <ul x-show="open" @click.away="open = false" x-transition
-            class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1"
-            role="menu">
-        {%- for entry in action_items %}
-            {%- if entry.divider %}<li class="border-t border-gray-100 my-1"></li>{%- endif %}
-            <li class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">{{ entry.render() }}
-            </li>
-        {%- endfor %}
-        </ul>
-    </div>
-    """
 
 
 class ActionGroupItem(Action):

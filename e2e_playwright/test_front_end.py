@@ -53,7 +53,6 @@ def test_the_javascript_layer_is_loaded(logged_in: Page, base_url: str) -> None:
 
     assert logged_in.evaluate("typeof window.jQuery") == "undefined"
     assert logged_in.evaluate("typeof window.$") == "undefined"
-    assert logged_in.evaluate("typeof window.Alpine") != "undefined", "Alpine missing"
 
 
 def test_stylesheet_is_applied(logged_in: Page, base_url: str) -> None:

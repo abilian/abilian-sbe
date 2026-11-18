@@ -19,7 +19,7 @@ SRC = Path(__file__).parent.parent.parent / "src"
 
 #: Idioms belonging to plugins that are no longer shipped.
 DEAD = {
-    r'data-toggle="(?:modal|dropdown|collapse|tab)"': "use data-modal-open, or Alpine",
+    r'data-toggle="(?:modal|dropdown|collapse|tab)"': "use data-modal-open",
     r'data-dismiss="(?:modal|alert)"': "use data-modal-close",
     r"\b(?:show|shown|hide|hidden)\.bs\.modal\b": (
         "use the `modal:open` event, or <dialog>'s native `close`"

@@ -49,22 +49,3 @@
     {%- endif %}
   </div>
 {% endmacro %}
-
-{% macro m_audit_log(entries) %}
-  {%- if entries %}
-    <div x-data="{ open: false }">
-      <h3 @click="open = !open"
-          class="text-sm font-semibold text-gray-700 cursor-pointer flex items-center hover:text-gray-900">
-        <svg class="w-4 h-4 mr-1 text-gray-400 transition-transform" :class="{ 'rotate-90': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-        </svg>
-        {{ _("Audit Log") }}
-      </h3>
-      <div x-show="open" x-collapse x-cloak class="mt-2 mb-4">
-        {%- for entry in entries %}
-          {{ m_audit_entry(entry) }}
-        {%- endfor %}
-      </div>
-    </div>
-  {%- endif %}
-{% endmacro %}

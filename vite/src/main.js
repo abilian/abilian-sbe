@@ -1,7 +1,5 @@
-// Order matters only here: Alpine starts first, as the widgets have always
-// initialised after it. Every other module is self-contained and looks for its
-// own elements; a module script runs once the document is parsed.
-import "./alpine.js";
+// Each module is self-contained and looks for its own elements; a module script
+// runs once the document is parsed.
 import "./sentry.js";
 import "./modals.js";
 import "./suggest.js";

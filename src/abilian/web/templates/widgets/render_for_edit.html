@@ -1,58 +1,20 @@
-{% from "macros/form.html" import  m_field with context %}
+{#- A form whose fields are in groups: each group a fieldset, all shown, its name as
+    the legend, with how many of its fields are wrong. -#}
+{% from "macros/form.html" import m_field with context %}
 
-<form action="{{ request.path }}" method="POST" enctype="multipart/form-data" id="edit-form"
-    role="form" novalidate x-data="{ activeTab: '{{ (form._groups.keys()|list)[0]|toslug }}' }">
+<form action="{{ request.path }}" method="POST" enctype="multipart/form-data" id="edit-form" novalidate class="ads-stack">
   {{ form.csrf_token }}
-
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-    {%- set options = form._widgets_options|default({}) %}
-    <div class="lg:col-span-3">
-      <nav class="flex flex-col space-y-1" role="tablist">
-        {%- for label, field_names in form._groups.items() %}
-          {%- set label_id = label | toslug %}
-          {%- set has_required = form._has_required
-                                 and form._has_required(fields=field_names) %}
-          {%- set error_count = form._count_errors
-                                  and form._count_errors(fields=field_names) %}
-          <button type="button" role="tab"
-                  @click="activeTab = '{{ label_id }}'"
-                  :class="activeTab === '{{ label_id }}' ? 'bg-blue-50 text-blue-700 border-l-2 border-blue-500' : 'text-gray-600 hover:bg-gray-50 border-l-2 border-transparent'"
-                  class="flex items-center justify-between px-4 py-2 text-sm font-medium text-left transition-colors">
-            <span{% if has_required %} class="after:content-['*'] after:ml-0.5 after:text-red-500"{%- endif %}>{{ label }}</span>
-            {%- if error_count %}
-              <span class="inline-flex items-center justify-center w-5 h-5 text-xs font-medium text-white bg-red-500 rounded-full">{{ error_count }}</span>
-            {%- endif %}
-          </button>
-        {%- endfor %}
-      </nav>
-    </div>
-
-    <div class="lg:col-span-9" id="form-panel">
-      {%- for label, field_names in form._groups.items() %}
-        {%- set label_id = label | toslug %}
-        <div x-show="activeTab === '{{ label_id }}'" x-cloak role="tabpanel">
-          <h2 class="text-lg font-semibold text-gray-900 mb-6 pb-2 border-b border-gray-200">{{ label }}</h2>
-          <div class="space-y-6">
-            {%- for field_name in field_names %}
-              {%- set field = form[field_name] %}
-              {%- if field.is_hidden %}
-                {{ field() }}
-              {%- else %}
-                {{ m_field(form[field_name], horizontal=True, label_width=3, field_width=9) }}
-              {%- endif %}
-            {%- endfor %}
-          </div>
-        </div>
-      {% endfor %}
-    </div>
+  {%- for label, field_names in form._groups.items() %}
+  {%- set error_count = form._count_errors and form._count_errors(fields=field_names) %}
+  <fieldset class="ads-stack">
+    <legend>{{ label }}{% if error_count %} <span class="ads-badge ads-tone-danger">{{ error_count }}</span>{% endif %}</legend>
+    {%- for field_name in field_names %}
+    {%- set field = form[field_name] %}
+    {%- if field.is_hidden %}{{ field() }}{% else %}{{ m_field(field, horizontal=True, label_width=3, field_width=9) }}{% endif %}
+    {%- endfor %}
+  </fieldset>
+  {%- endfor %}
+  <div class="ads-cluster">
+    {%- for button in g.view.buttons %}{{ button.render() }}{%- endfor %}
   </div>
-
-  <div class="mt-8 pt-6 border-t border-gray-200">
-    <div class="flex justify-end gap-3">
-      {%- for button in g.view.buttons %}
-        {{ button.render() }}
-      {%- endfor %}
-    </div>
-  </div>
-
 </form>

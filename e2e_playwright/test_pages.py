@@ -450,38 +450,6 @@ def test_a_document_takes_the_whole_width_and_gives_it_back(
     js_errors.assert_clean("the document's width")
 
 
-def test_form_tabs_switch(logged_in: Page, base_url: str, js_errors: JSErrors) -> None:
-    """Tabs in widgets/render_for_edit.html. No form here declares groups yet, so
-    its markup is injected: Alpine picks it up like any other."""
-    page = logged_in
-    panel = """
-      <div id="tabs" x-data="{ activeTab: 'first-tab' }">
-        <button type="button" id="second" @click="activeTab = 'second-tab'"
-                :class="activeTab === 'second-tab' ? 'on' : 'off'">Second</button>
-        <div id="first-panel" x-show="activeTab === 'first-tab'">One</div>
-        <div id="second-panel" x-show="activeTab === 'second-tab'">Two</div>
-      </div>"""
-
-    def inject(route: Route) -> None:
-        response = route.fetch()
-        route.fulfill(
-            response=response,
-            body=response.text().replace("</body>", f"{panel}</body>"),
-        )
-
-    page.route(f"{base_url}/communities/", inject)
-    page.goto(f"{base_url}/communities/", wait_until="networkidle")
-
-    expect(page.locator("#first-panel")).to_be_visible()
-    expect(page.locator("#second-panel")).to_be_hidden()
-    page.locator("#second").click()
-    expect(page.locator("#second")).to_have_class("on")
-    expect(page.locator("#first-panel")).to_be_hidden()
-    expect(page.locator("#second-panel")).to_be_visible()
-
-    js_errors.assert_clean("form tabs")
-
-
 def test_no_inline_script_runs_or_is_refused(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:

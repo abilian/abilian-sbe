@@ -23,11 +23,9 @@ INLINE_SCRIPT = re.compile(
 )
 INLINE_HANDLER = re.compile(r"""<[a-zA-Z][^<>]*\son[a-z]+=["']""")
 LEGACY_JS = re.compile(r"""\$\(|\bjQuery\b|\bdeferJS\b""")
-#: What Alpine's CSP build cannot parse, or refuses: found only when the element
-#: renders, otherwise.
-ALPINE_REFUSED = re.compile(
-    r"""\bx-html\b|(?:\bx-[a-z:.-]+|@[a-z:.-]+|\s:[a-z-]+)="[^"]*(?:=>|\bfunction\b|\bnew\s)""",
-)
+#: Where Alpine starts: it is gone, so any directive under it would do nothing,
+#: silently.
+ALPINE = re.compile(r"""\bx-data=""")
 
 
 def sources() -> list[Path]:
@@ -63,5 +61,5 @@ def test_no_jquery_left_in_templates() -> None:
     assert offenders(LEGACY_JS, templates) == []
 
 
-def test_no_alpine_expression_the_csp_build_refuses() -> None:
-    assert offenders(ALPINE_REFUSED, sources()) == []
+def test_no_alpine_directive_left() -> None:
+    assert offenders(ALPINE, sources()) == []
