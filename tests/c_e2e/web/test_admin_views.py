@@ -110,7 +110,7 @@ def test_the_audit_log_shows_everything_when_all_contents_is_picked(
         unfiltered = client.get(url_for("admin.audit")).get_data(as_text=True)
         submitted = client.get(url_for("admin.audit", types="", user=""))
 
-    entry = '<li class="flex gap-3'
+    entry = '<span class="sbe-audit-icon'
     assert entry in unfiltered
     assert submitted.get_data(as_text=True).count(entry) == unfiltered.count(entry)
 

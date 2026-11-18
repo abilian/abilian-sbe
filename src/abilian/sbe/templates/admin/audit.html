@@ -1,0 +1,74 @@
+{#- The log of changes, to answer "who did this?": filtered by person, by kind of object
+    and from a day back; each line who, what, on which object, where, and what changed,
+    the days apart. Overrides Abilian Core's page; drawn in
+    `mockups/templates/admin-audit.html`. Without its export: nothing on the server
+    writes one. -#}
+{% extends "admin/_ads.html" %}
+{% import "admin/_ads_macros.html" as a with context %}
+{#- The kinds of objects people know, by their class, with what a line says of one. -#}
+{% set kinds = {
+  "Community": (_("Communities"), _("the community")),
+  "Thread": (_("Conversations"), _("the conversation")),
+  "Post": (_("Messages in conversations"), _("a message in")),
+  "Document": (_("Documents"), _("the document")),
+  "Folder": (_("Folders"), _("the folder")),
+  "WikiPage": (_("Wiki pages"), _("the wiki page")),
+  "Event": (_("Events"), _("the event")),
+  "Message": (_("Status updates"), _("a status update")),
+  "Comment": (_("Comments"), _("a comment on")),
+} %}
+{% set verbs = {
+  "create": ("plus", "ads-tone-success"),
+  "update": ("pencil", "ads-tone-info"),
+  "delete": ("trash", "ads-tone-danger"),
+  "permissions": ("lock", "ads-tone-warning"),
+} %}
+{% block page_title %}{{ _("Log") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("Log of changes") }}{% endblock %}
+
+{% macro pager() %}
+{% if top_date or lowest_date %}
+<div class="ads-card__foot ads-spread">
+  {% if top_date %}<a href="{{ url_for(request.endpoint, after=top_date, **url_params) }}">{{ _("Newer changes") }}</a>{% else %}<span></span>{% endif %}
+  {% if lowest_date %}<a href="{{ url_for(request.endpoint, before=lowest_date, **url_params) }}">{{ _("Older changes") }}</a>{% endif %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{% block content %}
+<div class="ads-card">
+  <form class="ads-card__head sbe-toolbar sbe-toolbar--wrap" id="audit-filters" method="get" action="{{ url_for(request.endpoint) }}" aria-label="{{ _('Filter the log') }}">
+    {%- if 'after' in request.args %}<input type="hidden" name="after" value="{{ request.args['after'] }}">
+    {%- elif 'before' in request.args %}<input type="hidden" name="before" value="{{ request.args['before'] }}">{% endif %}
+    <input class="ads-input" type="text" id="user-select" name="user" placeholder="{{ _('A person') }}" aria-label="{{ _('Filter by person') }}"
+           data-picker="{{ url_for('admin.audit_search_users') }}" data-picker-submit
+           {%- if filter_user %} data-picker-value="{{ filter_user.id }}" data-picker-label="{{ filter_user.name }} ({{ filter_user.email }})"{% endif %}>
+    <select class="ads-select" name="types" data-autosubmit aria-label="{{ _('Filter by kind of object') }}">
+      <option value="">{{ _("All objects") }}</option>
+      {% for name, type in all_classes if name in kinds %}<option value="{{ type }}" {{ "selected" if type in filter_types }}>{{ kinds[name][0] }}</option>{% endfor %}
+    </select>
+    <input class="ads-input sbe-fit" type="date" id="date-chooser" value="{{ current_date or '' }}" aria-label="{{ _('Changes up to this day') }}">
+  </form>
+  {% for day, day_entries in entries %}
+  <section aria-labelledby="day-{{ loop.index }}">
+    <h2 class="ads-card__body sbe-section-title" id="day-{{ loop.index }}"><time datetime="{{ day.isoformat() }}">{{ day | dateformat("full") }}</time></h2>
+    <ul class="ads-list">
+      {% for entry in day_entries %}
+      {% set glyph, tone = verbs[entry.verb] %}
+      <li>
+        <span class="sbe-audit-icon {{ tone }}">{{ icon(glyph) }}</span>
+        <span class="ads-fill sbe-lines">
+          {% if entry.verb == "permissions" %}{{ a.permission_line(entry) }}
+          {% else %}{{ a.audit_line(entry, kinds) }}{% endif %}
+        </span>
+        <span class="ads-muted">{{ entry.date.strftime("%H:%M") }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% else %}
+  <p class="ads-card__body ads-muted">{{ _("No change here.") }}</p>
+  {% endfor %}
+  {{ pager() }}
+</div>
+{% endblock %}

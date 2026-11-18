@@ -739,6 +739,8 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
    that takes what room there is. */
 .sbe-toolbar--wrap { flex-wrap: wrap; }
 .sbe-toolbar > .sbe-grow, .sbe-toolbar > .picker { flex: 1 1 15rem; min-width: 0; }
+/* A field as wide as what it holds (a date), not as the line. */
+.sbe-toolbar > .sbe-fit { flex: none; width: auto; }
 /* A person's name in a table keeps room for itself: on a phone the table scrolls
    rather than the name being cut to a letter. */
 .sbe-cell-person { min-width: 10rem; }
@@ -764,6 +766,12 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   background: var(--ads-tone-tint);
   border-radius: var(--ads-radius);
 }
+
+/* What a change in the log changed: one line a field, the old value struck out. */
+.sbe-changes { margin: 0; padding: 0; list-style: none; font-size: var(--ads-text-sm); }
+.sbe-changes .sbe-changes { display: inline; }
+.sbe-changes .sbe-changes > li { display: inline; }
+.sbe-changes ins { text-decoration: none; color: var(--ads-ink); }
 
 /* The dashboard's charts (uPlot draws them; its markup is fixed, hence its classes):
    the legend, which follows the cursor, in the type of the page; the switch between

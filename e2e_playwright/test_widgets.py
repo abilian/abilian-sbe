@@ -369,8 +369,7 @@ def test_the_audit_log_jumps_to_the_day_picked(logged_in: Page, base_url: str) -
     today = chooser.input_value()
     assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", today), today
 
-    year, month, day = today.split("-")
-    todays_heading = page.locator("h2", has_text=f"{day}-{month}-{year}")
+    todays_heading = page.locator(f'h2 time[datetime="{today}"]')
 
     chooser.fill("2000-01-01")
     page.wait_for_url(re.compile(r"before=2000-01-0[12]T"))

@@ -2737,3 +2737,105 @@ msgstr "Tous les comptes"
 
 msgid "Measure"
 msgstr "Mesure"
+
+msgid "the community"
+msgstr "la communauté"
+
+msgid "the conversation"
+msgstr "la conversation"
+
+msgid "Messages in conversations"
+msgstr "Messages des conversations"
+
+msgid "a message in"
+msgstr "un message dans"
+
+msgid "the document"
+msgstr "le document"
+
+msgid "the folder"
+msgstr "le dossier"
+
+msgid "Wiki pages"
+msgstr "Pages du wiki"
+
+msgid "the wiki page"
+msgstr "la page du wiki"
+
+msgid "Events"
+msgstr "Événements"
+
+msgid "the event"
+msgstr "l’événement"
+
+msgid "Status updates"
+msgstr "Messages du fil"
+
+msgid "a status update"
+msgstr "un message du fil"
+
+msgid "a comment on"
+msgstr "un commentaire sur"
+
+msgid "Log"
+msgstr "Journal"
+
+msgid "Log of changes"
+msgstr "Journal des modifications"
+
+msgid "Newer changes"
+msgstr "Les modifications plus récentes"
+
+msgid "Older changes"
+msgstr "Les modifications plus anciennes"
+
+msgid "Filter the log"
+msgstr "Filtrer le journal"
+
+msgid "A person"
+msgstr "Une personne"
+
+msgid "Filter by person"
+msgstr "Filtrer par personne"
+
+msgid "Filter by kind of object"
+msgstr "Filtrer par sorte d’objet"
+
+msgid "All objects"
+msgstr "Tous les objets"
+
+msgid "Changes up to this day"
+msgstr "Les modifications jusqu’à ce jour"
+
+msgid "No change here."
+msgstr "Aucune modification ici."
+
+msgid "The system"
+msgstr "Le système"
+
+msgid "%(who)s created %(kind)s %(what)s"
+msgstr "%(who)s a créé %(kind)s %(what)s"
+
+msgid "%(who)s changed %(kind)s %(what)s"
+msgstr "%(who)s a modifié %(kind)s %(what)s"
+
+msgid "%(who)s deleted %(kind)s %(what)s"
+msgstr "%(who)s a supprimé %(kind)s %(what)s"
+
+msgid "in %(community)s"
+msgstr "dans %(community)s"
+
+msgid "%(who)s gave the role %(role)s to %(principal)s"
+msgstr "%(who)s a donné le rôle %(role)s à %(principal)s"
+
+msgid "%(who)s took the role %(role)s from %(principal)s"
+msgstr "%(who)s a retiré le rôle %(role)s à %(principal)s"
+
+msgid "%(who)s made %(target)s inherit its permissions"
+msgstr "%(who)s a fait hériter %(target)s de ses droits"
+
+msgid "%(who)s stopped %(target)s inheriting its permissions"
+msgstr "%(who)s a cessé de faire hériter %(target)s de ses droits"
+
+msgid "on %(target)s"
+msgstr "sur %(target)s"

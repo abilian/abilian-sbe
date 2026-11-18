@@ -24,7 +24,7 @@ from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 from abilian.core.util import local_dt
 from abilian.i18n import _
-from abilian.services.audit import AuditEntry
+from abilian.services.audit import CREATION, DELETION, UPDATE, AuditEntry
 from abilian.services.security import SecurityAudit
 from abilian.web.admin import AdminPanel
 from abilian.web.util import url_for
@@ -294,35 +294,45 @@ class AuditEntryPresenter(BaseEntryPresenter):
         self.entry = entry
         self.entity_deleted = entry.entity is None
 
+    @property
+    def verb(self) -> str:
+        """What was done: "create", "update" (a related object's change is one
+        too) or "delete"."""
+        e = self.entry
+        if e.type == CREATION:
+            return "create"
+        if e.related or e.op == UPDATE:
+            return "update"
+        if e.op == DELETION:
+            return "delete"
+        msg = f"Bad entry type: {e.type}"
+        raise ValueError(msg)
+
+    @property
+    def entity_url(self) -> str | None:
+        """Where the object is seen, if it still is and has a page of its own."""
+        return None if self.entity_deleted else _url_or_none(self.entry.entity)
+
     def render(self) -> str:
         render = render_template_string
         e = self.entry
         user = self.render_user(e.user)
         entity_html = e.entity_name
 
-        if not self.entity_deleted:
-            try:
-                entity_url = url_for(e.entity)
-            except (BuildError, ValueError):
-                pass
-            else:
-                entity_html = Markup(
-                    render(
-                        '<a href="{{ url }}">{{ entity.path or entity.name }}</a>',
-                        url=entity_url,
-                        entity=e.entity,
-                    )
+        if self.entity_url:
+            entity_html = Markup(
+                render(
+                    '<a href="{{ url }}">{{ entity.path or entity.name }}</a>',
+                    url=self.entity_url,
+                    entity=e.entity,
                 )
+            )
 
-        if e.type == 0:
-            msg = _('{user} created {entity_type} {entity_id} "{entity}"')
-        elif e.related or e.op == 1:
-            msg = _('{user} made changes on {entity_type} {entity_id} "{entity}"')
-        elif e.op == 2:
-            msg = _('{user} has deleted {entity_type}: {entity_id} "{entity}"')
-        else:
-            msg = f"Bad entry type: {e.type}"
-            raise Exception(msg)
+        msg = {
+            "create": _('{user} created {entity_type} {entity_id} "{entity}"'),
+            "update": _('{user} made changes on {entity_type} {entity_id} "{entity}"'),
+            "delete": _('{user} has deleted {entity_type}: {entity_id} "{entity}"'),
+        }[self.verb]
 
         self.msg = Markup(
             msg.format(
@@ -337,6 +347,14 @@ class AuditEntryPresenter(BaseEntryPresenter):
 
 
 class SecurityEntryPresenter(BaseEntryPresenter):
+    #: A role given or taken, or permissions inherited or not.
+    verb = "permissions"
+
+    @property
+    def object_url(self) -> str | None:
+        """Where the object is seen, if there is one and it has a page."""
+        return _url_or_none(self.entry.object) if self.entry.object else None
+
     def __init__(self, entry: SecurityAudit) -> None:
         assert isinstance(entry, SecurityAudit)
         super().__init__(entry.manager, entry.happened_at)
@@ -406,3 +424,11 @@ class SecurityEntryPresenter(BaseEntryPresenter):
         )
         tmpl = get_template_attribute("admin/_macros.html", "m_security_entry")
         return tmpl(self)
+
+
+def _url_or_none(obj: Entity) -> str | None:
+    """`obj`'s page, or None for an object that has none."""
+    try:
+        return url_for(obj)
+    except (BuildError, ValueError):
+        return None
