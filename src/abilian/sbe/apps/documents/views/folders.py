@@ -1119,7 +1119,8 @@ def descendants_view(user: User, folder_id):
     owner_ids = set()
     for hit in results:
         by_path.setdefault(hit["parent_ids"], []).append(hit)
-        owner_type, owner_id = hit["owner"].split(":")
+        # An object may have no owner, and its hit then no `owner` field.
+        owner_type, _, owner_id = hit.get("owner", "").partition(":")
         if owner_type == "user":
             try:
                 owner_id = int(owner_id)
