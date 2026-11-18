@@ -30,23 +30,23 @@ def test_user(client, login_admin) -> None:
         ("social.user", {"user_id": 999999}),
     ],
 )
-def test_an_unknown_user_is_not_found(
-    client, login_admin, endpoint, kwargs
-) -> None:
+def test_an_unknown_user_is_not_found(client, login_admin, endpoint, kwargs) -> None:
     assert client.get(url_for(endpoint, **kwargs)).status_code == 404
 
 
-def test_only_the_owner_or_an_admin_edits_a_profile(
+def test_editing_a_profile_leads_where_it_is_done(
     client, user, admin_user, db_session
 ) -> None:
+    """One's own on one's account page, another's in the administration."""
     url = url_for("social.user_edit", user_id=admin_user.id)
 
     with client_login(client, user):
         assert client.get(url).status_code == 403
-        form = {"first_name": "Changed", "__action": "edit"}
-        assert client.post(url, data=form).status_code == 403
-    db_session.expire_all()
-    assert admin_user.first_name != "Changed"
+        own = client.get(url_for("social.user_edit", user_id=user.id))
+        assert own.headers["Location"].endswith(url_for("preferences.user"))
 
     with client_login(client, admin_user):
-        assert client.get(url).status_code == 200
+        response = client.get(url_for("social.user_edit", user_id=user.id))
+    assert response.headers["Location"].endswith(
+        url_for("admin.users_user", user_id=user.id)
+    )

@@ -17,6 +17,7 @@ import pytest
 from flask import url_for
 
 from abilian.services import security_service
+from abilian.services.security import ADMIN
 from tests.util import client_login
 
 if TYPE_CHECKING:
@@ -109,9 +110,10 @@ def test_referenced_assets_resolve_in_production_mode(
             )
         )
 
-    # A page still on Tailwind (one's preferences), and one on the Abilian Design
-    # System (the community's home).
-    legacy = static_urls("preferences.user")
+    # A page still on Tailwind (making a community, for a site administrator),
+    # and one on the Abilian Design System (the community's home).
+    security_service.grant_role(community1.test_user, ADMIN)
+    legacy = static_urls("communities.new")
     assert any("/vite/" in url for url in legacy), "page linked no Vite assets"
     assert any("font-awesome" in url for url in legacy), "page linked no icon font"
     ads = static_urls("wall.index")

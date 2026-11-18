@@ -1,0 +1,104 @@
+{#- My account, on one page: who I am to the others (my photo, my name), the language
+    and time zone the site speaks to me in, the daily digest, my password; beside it,
+    how the others see me. The address, which I sign in with, is shown and not changed
+    here. Drawn in `mockups/templates/profile-edit.html`. -#}
+{% extends "ads_base.html" %}
+{% import "forum/_post_fields.html" as fields %}
+{% block page_title %}{{ _("My account") }}{% endblock %}
+{% block heading %}{{ _("My account") }}{% endblock %}
+
+{#- A select of the field's own choices. -#}
+{% macro select(field, label) %}
+<div class="ads-field">
+  <label class="ads-label" for="{{ field.id }}">{{ label }}</label>
+  <select class="ads-select" id="{{ field.id }}" name="{{ field.name }}" {{ fields.invalid(field) }}>
+    {% for choice in field.iter_choices() %}<option value="{{ choice[0] }}" {{ "selected" if choice[2] }}>{{ choice[1] }}</option>{% endfor %}
+  </select>
+  {{ fields.errors(field) }}
+</div>
+{% endmacro %}
+
+{#- A text field, its errors under it. -#}
+{% macro input(field, label, type="text", autocomplete=none, required=false, help=none) %}
+{% set described = ([field.id ~ "-help"] if help else []) + ([field.id ~ "-error"] if field.errors else []) %}
+<div class="ads-field">
+  <label class="ads-label {{ 'ads-label--required' if required }}" for="{{ field.id }}">{{ label }}</label>
+  <input class="ads-input" id="{{ field.id }}" name="{{ field.name }}" type="{{ type }}" {% if type != "password" %}value="{{ field.data or '' }}"{% endif %} {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %} {{ "required" if required }} {% if field.errors %}aria-invalid="true"{% endif %} {% if described %}aria-describedby="{{ described | join(' ') }}"{% endif %}>
+  {% if help %}<small class="ads-help" id="{{ field.id }}-help">{{ help }}</small>{% endif %}
+  {{ fields.errors(field) }}
+</div>
+{% endmacro %}
+
+{% block body %}
+<div class="ads-with-aside">
+  <form class="ads-stack" id="account-form" method="post" action="{{ url_for('preferences.user_post') }}" enctype="multipart/form-data" aria-label="{{ _('My account') }}">
+    {{ csrf.field() }}
+    <section class="ads-card" aria-labelledby="who">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="who">{{ _("Who I am") }}</h2></div>
+      <div class="ads-card__body ads-stack">
+        <div class="ads-media">
+          {% if user.photo %}<img class="ads-avatar ads-avatar--lg" src="{{ url_for('users.photo', user_id=user.id) }}" alt="">{% else %}{{ m.avatar(user, "ads-avatar--lg") }}{% endif %}
+          <div class="ads-stack ads-gap-sm">
+            {#- Sent as soon as it is picked (`widgets/image.js`). -#}
+            <div class="js-widget sbe-uploader" data-init-with="imageInput" data-init-params='{"width": 55, "height": 55, "resize_mode": "CROP"}'>
+              <label class="ads-btn js-file-button">{{ icon("photo") }}{{ _("Change the photo") }}<input class="sbe-sr-only" type="file" name="{{ form.photo.name }}" accept="image/png, image/jpeg"></label>
+              <div class="selected-files sbe-uploader__list"></div>
+            </div>
+            {% if user.photo %}<label class="ads-check"><input type="checkbox" name="__{{ form.photo.name }}_delete__" value="0"> <span>{{ _("Remove the photo") }}</span></label>{% endif %}
+            <small class="ads-help">{{ _("A square photo, in JPEG or PNG. Without one, your initials.") }}</small>
+            {{ fields.errors(form.photo) }}
+          </div>
+        </div>
+        <div class="ads-grid ads-col-sm">
+          {{ input(form.first_name, _("First name"), autocomplete="given-name", required=true) }}
+          {{ input(form.last_name, _("Last name"), autocomplete="family-name", required=true) }}
+        </div>
+        <div class="ads-field">
+          <span class="ads-label">{{ _("Email address") }}</span>
+          <span>{{ user.email }}</span>
+          <small class="ads-help">{{ _("To sign in, and for the site's e-mails. To change it, ask an administrator.") }}</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="ads-card" aria-labelledby="speaks">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="speaks">{{ _("Language and time") }}</h2></div>
+      <div class="ads-card__body ads-grid ads-col-sm">
+        {{ select(form.locale, _("Language")) }}
+        {{ select(form.timezone, _("Time zone")) }}
+      </div>
+    </section>
+
+    <section class="ads-card" aria-labelledby="emails">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="emails">{{ _("What I receive by e-mail") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <label class="ads-switch"><input type="checkbox" name="{{ form.daily.name }}" value="y" {{ "checked" if form.daily.data }}><span class="ads-switch__track"></span><span>{{ _("Each morning, what happened in my communities") }}</span></label>
+      </div>
+    </section>
+
+    <section class="ads-card" aria-labelledby="password">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="password">{{ _("Password") }}</h2></div>
+      <div class="ads-card__body ads-grid ads-col-sm">
+        {{ input(form.password, _("New password"), "password", "new-password", help=_("At least 8 characters, with an upper case letter, a lower case letter and a digit. Leave it empty to keep yours.")) }}
+        {{ input(form.confirm_password, _("The same, once more"), "password", "new-password") }}
+      </div>
+    </section>
+
+    <div class="ads-cluster ads-gap-sm">
+      <button class="ads-btn ads-btn--primary" type="submit">{{ _("Save") }}</button>
+      <a class="ads-btn ads-btn--ghost" href="{{ url_for('social.user', user_id=user.id) }}">{{ _("Cancel") }}</a>
+    </div>
+  </form>
+
+  <aside class="ads-stack" aria-label="{{ _('How the others see me') }}">
+    <section class="ads-card" aria-labelledby="seen">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="seen">{{ _("How the others see me") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <span class="ads-media ads-gap-sm">{{ m.avatar(user, "ads-avatar--lg") }}<span class="sbe-lines"><strong>{{ user.name }}</strong><span class="ads-muted">{{ user.email }}</span></span></span>
+        <p class="ads-muted">{{ _("In the directory and on your messages, for the members of your communities.") }}</p>
+      </div>
+      <div class="ads-card__foot"><a href="{{ url_for('social.user', user_id=user.id) }}">{{ _("See my profile") }}</a></div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

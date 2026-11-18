@@ -39,8 +39,6 @@ OPEN_TO_ANY_USER = frozenset(
         "preferences.index",
         "preferences.user",
         "preferences.user_post",
-        "preferences.sbe_notifications",
-        "preferences.sbe_notifications_post",
         # Results are filtered by what the user may read.
         "search.live",
         "search.search_main",

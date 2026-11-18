@@ -255,18 +255,20 @@ def test_a_user_photo_is_uploaded(
     page.goto(f"{base_url}/preferences/user", wait_until="networkidle")
     before = page.request.get(f"{base_url}/users/1/photo").body()
 
-    page.locator('#user-preferences input[type="file"]').set_input_files(
+    page.locator('#account-form input[type="file"]').set_input_files(
         {"name": "me.png", "mimeType": "image/png", "buffer": png.getvalue()}
     )
     expect(
-        page.locator('#user-preferences input[type="hidden"][name="user-photo"]')
+        page.locator('#account-form input[type="hidden"][name="photo"]')
     ).to_have_count(1, timeout=10_000)
     expect(
         page.locator(
-            "#user-preferences .file-item img, #user-preferences .file-item canvas"
+            "#account-form .file-item img, #account-form .file-item canvas"
         ).first
     ).to_be_visible()
-    page.locator('#user-preferences button[value="add"]').click()
+    # The seeded administrator has no first name, which the account asks for.
+    page.fill("#first_name", "Ada")
+    page.locator('#account-form button[type="submit"]').click()
     page.wait_for_load_state("networkidle")
 
     after = page.request.get(f"{base_url}/users/1/photo")

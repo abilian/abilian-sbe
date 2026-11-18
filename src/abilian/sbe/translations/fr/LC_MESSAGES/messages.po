@@ -3045,3 +3045,54 @@ msgstr "Supprimer « %(name)s »"
 
 msgid "Its discussions, its documents and its wiki go for its %(num)d members. This cannot be undone."
 msgstr "Ses discussions, ses documents et son wiki disparaissent pour ses %(num)d membres. C’est définitif."
+
+msgid "Who I am"
+msgstr "Qui je suis"
+
+msgid "Change the photo"
+msgstr "Changer la photo"
+
+msgid "Remove the photo"
+msgstr "Retirer la photo"
+
+msgid "A square photo, in JPEG or PNG. Without one, your initials."
+msgstr "Une photo carrée, en JPEG ou PNG. Sans photo, vos initiales."
+
+msgid "To sign in, and for the site's e-mails. To change it, ask an administrator."
+msgstr "Pour vous connecter, et pour les e-mails du site. Pour la changer, demandez à un administrateur."
+
+msgid "Language and time"
+msgstr "Langue et heure"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "What I receive by e-mail"
+msgstr "Ce que je reçois par e-mail"
+
+msgid "Each morning, what happened in my communities"
+msgstr "Chaque matin, le résumé de ce qui s’est passé dans mes communautés"
+
+msgid "At least 8 characters, with an upper case letter, a lower case letter and a digit. Leave it empty to keep yours."
+msgstr "Au moins 8 caractères, avec une majuscule, une minuscule et un chiffre. Laissez vide pour garder l’actuel."
+
+msgid "The same, once more"
+msgstr "Le même, encore une fois"
+
+msgid "How the others see me"
+msgstr "Comme les autres me voient"
+
+msgid "In the directory and on your messages, for the members of your communities."
+msgstr "Dans l’annuaire et sur vos messages, pour les membres de vos communautés."
+
+msgid "See my profile"
+msgstr "Voir mon profil"
+
+msgid "Time zone"
+msgstr "Fuseau horaire"
+
+msgid "Password"
+msgstr "Mot de passe"
+
+msgid "Password changed"
+msgstr "Mot de passe changé"

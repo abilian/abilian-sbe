@@ -98,7 +98,7 @@
     <div class="ads-menu">
       <p class="ads-subheader sbe-menu-heading">{{ current_user.name }}</p>
       <a class="ads-menu__item" href="{{ url_for('social.user', user_id=current_user.id) }}">{{ icon("user") }}{{ _("My profile") }}</a>
-      <a class="ads-menu__item" href="{{ url_for('preferences.index') }}">{{ icon("settings") }}{{ _("Preferences") }}</a>
+      <a class="ads-menu__item" href="{{ url_for('preferences.index') }}">{{ icon("settings") }}{{ _("My account") }}</a>
       <div class="ads-menu__sep"></div>
       <a class="ads-menu__item" href="{{ url_for('login.logout') }}">{{ icon("logout") }}{{ _("Log out") }}</a>
     </div>
