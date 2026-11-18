@@ -136,7 +136,6 @@ def user_edit(user: User, user_id: int) -> Response:
 def user_post(user: User, user_id: int) -> Response:
     followed = User.query.get_or_404(user_id)
     action = request.form.get("action")
-    return_url = request.form.get("return_url")
 
     match action:
         case "follow":
@@ -147,10 +146,6 @@ def user_post(user: User, user_id: int) -> Response:
             msg = f"Unknown action: {action}"
             raise BadRequest(msg)
     db.session.commit()
-
-    if return_url:
-        # TODO: security check
-        return redirect(return_url)
     return redirect(url_for(".user_view", user_id=user_id))
 
 
