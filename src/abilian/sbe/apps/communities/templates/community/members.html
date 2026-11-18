@@ -1,11 +1,12 @@
 {#- A community's members: who, their role, their posts, when they were last active
     here. Its managers add someone who has an account, change a role in place, remove
-    someone after saying so; inviting new people is the community's action, in its
-    header. Drawn in `mockups/templates/members.html`. -#}
+    someone after saying so, and do the same to several at once through the selection
+    (ADS's datatable shows its bar once a box is ticked); inviting new people is the
+    community's action, in its header. Drawn in `mockups/templates/members.html`. -#}
 {% extends "ads_community.html" %}
 {% block page_title %}{{ _("Members") }} · {{ g.community.name }}{% endblock %}
 {% block content %}
-<div class="ads-card">
+<div class="ads-card ads-datatable">
   <div class="ads-card__head ads-spread">
     <ul class="ads-pills" aria-label="{{ _('Whom to list') }}">
       <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug) }}" {{ 'aria-current="page"' | safe if not only_managers }}>{{ _("All") }} ({{ counts.all }})</a></li>
@@ -36,7 +37,7 @@
   </form>
   {% endif %}
 
-  <form class="sbe-toolbar" method="get" action="{{ url_for('.members', community_id=g.community.slug) }}">
+  <form class="ads-datatable__idle sbe-toolbar" method="get" action="{{ url_for('.members', community_id=g.community.slug) }}">
     <span class="ads-input-icon">
       <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
       <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Filter the members') }}" aria-label="{{ _('Filter the members by name or address') }}">
@@ -45,10 +46,22 @@
     <span class="ads-muted">{{ ngettext("%(num)d member", "%(num)d members", listing.total) }}</span>
     {% if listing.search %}<a href="{{ url_for('.members', community_id=g.community.slug, role=request.args.get('role')) }}">{{ _("Show all") }}</a>{% endif %}
   </form>
+  {% if can_manage_community %}
+  {#- The rows' boxes belong to this form (`form="members-selection"`): each row has a
+      form of its own, for its role, and forms do not nest. -#}
+  <form class="ads-bulkbar" id="members-selection" method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+    {{ csrf.field() }}
+    <strong>{{ _("Selection") }}</strong>
+    <button class="ads-btn ads-btn--sm" type="submit" name="action" value="selection-managers">{{ icon("users") }}{{ _("Make community managers") }}</button>
+    <button class="ads-btn ads-btn--sm" type="submit" name="action" value="selection-members">{{ icon("user") }}{{ _("Make members") }}</button>
+    <button class="ads-btn ads-btn--sm ads-btn--danger" type="button" data-modal-open="#modal-remove-selection">{{ icon("trash") }}{{ _("Remove from the community") }}</button>
+  </form>
+  {% endif %}
 
   <div class="ads-table-scroll">
     <table class="ads-table ads-table--vcenter ads-table--hover" id="members-table">
       <thead><tr>
+        {% if can_manage_community %}<th class="ads-table__select"><input class="ads-check" type="checkbox" data-select-all="selected" aria-label="{{ _('Select all') }}"></th>{% endif %}
         {{ m.sort_th(listing, "name", _("Name")) }}
         {{ m.sort_th(listing, "role", _("Role")) }}
         {{ m.sort_th(listing, "posts", _("Discussions started"), "ads-end ads-col--secondary") }}
@@ -58,6 +71,7 @@
       <tbody>
         {% for user, m_id, role, last_activity_date in memberships %}
         <tr>
+          {% if can_manage_community %}<td class="ads-table__select"><input class="ads-check" type="checkbox" form="members-selection" name="selected" value="{{ user.id }}" aria-label="{{ _('Select %(name)s', name=user.name) }}"></td>{% endif %}
           <td class="ads-full sbe-cell-person">
             <span class="ads-media ads-gap-sm">{{ m.avatar(user) }}
               <span class="sbe-lines">
@@ -96,7 +110,7 @@
           {% endif %}
         </tr>
         {% else %}
-        <tr><td colspan="5" class="ads-muted">{{ _("No matching records found") }}</td></tr>
+        <tr><td colspan="6" class="ads-muted">{{ _("No matching records found") }}</td></tr>
         {% endfor %}
       </tbody>
     </table>
@@ -123,5 +137,13 @@
   </form>
 </dialog>
 {% endfor %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-remove-selection" aria-labelledby="modal-remove-selection-title">
+  <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-remove-selection-title">{{ _("Remove the selected members from the community?") }}</h2></div>
+  <div class="ads-modal__body">{{ _("They will no longer see its discussions and documents. What they wrote stays.") }}</div>
+  <div class="ads-modal__foot">
+    <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+    <button class="ads-btn ads-btn--danger" type="submit" form="members-selection" name="action" value="selection-remove">{{ icon("trash") }}{{ _("Remove") }}</button>
+  </div>
+</dialog>
 {% endif %}
 {% endblock %}

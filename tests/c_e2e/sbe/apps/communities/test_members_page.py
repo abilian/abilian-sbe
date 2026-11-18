@@ -22,6 +22,7 @@ from tests.util import client_login, ensure_services_started
 
 if TYPE_CHECKING:
     from flask.testing import FlaskClient
+    from werkzeug.test import TestResponse
 
     from abilian.core.sqlalchemy import SQLAlchemy
     from abilian.sbe.apps.communities.models import Community
@@ -91,3 +92,63 @@ def test_a_manager_is_asked_before_removing_someone(
     dialog = html.split('aria-labelledby="modal-remove-')[2]
     assert "from the community?" in dialog
     assert 'name="action" value="delete"' in dialog
+
+
+def _act_on(
+    client: FlaskClient, manager: User, community: Community, action: str, *users: User
+) -> TestResponse:
+    url = url_for("communities.members_post", community_id=community.slug)
+    data = {"action": action, "selected": [str(u.id) for u in users]}
+    with client_login(client, manager):
+        return client.post(url, data=data)
+
+
+def test_a_manager_selects_members_to_make_them_managers(
+    client: FlaskClient, community1: Community, people: dict[str, User], db: SQLAlchemy
+) -> None:
+    html = _page(client, people["manager"], community1)
+    assert 'form="members-selection"' in html
+
+    response = _act_on(
+        client, people["manager"], community1, "selection-managers", people["member"]
+    )
+
+    assert response.status_code == 302
+    assert community1.get_role(people["member"]) == MANAGER
+
+
+def test_a_manager_removes_the_selected_members_and_no_one_else(
+    client: FlaskClient,
+    community1: Community,
+    community2: Community,
+    people: dict[str, User],
+    db: SQLAlchemy,
+) -> None:
+    outsider = _person(db, community2, "Outsider", MEMBER)
+    db.session.commit()
+
+    _act_on(
+        client,
+        people["manager"],
+        community1,
+        "selection-remove",
+        people["member"],
+        outsider,
+    )
+
+    assert community1.get_role(people["member"]) is None
+    assert community2.get_role(outsider) == MEMBER
+
+
+def test_a_member_does_not_act_on_a_selection(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    html = _page(client, people["member"], community1)
+    assert 'form="members-selection"' not in html
+
+    response = _act_on(
+        client, people["member"], community1, "selection-remove", people["manager"]
+    )
+
+    assert response.status_code == 403
+    assert community1.get_role(people["manager"]) == MANAGER

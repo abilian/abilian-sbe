@@ -275,3 +275,20 @@ def test_the_bar_suggests_as_one_types(
     assert page.url.endswith("/communities/e2e-community/forum/"), page.url
 
     js_errors.assert_clean("the bar's suggestions")
+
+
+def test_selecting_all_members_shows_what_applies_to_them(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    page = logged_in
+    page.goto(f"{base_url}/communities/{COMMUNITY}/members", wait_until="networkidle")
+    boxes = page.locator('input[name="selected"]')
+    bar = page.locator("#members-selection")
+    expect(bar).to_be_hidden()
+
+    page.locator("[data-select-all]").check()
+
+    expect(bar).to_be_visible()
+    for box in boxes.all():
+        expect(box).to_be_checked()
+    js_errors.assert_clean("the members' selection")

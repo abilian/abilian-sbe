@@ -8,6 +8,20 @@ document.addEventListener("change", (event) => {
   }
 });
 
+/* <input type="checkbox" data-select-all="name">: ticks or unticks every box of that
+   name in its table, wherever their form is. */
+document.addEventListener("change", (event) => {
+  const all = event.target.closest("[data-select-all]");
+  if (!all) return;
+  const name = all.dataset.selectAll;
+  all
+    .closest("table")
+    .querySelectorAll(`input[type="checkbox"][name="${name}"]`)
+    .forEach((box) => {
+      box.checked = all.checked;
+    });
+});
+
 /* data-no-enter on a container: Enter in a text box does not submit the form. */
 document.addEventListener("keydown", (event) => {
   if (

@@ -3329,3 +3329,17 @@ msgstr "Envoi des e-mails"
 
 msgid "Sending is turned off."
 msgstr "L’envoi est désactivé."
+
+msgid "Make community managers"
+msgstr "Nommer animateurs"
+
+msgid "Make members"
+msgstr "Redevenir membres"
+
+msgid "Remove the selected members from the community?"
+msgstr "Retirer de la communauté les membres sélectionnés ?"
+
+msgid "%(num)d member changed."
+msgid_plural "%(num)d members changed."
+msgstr[0] "%(num)d membre modifié."
+msgstr[1] "%(num)d membres modifiés."

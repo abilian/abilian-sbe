@@ -33,7 +33,7 @@ from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.models.subjects import User, UserQuery
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
-from abilian.i18n import _, _l
+from abilian.i18n import _, _l, _n
 from abilian.sbe.apps.communities import security as community_security
 from abilian.sbe.apps.communities.actions import register_actions
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
@@ -43,6 +43,7 @@ from abilian.sbe.apps.communities.models import (
     DEFAULT_IMAGE,
     DEFAULT_IMAGE_MD5,
     MANAGER,
+    MEMBER,
     Community,
     Membership,
 )
@@ -415,6 +416,8 @@ def members() -> str:
 def members_post() -> Response:
     community = g.community._model
     action = request.form.get("action")
+    if action in SELECTION_ACTIONS:
+        return _act_on_selection(community, action)
 
     user_id = request.form.get("user")
     if not user_id:
@@ -453,6 +456,36 @@ def members_post() -> Response:
 
     msg = f"Unknown action: {action!r}"
     raise BadRequest(msg)
+
+
+#: What the members' selection does: the role it gives, or None to remove them.
+SELECTION_ACTIONS = {
+    "selection-managers": MANAGER,
+    "selection-members": MEMBER,
+    "selection-remove": None,
+}
+
+
+def _act_on_selection(community: Community, action: str) -> Response:
+    """Give the selected members a role, or remove them: only members of
+    `community`, whatever else is posted."""
+    ids = [int(user_id) for user_id in request.form.getlist("selected")]
+    members = (
+        User.query.join(Membership, Membership.user_id == User.id)
+        .filter(Membership.community_id == community.id, User.id.in_(ids))
+        .all()
+    )
+    role = SELECTION_ACTIONS[action]
+    app = unwrap(current_app)
+    for user in members:
+        if role is None:
+            community.remove_membership(user)
+            activity.send(app, actor=user, verb="leave", object=community)
+        else:
+            community.set_membership(user, role)
+    db.session.commit()
+    flash(_n("%(num)d member changed.", "%(num)d members changed.", len(members)))
+    return redirect(url_for(".members", community_id=community.slug))
 
 
 MEMBERS_EXPORT_HEADERS = [
