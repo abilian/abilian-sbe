@@ -9,13 +9,13 @@
 <title>{% block page_title %}{% endblock %}{% if config.SITE_NAME %} · {{ config.SITE_NAME }}{% endif %}</title>
 <link rel="stylesheet" href="{{ url_for('abilian_sbe_static', filename='ads/ads.css') }}">
 <link rel="stylesheet" href="{{ url_for('abilian_sbe_static', filename='theme.css') }}">
-<link rel="icon" href="{{ url_for('abilian_sbe_static', filename='abilian-mark.png') }}" type="image/png">
+<link rel="icon" href="{{ url_for('abilian_sbe_static', filename='abilian-mark.svg') }}" type="image/svg+xml"><link rel="apple-touch-icon" href="{{ url_for('abilian_sbe_static', filename='apple-touch-icon.png') }}">
 {#- The theme chosen on this device, before anything is drawn. -#}
 <script src="{{ url_for('abilian_sbe_static', filename='ads/restore.js') }}"></script>
 </head>
 <body class="ads-centered">
   <main class="ads-centered__inner ads-stack">
-    <div class="ads-center"><a class="ads-brand sbe-brand-centered" href="{{ url_for('main.home') }}"><span class="ads-brand__mark"><img src="{{ url_for('abilian_sbe_static', filename='abilian-mark.png') }}" alt=""></span>{% if config.SITE_NAME %}<span class="sbe-brandname">{{ config.SITE_NAME }}</span>{% endif %}</a></div>
+    <div class="ads-center"><a class="ads-brand sbe-brand-centered" href="{{ url_for('main.home') }}"><span class="ads-brand__mark"><img src="{{ url_for('abilian_sbe_static', filename='abilian-mark.svg') }}" alt=""></span>{% if config.SITE_NAME %}<span class="sbe-brandname">{{ config.SITE_NAME }}</span>{% endif %}</a></div>
     {{ m.flashes("ads-stack ads-gap-sm") }}
     {% block content %}{% endblock %}
   </main>

@@ -20,11 +20,11 @@
     (the editor) replaces the `scripts` block. -#}
 {% block head %}{% include "_js_config.html" %}{% endblock %}
 {% block scripts %}{{ vite_asset("src/main.js") }}{% endblock %}
-{% block icon %}<link rel="icon" href="{{ url_for('abilian_sbe_static', filename='abilian-mark.png') }}" type="image/png">{% endblock %}
+{% block icon %}<link rel="icon" href="{{ url_for('abilian_sbe_static', filename='abilian-mark.svg') }}" type="image/svg+xml"><link rel="apple-touch-icon" href="{{ url_for('abilian_sbe_static', filename='apple-touch-icon.png') }}">{% endblock %}
 {% block skip %}{{ _("Skip to content") }}{% endblock %}
 {% block menu_label %}{{ _("Menu") }}{% endblock %}
 {% block brand_href %}{{ url_for("main.home") }}{% endblock %}
-{% block brand_mark %}<span class="ads-brand__mark"><img src="{{ url_for('abilian_sbe_static', filename='abilian-mark.png') }}" alt=""></span>{% endblock %}
+{% block brand_mark %}<span class="ads-brand__mark"><img src="{{ url_for('abilian_sbe_static', filename='abilian-mark.svg') }}" alt=""></span>{% endblock %}
 {% block brand_name %}<span class="sbe-brandname">{{ config.SITE_NAME }}</span>{% endblock %}
 
 {% block nav %}
