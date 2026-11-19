@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING
 
 from flask import current_app
 
-from abilian.i18n import _
+from abilian.i18n import _, force_locale, get_default_locale
 from abilian.services.auth.views import password_link, send_mail
 from abilian.web.util import url_for
 
@@ -23,16 +23,20 @@ def send_invitation(user: User, community: Community, inviter: User, note: str) 
     """Tell `user` that `inviter` put them in `community`, with `note` if any."""
     first_time = not user.last_active
     link = password_link(user) if first_time else url_for(community, _external=True)
-    subject = _(
-        "%(inviter)s invites you to %(community)s on %(site)s",
-        inviter=inviter.name,
-        community=community.name,
-        site=current_app.config.get("SITE_NAME"),
-    )
+    # In the language of whoever is invited, the site's until they choose one.
+    locale = user.locale or get_default_locale()
+    with force_locale(locale):
+        subject = _(
+            "%(inviter)s invites you to %(community)s on %(site)s",
+            inviter=inviter.name,
+            community=community.name,
+            site=current_app.config.get("SITE_NAME"),
+        )
     send_mail(
         subject,
         user.email,
         "community_invitation",
+        locale=locale,
         user=user,
         community=community,
         inviter=inviter,

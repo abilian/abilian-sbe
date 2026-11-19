@@ -299,3 +299,24 @@ def test_the_new_accounts_page_carries_its_list_whole(
     assert json.loads(unescape(value.group(1)))[0]["email"] == "new@x.org"
     # The header's button leads to the first page here: there is no dialog.
     assert 'data-modal-open="#modal-invite"' not in html
+
+
+def test_the_invitation_speaks_the_language_of_whoever_is_invited(
+    client: FlaskClient,
+    community1: Community,
+    people: dict[str, User],
+    db: SQLAlchemy,
+) -> None:
+    people["account"].locale = "fr"
+    db.session.commit()
+
+    _status, outbox = _saving(
+        client,
+        people["manager"],
+        community1,
+        existing_account=json.dumps({"account@example.com": "member"}),
+    )
+
+    (message,) = outbox
+    assert " vous invite dans " in message.subject
+    assert "vous a ajouté à la communauté" in message.body
