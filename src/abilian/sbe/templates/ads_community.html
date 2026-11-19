@@ -23,8 +23,9 @@
 {% if tab_home is defined and community.description %}
 <p class="ads-muted">{{ community.description }}</p>
 {% endif %}
-{#- The community's tools; its settings are in the header's menu. -#}
-<ul class="ads-tabs">
+{#- The community's tools; its settings are in the header's menu. The current one
+    wears the community's colour, its tile's: where one is, at a glance. -#}
+<ul class="ads-tabs sbe-tabs-tinted {{ identity_class(community.id) }}">
   {% for tab in actions.for_category("communities:tabs") if tab.name != "settings" %}
   <li><a class="ads-tab" href="{{ tab.url() }}" {{ 'aria-current="page"' | safe if tab.is_current() }}>{{ tab.title }}</a></li>
   {% endfor %}

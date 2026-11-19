@@ -83,6 +83,10 @@
 .sbe-id-7 { --sbe-id: var(--sbe-id-7); }
 .sbe-id-8 { --sbe-id: var(--sbe-id-8); }
 
+/* A community's current tab wears its colour, its tile's, as a band along the top: one
+   knows where one is at a glance, and identity still never reads as state. */
+.sbe-tabs-tinted .ads-tab[aria-current] { box-shadow: inset 0 3px var(--sbe-id); }
+
 /* An avatar keeps its size in a row: ADS's can shrink, and a crowded row squeezed
    it into an oval (ADS request 25). */
 .ads-avatar { flex: none; }
