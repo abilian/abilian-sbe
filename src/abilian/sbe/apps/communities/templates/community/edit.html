@@ -33,6 +33,7 @@
       </div>
       {{ c.members(form, form.type.data) }}
       {{ c.tools(form, {"has_forum": form.has_forum.data, "has_documents": form.has_documents.data, "has_wiki": form.has_wiki.data}) }}
+      {{ c.joining(form, form.visibility.data) }}
     </div>
     <div class="ads-card__foot ads-cluster ads-gap-sm">
       <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="edit">{{ _("Save") }}</button>

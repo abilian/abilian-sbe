@@ -2716,3 +2716,84 @@ msgstr "En discuter"
 
 msgid "About the event"
 msgstr "À propos de l’événement"
+
+msgid "Anyone finds it among the communities to discover and asks to join; a manager accepts."
+msgstr "Chacun la trouve parmi les communautés à découvrir et demande à la rejoindre ; un gestionnaire accepte."
+
+msgid "Anyone finds it among the communities to discover and joins at once."
+msgstr "Chacun la trouve parmi les communautés à découvrir et la rejoint aussitôt."
+
+msgid "Closed"
+msgstr "Fermée"
+
+msgid "Only those its managers invite. Others do not see it."
+msgstr "Seuls ceux que ses gestionnaires invitent. Les autres ne la voient pas."
+
+msgid "Open"
+msgstr "Ouverte"
+
+msgid "Open, on request"
+msgstr "Ouverte, sur demande"
+
+msgid "Who is not a member sees its name, what it is for and its managers, not what it holds."
+msgstr "Qui n’en est pas membre voit son nom, ce à quoi elle sert et ses gestionnaires, pas ce qu’elle contient."
+
+msgid "Discover the other communities"
+msgstr "Découvrir les autres communautés"
+
+msgid "Ask to join"
+msgstr "Demander à rejoindre"
+
+msgid "Ask to join %(name)s"
+msgstr "Demander à rejoindre %(name)s"
+
+msgid "Asked"
+msgstr "Demandé"
+
+msgid "Communities to discover"
+msgstr "Communautés à découvrir"
+
+msgid "Join"
+msgstr "Rejoindre"
+
+msgid "Join %(name)s"
+msgstr "Rejoindre %(name)s"
+
+msgid "Managed by %(names)s"
+msgstr "Gérée par %(names)s"
+
+msgid "No other community is open for now."
+msgstr "Aucune autre communauté n’est ouverte pour l’instant."
+
+msgid "Welcome to %(name)s."
+msgstr "Bienvenue dans %(name)s."
+
+msgid "Your request to join %(name)s went to its managers."
+msgstr "Votre demande pour rejoindre %(name)s est partie à ses gestionnaires."
+
+msgid "%(name)s asks to join %(community)s"
+msgstr "%(name)s demande à rejoindre %(community)s"
+
+msgid "Accept"
+msgstr "Accepter"
+
+msgid "Accept %(name)s"
+msgstr "Accepter %(name)s"
+
+msgid "Asking to join"
+msgstr "Demandent à rejoindre"
+
+msgid "Refuse"
+msgstr "Refuser"
+
+msgid "Refuse %(name)s"
+msgstr "Refuser %(name)s"
+
+msgid "%(name)s is a member now, and told so."
+msgstr "%(name)s est membre, et en est prévenu."
+
+msgid "%(name)s is a member, but could not be told by e-mail."
+msgstr "%(name)s est membre, mais n’a pas pu être prévenu par e-mail."
+
+msgid "%(name)s will not join the community."
+msgstr "%(name)s ne rejoindra pas la communauté."

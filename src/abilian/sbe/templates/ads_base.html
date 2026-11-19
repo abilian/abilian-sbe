@@ -59,6 +59,7 @@
         {% endif %}
         {% if communities_menu %}<div class="ads-menu__sep"></div>{% endif %}
         <a class="ads-menu__item" href="{{ url_for('communities.index') }}">{{ icon("users") }}{{ _("All my communities") }}</a>
+        <a class="ads-menu__item" href="{{ url_for('communities.discover') }}">{{ icon("world") }}{{ _("Discover the other communities") }}</a>
       </div>
     </details></li>
     <li><a class="ads-nav__link ads-tip" data-tip="{{ _('Directory') }}" href="{{ url_for('social.users') }}" {{ 'aria-current="page"' | safe if request.endpoint == "social.users" }}>

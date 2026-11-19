@@ -12,7 +12,7 @@ from abilian.web.forms.fields import ChoiceField, FileField
 from abilian.web.forms.validators import length, open_png_or_jpeg
 from abilian.web.forms.widgets import BooleanWidget, ImageInput, TextArea
 
-from .models import Community
+from .models import CLOSED, ON_REQUEST, OPEN, Community
 
 
 def strip(s: str) -> str:
@@ -43,6 +43,18 @@ class CommunityForm(Form):
         choices=[
             (_l("informative"), "informative"),
             (_l("participative"), "participative"),
+        ],
+    )
+
+    visibility = ChoiceField(
+        label=_l("Who joins"),
+        validators=[data_required()],
+        # Closed unless said otherwise: as every community was before.
+        filters=(lambda value: value or CLOSED,),
+        choices=[
+            (CLOSED, _l("Closed")),
+            (ON_REQUEST, _l("Open, on request")),
+            (OPEN, _l("Open")),
         ],
     )
 

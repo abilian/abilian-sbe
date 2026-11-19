@@ -11,10 +11,11 @@
 {%- endmacro %}
 
 {#- A community: its image, or else its initial on its colour. Squares for places,
-    circles for people. -#}
-{% macro tile(community, size_class="") -%}
+    circles for people. Without `image` for who is not a member, whom the image's
+    address, inside the community, refuses. -#}
+{% macro tile(community, size_class="", image=true) -%}
 <span class="sbe-tile {{ size_class }} {{ identity_class(community.id) }}" aria-hidden="true">
-  {%- if community.own_image %}<img src="{{ community_image_url(community, s=64) }}" alt="" loading="lazy">{% else %}{{ initials(community.name)[:1] }}{% endif -%}
+  {%- if image and community.own_image %}<img src="{{ community_image_url(community, s=64) }}" alt="" loading="lazy">{% else %}{{ initials(community.name)[:1] }}{% endif -%}
 </span>
 {%- endmacro %}
 

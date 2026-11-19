@@ -17,6 +17,7 @@
       {#- A new community: its members take part, it has discussions and documents. -#}
       {{ c.members(form, form.type.data if posted else "participative") }}
       {{ c.tools(form, {"has_forum": form.has_forum.data, "has_documents": form.has_documents.data, "has_wiki": form.has_wiki.data} if posted else {"has_forum": true, "has_documents": true}) }}
+      {{ c.joining(form, form.visibility.data if posted else "secret") }}
       <div class="ads-field">
         <label class="ads-label" for="manager">{{ _("Its manager") }}</label>
         {#- No icon beside it: the picker wraps the field in its own box. -#}

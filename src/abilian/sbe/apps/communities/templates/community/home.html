@@ -6,7 +6,7 @@
 {% set admin = is_site_admin() %}
 {% block page_title %}{{ _("Communities") if admin else _("My communities") }}{% endblock %}
 {% block heading %}{{ _("Communities") if admin else _("My communities") }}{% endblock %}
-{% block actions %}{% if admin %}<a class="ads-btn ads-btn--primary" href="{{ url_for('.new') }}">{{ icon("plus") }}{{ _("New community") }}</a>{% endif %}{% endblock %}
+{% block actions %}<a class="ads-btn ads-btn--ghost" href="{{ url_for('.discover') }}">{{ icon("world") }}{{ _("Discover the other communities") }}</a>{% if admin %}<a class="ads-btn ads-btn--primary" href="{{ url_for('.new') }}">{{ icon("plus") }}{{ _("New community") }}</a>{% endif %}{% endblock %}
 {% block body %}
 <div class="ads-card">
   <div class="ads-card__head ads-spread">

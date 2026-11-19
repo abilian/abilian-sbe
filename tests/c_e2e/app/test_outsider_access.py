@@ -34,6 +34,10 @@ OPEN_TO_ANY_USER = frozenset(
     {
         # The user's own communities, and their own home page and settings.
         "communities.index",
+        # The communities their managers opened, shown by their card only, and the
+        # way into them, which refuses any other community.
+        "communities.discover",
+        "communities.discover_post",
         "main.home",
         "main.feed_read",
         "social.home",

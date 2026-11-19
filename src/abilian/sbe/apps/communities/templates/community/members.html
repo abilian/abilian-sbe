@@ -2,10 +2,30 @@
     here. Its managers add someone who has an account, change a role in place, remove
     someone after saying so, and do the same to several at once through the selection
     (ADS's datatable shows its bar once a box is ticked); inviting new people is the
-    community's action, in its header. Drawn in `mockups/templates/members.html`. -#}
+    community's action, in its header. Above them, for its managers, who asks to
+    join, if it is open on request: accepted or refused. Drawn in
+    `mockups/templates/members.html`. -#}
 {% extends "ads_community.html" %}
 {% block page_title %}{{ _("Members") }} · {{ g.community.name }}{% endblock %}
 {% block content %}
+{% if can_manage_community and requests %}
+<section class="ads-card" aria-labelledby="asking">
+  <div class="ads-card__head"><h2 class="ads-card__title" id="asking">{{ _("Asking to join") }} ({{ requests | length }})</h2></div>
+  <ul class="ads-list">
+    {% for asking in requests %}
+    <li>
+      <span class="ads-media ads-gap-sm ads-fill">{{ m.avatar(asking.user) }}<span class="sbe-lines"><strong>{{ asking.user.name }}</strong><span class="ads-muted">{{ asking.user.email }} · {{ m.time(asking.created_at) }}</span></span></span>
+      <form class="ads-cluster ads-gap-sm" method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+        {{ csrf.field() }}
+        <input type="hidden" name="request" value="{{ asking.id }}">
+        <button class="ads-btn ads-btn--primary ads-btn--sm" type="submit" name="action" value="accept-request" aria-label="{{ _('Accept %(name)s', name=asking.user.name) }}">{{ icon("check") }}{{ _("Accept") }}</button>
+        <button class="ads-btn ads-btn--ghost ads-btn--sm" type="submit" name="action" value="refuse-request" aria-label="{{ _('Refuse %(name)s', name=asking.user.name) }}">{{ _("Refuse") }}</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
 <div class="ads-card ads-datatable">
   <div class="ads-card__head ads-spread">
     <ul class="ads-pills" aria-label="{{ _('Whom to list') }}">

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import smtplib
 from collections import Counter
 from functools import cache, wraps
 from io import BytesIO
@@ -39,6 +40,7 @@ from abilian.sbe.apps.communities.actions import register_actions
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
 from abilian.sbe.apps.communities.decorators import can_manage, is_site_admin
 from abilian.sbe.apps.communities.forms import CommunityForm
+from abilian.sbe.apps.communities.invitations import send_invitation
 from abilian.sbe.apps.communities.models import (
     DEFAULT_IMAGE,
     DEFAULT_IMAGE_MD5,
@@ -46,6 +48,7 @@ from abilian.sbe.apps.communities.models import (
     MEMBER,
     Community,
     Membership,
+    MembershipRequest,
 )
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import content_repository
@@ -413,6 +416,7 @@ def members() -> str:
         "memberships": memberships,
         "threads_count": threads_count,
         "only_managers": only_managers,
+        "requests": g.community._model.membership_requests,
         "counts": {
             name: sum(listing.matches(text(row)) for row in group)
             for name, group in (("all", rows), ("managers", managers))
@@ -429,6 +433,8 @@ def members_post() -> Response:
     action = request.form.get("action")
     if action in SELECTION_ACTIONS:
         return _act_on_selection(community, action)
+    if action in {"accept-request", "refuse-request"}:
+        return _answer_request(community, action == "accept-request")
 
     user_id = request.form.get("user")
     if not user_id:
@@ -471,6 +477,34 @@ def members_post() -> Response:
 
     msg = f"Unknown action: {action!r}"
     raise BadRequest(msg)
+
+
+def _answer_request(community: Community, accepted: bool) -> Response:
+    """A request to join, answered: its person made a member and told so, or not."""
+    asking = MembershipRequest.query.filter_by(
+        id=request.form.get("request", type=int), community_id=community.id
+    ).first_or_404()
+    user = asking.user
+    db.session.delete(asking)
+    members = redirect(url_for(".members", community_id=community.slug))
+    if not accepted:
+        db.session.commit()
+        flash(_("%(name)s will not join the community.", name=user.name))
+        return members
+
+    community.set_membership(user, MEMBER)
+    activity.send(unwrap(current_app), actor=user, verb="join", object=community)
+    db.session.commit()
+    try:
+        send_invitation(user, community, authenticated_user(), "")
+    except (smtplib.SMTPException, OSError):
+        flash(
+            _("%(name)s is a member, but could not be told by e-mail.", name=user.name),
+            "warning",
+        )
+        return members
+    flash(_("%(name)s is a member now, and told so.", name=user.name), "success")
+    return members
 
 
 #: What the members' selection does: the role it gives, or None to remove them.

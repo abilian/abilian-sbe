@@ -131,6 +131,11 @@ def indexable_roles_and_users(community: Community) -> str:
     return " ".join(indexable_role(user) for user in community.members)
 
 
+#: A community's `visibility`: the values are the column's, from before they were read.
+CLOSED, ON_REQUEST, OPEN = "secret", "public", "open"
+VISIBILITIES = (CLOSED, ON_REQUEST, OPEN)
+
+
 class Community(Entity):
     """Ad-hoc objects that hold properties about a community."""
 
@@ -209,7 +214,9 @@ class Community(Entity):
     #: One of 'participative' or 'informative
     type: Mapped[str] = mapped_column(String(20), nullable=False, default="informative")
 
-    #: One of 'secret', 'public', 'open' (currently not used)
+    #: Who sees it and joins: `CLOSED` to all but its members, as every community
+    #: was; or listed among the communities to discover, joined on request
+    #: (`ON_REQUEST`) or freely (`OPEN`). Its managers choose.
     visibility: Mapped[str] = mapped_column(
         String(20), nullable=False, default="secret"
     )
@@ -631,3 +638,42 @@ def managers_of(communities: Iterable[Community]) -> dict[int, list[User]]:
     for community_id, user in rows.tuples():
         managers.setdefault(community_id, []).append(user)
     return managers
+
+
+class MembershipRequest(db.Model):
+    """Someone asking to join a community open on request, until a manager answers."""
+
+    __tablename__ = "community_membership_request"
+    __table_args__ = (UniqueConstraint("community_id", "user_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    community_id: Mapped[int] = mapped_column(
+        ForeignKey(Community.id, ondelete="CASCADE"), nullable=False
+    )
+    community = relationship(
+        Community,
+        backref=backref(
+            "membership_requests",
+            order_by="MembershipRequest.created_at",
+            cascade="all, delete-orphan",
+        ),
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey(User.id, ondelete="CASCADE"), nullable=False
+    )
+    user = relationship(User)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+
+
+def communities_to_discover(user: User) -> list[Community]:
+    """The communities open to `user`, who is not in them, by name."""
+    mine = sa.select(Membership.community_id).where(Membership.user_id == user.id)
+    return (
+        Community.query.filter(
+            Community.visibility.in_((ON_REQUEST, OPEN)), Community.id.not_in(mine)
+        )
+        .order_by(sa.func.lower(Community.name))
+        .all()
+    )

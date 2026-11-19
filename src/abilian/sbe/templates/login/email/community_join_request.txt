@@ -1,0 +1,11 @@
+Hello{% if manager.first_name %} {{ manager.first_name }}{% endif %},
+
+{{ user.name }} ({{ user.email }}) asks to join the community "{{ community.name }}" on {{ config.SITE_NAME }}, which you manage.
+
+You accept or refuse on the community's members page:
+
+{{ link }}
+
+Best regards,
+
+  {{ config.SITE_NAME }}

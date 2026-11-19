@@ -1,6 +1,6 @@
 {#- A community's fields, shared by making one and by its settings: its name, what it is
-    for, whether its members take part or mostly read, its tools. Imported `with
-    context`. -#}
+    for, whether its members take part or mostly read, its tools, who joins. Imported
+    `with context`. -#}
 {% import "forum/_post_fields.html" as fields %}
 
 {% macro name(form) %}
@@ -32,6 +32,23 @@
   <label class="ads-choice"><input type="radio" name="{{ form.type.name }}" value="{{ value }}" {{ "checked" if kind == value }}>
     <span>{{ label }}<span class="ads-choice__note">{{ note }}</span></span></label>
   {% endfor %}
+</fieldset>
+{% endmacro %}
+
+{#- Who joins, `value` ticked: only those invited, as every community was; or anyone,
+    who finds it among the communities to discover, on request or freely. -#}
+{% macro joining(form, value) %}
+<fieldset class="ads-stack ads-gap-sm sbe-fieldset">
+  <legend class="ads-label">{{ _("Who joins") }}</legend>
+  {% for choice, label, note in [
+    ("secret", _("Closed"), _("Only those its managers invite. Others do not see it.")),
+    ("public", _("Open, on request"), _("Anyone finds it among the communities to discover and asks to join; a manager accepts.")),
+    ("open", _("Open"), _("Anyone finds it among the communities to discover and joins at once.")),
+  ] %}
+  <label class="ads-choice"><input type="radio" name="{{ form.visibility.name }}" value="{{ choice }}" {{ "checked" if value == choice }}>
+    <span>{{ label }}<span class="ads-choice__note">{{ note }}</span></span></label>
+  {% endfor %}
+  <small class="ads-help">{{ _("Who is not a member sees its name, what it is for and its managers, not what it holds.") }}</small>
 </fieldset>
 {% endmacro %}
 
