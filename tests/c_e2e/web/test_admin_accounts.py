@@ -156,6 +156,19 @@ def test_an_administrator_signs_in_as_someone(
         assert current_user.id == active.id
 
 
+def test_a_link_does_not_sign_an_administrator_in_as_someone(
+    client: FlaskClient, admin_user: User, accounts: dict[str, User]
+) -> None:
+    """A page or an e-mail an administrator opens could hold such a link."""
+    active = accounts["active"]
+    with client_login(client, admin_user):
+        response = client.get(f"/admin/impersonate?email={active.email}")
+        client.get(url_for("main.home"))
+        assert current_user.id == admin_user.id
+
+    assert response.status_code == 405
+
+
 def test_a_refused_account_says_why_under_the_field(
     client: FlaskClient, admin_user: User, accounts: dict[str, User]
 ) -> None:
