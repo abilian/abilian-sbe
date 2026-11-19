@@ -14,7 +14,7 @@
     <textarea class="ads-textarea" id="wizard-emails" name="wizard-emails" rows="5" aria-describedby="wizard-emails-help"></textarea>
     <small class="ads-help" id="wizard-emails-help">{{ _("One per line, or separated by commas or spaces. What will happen to each shows as you type.") }}</small>
   </div>
-  <div aria-live="polite" data-invitees="{{ url_for('.wizard_preview', community_id=g.community.slug) }}"></div>
+  <div aria-live="polite" data-preview="{{ url_for('.wizard_preview', community_id=g.community.slug) }}" data-preview-of="wizard-emails"></div>
   <div class="ads-field">
     <label class="ads-label" for="invite-role">{{ _("Role") }}</label>
     <select class="ads-select sbe-fit" id="invite-role" name="role">

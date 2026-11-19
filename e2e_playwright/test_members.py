@@ -45,7 +45,7 @@ def test_wizard_adds_existing_and_new_people_from_pasted_addresses(
         "eva.existing@example.com, nina.new@example.com\nnot-an-address",
     )
     # What will happen to each shows as it is typed; one role for all.
-    expect(page.locator("[data-invitees]")).to_contain_text("not-an-address")
+    expect(page.locator("[data-preview]")).to_contain_text("not-an-address")
     page.select_option("#invite-role", "manager")
     page.get_by_role("button", name="Next step").click()
     page.wait_for_load_state("networkidle")

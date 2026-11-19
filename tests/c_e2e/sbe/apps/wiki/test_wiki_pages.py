@@ -148,3 +148,18 @@ def test_a_page_runs_no_script_its_writer_put_in(
     assert "onerror" not in body
     assert "javascript:" not in body
     assert '<h2 id="heading">Heading</h2>' in body
+
+
+def test_the_text_being_written_shows_as_the_page_will(
+    member: User, community1: Community, client: FlaskClient
+) -> None:
+    with client_login(client, member):
+        response = client.post(
+            url_for("wiki.page_preview", community_id=community1.slug),
+            data={"body_src": "See [[Glossary]], [[Nowhere]].<script>x</script>"},
+        )
+
+    html = response.get_data(as_text=True)
+    assert '<a class="wikilink" href="/communities/' in html
+    assert '<a class="wikilink new" href="/communities/' in html
+    assert "<script" not in html

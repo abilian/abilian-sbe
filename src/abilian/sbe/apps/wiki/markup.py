@@ -19,7 +19,7 @@ from .util import page_exists
 if TYPE_CHECKING:
     from markdown.core import Markdown
 
-    from abilian.sbe.apps.wiki.models import WikiPage
+    from abilian.sbe.apps.communities.models import Community
 
 __all__ = ("SBEWikiLinkExtension", "convert")
 
@@ -73,16 +73,17 @@ ALLOWED_ATTRIBUTES = {
 
 
 class UrlBuilder:
-    def __init__(self, page: WikiPage) -> None:
-        self.page = page
+    def __init__(self, community: Community) -> None:
+        self.community = community
 
     def build(self, label: str, base: str, end: str) -> str:
         label = label.strip()
-        return url_for(".page", community_id=self.page.community.slug, title=label)
+        return url_for(".page", community_id=self.community.slug, title=label)
 
 
-def convert(page: WikiPage, text: str) -> str:
-    build_url = UrlBuilder(page).build
+def convert(community: Community, text: str) -> str:
+    """`text`, in Markdown, as a page of `community`'s wiki shows it."""
+    build_url = UrlBuilder(community).build
     extension = SBEWikiLinkExtension(build_url=build_url)
     ctx = {
         "extensions": [extension, "markdown.extensions.toc"],

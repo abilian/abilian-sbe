@@ -1768,6 +1768,9 @@ msgstr "le"
 msgid "(source)"
 msgstr "(source)"
 
+msgid "Preview"
+msgstr "Aperçu"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 
@@ -1809,9 +1812,6 @@ msgstr "(source)"
 
 #~ msgid "Posted by %(creator)s"
 #~ msgstr "Posté par %(creator)s"
-
-#~ msgid "Preview"
-#~ msgstr "Aperçu"
 
 #~ msgid "Folder contents"
 #~ msgstr "Contenu du dossier"

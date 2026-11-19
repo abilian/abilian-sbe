@@ -1,7 +1,7 @@
 {#- Writing a wiki page, new or not: its title, its text in Markdown, and a word on what
     changed, which the history shows. If someone saved it meanwhile, the error under the
-    text says what each changed. Drawn in `mockups/templates/wiki-edit.html`, without
-    its preview, which SBE does not have yet. -#}
+    text says what each changed. The text shows beside it as the page will, as it is
+    typed (`vite/src/preview.js`). Drawn in `mockups/templates/wiki-edit.html`. -#}
 {% extends "wiki/_base.html" %}
 {% import "wiki/macros.html" as w with context %}
 {% import "forum/_post_fields.html" as fields %}
@@ -24,11 +24,18 @@
       <input class="ads-input" id="{{ form.title.id }}" name="{{ form.title.name }}" type="text" value="{{ form.title.data or '' }}" required {{ fields.invalid(form.title) }}>
       {{ fields.errors(form.title) }}
     </div>
+    {#- Side by side while both fit, the preview under the text on a narrow screen. -#}
+    <div class="ads-grid ads-col-lg">
     <div class="ads-field">
       <label class="ads-label ads-label--required" for="{{ form.body_src.id }}">{{ _("Text") }}</label>
       <textarea class="ads-textarea sbe-source" id="{{ form.body_src.id }}" name="{{ form.body_src.name }}" rows="18" required aria-describedby="body-help" {{ fields.invalid(form.body_src) }}>{{ form.body_src.data or "" }}</textarea>
       <small class="ads-help" id="body-help">{{ _("In Markdown: **bold**, ## heading, - list, [[Title of a page]] for a link to another page.") }} <a href="{{ url_for('.wiki_help', community_id=g.community.slug) }}">{{ _("Syntax help") }}</a></small>
       {% for error in form.body_src.errors %}<div class="ads-error" id="{{ form.body_src.id }}-error">{{ error }}</div>{% endfor %}
+    </div>
+    <section class="ads-field" aria-labelledby="preview-label">
+      <span class="ads-label" id="preview-label">{{ _("Preview") }}</span>
+      <div class="sbe-preview-pane ads-prose" data-preview="{{ url_for('.page_preview', community_id=g.community.slug) }}" data-preview-of="{{ form.body_src.id }}"></div>
+    </section>
     </div>
     <div class="ads-field">
       <label class="ads-label" for="{{ form.message.id }}">{{ _("What you changed") }}</label>

@@ -38,6 +38,7 @@ from abilian.web.util import url_for
 from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, default_view
 from abilian.web.views.base import Redirect
 
+from . import markup
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
@@ -330,6 +331,13 @@ class PageCreate(PageEdit, ObjectCreate[WikiPage, WikiPageForm]):
 
 
 route("/new")(PageCreate.as_view("page_new", view_endpoint=".page"))
+
+
+@route("/preview", methods=["POST"])
+def page_preview() -> Markup:
+    """The text being written, as the page will show it: the form that writes a page
+    shows it beside the text (`vite/src/preview.js`)."""
+    return Markup(markup.convert(g.community, request.form["body_src"]))
 
 
 @route("/source/")

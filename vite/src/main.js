@@ -11,5 +11,5 @@ import "./documents/name-check.js";
 import "./documents/upload-dialog.js";
 import "./documents/viewer.js";
 import "./wizard.js";
-import "./invite.js";
+import "./preview.js";
 import "./audit.js";

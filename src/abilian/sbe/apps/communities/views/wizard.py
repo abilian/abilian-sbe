@@ -87,7 +87,7 @@ def classify_invitees(text: str) -> list[Invitee]:
 @can_manage
 def wizard_preview() -> str:
     """What inviting the addresses typed so far would do to each: a piece of the
-    first page, which `vite/src/invite.js` puts under the field as one types. Posted,
+    first page, which `vite/src/preview.js` puts under the field as one types. Posted,
     the first page's form as it is: a long list makes too long an address."""
     invitees = classify_invitees(request.form.get("wizard-emails", ""))
     return render_template("community/_invitees.html", invitees=invitees)

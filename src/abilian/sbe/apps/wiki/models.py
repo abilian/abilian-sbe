@@ -123,7 +123,7 @@ class WikiPage(Entity):
     def body_html(self) -> str:
         from . import markup
 
-        return markup.convert(self, self.body_src)
+        return markup.convert(self.community, self.body_src)
 
 
 @listens_for(WikiPage.name, "set", active_history=True)
