@@ -7,17 +7,21 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from flask import Blueprint, render_template, request
+from flask import Blueprint, redirect, render_template, request, url_for
 from werkzeug.exceptions import NotFound
 
+from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated
 from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import communities_of
 from abilian.sbe.apps.wall.util import get_recent_entries
+from abilian.services import get_service
 
 from .feed import FILTERS, SECTIONS, feed_item
 
 if TYPE_CHECKING:
+    from werkzeug.wrappers import Response
+
     from abilian.core.models.subjects import User
     from abilian.sbe.apps.communities.models import Community
 
@@ -35,6 +39,10 @@ COMMUNITIES_SHOWN = 8
 #: How many events to come the column beside the feed lists, soonest first.
 EVENTS_SHOWN = 3
 
+#: The preference that keeps when the user last marked Mon fil read, in UTC as the
+#: activity's dates are: what came after is new.
+READ_UNTIL_KEY = "feed:read_until"
+
 
 @route("/")
 @authenticated
@@ -46,9 +54,13 @@ def home(user: User) -> str:
         raise NotFound
     communities = communities_of(user)
     entries = get_recent_entries(user, FEED_LENGTH, kinds=FILTERS.get(kind, ()))
+    items = [feed_item(entry) for entry in entries]
+    seen = read_until(user)
     return render_template(
         "main/home.html",
-        items=[feed_item(entry) for entry in entries],
+        items=items,
+        read_until=seen,
+        new_count=sum(item.happened_at > seen for item in items),
         filters={name: SECTIONS[kinds[0]] for name, kinds in FILTERS.items()},
         kind=kind,
         communities=communities[:COMMUNITIES_SHOWN],
@@ -68,3 +80,29 @@ def events_to_come(communities: list[Community]) -> list[Event]:
         .limit(EVENTS_SHOWN)
         .all()
     )
+
+
+@route("/read", methods=["POST"])
+@authenticated
+def feed_read(user: User) -> Response:
+    """Mon fil marked read: nothing that came so far is new any more."""
+    mark_read(user)
+    kind = request.form.get("kind")
+    return redirect(url_for(".home", kind=kind if kind in FILTERS else None))
+
+
+def read_until(user: User) -> datetime:
+    """When `user` last marked Mon fil read; on their first visit, now."""
+    preferences = get_service("preferences").get_preferences(user)
+    stored = preferences.get(READ_UNTIL_KEY)
+    return mark_read(user) if stored is None else datetime.fromisoformat(stored)
+
+
+def mark_read(user: User) -> datetime:
+    """Now, kept as when `user` last marked Mon fil read."""
+    now = datetime.utcnow()
+    get_service("preferences").set_preferences(
+        user, **{READ_UNTIL_KEY: now.isoformat()}
+    )
+    db.session.commit()
+    return now

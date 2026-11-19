@@ -33,8 +33,8 @@
 {%- endmacro %}
 
 {#- An entry of a feed (`abilian.sbe.apps.main.feed.FeedItem`): who did what, where and
-    when, then the thing itself. -#}
-{% macro feed_entry(item, show_community=true) %}
+    when, marked if `new`, then the thing itself. -#}
+{% macro feed_entry(item, show_community=true, new=false) %}
 <article class="ads-card">
   <div class="ads-card__body ads-stack">
     <div class="ads-media">
@@ -46,6 +46,7 @@
           <span>{% if item.section %}{{ item.section }} · {% endif %}{{ time(item.happened_at) }}</span>
         </span>
       </div>
+      {% if new %}<span class="ads-badge ads-tone-info">{{ _("New") }}</span>{% endif %}
     </div>
     {% if item.title %}<h2 class="sbe-entry__title"><a class="sbe-quiet" href="{{ item.url }}">{{ item.title }}</a></h2>{% endif %}
     {% if item.excerpt %}<p class="sbe-excerpt">{{ item.excerpt }}</p>{% endif %}

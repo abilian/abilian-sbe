@@ -1789,6 +1789,20 @@ msgstr "Mes communautés et ce qui vient"
 msgid "Coming up"
 msgstr "À venir"
 
+msgid "Mark all as read"
+msgstr "Tout marquer comme lu"
+
+msgid "%(num)d new since %(date)s"
+msgid_plural "%(num)d new since %(date)s"
+msgstr[0] "%(num)d nouveauté depuis %(date)s"
+msgstr[1] "%(num)d nouveautés depuis %(date)s"
+
+msgid "Read already"
+msgstr "Déjà lu"
+
+msgid "New"
+msgstr "Nouveau"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

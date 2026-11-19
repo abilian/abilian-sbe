@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
+from html import unescape
 from typing import TYPE_CHECKING
 
 from flask import url_for
@@ -12,6 +13,7 @@ from flask import url_for
 from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import MANAGER, Community
 from abilian.sbe.apps.forum.models import Thread
+from abilian.services import get_service
 from abilian.services.activity.models import ActivityEntry
 from abilian.services.security import ADMIN, security
 from tests.util import client_login, ensure_services_started
@@ -200,3 +202,79 @@ def test_my_feed_lists_the_events_to_come_in_my_communities(
     assert "Soon in mine" in coming
     assert "Soon elsewhere" not in coming
     assert "Long ago in mine" not in coming
+
+
+def _read_until(user: User, moment: datetime) -> None:
+    get_service("preferences").set_preferences(
+        user, **{"feed:read_until": moment.isoformat()}
+    )
+
+
+def _news_then_older_news(db: SQLAlchemy, community: Community) -> User:
+    """A thread from two days ago, read already, and one from now, not yet."""
+    member = community.test_user
+    _started(db, community, member, "An older thread")
+    older = ActivityEntry.query.one()
+    older.happened_at = datetime.utcnow() - timedelta(days=2)
+    _read_until(member, datetime.utcnow() - timedelta(days=1))
+    _started(db, community, member, "A newer thread")
+    return member
+
+
+def test_on_a_first_visit_nothing_is_new(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = community1.test_user
+    _started(db, community1, member, "A thread in my community")
+
+    with client_login(client, member):
+        html = client.get(url_for("main.home")).get_data(as_text=True)
+
+    assert "Mark all as read" not in html
+    assert ">New</span>" not in html
+    preferences = get_service("preferences").get_preferences(member)
+    assert "feed:read_until" in preferences
+
+
+def test_what_came_since_i_marked_my_feed_read_is_new(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = _news_then_older_news(db, community1)
+
+    with client_login(client, member):
+        html = client.get(url_for("main.home")).get_data(as_text=True)
+
+    assert "1 new since" in html
+    newer, older = html.split("A newer thread")[0], html.split("A newer thread")[1]
+    assert ">New</span>" in newer
+    assert ">New</span>" not in older
+    assert older.index("Read already") < older.index("An older thread")
+
+
+def test_marking_my_feed_read_leaves_nothing_new(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = _news_then_older_news(db, community1)
+
+    with client_login(client, member):
+        response = client.post(url_for("main.feed_read"), data={"kind": "wiki"})
+        html = client.get(url_for("main.home")).get_data(as_text=True)
+
+    assert response.location == url_for("main.home", kind="wiki")
+    assert "A newer thread" in html
+    assert ">New</span>" not in html
+
+
+def test_what_is_new_is_said_in_my_language(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = _news_then_older_news(db, community1)
+    member.locale = "fr"
+    db.session.commit()
+
+    with client_login(client, member):
+        html = unescape(client.get(url_for("main.home")).get_data(as_text=True))
+
+    assert ">Nouveau</span>" in html
+    assert "1 nouveauté depuis" in html
+    assert "Tout marquer comme lu" in html

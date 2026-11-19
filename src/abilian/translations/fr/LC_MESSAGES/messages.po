@@ -293,8 +293,8 @@ msgid "Monthly"
 msgstr "Mensuelles"
 
 #: abilian/web/admin/panels/dashboard.py:54
-msgid "New"
-msgstr "Nouveaux"
+msgid "Newcomers"
+msgstr "Nouveaux venus"
 
 #: abilian/web/admin/panels/dashboard.py:55
 msgid "Total"

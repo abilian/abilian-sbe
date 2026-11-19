@@ -71,7 +71,7 @@ class DashboardPanel(AdminPanel):
             "series": [
                 {"label": _("Registered"), "stroke": "#2a78d6"},
                 {"label": _("Active"), "stroke": "#eb6834"},
-                {"label": _("New"), "stroke": "#4a3aa7"},
+                {"label": _("Newcomers"), "stroke": "#4a3aa7"},
             ],
         }
         # One measure at three resolutions: a granularity switch, not three
