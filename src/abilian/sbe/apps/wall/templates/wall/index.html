@@ -1,10 +1,10 @@
-{#- A community's home: where to start a discussion or add an event, then its feed;
-    beside it, its recent documents and its members. Drawn in
-    `mockups/templates/community.html`. -#}
+{#- A community's home: what it is for, under the tabs, where they stay on every page;
+    where to start a discussion or add an event, then its feed; beside it, its recent
+    documents and its members. Drawn in `mockups/templates/community.html`. -#}
 {% extends "ads_community.html" %}
-{% set tab_home = true %}
 {% block page_title %}{{ g.community.name }}{% endblock %}
 {% block content %}
+{% if g.community.description %}<p class="ads-muted">{{ g.community.description }}</p>{% endif %}
 <div class="ads-with-aside">
   <section class="ads-stack" aria-label="{{ _('News of the community') }}">
     {{ m.composer(community=g.community) }}

@@ -139,6 +139,22 @@ def test_a_community_home_shows_its_news_and_its_tools(
     assert url_for("communities.settings", community_id=community1.slug) not in html
 
 
+def test_the_tabs_stay_put_the_homes_description_comes_under_them(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    """Above them, it moved the tabs down on the home and up again elsewhere."""
+    ensure_services_started(["security"])
+    community1.description = "What the community is for."
+    db.session.commit()
+
+    with client_login(client, community1.test_user):
+        html = client.get(url_for("wall.index", community_id=community1.slug)).get_data(
+            as_text=True
+        )
+
+    assert html.index('class="ads-tabs') < html.index("What the community is for.")
+
+
 def test_a_manager_finds_the_settings_in_the_header(
     app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
 ) -> None:

@@ -1,6 +1,7 @@
 {#- A community's pages on the Abilian Design System. Its header carries what concerns
     the community and nothing else; its tools are tabs (drawn in
-    `mockups/templates/community_base.html`). A page sets `tab_home` on the home. -#}
+    `mockups/templates/community_base.html`). The tabs sit in one place on every page:
+    what differs, the home's description among it, comes under them. -#}
 {% extends "ads_base.html" %}
 {% set community = g.community %}
 {% set manager = can_manage(current_user, community) %}
@@ -20,9 +21,6 @@
 {% endif %}
 {% endblock %}
 {% block body %}
-{% if tab_home is defined and community.description %}
-<p class="ads-muted">{{ community.description }}</p>
-{% endif %}
 {#- The community's tools; its settings are in the header's menu. The current one
     wears the community's colour, its tile's: where one is, at a glance. -#}
 <ul class="ads-tabs sbe-tabs-tinted {{ identity_class(community.id) }}">
