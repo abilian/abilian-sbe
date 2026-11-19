@@ -18,7 +18,11 @@ from werkzeug.wrappers import Response
 from abilian.core.extensions.login import authenticated_user
 from abilian.core.util import utcnow
 from abilian.i18n import _l
-from abilian.sbe.apps.communities.blueprint import CommunityBlueprint, in_community
+from abilian.sbe.apps.communities.blueprint import (
+    CommunityBlueprint,
+    in_community,
+    with_tool,
+)
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.web import url_for, views
@@ -36,6 +40,7 @@ blueprint = CommunityBlueprint(
 )
 route = blueprint.route
 blueprint.before_request(in_community("event_id", Event))
+blueprint.before_request(with_tool("has_calendar"))
 
 #: How many of the events to come an event's page shows beside it.
 OTHERS = 4
@@ -194,7 +199,6 @@ class ChangingAnEvent(BaseEventView):
 
 
 class EventEditView(ChangingAnEvent, views.ObjectEdit[Event, EventForm]):
-
     template = "calendar/event_form.html"
     _message_success = _l("The event is changed.")
     POST_BUTTON = ButtonAction(

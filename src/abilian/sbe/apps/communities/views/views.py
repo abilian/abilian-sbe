@@ -429,6 +429,8 @@ def members_post() -> Response:
     match action:
         case "add-user-role" | "set-user-role":
             role = request.form["role"].lower()
+            if role != MANAGER and _leaves_no_manager(community, {user.id}):
+                return _refused_last_manager(community)
 
             community.set_membership(user, role)
 
@@ -446,6 +448,8 @@ def members_post() -> Response:
                 msg = "This membership is not the user's"
                 raise BadRequest(msg)
 
+            if _leaves_no_manager(community, {user.id}):
+                return _refused_last_manager(community)
             community.remove_membership(user)
 
             app = unwrap(current_app)
@@ -459,6 +463,21 @@ def members_post() -> Response:
 
 
 #: What the members' selection does: the role it gives, or None to remove them.
+def _leaves_no_manager(community: Community, user_ids: set[int]) -> bool:
+    """Whether taking `user_ids` from the community's managers leaves it with none,
+    where it had some: no one inside could run it any more."""
+    managers = {m.user_id for m in community.memberships if m.role == MANAGER}
+    return bool(managers) and managers <= user_ids
+
+
+def _refused_last_manager(community: Community) -> Response:
+    flash(
+        _("A community keeps at least one manager: name another one first."),
+        "error",
+    )
+    return redirect(url_for(".members", community_id=community.slug))
+
+
 SELECTION_ACTIONS = {
     "selection-managers": MANAGER,
     "selection-members": MEMBER,
@@ -469,13 +488,15 @@ SELECTION_ACTIONS = {
 def _act_on_selection(community: Community, action: str) -> Response:
     """Give the selected members a role, or remove them: only members of
     `community`, whatever else is posted."""
-    ids = [int(user_id) for user_id in request.form.getlist("selected")]
+    ids = request.form.getlist("selected", type=int)
     members = (
         User.query.join(Membership, Membership.user_id == User.id)
         .filter(Membership.community_id == community.id, User.id.in_(ids))
         .all()
     )
     role = SELECTION_ACTIONS[action]
+    if role != MANAGER and _leaves_no_manager(community, {u.id for u in members}):
+        return _refused_last_manager(community)
     app = unwrap(current_app)
     for user in members:
         if role is None:

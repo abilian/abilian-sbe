@@ -10,7 +10,7 @@ from flask import url_for
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
-from abilian.sbe.apps.communities.models import Community
+from abilian.sbe.apps.communities.models import MANAGER, Community
 from abilian.services import security_service
 from abilian.services.security import ADMIN
 from tests.util import client_login
@@ -148,7 +148,9 @@ def test_members(
         community = Community.query.get(community1.id)
         assert user2 in community.members
 
-        # test delete
+        # test delete: another manager first, for a community keeps one
+        community1.set_membership(user1, MANAGER)
+        db.session.commit()
         data = {
             "action": "delete",
             "user": user2.id,

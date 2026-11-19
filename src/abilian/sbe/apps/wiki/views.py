@@ -27,7 +27,7 @@ from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _l, _n
-from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.communities.blueprint import CommunityBlueprint, with_tool
 from abilian.sbe.apps.communities.common import object_viewers
 from abilian.sbe.apps.communities.views import default_view_kw as community_dv_kw
 from abilian.services.viewtracker import viewtracker
@@ -54,6 +54,7 @@ wiki = CommunityBlueprint(
     "wiki", __name__, url_prefix="/wiki", template_folder="templates"
 )
 route = wiki.route
+wiki.before_request(with_tool("has_wiki"))
 
 
 @wiki.context_processor

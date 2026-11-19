@@ -61,6 +61,8 @@ def test_a_manager_can_open_the_settings_page(
         response = client.get(_settings_url(community1))
 
     assert response.status_code == 200
+    # Deleting it is the site's administrators': not offered to its manager.
+    assert 'id="modal-delete"' not in response.get_data(as_text=True)
 
 
 def test_a_manager_can_rename_their_community(
@@ -117,6 +119,7 @@ def test_a_site_admin_still_can(
         response = client.get(_settings_url(community1))
 
     assert response.status_code == 200
+    assert 'id="modal-delete"' in response.get_data(as_text=True)
 
 
 def test_the_settings_page_says_what_each_choice_does(
@@ -129,7 +132,6 @@ def test_the_settings_page_says_what_each_choice_does(
 
     assert f'value="{community1.type}" checked' in html
     assert 'name="has_wiki"' in html
-    assert 'id="modal-delete"' in html
     assert "group" not in html.lower()
 
 

@@ -48,6 +48,8 @@
         <p class="ads-muted">{{ _("It does not change with the name: the links already sent stay good.") }}</p>
       </div>
     </section>
+    {#- Deleting a community is the site's administrators' (`CommunityDelete`). -#}
+    {% if is_site_admin() %}
     <section class="ads-card" aria-labelledby="delete">
       <div class="ads-card__head"><h2 class="ads-card__title" id="delete">{{ _("Delete the community") }}</h2></div>
       <div class="ads-card__body ads-stack ads-gap-sm">
@@ -55,11 +57,13 @@
         <button class="ads-btn ads-btn--danger" type="button" data-modal-open="#modal-delete">{{ icon("trash") }}{{ _("Delete “%(name)s”", name=community.name) }}</button>
       </div>
     </section>
+    {% endif %}
   </aside>
 </div>
 {% endblock %}
 
 {% block overlays %}
+{% if is_site_admin() %}
 <dialog class="ads-modal__panel sbe-dialog" id="modal-delete" aria-labelledby="modal-delete-title">
   <form method="post" action="{{ url_for('.delete', community_id=community.slug) }}">
     {{ form.csrf_token }}
@@ -72,4 +76,5 @@
     </div>
   </form>
 </dialog>
+{% endif %}
 {% endblock %}

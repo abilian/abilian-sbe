@@ -40,13 +40,14 @@
 
 {#- Where to start a discussion, at the top of a feed: in `community`, with an event
     beside it, or, from Mon fil, in one of `communities`, chosen in a menu. Either
-    opens the new thread's form. -#}
+    opens the new thread's form. A tool turned off in a community is not offered. -#}
 {% macro composer(community=none, communities=()) %}
+{% if not community or community.has_forum or community.has_calendar %}
 <div class="ads-card"><div class="ads-card__body sbe-composer">
   {{ avatar(current_user) }}
   {% if community %}
-  <a class="ads-input sbe-prompt" href="{{ url_for('forum.new_thread', community_id=community.slug) }}">{{ _("Start a discussion in %(name)s…", name=community.name) }}</a>
-  <a class="ads-btn ads-btn--ghost" href="{{ url_for('calendar.new_event', community_id=community.slug) }}" aria-label="{{ _('Add an event') }}">{{ icon("calendar-plus") }}<span class="sbe-wide-only">{{ _("Event") }}</span></a>
+  {% if community.has_forum %}<a class="ads-input sbe-prompt" href="{{ url_for('forum.new_thread', community_id=community.slug) }}">{{ _("Start a discussion in %(name)s…", name=community.name) }}</a>{% endif %}
+  {% if community.has_calendar %}<a class="ads-btn ads-btn--ghost" href="{{ url_for('calendar.new_event', community_id=community.slug) }}" aria-label="{{ _('Add an event') }}">{{ icon("calendar-plus") }}<span class="sbe-wide-only">{{ _("Event") }}</span></a>{% endif %}
   {% else %}
   <details class="ads-dropdown sbe-composer__pick">
     <summary class="ads-input sbe-prompt">{{ _("Start a discussion in one of my communities…") }}</summary>
@@ -54,15 +55,17 @@
   </details>
   {% endif %}
 </div></div>
+{% endif %}
 {% endmacro %}
 
-{#- A menu's list of `communities` to start a discussion in, each opening its form. -#}
+{#- A menu's list of `communities` to start a discussion in, each opening its form:
+    those that have discussions. -#}
 {% macro start_in(communities) %}
 <p class="ads-subheader sbe-menu-heading">{{ _("Start a discussion in…") }}</p>
-{% for c in communities %}
+{% for c in communities | selectattr("has_forum") %}
 <a class="ads-menu__item" href="{{ url_for('forum.new_thread', community_id=c.slug) }}">{{ tile(c, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ c.name }}</span></a>
 {% else %}
-<p class="ads-muted sbe-menu-heading">{{ _("You are not a member of any community yet.") }}</p>
+<p class="ads-muted sbe-menu-heading">{{ _("None of your communities has discussions.") if communities else _("You are not a member of any community yet.") }}</p>
 {% endfor %}
 {% endmacro %}
 

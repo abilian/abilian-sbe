@@ -319,3 +319,23 @@ def test_my_communities_say_how_much_is_new_in_each(
     assert f"<strong>{community1.name}</strong>" in mine
     assert '<span class="ads-badge ads-tone-info" aria-hidden="true">1</span>' in mine
     assert '<span class="sbe-sr-only">1 new</span>' in mine
+
+
+def test_a_community_with_its_discussions_turned_off_offers_none(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = community1.test_user
+    community1.has_forum = False
+    db.session.commit()
+    here = {"community_id": community1.slug}
+
+    with client_login(client, member):
+        forum = client.get(url_for("forum.index", **here))
+        new_thread = client.get(url_for("forum.new_thread", **here))
+        home = client.get(url_for("wall.index", **here)).get_data(as_text=True)
+        feed = client.get(url_for("main.home")).get_data(as_text=True)
+
+    assert (forum.status_code, new_thread.status_code) == (404, 404)
+    assert url_for("forum.new_thread", **here) not in home
+    assert url_for("forum.new_thread", **here) not in feed
+    assert "None of your communities has discussions." in feed

@@ -1886,6 +1886,15 @@ msgstr "non envoyé"
 msgid "Send a link to choose a password"
 msgstr "Envoyer un lien pour choisir un mot de passe"
 
+msgid "None of your communities has discussions."
+msgstr "Aucune de vos communautés n’a de discussions."
+
+msgid "A community keeps at least one manager: name another one first."
+msgstr "Une communauté garde au moins un responsable : nommez-en un autre d’abord."
+
+msgid "Added, but not told by e-mail, which could not be sent: {addresses}"
+msgstr "Ajoutés, mais pas prévenus par e-mail, qui n’a pas pu partir : {addresses}"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

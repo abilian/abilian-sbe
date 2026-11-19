@@ -152,3 +152,24 @@ def test_a_member_does_not_act_on_a_selection(
 
     assert response.status_code == 403
     assert community1.get_role(people["manager"]) == MANAGER
+
+
+def test_a_community_keeps_at_least_one_manager(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    manager = people["manager"]
+    everyone = (manager, people["member"])
+
+    removed = _act_on(client, manager, community1, "selection-remove", *everyone)
+    demoted = _act_on(client, manager, community1, "selection-members", manager)
+    url = url_for("communities.members_post", community_id=community1.slug)
+    with client_login(client, manager):
+        alone = client.post(
+            url, data={"action": "set-user-role", "user": manager.id, "role": "member"}
+        )
+        garbled = client.post(url, data={"action": "selection-remove", "selected": "x"})
+
+    assert {removed.status_code, demoted.status_code, alone.status_code} == {302}
+    assert community1.get_role(manager) == MANAGER
+    assert community1.get_role(people["member"]) == MEMBER
+    assert garbled.status_code == 302

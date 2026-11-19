@@ -107,3 +107,15 @@ def in_community(param: str, model: type) -> Callable[[], None]:
             raise NotFound
 
     return check
+
+
+def with_tool(flag: str) -> Callable[[], None]:
+    """A guard for a tool's blueprint: not found in a community that has the tool
+    turned off (`flag`, such as `has_forum`), whatever the address. The tabs and
+    menus leave it out; without this, its address would still reach it."""
+
+    def check() -> None:
+        if hasattr(g, "community") and not getattr(g.community, flag):
+            raise NotFound
+
+    return check

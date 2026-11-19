@@ -7,7 +7,7 @@ from __future__ import annotations
 from flask import g
 
 from abilian.i18n import _l
-from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.communities.blueprint import CommunityBlueprint, with_tool
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
 
@@ -17,6 +17,7 @@ community_blueprint = CommunityBlueprint(
     "documents", __name__, url_prefix="/docs", template_folder="../templates"
 )
 route = community_blueprint.route
+community_blueprint.before_request(with_tool("has_documents"))
 
 
 @community_blueprint.url_value_preprocessor
