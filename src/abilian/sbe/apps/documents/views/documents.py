@@ -81,6 +81,18 @@ def may_open(user: User, doc: Document) -> bool:
 comment.read_rule(Document, may_open)
 
 
+def may_take_lock(user: User, doc: Document) -> bool:
+    """Whether `user` may lock, or unlock, `doc`: anyone when it is free; when it
+    is locked, whoever locked it, or one who manages it. No one else ends another's
+    work, or takes it over."""
+    lock = doc.lock
+    return (
+        lock is None
+        or lock.is_owner(user)
+        or content_repository.has_permission(user, MANAGE, doc)
+    )
+
+
 @default_view(community_blueprint, Document, id_attr="doc_id", kw_func=default_view_kw)
 @route("/doc/<int:doc_id>")
 @authenticated
@@ -114,6 +126,7 @@ def document_view(user: User, doc_id: int) -> str:
         "may_write": may_write,
         # A lock keeps the others from uploading a version (`document_upload`).
         "may_replace": may_write and (lock is None or lock.is_owner(user)),
+        "may_unlock": may_write and may_take_lock(user, doc),
         "may_manage": content_repository.has_permission(user, MANAGE, doc),
         "doc_comments": doc_comments,
         "may_comment": comments.can_create(user, doc),
@@ -280,6 +293,8 @@ def document_download(user: User, doc_id: int, attach: bool = False) -> Response
 def checkin_checkout(user: User, doc_id):
     doc = get_document(user, doc_id)
     check_write_access(user, doc)
+    if not may_take_lock(user, doc):
+        raise Forbidden
     action = request.form.get("action")
 
     if action not in ("checkout", "lock", "unlock"):

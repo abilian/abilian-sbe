@@ -266,6 +266,7 @@ TEMPLATE_NAMES = {
     "may_write": "documents/views: folder_view, document_view",
     "may_manage": "documents/views: folder_view, document_view",
     "may_replace": "documents/views/documents.py: document_view",
+    "may_unlock": "documents/views/documents.py: document_view",
     "may_comment": "documents/views/documents.py: document_view",
     "may_edit": "social/views/users.py: user",
     "may_change": "calendar/views.py: EventView, from can_change",

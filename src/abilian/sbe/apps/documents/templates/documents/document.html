@@ -67,7 +67,7 @@
       {% if lock %}
       <div class="ads-alert ads-tone-warning ads-spread">
         <span class="ads-cluster ads-gap-sm">{{ icon("lock") }}<span>{{ _("Locked by %(user)s, who is working on it (%(age)s).", user=lock.user, age=lock.date | age) }}</span></span>
-        {% if may_write %}
+        {% if may_unlock %}
         <form method="post" action="{{ url_for('.checkin_checkout', **doc_kw) }}">
           {{ csrf.field() }}
           <button class="ads-btn ads-btn--sm" type="submit" name="action" value="unlock">{{ icon("lock-open") }}{{ _("Unlock") }}</button>

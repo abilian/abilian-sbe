@@ -153,6 +153,30 @@ def test_a_document_locked_by_someone_else_takes_no_version_from_another(
     assert document.content == b"one"
 
 
+def test_a_writer_neither_lifts_nor_takes_over_someone_elses_lock(
+    community1: Community,
+    document: Document,
+    manager: User,
+    client: FlaskClient,
+    db: SQLAlchemy,
+) -> None:
+    community1.type = "participative"
+    db.session.commit()
+    writer = _member(db, community1, MEMBER)
+    with client_login(client, manager):
+        assert _post(client, "documents.checkin_checkout", document, action="lock")
+
+    html = _page(client, writer, document)
+    with client_login(client, writer):
+        unlock = _post(client, "documents.checkin_checkout", document, action="unlock")
+        take = _post(client, "documents.checkin_checkout", document, action="lock")
+
+    assert UNLOCK not in html
+    assert (unlock, take) == (403, 403)
+    db.session.expire(document)
+    assert document.lock.is_owner(manager)
+
+
 def test_whoever_locked_it_uploads_the_next_version_which_unlocks_it(
     document: Document, manager: User, client: FlaskClient, db: SQLAlchemy
 ) -> None:
