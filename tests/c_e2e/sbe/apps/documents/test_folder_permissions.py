@@ -10,14 +10,17 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
+from flask_login import login_user
 
-from abilian.core.models.subjects import User
+from abilian.core.models.subjects import Group, User
 from abilian.sbe.apps.communities.models import MANAGER
+from abilian.services import security_service
 from abilian.services.security import READER
 from abilian.web.util import url_for
 from tests.util import client_login, ensure_services_started
 
 if TYPE_CHECKING:
+    from flask import Flask
     from flask.testing import FlaskClient
 
     from abilian.core.sqlalchemy import SQLAlchemy
@@ -104,3 +107,21 @@ def test_a_role_given_here_can_be_taken_back(
     html = _page(client, manager, folder)
 
     assert f'name="delete-user-role" value="reader:{other.id}"' in html
+
+
+def test_a_groups_name_is_shown_as_text_in_the_history(
+    app: Flask, client: FlaskClient, manager: User, folder: Folder, db: SQLAlchemy
+) -> None:
+    group = Group(name="<img src=x onerror=alert(1)>")
+    db.session.add(group)
+    db.session.flush()
+    with app.test_request_context():
+        login_user(manager)
+        security_service.grant_role(group, READER, folder)
+        db.session.commit()
+
+    with client_login(client, manager):
+        html = client.get(_url(folder)).get_data(as_text=True)
+
+    assert "<img src=x onerror" not in html
+    assert "&lt;img src=x onerror=alert(1)&gt;" in html

@@ -35,7 +35,7 @@ from flask import (
     session,
 )
 from loguru import logger
-from markupsafe import Markup
+from markupsafe import Markup, escape
 from werkzeug.exceptions import BadRequest, InternalServerError
 from xlwt import Workbook, easyxf
 
@@ -339,7 +339,7 @@ def permissions(user: User, folder_id):
             if self.entry.user:
                 principal = render(self._USER_FMT, user=self.entry.user)
             elif self.entry.group:
-                principal = self.entry.group.name
+                principal = escape(self.entry.group.name)
 
             self.msg = Markup(
                 msg.format(
