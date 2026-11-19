@@ -1,6 +1,7 @@
-{#- Mon fil: the news of my communities, newest first, all of it or of one kind; what
-    came since I last marked it read, marked new, and a rule after it. Beside it, my communities, the most active first, and the events to come. Drawn
-    in `mockups/templates/home.html`. -#}
+{#- Mon fil: where to start a discussion, then the news of my communities, newest
+    first, all of it or of one kind; what came since I last marked it read, marked
+    new, and a rule after it. Beside it, my communities, the most active first, and
+    the events to come. Drawn in `mockups/templates/home.html`. -#}
 {% extends "ads_base.html" %}
 {% import "calendar/_events.html" as ev with context %}
 {% block page_title %}{{ _("My feed") }}{% endblock %}
@@ -17,6 +18,7 @@
 {% block body %}
 <div class="ads-with-aside">
   <div class="ads-stack" aria-label="{{ _('News of my communities') }}">
+    {{ m.composer(communities=communities) }}
     <div class="ads-spread">
       <ul class="ads-pills" aria-label="{{ _('Which news') }}">
         <li><a class="ads-pill" href="{{ url_for('.home') }}" {{ 'aria-current="page"' | safe if not kind }}>{{ _("All") }}</a></li>

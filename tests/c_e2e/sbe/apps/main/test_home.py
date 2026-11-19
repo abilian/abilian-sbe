@@ -278,3 +278,30 @@ def test_what_is_new_is_said_in_my_language(
     assert ">Nouveau</span>" in html
     assert "1 nouveauté depuis" in html
     assert "Tout marquer comme lu" in html
+
+
+def test_my_feed_starts_a_discussion_in_one_of_my_communities(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    with client_login(client, community1.test_user):
+        html = client.get(url_for("main.home")).get_data(as_text=True)
+
+    composer = html.split('class="ads-card__body sbe-composer"')[1].split("</details>")[
+        0
+    ]
+    new_thread = url_for("forum.new_thread", community_id=community1.slug)
+    assert f'href="{new_thread}"' in composer
+
+
+def test_a_communitys_home_starts_a_discussion_or_an_event_in_it(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = community1.test_user
+    here = {"community_id": community1.slug}
+
+    with client_login(client, member):
+        html = client.get(url_for("wall.index", **here)).get_data(as_text=True)
+
+    composer = html.split('class="ads-card__body sbe-composer"')[1].split("</div>")[0]
+    assert f'href="{url_for("forum.new_thread", **here)}"' in composer
+    assert f'href="{url_for("calendar.new_event", **here)}"' in composer

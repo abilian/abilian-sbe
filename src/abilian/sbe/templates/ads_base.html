@@ -72,14 +72,7 @@
       forms move to ADS. -#}
   <details class="ads-dropdown">
     <summary class="ads-btn ads-btn--primary" aria-label="{{ _('Create') }}">{{ icon("plus") }}<span class="sbe-wide-only">{{ _("Create") }}</span></summary>
-    <div class="ads-menu sbe-menu-create">
-      <p class="ads-subheader sbe-menu-heading">{{ _("Start a discussion in…") }}</p>
-      {% for c in communities_menu %}
-      <a class="ads-menu__item" href="{{ url_for('forum.new_thread', community_id=c.slug) }}">{{ m.tile(c, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ c.name }}</span></a>
-      {% else %}
-      <p class="ads-muted sbe-menu-heading">{{ _("You are not a member of any community yet.") }}</p>
-      {% endfor %}
-    </div>
+    <div class="ads-menu sbe-menu-create">{{ m.start_in(communities_menu) }}</div>
   </details>
 </div>
 

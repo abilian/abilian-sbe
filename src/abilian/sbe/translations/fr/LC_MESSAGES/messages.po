@@ -1803,6 +1803,18 @@ msgstr "Déjà lu"
 msgid "New"
 msgstr "Nouveau"
 
+msgid "Start a discussion in %(name)s…"
+msgstr "Lancer une discussion dans %(name)s…"
+
+msgid "Add an event"
+msgstr "Ajouter un événement"
+
+msgid "Event"
+msgstr "Événement"
+
+msgid "Start a discussion in one of my communities…"
+msgstr "Lancer une discussion dans l’une de mes communautés…"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

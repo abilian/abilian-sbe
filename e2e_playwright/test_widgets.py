@@ -344,3 +344,18 @@ def test_an_events_link_is_copied_from_its_menu(
     copied = page.evaluate("navigator.clipboard.readText()")
     assert copied == page.url
     js_errors.assert_clean("copying an event's link")
+
+
+def test_my_feed_starts_a_discussion_in_the_community_chosen(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    page = logged_in
+    page.goto(f"{base_url}/", wait_until="networkidle")
+
+    composer = page.locator(".sbe-composer")
+    composer.get_by_text("Start a discussion in one of my communities").click()
+    composer.get_by_role("link", name="E2E Community").click()
+    page.wait_for_load_state("networkidle")
+
+    assert page.url.endswith(f"/communities/{COMMUNITY}/forum/new_thread/")
+    js_errors.assert_clean("the composer on my feed")

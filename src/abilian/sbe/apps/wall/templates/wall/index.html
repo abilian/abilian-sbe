@@ -1,11 +1,13 @@
-{#- A community's home: its feed; beside it, its recent documents and its members.
-    Drawn in `mockups/templates/community.html`. -#}
+{#- A community's home: where to start a discussion or add an event, then its feed;
+    beside it, its recent documents and its members. Drawn in
+    `mockups/templates/community.html`. -#}
 {% extends "ads_community.html" %}
 {% set tab_home = true %}
 {% block page_title %}{{ g.community.name }}{% endblock %}
 {% block content %}
 <div class="ads-with-aside">
   <div class="ads-stack" aria-label="{{ _('News of the community') }}">
+    {{ m.composer(community=g.community) }}
     {% for item in items %}
     {{ m.feed_entry(item, show_community=false) }}
     {% else %}
