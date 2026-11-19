@@ -6,6 +6,7 @@ import csv
 import io
 import json
 import re
+import smtplib
 from dataclasses import dataclass
 from os.path import splitext
 from typing import IO, TYPE_CHECKING, Any
@@ -98,6 +99,31 @@ def wizard_preview() -> str:
     return render_template("community/_invitees.html", invitees=invitees)
 
 
+def _account(email: str) -> User:
+    """The account an address names, whatever its case."""
+    user = User.query.filter(sa.func.lower(User.email) == email.lower()).first()
+    if user is None:
+        msg = f"No account for {email!r}"
+        raise BadRequest(msg)
+    return user
+
+
+def _new_account(account: dict[str, str]) -> User:
+    """An account for an address that has none; refused if one came meanwhile."""
+    email = account["email"]
+    if User.query.filter(sa.func.lower(User.email) == email.lower()).count():
+        msg = f"{email!r} has an account already"
+        raise BadRequest(msg)
+    user = User(
+        email=email,
+        first_name=account["first_name"],
+        last_name=account["last_name"],
+        can_login=True,
+    )
+    db.session.add(user)
+    return user
+
+
 def invitation_note(form: MultiDict[str, str]) -> str:
     """The word a manager wrote to go with the invitation; refused if too long."""
     note = form.get("note", "").strip()
@@ -108,8 +134,12 @@ def invitation_note(form: MultiDict[str, str]) -> str:
 
 
 def wizard_parse_emails(text: str) -> tuple[list[str], list[str]]:
-    """Split pasted text into its valid and invalid addresses, without repeats."""
-    addresses = dict.fromkeys(filter(None, EMAIL_SEPARATORS.split(text)))
+    """Split pasted text into its valid and invalid addresses, without repeats: an
+    address is the same whatever its case, as the accounts' index has it."""
+    first_seen: dict[str, str] = {}
+    for address in filter(None, EMAIL_SEPARATORS.split(text)):
+        first_seen.setdefault(address.lower(), address)
+    addresses = list(first_seen.values())
     valid = [address for address in addresses if validate_email(address)]
     invalid = [address for address in addresses if address not in valid]
     return valid, invalid
@@ -121,29 +151,34 @@ def wizard_extract_data(
     """Filter data and extract existing accounts, existing members and new
     emails."""
     if csv_data:
-        existing_account_csv_roles = {user["email"]: user["role"] for user in csv_data}
+        existing_account_csv_roles = {
+            user["email"].lower(): user["role"] for user in csv_data
+        }
         emails = [user["email"] for user in csv_data]
         is_csv = True
     else:
         is_csv = False
 
+    # An address is the same whatever its case, as the accounts' index has it.
     emails = [email.strip() for email in emails]
-
-    already_member_emails = [
-        member.email for member in g.community.members if member.email in emails
-    ]
-    not_member_emails = set(emails) - set(already_member_emails)
-
+    members = {member.email.lower(): member for member in g.community.members}
     existing_members_objects = [
-        user for user in g.community.members if user.email in already_member_emails
+        members[email.lower()] for email in emails if email.lower() in members
     ]
+    not_member_emails = [email for email in emails if email.lower() not in members]
 
-    existing_accounts_objects = User.query.filter(
-        User.email.in_(not_member_emails)
-    ).all()
-    existing_account_emails = [user.email for user in existing_accounts_objects]
-
-    emails_without_account = set(not_member_emails) - set(existing_account_emails)
+    accounts = {
+        user.email.lower(): user
+        for user in User.query.filter(
+            sa.func.lower(User.email).in_(
+                [email.lower() for email in not_member_emails]
+            )
+        )
+    }
+    existing_accounts_objects = list(accounts.values())
+    emails_without_account = {
+        email.lower() for email in not_member_emails if email.lower() not in accounts
+    }
 
     accounts_list = []
     for user in existing_accounts_objects:
@@ -151,7 +186,9 @@ def wizard_extract_data(
             "email": user.email,
             "first_name": user.first_name,
             "last_name": user.last_name,
-            "role": existing_account_csv_roles[user.email] if is_csv else "member",
+            "role": existing_account_csv_roles[user.email.lower()]
+            if is_csv
+            else "member",
             "status": "existing",
         }
         accounts_list.append(account)
@@ -160,7 +197,7 @@ def wizard_extract_data(
         emails_without_account = [
             csv_account
             for csv_account in csv_data
-            if csv_account["email"] in emails_without_account
+            if csv_account["email"].lower() in emails_without_account
         ]
         existing_accounts_objects = {
             "account_objects": existing_accounts_objects,
@@ -177,7 +214,9 @@ def wizard_extract_data(
             accounts_list.append(account)
 
     else:
-        for email in emails_without_account:
+        for email in dict.fromkeys(
+            email for email in not_member_emails if email.lower() not in accounts
+        ):
             account = {}
             account["email"] = email
             account["first_name"] = ""
@@ -209,6 +248,7 @@ def wizard_read_csv(csv_file: IO[str]) -> list[dict[str, str]]:
     contents = csv.reader(io.StringIO(data), delimiter=";")
 
     new_accounts = []
+    seen = set()
 
     for row in contents:
         account = {}
@@ -220,10 +260,12 @@ def wizard_read_csv(csv_file: IO[str]) -> list[dict[str, str]]:
         last_name = row[2].strip()
         role = row[3].strip()
 
-        if not validate_email(email):
+        role = role.lower()
+        if not validate_email(email) or email.lower() in seen:
             continue
-        if role.lower() not in ["manager", "member"]:
+        if role not in INVITED_ROLES:
             continue
+        seen.add(email.lower())
 
         account["email"] = email
         account["first_name"] = first_name
@@ -396,34 +438,37 @@ def wizard_saving() -> Response:
         flash(_("No new members were found"), "warning")
         return redirect(url_for(".members", community_id=g.community.slug))
 
-    if existing_accounts:
-        for email, role in existing_accounts.items():
-            user = User.query.filter(User.email == email).first()
-            community.set_membership(user, role)
+    roles = [*existing_accounts.values(), *(a["role"] for a in new_accounts)]
+    if any(role not in INVITED_ROLES for role in roles):
+        msg = "Not a role one is invited with"
+        raise BadRequest(msg)
 
-            app = unwrap(current_app)
-            activity.send(app, actor=user, verb="join", object=community)
+    # All of them in the community, then all of them told: a mail server that fails
+    # halfway leaves no one half invited.
+    invited = [
+        *(_account(email) for email in existing_accounts),
+        *(_new_account(account) for account in new_accounts),
+    ]
+    app = unwrap(current_app)
+    for user, role in zip(invited, roles, strict=True):
+        community.set_membership(user, role)
+        activity.send(app, actor=user, verb="join", object=community)
+    db.session.commit()
 
-            db.session.commit()
+    untold = []
+    for user in invited:
+        try:
             send_invitation(user, community, inviter, note)
-
-    if new_accounts:
-        for account in new_accounts:
-            email = account["email"]
-            first_name = account["first_name"]
-            last_name = account["last_name"]
-            role = account["role"]
-
-            user = User(
-                email=email, last_name=last_name, first_name=first_name, can_login=True
-            )
-            db.session.add(user)
-
-            community.set_membership(user, role)
-            app = unwrap(current_app)
-            activity.send(app, actor=user, verb="join", object=community)
-            db.session.commit()
-            send_invitation(user, community, inviter, note)
+        except (smtplib.SMTPException, OSError):
+            untold.append(user.email)
+    if untold:
+        flash(
+            _(
+                "Added, but not told by e-mail, which could not be sent: {addresses}"
+            ).format(addresses=", ".join(untold)),
+            "warning",
+        )
+        return redirect(url_for(".members", community_id=community.slug))
 
     flash(_("New members added successfully"), "success")
     return redirect(url_for(".members", community_id=community.slug))

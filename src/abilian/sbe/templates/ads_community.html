@@ -8,7 +8,7 @@
 {% block heading %}<span class="ads-cluster ads-gap-sm">{{ m.tile(community) }}<span>{{ community.name }}</span></span>{% endblock %}
 {% block actions %}
 {% if manager %}
-<a class="ads-btn" href="{{ url_for('communities.wizard_data_insertion', community_id=community.slug) }}" data-modal-open="#modal-invite" aria-label="{{ _('Invite members') }}">{{ icon("user-plus") }}<span class="sbe-wide-only">{{ _("Invite members") }}</span></a>
+<a class="ads-btn" href="{{ url_for('communities.wizard_data_insertion', community_id=community.slug) }}" {% if invite_page is not defined %}data-modal-open="#modal-invite" {% endif %}aria-label="{{ _('Invite members') }}">{{ icon("user-plus") }}<span class="sbe-wide-only">{{ _("Invite members") }}</span></a>
 <details class="ads-dropdown">
   <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the community') }}">{{ icon("dots-vertical") }}</summary>
   <div class="ads-menu">

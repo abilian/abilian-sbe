@@ -13,9 +13,10 @@
 
 document.addEventListener("click", (event) => {
   const opener = event.target.closest("[data-modal-open]");
-  if (opener) {
+  // A link whose dialog is not on this page goes where it points.
+  const dialog = opener && document.querySelector(opener.dataset.modalOpen);
+  if (dialog) {
     event.preventDefault();
-    const dialog = document.querySelector(opener.dataset.modalOpen);
     // Opened from a menu, which has done its work: it closes, and its button
     // takes the focus, for the dialog to give it back to when it closes.
     const menu = opener.closest("details[open]");

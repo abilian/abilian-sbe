@@ -42,7 +42,7 @@
 <form id="wizard-form" method="post" action="{{ url_for('.wizard_saving', community_id=g.community.slug) }}" hidden>
   {{ csrf.field() }}
   <input id="existing_account" type="hidden" name="existing_account" value="{{ existing_account }}">
-  <input id="new_accounts" type="hidden" name="new_accounts" value="{{ new_accounts | tojson }}">
+  <input id="new_accounts" type="hidden" name="new_accounts" value='{{ new_accounts | tojson }}'>
   <input type="hidden" name="note" value="{{ note }}">
 </form>
 {% endblock %}

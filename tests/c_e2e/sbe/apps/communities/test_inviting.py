@@ -8,8 +8,10 @@ e-mail, and whoever never signed in gets the link to choose a password."""
 from __future__ import annotations
 
 import datetime as dt
+import io
 import json
 import re
+import smtplib
 from html import unescape
 from typing import TYPE_CHECKING
 from uuid import uuid4
@@ -19,6 +21,7 @@ import pytest
 from abilian.core.extensions import mail
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
+from abilian.sbe.apps.communities.views import wizard
 from abilian.web.util import url_for
 from tests.util import client_login, ensure_services_started
 
@@ -133,7 +136,8 @@ def test_each_one_added_is_told_with_the_word_that_came_with_it(
         assert people["manager"].name in message.subject
         assert "See you Monday." in message.body
     # Whoever never signed in chooses a password; the others find the community.
-    choose = url_for("login.reset_password", token="TOKEN").removesuffix("TOKEN")
+    any_token = uuid4().hex
+    choose = url_for("login.reset_password", token=any_token).removesuffix(any_token)
     assert choose in told["invited@example.com"].body
     community_url = url_for(community1, _external=True)
     assert community_url in told["account@example.com"].body
@@ -173,3 +177,125 @@ def test_a_member_sees_no_preview(
         )
 
     assert response.status_code == 403
+
+
+def _saving(
+    client: FlaskClient, manager: User, community: Community, **data
+) -> tuple[int, list]:
+    with client_login(client, manager), mail.record_messages() as outbox:
+        response = client.post(
+            url_for("communities.wizard_saving", community_id=community.slug),
+            data=data,
+        )
+    return response.status_code, outbox
+
+
+def test_an_address_is_the_same_whatever_its_case(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    html = _post(
+        client,
+        people["manager"],
+        "communities.wizard_check_data",
+        community1,
+        **{
+            "wizard-emails": "ACCOUNT@example.com new@x.org New@X.org",
+            "role": "member",
+        },
+    )
+
+    # The account is found, not made again; the new address is asked for once.
+    assert html.count('name="account"') == 1
+    value = re.search(r'name="existing_account" value="([^"]*)"', html)
+    assert value
+    assert json.loads(unescape(value.group(1))) == {"account@example.com": "member"}
+
+    status, _outbox = _saving(
+        client,
+        people["manager"],
+        community1,
+        existing_account=json.dumps({"ACCOUNT@example.com": "member"}),
+    )
+    assert status == 302
+    assert community1.get_role(people["account"]) == MEMBER
+
+
+def test_a_role_one_is_not_invited_with_is_refused(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    status, outbox = _saving(
+        client,
+        people["manager"],
+        community1,
+        existing_account=json.dumps({"account@example.com": "Manager"}),
+    )
+
+    assert status == 400
+    assert outbox == []
+    assert community1.get_role(people["account"]) is None
+
+
+def test_a_spreadsheets_role_is_read_whatever_its_case(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    csv = io.BytesIO(b"carla@x.org;Carla;Csv;Manager\nCARLA@x.org;C;C;member\n")
+
+    html = _post(
+        client,
+        people["manager"],
+        "communities.wizard_check_data",
+        community1,
+        csv_file=(csv, "people.csv"),
+    )
+
+    value = re.search(r'name="wizard-emails" value="([^"]*)"', html)
+    assert value
+    accounts = json.loads(unescape(value.group(1)))
+    assert [(a["email"], a["role"]) for a in accounts] == [("carla@x.org", "manager")]
+
+
+def test_all_are_added_before_anyone_is_told_and_the_untold_are_named(
+    client: FlaskClient,
+    community1: Community,
+    people: dict[str, User],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def refuse_the_first(user, community, inviter, note) -> None:
+        if user.email == "invited@example.com":
+            raise smtplib.SMTPRecipientsRefused({user.email: (550, b"no")})
+
+    monkeypatch.setattr(wizard, "send_invitation", refuse_the_first)
+    accounts = {"invited@example.com": "member", "account@example.com": "member"}
+
+    with client_login(client, people["manager"]):
+        client.post(
+            url_for("communities.wizard_saving", community_id=community1.slug),
+            data={"existing_account": json.dumps(accounts)},
+        )
+        html = unescape(
+            client.get(
+                url_for("communities.members", community_id=community1.slug)
+            ).get_data(as_text=True)
+        )
+
+    assert community1.get_role(people["invited"]) == MEMBER
+    assert community1.get_role(people["account"]) == MEMBER
+    assert "not told by e-mail, which could not be sent: invited@example.com" in html
+
+
+def test_the_new_accounts_page_carries_its_list_whole(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    html = _post(
+        client,
+        people["manager"],
+        "communities.wizard_check_data",
+        community1,
+        **{"wizard-emails": "new@x.org", "role": "member"},
+    )
+
+    value = re.search(r"name=\"new_accounts\" value='([^']*)'", html)
+    assert value
+    assert json.loads(unescape(value.group(1)))[0]["email"] == "new@x.org"
+    # The header's button leads to the first page here: there is no dialog.
+    assert 'data-modal-open="#modal-invite"' not in html

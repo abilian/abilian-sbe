@@ -27,7 +27,7 @@
           {% for user in existing_accounts_object %}
           <tr data-wizard-row>
             <td class="ads-full sbe-cell-person"><span class="ads-media ads-gap-sm">{{ m.avatar(user, "ads-avatar--xs") }}<span class="sbe-lines"><span>{{ user.name }}</span><span class="ads-muted ads-truncate">{{ user.email }}</span></span></span></td>
-            <td>{{ wizard.role_select({"data-wizard-role": user.email}, csv_roles[user.email] if csv_roles else "member") }}</td>
+            <td>{{ wizard.role_select({"data-wizard-role": user.email}, csv_roles[user.email.lower()] if csv_roles else "member") }}</td>
             <td class="ads-end">{{ wizard.remove_button({"data-wizard-remove": user.email}) }}</td>
           </tr>
           {% endfor %}
