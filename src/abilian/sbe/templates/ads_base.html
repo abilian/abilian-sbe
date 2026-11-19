@@ -9,6 +9,7 @@
 {% set restore_script = url_for("abilian_sbe_static", filename="ads/restore.js") %}
 {% set here = g.get("community") %}
 {% set communities_menu = communities_of(current_user)[:8] %}
+{% set menu_news = news_in(current_user, communities_menu) %}
 {% block lang %}{{ get_locale().language }}{% endblock %}
 {% block title %}{% block page_title %}{% endblock %} · {{ config.SITE_NAME }}{% endblock %}
 {% block stylesheet %}
@@ -38,11 +39,19 @@
       <summary class="ads-nav__link ads-tip" data-tip="{{ _('Communities') }}" {{ 'aria-current="true"' | safe if here }}>
         <span class="ads-nav__icon">{{ icon("users") }}</span><span class="sbe-nav-label">{{ _("Communities") }}</span>{{ icon("chevron-down", "ads-icon sbe-caret") }}</summary>
       <div class="ads-menu sbe-menu-wide">
-        {% if communities_menu %}
-        <p class="ads-subheader sbe-menu-heading">{{ _("Recent") }}</p>
-        {% for c in communities_menu %}{{ m.community_item(c, here=here and c.id == here.id) }}{% endfor %}
-        <div class="ads-menu__sep"></div>
+        {#- What has something new since Mon fil was last marked read first, with how
+            much; then the others. -#}
+        {% set fresh = communities_menu | selectattr("id", "in", menu_news) | list %}
+        {% set others = communities_menu | rejectattr("id", "in", menu_news) | list %}
+        {% if fresh %}
+        <p class="ads-subheader sbe-menu-heading">{{ _("With something new") }}</p>
+        {% for c in fresh %}{{ m.community_item(c, here=here and c.id == here.id, new=menu_news[c.id]) }}{% endfor %}
         {% endif %}
+        {% if others %}
+        <p class="ads-subheader sbe-menu-heading">{{ _("Recent") }}</p>
+        {% for c in others %}{{ m.community_item(c, here=here and c.id == here.id) }}{% endfor %}
+        {% endif %}
+        {% if communities_menu %}<div class="ads-menu__sep"></div>{% endif %}
         <a class="ads-menu__item" href="{{ url_for('communities.index') }}">{{ icon("users") }}{{ _("All my communities") }}</a>
       </div>
     </details></li>

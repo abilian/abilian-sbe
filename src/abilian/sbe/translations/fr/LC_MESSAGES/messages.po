@@ -1970,6 +1970,9 @@ msgstr "Aucun vocabulaire n’est défini. Les vocabulaires se déclarent dans l
 msgid "Connections"
 msgstr "Connexions"
 
+msgid "With something new"
+msgstr "Avec du nouveau"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

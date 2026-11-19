@@ -104,6 +104,7 @@ def register(app: Flask) -> None:
         community_counts,
         site_figures,
     )
+    from abilian.sbe.apps.main.main import news_in
     from abilian.sbe.apps.main.recent import recently_opened
 
     for helper in (
@@ -116,5 +117,6 @@ def register(app: Flask) -> None:
         community_counts,
         site_figures,
         recently_opened,
+        news_in,
     ):
         app.add_template_global(helper)

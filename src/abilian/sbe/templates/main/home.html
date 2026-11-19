@@ -53,11 +53,7 @@
               {#- One line: how long ago, the exact date on hover. -#}
               <span class="ads-muted ads-truncate">{{ ngettext("%(num)d member", "%(num)d members", c.membership_count) }} · <time datetime="{{ c.last_active_at.isoformat() }}" title="{{ c.last_active_at | datetimeformat('medium') }}">{{ c.last_active_at | age }}</time></span>
             </span>
-            {% if new_in[c.id] %}
-            {#- Up to 99, then "99+"; the exact number said to screen readers. -#}
-            <span class="ads-badge ads-tone-info" aria-hidden="true">{{ "99+" if new_in[c.id] > 99 else new_in[c.id] }}</span>
-            <span class="sbe-sr-only">{{ ngettext("%(num)d new", "%(num)d new", new_in[c.id]) }}</span>
-            {% endif %}
+            {% if new_in[c.id] %}{{ m.new_badge(new_in[c.id]) }}{% endif %}
           </a>
         </li>
         {% else %}

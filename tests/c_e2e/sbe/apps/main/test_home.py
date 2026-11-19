@@ -321,6 +321,28 @@ def test_my_communities_say_how_much_is_new_in_each(
     assert '<span class="sbe-sr-only">1 new</span>' in mine
 
 
+def _bar_menu(html: str) -> str:
+    menu = html.partition('class="ads-menu sbe-menu-wide"')[2]
+    return menu.partition("All my communities")[0]
+
+
+def test_the_bars_menu_puts_the_communities_with_news_first(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = _news_then_older_news(db, community1)
+
+    with client_login(client, member):
+        before = _bar_menu(client.get(url_for("social.users")).get_data(as_text=True))
+        client.post(url_for("main.feed_read"))
+        after = _bar_menu(client.get(url_for("social.users")).get_data(as_text=True))
+
+    news = before.split("With something new")[1].split("Recent")[0]
+    assert community1.name in news
+    assert '<span class="sbe-sr-only">1 new</span>' in news
+    assert "With something new" not in after
+    assert community1.name in after.split("Recent")[1]
+
+
 def test_a_community_with_its_discussions_turned_off_offers_none(
     app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
 ) -> None:

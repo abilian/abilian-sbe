@@ -93,8 +93,14 @@
 {% endmacro %}
 
 {#- A community in a menu or a list: its tile and name; the one I am in, marked. -#}
-{% macro community_item(community, here=false) -%}
-<a class="ads-menu__item" href="{{ url_for(community) }}" {{ 'aria-current="page"' | safe if here }}>{{ tile(community, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ community.name }}</span>{% if here %}<span class="ads-muted">{{ _("here") }}</span>{% endif %}</a>
+{% macro community_item(community, here=false, new=0) -%}
+<a class="ads-menu__item" href="{{ url_for(community) }}" {{ 'aria-current="page"' | safe if here }}>{{ tile(community, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ community.name }}</span>{% if here %}<span class="ads-muted">{{ _("here") }}</span>{% elif new %}{{ new_badge(new) }}{% endif %}</a>
+{%- endmacro %}
+
+{#- How many things are new: up to 99, then "99+"; the exact number said to screen
+    readers. -#}
+{% macro new_badge(count) -%}
+<span class="ads-badge ads-tone-info" aria-hidden="true">{{ "99+" if count > 99 else count }}</span><span class="sbe-sr-only">{{ ngettext("%(num)d new", "%(num)d new", count) }}</span>
 {%- endmacro %}
 
 {#- A thread as a row: the title, in bold with its count of new posts when some are

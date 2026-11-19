@@ -87,6 +87,18 @@ def new_by_community(communities: list[Community], since: datetime) -> dict[int,
     return dict(rows.tuples().all())
 
 
+def news_in(user: User, communities: list[Community]) -> dict[int, int]:
+    """What is new in each of `communities` since `user` last marked Mon fil read,
+    by its id, for the bar; nothing before their first visit to Mon fil. With no
+    community (an anonymous visitor's case), nothing is asked."""
+    if not communities:
+        return {}
+    stored = get_service("preferences").get_preferences(user).get(READ_UNTIL_KEY)
+    if stored is None:
+        return {}
+    return new_by_community(communities, datetime.fromisoformat(stored))
+
+
 def events_to_come(communities: list[Community]) -> list[Event]:
     """The next events of `communities`, soonest first."""
     return (
