@@ -147,7 +147,7 @@ def test_a_page_runs_no_script_its_writer_put_in(
     assert "<script" not in body
     assert "onerror" not in body
     assert "javascript:" not in body
-    assert '<h2 id="heading">Heading</h2>' in body
+    assert '<h2 id="wiki-heading">Heading</h2>' in body
 
 
 def test_the_text_being_written_shows_as_the_page_will(
@@ -163,3 +163,18 @@ def test_the_text_being_written_shows_as_the_page_will(
     assert '<a class="wikilink" href="/communities/' in html
     assert '<a class="wikilink new" href="/communities/' in html
     assert "<script" not in html
+
+
+def test_a_page_takes_no_id_or_class_of_the_page_around_it(
+    member: User, community1: Community, client: FlaskClient
+) -> None:
+    text = '## Upload files\n\n<div id="modal-delete" class="ads-btn">Click</div>'
+
+    with client_login(client, member):
+        html = client.post(
+            url_for("wiki.page_preview", community_id=community1.slug),
+            data={"body_src": text},
+        ).get_data(as_text=True)
+
+    assert '<h2 id="wiki-upload-files">Upload files</h2>' in html
+    assert "<div>Click</div>" in html
