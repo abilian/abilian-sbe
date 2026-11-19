@@ -8,6 +8,7 @@ from __future__ import annotations
 from html import unescape
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
 from flask import url_for
 
 from abilian.services import settings_service
@@ -82,3 +83,46 @@ def test_a_process_starts_with_the_settings_saved(
     load_stored_settings(app)
 
     assert app.config["SITE_NAME"] == "Saved"
+
+
+def test_a_digest_turned_off_stays_off(
+    app: Flask,
+    client: FlaskClient,
+    admin_user: User,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setitem(app.config, "SITE_NAME", app.config.get("SITE_NAME"))
+    monkeypatch.setitem(app.config, "SCHEDULE_SEND_DAILY_SOCIAL_DIGEST", "")
+    form = {"action": "save", "SITE_NAME": "x", "MAIL_SENDER": "x"}
+
+    with client_login(client, admin_user):
+        page = client.get(url_for("admin.settings")).get_data(as_text=True)
+        client.post(
+            url_for("admin.settings"),
+            data={**form, "SCHEDULE_SEND_DAILY_SOCIAL_DIGEST": "off"},
+        )
+        overview = unescape(
+            client.get(url_for("admin.dashboard")).get_data(as_text=True)
+        )
+
+    assert '<option value="off" selected>' in page
+    assert (
+        settings_service.namespace("config").get("SCHEDULE_SEND_DAILY_SOCIAL_DIGEST")
+        == ""
+    )
+    assert "<dd>not sent</dd>" in overview
+
+
+def test_a_process_starts_on_its_files_when_the_database_does_not_answer(
+    app: Flask, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def no_answer(engine) -> None:
+        statement = "SELECT 1"
+        raise sa.exc.OperationalError(statement, {}, Exception("refused"))
+
+    monkeypatch.setitem(app.config, "SITE_NAME", "From the files")
+    monkeypatch.setattr(sa, "inspect", no_answer)
+
+    load_stored_settings(app)
+
+    assert app.config["SITE_NAME"] == "From the files"

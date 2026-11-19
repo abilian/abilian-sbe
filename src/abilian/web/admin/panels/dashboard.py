@@ -24,7 +24,7 @@ from abilian.services.audit import CREATION, AuditEntry
 from abilian.services.auth.models import LoginSession
 from abilian.web.admin import AdminPanel
 from abilian.web.admin.panels.health import site_health
-from abilian.web.admin.panels.settings import digest_hour
+from abilian.web.admin.panels.settings import digest_hour, digest_schedule
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
@@ -102,7 +102,10 @@ class DashboardPanel(AdminPanel):
         everyone = User.query.filter(User.id != ROOT_USER_ID)
         accounts = {
             "all": everyone.count(),
-            "never_signed_in": everyone.filter(User.last_active.is_(None)).count(),
+            # As the accounts' "Never signed in" counts them: not the disabled.
+            "never_signed_in": everyone.filter(
+                User.can_login, User.last_active.is_(None)
+            ).count(),
             "sign_ins": len(this_month),
             "people": len(set(this_month)),
         }
@@ -117,6 +120,7 @@ class DashboardPanel(AdminPanel):
             "admin/dashboard.html",
             health=site_health(),
             digest_hour=digest_hour(current_app.config),
+            digest_schedule=digest_schedule(current_app.config),
             stats=stats,
             users=users,
             connections=connections,
@@ -126,7 +130,7 @@ class DashboardPanel(AdminPanel):
 
 
 def stats_since(dt: timedelta) -> dict[str, int]:
-    new_members = new_documents = new_messages = 0
+    new_documents = new_messages = 0
     after_date = datetime.utcnow() - dt
     session = db.session()
     counts_per_type = (
@@ -140,11 +144,15 @@ def stats_since(dt: timedelta) -> dict[str, int]:
         .all()
     )
 
+    # Accounts are not audited: their own date says when they were made.
+    new_members = (
+        session.query(sa.func.count(User.id))
+        .filter(User.id != ROOT_USER_ID, User.created_at > after_date)
+        .scalar()
+    )
     for entity_type, count in counts_per_type:
         entity_class = entity_type.split(".")[-1]
         match entity_class:
-            case "User":
-                new_members = count
             case "Document":
                 new_documents = count
             case "Message":

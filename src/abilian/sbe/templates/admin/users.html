@@ -58,7 +58,7 @@
                 {% if user.can_login %}
                 <form method="post" action="{{ account_url }}">
                   {{ csrf.field() }}
-                  <button class="ads-menu__item" type="submit" name="action" value="send-link">{{ icon("mail") }}{{ _("Resend the invitation") if not user.last_active else _("Send a link to change the password") }}</button>
+                  <button class="ads-menu__item" type="submit" name="action" value="send-link">{{ icon("mail") }}{{ _("Send a link to choose a password") }}</button>
                 </form>
                 {{ a.sign_in_as(user, "ads-menu__item") }}
                 {% endif %}

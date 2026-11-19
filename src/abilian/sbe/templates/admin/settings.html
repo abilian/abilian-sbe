@@ -13,7 +13,8 @@
     <div class="ads-field">
       <label class="ads-label" for="{{ key.id }}">{{ key.label }}</label>
       <select class="ads-select sbe-fit" id="{{ key.id }}" name="{{ key.id }}" aria-describedby="{{ key.id }}-help">
-        {% if key.hour is none %}<option value="" selected>{{ _("As configured: %(schedule)s", schedule=config[key.id]) }}</option>{% endif %}
+        <option value="off" {{ "selected" if not key.schedule }}>{{ _("Not sent") }}</option>
+        {% if key.schedule and key.hour is none %}<option value="" selected>{{ _("As configured: %(schedule)s", schedule=key.schedule) }}</option>{% endif %}
         {% for hour in range(24) %}<option value="{{ hour }}" {{ "selected" if hour == key.hour }}>{{ "%02d:00" | format(hour) }}</option>{% endfor %}
       </select>
       <small class="ads-help" id="{{ key.id }}-help">{{ key.description }}</small>

@@ -121,3 +121,18 @@ def test_the_log_goes_to_a_spreadsheet_as_filtered(
     renamed = next(line for line in lines if line[5] == "'=Renamed")
     assert renamed[1:5] == [admin_user.name, admin_user.email, "changed", "Community"]
     assert "name" in renamed[6].split(", ")
+
+
+def test_the_logs_address_takes_a_whole_second_and_refuses_nonsense(
+    client: FlaskClient, admin_user: User
+) -> None:
+    with client_login(client, admin_user):
+        whole = client.get(url_for("admin.audit", before="2026-11-19T10:00:00"))
+        newer = client.get(url_for("admin.audit", after="2026-11-19T10:00:00"))
+        day = client.get(url_for("admin.audit", before="tomorrow"))
+        person = client.get(url_for("admin.audit", user="abc"))
+
+    assert (whole.status_code, newer.status_code) == (200, 200)
+    assert (day.status_code, person.status_code) == (400, 400)
+    # Filtering again from a page of newer changes starts afresh.
+    assert 'name="after"' not in newer.get_data(as_text=True)

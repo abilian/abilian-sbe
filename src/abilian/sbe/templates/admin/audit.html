@@ -38,8 +38,9 @@
 {% block content %}
 <div class="ads-card">
   <form class="ads-card__head sbe-toolbar sbe-toolbar--wrap" id="audit-filters" method="get" action="{{ url_for(request.endpoint) }}" aria-label="{{ _('Filter the log') }}">
-    {%- if 'after' in request.args %}<input type="hidden" name="after" value="{{ request.args['after'] }}">
-    {%- elif 'before' in request.args %}<input type="hidden" name="before" value="{{ request.args['before'] }}">{% endif %}
+    {#- A new filter starts from the day chosen, or from now: not from a page of newer
+        changes, which would show the oldest after it. -#}
+    {%- if 'before' in request.args %}<input type="hidden" name="before" value="{{ request.args['before'] }}">{% endif %}
     <input class="ads-input" type="text" id="user-select" name="user" placeholder="{{ _('A person') }}" aria-label="{{ _('Filter by person') }}"
            data-picker="{{ url_for('admin.audit_search_users') }}" data-picker-submit
            {%- if filter_user %} data-picker-value="{{ filter_user.id }}" data-picker-label="{{ filter_user.name }} ({{ filter_user.email }})"{% endif %}>

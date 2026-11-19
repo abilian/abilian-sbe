@@ -13,12 +13,14 @@ import svcs
 from flask import Flask, appcontext_pushed, g, request_started
 from flask_super import register_commands
 from flask_talisman import DEFAULT_CSP_POLICY, Talisman
+from loguru import logger
 
 from abilian.core import extensions, signals
 
 # Vite integration now handled by Flask-Vite in setup/extensions.py
 from abilian.services import settings_service
 from abilian.services.security import ANONYMOUS
+from abilian.services.settings.models import Setting
 from abilian.web.access_blueprint import allow_access_for_roles
 from abilian.web.nav import setup_nav_and_breadcrumbs
 
@@ -107,10 +109,17 @@ def load_stored_settings(app: Flask) -> None:
     files: each process reads them as it starts."""
     with app.app_context():
         try:
-            stored = settings_service.namespace("config").as_dict()
-        except (sa.exc.OperationalError, sa.exc.ProgrammingError):
             # No table yet: the database is still to be made (`flask initdb`).
-            extensions.db.session.rollback()
+            if not sa.inspect(extensions.db.engine).has_table(Setting.__tablename__):
+                return
+            stored = settings_service.namespace("config").as_dict()
+        except sa.exc.OperationalError as e:
+            # The process starts all the same, on its files' settings, and says so.
+            logger.error(
+                "Settings saved from the administration not read, the database "
+                "does not answer: {error}",
+                error=e,
+            )
             return
     app.config.update(stored)
 

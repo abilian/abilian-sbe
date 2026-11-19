@@ -130,8 +130,9 @@ class UserCreate(UserBase, views.ObjectCreate[User, UserCreateForm]):
 
 def account_action(user_id: int):
     """What the accounts' list does to one from its row: send a link to choose a
-    password (an invitation, again, to whoever never signed in), disable it, enable
-    it again. Not to one's own account, whose access an administrator keeps."""
+    password (the password-reset e-mail: the invitation, which says who added them
+    to which community, comes from a community's managers), disable it, enable it
+    again. Not to one's own account, whose access an administrator keeps."""
     user = db.get_or_404(User, user_id)
     action = request.form.get("action")
     if user == authenticated_user() and action == "disable":

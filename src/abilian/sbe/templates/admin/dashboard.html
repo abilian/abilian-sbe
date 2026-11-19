@@ -65,7 +65,7 @@
         <dl class="ads-card__body sbe-pairs">
           <dt>{{ _("Site name") }}</dt><dd>{{ config.SITE_NAME }}</dd>
           <dt>{{ _("E-mails come from") }}</dt><dd>{{ config.MAIL_SENDER or _("not set") }}</dd>
-          <dt>{{ _("Daily digest") }}</dt><dd>{% if digest_hour is not none %}{{ _("at %(hour)s", hour="%02d:00" | format(digest_hour)) }}{% else %}{{ config.SCHEDULE_SEND_DAILY_SOCIAL_DIGEST }}{% endif %}</dd>
+          <dt>{{ _("Daily digest") }}</dt><dd>{% if not digest_schedule %}{{ _("not sent") }}{% elif digest_hour is not none %}{{ _("at %(hour)s", hour="%02d:00" | format(digest_hour)) }}{% else %}{{ digest_schedule }}{% endif %}</dd>
           <dt>{{ _("New accounts") }}</dt><dd>{{ _("by invitation, from a community's managers or an administrator") }}</dd>
         </dl>
       </section>

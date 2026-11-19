@@ -21,6 +21,9 @@ try:
 except ImportError:
     clamd = None
 
+#: How long ClamAV has to say it answers, in seconds.
+PING_TIMEOUT = 2
+
 CLAMD_CONF = {"StreamMaxLength": "25M", "MaxFileSize": "25M"}
 CLAMD_STREAMMAXLENGTH = 26214400
 CLAMD_MAXFILESIZE = 26214400
@@ -69,8 +72,10 @@ class AntiVirusService(Service):
         if not clamd:
             return _("ClamAV is not installed")
         try:
-            clamd.ping()
-        except ClamdError as e:
+            # A socket of its own, which waits briefly: a stalled daemon must not
+            # hold the page that asks. Scanning a file may take longer.
+            ClamdUnixSocket(timeout=PING_TIMEOUT).ping()
+        except (ClamdError, OSError) as e:
             return str(e)
         return None
 

@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import socket
+import time
 from html import unescape
 from typing import TYPE_CHECKING
 
@@ -80,3 +81,23 @@ def test_a_mail_server_that_answers_is_running(
 
         with app.test_request_context():
             assert health.mail().ok
+
+
+def test_a_task_broker_that_never_answers_is_to_look_at_without_waiting_long(
+    app: Flask, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    # A port that takes the connection and then says nothing, as a stalled host.
+    with socket.socket() as silent:
+        silent.bind(("127.0.0.1", 0))
+        silent.listen()
+        port = silent.getsockname()[1]
+        monkeypatch.setitem(
+            app.config, "DRAMATIQ_BROKER_URL", f"redis://127.0.0.1:{port}/0"
+        )
+
+        started = time.monotonic()
+        with app.test_request_context():
+            check = health.task_queue()
+
+    assert not check.ok
+    assert time.monotonic() - started < 3 * health.ANSWER_TIMEOUT

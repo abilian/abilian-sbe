@@ -1877,6 +1877,15 @@ msgstr "Facultatif"
 msgid "%(inviter)s invites you to %(community)s on %(site)s"
 msgstr "%(inviter)s vous invite dans %(community)s sur %(site)s"
 
+msgid "Not sent"
+msgstr "Non envoyé"
+
+msgid "not sent"
+msgstr "non envoyé"
+
+msgid "Send a link to choose a password"
+msgstr "Envoyer un lien pour choisir un mot de passe"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

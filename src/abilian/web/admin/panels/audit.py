@@ -113,15 +113,11 @@ class AuditPanel(AdminPanel):
             return q.filter(model.happened_at < date).order_by(model.happened_at.desc())
 
         if after:
-            after = datetime.strptime(after, "%Y-%m-%dT%H:%M:%S.%f")
+            after = page_moment(after)
             audit_q = after_query(base_audit_q, AuditEntry, after)
             security_q = after_query(base_security_q, SecurityAudit, after)
         else:
-            before = (
-                datetime.strptime(before, "%Y-%m-%dT%H:%M:%S.%f")
-                if before
-                else datetime.utcnow()
-            )
+            before = page_moment(before) if before else datetime.utcnow()
             audit_q = before_query(base_audit_q, AuditEntry, before)
             security_q = before_query(base_security_q, SecurityAudit, before)
 
@@ -168,9 +164,8 @@ class AuditPanel(AdminPanel):
         lowest_date = ""
 
         if entries:
-            # top_date and lowest_date are converted to naive datetime (from UTC), so
-            # that isoformat does not include TZ shift (else we should fix strptime
-            # above)
+            # top_date and lowest_date are converted to naive datetimes (from UTC):
+            # their isoformat then carries no zone, as the entries are stored.
             top_date = entries[0][1][0].date.astimezone(pytz.utc).replace(tzinfo=None)
             lowest_date = (
                 entries[-1][1][-1].date.astimezone(pytz.utc).replace(tzinfo=None)
@@ -253,6 +248,8 @@ def log_filter(args: MultiDict[str, str]) -> LogFilter:
     user = None
     user_id = args.get("user")
     if user_id:
+        if not user_id.isdigit():
+            raise BadRequest
         user = User.query.get(int(user_id))
         audit_q = audit_q.filter(AuditEntry.user == user)
         security_q = security_q.filter(SecurityAudit.manager == user)
@@ -276,6 +273,15 @@ def log_filter(args: MultiDict[str, str]) -> LogFilter:
         security_q = security_q.filter(SecurityAudit.happened_at >= start)
 
     return LogFilter(audit_q, security_q, user, types, period, all_classes)
+
+
+def page_moment(value: str) -> datetime:
+    """A page's edge in the address: an ISO date, with or without its fraction of a
+    second (an entry at a whole second has none)."""
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError as e:
+        raise BadRequest from e
 
 
 def period_start(period: str | None, now: datetime) -> datetime | None:

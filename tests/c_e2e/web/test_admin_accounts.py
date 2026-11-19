@@ -210,7 +210,8 @@ def test_the_overview_counts_the_accounts_and_the_communities(
     everyone = User.query.filter(User.id != 0)
     assert figures["accounts"] == str(everyone.count())
     assert figures["communities"] == "1"
-    never = everyone.filter(User.last_active.is_(None)).count()
+    # As the accounts' "Never signed in" counts them: not the disabled.
+    never = everyone.filter(User.can_login, User.last_active.is_(None)).count()
     assert f"{never} never signed in" in html
     assert url_for("admin.users_user", user_id=accounts["active"].id) in html
 

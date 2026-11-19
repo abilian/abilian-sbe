@@ -47,15 +47,23 @@ class Key:
 #: The daily digest's schedule, in the scheduler's configuration.
 DIGEST_SCHEDULE = "SCHEDULE_SEND_DAILY_SOCIAL_DIGEST"
 
+#: What the settings' form sends for a digest that is not sent.
+OFF = "off"
+
 #: A schedule that runs once a day, on the hour: the hour.
 DAILY_AT = re.compile(r"^0 (\d{1,2}) \* \* \*$")
 
 
+def digest_schedule(config: dict) -> str:
+    """The daily digest's schedule as the scheduler reads it: "" when it is not
+    sent at all (`crontab_from_config`)."""
+    return config.get(DIGEST_SCHEDULE, DEFAULT_SCHEDULE[DIGEST_SCHEDULE]).strip()
+
+
 def digest_hour(config: dict) -> int | None:
-    """The hour the daily digest leaves at, on the server's clock; None for a
-    schedule set otherwise in the configuration files."""
-    schedule = config.get(DIGEST_SCHEDULE) or DEFAULT_SCHEDULE[DIGEST_SCHEDULE]
-    match = DAILY_AT.match(schedule.strip())
+    """The hour the daily digest leaves at, on the server's clock; None when it is
+    not sent, or sent on a schedule set otherwise in the configuration files."""
+    match = DAILY_AT.match(digest_schedule(config))
     return int(match.group(1)) if match else None
 
 
@@ -77,11 +85,17 @@ class DigestHourKey(Key):
     def hour(self) -> int | None:
         return digest_hour(current_app.config)
 
+    @property
+    def schedule(self) -> str:
+        return digest_schedule(current_app.config)
+
     def value_from_request(self) -> str:
         value = request.form[self.id]
+        if value == OFF:
+            return ""
         if not value:
             # A schedule set in the configuration files, kept as it is.
-            return current_app.config.get(self.id) or DEFAULT_SCHEDULE[self.id]
+            return self.schedule
         if not value.isdigit() or int(value) > 23:
             raise BadRequest
         return f"0 {int(value)} * * *"
@@ -123,9 +137,8 @@ class SettingsPanel(AdminPanel):
 
             db.session.commit()
 
-            # FIXME: this is weak: only this process will have its config changed;
-            # full reload of app stack (web workers + task workers) has to be done
-            # manually.
+            # This process at once; the others (web workers, the task scheduler)
+            # read the saved settings as they start, so they need a restart.
             current_app.config.update(settings.as_dict())
             flash(_("Changes saved."))
 

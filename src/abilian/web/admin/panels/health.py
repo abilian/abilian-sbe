@@ -23,8 +23,8 @@ from abilian.services.conversion.handlers import HAS_LIBREOFFICE, HAS_PDFTOTEXT
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-#: How long the mail server has to answer, in seconds.
-MAIL_TIMEOUT = 2
+#: How long what the site depends on has to answer, in seconds.
+ANSWER_TIMEOUT = 2
 
 
 @dataclass(frozen=True)
@@ -53,13 +53,18 @@ def database() -> Check:
 
 
 def task_queue() -> Check:
+    """The task broker Dramatiq sends to, asked briefly: a host that drops packets
+    must not hold the page."""
     name = _("Task queue")
-    extension = current_app.extensions.get("redis")
-    if extension is None:
+    url = current_app.config.get("DRAMATIQ_BROKER_URL")
+    if not url:
         return Check(name, False, _("Redis is not configured."))
+    broker = redis.Redis.from_url(
+        url, socket_connect_timeout=ANSWER_TIMEOUT, socket_timeout=ANSWER_TIMEOUT
+    )
     try:
-        extension.client.ping()
-    except redis.exceptions.ConnectionError as e:
+        broker.ping()
+    except redis.exceptions.RedisError as e:
         return Check(name, False, str(e))
     return Check(name, True, _("Redis answers."))
 
@@ -104,7 +109,7 @@ def mail() -> Check:
     server = config.get("MAIL_SERVER", "localhost")
     port = config.get("MAIL_PORT", 25)
     try:
-        socket.create_connection((server, port), timeout=MAIL_TIMEOUT).close()
+        socket.create_connection((server, port), timeout=ANSWER_TIMEOUT).close()
     except OSError as e:
         return Check(name, False, f"{server}:{port}: {e}")
     return Check(name, True, f"{server}:{port}")

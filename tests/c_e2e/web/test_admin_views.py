@@ -12,20 +12,21 @@ for the first time.
 
 from __future__ import annotations
 
+from datetime import timedelta
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
 from flask import url_for
 
-from abilian.core.models.subjects import Group
+from abilian.core.models.subjects import Group, User
+from abilian.web.admin.panels.dashboard import stats_since
 from abilian.web.admin.panels.sysinfo import HIDDEN, installed_packages
 from tests.util import client_login
 
 if TYPE_CHECKING:
     from flask.testing import FlaskClient
 
-    from abilian.core.models.subjects import User
 
 #: Every panel registered by abilian core.
 PANELS = [
@@ -189,3 +190,15 @@ def test_the_tabs_say_what_each_part_is(client: FlaskClient, admin_user: User) -
         "Settings",
         "System information",
     ]
+
+
+def test_the_overview_counts_the_accounts_made_lately(
+    app, admin_user: User, db_session
+) -> None:
+    before = stats_since(timedelta(days=1))["new_members"]
+    db_session.add(
+        User(email=f"{uuid4().hex}@example.com", password=uuid4().hex, can_login=True)
+    )
+    db_session.flush()
+
+    assert stats_since(timedelta(days=1))["new_members"] == before + 1
