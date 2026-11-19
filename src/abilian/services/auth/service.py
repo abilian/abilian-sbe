@@ -24,7 +24,7 @@ from abilian.services import Service, ServiceState, get_service
 from abilian.web.action import DynamicIcon, Endpoint, actions
 from abilian.web.nav import NavGroup, NavItem
 
-from .models import LoginSession
+from .models import IDLE_LIMIT, LoginSession
 from .views import login as login_views
 
 if TYPE_CHECKING:
@@ -285,7 +285,7 @@ def refresh_login_session(user: User) -> None:
 
     from_now = now - session.last_active_at
 
-    if from_now > timedelta(hours=1):
+    if from_now > IDLE_LIMIT:
         session.ended_at = session.last_active_at
         session = LoginSession.new(user)
         db.session.add(session)

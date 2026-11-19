@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import request
 from flask_sqlalchemy.query import Query
@@ -13,6 +13,9 @@ from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 
 _MARK = object()
+
+#: Idle this long, a sign-in is over: the next request starts another.
+IDLE_LIMIT = timedelta(hours=1)
 
 
 class LoginSessionQuery(Query):
@@ -79,6 +82,19 @@ class LoginSession(db.Model):
 
     #: Limited (somewhat artbitrarily) to 512 characters.
     user_agent: Mapped[str] = mapped_column(String(512), default="", nullable=False)
+
+    @property
+    def end(self) -> datetime | None:
+        """When the sign-in ended, or None while it is still on.
+
+        One left idle ended at its last request, though it is only closed when its
+        user comes back.
+        """
+        if self.ended_at:
+            return self.ended_at
+        if datetime.utcnow() - self.last_active_at > IDLE_LIMIT:
+            return self.last_active_at
+        return None
 
     @staticmethod
     def new(user: User) -> LoginSession:
