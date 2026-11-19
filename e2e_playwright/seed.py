@@ -13,11 +13,13 @@ from __future__ import annotations
 
 import io
 import os
+from datetime import datetime, timedelta
 
 from PIL import Image, ImageDraw
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
+from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import MANAGER, Community
 from abilian.sbe.apps.forum.models import Thread
 from abilian.services.activity.models import ActivityEntry
@@ -76,6 +78,19 @@ if existing is None:
     db.session.add(Group(name="E2E Group"))
     db.session.commit()
 
+    # An event to come, so the calendar lists one and its page can be opened.
+    start = datetime.now().replace(hour=14, minute=0, second=0, microsecond=0)
+    start += timedelta(days=7)
+    event = Event(
+        title="General assembly",
+        community=community,
+        start=start,
+        end=start + timedelta(hours=2),
+    )
+    event.creator = event.owner = admin
+    db.session.add(event)
+    db.session.commit()
+
     # What the views record when a document is posted or a thread started: Mon fil
     # (`/`) lists these, so the sweeps that visit it (axe, no sideways scroll)
     # cover a feed with entries rather than an empty one.
@@ -114,7 +129,7 @@ if existing is None:
     db.session.commit()
 
     print(
-        f"seeded community {community.slug!r} with 1 document and 1 thread "
+        f"seeded community {community.slug!r} with 1 document, 1 thread, 1 event "
         f"for {ADMIN_EMAIL}"
     )
 else:

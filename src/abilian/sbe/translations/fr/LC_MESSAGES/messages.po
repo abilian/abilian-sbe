@@ -1771,6 +1771,12 @@ msgstr "(source)"
 msgid "Preview"
 msgstr "Aperçu"
 
+msgid "Copy the link"
+msgstr "Copier le lien"
+
+msgid "Link copied"
+msgstr "Lien copié"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

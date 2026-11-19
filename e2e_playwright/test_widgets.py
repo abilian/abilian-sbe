@@ -325,3 +325,22 @@ def test_a_wiki_page_shows_beside_its_text_as_it_is_typed(
     expect(preview.locator("strong")).to_have_text("second")
     expect(preview.locator("a.wikilink.new")).to_have_text("Fares")
     js_errors.assert_clean("the wiki's preview")
+
+
+def test_an_events_link_is_copied_from_its_menu(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    page = logged_in
+    page.context.grant_permissions(["clipboard-read", "clipboard-write"])
+    page.goto(f"{base_url}/communities/{COMMUNITY}/calendar/", wait_until="networkidle")
+    page.get_by_role("link", name="General assembly").first.click()
+    page.wait_for_load_state("networkidle")
+
+    page.get_by_label("More actions on the event").click()
+    copy = page.locator("[data-copy]")
+    copy.click()
+
+    expect(copy).to_contain_text("Link copied")
+    copied = page.evaluate("navigator.clipboard.readText()")
+    assert copied == page.url
+    js_errors.assert_clean("copying an event's link")

@@ -248,3 +248,14 @@ def test_a_manager_changes_any_event(
 
     assert url_for("calendar.event_edit", **here) in html
     assert 'id="modal-delete"' in html
+
+
+def test_any_member_copies_an_events_link(
+    client: FlaskClient, community1: Community, member: User, events: dict
+) -> None:
+    here = {"community_id": community1.slug, "event_id": events["coming"].id}
+
+    html = _page(client, member, url_for("calendar.event", **here))
+
+    link = url_for("calendar.event", _external=True, **here)
+    assert f'data-copy="{link}"' in html

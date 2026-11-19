@@ -38,6 +38,18 @@ document.querySelectorAll("[data-dismiss][hidden]").forEach((button) => {
   button.hidden = false;
 });
 
+/* <button data-copy="text" data-copied="Copied" hidden>: copies its text, then says
+   so in its label. Shown only where the browser lets a page write the clipboard. */
+if (navigator.clipboard) {
+  document.querySelectorAll("[data-copy][hidden]").forEach((button) => {
+    button.hidden = false;
+    button.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(button.dataset.copy);
+      button.querySelector("span").textContent = button.dataset.copied;
+    });
+  });
+}
+
 document.addEventListener("click", (event) => {
   const dismiss = event.target.closest("[data-dismiss]");
   if (dismiss) {
