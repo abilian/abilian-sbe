@@ -1,62 +1,52 @@
-# Hop3 deployment configuration for Abilian SBE.
+# Abilian SBE on Hop3: the web app, its Dramatiq worker and scheduler; PostgreSQL and
+# Redis as addons; the instance (the files, the search index, the conversions'
+# cache) on a volume, which a redeploy keeps.
 #
-# Deploys natively (Python toolchain + Node for the Vite build).
-# NOTE: the repo contains a stub Dockerfile (CMD is `echo OK`) which would
-# otherwise auto-select the Docker builder, hence builder = "local".
+# Secrets are not here: the operator sets them with `hop3 env set --app sbe KEY=…`
+# (FLASK_MAIL_SERVER, FLASK_MAIL_PORT, FLASK_MAIL_USERNAME, FLASK_MAIL_PASSWORD,
+# FLASK_MAIL_USE_TLS, FLASK_MAIL_SENDER, FLASK_SENTRY_DSN).
 
 [metadata]
-id = "abilian-sbe"
-name = "Abilian SBE"
-description = "Abilian Social Business Engine"
+id = "sbe"
+title = "Abilian SBE"
 
 [build]
+# The Dockerfile at the root is a stub that runs `echo OK`; its presence alone would
+# pick the Docker builder.
 builder = "local"
-
-# Python only, declared rather than detected. Hop3 finds pyproject.toml *and*
-# package.json and calls the result "multi-language", which no deployer on this
-# server claims -- the build succeeds and then nothing will run it. The Node
-# markers are misleading anyway: the root package.json holds `markdown-toc`, a
-# docs tool, and vite/ is a build-time concern the server has no reason to run.
 toolchain = "python"
-
-# So the Vite assets are built locally and ride along in the upload -- `hop3
-# deploy` sends gitignored files, and src/abilian/sbe/static/vite/ is ignored
-# but generated. That trades a build-time Node toolchain for a step someone can
-# forget, so fail loudly rather than serve a page with no CSS.
-before-build = "test -f src/abilian/sbe/static/vite/main.js || { echo 'Vite assets missing: run `make front` before deploying' >&2; exit 1; }"
+# The pages' scripts are built by Vite, not committed (`static/vite/` is ignored).
+# Vite 7 wants Node 20.19 or 22.12 at least. hop3check calls this a redundant
+# install: the toolchain installs the root package.json, which holds only
+# markdown-toc, a docs tool; Vite's is in vite/.
+node-version = "22"
+before-build = "cd vite && npm ci && npm run build"
 
 [run]
-# Every command runs behind scripts/hop3-env.sh, which translates the
-# addon-injected DATABASE_URL and REDIS_URL into the FLASK_* names this app
-# reads through `from_prefixed_env()`. Hop3 does not interpolate in `[env]`, so
-# it cannot be done there.
-#
-# initdb is idempotent (create_all + create-if-absent root user), and so are
-# both backfills. backfill-community-roles is REQUIRED as of the release that
-# records community memberships as roles on the community: until it runs, every
-# existing community manager loses MANAGE. It ships with that code, so it
-# cannot run any earlier than this.
-before-run = 'sh scripts/hop3-env.sh sh -c "flask initdb && flask backfill-community-roles && flask backfill-creator-memberships"'
-start = 'sh scripts/hop3-env.sh gunicorn wsgi:app -b 0.0.0.0:$PORT --workers 4 --log-level info --access-logfile - --error-logfile -'
+# Before any process starts: the schema follows the code (from production's
+# 1f4631da751b, the migrations are all it lacks), then the two data backfills that
+# memberships from before need, both idempotent.
+before-run = ["flask db upgrade", "flask backfill-community-roles", "flask backfill-creator-memberships"]
+start = "gunicorn abilian.wsgi:app -b 0.0.0.0:$PORT --workers 4 --log-level info --log-file -"
+start-timeout = 180
+# What the previews and text extraction call: pdftotext and pdftoppm, convert, and
+# soffice for office documents. ClamAV is left out: without it the antivirus service
+# stands aside.
+packages = ["poppler-utils", "imagemagick", "libreoffice-nogui"]
 
 [run.workers]
-worker = 'sh scripts/hop3-env.sh flask worker'       # dramatiq (flask-dramatiq)
-scheduler = 'sh scripts/hop3-env.sh flask scheduler'
+worker = "flask worker"
+scheduler = "flask scheduler"
+
+[healthcheck]
+# Answers 200 without signing in, on a private site too; the password field is this
+# app's sign-in form, not a proxy's default page or an error.
+path = "/user/login"
+contains = 'name="password"'
 
 [deploy]
-# Hop3 detects Python and Node from pyproject.toml and vite/package.json and
-# calls the artifact "multi-language", which no deployer claims — the build
-# succeeds and then there is nothing to run it. Both toolchains are wanted (the
-# Vite output is generated at build time, not committed), so the fix is to name
-# the deployer rather than to drop a toolchain. This is a WSGI app either way:
-# `wsgi:app` is a plain WSGI callable, whether uwsgi runs [run].start or loads
-# it itself.
-#
-# NOTE 2026-09-08: hop3-dev.abilian.com ignored this — the deploy failed with
-# the identical "No deployer found for artifact kind 'multi-language'". The key
-# is in the schema this repo's hop3check validates against, so the server is
-# probably running an older Hop3. Left in place: harmless there, correct once
-# it is upgraded.
+# Hop3 sees pyproject.toml and vite/package.json and calls the artifact
+# "multi-language", which no deployer claims: name the one that serves WSGI.
 deployer = "uwsgi"
 
 [[addons]]
@@ -65,24 +55,43 @@ type = "postgres"
 [[addons]]
 type = "redis"
 
-[env]
-# Generated once on first deploy; never committed.
-FLASK_SECRET_KEY = { generate = "hex", length = 64 }
-# The app reads config via from_prefixed_env() (FLASK_* -> config keys).
-# Defaults: PRODUCTION = False, TALISMAN_FORCE_HTTPS = True (correct behind
-# Hop3's TLS-terminating nginx).
-FLASK_PRODUCTION = "true"
-
 [[volumes]]
 name = "instance"
-target = "instance" # uploads, whoosh index, tmp; survives redeploys
+target = "instance"
 
-[healthcheck]
-path = "/"
-# `main.home` renders a template, so an anonymous GET / is a 200 -- but a 200
-# alone can be nginx's default_server or an error page, so match on something
-# only this app serves. This is the h1 in web/templates/index.html, a literal
-# rather than a `_()` string, so it does not move with the locale or SITE_NAME.
-# Change it if that heading changes, or the deploy will wait for readiness that
-# never arrives.
-contains = "Welcome to Abilian!"
+[proxy]
+# Documents are uploaded through the app; the proxy's default is 50m.
+max-body-size = "200m"
+
+[env]
+FLASK_APP = "abilian.wsgi"
+# Relative to where the processes start: the volume above.
+FLASK_INSTANCE_PATH = "instance"
+FLASK_SECRET_KEY = { generate = "hex", length = 64 }
+# Without it the daily digest is never sent.
+FLASK_PRODUCTION = "true"
+# What the CNLL layer (`extranet.app`) did, now plain settings: every page asks to
+# sign in, French first, attachments' names in ASCII in e-mails.
+FLASK_PRIVATE_SITE = "true"
+FLASK_BABEL_ACCEPT_LANGUAGES = '["fr", "en"]'
+FLASK_MAIL_ASCII_ATTACHMENTS = "true"
+FLASK_SITE_NAME = "Extranet CNLL"
+FLASK_PREFERRED_URL_SCHEME = "https"
+
+[env.computed]
+FLASK_SQLALCHEMY_DATABASE_URI = "${DATABASE_URL}"
+FLASK_REDIS_URI = "${REDIS_URL}"
+FLASK_DRAMATIQ_BROKER_URL = "${REDIS_URL}"
+# Without these two, Dramatiq falls back to localhost:6379 without a word.
+FLASK_DRAMATIQ_ABORT_REDIS_URL = "${REDIS_URL}"
+FLASK_DRAMATIQ_RATE_LIMIT_REDIS_URL = "${REDIS_URL}"
+
+# To fill in: the production hostname. The worker and the scheduler build the links
+# in e-mails (invitations, digests) with no request to take a host from, so the
+# server name is needed as well.
+#
+# [domains]
+# list = ["extranet.example.org"]
+#
+# and, under [env.computed]:
+# FLASK_SERVER_NAME = "${HOST_NAME}"
