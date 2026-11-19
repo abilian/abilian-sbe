@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Unicode, UnicodeText
+from sqlalchemy import DateTime, ForeignKey, Integer, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
 from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
@@ -14,6 +14,8 @@ from abilian.sbe.apps.communities.models import (
     CommunityIdColumn,
     community_content,
 )
+from abilian.sbe.apps.documents.models import BaseContent
+from abilian.sbe.apps.forum.models import Thread
 
 
 @community_content
@@ -44,6 +46,35 @@ class Event(Entity):
     end: Mapped[datetime | None] = mapped_column(DateTime)
 
     url: Mapped[str] = mapped_column(UnicodeText, nullable=False, default="")
+
+    #: Where the event is discussed, once someone started a discussion about it.
+    thread_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Thread.id, ondelete="SET NULL")
+    )
+    thread = relationship(Thread, foreign_keys=[thread_id])
+
+
+class EventAttachment(BaseContent):
+    """A file attached to an event, as a wiki page's are."""
+
+    __tablename__: str = None
+    __indexable__ = False
+    __mapper_args__ = {"polymorphic_identity": "event_attachment"}
+    sbe_type = "event:attachment"
+
+    _event_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Event.id), nullable=True
+    )
+    event = relationship(
+        Event,
+        primaryjoin=(_event_id == Event.id),
+        backref=backref(
+            "attachments",
+            lazy="select",
+            order_by="EventAttachment.name",
+            cascade="all, delete-orphan",
+        ),
+    )
 
 
 @listens_for(Event.title, "set", active_history=True)

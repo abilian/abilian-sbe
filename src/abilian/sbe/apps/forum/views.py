@@ -19,6 +19,7 @@ from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
+from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities import decorators as guard
 from abilian.sbe.apps.communities.blueprint import (
     CommunityBlueprint,
@@ -296,7 +297,16 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         self.thread = self.obj
+        self.about = event_to_discuss(request.values.get("event"))
+        if self.about is not None and not self.thread.title:
+            self.thread.title = self.about.title
         return args, kwargs
+
+    @property
+    def template_kwargs(self):
+        kw = super().template_kwargs
+        kw["about"] = self.about
+        return kw
 
     def before_populate_obj(self) -> None:
         del self.form["attachments"]
@@ -312,6 +322,8 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
     def after_populate_obj(self) -> None:
         if self.thread.community is None:
             self.thread.community = g.community._model
+        if self.about is not None:
+            self.about.thread = self.thread
 
         self.new_post = self.thread.create_post(body_html=self.message_body)
         obj_meta = self.new_post.meta.setdefault("abilian.sbe.forum", {})
@@ -362,6 +374,22 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
 
 
 route("/new_thread/")(ThreadCreate.as_view("new_thread", view_endpoint=".thread"))
+
+
+def event_to_discuss(value: str | None) -> Event | None:
+    """The event of this community a new thread is about, while it has none."""
+    if not value:
+        return None
+    try:
+        event_id = int(value)
+    except ValueError as e:
+        msg = f"Not an event: {value!r}"
+        raise BadRequest(msg) from e
+    return Event.query.filter(
+        Event.id == event_id,
+        Event.community_id == g.community.id,
+        Event.thread_id.is_(None),
+    ).first()
 
 
 class ThreadPostCreate(ThreadCreate):

@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, timedelta
 from html import unescape
+from io import BytesIO
 from typing import TYPE_CHECKING
 
 import pytest
@@ -15,7 +16,7 @@ from flask import g
 from werkzeug.datastructures import MultiDict
 
 from abilian.sbe.apps.calendar.forms import EventForm
-from abilian.sbe.apps.calendar.models import Event
+from abilian.sbe.apps.calendar.models import Event, EventAttachment
 from abilian.sbe.apps.calendar.views import _events_in_grid, month_weeks
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.web.util import url_for
@@ -297,3 +298,104 @@ def test_today_is_said_in_the_month(
     )
 
     assert html.count('aria-current="date"') == 1
+
+
+def test_an_event_comes_with_its_files_and_lets_them_go(
+    client: FlaskClient, community1: Community, member: User, db: SQLAlchemy
+) -> None:
+    """Attached and removed from its form, as a wiki page's; read from its page."""
+    day = (datetime.now().date() + timedelta(days=3)).isoformat()
+    data = MultiDict(
+        [
+            ("title", "Board meeting"),
+            ("start", day),
+            ("start", "09:00"),
+            ("end", day),
+            ("end", "11:00"),
+            ("description", "<p>The board.</p>"),
+            ("attachments", (BytesIO(b"the agenda"), "agenda.txt")),
+            ("__action", "create"),
+        ]
+    )
+    with client_login(client, member):
+        client.post(
+            url_for("calendar.new_event", community_id=community1.slug), data=data
+        )
+    event = Event.query.filter(Event.title == "Board meeting").one()
+    (agenda,) = event.attachments
+    here = {"community_id": community1.slug, "event_id": event.id}
+    download = url_for("calendar.event_attachment", attachment_id=agenda.id, **here)
+
+    page = _page(client, member, url_for(event))
+    with client_login(client, member):
+        content = client.get(download).get_data()
+        client.post(
+            url_for("calendar.event_edit", **here),
+            data=MultiDict(
+                [
+                    *[
+                        (k, v)
+                        for k, v in data.items(multi=True)
+                        if k not in {"attachments", "__action"}
+                    ],
+                    ("remove_attachment", str(agenda.id)),
+                    ("__action", "edit"),
+                ]
+            ),
+        )
+
+    assert f'href="{download}"' in page
+    assert content == b"the agenda"
+    db.session.expire_all()
+    assert event.attachments == []
+
+
+def test_an_events_file_is_found_under_its_event_only(
+    client: FlaskClient, events: dict[str, Event], member: User, db: SQLAlchemy
+) -> None:
+    coming, past = events["coming"], events["past"]
+    attachment = EventAttachment(name="secret.txt")
+    past.attachments.append(attachment)
+    attachment.set_content(b"secret", "text/plain")
+    db.session.commit()
+
+    with client_login(client, member):
+        response = client.get(
+            url_for(
+                "calendar.event_attachment",
+                community_id=coming.community.slug,
+                event_id=coming.id,
+                attachment_id=attachment.id,
+            )
+        )
+
+    assert response.status_code == 404
+
+
+def test_an_event_is_discussed_in_a_thread_started_from_it(
+    client: FlaskClient, events: dict[str, Event], member: User, db: SQLAlchemy
+) -> None:
+    event = events["coming"]
+    community = event.community
+    page = _page(client, member, url_for(event))
+    start = url_for("forum.new_thread", community_id=community.slug, event=event.id)
+    form = _page(client, member, start)
+
+    with client_login(client, member):
+        client.post(
+            url_for("forum.new_thread", community_id=community.slug),
+            data={
+                "title": "General meeting",
+                "message": "<p>Who brings the coffee?</p>",
+                "event": str(event.id),
+                "__action": "create",
+            },
+        )
+    db.session.expire_all()
+
+    assert f'href="{start}"' in page
+    assert 'value="General meeting"' in form
+    assert f'name="event" value="{event.id}"' in form
+    assert event.thread is not None
+    assert event.thread.title == "General meeting"
+    assert "Discussed in" in _page(client, member, url_for(event))

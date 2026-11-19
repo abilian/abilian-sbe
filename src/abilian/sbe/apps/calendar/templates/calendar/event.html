@@ -1,6 +1,8 @@
 {#- An event: when and where first, who posted it, then what it is and where to read
-    more; adding it to one's own calendar in sight; copying its link behind ⋮, and
-    changing and deleting it, for who posted it and the community's managers; the other events to come beside it. Drawn in `mockups/templates/event.html`. -#}
+    more, its files; where it is discussed, or starting the discussion; adding it to
+    one's own calendar in sight; copying its link behind ⋮, and changing and deleting
+    it, for who posted it and the community's managers; the other events to come
+    beside it. Drawn in `mockups/templates/event.html`. -#}
 {% extends "ads_community.html" %}
 {% import "calendar/_events.html" as ev with context %}
 {% set kw = {"community_id": g.community.slug} %}
@@ -71,7 +73,16 @@
       <div class="ads-prose">{{ event.description | safe }}</div>
       {#- A link only to the web: an address typed in may be anything. -#}
       {% if event.url %}<p>{{ _("More information") }}: {% if event.url.startswith(("http://", "https://")) %}<a href="{{ event.url }}" rel="noopener">{{ event.url }}</a>{% else %}{{ event.url }}{% endif %}</p>{% endif %}
+      {% for attachment in event.attachments %}
+      <div class="ads-file"><span class="ads-file__icon">{{ file_icon(attachment.name) }}</span><span class="ads-file__meta"><a class="ads-file__name" href="{{ url_for('.event_attachment', event_id=event.id, attachment_id=attachment.id, **kw) }}">{{ attachment.name }}</a><span class="ads-muted">{{ attachment.content_length | filesize }}</span></span></div>
+      {% endfor %}
     </div>
+    {#- Where it is discussed: a thread of the forum, started from here. -#}
+    {% if event.thread %}
+    <div class="ads-card__foot ads-cluster ads-gap-sm">{{ icon("message-circle") }}<span>{{ _("Discussed in") }} <a href="{{ url_for(event.thread) }}">{{ event.thread.title }}</a></span></div>
+    {% elif discuss_url %}
+    <div class="ads-card__foot"><a class="ads-btn" href="{{ discuss_url }}">{{ icon("message-plus") }}{{ _("Discuss it") }}</a></div>
+    {% endif %}
   </article>
 
   <aside class="ads-stack" aria-label="{{ _('The other events') }}">

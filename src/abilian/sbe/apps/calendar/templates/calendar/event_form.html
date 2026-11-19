@@ -1,6 +1,6 @@
 {#- Making an event, or changing one: its title, when it starts and ends (a time is
     suggested, the day left blank), where, a link to read more, what it is in rich
-    text. -#}
+    text, its files. -#}
 {% extends "ads_community.html" %}
 {% import "forum/_post_fields.html" as fields %}
 {% set creating = not view.obj.id %}
@@ -24,7 +24,7 @@
 {% endmacro %}
 
 {% block content %}
-<form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" aria-labelledby="event-form">
+<form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" enctype="multipart/form-data" aria-labelledby="event-form">
   {{ form.csrf_token }}
   <div class="ads-card__head"><h2 class="ads-card__title" id="event-form">{{ _("New event") if creating else _("Edit event") }}</h2></div>
   <div class="ads-card__body ads-stack">
@@ -48,6 +48,7 @@
       {{ fields.errors(form.url) }}
     </div>
     {{ fields.message_field(form.description, _("What it is")) }}
+    {{ m.files_field([] if creating else view.obj.attachments) }}
   </div>
   <div class="ads-card__foot ads-cluster ads-gap-sm">
     <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="{{ 'create' if creating else 'edit' }}">{{ _("Post this event") if creating else _("Save") }}</button>

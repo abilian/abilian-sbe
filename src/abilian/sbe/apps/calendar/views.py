@@ -1,18 +1,19 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
 """A community's calendar: its events to come or past, by month, the month at a
-glance beside them; an event, and adding it to one's own calendar; making,
-changing and deleting one."""
+glance beside them; an event, its files, where it is discussed, and adding it to
+one's own calendar; making, changing and deleting one."""
 
 from __future__ import annotations
 
 import calendar
 from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
+from urllib.parse import quote
 
 from flask import g, render_template, request
 from toolz import groupby
-from werkzeug.exceptions import BadRequest, Forbidden
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 from werkzeug.wrappers import Response
 
 from abilian.core.extensions.login import authenticated_user
@@ -25,12 +26,13 @@ from abilian.sbe.apps.communities.blueprint import (
 )
 from abilian.sbe.apps.communities.security import can_manage
 from abilian.sbe.apps.communities.views import default_view_kw
+from abilian.sbe.apps.documents.form_files import apply_form_files
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction
 
 from .forms import EventForm
 from .ics import event_ics
-from .models import Event
+from .models import Event, EventAttachment
 
 if TYPE_CHECKING:
     from abilian.core.models.subjects import User
@@ -144,6 +146,16 @@ class EventView(BaseEventView, views.ObjectView[Event, EventForm]):
         kw = super().template_kwargs
         kw["event"] = self.obj
         kw["may_change"] = can_change(authenticated_user(), self.obj)
+        # A discussion starts in the forum, when the community has one.
+        kw["discuss_url"] = (
+            url_for(
+                "forum.new_thread",
+                community_id=g.community.slug,
+                event=self.obj.id,
+            )
+            if g.community.has_forum
+            else None
+        )
         kw["others"] = (
             _events()
             .filter(Event.end > datetime.now(), Event.id != self.obj.id)
@@ -171,6 +183,21 @@ def event_file(event_id: int) -> Response:
     )
 
 
+@route("/<int:event_id>/files/<int:attachment_id>")
+def event_attachment(event_id: int, attachment_id: int) -> Response:
+    """One of the event's files: of this event, in this community, only."""
+    event = _events().filter(Event.id == event_id).first_or_404()
+    attachment = EventAttachment.query.get_or_404(attachment_id)
+    if attachment.event is not event:
+        raise NotFound
+    filename = quote(attachment.name.encode("utf8"))
+    return Response(
+        attachment.content,
+        mimetype=attachment.content_type,
+        headers={"Content-Disposition": f"attachment;filename*=UTF-8''{filename}"},
+    )
+
+
 class EventCreateView(BaseEventView, views.ObjectCreate[Event, EventForm]):
     template = "calendar/event_form.html"
     _message_success = _l("The event is posted.")
@@ -183,6 +210,7 @@ class EventCreateView(BaseEventView, views.ObjectCreate[Event, EventForm]):
     def after_populate_obj(self) -> None:
         if self.obj.community is None:
             self.obj.community = g.community._model
+        apply_form_files(self.obj.attachments, EventAttachment)
 
     def get_form_buttons(self, *args, **kwargs):
         return [self.POST_BUTTON, views.object.CANCEL_BUTTON]
@@ -214,6 +242,9 @@ class EventEditView(ChangingAnEvent, views.ObjectEdit[Event, EventForm]):
     )
 
     title = _l("Edit event")
+
+    def after_populate_obj(self) -> None:
+        apply_form_files(self.obj.attachments, EventAttachment)
 
 
 event_edit_view = EventEditView.as_view("event_edit", view_endpoint=".event")

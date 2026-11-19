@@ -1,5 +1,6 @@
 {#- Starting a discussion: its subject, the message in rich text, files, and whether to
-    send it by email; beside it, where it goes and who will see it. Drawn in
+    send it by email; beside it, where it goes and who will see it. Started from an
+    event, it is about that event, whose page then leads to it. Drawn in
     `mockups/templates/new-thread.html`. -#}
 {% extends "ads_community.html" %}
 {% import "forum/_post_fields.html" as fields %}
@@ -10,10 +11,12 @@
 <div class="ads-with-aside">
   <form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" enctype="multipart/form-data" aria-labelledby="new-title">
     {{ form.csrf_token }}
+    {% if about %}<input type="hidden" name="event" value="{{ about.id }}">{% endif %}
     <div class="ads-card__head">
       <div class="sbe-lines">
         <ol class="ads-breadcrumb"><li><a href="{{ url_for('forum.index', community_id=g.community.slug) }}">{{ _("Discussions") }}</a></li></ol>
         <h2 class="ads-card__title" id="new-title">{{ _("New discussion") }}</h2>
+        {% if about %}<span class="ads-muted">{{ _("About the event") }} <a href="{{ url_for(about) }}">{{ about.title }}</a></span>{% endif %}
       </div>
     </div>
     <div class="ads-card__body ads-stack">

@@ -2707,3 +2707,12 @@ msgstr ""
 
 msgid "You must give your first and last names."
 msgstr "Vous devez indiquer votre prénom et votre nom."
+
+msgid "Discussed in"
+msgstr "Discuté dans"
+
+msgid "Discuss it"
+msgstr "En discuter"
+
+msgid "About the event"
+msgstr "À propos de l’événement"
