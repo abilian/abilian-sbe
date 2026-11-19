@@ -135,3 +135,21 @@ def test_a_new_password_has_at_least_eight_characters(
     assert refused.location.endswith(url)
     assert accepted.location.startswith(url_for("login.login_form"))
     assert user.authenticate("Abcdefg1")
+
+
+def test_a_password_link_opens_nothing_once_used(
+    app: Application, session: Session, client: FlaskClient
+) -> None:
+    """A forwarded invitation must not let someone else choose the password again."""
+    user = User(email="user@domain.tld", password=uuid4().hex, can_login=True)
+    session.add(user)
+    session.flush()
+    token = views.generate_reset_password_token(user)
+    url = url_for("login.reset_password_post", token=token)
+
+    client.post(url, data={"password": "Abcdefg1"})
+    again = client.post(url, data={"password": "Hijklmn2"})
+
+    assert again.location.endswith(url_for("login.forgotten_pw"))
+    assert user.authenticate("Abcdefg1")
+    assert not user.authenticate("Hijklmn2")

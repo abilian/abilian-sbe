@@ -332,6 +332,10 @@ def get_token_status(
 
     if data:
         user = User.query.get(data[0])
+        # The token carries the password it was made for: once the password is
+        # changed through it, or otherwise, it opens nothing.
+        if user is not None and data[1] != md5(user.password):
+            invalid = True
 
     expired = expired and (user is not None)
     return expired, invalid, user
