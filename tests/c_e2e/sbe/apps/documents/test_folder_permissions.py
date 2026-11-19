@@ -125,3 +125,12 @@ def test_a_groups_name_is_shown_as_text_in_the_history(
 
     assert "<img src=x onerror" not in html
     assert "&lt;img src=x onerror=alert(1)&gt;" in html
+
+
+def test_the_permissions_lead_back_to_their_folder(
+    client: FlaskClient, manager: User, folder: Folder
+) -> None:
+    html = _page(client, manager, folder)
+
+    crumbs = html.split('<ol class="ads-breadcrumb">')[1].split("</ol>")[0]
+    assert f'<a href="{url_for(folder)}">{folder.title}</a>' in crumbs

@@ -35,7 +35,10 @@
     {% else %}
     <a class="ads-menu__item" href="{{ url_for('.document_download', community_id=g.community.slug, doc_id=obj.id, attach=True) }}">{{ icon("download") }}{{ _("Download") }}</a>
     {% if may_write %}
+    {#- A document someone else locked takes no version from another (`document_upload`). -#}
+    {% if obj.lock is none or obj.lock.is_owner(current_user) %}
     <button class="ads-menu__item" type="button" data-row-action="replace-document" data-object-id="{{ obj.id }}" data-modal-open="#modal-upload-new-version">{{ icon("upload") }}{{ _("Upload new version") }}</button>
+    {% endif %}
     <button class="ads-menu__item" type="button" data-row-action="send-by-email" data-object-id="{{ obj.id }}" data-modal-open="#modal-send-by-email">{{ icon("mail") }}{{ _("Send by email") }}</button>
     <button class="ads-menu__item" type="button" data-row-action="edit-document" data-object-id="{{ obj.id }}">{{ icon("pencil") }}{{ _("Edit properties") }}</button>
     {% endif %}

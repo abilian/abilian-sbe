@@ -42,16 +42,19 @@ def test_the_list_shows_the_threads_with_their_unread_posts(
     assert "ads/ads.css" in html
 
 
-def test_a_thread_never_opened_counts_its_replies_as_new(
+def test_a_thread_never_opened_counts_all_its_messages_as_new(
     app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
 ) -> None:
+    """Its first message too: a discussion just started, with no reply yet, is new."""
     ensure_services_started(["security"])
     author = community1.test_user
     started_thread(db, community1, author, "Budget 2027", replies=2)
+    started_thread(db, community1, author, "Just started")
 
     html = _list(client, community1, author)
 
-    assert "2 new" in html
+    assert "3 new" in html
+    assert "<strong>Just started</strong>" in html
 
 
 def test_the_filter_keeps_the_threads_with_the_words_in_their_title(

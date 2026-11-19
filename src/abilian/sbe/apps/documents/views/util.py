@@ -26,10 +26,12 @@ if TYPE_CHECKING:
 # Utils
 #
 def breadcrumbs_for(obj: Document) -> list[dict[str, str]]:
+    """The folders down to `obj`, then `obj`, each with its page: the pages about
+    an object (its permissions, its readers) lead back to it."""
     if obj is None:
         return []
 
-    bc = [{"label": obj.title}]
+    bc = [{"label": obj.title, "path": url_for(obj)}]
     parent = obj.parent
     while parent and not parent.is_root_folder:
         bc = [{"label": parent.title, "path": url_for(parent)}, *bc]

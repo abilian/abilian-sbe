@@ -11,11 +11,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 import pytz
+from flask import g
 from werkzeug.datastructures import MultiDict
 
 from abilian.sbe.apps.calendar.forms import EventForm
 from abilian.sbe.apps.calendar.models import Event
-from abilian.sbe.apps.calendar.views import month_weeks
+from abilian.sbe.apps.calendar.views import _events_in_grid, month_weeks
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.web.util import url_for
 from tests.util import client_login, ensure_services_started
@@ -259,3 +260,30 @@ def test_any_member_copies_an_events_link(
 
     link = url_for("calendar.event", _external=True, **here)
     assert f'data-copy="{link}"' in html
+
+
+def test_the_month_grid_loads_only_its_own_days_events(
+    app, db: SQLAlchemy, community1: Community
+) -> None:
+    starts = {
+        "grid's first day": datetime(2026, 10, 26, 9),
+        "in the month": datetime(2026, 11, 18, 9),
+        "months before": datetime(2026, 3, 1, 9),
+        "after the grid": datetime(2026, 12, 7, 9),
+    }
+    for title, start in starts.items():
+        db.session.add(
+            Event(
+                title=title,
+                community=community1,
+                start=start,
+                end=start + timedelta(hours=2),
+            )
+        )
+    db.session.commit()
+
+    with app.test_request_context():
+        g.community = community1
+        loaded = {e.title for e in _events_in_grid(date(2026, 11, 1))}
+
+    assert loaded == {"grid's first day", "in the month"}

@@ -78,7 +78,6 @@
       {{ fields.send_by_email(form) }}
       <div class="ads-cluster ads-gap-sm">
         <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="create">{{ icon("send") }}{{ _("Send") }}</button>
-        <span class="ads-muted ads-push">{{ ngettext("%(num)d participant will be told by email.", "%(num)d participants will be told by email.", participants | length) }}</span>
       </div>
     </form>
     {% endif %}

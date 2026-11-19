@@ -241,13 +241,12 @@ def folder_json(user: User, folder_id):
         }
         bc.append(data)
 
+    # Below the community's top folder, a way one level up; the top folder itself
+    # takes documents like any other.
     if folder.parent is not None and not folder.parent.is_root_folder:
-        # not at root folder: allow to go 1 level up
         data = bc[-2].copy()
         data["title"] = ".."
         folders.append(data)
-    else:
-        result["current_folder_selectable"] = False
 
     for folder in subfolders:
         data = {

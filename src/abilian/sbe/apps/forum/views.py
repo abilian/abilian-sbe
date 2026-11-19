@@ -89,9 +89,10 @@ def get_viewed_posts(user: User, entities):
                 [post for post in entity.posts if post.created_at > cutoff]
             )
 
+    # A thread never opened is new from its first message on.
     never_viewed = set(entities) - {view.entity for view in views}
     for entity in never_viewed:
-        nb_viewed_posts[entity] = len(entity.posts) - 1
+        nb_viewed_posts[entity] = len(entity.posts)
 
     return nb_viewed_posts
 
@@ -268,7 +269,11 @@ def thread_page_kwargs(user: User, thread: Thread) -> dict:
         "views": get_viewed_times([thread]),
         "participants": {post.creator for post in thread.posts},
         "activity_time_format": activity_time_format,
-        "new_posts": (get_viewed_posts(user, [thread]) or {}).get(thread, 0),
+        # On its page, what is new comes after its first message, the thread itself.
+        "new_posts": min(
+            (get_viewed_posts(user, [thread]) or {}).get(thread, 0),
+            len(thread.posts) - 1,
+        ),
     }
 
 
@@ -394,15 +399,9 @@ class ThreadPostCreate(ThreadCreate):
         self.obj = self.new_post
 
 
-class ThreadViewers(ThreadView):
-    template = "forum/thread_viewers.html"
-
-
 route("/<int:thread_id>/")(
     ThreadPostCreate.as_view("thread_post", view_endpoint=".thread")
 )
-
-route("/<int:thread_id>/viewers")(ThreadViewers.as_view("thread_viewers"))
 
 
 class ThreadDelete(BaseThreadView, views.ObjectDelete[Thread, ThreadForm]):

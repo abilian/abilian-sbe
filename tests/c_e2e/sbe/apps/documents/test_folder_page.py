@@ -148,3 +148,34 @@ def test_the_gallery_shows_the_same_items_as_tiles(
     assert "budget.pdf" in tiles
     assert 'name="object-selected"' in tiles
     assert 'value="gallery_view" aria-pressed="true"' in html
+
+
+def test_a_document_goes_back_to_the_communitys_top_folder(
+    folders: tuple[Folder, Folder, Folder], community1: Community, client: FlaskClient
+) -> None:
+    root, _reports, _year = folders
+    url = url_for(
+        "documents.folder_json", community_id=community1.slug, folder_id=root.id
+    )
+
+    with client_login(client, community1.test_user):
+        listing = client.get(url, headers={"Accept": "application/json"}).get_json()
+
+    assert listing["current_folder_selectable"] is True
+
+
+def test_a_row_offers_no_new_version_of_what_someone_else_locked(
+    folders: tuple[Folder, Folder, Folder],
+    community1: Community,
+    client: FlaskClient,
+    db: SQLAlchemy,
+) -> None:
+    _root, _reports, year = folders
+    (budget,) = year.children
+    other = _member(db, community1, MANAGER)
+    budget.lock = other
+    db.session.commit()
+
+    html = _page(client, community1.test_user, year)
+
+    assert 'data-row-action="replace-document"' not in html

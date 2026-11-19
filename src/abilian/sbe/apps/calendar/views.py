@@ -7,7 +7,7 @@ changing and deleting one."""
 from __future__ import annotations
 
 import calendar
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import TYPE_CHECKING
 
 from flask import g, render_template, request
@@ -75,10 +75,18 @@ def _calendar(events: list[Event], past: bool) -> str:
         past=past,
         month=shown,
         today=datetime.now().date(),
-        weeks=month_weeks(shown, _events().all()),
+        weeks=month_weeks(shown, _events_in_grid(shown)),
         previous=_shift(shown, -1),
         following=_shift(shown, 1),
     )
+
+
+def _events_in_grid(month: date) -> list[Event]:
+    """The events that start on a day the grid of `month` shows, and no others."""
+    weeks = calendar.Calendar().monthdatescalendar(month.year, month.month)
+    first = datetime.combine(weeks[0][0], datetime.min.time())
+    after = datetime.combine(weeks[-1][-1], datetime.min.time()) + timedelta(days=1)
+    return _events().filter(Event.start >= first, Event.start < after).all()
 
 
 def _month_shown() -> date:
