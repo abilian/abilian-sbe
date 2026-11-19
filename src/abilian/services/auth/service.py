@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING, Any, cast
 
 from flask import current_app, g, redirect, request, url_for
 from flask_login import login_user, user_logged_in, user_logged_out
-from loguru import logger
 from werkzeug.exceptions import Forbidden
 
 from abilian.core.extensions import db, login_manager
@@ -167,21 +166,10 @@ class AuthService(Service):
 
     @login_manager.user_loader
     def load_user(user_id: str) -> User | None:
-        try:
-            user = User.query.get(user_id)
-
-            if not user or not user.can_login:
-                # if a user is edited and should not have access any more, this
-                # will ensure they cannot continue if he had an active session
-                return None
-        except Exception:
-            logger.opt(exception=True).warning("Error during login.")
-            session = db.session()
-            if not session.is_active:
-                # session is not usable, rollback should restore a usable
-                # session
-                session.rollback()
-
+        """The signed-in user, or None for an account gone or disabled since. A
+        database that fails here is a server error, not an anonymous visitor."""
+        user = User.query.get(user_id)
+        if not user or not user.can_login:
             return None
 
         app = unwrap(current_app)

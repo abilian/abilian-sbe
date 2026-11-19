@@ -9,8 +9,11 @@ from functools import partial
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+import pytest
+import sqlalchemy as sa
 from flask import request, url_for
 
+from abilian.core.extensions import login_manager
 from abilian.core.models.subjects import User
 from abilian.services.auth import views
 
@@ -188,3 +191,21 @@ def test_a_password_link_opens_nothing_once_used(
     assert again.location.endswith(url_for("login.forgotten_pw"))
     assert user.authenticate("Abcdefg1")
     assert not user.authenticate("Hijklmn2")
+
+
+def test_a_database_failing_to_load_the_signed_in_user_is_an_error(
+    app: Application, session: Session
+) -> None:
+    """Not an anonymous visitor: the failure was swallowed there, and its logging,
+    which printed `current_user`, loaded the user again, and again."""
+    user = User(email="user@domain.tld", password=uuid4().hex, can_login=True)
+    session.add(user)
+    session.commit()
+    user_id = str(user.id)
+    # A column the code maps and the database lacks: a migration not applied.
+    session.execute(sa.text('ALTER TABLE "user" DROP COLUMN job_title'))
+    session.commit()
+    session.expire_all()
+
+    with app.test_request_context(), pytest.raises(sa.exc.OperationalError):
+        login_manager._user_callback(user_id)

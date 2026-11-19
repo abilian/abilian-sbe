@@ -36,7 +36,12 @@ def init_loguru(app: Flask) -> None:
         level = "INFO"
 
     logger.remove()
-    logger.add(sys.stderr, level=level)
+    # Without `diagnose`, which loguru turns on by default: it prints the value of
+    # every variable in a traceback, which puts passwords and tokens in the logs, and
+    # runs code to do so. A request's `current_user` is a proxy: printing it loads
+    # the user, and a database that fails there logged the error again, which
+    # printed it again, and so on, holding a CPU and the request for minutes.
+    logger.add(sys.stderr, level=level, diagnose=False)
 
     app.logger.handlers = [InterceptHandler()]
     logger.info("Loguru initialized")
