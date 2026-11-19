@@ -47,6 +47,7 @@ def setup_app(app: Application, plugins=None) -> None:
     # First init required stuff: db to make queries, and settings service
     extensions.db.init_app(app)
     settings_service.init_app(app)
+    load_stored_settings(app)
 
     init_extensions(app)
 
@@ -99,6 +100,19 @@ def setup_app(app: Application, plugins=None) -> None:
 
     # Register CLI commands
     register_commands(app)
+
+
+def load_stored_settings(app: Flask) -> None:
+    """The settings saved from the administration, over those of the configuration
+    files: each process reads them as it starts."""
+    with app.app_context():
+        try:
+            stored = settings_service.namespace("config").as_dict()
+        except (sa.exc.OperationalError, sa.exc.ProgrammingError):
+            # No table yet: the database is still to be made (`flask initdb`).
+            extensions.db.session.rollback()
+            return
+    app.config.update(stored)
 
 
 def connect_signals() -> None:

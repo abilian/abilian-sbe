@@ -1,8 +1,9 @@
 {#- The administration's first page: the site at a glance (its accounts, its sign-ins,
     its communities, its files), what it depends on and whether it answers
     (`admin/panels/health.py`), the accounts and the sign-ins over time, what was
-    made lately; beside it, who signed in last. Overrides Abilian Core's page; drawn
-    in `mockups/templates/admin.html`, which has no charts. -#}
+    made lately; beside it, the settings that matter and who signed in last.
+    Overrides Abilian Core's page; drawn in `mockups/templates/admin.html`, which has
+    no charts. -#}
 {% extends "admin/_ads.html" %}
 {% set site = site_figures() %}
 {% set tiles = [
@@ -58,7 +59,16 @@
         </div>
       </section>
     </div>
-    <aside class="ads-stack" aria-label="{{ _('Last sign-ins') }}">
+    <aside class="ads-stack" aria-label="{{ _('Settings and sign-ins') }}">
+      <section class="ads-card" aria-labelledby="settings">
+        <div class="ads-card__head ads-spread"><h2 class="ads-card__title" id="settings">{{ _("Settings") }}</h2><a href="{{ url_for('.settings') }}">{{ _("Edit") }}</a></div>
+        <dl class="ads-card__body sbe-pairs">
+          <dt>{{ _("Site name") }}</dt><dd>{{ config.SITE_NAME }}</dd>
+          <dt>{{ _("E-mails come from") }}</dt><dd>{{ config.MAIL_SENDER or _("not set") }}</dd>
+          <dt>{{ _("Daily digest") }}</dt><dd>{% if digest_hour is not none %}{{ _("at %(hour)s", hour="%02d:00" | format(digest_hour)) }}{% else %}{{ config.SCHEDULE_SEND_DAILY_SOCIAL_DIGEST }}{% endif %}</dd>
+          <dt>{{ _("New accounts") }}</dt><dd>{{ _("by invitation, from a community's managers or an administrator") }}</dd>
+        </dl>
+      </section>
       <section class="ads-card" aria-labelledby="signins">
         <div class="ads-card__head"><h2 class="ads-card__title" id="signins">{{ _("Last sign-ins") }}</h2></div>
         {% if last_seen %}

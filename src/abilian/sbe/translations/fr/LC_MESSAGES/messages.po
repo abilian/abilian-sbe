@@ -1838,6 +1838,30 @@ msgstr "Organisation"
 msgid "Job title"
 msgstr "Fonction"
 
+msgid "Settings and sign-ins"
+msgstr "Réglages et connexions"
+
+msgid "E-mails come from"
+msgstr "Les e-mails partent de"
+
+msgid "not set"
+msgstr "non renseigné"
+
+msgid "Daily digest"
+msgstr "Résumé quotidien"
+
+msgid "at %(hour)s"
+msgstr "à %(hour)s"
+
+msgid "by invitation, from a community's managers or an administrator"
+msgstr "sur invitation, par les responsables d’une communauté ou un administrateur"
+
+msgid "As configured: %(schedule)s"
+msgstr "Selon la configuration : %(schedule)s"
+
+msgid "The hour it leaves, on the server's clock. The task scheduler takes it up when it restarts."
+msgstr "L’heure à laquelle il part, à l’horloge du serveur. Le planificateur de tâches la prend en compte à son redémarrage."
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

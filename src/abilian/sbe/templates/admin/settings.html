@@ -1,5 +1,5 @@
-{#- The site's settings: its name, who its e-mails come from, how long a sign-in lasts
-    without a visit. Overrides Abilian Core's page. -#}
+{#- The site's settings: its name, who its e-mails come from, the hour the daily digest
+    leaves, how long a sign-in lasts without a visit. Overrides Abilian Core's page. -#}
 {% extends "admin/_ads.html" %}
 {% block page_title %}{{ _("Settings") }} · {{ _("Administration") }}{% endblock %}
 {% block heading %}{{ _("Settings") }}{% endblock %}
@@ -19,6 +19,15 @@
       </div>
       <small class="ads-help" id="{{ key.id }}-help">{{ key.description }}</small>
     </fieldset>
+    {% elif key.hour is defined %}
+    <div class="ads-field">
+      <label class="ads-label" for="{{ key.id }}">{{ key.label }}</label>
+      <select class="ads-select sbe-fit" id="{{ key.id }}" name="{{ key.id }}" aria-describedby="{{ key.id }}-help">
+        {% if key.hour is none %}<option value="" selected>{{ _("As configured: %(schedule)s", schedule=config[key.id]) }}</option>{% endif %}
+        {% for hour in range(24) %}<option value="{{ hour }}" {{ "selected" if hour == key.hour }}>{{ "%02d:00" | format(hour) }}</option>{% endfor %}
+      </select>
+      <small class="ads-help" id="{{ key.id }}-help">{{ key.description }}</small>
+    </div>
     {% else %}
     <div class="ads-field">
       <label class="ads-label" for="{{ key.id }}">{{ key.label }}</label>

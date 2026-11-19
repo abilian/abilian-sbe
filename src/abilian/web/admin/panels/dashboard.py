@@ -15,7 +15,7 @@ from itertools import accumulate
 from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
-from flask import render_template
+from flask import current_app, render_template
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import ROOT_USER_ID, User
@@ -24,6 +24,7 @@ from abilian.services.audit import CREATION, AuditEntry
 from abilian.services.auth.models import LoginSession
 from abilian.web.admin import AdminPanel
 from abilian.web.admin.panels.health import site_health
+from abilian.web.admin.panels.settings import digest_hour
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterable, Mapping
@@ -115,6 +116,7 @@ class DashboardPanel(AdminPanel):
         return render_template(
             "admin/dashboard.html",
             health=site_health(),
+            digest_hour=digest_hour(current_app.config),
             stats=stats,
             users=users,
             connections=connections,
