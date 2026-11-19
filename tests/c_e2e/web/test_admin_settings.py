@@ -37,7 +37,6 @@ def test_the_digest_leaves_at_the_hour_chosen(
         "SITE_NAME": "Our extranet",
         "MAIL_SENDER": "extranet@example.org",
         "SCHEDULE_SEND_DAILY_SOCIAL_DIGEST": "7",
-        "PERMANENT_SESSION_LIFETIME:days": "1",
     }
 
     with client_login(client, admin_user):

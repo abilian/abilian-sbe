@@ -6,7 +6,6 @@
 from __future__ import annotations
 
 import re
-from datetime import timedelta
 
 from flask import current_app, flash, redirect, render_template, request, url_for
 from jinja2 import Template
@@ -43,59 +42,6 @@ class Key:
 
     def value_from_request(self):
         return request.form[self.id].strip()
-
-
-class SessionLifeTimeKey(Key):
-    template = "admin/settings_session_lifetime.html"
-
-    def __init__(self) -> None:
-        super().__init__(
-            "PERMANENT_SESSION_LIFETIME",
-            "timedelta",
-            label=_l("Session lifetime"),
-            description=_l(
-                "Session expiration time after last visit. "
-                "When session is expired user must login again."
-            ),
-        )
-
-    def value_from_request(self):
-        form = request.form
-        days = max(0, int(form.get(f"{self.id}:days") or 0))
-        hours = min(23, max(0, int(form.get(f"{self.id}:hours") or 0)))
-        minutes = min(59, max(0, int(form.get(f"{self.id}:minutes") or 0)))
-
-        if (days + hours) == 0 and minutes < 10:
-            # avoid dummy sessions durations: minimum is 10 minutes
-            msg = _("Minimum session lifetime is 10 minutes. Value has been adjusted.")
-            flash(msg, "warning")
-            minutes = 10
-
-        return timedelta(days=days, hours=hours, minutes=minutes)
-
-    def _get_current(self, field: str) -> int:
-        td = current_app.config.get(self.id)
-        if td:
-            match field:
-                case "days":
-                    return td.days
-                case "hours":
-                    return int(td.seconds / 3600)
-                case "minutes":
-                    return int(td.seconds % 3600 / 60)
-        return 0
-
-    @property
-    def days(self) -> int:
-        return self._get_current("days")
-
-    @property
-    def hours(self) -> int:
-        return self._get_current("hours")
-
-    @property
-    def minutes(self) -> int:
-        return self._get_current("minutes")
 
 
 #: The daily digest's schedule, in the scheduler's configuration.
@@ -156,7 +102,6 @@ class SettingsPanel(AdminPanel):
         Key("SITE_NAME", "string", _l("Site name")),
         Key("MAIL_SENDER", "string", _l("Mail sender")),
         DigestHourKey(),
-        SessionLifeTimeKey(),
     )
 
     @property

@@ -1,5 +1,5 @@
 {#- The site's settings: its name, who its e-mails come from, the hour the daily digest
-    leaves, how long a sign-in lasts without a visit. Overrides Abilian Core's page. -#}
+    leaves. Overrides Abilian Core's page. -#}
 {% extends "admin/_ads.html" %}
 {% block page_title %}{{ _("Settings") }} · {{ _("Administration") }}{% endblock %}
 {% block heading %}{{ _("Settings") }}{% endblock %}
@@ -9,17 +9,7 @@
   <div class="ads-card__head"><h2 class="ads-card__title" id="settings-title">{{ _("The site") }}</h2></div>
   <div class="ads-card__body ads-stack">
     {% for key in keys %}
-    {% if key.type == "timedelta" %}
-    <fieldset class="ads-field">
-      <legend class="ads-label">{{ key.label }}</legend>
-      <div class="ads-cluster ads-gap-sm">
-        {% for unit, label, top in [("days", _("Days"), none), ("hours", _("Hours"), 23), ("minutes", _("Minutes"), 59)] %}
-        <label class="ads-cluster ads-gap-sm"><input class="ads-input sbe-fit" type="number" min="0" {% if top %}max="{{ top }}"{% endif %} name="{{ key.id }}:{{ unit }}" value="{{ key[unit] }}" aria-describedby="{{ key.id }}-help"><span>{{ label }}</span></label>
-        {% endfor %}
-      </div>
-      <small class="ads-help" id="{{ key.id }}-help">{{ key.description }}</small>
-    </fieldset>
-    {% elif key.hour is defined %}
+    {% if key.hour is defined %}
     <div class="ads-field">
       <label class="ads-label" for="{{ key.id }}">{{ key.label }}</label>
       <select class="ads-select sbe-fit" id="{{ key.id }}" name="{{ key.id }}" aria-describedby="{{ key.id }}-help">
