@@ -240,7 +240,7 @@ def test_the_bar_suggests_as_one_types(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:
     """`/` reaches the field from the page, which opens on what is recent; typing
-    asks the server, the arrows move, Escape closes, Enter opens."""
+    asks the server, the arrows move, Escape closes, Enter opens what they reached."""
     page = logged_in
     page.route(
         "**/search/suggest?*",
@@ -258,8 +258,11 @@ def test_the_bar_suggests_as_one_types(
     field.press_sequentially("we")
     expect(page.locator("#suggestions")).to_be_visible()
     expect(field).to_have_attribute("aria-expanded", "true")
-    expect(page.locator("#s-1")).to_have_attribute("aria-selected", "true")
+    # Nothing is chosen before the arrows: Enter would search what was typed.
+    expect(page.locator('#suggestions [aria-selected="true"]')).to_have_count(0)
 
+    field.press("ArrowDown")
+    expect(page.locator("#s-1")).to_have_attribute("aria-selected", "true")
     field.press("ArrowDown")
     expect(page.locator("#s-2")).to_have_attribute("aria-selected", "true")
     expect(field).to_have_attribute("aria-activedescendant", "s-2")
@@ -269,12 +272,44 @@ def test_the_bar_suggests_as_one_types(
     expect(field).to_have_value("we")
 
     field.press_sequentially("l")
+    expect(page.locator("#suggestions")).to_be_visible()
+    field.press("ArrowDown")
     expect(page.locator("#s-1")).to_have_attribute("aria-selected", "true")
     with page.expect_navigation():
         field.press("Enter")
     assert page.url.endswith("/communities/e2e-community/forum/"), page.url
 
     js_errors.assert_clean("the bar's suggestions")
+
+
+def test_on_a_phone_the_bar_search_stays_open_and_enter_searches(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    page = logged_in
+    page.set_viewport_size({"width": 390, "height": 800})
+    page.route(
+        "**/search/suggest?*",
+        lambda route: route.fulfill(
+            status=200, body=SUGGESTIONS, content_type="text/html"
+        ),
+    )
+    page.goto(f"{base_url}/", wait_until="networkidle")
+    field = page.locator('.sbe-suggest input[name="q"]')
+
+    page.locator(".sbe-bar-search").click()
+    field.press_sequentially("b")
+    # One letter asks nothing, and the field stays where one types.
+    page.wait_for_timeout(400)
+    expect(field).to_be_visible()
+    expect(field).to_be_focused()
+
+    field.press_sequentially("udget")
+    expect(page.locator("#suggestions")).to_be_visible()
+    with page.expect_navigation():
+        field.press("Enter")
+    assert "/search" in page.url, page.url
+    assert "q=budget" in page.url, page.url
+    js_errors.assert_clean("the bar's search on a phone")
 
 
 def test_selecting_all_members_shows_what_applies_to_them(

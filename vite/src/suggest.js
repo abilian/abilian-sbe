@@ -1,8 +1,8 @@
 // The bar's search: as one types, the server's suggestions open under the field
 // (search/_suggestions.html), and on an empty field what one searched and opened
-// lately; the arrows move among them, Enter opens the current one, Escape closes
-// them; `/` reaches the field from any page. On a phone, the bar's magnifier opens
-// the field over the bar.
+// lately; the arrows move among them, Enter opens the one they reached (or else
+// searches what was typed), Escape closes them; `/` reaches the field from any page.
+// On a phone, the bar's magnifier opens the field over the bar.
 
 const box = document.querySelector("[data-suggest]");
 if (box) {
@@ -16,19 +16,30 @@ if (box) {
   const current = () =>
     box.querySelector('[role="option"][aria-selected="true"]');
 
-  const close = () => {
+  // The suggestions go; the field stays, open on a phone, for the typing goes on.
+  const closePanel = () => {
     asked = "";
     panel()?.remove();
     input.setAttribute("aria-expanded", "false");
     input.removeAttribute("aria-activedescendant");
+  };
+
+  // The suggestions go, and on a phone the field with them.
+  const close = () => {
+    closePanel();
     box.classList.remove("is-open");
   };
 
+  // Only an option reached with the arrows is chosen: Enter otherwise searches
+  // what was typed.
   const choose = (option) => {
     options().forEach((o) =>
       o.setAttribute("aria-selected", String(o === option)),
     );
-    if (!option) return;
+    if (!option) {
+      input.removeAttribute("aria-activedescendant");
+      return;
+    }
     input.setAttribute("aria-activedescendant", option.id);
     option.scrollIntoView({ block: "nearest" });
   };
@@ -37,7 +48,7 @@ if (box) {
     const q = input.value.trim();
     // One letter matches too much to say anything.
     if (q.length === 1) {
-      close();
+      closePanel();
       return;
     }
     const params = new URLSearchParams({ q });
@@ -53,14 +64,13 @@ if (box) {
     if (asked !== query) return;
     // Nothing to suggest: an empty field with nothing searched or opened yet.
     if (!html) {
-      close();
+      closePanel();
       return;
     }
     panel()?.remove();
     box.insertAdjacentHTML("beforeend", html);
     input.setAttribute("aria-expanded", "true");
     box.classList.add("is-open");
-    choose(options()[0]);
   };
 
   input.addEventListener("focus", () => {
@@ -68,6 +78,8 @@ if (box) {
   });
 
   input.addEventListener("input", () => {
+    // What was chosen belongs to the text before.
+    choose(null);
     clearTimeout(timer);
     timer = setTimeout(suggest, 150);
   });
@@ -87,8 +99,11 @@ if (box) {
       window.location.assign(current().href);
     } else if (event.key === "Escape" && panel()) {
       // Closes the suggestions and keeps the text: a search field's Escape would
-      // empty it. A second Escape, with nothing open, still does.
+      // empty it. A second Escape, with nothing open, still does, and closes the
+      // field on a phone.
       event.preventDefault();
+      closePanel();
+    } else if (event.key === "Escape") {
       close();
     }
   });

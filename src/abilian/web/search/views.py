@@ -194,8 +194,11 @@ def search_main(user: User, q="", page=1):
         key=operator.attrgetter("label"),
     )
 
-    # Where else the same words are: the communities, with the scope set aside.
-    everywhere = run(recent, types=object_types) if scope else unfiltered
+    # Where else the same words are, of the kind chosen: the communities, with the
+    # scope set aside.
+    everywhere = (
+        run(recent, types=object_types) if scope or object_types else unfiltered
+    )
     community_counts = _groups(everywhere, "community_id")
     results = run(in_scope, recent, types=object_types) if object_types else unfiltered
 

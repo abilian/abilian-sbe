@@ -170,6 +170,10 @@ def test_a_kind_narrows_the_results_and_keeps_its_count(
     assert len(_links(html)) == 1
     assert "/docs/doc/" in _links(html)[0]
     assert "Discussions (2)" in html
+    # The communities count what is of that kind, as the results do.
+    by_community = html.split('id="elsewhere"')[1].split("</section>")[0]
+    assert '<span class="ads-muted">1</span>' in by_community
+    assert '<span class="ads-muted">2</span>' not in by_community
 
 
 def test_a_period_leaves_out_what_changed_before_it(
