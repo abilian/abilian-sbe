@@ -3,13 +3,23 @@
 from __future__ import annotations
 
 import abc
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import CheckConstraint, ForeignKey, Integer, UnicodeText
 from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
 from abilian.core.entities import Entity, EntityQuery
 from abilian.services.security import ANONYMOUS, CREATE, DELETE, OWNER, WRITE
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    from abilian.core.models.subjects import User
+
+#: What reading a commentable object takes beyond the permission on it, by class:
+#: an application registers its own rule (`read_rule`), as SBE does for a document,
+#: which must be reachable through its folders.
+_READ_RULES: dict[type, Callable[[User, Any], bool]] = {}
 
 #: name of backref on target :class:`Entity` object
 ATTRIBUTE = "__comments__"
@@ -36,6 +46,17 @@ def register(cls: type[Entity]) -> type:
 
     Commentable.register(cls)
     return cls
+
+
+def read_rule(cls: type[Entity], rule: Callable[[User, Any], bool]) -> None:
+    """Ask `rule(user, obj)` too before `user` reads, or comments, an `obj` of `cls`."""
+    _READ_RULES[cls] = rule
+
+
+def may_read(user: User, obj: Any) -> bool:
+    """Whether the rule registered for `obj`'s class, if any, lets `user` read it."""
+    rules = [rule for cls, rule in _READ_RULES.items() if isinstance(obj, cls)]
+    return all(rule(user, obj) for rule in rules)
 
 
 def is_commentable(obj_or_class: Any) -> bool:

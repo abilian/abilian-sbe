@@ -23,11 +23,13 @@ from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from abilian.core.extensions import db, mail
 from abilian.core.extensions.login import authenticated
+from abilian.core.models import comment
 from abilian.core.signals import activity
 from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import unwrap
 from abilian.i18n import _, render_template_i18n
 from abilian.sbe.apps.communities.common import object_viewers
+from abilian.sbe.apps.communities.security import is_member
 from abilian.sbe.apps.communities.views import default_view_kw
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.documents.repository import content_repository
@@ -68,6 +70,15 @@ route = community_blueprint.route
 MAX_PREVIEW_SIZE = 1000
 
 __all__ = ()
+
+
+def may_open(user: User, doc: Document) -> bool:
+    """Whether `user` may open `doc`, as its page asks: a member of its community,
+    who may read every folder it is in. Its comments ask the same."""
+    return is_member(user, doc.community) and content_repository.has_access(user, doc)
+
+
+comment.read_rule(Document, may_open)
 
 
 @default_view(community_blueprint, Document, id_attr="doc_id", kw_func=default_view_kw)

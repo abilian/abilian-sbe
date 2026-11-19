@@ -18,7 +18,8 @@ import pytest
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.documents.views.documents import document_history
-from abilian.services import audit_service
+from abilian.services import audit_service, security_service
+from abilian.services.security import WRITER
 from abilian.web.util import url_for
 from tests.util import client_login, ensure_services_started
 
@@ -236,6 +237,25 @@ def test_a_reader_reads_the_comments_and_does_not_comment(
     assert COMMENT_ACTIONS not in html
     assert response.status_code == 403
     assert [c.body for c in document.__comments__] == ["Approved."]
+
+
+def test_one_who_may_not_open_the_document_does_not_comment_on_it(
+    document: Document, client: FlaskClient, db: SQLAlchemy
+) -> None:
+    """A role on its folder is not enough: one must be in its community."""
+    outsider = User(
+        email=f"{uuid4().hex}@example.com", password=uuid4().hex, can_login=True
+    )
+    db.session.add(outsider)
+    db.session.flush()
+    security_service.grant_role(outsider, WRITER, document.parent)
+    db.session.commit()
+
+    with client_login(client, outsider):
+        response = _comment(client, document, "Let me in.")
+
+    assert response.status_code == 403
+    assert document.__comments__ == []
 
 
 def test_the_author_edits_then_deletes_their_comment(

@@ -55,19 +55,27 @@ class CommentExtension:
 
     def can_read(self, user: User, entity):
         """True if `user` can read comments on entity."""
-        return security.has_permission(user, READ, obj=entity, inherit=True)
+        return comments.may_read(user, entity) and security.has_permission(
+            user, READ, obj=entity, inherit=True
+        )
 
     def can_create(self, user: User, entity):
         """True if `user` can comment on entity."""
-        return security.has_permission(user, CREATE, obj=entity, inherit=True)
+        return comments.may_read(user, entity) and security.has_permission(
+            user, CREATE, obj=entity, inherit=True
+        )
 
     def can_write(self, user: User, comment):
         """True if `user` can edit this comment."""
-        return security.has_permission(user, WRITE, obj=comment, roles=OWNER)
+        return comments.may_read(user, comment.entity) and security.has_permission(
+            user, WRITE, obj=comment, roles=OWNER
+        )
 
     def can_delete(self, user: User, comment):
         """True if `user` can delete this comment."""
-        return security.has_permission(user, DELETE, obj=comment, roles=OWNER)
+        return comments.may_read(user, comment.entity) and security.has_permission(
+            user, DELETE, obj=comment, roles=OWNER
+        )
 
     def get_form_context(self, obj):
         """Return a dict: form instance, action button, submit url...
