@@ -102,6 +102,9 @@ administratorship = db.Table(
 
 _RANDOM_PASSWORD_CHARS = string.ascii_letters + string.digits + string.punctuation
 
+#: The longest job title or organization one may give.
+AFFILIATION_LENGTH = 200
+
 
 def gen_random_password(length=15):
     rg = random.SystemRandom()

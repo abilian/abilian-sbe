@@ -5,8 +5,9 @@
 from __future__ import annotations
 
 from wtforms import BooleanField, StringField
-from wtforms.validators import ValidationError
+from wtforms.validators import Length, ValidationError
 
+from abilian.core.models.subjects import AFFILIATION_LENGTH
 from abilian.i18n import _, _l
 from abilian.services.security.models import Role
 from abilian.web.forms import Form, widgets
@@ -34,6 +35,16 @@ class BaseUserAdminForm(Form):
         description=_l("ex: Smith"),
         filters=(strip,),
         validators=[required()],
+    )
+    job_title = StringField(
+        _l("Job title"),
+        filters=(strip,),
+        validators=[Length(max=AFFILIATION_LENGTH)],
+    )
+    organization = StringField(
+        _l("Organization"),
+        filters=(strip,),
+        validators=[Length(max=AFFILIATION_LENGTH)],
     )
 
     can_login = BooleanField(

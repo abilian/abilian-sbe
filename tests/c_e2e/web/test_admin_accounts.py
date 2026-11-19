@@ -155,6 +155,32 @@ def test_an_account_is_disabled_and_made_administrator_from_its_page(
     assert ADMIN in security_service.get_roles(active, no_group_roles=True)
 
 
+def test_an_administrator_gives_an_account_its_job_and_organization(
+    client: FlaskClient, admin_user: User, accounts: dict[str, User], db: SQLAlchemy
+) -> None:
+    active = accounts["active"]
+    data = {
+        "first_name": "Pat",
+        "last_name": "Active",
+        "email": active.email,
+        "can_login": "y",
+        "job_title": " Librarian ",
+        "organization": "x" * 201,
+        "password": "",
+        "confirm_password": "",
+        "__action": "edit",
+    }
+    with client_login(client, admin_user):
+        url = url_for("admin.users_user", user_id=active.id)
+        too_long = client.post(url, data=data)
+        saved = client.post(url, data={**data, "organization": "City Library"})
+
+    assert too_long.status_code == 200
+    assert saved.status_code == 302
+    db.session.expire_all()
+    assert (active.job_title, active.organization) == ("Librarian", "City Library")
+
+
 def test_an_administrator_signs_in_as_someone(
     client: FlaskClient, admin_user: User, accounts: dict[str, User]
 ) -> None:

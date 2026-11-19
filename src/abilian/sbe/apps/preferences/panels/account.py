@@ -15,6 +15,7 @@ from wtforms.validators import Length, ValidationError
 
 from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated_user
+from abilian.core.models.subjects import AFFILIATION_LENGTH
 from abilian.i18n import _, _l, get_default_locale
 from abilian.services import get_service
 from abilian.services.auth.passwords import weakness
@@ -33,9 +34,6 @@ if TYPE_CHECKING:
 #: Where the daily digest's choice is kept, among a person's preferences.
 DAILY = "sbe:notifications:daily"
 
-#: The longest job title or organization one may give.
-NAME_LENGTH = 200
-
 
 class AccountForm(UserPreferencesForm):
     first_name = StringField(
@@ -43,10 +41,12 @@ class AccountForm(UserPreferencesForm):
     )
     last_name = StringField(_l("Last name"), filters=(strip,), validators=[required()])
     job_title = StringField(
-        _l("Job title"), filters=(strip,), validators=[Length(max=NAME_LENGTH)]
+        _l("Job title"), filters=(strip,), validators=[Length(max=AFFILIATION_LENGTH)]
     )
     organization = StringField(
-        _l("Organization"), filters=(strip,), validators=[Length(max=NAME_LENGTH)]
+        _l("Organization"),
+        filters=(strip,),
+        validators=[Length(max=AFFILIATION_LENGTH)],
     )
     daily = BooleanField(_l("Each morning, what happened in my communities"))
 

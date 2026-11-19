@@ -1,7 +1,7 @@
-{#- One account, or a new one: who it is and what it may do (sign in at all, run the
-    site) and its password; beside it, its communities and its last
-    sign-ins. Signing in as the person is in sight. Overrides Abilian Core's page;
-    drawn in `mockups/templates/admin-user.html`. -#}
+{#- One account, or a new one: who it is, what it does and where, what it may do
+    (sign in at all, run the site) and its password; beside it, its communities and
+    its last sign-ins. Signing in as the person is in sight. Overrides Abilian Core's
+    page; drawn in `mockups/templates/admin-user.html`. -#}
 {% extends "admin/_ads.html" %}
 {% import "admin/_ads_macros.html" as a with context %}
 {% import "forum/_post_fields.html" as fields %}
@@ -31,6 +31,8 @@
       <div class="ads-grid ads-col-sm">
         {{ input(form.first_name, label=_("First name"), autocomplete="off") }}
         {{ input(form.last_name, label=_("Last name"), autocomplete="off") }}
+        {{ input(form.job_title, label=_("Job title"), autocomplete="off") }}
+        {{ input(form.organization, label=_("Organization"), autocomplete="off") }}
       </div>
       {{ input(form.email, "email", _("Email address"), "off", help=true) }}
       <label class="ads-switch"><input type="checkbox" name="{{ form.can_login.name }}" value="y" {{ "checked" if form.can_login.data }}><span class="ads-switch__track"></span><span>{{ _("May sign in") }}</span></label>
