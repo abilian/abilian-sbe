@@ -1,20 +1,28 @@
-{#- Mon fil: the news of my communities, newest first; beside it, my communities, the
-    most active first. Drawn in `mockups/templates/home.html`. -#}
+{#- Mon fil: the news of my communities, newest first, all of it or of one kind;
+    beside it, my communities, the most active first, and the events to come. Drawn
+    in `mockups/templates/home.html`. -#}
 {% extends "ads_base.html" %}
+{% import "calendar/_events.html" as ev with context %}
 {% block page_title %}{{ _("My feed") }}{% endblock %}
 {% block pretitle %}{{ _("Hello %(name)s", name=current_user.first_name or current_user.name) }}{% endblock %}
 {% block heading %}{{ _("My feed") }}{% endblock %}
 {% block body %}
 <div class="ads-with-aside">
   <div class="ads-stack" aria-label="{{ _('News of my communities') }}">
+    <ul class="ads-pills" aria-label="{{ _('Which news') }}">
+      <li><a class="ads-pill" href="{{ url_for('.home') }}" {{ 'aria-current="page"' | safe if not kind }}>{{ _("All") }}</a></li>
+      {% for name, label in filters.items() %}
+      <li><a class="ads-pill" href="{{ url_for('.home', kind=name) }}" {{ 'aria-current="page"' | safe if kind == name }}>{{ label }}</a></li>
+      {% endfor %}
+    </ul>
     {% for item in items %}
     {{ m.feed_entry(item) }}
     {% else %}
-    <div class="ads-card"><div class="ads-card__body ads-muted">{{ _("Nothing has happened in your communities yet.") }}</div></div>
+    <div class="ads-card"><div class="ads-card__body ads-muted">{{ _("Nothing of this kind in your communities yet.") if kind else _("Nothing has happened in your communities yet.") }}</div></div>
     {% endfor %}
   </div>
 
-  <aside class="ads-stack" aria-label="{{ _('My communities') }}">
+  <aside class="ads-stack" aria-label="{{ _('My communities and what is coming up') }}">
     <section class="ads-card" aria-labelledby="mine">
       <div class="ads-card__head"><h2 class="ads-card__title" id="mine">{{ _("My communities") }}</h2></div>
       <ul class="ads-list">
@@ -35,6 +43,12 @@
       </ul>
       <div class="ads-card__foot"><a href="{{ url_for('communities.index') }}">{{ _("All my communities (%(num)d)", num=communities_count) }}</a></div>
     </section>
+    {% if coming %}
+    <section class="ads-card" aria-labelledby="coming">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="coming">{{ _("Coming up") }}</h2></div>
+      <ul class="ads-list">{% for e in coming %}{{ ev.event_row(e) }}{% endfor %}</ul>
+    </section>
+    {% endif %}
   </aside>
 </div>
 {% endblock %}

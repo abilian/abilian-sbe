@@ -28,9 +28,10 @@ def get_recent_entries(
     num: int = 20,
     actor: User | None = None,
     community: CommunityPresenter | None = None,
+    kinds: tuple[type, ...] = (),
 ) -> list[ActivityEntry]:
     """What `user` may see of the latest activity, by `actor` or in `community`
-    if given."""
+    if given, on objects of one of `kinds` if any."""
     # Check just in case
     if not user.has_role(ADMIN):
         if community and not community.has_member(user):
@@ -47,6 +48,10 @@ def get_recent_entries(
         )
     if actor:
         query = query.filter(ActivityEntry.actor == actor)
+    if kinds:
+        query = query.filter(
+            ActivityEntry.object_type.in_([kind.entity_type for kind in kinds])
+        )
 
     # Security check
     #

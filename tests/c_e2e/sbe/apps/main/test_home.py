@@ -4,10 +4,12 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from typing import TYPE_CHECKING
 
 from flask import url_for
 
+from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import MANAGER, Community
 from abilian.sbe.apps.forum.models import Thread
 from abilian.services.activity.models import ActivityEntry
@@ -150,3 +152,51 @@ def test_a_manager_finds_the_settings_in_the_header(
 
     assert url_for("communities.settings", community_id=community1.slug) in html
     assert "Invite members" in html
+
+
+def test_my_feed_keeps_one_kind_of_news_when_asked(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = community1.test_user
+    _started(db, community1, member, "A thread in my community")
+
+    with client_login(client, member):
+        discussions = client.get(url_for("main.home", kind="discussions"))
+        documents = client.get(url_for("main.home", kind="documents"))
+        unknown = client.get(url_for("main.home", kind="nonsense"))
+
+    assert "A thread in my community" in discussions.get_data(as_text=True)
+    html = documents.get_data(as_text=True)
+    assert "A thread in my community" not in html
+    assert 'href="/?kind=documents" aria-current="page"' in html
+    assert unknown.status_code == 404
+
+
+def test_my_feed_lists_the_events_to_come_in_my_communities(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    elsewhere = Community(name="Somewhere else")
+    soon = datetime.now() + timedelta(days=3)
+    long_ago = datetime(2020, 1, 6, 9)
+    for title, community, start in (
+        ("Soon in mine", community1, soon),
+        ("Soon elsewhere", elsewhere, soon),
+        ("Long ago in mine", community1, long_ago),
+    ):
+        db.session.add(
+            Event(
+                title=title,
+                community=community,
+                start=start,
+                end=start + timedelta(hours=2),
+            )
+        )
+    db.session.commit()
+
+    with client_login(client, community1.test_user):
+        html = client.get(url_for("main.home")).get_data(as_text=True)
+
+    coming = html.split('id="coming"')[1]
+    assert "Soon in mine" in coming
+    assert "Soon elsewhere" not in coming
+    assert "Long ago in mine" not in coming

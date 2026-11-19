@@ -53,6 +53,15 @@ SECTIONS: dict[type, str] = {
     Community: _l("Members"),
 }
 
+#: Mon fil's filters: the name in the address, the kinds of object kept. Each is
+#: labelled with its kinds' section.
+FILTERS: dict[str, tuple[type, ...]] = {
+    "discussions": (Thread, Post),
+    "documents": (Document,),
+    "calendar": (Event,),
+    "wiki": (WikiPage,),
+}
+
 #: How much of a post an entry shows; the page cuts it further, to three lines.
 EXCERPT_LENGTH = 300
 

@@ -1777,6 +1777,18 @@ msgstr "Copier le lien"
 msgid "Link copied"
 msgstr "Lien copié"
 
+msgid "Which news"
+msgstr "Quelles nouvelles"
+
+msgid "Nothing of this kind in your communities yet."
+msgstr "Rien de ce genre dans vos communautés pour l’instant."
+
+msgid "My communities and what is coming up"
+msgstr "Mes communautés et ce qui vient"
+
+msgid "Coming up"
+msgstr "À venir"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 
