@@ -41,6 +41,12 @@ DIRECTORY_SORT_COLUMNS = {
     "created_at": (User.created_at, *_NAME),
     "last_active": (User.last_active, *_NAME),
 }
+DIRECTORY_SEARCH_COLUMNS = (
+    User.first_name,
+    User.last_name,
+    User.job_title,
+    User.organization,
+)
 
 
 @social.route("/users/")
@@ -68,14 +74,16 @@ def users(user: User) -> str:
         User.query if everyone else neighbours,
         DIRECTORY_SORT_COLUMNS,
         "name",
-        (User.first_name, User.last_name, User.job_title, User.organization),
+        DIRECTORY_SEARCH_COLUMNS,
     )
+    found_mine = listing.filter(neighbours, DIRECTORY_SEARCH_COLUMNS).count()
+    found_all = listing.filter(User.query, DIRECTORY_SEARCH_COLUMNS).count()
     return render_template(
         "social/users.html",
         listing=listing,
         users=people,
         everyone=everyone,
-        counts={"mine": neighbours.count() if mine else 0, "all": User.query.count()},
+        counts={"mine": found_mine if mine else 0, "all": found_all},
         shared=communities_in_common(people, mine),
     )
 

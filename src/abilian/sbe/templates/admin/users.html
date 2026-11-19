@@ -13,7 +13,7 @@
   <div class="ads-card__head ads-spread">
     <ul class="ads-pills" aria-label="{{ _('Which accounts') }}">
       {% for name, label in kinds %}
-      <li><a class="ads-pill" href="{{ url_for('.users', state=None if name == 'all' else name) }}" {{ 'aria-current="page"' | safe if name == kind }}>{{ label }} ({{ counts[name] }})</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.users', state=None if name == 'all' else name, q=listing.search or None) }}" {{ 'aria-current="page"' | safe if name == kind }}>{{ label }} ({{ counts[name] }})</a></li>
       {% endfor %}
     </ul>
     <form method="get" action="{{ url_for('.users') }}">

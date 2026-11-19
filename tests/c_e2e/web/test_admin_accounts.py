@@ -106,6 +106,18 @@ def test_each_state_says_how_many_accounts_it_has(
     assert "Administrators (2)" in pills
 
 
+def test_a_search_counts_and_keeps_what_it_found_in_each_state(
+    client: FlaskClient, admin_user: User, accounts: dict[str, User]
+) -> None:
+    html = _page(client, admin_user, url_for("admin.users", q="dis"))
+
+    pills = html.split('class="ads-pills"')[1].split("</ul>")[0]
+    assert "All (1)" in pills
+    assert "Never signed in (0)" in pills
+    assert "Disabled (1)" in pills
+    assert "/admin/users?state=disabled&q=dis" in pills
+
+
 def test_an_accounts_page_says_where_it_is_and_when_it_came(
     client: FlaskClient, admin_user: User, accounts: dict[str, User]
 ) -> None:

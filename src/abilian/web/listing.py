@@ -69,8 +69,7 @@ class Listing:
         `text` gives what the filter searches in a row.
         """
         listing = cls.from_request(sort_keys, default_sort, prefix)
-        wanted = listing.search.lower()
-        matching = [row for row in rows if wanted in text(row).lower()]
+        matching = [row for row in rows if listing.matches(text(row))]
         matching.sort(key=sort_keys[listing.sort], reverse=listing.descending)
         listing = replace(listing, total=len(matching))
         return listing, matching[listing.start : listing.stop]
@@ -85,16 +84,7 @@ class Listing:
     ) -> tuple[Listing, list[Any]]:
         """Filter, sort and page in the database."""
         listing = cls.from_request(sort_columns, default_sort)
-        if listing.search:
-            wanted = listing.search.lower()
-            query = query.filter(
-                or_(
-                    *(
-                        func.lower(column).contains(wanted, autoescape=True)
-                        for column in search_columns
-                    )
-                )
-            )
+        query = listing.filter(query, search_columns)
         listing = replace(listing, total=query.count())
         direction = desc if listing.descending else asc
         # Empty values go last. MariaDB has no NULLS LAST, so sort on IS NULL
@@ -109,6 +99,24 @@ class Listing:
         ordering += [direction(column) for column in primary_key]
         rows = query.order_by(*ordering).slice(listing.start, listing.stop).all()
         return listing, rows
+
+    def matches(self, text: str) -> bool:
+        """Whether a row in memory, by what the filter searches in it, is kept."""
+        return self.search.lower() in text.lower()
+
+    def filter(self, query: Any, search_columns: tuple[Any, ...]) -> Any:
+        """The rows of a query the filter keeps: so a tab can count them too."""
+        if not self.search:
+            return query
+        wanted = self.search.lower()
+        return query.filter(
+            or_(
+                *(
+                    func.lower(column).contains(wanted, autoescape=True)
+                    for column in search_columns
+                )
+            )
+        )
 
     @property
     def pages(self) -> int:

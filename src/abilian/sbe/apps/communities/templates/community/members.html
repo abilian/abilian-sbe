@@ -9,8 +9,8 @@
 <div class="ads-card ads-datatable">
   <div class="ads-card__head ads-spread">
     <ul class="ads-pills" aria-label="{{ _('Whom to list') }}">
-      <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug) }}" {{ 'aria-current="page"' | safe if not only_managers }}>{{ _("All") }} ({{ counts.all }})</a></li>
-      <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug, role='manager') }}" {{ 'aria-current="page"' | safe if only_managers }}>{{ _("Managers") }} ({{ counts.managers }})</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug, q=listing.search or none) }}" {{ 'aria-current="page"' | safe if not only_managers }}>{{ _("All") }} ({{ counts.all }})</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug, role='manager', q=listing.search or none) }}" {{ 'aria-current="page"' | safe if only_managers }}>{{ _("Managers") }} ({{ counts.managers }})</a></li>
     </ul>
     {% if can_manage_community %}
     <details class="ads-dropdown">

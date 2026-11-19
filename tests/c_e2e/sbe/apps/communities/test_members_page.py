@@ -73,6 +73,17 @@ def test_the_managers_are_one_pill_away(
     assert 'aria-current="page">Managers (1)' in html
 
 
+def test_a_search_counts_what_it_found_under_each_pill(
+    people: dict[str, User], community1: Community, client: FlaskClient
+) -> None:
+    html = _page(client, people["member"], community1, q="member")
+
+    pills = html.split('class="ads-pills"')[1].split("</ul>")[0]
+    assert "All (1)" in pills
+    assert "Managers (0)" in pills
+    assert "role=manager&q=member" in pills
+
+
 def test_a_member_reads_the_list_and_changes_nothing(
     people: dict[str, User], community1: Community, client: FlaskClient
 ) -> None:

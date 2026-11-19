@@ -29,6 +29,7 @@ SORT_COLUMNS = {
     "email": (func.lower(User.email), *_NAME),
     "last_active": (User.last_active, *_NAME),
 }
+SEARCH_COLUMNS = (User.first_name, User.last_name, User.email)
 
 
 class UsersPanel(AdminPanel):
@@ -67,11 +68,14 @@ class UsersPanel(AdminPanel):
             query,
             SORT_COLUMNS,
             "name",
-            (User.first_name, User.last_name, User.email),
+            SEARCH_COLUMNS,
         )
         admins = set(db.session.scalars(admin_ids))
         rows = [(user, [ADMIN] if user.id in admins else []) for user in users]
-        counts = {name: query.count() for name, query in kinds.items()}
+        counts = {
+            name: listing.filter(query, SEARCH_COLUMNS).count()
+            for name, query in kinds.items()
+        }
         return render_template(
             "admin/users.html", listing=listing, rows=rows, kind=kind, counts=counts
         )

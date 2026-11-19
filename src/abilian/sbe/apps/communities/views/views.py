@@ -393,11 +393,12 @@ def members() -> str:
     rows = _members_query().all()
     managers = [row for row in rows if str(row[2]) == "manager"]
     only_managers = request.args.get("role") == "manager"
+
+    def text(row: tuple) -> str:
+        return f"{row[0].name} {row[0].email}"
+
     listing, memberships = Listing.from_rows(
-        managers if only_managers else rows,
-        sort_keys,
-        "name",
-        text=lambda row: f"{row[0].name} {row[0].email}",
+        managers if only_managers else rows, sort_keys, "name", text=text
     )
 
     ctx = {
@@ -405,7 +406,10 @@ def members() -> str:
         "memberships": memberships,
         "threads_count": threads_count,
         "only_managers": only_managers,
-        "counts": {"all": len(rows), "managers": len(managers)},
+        "counts": {
+            name: sum(listing.matches(text(row)) for row in group)
+            for name, group in (("all", rows), ("managers", managers))
+        },
     }
     return render_template("community/members.html", **ctx)
 
