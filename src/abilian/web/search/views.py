@@ -23,7 +23,7 @@ from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.util import utcnow
 from abilian.i18n import _, _l
 from abilian.services import get_service
-from abilian.services.security import AUTHENTICATED
+from abilian.services.security import AUTHENTICATED, is_site_admin, security
 from abilian.web import views
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.action import Endpoint
@@ -210,7 +210,8 @@ def search_main(user: User, q="", page=1):
     communities = {
         c.id: c for c in Entity.query.filter(Entity.id.in_(ids - {None})).all()
     }
-    # Looked up on its own: a search with no result in it still says where it looked.
+    # Looked up on its own: a search with no result in it still says where it looked,
+    # to those who are in it; the others learn nothing of it, not even its name.
     scope_community = (
         Entity.query.filter(
             Entity.slug == scope, Entity._entity_type == COMMUNITY_TYPE
@@ -218,6 +219,10 @@ def search_main(user: User, q="", page=1):
         if scope
         else None
     )
+    if scope_community is not None and not (
+        is_site_admin(user) or security.get_roles(user, scope_community)
+    ):
+        scope_community = None
     elsewhere = sorted(
         (
             (communities[cid], count, url(community=communities[cid].slug))

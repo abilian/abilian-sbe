@@ -201,6 +201,25 @@ def test_a_search_with_nothing_in_its_community_still_says_where_it_looked(
     assert community1.name in html.split('class="ads-chip')[1]
 
 
+def test_a_search_in_a_community_one_is_not_in_does_not_name_it(
+    community1: Community,
+    community2: Community,
+    db: SQLAlchemy,
+    client: FlaskClient,
+) -> None:
+    ensure_services_started(["security", "indexing"])
+    member = community1.test_user
+    community1.set_membership(member, MEMBER)
+    db.session.commit()
+
+    with client_login(client, member):
+        response = client.get(
+            url_for("search.search_main", q="nowhere", community=community2.slug)
+        )
+
+    assert community2.name not in unescape(response.get_data(as_text=True))
+
+
 def _suggestions(client: FlaskClient, user: User, **args) -> str:
     with client_login(client, user):
         response = client.get(url_for("search.suggest", **args))
