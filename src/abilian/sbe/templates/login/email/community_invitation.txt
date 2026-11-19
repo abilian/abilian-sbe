@@ -1,0 +1,22 @@
+Hello{% if user.first_name %} {{ user.first_name }}{% endif %},
+
+{{ inviter.name }} has added you to the community "{{ community.name }}" on {{ config.SITE_NAME }}.
+{% if note %}
+They write:
+
+{{ note | indent(2, first=true) }}
+{% endif %}
+{% if first_time %}
+To come in, choose your password at this address, which works for 24 hours:
+
+{{ link }}
+
+After that, "Forgot password?" on the sign-in page sends you another one.
+{% else %}
+You will find the community here:
+
+{{ link }}
+{% endif %}
+Best regards,
+
+  {{ config.SITE_NAME }}

@@ -8,7 +8,7 @@
 {% block heading %}<span class="ads-cluster ads-gap-sm">{{ m.tile(community) }}<span>{{ community.name }}</span></span>{% endblock %}
 {% block actions %}
 {% if manager %}
-<a class="ads-btn" href="{{ url_for('communities.wizard_data_insertion', community_id=community.slug) }}" aria-label="{{ _('Invite members') }}">{{ icon("user-plus") }}<span class="sbe-wide-only">{{ _("Invite members") }}</span></a>
+<a class="ads-btn" href="{{ url_for('communities.wizard_data_insertion', community_id=community.slug) }}" data-modal-open="#modal-invite" aria-label="{{ _('Invite members') }}">{{ icon("user-plus") }}<span class="sbe-wide-only">{{ _("Invite members") }}</span></a>
 <details class="ads-dropdown">
   <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the community') }}">{{ icon("dots-vertical") }}</summary>
   <div class="ads-menu">
@@ -30,4 +30,24 @@
   {% endfor %}
 </ul>
 {% block content %}{% endblock %}
+{#- Inviting people, from any of the community's pages, for its managers; not on the
+    pages of inviting itself (they set `invite_page`): the first has the same fields,
+    and is where a spreadsheet goes. -#}
+{% if manager and invite_page is not defined %}
+{% import "community/_invite_fields.html" as invite with context %}
+<dialog class="ads-modal__panel sbe-dialog sbe-modal-wide" id="modal-invite" aria-labelledby="modal-invite-title">
+  <form method="post" action="{{ url_for('communities.wizard_check_data', community_id=community.slug) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-invite-title">{{ _("Invite members to %(name)s", name=community.name) }}</h2></div>
+    <div class="ads-modal__body ads-stack">
+      {{ invite.fields(community) }}
+      <small class="ads-help"><a href="{{ url_for('communities.wizard_data_insertion', community_id=community.slug) }}">{{ _("Or import a spreadsheet") }}</a></small>
+    </div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--primary" type="submit">{{ icon("user-plus") }}{{ _("Invite") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
 {% endblock %}

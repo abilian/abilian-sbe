@@ -1,6 +1,8 @@
 {#- Inviting people, step 3: accounts for those who have none, a name each, and a role.
-    Each gets an email to choose a password. -#}
+    Each one added gets an e-mail (`communities/invitations.py`), with the word that
+    came with the invitation. -#}
 {% extends "ads_community.html" %}
+{% set invite_page = true %}
 {% import "community/_wizard.html" as wizard with context %}
 {% block page_title %}{{ _("Invite members") }} · {{ g.community.name }}{% endblock %}
 {% block content %}
@@ -41,5 +43,6 @@
   {{ csrf.field() }}
   <input id="existing_account" type="hidden" name="existing_account" value="{{ existing_account }}">
   <input id="new_accounts" type="hidden" name="new_accounts" value="{{ new_accounts | tojson }}">
+  <input type="hidden" name="note" value="{{ note }}">
 </form>
 {% endblock %}

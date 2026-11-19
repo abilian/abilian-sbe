@@ -1,8 +1,9 @@
 # Copyright (c) 2012-2026, Abilian SAS
 
-"""Inviting people: what will happen to each address, said as they are typed; typed
-addresses go on to the accounts to make, with one role for all; whoever never signed
-in is invited again."""
+"""Inviting people: from a dialog on every page of the community; what will happen to
+each address, said as they are typed; typed addresses go on to the accounts to make,
+with one role for all and a word to go with the invitation; each one added is told by
+e-mail, and whoever never signed in gets the link to choose a password."""
 
 from __future__ import annotations
 
@@ -14,11 +15,11 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
-from flask import url_for
 
 from abilian.core.extensions import mail
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
+from abilian.web.util import url_for
 from tests.util import client_login, ensure_services_started
 
 if TYPE_CHECKING:
@@ -84,11 +85,11 @@ def test_each_address_says_what_inviting_does_to_it(
 
     html = unescape(html)
     assert "Already a member: nothing to do" in html
-    assert "Has an account: will be added" in html
+    assert "Has an account: will be added, and told by email" in html
     assert "Invited already, never signed in" in html
     assert "No account: one will be made" in html
     assert "Not an address: it will be left out" in html
-    assert "2 people will get an email." in html
+    assert "3 people will get an email." in html
 
 
 def test_typed_addresses_go_on_to_the_accounts_to_make_with_their_role(
@@ -99,7 +100,11 @@ def test_typed_addresses_go_on_to_the_accounts_to_make_with_their_role(
         people["manager"],
         "communities.wizard_check_data",
         community1,
-        **{"wizard-emails": "account@example.com new@x.org", "role": "manager"},
+        **{
+            "wizard-emails": "account@example.com new@x.org",
+            "role": "manager",
+            "note": "Welcome to the board.",
+        },
     )
 
     assert '<input type="hidden" name="account" value="new@x.org">' in html
@@ -107,9 +112,10 @@ def test_typed_addresses_go_on_to_the_accounts_to_make_with_their_role(
     assert value
     carried = json.loads(unescape(value.group(1)))
     assert carried == {"account@example.com": "manager"}
+    assert '<input type="hidden" name="note" value="Welcome to the board.">' in html
 
 
-def test_whoever_never_signed_in_is_invited_again(
+def test_each_one_added_is_told_with_the_word_that_came_with_it(
     client: FlaskClient, community1: Community, people: dict[str, User]
 ) -> None:
     accounts = {"invited@example.com": "member", "account@example.com": "member"}
@@ -117,12 +123,44 @@ def test_whoever_never_signed_in_is_invited_again(
     with client_login(client, people["manager"]), mail.record_messages() as outbox:
         client.post(
             url_for("communities.wizard_saving", community_id=community1.slug),
-            data={"existing_account": json.dumps(accounts)},
+            data={"existing_account": json.dumps(accounts), "note": "See you Monday."},
         )
 
-    assert [message.recipients for message in outbox] == [["invited@example.com"]]
+    told = {message.recipients[0]: message for message in outbox}
+    assert set(told) == set(accounts)
+    for message in told.values():
+        assert community1.name in message.subject
+        assert people["manager"].name in message.subject
+        assert "See you Monday." in message.body
+    # Whoever never signed in chooses a password; the others find the community.
+    choose = url_for("login.reset_password", token="TOKEN").removesuffix("TOKEN")
+    assert choose in told["invited@example.com"].body
+    community_url = url_for(community1, _external=True)
+    assert community_url in told["account@example.com"].body
     assert community1.get_role(people["invited"]) == MEMBER
     assert community1.get_role(people["account"]) == MEMBER
+
+
+def test_a_managers_pages_invite_from_a_dialog(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    home = url_for("wall.index", community_id=community1.slug)
+    first_page = url_for(
+        "communities.wizard_data_insertion", community_id=community1.slug
+    )
+
+    with client_login(client, people["manager"]):
+        managed = client.get(home).get_data(as_text=True)
+        page = client.get(first_page).get_data(as_text=True)
+    with client_login(client, people["member"]):
+        seen = client.get(home).get_data(as_text=True)
+
+    assert 'id="modal-invite"' in managed
+    assert 'data-modal-open="#modal-invite"' in managed
+    # The first page has the same fields: not twice.
+    assert 'id="modal-invite"' not in page
+    assert page.count('id="wizard-emails"') == 1
+    assert 'id="modal-invite"' not in seen
 
 
 def test_a_member_sees_no_preview(

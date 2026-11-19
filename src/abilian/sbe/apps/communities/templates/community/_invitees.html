@@ -11,7 +11,7 @@
     <span class="ads-fill sbe-lines">
       <span class="ads-truncate">{{ invitee.user.name if invitee.user else invitee.email }}</span>
       {% if invitee.status == "member" %}<span class="ads-muted">{{ _("Already a member: nothing to do") }}</span>
-      {% elif invitee.status == "account" %}<span class="ads-muted">{{ _("Has an account: will be added") }}</span>
+      {% elif invitee.status == "account" %}<span class="ads-muted">{{ _("Has an account: will be added, and told by email") }}</span>
       {% elif invitee.status == "invited" %}<span class="ads-muted">{{ _("Invited already, never signed in: will be added, and invited again") }}</span>
       {% elif invitee.status == "new" %}<span class="ads-muted">{{ _("No account: one will be made, and an invitation sent") }}</span>
       {% else %}<span class="ads-toned ads-tone-danger sbe-upload__error">{{ icon("alert-triangle") }}{{ _("Not an address: it will be left out") }}</span>{% endif %}

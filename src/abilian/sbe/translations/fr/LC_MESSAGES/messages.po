@@ -1862,6 +1862,21 @@ msgstr "Selon la configuration : %(schedule)s"
 msgid "The hour it leaves, on the server's clock. The task scheduler takes it up when it restarts."
 msgstr "L’heure à laquelle il part, à l’horloge du serveur. Le planificateur de tâches la prend en compte à son redémarrage."
 
+msgid "Invite members to %(name)s"
+msgstr "Inviter des membres dans %(name)s"
+
+msgid "Or import a spreadsheet"
+msgstr "Ou importer un tableur"
+
+msgid "A word to go with the invitation"
+msgstr "Un mot pour accompagner l’invitation"
+
+msgid "Optional"
+msgstr "Facultatif"
+
+msgid "%(inviter)s invites you to %(community)s on %(site)s"
+msgstr "%(inviter)s vous invite dans %(community)s sur %(site)s"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 
@@ -3438,8 +3453,8 @@ msgstr "Ce que l’invitation fait de chaque adresse"
 msgid "Already a member: nothing to do"
 msgstr "Déjà membre : rien à faire"
 
-msgid "Has an account: will be added"
-msgstr "A un compte : sera ajouté"
+msgid "Has an account: will be added, and told by email"
+msgstr "A un compte : sera ajouté, et prévenu par e-mail"
 
 msgid "Invited already, never signed in: will be added, and invited again"
 msgstr "Déjà invité, jamais connecté : sera ajouté, et invité de nouveau"

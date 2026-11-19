@@ -2,6 +2,7 @@
     are left alone; those with an account will be added, each with a role, or taken
     off the list; those without one get an account at the next step. -#}
 {% extends "ads_community.html" %}
+{% set invite_page = true %}
 {% import "community/_wizard.html" as wizard with context %}
 {% block page_title %}{{ _("Invite members") }} · {{ g.community.name }}{% endblock %}
 {% block content %}
@@ -44,5 +45,6 @@
 <form id="wizard-form" method="post" action="{{ url_for('.wizard_new_accounts', community_id=g.community.slug) }}" hidden>
   {{ csrf.field() }}
   <input data-wizard-accounts type="hidden" name="wizard-emails" value="{{ wizard_emails }}">
+  <input type="hidden" name="note" value="{{ note }}">
 </form>
 {% endblock %}

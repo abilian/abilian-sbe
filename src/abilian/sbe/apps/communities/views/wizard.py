@@ -16,12 +16,13 @@ from validate_email import validate_email
 from werkzeug.exceptions import BadRequest
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.subjects import User
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _
 from abilian.sbe.apps.communities.decorators import can_manage
-from abilian.services.auth.views import send_reset_password_instructions
+from abilian.sbe.apps.communities.invitations import send_invitation
 from abilian.web import csrf
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
@@ -31,11 +32,15 @@ from .views import route, tab
 if TYPE_CHECKING:
     from collections.abc import Sequence
 
+    from werkzeug.datastructures import MultiDict
     from werkzeug.wrappers import Response
 
 
 #: The roles one is invited with.
 INVITED_ROLES = ("member", "manager")
+
+#: The longest word a manager may write to go with an invitation.
+NOTE_LENGTH = 1000
 
 #: People paste addresses from anywhere: a spreadsheet column, a mail header.
 EMAIL_SEPARATORS = re.compile(r"[\s,;]+")
@@ -46,7 +51,7 @@ class Invitee:
     """An address typed in, its account if it has one, and what inviting does to it:
     nothing for a `member`; adds an `account`; adds, and sends the invitation again
     to, an account `invited` that never signed in; makes a `new` one; ignores an
-    `invalid` address."""
+    `invalid` address. Each one added is told by e-mail."""
 
     email: str
     status: str
@@ -54,7 +59,7 @@ class Invitee:
 
     @property
     def gets_email(self) -> bool:
-        return self.status in {"invited", "new"}
+        return self.status in {"account", "invited", "new"}
 
 
 def classify_invitees(text: str) -> list[Invitee]:
@@ -91,6 +96,15 @@ def wizard_preview() -> str:
     the first page's form as it is: a long list makes too long an address."""
     invitees = classify_invitees(request.form.get("wizard-emails", ""))
     return render_template("community/_invitees.html", invitees=invitees)
+
+
+def invitation_note(form: MultiDict[str, str]) -> str:
+    """The word a manager wrote to go with the invitation; refused if too long."""
+    note = form.get("note", "").strip()
+    if len(note) > NOTE_LENGTH:
+        msg = f"An invitation's note is at most {NOTE_LENGTH} characters"
+        raise BadRequest(msg)
+    return note
 
 
 def wizard_parse_emails(text: str) -> tuple[list[str], list[str]]:
@@ -275,7 +289,8 @@ def wizard_check_data() -> Response | str:
             msg = f"Not a role one is invited with: {role!r}"
             raise BadRequest(msg)
         return _new_accounts_page(
-            [{**account, "role": role} for account in final_email_list]
+            [{**account, "role": role} for account in final_email_list],
+            invitation_note(request.form),
         )
 
     csv_file = request.files.get("csv_file")
@@ -312,6 +327,7 @@ def wizard_check_data() -> Response | str:
         "csv_roles": existing_accounts_csv_roles,
         "wizard_emails": final_email_list_json,
         "existing_members_objects": existing_members_objects,
+        "note": invitation_note(request.form),
     }
     return render_template("community/wizard_check_members.html", **ctx)
 
@@ -332,12 +348,14 @@ def wizard_new_accounts() -> str | Response:
         )
     )
 
-    return _new_accounts_page(json.loads(request.form["wizard-emails"]))
+    return _new_accounts_page(
+        json.loads(request.form["wizard-emails"]), invitation_note(request.form)
+    )
 
 
-def _new_accounts_page(wizard_accounts: list[dict[str, Any]]) -> str:
+def _new_accounts_page(wizard_accounts: list[dict[str, Any]], note: str) -> str:
     """The last page: names for the addresses with no account; those with one go
-    along, to be added."""
+    along, to be added, and the word that goes with the invitation."""
     wizard_existing_account = {}
     new_accounts = []
 
@@ -355,6 +373,7 @@ def _new_accounts_page(wizard_accounts: list[dict[str, Any]]) -> str:
         "community/wizard_new_accounts.html",
         existing_account=existing_account,
         new_accounts=new_accounts,
+        note=note,
     )
 
 
@@ -362,13 +381,12 @@ def _new_accounts_page(wizard_accounts: list[dict[str, Any]]) -> str:
 @csrf.protect
 @can_manage
 def wizard_saving() -> Response:
-    """Automatically add existing accounts to the current community, and send
-    the invitation again to those that never signed in.
-
-    Create accounts for new emails, add them to the community and send
-    them a password reset email.
-    """
+    """Add the accounts there are to the community, make the others, and tell each
+    one by e-mail, with the word that came with the invitation: one who never
+    signed in gets the link to choose a password."""
     community = g.community._model
+    inviter = authenticated_user()
+    note = invitation_note(request.form)
     existing_accounts = request.form["existing_account"]
     existing_accounts = json.loads(existing_accounts)
     new_accounts = request.form.get("new_accounts", "[]")
@@ -387,8 +405,7 @@ def wizard_saving() -> Response:
             activity.send(app, actor=user, verb="join", object=community)
 
             db.session.commit()
-            if user.can_login and not user.last_active:
-                send_reset_password_instructions(user)
+            send_invitation(user, community, inviter, note)
 
     if new_accounts:
         for account in new_accounts:
@@ -406,8 +423,7 @@ def wizard_saving() -> Response:
             app = unwrap(current_app)
             activity.send(app, actor=user, verb="join", object=community)
             db.session.commit()
-
-            send_reset_password_instructions(user)
+            send_invitation(user, community, inviter, note)
 
     flash(_("New members added successfully"), "success")
     return redirect(url_for(".members", community_id=community.slug))

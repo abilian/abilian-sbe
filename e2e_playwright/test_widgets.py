@@ -359,3 +359,27 @@ def test_my_feed_starts_a_discussion_in_the_community_chosen(
 
     assert page.url.endswith(f"/communities/{COMMUNITY}/forum/new_thread/")
     js_errors.assert_clean("the composer on my feed")
+
+
+def test_inviting_opens_a_dialog_from_the_communitys_home(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    page = logged_in
+    page.goto(f"{base_url}/communities/{COMMUNITY}/wall/", wait_until="networkidle")
+
+    page.get_by_label("Invite members").first.click()
+    dialog = page.locator("#modal-invite")
+    expect(dialog).to_be_visible()
+    dialog.locator("#wizard-emails").fill("someone.invited@example.org")
+    expect(dialog.locator("[data-preview] li")).to_have_count(1)
+    dialog.locator("#invite-note").fill("Welcome aboard.")
+    dialog.get_by_role("button", name="Invite").click()
+    page.wait_for_load_state("networkidle")
+
+    expect(page.locator('input[name="account"]')).to_have_value(
+        "someone.invited@example.org"
+    )
+    expect(page.locator('#wizard-form input[name="note"]')).to_have_value(
+        "Welcome aboard."
+    )
+    js_errors.assert_clean("inviting from the dialog")

@@ -277,15 +277,19 @@ def send_reset_password_instructions(user: User) -> None:
 
     :param user: The user to send the instructions to
     """
-    token = generate_reset_password_token(user)
-    url = url_for("login.reset_password", token=token)
-    reset_link = request.url_root[:-1] + url
-
     subject = _("Password reset instruction for {site_name}").format(
         site_name=current_app.config.get("SITE_NAME")
     )
     mail_template = "password_reset_instructions"
-    send_mail(subject, user.email, mail_template, user=user, reset_link=reset_link)
+    send_mail(
+        subject, user.email, mail_template, user=user, reset_link=password_link(user)
+    )
+
+
+def password_link(user: User) -> str:
+    """The address where `user` chooses a new password, for a day."""
+    token = generate_reset_password_token(user)
+    return request.url_root[:-1] + url_for("login.reset_password", token=token)
 
 
 def generate_reset_password_token(user: User) -> str:
