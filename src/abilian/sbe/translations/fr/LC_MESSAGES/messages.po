@@ -1826,6 +1826,18 @@ msgid_plural "%(num)d changes"
 msgstr[0] "%(num)d modification"
 msgstr[1] "%(num)d modifications"
 
+msgid "Name or organization"
+msgstr "Nom ou organisation"
+
+msgid "Filter people by name or organization"
+msgstr "Filtrer les personnes par nom ou organisation"
+
+msgid "Organization"
+msgstr "Organisation"
+
+msgid "Job title"
+msgstr "Fonction"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

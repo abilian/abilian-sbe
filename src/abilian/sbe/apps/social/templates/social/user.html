@@ -1,11 +1,10 @@
-{#- A person: who they are and how to reach them; what they did lately in the
-    communities the viewer shares with them; those communities. Drawn in
-    `mockups/templates/profile.html`, without the title and organisation, which SBE does
-    not keep. -#}
+{#- A person: who they are, what they do and where, and how to reach them; what they
+    did lately in the communities the viewer shares with them; those communities. Drawn
+    in `mockups/templates/profile.html`. -#}
 {% extends "ads_base.html" %}
 {% block page_title %}{{ person.name }} · {{ _("Directory") }}{% endblock %}
 {% block pretitle %}<a href="{{ url_for('.users') }}">{{ _("Directory") }}</a>{% endblock %}
-{% block heading %}<span class="ads-cluster ads-gap-sm">{{ m.avatar(person, "ads-avatar--lg") }}<span>{{ person.name }}</span></span>{% endblock %}
+{% block heading %}<span class="ads-cluster ads-gap-sm">{{ m.avatar(person, "ads-avatar--lg") }}<span class="sbe-lines"><span>{{ person.name }}</span>{% if m.job(person) %}<span class="ads-muted sbe-profile__title">{{ m.job(person) }}</span>{% endif %}</span></span>{% endblock %}
 {% block actions %}
 {% if person.email %}<a class="ads-btn ads-btn--primary" href="mailto:{{ person.email }}">{{ icon("mail") }}{{ _("Send an email") }}</a>{% endif %}
 {% if may_edit %}<a class="ads-btn" href="{{ url_for('.user_edit', user_id=person.id) }}">{{ icon("pencil") }}{{ _("Edit the profile") }}</a>{% endif %}

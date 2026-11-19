@@ -1,7 +1,6 @@
-{#- The directory: people as rows, to find someone by name; whom I share a community
-    with first, and those communities; when each was last seen. Drawn in
-    `mockups/templates/people.html`, without the title and organisation, which SBE does
-    not keep. -#}
+{#- The directory: people as rows, to find someone by name or organization; whom I
+    share a community with first, and those communities; what each does, and where;
+    when each was last seen. Drawn in `mockups/templates/people.html`. -#}
 {% extends "ads_base.html" %}
 {% block page_title %}{{ _("Directory") }}{% endblock %}
 {% block heading %}{{ _("Directory") }}{% endblock %}
@@ -18,7 +17,7 @@
   <form class="sbe-toolbar" method="get" action="{{ url_for('.users') }}">
     <span class="ads-input-icon">
       <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
-      <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Filter by name') }}" aria-label="{{ _('Filter people by name') }}">
+      <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Name or organization') }}" aria-label="{{ _('Filter people by name or organization') }}">
     </span>
     {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
     <span class="ads-muted">{{ ngettext("%(num)d person", "%(num)d people", listing.total) }}</span>
@@ -28,13 +27,15 @@
     <table class="ads-table ads-table--vcenter ads-table--hover" id="users-table">
       <thead><tr>
         {{ m.sort_th(listing, "name", _("Name")) }}
+        <th class="ads-col--secondary">{{ _("Organization") }}</th>
         <th class="ads-col--secondary">{{ _("Communities in common") }}</th>
         {{ m.sort_th(listing, "last_active", _("Last seen"), "ads-end") }}
       </tr></thead>
       <tbody>
         {% for person in users %}
         <tr>
-          <td class="ads-full"><span class="ads-cluster ads-gap-sm">{{ m.avatar(person) }}<a class="sbe-quiet" href="{{ url_for('.user', user_id=person.id) }}"><strong>{{ person.name }}</strong></a></span></td>
+          <td class="ads-full"><span class="ads-media ads-gap-sm">{{ m.avatar(person) }}<span class="sbe-lines"><a class="sbe-quiet" href="{{ url_for('.user', user_id=person.id) }}"><strong>{{ person.name }}</strong></a>{% if person.job_title %}<span class="ads-muted">{{ person.job_title }}</span>{% endif %}</span></span></td>
+          <td class="ads-col--secondary">{{ person.organization or "" }}</td>
           <td class="ads-col--secondary">
             {% set common = shared[person.id] %}
             <span class="sbe-inline ads-gap-sm">{% for c in common[:4] %}<span role="img" aria-label="{{ c.name }}" title="{{ c.name }}">{{ m.tile(c, "sbe-tile--sm") }}</span>{% endfor %}{% if common | length > 4 %}<span class="ads-muted">+{{ common | length - 4 }}</span>{% endif %}</span>
@@ -42,7 +43,7 @@
           <td class="ads-end ads-muted">{% if person.last_active %}{{ m.time(person.last_active) }}{% else %}{{ _("never") }}{% endif %}</td>
         </tr>
         {% else %}
-        <tr><td colspan="3" class="ads-muted">{{ _("No matching records found") }}</td></tr>
+        <tr><td colspan="4" class="ads-muted">{{ _("No matching records found") }}</td></tr>
         {% endfor %}
       </tbody>
     </table>

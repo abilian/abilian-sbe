@@ -76,6 +76,7 @@
             <span class="ads-media ads-gap-sm">{{ m.avatar(user) }}
               <span class="sbe-lines">
                 <span class="ads-cluster ads-gap-sm"><a class="sbe-quiet" href="{{ url_for('social.user', user_id=user.id) }}"><strong>{{ user.name }}</strong></a></span>
+                {% if m.job(user) %}<span class="ads-truncate">{{ m.job(user) }}</span>{% endif %}
                 <span class="ads-muted ads-truncate">{{ user.email }}</span>
               </span>
             </span>

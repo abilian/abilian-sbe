@@ -210,7 +210,9 @@ class User(Principal, UserMixin, Model):
     # Basic information
     first_name: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
     last_name: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
-    # Should we add gender, salutation ?
+    #: What the person does, and where, as the directory shows it: both optional.
+    job_title: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
+    organization: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
 
     # System information
     email: Mapped[str] = mapped_column(

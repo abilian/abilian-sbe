@@ -52,12 +52,19 @@ def test_my_account_saves_my_name_and_the_daily_digest(
     with client_login(client, user):
         response = client.post(
             url_for("preferences.user_post"),
-            data=_form(user, first_name="Renamed", daily="y"),
+            data=_form(
+                user,
+                first_name="Renamed",
+                job_title="Treasurer",
+                organization="Acme Cooperative",
+                daily="y",
+            ),
         )
 
     assert response.status_code == 302
     db.session.expire_all()
     assert user.first_name == "Renamed"
+    assert (user.job_title, user.organization) == ("Treasurer", "Acme Cooperative")
     assert get_service("preferences").get_preferences(user)[DAILY] is True
 
 

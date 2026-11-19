@@ -121,3 +121,27 @@ def test_one_edits_ones_own_profile(neighbour: User, client: FlaskClient) -> Non
     html = unescape(response.get_data(as_text=True))
     assert url_for("social.user_edit", user_id=neighbour.id) in html
     assert "Communities</h2>" in html
+
+
+def test_the_directory_says_what_each_does_and_where_and_finds_them_by_it(
+    client: FlaskClient, community1: Community, neighbour: User, db: SQLAlchemy
+) -> None:
+    neighbour.job_title = "Treasurer"
+    neighbour.organization = "Acme Cooperative"
+    db.session.commit()
+
+    row = _row(_rows(_directory(client, community1.test_user)), neighbour.name)
+    found = _rows(_directory(client, community1.test_user, q="acme"))
+    profile = _directory_page(client, community1.test_user, neighbour)
+
+    assert '<span class="ads-muted">Treasurer</span>' in row
+    assert '<td class="ads-col--secondary">Acme Cooperative</td>' in row
+    assert f">{neighbour.name}</strong>" in found
+    assert "Treasurer, Acme Cooperative</span>" in profile
+
+
+def _directory_page(client: FlaskClient, user: User, person: User) -> str:
+    with client_login(client, user):
+        response = client.get(url_for("social.user", user_id=person.id))
+    assert response.status_code == 200
+    return unescape(response.get_data(as_text=True))

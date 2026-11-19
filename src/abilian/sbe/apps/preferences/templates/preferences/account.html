@@ -1,7 +1,7 @@
-{#- My account, on one page: who I am to the others (my photo, my name), the language
-    and time zone the site speaks to me in, the daily digest, my password; beside it,
-    how the others see me. The address, which I sign in with, is shown and not changed
-    here. Drawn in `mockups/templates/profile-edit.html`. -#}
+{#- My account, on one page: who I am to the others (my photo, my name, what I do and
+    where), the language and time zone the site speaks to me in, the daily digest, my
+    password; beside it, how the others see me. The address, which I sign in with, is
+    shown and not changed here. Drawn in `mockups/templates/profile-edit.html`. -#}
 {% extends "ads_base.html" %}
 {% import "forum/_post_fields.html" as fields %}
 {% block page_title %}{{ _("My account") }}{% endblock %}
@@ -52,6 +52,8 @@
         <div class="ads-grid ads-col-sm">
           {{ input(form.first_name, _("First name"), autocomplete="given-name", required=true) }}
           {{ input(form.last_name, _("Last name"), autocomplete="family-name", required=true) }}
+          {{ input(form.job_title, _("Job title"), autocomplete="organization-title") }}
+          {{ input(form.organization, _("Organization"), autocomplete="organization") }}
         </div>
         <div class="ads-field">
           <span class="ads-label">{{ _("Email address") }}</span>
@@ -94,7 +96,7 @@
     <section class="ads-card" aria-labelledby="seen">
       <div class="ads-card__head"><h2 class="ads-card__title" id="seen">{{ _("How the others see me") }}</h2></div>
       <div class="ads-card__body ads-stack ads-gap-sm">
-        <span class="ads-media ads-gap-sm">{{ m.avatar(user, "ads-avatar--lg") }}<span class="sbe-lines"><strong>{{ user.name }}</strong><span class="ads-muted">{{ user.email }}</span></span></span>
+        <span class="ads-media ads-gap-sm">{{ m.avatar(user, "ads-avatar--lg") }}<span class="sbe-lines"><strong>{{ user.name }}</strong>{% if m.job(user) %}<span>{{ m.job(user) }}</span>{% endif %}<span class="ads-muted">{{ user.email }}</span></span></span>
         <p class="ads-muted">{{ _("In the directory and on your messages, for the members of your communities.") }}</p>
       </div>
       <div class="ads-card__foot"><a href="{{ url_for('social.user', user_id=user.id) }}">{{ _("See my profile") }}</a></div>

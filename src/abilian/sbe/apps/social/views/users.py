@@ -67,7 +67,7 @@ def users(user: User) -> str:
         User.query if everyone else neighbours,
         DIRECTORY_SORT_COLUMNS,
         "name",
-        (User.first_name, User.last_name),
+        (User.first_name, User.last_name, User.job_title, User.organization),
     )
     return render_template(
         "social/users.html",

@@ -1,9 +1,9 @@
 # Copyright (c) 2026, Abilian SAS
 
-"""One's account on one page: one's photo and name, the language and time zone the
-site speaks in, the daily digest, the password. It takes the place of Abilian Core's
-"About me" panel and of the notifications panel; the address, which one signs in
-with, is not changed here."""
+"""One's account on one page: one's photo, name, job title and organization, the
+language and time zone the site speaks in, the daily digest, the password. It takes
+the place of Abilian Core's "About me" panel and of the notifications panel; the
+address, which one signs in with, is not changed here."""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING, cast
 
 from flask import flash, redirect, render_template, request, url_for
 from wtforms import BooleanField, StringField
-from wtforms.validators import ValidationError
+from wtforms.validators import Length, ValidationError
 
 from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated_user
@@ -33,12 +33,21 @@ if TYPE_CHECKING:
 #: Where the daily digest's choice is kept, among a person's preferences.
 DAILY = "sbe:notifications:daily"
 
+#: The longest job title or organization one may give.
+NAME_LENGTH = 200
+
 
 class AccountForm(UserPreferencesForm):
     first_name = StringField(
         _l("First name"), filters=(strip,), validators=[required()]
     )
     last_name = StringField(_l("Last name"), filters=(strip,), validators=[required()])
+    job_title = StringField(
+        _l("Job title"), filters=(strip,), validators=[Length(max=NAME_LENGTH)]
+    )
+    organization = StringField(
+        _l("Organization"), filters=(strip,), validators=[Length(max=NAME_LENGTH)]
+    )
     daily = BooleanField(_l("Each morning, what happened in my communities"))
 
     def validate_password(self, field: StringField) -> None:

@@ -32,6 +32,12 @@
 </div>
 {%- endmacro %}
 
+{#- What a person does, and where, as one line: "Treasurer, Acme"; either alone; or
+    nothing. -#}
+{% macro job(user) -%}
+{{ [user.job_title, user.organization] | select | join(", ") }}
+{%- endmacro %}
+
 {#- Where to start a discussion, at the top of a feed: in `community`, with an event
     beside it, or, from Mon fil, in one of `communities`, chosen in a menu. Either
     opens the new thread's form. -#}
