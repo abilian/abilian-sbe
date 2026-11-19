@@ -1,0 +1,25 @@
+{#- What inviting the addresses typed so far does to each, said before anything is
+    sent; how many will get an email. A piece of the first page of inviting people,
+    put under the field as one types (`vite/src/invite.js`). Drawn in
+    `mockups/templates/members-add.html`. -#}
+{% import "ads_macros.html" as m with context %}
+{% if invitees %}
+<ul class="ads-list sbe-uploads" aria-label="{{ _('What inviting does to each address') }}">
+  {% for invitee in invitees %}
+  <li>
+    {% if invitee.user %}{{ m.avatar(invitee.user, "ads-avatar--xs") }}{% else %}{{ icon("mail") }}{% endif %}
+    <span class="ads-fill sbe-lines">
+      <span class="ads-truncate">{{ invitee.user.name if invitee.user else invitee.email }}</span>
+      {% if invitee.status == "member" %}<span class="ads-muted">{{ _("Already a member: nothing to do") }}</span>
+      {% elif invitee.status == "account" %}<span class="ads-muted">{{ _("Has an account: will be added") }}</span>
+      {% elif invitee.status == "invited" %}<span class="ads-muted">{{ _("Invited already, never signed in: will be added, and invited again") }}</span>
+      {% elif invitee.status == "new" %}<span class="ads-muted">{{ _("No account: one will be made, and an invitation sent") }}</span>
+      {% else %}<span class="ads-toned ads-tone-danger sbe-upload__error">{{ icon("alert-triangle") }}{{ _("Not an address: it will be left out") }}</span>{% endif %}
+    </span>
+    {% if invitee.status in ("account", "invited", "new") %}{{ icon("circle-check", "ads-icon sbe-ok") }}{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% set emailed = invitees | selectattr("gets_email") | list | length %}
+<p class="ads-muted">{{ ngettext("%(num)d person will get an email.", "%(num)d people will get an email.", emailed) }}</p>
+{% endif %}

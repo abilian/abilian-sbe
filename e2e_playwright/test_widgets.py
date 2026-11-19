@@ -292,3 +292,21 @@ def test_selecting_all_members_shows_what_applies_to_them(
     for box in boxes.all():
         expect(box).to_be_checked()
     js_errors.assert_clean("the members' selection")
+
+
+def test_inviting_says_what_happens_to_each_address_as_it_is_typed(
+    logged_in: Page, base_url: str, js_errors: JSErrors
+) -> None:
+    page = logged_in
+    page.goto(
+        f"{base_url}/communities/{COMMUNITY}/members/wizard/step1",
+        wait_until="networkidle",
+    )
+
+    page.locator("#wizard-emails").fill("someone.new@example.org, not-an-address")
+
+    preview = page.locator("[data-invitees]")
+    expect(preview).to_contain_text("someone.new@example.org")
+    expect(preview).to_contain_text("not-an-address")
+    expect(preview.locator("li")).to_have_count(2)
+    js_errors.assert_clean("inviting's preview")

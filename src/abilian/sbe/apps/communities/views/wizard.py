@@ -6,11 +6,14 @@ import csv
 import io
 import json
 import re
+from dataclasses import dataclass
 from os.path import splitext
 from typing import IO, TYPE_CHECKING, Any
 
+import sqlalchemy as sa
 from flask import current_app, flash, g, redirect, render_template, request, url_for
 from validate_email import validate_email
+from werkzeug.exceptions import BadRequest
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
@@ -31,8 +34,63 @@ if TYPE_CHECKING:
     from werkzeug.wrappers import Response
 
 
+#: The roles one is invited with.
+INVITED_ROLES = ("member", "manager")
+
 #: People paste addresses from anywhere: a spreadsheet column, a mail header.
 EMAIL_SEPARATORS = re.compile(r"[\s,;]+")
+
+
+@dataclass(frozen=True)
+class Invitee:
+    """An address typed in, its account if it has one, and what inviting does to it:
+    nothing for a `member`; adds an `account`; adds, and sends the invitation again
+    to, an account `invited` that never signed in; makes a `new` one; ignores an
+    `invalid` address."""
+
+    email: str
+    status: str
+    user: User | None = None
+
+    @property
+    def gets_email(self) -> bool:
+        return self.status in {"invited", "new"}
+
+
+def classify_invitees(text: str) -> list[Invitee]:
+    """What inviting the addresses in `text` to the current community does to each,
+    in the order they came."""
+    valid, invalid = wizard_parse_emails(text)
+    accounts = {
+        user.email.lower(): user
+        for user in User.query.filter(
+            sa.func.lower(User.email).in_([email.lower() for email in valid])
+        )
+    }
+    members = {user.id for user in g.community.members}
+    invitees = [Invitee(email, "invalid") for email in invalid]
+    for email in valid:
+        user = accounts.get(email.lower())
+        if user is None:
+            invitees.append(Invitee(email, "new"))
+        elif user.id in members:
+            invitees.append(Invitee(email, "member", user))
+        elif user.can_login and not user.last_active:
+            invitees.append(Invitee(email, "invited", user))
+        else:
+            invitees.append(Invitee(email, "account", user))
+    return invitees
+
+
+@route("/<string:community_id>/members/wizard/preview", methods=["POST"])
+@csrf.protect
+@can_manage
+def wizard_preview() -> str:
+    """What inviting the addresses typed so far would do to each: a piece of the
+    first page, which `vite/src/invite.js` puts under the field as one types. Posted,
+    the first page's form as it is: a long list makes too long an address."""
+    invitees = classify_invitees(request.form.get("wizard-emails", ""))
+    return render_template("community/_invitees.html", invitees=invitees)
 
 
 def wizard_parse_emails(text: str) -> tuple[list[str], list[str]]:
@@ -193,7 +251,6 @@ def wizard_check_data() -> Response | str:
         )
     )
 
-    is_csv = False
     if request.form.get("wizard-emails"):
         wizard_emails, invalid_emails = wizard_parse_emails(
             request.form["wizard-emails"]
@@ -205,37 +262,44 @@ def wizard_check_data() -> Response | str:
                 ).format(addresses=", ".join(invalid_emails)),
                 "warning",
             )
-        (
-            existing_accounts_object,
-            existing_members_objects,
-            final_email_list,
-        ) = wizard_extract_data(wizard_emails)
-        final_email_list_json = json.dumps(final_email_list)
-
-    else:
-        csv_file = request.files.get("csv_file")
-        if not (csv_file and csv_file.filename):
+        _accounts, _members, final_email_list = wizard_extract_data(wizard_emails)
+        if not final_email_list:
             flash(_("No new members were found"), "warning")
             return redirect(
                 url_for(".wizard_data_insertion", community_id=g.community.slug)
             )
+        # The first page said what happens to each address as it was typed, and
+        # chose one role for all: on to the accounts to make.
+        role = request.form.get("role")
+        if role not in INVITED_ROLES:
+            msg = f"Not a role one is invited with: {role!r}"
+            raise BadRequest(msg)
+        return _new_accounts_page(
+            [{**account, "role": role} for account in final_email_list]
+        )
 
-        is_csv = True
-        accounts_data = wizard_read_csv(csv_file)
-        if not accounts_data:
-            flash(_("To add new members, please follow the CSV file model."), "warning")
-            return redirect(
-                url_for(".wizard_data_insertion", community_id=g.community.slug)
-            )
+    csv_file = request.files.get("csv_file")
+    if not (csv_file and csv_file.filename):
+        flash(_("No new members were found"), "warning")
+        return redirect(
+            url_for(".wizard_data_insertion", community_id=g.community.slug)
+        )
 
-        (
-            existing_accounts,
-            existing_members_objects,
-            final_email_list,
-        ) = wizard_extract_data(csv_data=accounts_data)
-        existing_accounts_object = existing_accounts["account_objects"]
-        existing_accounts_csv_roles = existing_accounts["csv_roles"]
-        final_email_list_json = json.dumps(final_email_list)
+    accounts_data = wizard_read_csv(csv_file)
+    if not accounts_data:
+        flash(_("To add new members, please follow the CSV file model."), "warning")
+        return redirect(
+            url_for(".wizard_data_insertion", community_id=g.community.slug)
+        )
+
+    (
+        existing_accounts,
+        existing_members_objects,
+        final_email_list,
+    ) = wizard_extract_data(csv_data=accounts_data)
+    existing_accounts_object = existing_accounts["account_objects"]
+    existing_accounts_csv_roles = existing_accounts["csv_roles"]
+    final_email_list_json = json.dumps(final_email_list)
 
     if not final_email_list:
         flash(_("No new members were found"), "warning")
@@ -245,7 +309,7 @@ def wizard_check_data() -> Response | str:
 
     ctx = {
         "existing_accounts_object": existing_accounts_object,
-        "csv_roles": existing_accounts_csv_roles if is_csv else False,
+        "csv_roles": existing_accounts_csv_roles,
         "wizard_emails": final_email_list_json,
         "existing_members_objects": existing_members_objects,
     }
@@ -268,9 +332,12 @@ def wizard_new_accounts() -> str | Response:
         )
     )
 
-    wizard_emails = request.form["wizard-emails"]
-    wizard_accounts = json.loads(wizard_emails)
+    return _new_accounts_page(json.loads(request.form["wizard-emails"]))
 
+
+def _new_accounts_page(wizard_accounts: list[dict[str, Any]]) -> str:
+    """The last page: names for the addresses with no account; those with one go
+    along, to be added."""
     wizard_existing_account = {}
     new_accounts = []
 
@@ -295,7 +362,8 @@ def wizard_new_accounts() -> str | Response:
 @csrf.protect
 @can_manage
 def wizard_saving() -> Response:
-    """Automatically add existing accounts to the current community.
+    """Automatically add existing accounts to the current community, and send
+    the invitation again to those that never signed in.
 
     Create accounts for new emails, add them to the community and send
     them a password reset email.
@@ -319,6 +387,8 @@ def wizard_saving() -> Response:
             activity.send(app, actor=user, verb="join", object=community)
 
             db.session.commit()
+            if user.can_login and not user.last_active:
+                send_reset_password_instructions(user)
 
     if new_accounts:
         for account in new_accounts:

@@ -2487,9 +2487,6 @@ msgstr "Nouveaux comptes"
 msgid "Email addresses"
 msgstr "Adresses e-mail"
 
-msgid "One per line, or separated by commas or spaces. The next step says what will happen to each."
-msgstr "Une par ligne, ou séparées par des virgules ou des espaces. L’étape suivante dit ce qui arrivera à chacune."
-
 msgid "Or a spreadsheet"
 msgstr "Ou un tableur"
 
@@ -3343,3 +3340,29 @@ msgid "%(num)d member changed."
 msgid_plural "%(num)d members changed."
 msgstr[0] "%(num)d membre modifié."
 msgstr[1] "%(num)d membres modifiés."
+
+msgid "What inviting does to each address"
+msgstr "Ce que l’invitation fait de chaque adresse"
+
+msgid "Already a member: nothing to do"
+msgstr "Déjà membre : rien à faire"
+
+msgid "Has an account: will be added"
+msgstr "A un compte : sera ajouté"
+
+msgid "Invited already, never signed in: will be added, and invited again"
+msgstr "Déjà invité, jamais connecté : sera ajouté, et invité de nouveau"
+
+msgid "No account: one will be made, and an invitation sent"
+msgstr "Pas de compte : un compte sera créé, et une invitation envoyée"
+
+msgid "Not an address: it will be left out"
+msgstr "Adresse invalide : elle sera ignorée"
+
+msgid "%(num)d person will get an email."
+msgid_plural "%(num)d people will get an email."
+msgstr[0] "%(num)d personne recevra un e-mail."
+msgstr[1] "%(num)d personnes recevront un e-mail."
+
+msgid "One per line, or separated by commas or spaces. What will happen to each shows as you type."
+msgstr "Une par ligne, ou séparées par des virgules ou des espaces. Ce qui arrivera à chacune s’affiche à mesure."

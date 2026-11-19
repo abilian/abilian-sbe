@@ -1,5 +1,7 @@
-{#- Inviting people, step 1: their addresses, typed or pasted, or a spreadsheet. Drawn
-    in `mockups/templates/members-add.html`. -#}
+{#- Inviting people, step 1: their addresses, typed or pasted, and what will happen to
+    each as they are typed (`community/_invitees.html`), with one role for all; or a
+    spreadsheet, a role each, reviewed at the next step. Drawn in
+    `mockups/templates/members-add.html`, as a dialog. -#}
 {% extends "ads_community.html" %}
 {% import "community/_wizard.html" as wizard with context %}
 {% block page_title %}{{ _("Invite members") }} · {{ g.community.name }}{% endblock %}
@@ -10,7 +12,15 @@
   <div class="ads-field">
     <label class="ads-label" for="wizard-emails">{{ _("Email addresses") }}</label>
     <textarea class="ads-textarea" id="wizard-emails" name="wizard-emails" rows="5" aria-describedby="wizard-emails-help"></textarea>
-    <small class="ads-help" id="wizard-emails-help">{{ _("One per line, or separated by commas or spaces. The next step says what will happen to each.") }}</small>
+    <small class="ads-help" id="wizard-emails-help">{{ _("One per line, or separated by commas or spaces. What will happen to each shows as you type.") }}</small>
+  </div>
+  <div aria-live="polite" data-invitees="{{ url_for('.wizard_preview', community_id=g.community.slug) }}"></div>
+  <div class="ads-field">
+    <label class="ads-label" for="invite-role">{{ _("Role") }}</label>
+    <select class="ads-select sbe-fit" id="invite-role" name="role">
+      <option value="member" selected>{{ _("Member") }}</option>
+      <option value="manager">{{ _("Community manager") }}</option>
+    </select>
   </div>
   <div class="ads-field">
     <label class="ads-label" for="csv_file">{{ _("Or a spreadsheet") }}</label>

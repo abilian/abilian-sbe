@@ -44,23 +44,16 @@ def test_wizard_adds_existing_and_new_people_from_pasted_addresses(
         "#wizard-emails",
         "eva.existing@example.com, nina.new@example.com\nnot-an-address",
     )
+    # What will happen to each shows as it is typed; one role for all.
+    expect(page.locator("[data-invitees]")).to_contain_text("not-an-address")
+    page.select_option("#invite-role", "manager")
     page.get_by_role("button", name="Next step").click()
     page.wait_for_load_state("networkidle")
 
-    expect(page).to_have_url(re.compile(r"/wizard/step2$"))
-    expect(page.get_by_text("not-an-address")).to_be_visible()
-
-    page.locator('[data-wizard-role="eva.existing@example.com"]').select_option(
-        "manager"
-    )
-    page.get_by_role("button", name="Next step").click()
-    page.wait_for_load_state("networkidle")
-    expect(page).to_have_url(re.compile(r"/wizard/step3$"))
-
+    # Typed addresses go straight on to the accounts to make.
     # A name is required before the account can be created.
     page.locator("[data-wizard-save]").click()
     expect(page.locator(".wizard-warning")).to_be_visible()
-    expect(page).to_have_url(re.compile(r"/wizard/step3$"))
 
     page.fill('input[name="first_name"]', "Nina")
     page.fill('input[name="last_name"]', "New")
@@ -75,15 +68,19 @@ def test_wizard_adds_existing_and_new_people_from_pasted_addresses(
 
 
 def test_wizard_can_drop_someone_at_each_step(
-    logged_in: Page, base_url: str, js_errors: JSErrors
+    logged_in: Page, base_url: str, js_errors: JSErrors, tmp_path: Path
 ) -> None:
+    """From a spreadsheet, which has a step to review the accounts that exist."""
     page = logged_in
     _step1(page, base_url)
 
-    page.fill(
-        "#wizard-emails",
-        "rita.removed@example.com otto.other@example.com oskar.other@example.com",
+    csv = tmp_path / "members.csv"
+    csv.write_text(
+        "rita.removed@example.com;Rita;Removed;member\n"
+        "otto.other@example.com;Otto;Other;member\n"
+        "oskar.other@example.com;Oskar;Other;member\n"
     )
+    page.set_input_files("#csv_file", csv)
     page.get_by_role("button", name="Next step").click()
     page.wait_for_load_state("networkidle")
 
@@ -97,8 +94,6 @@ def test_wizard_can_drop_someone_at_each_step(
     row.locator("[data-wizard-remove]").click()
     expect(row).to_have_count(0)
 
-    page.fill('input[name="first_name"]', "Oskar")
-    page.fill('input[name="last_name"]', "Other")
     page.locator("[data-wizard-save]").click()
     page.wait_for_url(re.compile(r"/members"))
 
