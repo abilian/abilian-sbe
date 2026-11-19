@@ -592,6 +592,8 @@ a.sbe-quiet:hover { text-decoration: underline; }
 /* Files on their way: a row each, its state under its name. */
 .sbe-uploads > li { gap: var(--ads-space-3); }
 .sbe-uploads .ads-progress { margin-block-start: var(--ads-space-1); }
+/* A file ticked to be removed when the page is saved. */
+.sbe-uploads > li:has(.sbe-toggle > input:checked) .sbe-lines { text-decoration: line-through; color: var(--ads-ink-muted); }
 .sbe-upload__options { margin-block-start: var(--ads-space-1); font-size: var(--ads-text-sm); }
 .sbe-upload__error { display: inline-flex; align-items: center; gap: var(--ads-space-1); font-size: var(--ads-text-sm); }
 .sbe-ok { color: var(--ads-success-ink); }

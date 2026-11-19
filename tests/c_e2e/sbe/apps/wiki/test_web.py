@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from io import BytesIO
 from typing import TYPE_CHECKING
 
 import pytest
@@ -236,6 +237,64 @@ def test_an_attachment_of_another_page_is_not_found(
                 attachment=attachment_id,
             )
             assert getattr(client, method)(url).status_code == 404, attachment_id
+
+
+def _attachment(name: str) -> WikiPageAttachment:
+    attachment = WikiPageAttachment(name=name)
+    attachment.set_content(name.encode(), "text/plain")
+    return attachment
+
+
+def test_the_form_attaches_and_removes_files_when_the_page_is_saved(
+    app, db, client, community1, user1
+) -> None:
+    """Only this page's files: another page's, named in the form, stays."""
+    security_service.start()
+    security_service.grant_role(user1, ADMIN)
+    page = WikiPage(title="Here", body_src="here", community=community1)
+    other = WikiPage(title="There", body_src="there", community=community1)
+    old, kept, elsewhere = (_attachment(n) for n in ("old.txt", "kept.txt", "x.txt"))
+    page.attachments.extend([old, kept])
+    other.attachments.append(elsewhere)
+    db.session.add_all([page, other])
+    db.session.commit()
+
+    data = {
+        "title": "Here",
+        "page_id": page.id,
+        "body_src": "here",
+        "remove_attachment": [str(old.id), str(elsewhere.id)],
+        "attachments": (BytesIO(b"new"), "new.txt"),
+        "__action": "edit",
+    }
+    with client_login(client, user1):
+        response = client.post(
+            url_for("wiki.page_edit", community_id=community1.slug), data=data
+        )
+
+    assert response.status_code == 302
+    db.session.expire_all()
+    assert [a.name for a in page.attachments] == ["kept.txt", "new.txt"]
+    assert [a.name for a in other.attachments] == ["x.txt"]
+
+
+def test_a_new_page_comes_with_its_files(app, db, client, community1, user1) -> None:
+    security_service.start()
+    security_service.grant_role(user1, ADMIN)
+    data = {
+        "title": "Fresh",
+        "body_src": "fresh",
+        "attachments": [(BytesIO(b"a"), "a.txt"), (BytesIO(b""), "")],
+        "__action": "create",
+    }
+    with client_login(client, user1):
+        response = client.post(
+            url_for("wiki.page_new", community_id=community1.slug), data=data
+        )
+
+    assert response.status_code == 302
+    page = WikiPage.query.filter(WikiPage.title == "Fresh").one()
+    assert [a.name for a in page.attachments] == ["a.txt"]
 
 
 def test_a_page_url_is_the_page_not_its_viewers(

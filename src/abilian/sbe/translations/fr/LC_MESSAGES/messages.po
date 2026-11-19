@@ -2676,3 +2676,9 @@ msgstr ""
 
 msgid "Wrong email address or password."
 msgstr "Adresse e-mail ou mot de passe incorrect."
+
+msgid "Attached files"
+msgstr "Fichiers joints"
+
+msgid "Keep"
+msgstr "Garder"

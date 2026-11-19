@@ -1,14 +1,16 @@
-{#- Writing a wiki page, new or not: its title, its text in Markdown, and a word on what
-    changed, which the history shows. If someone saved it meanwhile, the error under the
-    text says what each changed. The text shows beside it as the page will, as it is
-    typed (`vite/src/preview.js`). Drawn in `mockups/templates/wiki-edit.html`. -#}
+{#- Writing a wiki page, new or not: its title, its text in Markdown, its files, and a
+    word on what changed, which the history shows. If someone saved it meanwhile, the
+    error under the text says what each changed. The text shows beside it as the page
+    will, as it is typed (`vite/src/preview.js`). Files are attached or removed when
+    the page is saved: a file to remove is a ticked box, with no script. Drawn in
+    `mockups/templates/wiki-edit.html`. -#}
 {% extends "wiki/_base.html" %}
 {% import "wiki/macros.html" as w with context %}
 {% import "forum/_post_fields.html" as fields %}
 {% set creating = not (page and page.id) %}
 {% block wiki_title %}{{ _("New page") if creating else _("Edit the page") }}{% endblock %}
 {% block wiki_content %}
-<form class="ads-card" id="edit-form" method="post" action="{{ request.full_path }}" aria-labelledby="page-title">
+<form class="ads-card" id="edit-form" method="post" action="{{ request.full_path }}" enctype="multipart/form-data" aria-labelledby="page-title">
   {{ form.csrf_token }}{{ form.page_id }}{{ form.last_revision_id }}
   <div class="ads-card__head">
     <div class="ads-stack ads-gap-sm">
@@ -36,6 +38,18 @@
       <span class="ads-label" id="preview-label">{{ _("Preview") }}</span>
       <div class="sbe-preview-pane ads-prose" data-preview="{{ url_for('.page_preview', community_id=g.community.slug) }}" data-preview-of="{{ form.body_src.id }}"></div>
     </section>
+    </div>
+    <div class="ads-field">
+      <label class="ads-label" for="attachments">{{ _("Attached files") }}</label>
+      {% if not creating and page.attachments %}
+      <ul class="ads-list sbe-uploads">
+        {% for attachment in page.attachments %}
+        <li>{{ file_icon(attachment.name) }}<span class="ads-fill sbe-lines"><span class="ads-truncate">{{ attachment.name }}</span><span class="ads-muted">{{ attachment.content_length | filesize }}</span></span>
+          <label class="ads-btn ads-btn--ghost ads-btn--sm sbe-toggle"><input type="checkbox" name="remove_attachment" value="{{ attachment.id }}" aria-label="{{ _('Remove %(name)s', name=attachment.name) }}"><span class="sbe-toggle__off">{{ icon("trash") }}{{ _("Remove") }}</span><span class="sbe-toggle__on">{{ icon("arrow-back-up") }}{{ _("Keep") }}</span></label></li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      <input class="ads-file-input" id="attachments" type="file" name="attachments" multiple>
     </div>
     <div class="ads-field">
       <label class="ads-label" for="{{ form.message.id }}">{{ _("What you changed") }}</label>
