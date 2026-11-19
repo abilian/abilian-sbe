@@ -48,6 +48,7 @@ def test_the_system_page_hides_the_secrets(
     secret = uuid4().hex
     app.config["MAIL_PASSWORD"] = secret
     app.config["BROKER_URI"] = f"redis://:{secret}@cache/0"
+    app.config["DRAMATIQ_BROKER_URL"] = f"redis://:{secret}@cache/1"
     with client_login(client, admin_user):
         html = client.get(url_for("admin.sysinfo")).get_data(as_text=True)
 

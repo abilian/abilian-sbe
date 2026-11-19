@@ -13,8 +13,8 @@ from abilian.i18n import _l
 from abilian.web.admin import AdminPanel
 
 #: What a setting's name holds when its value is a secret: a key, a password, or
-#: an address that may carry one (a database's, a broker's).
-SECRET_MARKS = ("SECRET", "PASSWORD", "TOKEN", "KEY", "URI")
+#: an address that may carry one (a database's, a broker's, a DSN).
+SECRET_MARKS = ("SECRET", "PASSWORD", "TOKEN", "KEY", "URI", "URL", "DSN")
 
 #: What the page shows in a secret's place.
 HIDDEN = "••••••••"
