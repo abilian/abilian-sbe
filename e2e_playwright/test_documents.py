@@ -79,7 +79,7 @@ def test_a_title_with_markup_stays_text_through_move_and_delete(
     _row_menu(page, title).get_by_role("button", name="Move").click()
     move = page.locator("#modal-move-files")
     expect(move).to_be_visible()
-    move.locator("tbody a", has_text="Existing Folder").click()
+    move.locator("[data-folders] a", has_text="Existing Folder").click()
     expect(move.locator(".breadcrumb")).to_contain_text("Existing Folder")
     submit = page.locator("#modal-move-button-submit")
     expect(submit).to_be_enabled()

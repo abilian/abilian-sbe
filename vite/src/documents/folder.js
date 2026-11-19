@@ -154,7 +154,7 @@ function setUpDeleteSelected() {
 /* Folders are titled by users: everything below is written with textContent. */
 function setUpMoveDialog(modal) {
   const breadcrumbs = modal.querySelector(".breadcrumb");
-  const tbody = modal.querySelector("tbody");
+  const folders = modal.querySelector("[data-folders]");
   const submit = document.getElementById("modal-move-button-submit");
 
   function folderLink({ title, url, id }) {
@@ -183,13 +183,11 @@ function setUpMoveDialog(modal) {
       }),
     );
 
-    tbody.replaceChildren(
+    folders.replaceChildren(
       ...data.folders.map((folder) => {
-        const row = document.createElement("tr");
-        const cell = document.createElement("td");
-        cell.append(folderLink(folder));
-        row.append(cell);
-        return row;
+        const item = document.createElement("li");
+        item.append(folderLink(folder));
+        return item;
       }),
     );
 

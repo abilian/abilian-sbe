@@ -238,5 +238,5 @@ def test_document_actions_open_their_modals(
 
     # folder.js fills the folder listing from a `modal:open` event -- it used to
     # listen for Bootstrap's `show.bs.modal`, which nothing fires any more, so
-    # the dialog opened onto an empty table.
+    # the dialog opened onto an empty list.
     modal.locator(".breadcrumb li").first.wait_for(state="attached", timeout=5_000)
