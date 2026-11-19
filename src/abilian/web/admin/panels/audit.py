@@ -5,13 +5,14 @@ from __future__ import annotations
 import csv
 import io
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from itertools import chain
 from typing import TYPE_CHECKING
 
 import pytz
 import sqlalchemy as sa
 import sqlalchemy.orm
+from babel.dates import LOCALTZ
 from flask import (
     Response,
     render_template,
@@ -76,8 +77,9 @@ class JSONUserSearch(JSONView):
 class AuditPanel(AdminPanel):
     """Global audit log.
 
-    Can receive one out of two possible GET parameter, datetime type:
+    Can receive one out of three possible GET parameters:
 
+    * day: events up to the end of that day, in the site's time zone
     * before: events that happened immediately before 't' (less recent than 't')
     * after: events that happened immediately after 't' (more recent than 't')
     """
@@ -100,8 +102,9 @@ class AuditPanel(AdminPanel):
         filter_types = log.types
         all_classes = log.all_classes
 
-        before = request.args.get("before")
-        after = request.args.get("after")
+        day = request.args.get("day")
+        before = day_end(day) if day else request.args.get("before")
+        after = None if day else request.args.get("after")
 
         def after_query(q, model, date):
             return q.filter(model.happened_at > date).order_by(model.happened_at.asc())
@@ -270,6 +273,17 @@ def log_filter(args: MultiDict[str, str]) -> LogFilter:
         security_q = security_q.filter(SecurityAudit.happened_at >= start)
 
     return LogFilter(audit_q, security_q, user, types, period, all_classes)
+
+
+def day_end(value: str) -> str:
+    """The end of a day, in the site's time zone, as a page's edge (UTC, naive,
+    which is how the log is stored)."""
+    try:
+        day = date.fromisoformat(value)
+    except ValueError as e:
+        raise BadRequest from e
+    midnight = LOCALTZ.localize(datetime.combine(day + timedelta(days=1), time()))
+    return midnight.astimezone(pytz.utc).replace(tzinfo=None).isoformat()
 
 
 def page_moment(value: str) -> datetime:

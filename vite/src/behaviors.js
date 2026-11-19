@@ -1,9 +1,9 @@
 // Small behaviours declared in the markup, for the pages that used to carry an
 // inline handler for each of them.
 
-/* <select data-autosubmit>: choosing a value posts the form. */
+/* <select data-autosubmit>, or a date: choosing a value posts the form. */
 document.addEventListener("change", (event) => {
-  if (event.target.matches("select[data-autosubmit]")) {
+  if (event.target.matches("[data-autosubmit]")) {
     event.target.form.submit();
   }
 });

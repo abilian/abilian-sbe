@@ -206,11 +206,12 @@ def test_delete_confirmation_opens(logged_in: Page, base_url: str) -> None:
 def test_the_audit_log_jumps_to_the_day_picked(logged_in: Page, base_url: str) -> None:
     """A native date input, shown and sent as YYYY-MM-DD whatever the locale.
 
-    Picking a day reloads the log at the entries before that day's end.
+    Picking a day reloads the log at the entries before that day's end, which the
+    server works out in the site's time zone.
     """
     page = logged_in
     page.goto(f"{base_url}/admin/audit", wait_until="networkidle")
-    chooser = page.locator("#date-chooser")
+    chooser = page.locator('#audit-filters input[name="day"]')
     # The seed ran today, so the newest entries are today's.
     today = chooser.input_value()
     assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", today), today
@@ -218,11 +219,11 @@ def test_the_audit_log_jumps_to_the_day_picked(logged_in: Page, base_url: str) -
     todays_heading = page.locator(f'h2 time[datetime="{today}"]')
 
     chooser.fill("2000-01-01")
-    page.wait_for_url(re.compile(r"before=2000-01-0[12]T"))
+    page.wait_for_url(re.compile(r"day=2000-01-01"))
     expect(todays_heading).to_have_count(0)
 
-    page.locator("#date-chooser").fill(today)
-    page.wait_for_url(re.compile(r"before=(?!2000-)"))
+    chooser.fill(today)
+    page.wait_for_url(re.compile(f"day={today}"))
     expect(todays_heading).to_be_visible()
 
 

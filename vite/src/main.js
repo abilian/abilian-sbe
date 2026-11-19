@@ -12,4 +12,3 @@ import "./documents/upload-dialog.js";
 import "./documents/viewer.js";
 import "./wizard.js";
 import "./preview.js";
-import "./audit.js";

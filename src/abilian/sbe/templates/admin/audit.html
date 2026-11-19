@@ -52,7 +52,7 @@
       {% for name, label in periods.items() %}<option value="{{ name }}" {{ "selected" if name == period }}>{{ label }}</option>{% endfor %}
       <option value="" {{ "selected" if not period }}>{{ _("Since the beginning") }}</option>
     </select>
-    <input class="ads-input sbe-fit" type="date" id="date-chooser" value="{{ current_date or '' }}" aria-label="{{ _('Changes up to this day') }}">
+    <input class="ads-input sbe-fit" type="date" name="day" value="{{ current_date or '' }}" data-autosubmit aria-label="{{ _('Changes up to this day') }}">
     <span class="ads-muted ads-push">{{ ngettext("%(num)d change", "%(num)d changes", total) }}</span>
   </form>
   {% for day, day_entries in entries %}

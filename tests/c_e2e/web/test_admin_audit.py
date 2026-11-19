@@ -6,10 +6,12 @@ from __future__ import annotations
 
 import csv
 import io
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from html import unescape
 from typing import TYPE_CHECKING
 
+import pytz
+from babel.dates import LOCALTZ
 from flask import url_for
 from flask_login import login_user
 
@@ -157,3 +159,36 @@ def test_a_change_with_no_actor_is_the_systems(
 
     assert response.status_code == 200
     assert "<em>The system</em>" in response.get_data(as_text=True)
+
+
+def _at_local(day: date, hour: int, minute: int) -> datetime:
+    """A moment of the site's time zone, as the log stores it (UTC, naive)."""
+    local = LOCALTZ.localize(datetime(day.year, day.month, day.day, hour, minute))
+    return local.astimezone(pytz.utc).replace(tzinfo=None)
+
+
+def test_a_day_shows_the_log_up_to_its_end_in_the_sites_time_zone(
+    client: FlaskClient, admin_user: User, community1: Community, db: SQLAlchemy
+) -> None:
+    """Whatever the browser's time zone: it sends the day, not a moment."""
+    day, next_day = date(2026, 3, 9), date(2026, 3, 10)
+    for moment in (_at_local(day, 23, 30), _at_local(next_day, 0, 30)):
+        db.session.add(
+            AuditEntry(
+                type=UPDATE,
+                happened_at=moment,
+                entity_id=community1.id,
+                entity_type=community1.entity_type,
+                entity_name=community1.name,
+            )
+        )
+    db.session.commit()
+
+    with client_login(client, admin_user):
+        page = client.get(url_for("admin.audit", day=day.isoformat()))
+        nonsense = client.get(url_for("admin.audit", day="tomorrow"))
+
+    html = page.get_data(as_text=True)
+    assert f'<time datetime="{day.isoformat()}">' in html
+    assert f'<time datetime="{next_day.isoformat()}">' not in html
+    assert nonsense.status_code == 400

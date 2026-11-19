@@ -109,9 +109,9 @@ def test_audit_filters_submit_themselves(
     assert "user=&" in page.url or page.url.endswith("user="), page.url
 
     with page.expect_navigation():
-        page.fill("#date-chooser", "2026-01-15")
-        page.locator("#date-chooser").dispatch_event("change")
-    assert "before=2026-01-1" in page.url, page.url
+        page.fill('#audit-filters input[name="day"]', "2026-01-15")
+        page.locator('#audit-filters input[name="day"]').dispatch_event("change")
+    assert "day=2026-01-15" in page.url, page.url
 
     types = page.locator('select[name="types"]')
     if types.locator("option").count() > 1:
