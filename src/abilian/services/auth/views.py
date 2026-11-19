@@ -36,7 +36,6 @@ from itsdangerous import (
 )
 from loguru import logger
 from sqlalchemy import sql
-from sqlalchemy.orm.exc import NoResultFound
 
 from abilian.core.extensions import csrf, db
 from abilian.core.models.subjects import User
@@ -89,21 +88,14 @@ def do_login(form: dict[str, Any] | ImmutableMultiDict) -> dict[str, Any]:
         res["code"] = 401
         return res
 
-    try:
-        user = User.query.filter(
-            sql.func.lower(User.email) == email, User.can_login == True
-        ).one()
-    except NoResultFound:
+    user = User.query.filter(
+        sql.func.lower(User.email) == email, User.can_login == True
+    ).one_or_none()
+    # One answer for an unknown address and a wrong password: else the form would
+    # tell anyone which addresses have an account.
+    if user is None or not user.authenticate(password):
         auth_failed.send(unwrap(current_app), email=email)
-        res["error"] = _(
-            "Sorry, we couldn't find an account for email '{email}'."
-        ).format(email=email)
-        res["code"] = 401
-        return res
-
-    if user and not user.authenticate(password):
-        auth_failed.send(unwrap(current_app), email=email)
-        res["error"] = _("Sorry, wrong password.")
+        res["error"] = _("Wrong email address or password.")
         res["code"] = 401
         return res
 
@@ -170,7 +162,7 @@ def forgotten_pw_form() -> str:
 
 @route("/forgotten_pw", methods=["POST"])
 @csrf.exempt
-def forgotten_pw(new_user: bool = False) -> str | Response | tuple[str, int]:
+def forgotten_pw(new_user: bool = False) -> str | Response:
     """Reset password for users who have already activated their accounts."""
     email = request.form.get("email", "").lower()
 
@@ -182,28 +174,24 @@ def forgotten_pw(new_user: bool = False) -> str | Response | tuple[str, int]:
         flash(_("You must provide your email address."), "error")
         return render_template("login/forgotten_password.html")
 
-    try:
-        user = User.query.filter(
-            sql.func.lower(User.email) == email, User.can_login == True
-        ).one()
-    except NoResultFound:
-        flash(
-            _("Sorry, we couldn't find an account for email '{email}'.").format(
-                email=email
-            ),
-            "error",
-        )
-        return render_template("login/forgotten_password.html"), 401
+    user = User.query.filter(
+        sql.func.lower(User.email) == email, User.can_login == True
+    ).one_or_none()
+    if user is not None:
+        if not user.password:
+            user.set_password(random_password())
+            db.session.commit()
+        send_reset_password_instructions(user)
 
-    if user.can_login and not user.password:
-        user.set_password(random_password())
-        db.session.commit()
-
-    send_reset_password_instructions(user)
+    # The same answer whether the address has an account or not: else the form
+    # would tell anyone which addresses do.
     flash(
-        _("Password reset instructions have been sent to your email address."), "info"
+        _(
+            "If an account uses this address, a link to choose a password "
+            "has been sent to it."
+        ),
+        "info",
     )
-
     return redirect(url_for("login.login_form"))
 
 

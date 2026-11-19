@@ -11,6 +11,7 @@ from html import unescape
 from typing import TYPE_CHECKING
 from uuid import uuid4
 
+import pytest
 from flask import url_for
 
 from abilian.core.models.subjects import User
@@ -37,22 +38,27 @@ def test_the_sign_in_page_has_no_bar_and_says_where_accounts_come_from(
     assert "The managers of your communities invite you" in html
 
 
-def test_a_wrong_password_comes_back_with_the_error_and_the_address(
-    session: Session, client: FlaskClient
+@pytest.mark.parametrize(
+    ("email", "password"),
+    [("user@domain.tld", "wrong"), ("nobody@domain.tld", SECRET)],
+)
+def test_a_failed_sign_in_comes_back_with_the_error_and_the_address(
+    email: str, password: str, session: Session, client: FlaskClient
 ) -> None:
+    """A wrong password and an unknown address get the same answer: the form does
+    not tell who has an account."""
     session.add(User(email="user@domain.tld", password=SECRET, can_login=True))
     session.flush()
 
     response = client.post(
-        url_for("login.login_post"),
-        data={"email": "user@domain.tld", "password": "wrong"},
+        url_for("login.login_post"), data={"email": email, "password": password}
     )
 
     html = unescape(response.get_data(as_text=True))
     assert response.status_code == 401
     alert = html.split('class="ads-alert ads-tone-danger" role="alert"')[1]
-    assert "Sorry, wrong password." in alert.split("</div>")[0]
-    assert 'value="user@domain.tld"' in html
+    assert "Wrong email address or password." in alert.split("</div>")[0]
+    assert f'value="{email}"' in html
 
 
 def test_a_new_password_is_for_someone_and_says_the_rules(

@@ -119,6 +119,29 @@ def test_forgotten_pw(app: Application, session: Session, client: FlaskClient) -
         assert msg.cc == []
 
 
+def test_the_forgotten_password_form_does_not_tell_who_has_an_account(
+    app: Application, session: Session, client: FlaskClient
+) -> None:
+    """An unknown address gets the same answer as a known one, and no e-mail."""
+    mail = app.extensions["mail"]
+    known = User(email="known@domain.tld", password=uuid4().hex, can_login=True)
+    session.add(known)
+    session.flush()
+
+    answers, messages = [], []
+    with mail.record_messages() as outbox:
+        for email in ("known@domain.tld", "nobody@domain.tld"):
+            answer = client.post(url_for("login.forgotten_pw"), data={"email": email})
+            answers.append(answer)
+            messages.append(client.get(answer.location).get_data(as_text=True))
+
+    assert [answer.status_code for answer in answers] == [302, 302]
+    assert answers[0].location == answers[1].location
+    assert "nobody@domain.tld" not in messages[1]
+    assert "If an account uses this address" in messages[1]
+    assert [message.recipients for message in outbox] == [["known@domain.tld"]]
+
+
 def test_a_new_password_has_at_least_eight_characters(
     app: Application, session: Session, client: FlaskClient
 ) -> None:

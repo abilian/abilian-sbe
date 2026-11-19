@@ -2666,3 +2666,13 @@ msgstr "Dernière activité"
 
 msgid "None"
 msgstr "Aucun"
+
+msgid ""
+"If an account uses this address, a link to choose a password has been sent "
+"to it."
+msgstr ""
+"Si un compte utilise cette adresse, un lien pour choisir un mot de passe "
+"vient de lui être envoyé."
+
+msgid "Wrong email address or password."
+msgstr "Adresse e-mail ou mot de passe incorrect."
