@@ -321,7 +321,8 @@ def test_managing_a_member_works_from_a_filtered_page(
     html = _get(client, members["ann"], _members_url(community1, q="xavier"))
     assert 'name="action" value="set-user-role"' in _body(html)
     # A form cannot sit inside another: the filter closes before the table opens.
-    assert html.index('role="search"') < html.index("</form>") < html.index("<tbody")
+    search = html.index('role="search"')
+    assert html.index("</form>", search) < html.index("<tbody")
 
 
 # Folder permissions: two tables on one page.

@@ -172,6 +172,12 @@ def index(user: User) -> str:
 
     session["sort_communities_order"] = sort_order
 
+    search = request.args.get("q", "").strip()
+    if search:
+        query = query.filter(
+            sa.func.lower(Community.name).contains(search.lower(), autoescape=True)
+        )
+
     # Not passed to the template: `is_admin` was one name for two different
     # questions there -- site-wide here, group-scoped on a group's page, gone
     # since -- which is how `g.is_manager` went wrong one layer down. The
@@ -184,6 +190,7 @@ def index(user: User) -> str:
     ctx = {
         "my_communities": query.all(),
         "sort_order": sort_order,
+        "search": search,
     }
     return render_template("community/home.html", **ctx)
 

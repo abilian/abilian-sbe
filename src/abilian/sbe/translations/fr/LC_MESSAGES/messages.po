@@ -2682,3 +2682,9 @@ msgstr "Fichiers joints"
 
 msgid "Keep"
 msgstr "Garder"
+
+msgid "Filter my communities"
+msgstr "Filtrer mes communautés"
+
+msgid "No community has “%(search)s” in its name."
+msgstr "Aucune communauté n’a « %(search)s » dans son nom."

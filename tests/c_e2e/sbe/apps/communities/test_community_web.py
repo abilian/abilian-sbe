@@ -33,6 +33,31 @@ def test_index(
         assert response.status_code == 200
 
 
+def test_my_communities_are_filtered_by_name_from_the_bar(
+    community1: Community, app: Application, db: SQLAlchemy, client: FlaskClient
+) -> None:
+    security_service.start()
+    user = community1.test_user
+    other = Community(name="Gardening club")
+    db.session.add(other)
+    other.set_membership(user, MANAGER)
+    db.session.commit()
+
+    with client_login(client, user):
+        html = client.get(url_for("communities.index")).get_data(as_text=True)
+        found = client.get(url_for("communities.index", q="GARDEN"))
+        none = client.get(url_for("communities.index", q="%"))
+
+    menu = html.split('class="ads-menu sbe-menu-wide"')[1]
+    assert f'action="{url_for("communities.index")}"' in menu.split("</form>")[0]
+    listed = found.get_data(as_text=True).split('class="ads-list"')[1]
+    assert "Gardening club" in listed
+    assert community1.name not in listed
+    assert (
+        "Gardening club" not in none.get_data(as_text=True).split("ads-card__head")[1]
+    )
+
+
 def test_community_home(
     community1: Community, community2: Community, app: Application, client: FlaskClient
 ) -> None:

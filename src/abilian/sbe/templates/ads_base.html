@@ -39,6 +39,12 @@
       <summary class="ads-nav__link ads-tip" data-tip="{{ _('Communities') }}" {{ 'aria-current="true"' | safe if here }}>
         <span class="ads-nav__icon">{{ icon("users") }}</span><span class="sbe-nav-label">{{ _("Communities") }}</span>{{ icon("chevron-down", "ads-icon sbe-caret") }}</summary>
       <div class="ads-menu sbe-menu-wide">
+        {#- Filtering leads to the list of communities, filtered by name: the menu
+            holds only the recent ones. -#}
+        <form class="ads-input-icon sbe-menu-search" method="get" action="{{ url_for('communities.index') }}">
+          <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+          <input class="ads-input" type="search" name="q" placeholder="{{ _('Filter my communities') }}" aria-label="{{ _('Filter my communities') }}">
+        </form>
         {#- What has something new since Mon fil was last marked read first, with how
             much; then the others. -#}
         {% set fresh = communities_menu | selectattr("id", "in", menu_news) | list %}

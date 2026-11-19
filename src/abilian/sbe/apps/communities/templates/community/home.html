@@ -1,6 +1,7 @@
 {#- The communities: mine, or all of them for a site administrator, by name or by
-    activity; each with its image or initial, what it is for, its members and
-    documents, when it last moved. A site administrator makes a new one from here. -#}
+    activity, filtered by name (as the bar's menu does too); each with its image or
+    initial, what it is for, its members and documents, when it last moved. A site
+    administrator makes a new one from here. -#}
 {% extends "ads_base.html" %}
 {% set admin = is_site_admin() %}
 {% block page_title %}{{ _("Communities") if admin else _("My communities") }}{% endblock %}
@@ -10,10 +11,18 @@
 <div class="ads-card">
   <div class="ads-card__head ads-spread">
     <ul class="ads-pills" aria-label="{{ _('Order') }}">
-      <li><a class="ads-pill" href="{{ url_for('.index', sort='alpha') }}" {{ 'aria-current="page"' | safe if sort_order != "activity" }}>{{ _("By name") }}</a></li>
-      <li><a class="ads-pill" href="{{ url_for('.index', sort='activity') }}" {{ 'aria-current="page"' | safe if sort_order == "activity" }}>{{ _("By activity") }}</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.index', sort='alpha', q=search or none) }}" {{ 'aria-current="page"' | safe if sort_order != "activity" }}>{{ _("By name") }}</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.index', sort='activity', q=search or none) }}" {{ 'aria-current="page"' | safe if sort_order == "activity" }}>{{ _("By activity") }}</a></li>
     </ul>
-    <span class="ads-muted">{{ ngettext("%(num)d community", "%(num)d communities", my_communities | length) }}</span>
+    <span class="ads-cluster ads-gap-sm">
+      <span class="ads-muted">{{ ngettext("%(num)d community", "%(num)d communities", my_communities | length) }}</span>
+      <form method="get" action="{{ url_for('.index') }}">
+        <span class="ads-input-icon">
+          <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+          <input class="ads-input" type="search" name="q" value="{{ search }}" placeholder="{{ _('Name') }}" aria-label="{{ _('Filter the communities by name') }}">
+        </span>
+      </form>
+    </span>
   </div>
   {% if my_communities %}
   <ul class="ads-list">
@@ -32,6 +41,8 @@
     </li>
     {% endfor %}
   </ul>
+  {% elif search %}
+  <p class="ads-card__body ads-muted">{{ _("No community has “%(search)s” in its name.", search=search) }}</p>
   {% else %}
   <p class="ads-card__body ads-muted">{{ _("You're not a member of a community yet.") }}</p>
   {% endif %}
