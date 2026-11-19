@@ -412,12 +412,9 @@ def test_inviting_opens_a_dialog_from_the_communitys_home(
     expect(dialog.locator("[data-preview] li")).to_have_count(1)
     dialog.locator("#invite-note").fill("Welcome aboard.")
     dialog.get_by_role("button", name="Invite").click()
-    page.wait_for_load_state("networkidle")
+    page.wait_for_url(re.compile(r"/members"))
 
-    expect(page.locator('input[name="account"]')).to_have_value(
-        "someone.invited@example.org"
-    )
-    expect(page.locator('#wizard-form input[name="note"]')).to_have_value(
-        "Welcome aboard."
-    )
+    expect(
+        page.locator("#members-table tbody tr", has_text="someone.invited@example.org")
+    ).to_be_visible()
     js_errors.assert_clean("inviting from the dialog")

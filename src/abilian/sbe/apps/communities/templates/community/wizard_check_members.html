@@ -1,6 +1,8 @@
-{#- Inviting people, step 2: what will happen to each address. Those already members
-    are left alone; those with an account will be added, each with a role, or taken
-    off the list; those without one get an account at the next step. -#}
+{#- Inviting people from a spreadsheet, step 2: what will happen to each address.
+    Those already members are left alone; the others are added, each with a role, or
+    taken off the list: those with an account as they are, those without one with an
+    account made for them, named as the spreadsheet names them, or by themselves when
+    they arrive. -#}
 {% extends "ads_community.html" %}
 {% set invite_page = true %}
 {% import "community/_wizard.html" as wizard with context %}
@@ -36,13 +38,32 @@
       </table>
     </div>
   </section>
+  <section class="ads-stack ads-gap-sm" aria-labelledby="new-accounts">
+    <h3 class="sbe-section-title" id="new-accounts">{{ _("No account: one will be made, and an invitation sent") }}</h3>
+    <div class="ads-table-scroll">
+      <table class="ads-table ads-table--vcenter">
+        <thead><tr><th scope="col">{{ _("Name") }}</th><th scope="col">{{ _("Role") }}</th><th scope="col"><span class="sbe-sr-only">{{ _("Remove") }}</span></th></tr></thead>
+        <tbody>
+          {% for account in new_accounts %}
+          {% set name = [account.first_name, account.last_name] | select | join(" ") %}
+          <tr data-wizard-row>
+            <td class="ads-full sbe-cell-person"><span class="sbe-lines">{% if name %}<span>{{ name }}</span><span class="ads-muted ads-truncate">{{ account.email }}</span>{% else %}<span class="ads-truncate">{{ account.email }}</span>{% endif %}</span></td>
+            <td>{{ wizard.role_select(account.email, {"data-wizard-role": account.email}, account.role) }}</td>
+            <td class="ads-end">{{ wizard.remove_button(account.email, {"data-wizard-remove": account.email}) }}</td>
+          </tr>
+          {% endfor %}
+          <tr data-wizard-empty {{ "hidden" if new_accounts }}><td colspan="3" class="ads-muted">{{ _("Nobody without an account") }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
   <div class="ads-cluster ads-gap-sm">
-    <button class="ads-btn ads-btn--primary" type="submit" form="wizard-form">{{ _("Next step") }}</button>
+    <button class="ads-btn ads-btn--primary" type="submit" form="wizard-form">{{ icon("user-plus") }}{{ _("Invite") }}</button>
     <a class="ads-btn ads-btn--ghost" href="{{ url_for('.members', community_id=g.community.slug) }}">{{ _("Cancel") }}</a>
   </div>
 </div>
 {% endcall %}
-<form id="wizard-form" method="post" action="{{ url_for('.wizard_new_accounts', community_id=g.community.slug) }}" hidden>
+<form id="wizard-form" method="post" action="{{ url_for('.wizard_saving', community_id=g.community.slug) }}" hidden>
   {{ csrf.field() }}
   <input data-wizard-accounts type="hidden" name="wizard-emails" value="{{ wizard_emails }}">
   <input type="hidden" name="note" value="{{ note }}">

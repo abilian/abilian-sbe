@@ -1,6 +1,6 @@
-{#- What the three pages of inviting people share: where one is in them, and the frame
-    of a page. `vite/src/wizard.js` keeps the accounts that travel between the steps in
-    line with what is removed or changed. -#}
+{#- What the two pages of inviting people from a spreadsheet share: where one is in
+    them, and the frame of a page. `vite/src/wizard.js` keeps the accounts that travel
+    between the steps in line with what is removed or changed. -#}
 
 {% macro frame(step, title) %}
 <div class="ads-card">
@@ -9,7 +9,7 @@
       <ol class="ads-breadcrumb"><li><a href="{{ url_for('.members', community_id=g.community.slug) }}">{{ _("Members") }}</a></li></ol>
       <h2 class="ads-card__title">{{ title }}</h2>
       <ol class="ads-steps" aria-label="{{ _('Steps') }}">
-        {% for label in [_("Addresses"), _("Who joins"), _("New accounts")] %}
+        {% for label in [_("Addresses"), _("Who joins")] %}
         {#- The current step only is `aria-current`; those passed are done (ADS request 35). -#}
         {% if loop.index == step %}<li class="ads-step" aria-current="step">{{ label }}</li>
         {%- elif loop.index < step %}<li class="ads-step sbe-step--done">{{ label }}<span class="sbe-sr-only">, {{ _("done") }}</span></li>

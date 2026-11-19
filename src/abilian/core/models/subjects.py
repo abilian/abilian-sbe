@@ -307,15 +307,26 @@ class User(Principal, UserMixin, Model):
     #
     @property
     def name(self) -> str:
+        """First and last names. An account an invitation made has none until its
+        person names themselves: it goes by its address's first half meanwhile."""
         name = f"{(self.first_name or '')} {(self.last_name or '')}"
-        return name.strip() or "Unknown"
+        return name.strip() or self._unnamed
 
     @property
     def short_name(self):
         first_name = self.first_name or ""
         last_name = f"{self.last_name[0:1]}." if self.last_name else ""
         name = f"{first_name} {last_name}"
-        return name.strip() or "Unknown"
+        return name.strip() or self._unnamed
+
+    @property
+    def has_names(self) -> bool:
+        """Whether the person gave both their first and last names."""
+        return bool(self.first_name and self.last_name)
+
+    @property
+    def _unnamed(self) -> str:
+        return (self.email or "").partition("@")[0] or "Unknown"
 
     def __str__(self) -> str:
         return self.name

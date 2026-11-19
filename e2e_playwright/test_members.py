@@ -47,17 +47,9 @@ def test_wizard_adds_existing_and_new_people_from_pasted_addresses(
     # What will happen to each shows as it is typed; one role for all.
     expect(page.locator("[data-preview]")).to_contain_text("not-an-address")
     page.select_option("#invite-role", "manager")
-    page.get_by_role("button", name="Next step").click()
-    page.wait_for_load_state("networkidle")
-
-    # Typed addresses go straight on to the accounts to make.
-    # A name is required before the account can be created.
-    page.locator("[data-wizard-save]").click()
-    expect(page.locator(".wizard-warning")).to_be_visible()
-
-    page.fill('input[name="first_name"]', "Nina")
-    page.fill('input[name="last_name"]', "New")
-    page.locator("[data-wizard-save]").click()
+    # Typed addresses are invited at once: an account with no name yet for an
+    # address that has none, its person naming themselves on arriving.
+    page.get_by_role("button", name="Invite", exact=True).click()
     page.wait_for_url(re.compile(r"/members"))
 
     eva = _member_row(page, "eva.existing@example.com")
@@ -81,20 +73,17 @@ def test_wizard_can_drop_someone_at_each_step(
         "oskar.other@example.com;Oskar;Other;member\n"
     )
     page.set_input_files("#csv_file", csv)
-    page.get_by_role("button", name="Next step").click()
+    page.get_by_role("button", name="Invite", exact=True).click()
     page.wait_for_load_state("networkidle")
 
     page.locator('[data-wizard-remove="rita.removed@example.com"]').click()
     expect(page.get_by_text("There is no existing accounts")).to_be_visible()
 
-    page.get_by_role("button", name="Next step").click()
-    page.wait_for_load_state("networkidle")
-
     row = page.locator("tr[data-wizard-row]", has_text="otto.other@example.com")
     row.locator("[data-wizard-remove]").click()
     expect(row).to_have_count(0)
 
-    page.locator("[data-wizard-save]").click()
+    page.get_by_role("button", name="Invite", exact=True).click()
     page.wait_for_url(re.compile(r"/members"))
 
     expect(_member_row(page, "oskar.other@example.com")).to_be_visible()
@@ -113,17 +102,15 @@ def test_wizard_takes_a_csv_file(
     csv = tmp_path / "members.csv"
     csv.write_text("carla.csv@example.com;Carla;Csv;manager\n")
     page.set_input_files("#csv_file", csv)
-    page.get_by_role("button", name="Next step").click()
+    page.get_by_role("button", name="Invite", exact=True).click()
     page.wait_for_load_state("networkidle")
 
     expect(page).to_have_url(re.compile(r"/wizard/step2$"))
-    page.get_by_role("button", name="Next step").click()
-    page.wait_for_load_state("networkidle")
+    row = page.locator("tr[data-wizard-row]", has_text="carla.csv@example.com")
+    expect(row).to_contain_text("Carla Csv")
+    expect(row.locator('select[name="role"]')).to_have_value("manager")
 
-    expect(page.locator('input[name="first_name"]')).to_have_value("Carla")
-    expect(page.locator('select[name="role"]')).to_have_value("manager")
-
-    page.locator("[data-wizard-save]").click()
+    page.get_by_role("button", name="Invite", exact=True).click()
     page.wait_for_url(re.compile(r"/members"))
 
     carla = _member_row(page, "carla.csv@example.com")
@@ -138,7 +125,7 @@ def test_wizard_says_so_when_given_nothing(
     page = logged_in
     _step1(page, base_url)
 
-    page.get_by_role("button", name="Next step").click()
+    page.get_by_role("button", name="Invite", exact=True).click()
     page.wait_for_load_state("networkidle")
 
     expect(page).to_have_url(re.compile(r"/wizard/step1$"))

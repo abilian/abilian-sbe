@@ -1,9 +1,11 @@
 # Copyright (c) 2012-2026, Abilian SAS
 
 """Inviting people: from a dialog on every page of the community; what will happen to
-each address, said as they are typed; typed addresses go on to the accounts to make,
-with one role for all and a word to go with the invitation; each one added is told by
-e-mail, and whoever never signed in gets the link to choose a password."""
+each address, said as they are typed; typed addresses are invited at once, with one
+role for all and a word to go with the invitation, an account made for each that has
+none, unnamed until its person arrives; a spreadsheet's list is checked on a page
+first. Each one added is told by e-mail, and whoever never signed in gets the link to
+choose a password."""
 
 from __future__ import annotations
 
@@ -17,6 +19,7 @@ from typing import TYPE_CHECKING
 from uuid import uuid4
 
 import pytest
+import sqlalchemy as sa
 
 from abilian.core.extensions import mail
 from abilian.core.models.subjects import User
@@ -95,42 +98,44 @@ def test_each_address_says_what_inviting_does_to_it(
     assert "3 people will get an email." in html
 
 
-def test_typed_addresses_go_on_to_the_accounts_to_make_with_their_role(
+def test_typed_addresses_are_invited_at_once_with_their_role(
     client: FlaskClient, community1: Community, people: dict[str, User]
 ) -> None:
-    html = _post(
-        client,
-        people["manager"],
-        "communities.wizard_check_data",
-        community1,
-        **{
-            "wizard-emails": "account@example.com new@x.org",
-            "role": "manager",
-            "note": "Welcome to the board.",
-        },
-    )
+    """No page for the names of the accounts to make: their people give them."""
+    data = {
+        "wizard-emails": "account@example.com new@x.org",
+        "role": "manager",
+        "note": "Welcome to the board.",
+    }
+    with client_login(client, people["manager"]), mail.record_messages() as outbox:
+        response = client.post(
+            url_for("communities.wizard_check_data", community_id=community1.slug),
+            data=data,
+        )
 
-    assert '<input type="hidden" name="account" value="new@x.org">' in html
-    value = re.search(r'name="existing_account" value="([^"]*)"', html)
-    assert value
-    carried = json.loads(unescape(value.group(1)))
-    assert carried == {"account@example.com": "manager"}
-    assert '<input type="hidden" name="note" value="Welcome to the board.">' in html
+    assert response.status_code == 302
+    new = User.query.filter(User.email == "new@x.org").one()
+    assert (new.first_name, new.last_name, new.name) == (None, None, "new")
+    assert community1.get_role(new) == MANAGER
+    assert community1.get_role(people["account"]) == MANAGER
+    assert sorted(message.recipients[0] for message in outbox) == [
+        "account@example.com",
+        "new@x.org",
+    ]
+    assert all("Welcome to the board." in message.body for message in outbox)
 
 
 def test_each_one_added_is_told_with_the_word_that_came_with_it(
     client: FlaskClient, community1: Community, people: dict[str, User]
 ) -> None:
-    accounts = {"invited@example.com": "member", "account@example.com": "member"}
+    accounts = _existing("invited@example.com", "account@example.com")
 
-    with client_login(client, people["manager"]), mail.record_messages() as outbox:
-        client.post(
-            url_for("communities.wizard_saving", community_id=community1.slug),
-            data={"existing_account": json.dumps(accounts), "note": "See you Monday."},
-        )
+    _status, outbox = _saving(
+        client, people["manager"], community1, accounts, note="See you Monday."
+    )
 
     told = {message.recipients[0]: message for message in outbox}
-    assert set(told) == set(accounts)
+    assert set(told) == {account["email"] for account in accounts}
     for message in told.values():
         assert community1.name in message.subject
         assert people["manager"].name in message.subject
@@ -179,13 +184,22 @@ def test_a_member_sees_no_preview(
     assert response.status_code == 403
 
 
+def _existing(*emails: str, role: str = "member") -> list[dict[str, str]]:
+    """Accounts there are, as the second page's script sends them."""
+    return [{"email": email, "status": "existing", "role": role} for email in emails]
+
+
 def _saving(
-    client: FlaskClient, manager: User, community: Community, **data
+    client: FlaskClient,
+    manager: User,
+    community: Community,
+    entries: list[dict[str, str]],
+    **data,
 ) -> tuple[int, list]:
     with client_login(client, manager), mail.record_messages() as outbox:
         response = client.post(
             url_for("communities.wizard_saving", community_id=community.slug),
-            data=data,
+            data={"wizard-emails": json.dumps(entries), **data},
         )
     return response.status_code, outbox
 
@@ -193,31 +207,21 @@ def _saving(
 def test_an_address_is_the_same_whatever_its_case(
     client: FlaskClient, community1: Community, people: dict[str, User]
 ) -> None:
-    html = _post(
-        client,
-        people["manager"],
-        "communities.wizard_check_data",
-        community1,
-        **{
-            "wizard-emails": "ACCOUNT@example.com new@x.org New@X.org",
-            "role": "member",
-        },
-    )
+    data = {
+        "wizard-emails": "ACCOUNT@example.com new@x.org New@X.org",
+        "role": "member",
+    }
+    with client_login(client, people["manager"]):
+        response = client.post(
+            url_for("communities.wizard_check_data", community_id=community1.slug),
+            data=data,
+        )
 
-    # The account is found, not made again; the new address is asked for once.
-    assert html.count('name="account"') == 1
-    value = re.search(r'name="existing_account" value="([^"]*)"', html)
-    assert value
-    assert json.loads(unescape(value.group(1))) == {"account@example.com": "member"}
-
-    status, _outbox = _saving(
-        client,
-        people["manager"],
-        community1,
-        existing_account=json.dumps({"ACCOUNT@example.com": "member"}),
-    )
-    assert status == 302
+    # The account is found, not made again; the new address makes one account.
+    assert response.status_code == 302
     assert community1.get_role(people["account"]) == MEMBER
+    made = User.query.filter(sa.func.lower(User.email) == "new@x.org").all()
+    assert len(made) == 1
 
 
 def test_a_role_one_is_not_invited_with_is_refused(
@@ -227,7 +231,7 @@ def test_a_role_one_is_not_invited_with_is_refused(
         client,
         people["manager"],
         community1,
-        existing_account=json.dumps({"account@example.com": "Manager"}),
+        _existing("account@example.com", role="Manager"),
     )
 
     assert status == 400
@@ -265,12 +269,12 @@ def test_all_are_added_before_anyone_is_told_and_the_untold_are_named(
             raise smtplib.SMTPRecipientsRefused({user.email: (550, b"no")})
 
     monkeypatch.setattr(wizard, "send_invitation", refuse_the_first)
-    accounts = {"invited@example.com": "member", "account@example.com": "member"}
+    accounts = _existing("invited@example.com", "account@example.com")
 
     with client_login(client, people["manager"]):
         client.post(
             url_for("communities.wizard_saving", community_id=community1.slug),
-            data={"existing_account": json.dumps(accounts)},
+            data={"wizard-emails": json.dumps(accounts)},
         )
         html = unescape(
             client.get(
@@ -283,20 +287,28 @@ def test_all_are_added_before_anyone_is_told_and_the_untold_are_named(
     assert "not told by e-mail, which could not be sent: invited@example.com" in html
 
 
-def test_the_new_accounts_page_carries_its_list_whole(
+def test_a_spreadsheets_new_accounts_are_checked_then_made_with_its_names(
     client: FlaskClient, community1: Community, people: dict[str, User]
 ) -> None:
+    csv = io.BytesIO(b"dora@x.org;Dora;Csv;member\n")
+
     html = _post(
         client,
         people["manager"],
         "communities.wizard_check_data",
         community1,
-        **{"wizard-emails": "new@x.org", "role": "member"},
+        csv_file=(csv, "people.csv"),
     )
 
-    value = re.search(r"name=\"new_accounts\" value='([^']*)'", html)
+    assert "Dora Csv" in html
+    value = re.search(r'name="wizard-emails" value="([^"]*)"', html)
     assert value
-    assert json.loads(unescape(value.group(1)))[0]["email"] == "new@x.org"
+    status, _outbox = _saving(
+        client, people["manager"], community1, json.loads(unescape(value.group(1)))
+    )
+    assert status == 302
+    dora = User.query.filter(User.email == "dora@x.org").one()
+    assert (dora.first_name, dora.last_name) == ("Dora", "Csv")
     # The header's button leads to the first page here: there is no dialog.
     assert 'data-modal-open="#modal-invite"' not in html
 
@@ -311,10 +323,7 @@ def test_the_invitation_speaks_the_language_of_whoever_is_invited(
     db.session.commit()
 
     _status, outbox = _saving(
-        client,
-        people["manager"],
-        community1,
-        existing_account=json.dumps({"account@example.com": "member"}),
+        client, people["manager"], community1, _existing("account@example.com")
     )
 
     (message,) = outbox
@@ -330,11 +339,11 @@ def test_the_steps_say_which_is_current_and_each_row_whose_it_is(
         people["manager"],
         "communities.wizard_check_data",
         community1,
-        **{"wizard-emails": "new@x.org", "role": "member"},
+        csv_file=(io.BytesIO(b"new@x.org;;;member\n"), "people.csv"),
     )
 
     assert html.count('aria-current="step"') == 1
-    assert html.count('class="ads-step sbe-step--done"') == 2
+    assert html.count('class="ads-step sbe-step--done"') == 1
     assert 'aria-label="Role of new@x.org"' in html
     assert 'aria-label="Remove new@x.org"' in html
 

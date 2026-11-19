@@ -235,6 +235,15 @@ def reset_password_post(token: str) -> Response:
         flash(problem, "error")
         return redirect(url_for("login.reset_password_post", token=token))
 
+    # An account an invitation made has no name yet: its person gives it here.
+    if not user.has_names:
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
+        if not (first_name and last_name):
+            flash(_("You must give your first and last names."), "error")
+            return redirect(url_for("login.reset_password_post", token=token))
+        user.first_name, user.last_name = first_name, last_name
+
     user.set_password(password)
     db.session.commit()
 

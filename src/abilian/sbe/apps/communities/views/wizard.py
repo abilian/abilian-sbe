@@ -109,15 +109,16 @@ def _account(email: str) -> User:
 
 
 def _new_account(account: dict[str, str]) -> User:
-    """An account for an address that has none; refused if one came meanwhile."""
+    """An account for an address that has none, named if a spreadsheet named it;
+    refused if one came meanwhile."""
     email = account["email"]
     if User.query.filter(sa.func.lower(User.email) == email.lower()).count():
         msg = f"{email!r} has an account already"
         raise BadRequest(msg)
     user = User(
         email=email,
-        first_name=account["first_name"],
-        last_name=account["last_name"],
+        first_name=account.get("first_name") or None,
+        last_name=account.get("last_name") or None,
         can_login=True,
     )
     db.session.add(user)
@@ -325,12 +326,9 @@ def wizard_check_data() -> Response | str:
                 url_for(".wizard_data_insertion", community_id=g.community.slug)
             )
         # The first page said what happens to each address as it was typed, and
-        # chose one role for all: on to the accounts to make.
+        # chose one role for all: nothing left to ask.
         role = request.form.get("role")
-        if role not in INVITED_ROLES:
-            msg = f"Not a role one is invited with: {role!r}"
-            raise BadRequest(msg)
-        return _new_accounts_page(
+        return invite(
             [{**account, "role": role} for account in final_email_list],
             invitation_note(request.form),
         )
@@ -366,6 +364,7 @@ def wizard_check_data() -> Response | str:
 
     ctx = {
         "existing_accounts_object": existing_accounts_object,
+        "new_accounts": [a for a in final_email_list if a["status"] == "new"],
         "csv_roles": existing_accounts_csv_roles,
         "wizard_emails": final_email_list_json,
         "existing_members_objects": existing_members_objects,
@@ -374,87 +373,44 @@ def wizard_check_data() -> Response | str:
     return render_template("community/wizard_check_members.html", **ctx)
 
 
-@route("/<string:community_id>/members/wizard/step3", methods=["GET", "POST"])
-@csrf.protect
-@can_manage
-@tab("members")
-def wizard_new_accounts() -> str | Response:
-    """Complete new emails information."""
-    if request.method == "GET":
-        return redirect(url_for(".members", community_id=g.community.slug))
-
-    g.breadcrumb.append(
-        BreadcrumbItem(
-            label=_("Members"),
-            url=Endpoint("communities.members", community_id=g.community.slug),
-        )
-    )
-
-    return _new_accounts_page(
-        json.loads(request.form["wizard-emails"]), invitation_note(request.form)
-    )
-
-
-def _new_accounts_page(wizard_accounts: list[dict[str, Any]], note: str) -> str:
-    """The last page: names for the addresses with no account; those with one go
-    along, to be added, and the word that goes with the invitation."""
-    wizard_existing_account = {}
-    new_accounts = []
-
-    for user in wizard_accounts:
-        match user["status"]:
-            case "existing":
-                wizard_existing_account[user["email"]] = user["role"]
-
-            case "new":
-                new_accounts.append(user)
-
-    existing_account = json.dumps(wizard_existing_account)
-
-    return render_template(
-        "community/wizard_new_accounts.html",
-        existing_account=existing_account,
-        new_accounts=new_accounts,
-        note=note,
-    )
-
-
 @route("/<string:community_id>/members/wizard/complete", methods=["POST"])
 @csrf.protect
 @can_manage
 def wizard_saving() -> Response:
-    """Add the accounts there are to the community, make the others, and tell each
-    one by e-mail, with the word that came with the invitation: one who never
-    signed in gets the link to choose a password."""
+    """The list the second page checked, as its script left it, invited."""
+    return invite(
+        json.loads(request.form["wizard-emails"]), invitation_note(request.form)
+    )
+
+
+def invite(entries: list[dict[str, Any]], note: str) -> Response:
+    """Add the accounts there are to the community and make the others, each with
+    its role; tell each one by e-mail, with the word that came with the invitation:
+    one who never signed in gets the link to choose a password, and names
+    themselves then if the entry did not. Back to the members."""
     community = g.community._model
-    inviter = authenticated_user()
-    note = invitation_note(request.form)
-    existing_accounts = request.form["existing_account"]
-    existing_accounts = json.loads(existing_accounts)
-    new_accounts = request.form.get("new_accounts", "[]")
-    new_accounts = json.loads(new_accounts)
-
-    if not (existing_accounts or new_accounts):
+    if not entries:
         flash(_("No new members were found"), "warning")
-        return redirect(url_for(".members", community_id=g.community.slug))
-
-    roles = [*existing_accounts.values(), *(a["role"] for a in new_accounts)]
-    if any(role not in INVITED_ROLES for role in roles):
+        return redirect(url_for(".members", community_id=community.slug))
+    if any(entry["role"] not in INVITED_ROLES for entry in entries):
         msg = "Not a role one is invited with"
         raise BadRequest(msg)
 
     # All of them in the community, then all of them told: a mail server that fails
     # halfway leaves no one half invited.
     invited = [
-        *(_account(email) for email in existing_accounts),
-        *(_new_account(account) for account in new_accounts),
+        _account(entry["email"])
+        if entry["status"] == "existing"
+        else _new_account(entry)
+        for entry in entries
     ]
     app = unwrap(current_app)
-    for user, role in zip(invited, roles, strict=True):
-        community.set_membership(user, role)
+    for user, entry in zip(invited, entries, strict=True):
+        community.set_membership(user, entry["role"])
         activity.send(app, actor=user, verb="join", object=community)
     db.session.commit()
 
+    inviter = authenticated_user()
     untold = []
     for user in invited:
         try:
@@ -468,7 +424,6 @@ def wizard_saving() -> Response:
             ).format(addresses=", ".join(untold)),
             "warning",
         )
-        return redirect(url_for(".members", community_id=community.slug))
-
-    flash(_("New members added successfully"), "success")
+    else:
+        flash(_("New members added successfully"), "success")
     return redirect(url_for(".members", community_id=community.slug))

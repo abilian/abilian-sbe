@@ -81,3 +81,32 @@ def test_a_new_password_is_for_someone_and_says_the_rules(
     assert response.status_code == 200
     assert "For Claire Moreau (claire@domain.tld)." in html
     assert "At least 8 characters" in html
+
+
+def test_an_invited_account_gets_its_names_with_its_password(
+    session: Session, client: FlaskClient
+) -> None:
+    """An invitation made the account without names: its person gives them."""
+    user = User(email="dora@domain.tld", can_login=True)
+    session.add(user)
+    session.flush()
+    token = views.generate_reset_password_token(user)
+    url = url_for("login.reset_password_post", token=token)
+
+    before = user.password
+    page = unescape(client.get(url).get_data(as_text=True))
+    nameless = client.post(url, data={"password": SECRET})
+    session.refresh(user)
+    unchanged = user.password
+    named = client.post(
+        url, data={"password": SECRET, "first_name": " Dora ", "last_name": "Lune"}
+    )
+    session.refresh(user)
+
+    assert 'name="first_name"' in page
+    assert 'name="last_name"' in page
+    assert nameless.location.endswith(url)
+    assert unchanged == before
+    assert named.status_code == 302
+    assert (user.first_name, user.last_name) == ("Dora", "Lune")
+    assert user.authenticate(SECRET)

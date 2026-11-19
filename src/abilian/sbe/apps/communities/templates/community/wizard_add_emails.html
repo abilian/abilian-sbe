@@ -1,7 +1,7 @@
 {#- Inviting people, step 1, as a page: what the dialog asks
-    (`community/_invite_fields.html`), or a spreadsheet, a role each, reviewed at the
-    next step. Where the dialog leads for a spreadsheet, and where the header's button
-    leads without a script. -#}
+    (`community/_invite_fields.html`), invited at once, or a spreadsheet, a role each,
+    reviewed at the next step. Where the dialog leads for a spreadsheet, and where the
+    header's button leads without a script. -#}
 {% extends "ads_community.html" %}
 {% import "community/_wizard.html" as wizard with context %}
 {% import "community/_invite_fields.html" as invite with context %}
@@ -15,10 +15,10 @@
   <div class="ads-field">
     <label class="ads-label" for="csv_file">{{ _("Or a spreadsheet") }}</label>
     <input class="ads-file-input" id="csv_file" type="file" name="csv_file" accept=".csv" aria-describedby="csv-help">
-    <small class="ads-help" id="csv-help">{{ _("A CSV file, one person per line: address; first name; last name; role (member or manager).") }} <a href="{{ url_for('abilian_sbe_static', filename='csv/csv_example.csv') }}">{{ _("Download CSV file model") }}</a></small>
+    <small class="ads-help" id="csv-help">{{ _("A CSV file, one person per line: address; first name; last name; role (member or manager). The names may be left empty: each one gives theirs on arriving.") }} <a href="{{ url_for('abilian_sbe_static', filename='csv/csv_example.csv') }}">{{ _("Download CSV file model") }}</a></small>
   </div>
   <div class="ads-cluster ads-gap-sm">
-    <button class="ads-btn ads-btn--primary" type="submit">{{ _("Next step") }}</button>
+    <button class="ads-btn ads-btn--primary" type="submit">{{ icon("user-plus") }}{{ _("Invite") }}</button>
     <a class="ads-btn ads-btn--ghost" href="{{ url_for('.members', community_id=g.community.slug) }}">{{ _("Cancel") }}</a>
   </div>
 </form>

@@ -90,7 +90,7 @@ def test_api_post(session: Session, client: FlaskClient) -> None:
     assert response.get_json() == {
         "email": "User@domain.tld",
         "username": "user@domain.tld",
-        "fullname": "Unknown",
+        "fullname": "User",
         "next_url": "",
     }
 
@@ -146,7 +146,13 @@ def test_a_new_password_has_at_least_eight_characters(
     app: Application, session: Session, client: FlaskClient
 ) -> None:
     """Seven were accepted, while the message asked for eight."""
-    user = User(email="user@domain.tld", password=uuid4().hex, can_login=True)
+    user = User(
+        first_name="Ann",
+        last_name="Lee",
+        email="user@domain.tld",
+        password=uuid4().hex,
+        can_login=True,
+    )
     session.add(user)
     session.flush()
     token = views.generate_reset_password_token(user)
@@ -164,7 +170,13 @@ def test_a_password_link_opens_nothing_once_used(
     app: Application, session: Session, client: FlaskClient
 ) -> None:
     """A forwarded invitation must not let someone else choose the password again."""
-    user = User(email="user@domain.tld", password=uuid4().hex, can_login=True)
+    user = User(
+        first_name="Ann",
+        last_name="Lee",
+        email="user@domain.tld",
+        password=uuid4().hex,
+        can_login=True,
+    )
     session.add(user)
     session.flush()
     token = views.generate_reset_password_token(user)

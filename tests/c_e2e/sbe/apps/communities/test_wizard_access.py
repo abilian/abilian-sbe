@@ -42,8 +42,11 @@ if TYPE_CHECKING:
 WIZARD_STEPS = [
     "communities.wizard_data_insertion",
     "communities.wizard_check_data",
-    "communities.wizard_new_accounts",
 ]
+
+
+def _existing(email: str, role: str) -> dict[str, str]:
+    return {"email": email, "status": "existing", "role": role}
 
 
 def _member(db: SQLAlchemy, community: Community, email: str, role) -> User:
@@ -82,7 +85,7 @@ def test_a_plain_member_cannot_promote_themselves(
     with client_login(client, reader):
         response = client.post(
             url_for("communities.wizard_saving", community_id=community1.slug),
-            data={"existing_account": json.dumps({reader.email: "manager"})},
+            data={"wizard-emails": json.dumps([_existing(reader.email, "manager")])},
         )
 
     db.session.expire_all()
@@ -103,7 +106,7 @@ def test_a_manager_still_can(
     with client_login(client, manager):
         response = client.post(
             url_for("communities.wizard_saving", community_id=community1.slug),
-            data={"existing_account": json.dumps({outsider.email: "member"})},
+            data={"wizard-emails": json.dumps([_existing(outsider.email, "member")])},
         )
 
     db.session.expire_all()

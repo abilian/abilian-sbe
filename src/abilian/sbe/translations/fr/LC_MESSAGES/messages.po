@@ -827,7 +827,7 @@ msgstr "Groupes"
 
 #: abilian/sbe/apps/social/templates/social/invite.html:30
 msgid "Invite"
-msgstr "Invitation"
+msgstr "Inviter"
 
 msgid "Readers list"
 msgstr "Liste des lecteurs"
@@ -1784,8 +1784,14 @@ msgstr "Adresses e-mail"
 msgid "Or a spreadsheet"
 msgstr "Ou un tableur"
 
-msgid "A CSV file, one person per line: address; first name; last name; role (member or manager)."
-msgstr "Un fichier CSV, une personne par ligne : adresse ; prénom ; nom ; rôle (member ou manager)."
+msgid ""
+"A CSV file, one person per line: address; first name; last name; role "
+"(member or manager). The names may be left empty: each one gives theirs on "
+"arriving."
+msgstr ""
+"Un fichier CSV, une personne par ligne : adresse ; prénom ; nom ; rôle "
+"(member ou manager). Les noms peuvent rester vides : chacun donnera les siens "
+"en arrivant."
 
 msgid "Already members: nothing to do"
 msgstr "Déjà membres : rien à faire"
@@ -2688,3 +2694,16 @@ msgstr "Filtrer mes communautés"
 
 msgid "No community has “%(search)s” in its name."
 msgstr "Aucune communauté n’a « %(search)s » dans son nom."
+
+msgid "Nobody without an account"
+msgstr "Personne sans compte"
+
+msgid ""
+"Welcome. For %(email)s: your names, as the others will see them, and a "
+"password."
+msgstr ""
+"Bienvenue. Pour %(email)s : vos prénom et nom, tels que les autres les "
+"verront, et un mot de passe."
+
+msgid "You must give your first and last names."
+msgstr "Vous devez indiquer votre prénom et votre nom."

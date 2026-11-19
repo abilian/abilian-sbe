@@ -1,5 +1,5 @@
-// The members wizard's second and third pages. The accounts travel between the
-// steps as JSON in a hidden field; these keep it in line with the table.
+// The members wizard's second page. The accounts travel to the last step as JSON
+// in a hidden field; this keeps it in line with the tables.
 
 function saySoIfEmpty(table) {
   if (!table.querySelector("tr[data-wizard-row]")) {
@@ -7,7 +7,7 @@ function saySoIfEmpty(table) {
   }
 }
 
-/* Step 2: existing accounts. */
+/* Step 2: the accounts there are, and those to make. */
 const emailsField = document.querySelector("[data-wizard-accounts]");
 if (emailsField) {
   const readAccounts = () => JSON.parse(emailsField.value);
@@ -35,42 +35,5 @@ if (emailsField) {
     button.closest("tr").remove();
     writeAccounts(readAccounts().filter((account) => account.email !== email));
     saySoIfEmpty(table);
-  });
-}
-
-/* Step 3: new accounts. The table is the state; the field is filled on saving. */
-const saveButton = document.querySelector("[data-wizard-save]");
-if (saveButton) {
-  const table = document.querySelector("[data-wizard-new-accounts]");
-
-  table.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-wizard-remove]");
-    if (!button) return;
-    button.closest("tr").remove();
-    saySoIfEmpty(table);
-  });
-
-  saveButton.addEventListener("click", () => {
-    let missing = 0;
-    table.querySelectorAll(".wizard-required").forEach((input) => {
-      const empty = input.value.trim() === "";
-      input.setAttribute("aria-invalid", String(empty));
-      if (empty) missing += 1;
-    });
-    document.querySelector(".wizard-warning").hidden = missing === 0;
-    if (missing) return;
-
-    const value = (row, name) => row.querySelector(`[name="${name}"]`).value;
-    const accounts = [...table.querySelectorAll("tr[data-wizard-row]")].map(
-      (row) => ({
-        email: value(row, "account"),
-        first_name: value(row, "first_name"),
-        last_name: value(row, "last_name"),
-        role: value(row, "role"),
-      }),
-    );
-
-    document.getElementById("new_accounts").value = JSON.stringify(accounts);
-    document.getElementById("wizard-form").submit();
   });
 }

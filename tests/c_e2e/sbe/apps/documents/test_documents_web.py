@@ -557,7 +557,7 @@ def test_document_send_by_mail(
             assert len(outbox) == 1
 
             msg = outbox[0]
-            assert msg.subject == "[Abilian Test] Unknown sent you a file"
+            assert msg.subject == f"[Abilian Test] {user.name} sent you a file"
             assert msg.recipients == ["dest@example.com"]
 
             assert len(msg.attachments) == 1
@@ -578,7 +578,7 @@ def test_document_send_by_mail(
 
             msg = outbox[0]
             assert isinstance(msg, flask_mail.Message)
-            assert msg.subject == "[Abilian Test] Unknown sent you a file"
+            assert msg.subject == f"[Abilian Test] {user.name} sent you a file"
             assert msg.recipients == ["dest@example.com"]
             assert len(msg.attachments) == 1
 

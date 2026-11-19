@@ -10,6 +10,7 @@ defined for every community template, and each page now draws its own table.
 
 from __future__ import annotations
 
+import io
 import re
 from typing import TYPE_CHECKING
 
@@ -154,8 +155,8 @@ def test_the_manager_check_does_not_run_once_per_row(
 def test_inviting_lists_the_new_accounts_one_cell_per_column(
     community1: Community, db: SQLAlchemy, client: FlaskClient, app: Application
 ) -> None:
-    """Typed addresses go from the first step to the accounts to make, whose header
-    and rows once came from macros that disagreed about the manager column; only
+    """A spreadsheet's addresses go on to a page that checks them, whose header and
+    rows once came from macros that disagreed about the manager column; only
     managers reach it."""
     ensure_services_started(["security"])
     manager = _member(db, community1, "wizard-manager@example.com", MANAGER)
@@ -164,7 +165,9 @@ def test_inviting_lists_the_new_accounts_one_cell_per_column(
     with client_login(client, manager):
         response = client.post(
             url_for("communities.wizard_check_data", community_id=community1.slug),
-            data={"wizard-emails": "no.account@example.com", "role": "member"},
+            data={
+                "csv_file": (io.BytesIO(b"no.account@example.com;;;member\n"), "a.csv")
+            },
         )
 
     html = response.get_data(as_text=True)

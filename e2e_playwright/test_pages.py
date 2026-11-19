@@ -378,7 +378,7 @@ def test_a_flash_message_can_be_dismissed(
         f"{base_url}/communities/{COMMUNITY}/members/wizard/step1",
         wait_until="networkidle",
     )
-    page.get_by_role("button", name="Next step").click()
+    page.get_by_role("button", name="Invite", exact=True).click()
     page.wait_for_load_state("networkidle")
 
     message = page.locator('[role="alert"]', has_text="No new members were found")
