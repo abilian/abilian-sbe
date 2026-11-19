@@ -15,7 +15,8 @@ from werkzeug.exceptions import BadRequest, Forbidden
 from abilian.core.extensions import db
 from abilian.core.extensions.login import authenticated
 from abilian.core.models.subjects import User
-from abilian.sbe.apps.communities.models import Membership
+from abilian.sbe.apps.communities.models import Community, Membership
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.sbe.apps.main.feed import feed_item
 from abilian.sbe.apps.wall.views import get_recent_entries
 from abilian.services import security_service
@@ -153,10 +154,20 @@ def user_post(user: User, user_id: int) -> Response:
 # Ad-hoc JSON endpoints, used by select boxes
 #
 @social.route("/users/json")
-def users_json():
+@authenticated
+def users_json(user: User) -> Response:
+    """The people whose name starts with `q`, with their address, for the pickers of
+    those who run something: a site administrator; or the manager of the community
+    `with_membership` names, who is told each one's role in it."""
     q = request.args.get("q", "").replace("%", " ").strip().lower()
     if len(q) < 2:
         raise BadRequest
+    managed = request.args.get("with_membership", type=int)
+    community = db.session.get(Community, managed) if managed is not None else None
+    if not is_site_admin(user) and (
+        community is None or not can_manage(user, community)
+    ):
+        raise Forbidden
 
     query = User.query.filter(
         or_(
@@ -165,10 +176,9 @@ def users_json():
         )
     ).order_by(func.lower(User.last_name))
 
-    with_membership = request.args.get("with_membership")
+    with_membership = managed
     if with_membership is not None:
         # provide membership info for a community
-        with_membership = int(with_membership)
         query = (
             query.outerjoin(
                 Membership,
@@ -196,19 +206,19 @@ def users_json():
         query = query.filter(exclude)
 
     results = []
-    for user in query.all():
+    for person in query.all():
         role = None
         if with_membership is not None:
-            user, role = user
+            person, role = person
 
         if role is not None:
             role = str(role)
 
         item = {
-            "id": user.id,
-            "text": f"{user.name} ({user.email})",
-            "name": user.name,
-            "email": user.email,
+            "id": person.id,
+            "text": f"{person.name} ({person.email})",
+            "name": person.name,
+            "email": person.email,
             "role": role,
         }
         results.append(item)

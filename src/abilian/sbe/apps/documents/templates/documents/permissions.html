@@ -128,7 +128,7 @@
 <div class="ads-stack">
   <div class="ads-field">
     <label class="ads-label" for="user-select">{{ _("Person") }}</label>
-    <input class="ads-input" type="text" id="user-select" name="user" required data-picker="{{ url_for('social.users_json') }}">
+    <input class="ads-input" type="text" id="user-select" name="user" required data-picker="{{ url_for('social.users_json', with_membership=g.community.id) }}">
   </div>
   <div class="ads-field">
     <label class="ads-label" for="role-select">{{ _("Role") }}</label>

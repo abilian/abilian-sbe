@@ -8,10 +8,11 @@ import hashlib
 
 from flask import Response, g, make_response, request
 from sqlalchemy.sql.expression import func, or_
-from werkzeug.exceptions import NotFound
+from werkzeug.exceptions import Forbidden, NotFound
 
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.subjects import User
-from abilian.services.security import AUTHENTICATED
+from abilian.services.security import AUTHENTICATED, is_site_admin
 from abilian.web import url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.views import JSONModelSearch
@@ -70,8 +71,15 @@ def photo(user):
 
 # JSON search
 class UserJsonListing(JSONModelSearch):
+    """Every account, with its address: for the administrators' pickers only."""
+
     Model = User
     minimum_input_length = 0
+
+    def prepare_args(self, args: tuple, kwargs: dict) -> tuple[tuple, dict]:
+        if not is_site_admin(authenticated_user()):
+            raise Forbidden
+        return super().prepare_args(args, kwargs)
 
     def filter(self, query, q, **kwargs):
         if q:
