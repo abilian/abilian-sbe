@@ -15,6 +15,7 @@ from uuid import uuid4
 
 import pytest
 
+from abilian.core.extensions import mail
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.documents.views.documents import document_history
@@ -374,3 +375,21 @@ def test_everything_in_a_folder_is_a_tree(
     nested = html.split(">Minutes</span>")[1].split("</li>")[0]
     assert 'class="ads-tree ads-tree--nested"' in nested
     assert "2026.txt" in nested
+
+
+def test_a_reader_has_no_document_mailed_by_the_site(
+    community1: Community, document: Document, client: FlaskClient, db: SQLAlchemy
+) -> None:
+    reader = _member(db, community1, MEMBER)
+
+    with client_login(client, reader), mail.record_messages() as outbox:
+        status = _post(
+            client,
+            "documents.document_send",
+            document,
+            recipient="anyone@example.org",
+            message="Buy now.",
+        )
+
+    assert status == 403
+    assert outbox == []

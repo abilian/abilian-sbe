@@ -420,7 +420,10 @@ def refresh_preview(user: User, doc_id):
 @csrf.protect
 @authenticated
 def document_send(user: User, doc_id: int) -> Response:
+    """Mail the document to an address, with a word: for whoever may write it, as
+    the page offers it, since the site's mail server carries it anywhere."""
     doc = get_document(user, doc_id)
+    check_write_access(user, doc)
 
     recipient = request.form.get("recipient")
     user_msg = request.form.get("message")
