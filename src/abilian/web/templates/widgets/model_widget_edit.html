@@ -1,6 +1,0 @@
-{%- from "macros/form.html" import  m_field with context %}
-{%- for field in form %} {# form could also be a formfield instance #}
-  <div class="w-full {%- if field.flags.hidden %} hidden{%- endif %}">
-    {{ m_field(field, label_width=3, field_width=9) }}
-  </div>
-{%- endfor %}

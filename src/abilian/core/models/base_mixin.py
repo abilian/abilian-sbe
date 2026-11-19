@@ -49,10 +49,6 @@ class BaseMixin(IdMixin, TimestampedMixin, OwnedMixin):
     def to_json(self) -> str:
         return json.dumps(self.to_dict())
 
-    def _icon(self, size: int = 12) -> str:
-        class_name = self.__class__.__name__.lower()
-        return f"/static/icons/{class_name}-{size}.png"
-
     # FIXME: we can do better than that
     @property
     def _name(self):

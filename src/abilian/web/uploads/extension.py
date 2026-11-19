@@ -62,7 +62,6 @@ class FileUploadsExtension:
         app.register_blueprint(ac_blueprint)
 
         app.extensions["uploads"] = self
-        app.add_template_global(self, "uploads")
         signals.register_js_api.connect(self._do_register_js_api)
 
         self.config: dict[str, Any] = {}

@@ -14,7 +14,7 @@ from flask import url_for
 from flask_login import login_user
 
 from abilian.services import audit_service
-from abilian.services.audit import AuditEntry
+from abilian.services.audit import UPDATE, AuditEntry
 from tests.util import client_login
 
 if TYPE_CHECKING:
@@ -136,3 +136,24 @@ def test_the_logs_address_takes_a_whole_second_and_refuses_nonsense(
     assert (day.status_code, person.status_code) == (400, 400)
     # Filtering again from a page of newer changes starts afresh.
     assert 'name="after"' not in newer.get_data(as_text=True)
+
+
+def test_a_change_with_no_actor_is_the_systems(
+    client: FlaskClient, admin_user: User, community1: Community, db: SQLAlchemy
+) -> None:
+    """Done outside a request (a migration, the CLI), it was made by nobody."""
+    db.session.add(
+        AuditEntry(
+            type=UPDATE,
+            entity_id=community1.id,
+            entity_type=community1.entity_type,
+            entity_name=community1.name,
+        )
+    )
+    db.session.commit()
+
+    with client_login(client, admin_user):
+        response = client.get(url_for("admin.audit"))
+
+    assert response.status_code == 200
+    assert "<em>The system</em>" in response.get_data(as_text=True)

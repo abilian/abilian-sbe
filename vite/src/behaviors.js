@@ -67,13 +67,4 @@ document.addEventListener("click", (event) => {
     }
     return;
   }
-
-  /* A button that opens a shared dialog tells its form where to post. */
-  const opener = event.target.closest("[data-form-action]");
-  if (opener) {
-    const { formAction, formTarget } = opener.dataset;
-    document.querySelectorAll(formTarget).forEach((form) => {
-      form.action = formAction;
-    });
-  }
 });

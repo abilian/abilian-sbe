@@ -7,11 +7,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from abilian.app import create_app
-from abilian.sbe.apps.documents.models import Document, Folder, icon_for
+from abilian.sbe.apps.documents.models import Document, Folder
 
 if TYPE_CHECKING:
     from flask import Flask
-    from flask.ctx import AppContext
     from sqlalchemy.orm import Session
 
 
@@ -115,19 +114,3 @@ def test_document_is_clonable(session: Session) -> None:
     clone = doc.clone()
     assert clone.title == doc.title
     assert clone.content == doc.content
-
-
-@pytest.mark.skip("FIXME ASAP")
-def test_document_has_an_icon(app_context: AppContext) -> None:
-    root = Folder(title="/")
-    doc = root.create_document(title="toto")
-    doc.content_type = "image/jpeg"
-    filename = doc.icon.split("/")[-1]
-    assert filename in ("jpg.png", "jpeg.png"), doc.icon
-
-
-@pytest.mark.skip("FIXME ASAP")
-def test_icon_from_mime_type(app_context: AppContext) -> None:
-    icon = icon_for("text/html")
-    filename = icon.split("/")[-1]
-    assert filename in ("html.png", "htm.png"), icon

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import uuid
 from importlib import resources as rso
 from typing import TYPE_CHECKING
 
@@ -62,7 +61,6 @@ def inject_template_utils() -> dict[str, Callable]:
     from abilian.sbe.apps.forum.security import can_write as can_write_post
 
     return {
-        "uuid": uuid.uuid1,
         "can_manage": can_manage,
         "can_write_post": can_write_post,
     }

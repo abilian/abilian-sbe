@@ -11,12 +11,11 @@ import itertools
 import mimetypes
 import threading
 import uuid
-from importlib import resources as rso
 from typing import TYPE_CHECKING, Any, ClassVar, Self
 
 import sqlalchemy as sa
 import whoosh.fields as wf
-from flask import current_app, json, url_for
+from flask import current_app, json
 
 # from loguru import logger
 from loguru import logger
@@ -60,23 +59,11 @@ __all__ = (
     "Document",
     "Folder",
     "PathAndSecurityIndexable",
-    "icon_for",
-    "icon_url",
     "setup_listener",
 )
 
 #: A Whoosh analyzer that folds accents and case.
 accent_folder = RegexTokenizer() | LowercaseFilter() | CharsetFilter(accent_map)
-
-ICONS_FOLDER = rso.files("abilian.sbe") / "static" / "fileicons"
-
-
-def icon_url(filename: str) -> str:
-    return url_for("abilian_sbe_static", filename=f"fileicons/{filename}")
-
-
-def icon_exists(filename: str) -> bool:
-    return ICONS_FOLDER.joinpath(filename).is_file()
 
 
 #
@@ -309,10 +296,6 @@ class Folder(PathAndSecurityIndexable, CmisObject):
     )
 
     @property
-    def icon(self):
-        return icon_url("folder.png")
-
-    @property
     def children(self) -> list[Folder | Document]:
         return [*self.subfolders, *self.documents]
 
@@ -524,10 +507,6 @@ class BaseContent(CmisObject):
                 content_type = guessed_content_type
 
         return content_type
-
-    @property
-    def icon(self) -> str:
-        return icon_for(self.content_type)
 
 
 @comment.register
@@ -746,17 +725,6 @@ class Document(BaseContent, PathAndSecurityIndexable):
         lock = Lock.new(user)
         meta["lock"] = lock.as_dict()
         self.meta.changed()
-
-
-def icon_for(content_type: str) -> str:
-    for extension, mime_type in mimetypes.types_map.items():
-        if mime_type == content_type:
-            extension = extension[1:]
-            icon = f"{extension}.png"
-            if icon_exists(icon):
-                return icon_url(icon)
-
-    return icon_url("bin.png")
 
 
 # Async conversion

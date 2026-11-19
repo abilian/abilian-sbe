@@ -14,12 +14,9 @@ import sqlalchemy as sa
 import sqlalchemy.orm
 from flask import (
     Response,
-    get_template_attribute,
     render_template,
-    render_template_string,
     request,
 )
-from markupsafe import Markup
 from werkzeug.exceptions import BadRequest
 from werkzeug.routing import BuildError
 
@@ -400,12 +397,6 @@ def spreadsheet_cell(value: str) -> str:
 #  Presenters for audit entries listing
 #
 class BaseEntryPresenter:
-    _USER_FMT = (
-        '<a href="{{ url_for("social.user", user_id=user.id) }}"> {{ user.name }}</a>'
-    )
-    #: A group has no page of its own any more: its name alone.
-    _GROUP_FMT = "{{ group.name }}"
-
     def __init__(self, user, date) -> None:
         self.user = user
         self.date = local_dt(date)
@@ -419,22 +410,6 @@ class BaseEntryPresenter:
     @staticmethod
     def model(model_name):
         return db.Model.registry._class_registry.get(model_name)
-
-    def render_user(self, user: User | None) -> str:
-        """Render the actor of an entry, which may not be one.
-
-        `AuditEntry.user_id` is nullable: anything done outside a request --
-        a migration, the CLI, `create_root_user` -- is recorded with no actor.
-        Only one of the two presenters below used to allow for that, and the
-        other took the whole admin audit panel down with an AttributeError the
-        first time it met such an entry.
-        """
-        if user is None:
-            return Markup("<em>{}</em>").format(_("System"))
-        return render_template_string(self._USER_FMT, user=user)
-
-    def render(self) -> str:
-        raise NotImplementedError
 
 
 class AuditEntryPresenter(BaseEntryPresenter):
@@ -463,38 +438,6 @@ class AuditEntryPresenter(BaseEntryPresenter):
         """Where the object is seen, if it still is and has a page of its own."""
         return None if self.entity_deleted else _url_or_none(self.entry.entity)
 
-    def render(self) -> str:
-        render = render_template_string
-        e = self.entry
-        user = self.render_user(e.user)
-        entity_html = e.entity_name
-
-        if self.entity_url:
-            entity_html = Markup(
-                render(
-                    '<a href="{{ url }}">{{ entity.path or entity.name }}</a>',
-                    url=self.entity_url,
-                    entity=e.entity,
-                )
-            )
-
-        msg = {
-            "create": _('{user} created {entity_type} {entity_id} "{entity}"'),
-            "update": _('{user} made changes on {entity_type} {entity_id} "{entity}"'),
-            "delete": _('{user} has deleted {entity_type}: {entity_id} "{entity}"'),
-        }[self.verb]
-
-        self.msg = Markup(
-            msg.format(
-                user=user,
-                entity=entity_html,
-                entity_type=e.entity_type.rsplit(".", 1)[-1],
-                entity_id=e.entity_id,
-            )
-        )
-        tmpl = get_template_attribute("admin/_macros.html", "m_audit_entry")
-        return tmpl(self)
-
 
 class SecurityEntryPresenter(BaseEntryPresenter):
     #: A role given or taken, or permissions inherited or not.
@@ -509,71 +452,6 @@ class SecurityEntryPresenter(BaseEntryPresenter):
         assert isinstance(entry, SecurityAudit)
         super().__init__(entry.manager, entry.happened_at)
         self.entry = entry
-
-    def render(self) -> str:
-        render = render_template_string
-        e = self.entry
-
-        # `manager` is nullable for the same reason `user` is: a role granted
-        # by the CLI or a migration has nobody who granted it.
-        manager = render(
-            '<img class="avatar" '
-            'src="{{ user_photo_url(user=manager, size=16) }}" alt="" />{{ link }}',
-            manager=e.manager,
-            link=self.render_user(e.manager),
-        )
-
-        if self.entry.user:
-            principal = self.render_user(self.entry.user)
-        elif self.entry.group:
-            principal = render(self._GROUP_FMT, group=self.entry.group)
-        else:
-            principal = ""
-
-        entity = ""
-        if e.object_id:
-            entity_url = None
-            entity_name = e.object_name
-            if e.object:
-                entity_name = getattr(e.object, "path", e.object.name)
-                entity_url = url_for(e.object)
-
-            entity = render(
-                '{%- if url %}<a href="{{ url }}">{%- endif %}'
-                "{{ name }}{%- if url %}</a>{%- endif %}",
-                url=entity_url,
-                name=entity_name,
-            )
-
-            match e.op:
-                case e.SET_INHERIT:
-                    msg = _("{manager} has activated inheritance on {entity}")
-                case e.UNSET_INHERIT:
-                    msg = _("{manager} has deactivated inheritance on {entity}")
-                case e.GRANT:
-                    msg = _(
-                        '{manager} has given role "{role}" to {principal} on {entity}'
-                    )
-                case e.REVOKE:
-                    msg = _(
-                        '{manager} has revoked role "{role}" from {principal} on {entity}'
-                    )
-                case _:
-                    msg = f"Invalid entity op: {e.op}"
-                    raise Exception(msg)
-        elif e.op == e.GRANT:
-            msg = _('{manager} has given role "{role}" to {principal}')
-        elif e.op == e.REVOKE:
-            msg = _('{manager} has revoked role "{role}" from {principal}')
-        else:
-            msg = f"Invalid entity op: {e.op}"
-            raise Exception(msg)
-
-        self.msg = Markup(
-            msg.format(manager=manager, principal=principal, role=e.role, entity=entity)
-        )
-        tmpl = get_template_attribute("admin/_macros.html", "m_security_entry")
-        return tmpl(self)
 
 
 def _url_or_none(obj: Entity) -> str | None:

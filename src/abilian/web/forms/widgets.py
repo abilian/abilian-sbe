@@ -10,19 +10,15 @@ from __future__ import annotations
 import base64
 import html
 import re
-from collections import namedtuple
-from typing import TYPE_CHECKING, Any
+from typing import Any
 from urllib import parse
 
 import bleach
-import sqlalchemy as sa
-import sqlalchemy.orm
 import wtforms
 from flask import current_app, render_template, render_template_string
 from flask_babel import format_date, format_datetime, format_number
-from flask_wtf.file import FileField
 from markupsafe import Markup
-from wtforms import Field, FieldList, Form, FormField, IntegerField, Label, StringField
+from wtforms import FieldList, IntegerField, StringField
 from wtforms.widgets import (
     DateInput as BaseDateInput,
     PasswordInput as BasePasswordInput,
@@ -30,7 +26,6 @@ from wtforms.widgets import (
     TextArea as BaseTextArea,
     html_params,
 )
-from wtforms_alchemy import ModelFieldList
 
 from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.blob import Blob
@@ -39,15 +34,9 @@ from abilian.services import image
 from abilian.services.image import get_format
 from abilian.web import url_for
 
-if TYPE_CHECKING:
-    from sqlalchemy.orm.mapper import Mapper
-
-    from abilian.core.entities import Entity
-
 __all__ = [
     # Widgets
     "BooleanWidget",
-    "Column",
     "DateInput",
     "DateTimeInput",
     "DateTimeWidget",
@@ -59,14 +48,9 @@ __all__ = [
     "FloatWidget",
     "ImageInput",
     "ListWidget",
-    "ModelListWidget",
     "MoneyWidget",
-    "Panel",
     "RichTextWidget",
-    "Row",
     "SelectWidget",
-    "SingleView",
-    "TabularFieldListWidget",
     "TextArea",
     "URLWidget",
     "linkify_url",
@@ -119,195 +103,12 @@ def text2html(text: str) -> Markup | str:
     return Markup(bleach.clean("\n".join(paragraphs), tags={"p"}))
 
 
-class Column:
-    def __init__(self, **kw) -> None:
-        for k, w in kw.items():
-            setattr(self, k, w)
-
-
-class View:
-    options: dict[str, Any] = {}
-
-    def get_templates(
-        self, specific_template_name: str, default_template: str
-    ) -> list[str]:
-        specific_template = self.options.get(specific_template_name)
-        if specific_template:
-            return [specific_template, default_template]
-        return [default_template]
-
-
 #
 # Single object view
 #
-class SingleView(View):
-    """View on a single object."""
-
-    def __init__(self, form: Form, *panels: Panel, **options: Any) -> None:
-        self.form = form
-        self.panels = panels
-        self.options = options
-
-    def render(self, item: Entity, related_views: tuple[()] = ()) -> Markup:
-        mapper = sa.orm.class_mapper(item.__class__)
-        panels = []
-        _to_skip = (None, False, 0, 0.0, "", "-")
-
-        for panel in self.panels:
-            data = {}
-            field_name_iter = (fn for row in panel.rows for fn in row)
-
-            for name in field_name_iter:
-                field = self.form._fields[name]
-                if field.is_hidden:
-                    continue
-
-                value = field.data
-                if not isinstance(field, FileField) and not field.flags.render_empty:
-                    if value in _to_skip:
-                        continue
-
-                value = Markup(field.render_view(entity=item))
-                if value == "":
-                    # related models may have [] as value, but we don't discard
-                    # this type # of value in order to let widget a chance
-                    # to render something useful like an 'add model' button.
-                    #
-                    # if it renders an empty string, there's really no point
-                    # in rendering a line for this empty field
-                    continue
-
-                label = self.label_for(field, mapper, name)
-                data[name] = (label, value)
-
-            if data:
-                panels.append((panel, data))
-
-        templates = self.get_templates("view_template", "widgets/render_single.html")
-        ctx = {
-            "view": self,
-            "related_views": related_views,
-            "entity": item,
-            "panels": panels,
-            "form": self.form,
-        }
-        return Markup(render_template(templates, **ctx))
-
-    def render_form(self, for_new=False, has_save_and_add_new=False):
-        templates = self.get_templates("edit_template", "widgets/render_for_edit.html")
-        ctx = {
-            "view": self,
-            "form": self.form,
-            "for_new": for_new,
-            "has_save_and_add_new": has_save_and_add_new,
-        }
-        return Markup(render_template(templates, **ctx))
-
-    def label_for(self, field: Field, mapper: Mapper, name: str) -> Label:
-        label = field.label
-        if label is None:
-            try:
-                info = mapper.c[name].info
-                label = info["label"]
-            except (AttributeError, KeyError):
-                pass
-
-        if label is None:
-            try:
-                label = _(name)
-            except KeyError:
-                # i18n may be not initialized (in some unit tests for example)
-                label = name
-
-        return label
-
-
 #
 # Used to describe single entity views.
 #
-class Panel:
-    """`Panel` and `Row` classes help implement a trivial internal DSL for
-    specifying multi-column layouts in forms or object views.
-
-    They are currently not really used, since we went with 1-column
-    designs eventually.
-    """
-
-    def __init__(self, label: str, *rows: Row) -> None:
-        self.label = label
-        self.rows = rows
-
-    def __iter__(self):
-        return iter(self.rows)
-
-    def __getitem__(self, item):
-        return self.rows[item]
-
-    def __len__(self) -> int:
-        return len(self.rows)
-
-
-class Row:
-    """`Panel` and `Row` classes help implement a trivial internal DSL for
-    specifying multi-column layouts in forms or object views.
-
-    They are currently not really used, since we went with 1-column
-    designs eventually.
-    """
-
-    def __init__(self, *cols: str) -> None:
-        self.cols = cols
-
-    def __iter__(self):
-        return iter(self.cols)
-
-    def __getitem__(self, item):
-        return self.cols[item]
-
-    def __len__(self) -> int:
-        return len(self.cols)
-
-
-class ModelWidget:
-    edit_template = "widgets/model_widget_edit.html"
-    view_template = "widgets/model_widget_view.html"
-
-    def __init__(self, edit_template=None, view_template=None) -> None:
-        if edit_template is not None:
-            self.edit_template = edit_template
-        if view_template is not None:
-            self.view_template = view_template
-
-    def __call__(self, field, *args, **kwargs):
-        return render_template(self.edit_template, form=field)
-
-    def render_view(self, field, *args, **kwargs):
-        _to_skip = (None, False, 0, 0.0, "", "-")
-        rows = []
-        for f in field.form:
-            if f.is_hidden:
-                continue
-
-            value = f.data
-            if value in _to_skip and not f.flags.render_empty:
-                continue
-
-            value = Markup(f.render_view())
-            if value == "":
-                # related models may have [] as value, but we don't discard this type
-                # of value in order to let widget a chance to render something useful
-                # like an 'add model' button.
-                #
-                # if it renders an empty string, there's really no point in rendering
-                # a line for this empty field
-                continue
-
-            label = f.label
-            rows.append((label, value))
-
-        return render_template(self.view_template, field=field, rows=rows)
-
-
 # Form field widgets #####################################################
 class TextInput(wtforms.widgets.TextInput):
     """Support pre and post icons.
@@ -822,90 +623,6 @@ class ListWidget(wtforms.widgets.ListWidget):
               <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{{ obj }}</span>
               {%- endfor %}"""
         return Markup(render_template_string(tpl, data=data))
-
-
-class FieldListWidget:
-    """For list of Fields (using <tr><td>)"""
-
-    view_template = "widgets/fieldlist_view.html"
-    template = "widgets/fieldlist.html"
-
-    def __init__(self, template=None, view_template=None) -> None:
-        if template is not None:
-            self.template = template
-        if view_template is not None:
-            self.view_template = view_template
-
-    def __call__(self, field, **kwargs):
-        assert isinstance(field, FieldList)
-        return Markup(render_template(self.template, field=field))
-
-    def render_view(self, field, **kwargs):
-        assert isinstance(field, FieldList)
-        value = field.object_data
-        if not value:
-            return ""
-        return Markup(render_template(self.view_template, field=field))
-
-
-class TabularFieldListWidget:
-    """For list of formfields.
-
-    2 templates are available:
-
-    * widgets/tabular_fieldlist_widget.html (default):
-      Show sub-forms as a table, one row of inputs per model
-    * widgets/model_fieldlist.html:
-      Show sub-forms as a list of forms
-    """
-
-    def __init__(self, template="widgets/tabular_fieldlist_widget.html") -> None:
-        self.template = template
-
-    def __call__(self, field, **kwargs):
-        assert isinstance(field, FieldList)
-        labels = None
-
-        if len(field):
-            assert isinstance(field[0], FormField)
-            field_names = [f.short_name for f in field[0] if not f.is_hidden]
-            data_type = f"{field.entries[0].__class__.__name__}Data"
-            Data = namedtuple(data_type, field_names)
-            labels = Data(*(f.label for f in field[0] if not f.is_hidden))
-
-        return Markup(render_template(self.template, labels=labels, field=field))
-
-
-class ModelListWidget:
-    def __init__(self, template="widgets/horizontal_table.html") -> None:
-        self.template = template
-
-    def render_view(self, field, **kwargs):
-        assert isinstance(field, ModelFieldList)
-        value = field.object_data
-        if not value:
-            return render_template(
-                self.template, field=field, labels=(), rows=(), **kwargs
-            )
-
-        field_names = field._field_names
-        labels = field._field_labels
-        data_type = f"{field.entries[0].object_data.__class__.__name__}Data"
-        Data = namedtuple(data_type, field_names)
-        labels = Data(*labels)
-
-        rows = []
-        for entry in field.entries:
-            row = []
-            for f in filter(lambda ff: not ff.is_hidden, entry.form):
-                row.append(Markup(f.render_view()))
-
-            rows.append(Data(*row))
-
-        rendered = render_template(
-            self.template, field=field, labels=labels, rows=rows, **kwargs
-        )
-        return rendered
 
 
 #

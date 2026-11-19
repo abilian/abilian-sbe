@@ -55,14 +55,10 @@ class _TagsForm(Form):
 
 
 class TagsExtension:
-    """API for tags, installed as an application extension.
-
-    It is also available in templates as `tags`.
-    """
+    """API for tags, installed as an application extension."""
 
     def __init__(self, app: Flask) -> None:
         app.extensions["tags"] = self
-        app.add_template_global(self, "tags")
         app.register_blueprint(tags_bp)
         app.register_blueprint(entity_bp)
 

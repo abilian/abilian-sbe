@@ -65,13 +65,7 @@ class BaseObjectView[M: ViewedModel](View):
     #: template to render
     template: str
 
-    #: default templates inherit from "base_template". This allows to use
-    #: generic templates with a custom base
-    base_template = "base.html"
-
-    def __init__(
-        self, Model=None, pk=None, base_template=None, *args, **kwargs
-    ) -> None:
+    def __init__(self, Model=None, pk=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         # Override the class attributes only with what is given: a view may set
         # them later, as one that builds its form for each object.
@@ -79,8 +73,6 @@ class BaseObjectView[M: ViewedModel](View):
             self.Model = Model
         if pk is not None:
             self.pk = pk
-        if base_template is not None:
-            self.base_template = base_template
 
     def prepare_args(self, args, kwargs):
         args, kwargs = self.init_object(args, kwargs)
@@ -119,27 +111,19 @@ class BaseObjectView[M: ViewedModel](View):
             assert all(isinstance(b, nav.BreadcrumbItem) for b in bc)
             g.breadcrumb.extend(bc)
 
-        kwargs = {"base_template": self.base_template}
-        kwargs.update(self.template_kwargs)
+        kwargs = dict(self.template_kwargs)
         # forbid override "view"
         kwargs["view"] = self
         return render_template(self.template, **kwargs)
 
     @property
     def template_kwargs(self):
-        """Get template render arguments.
-
-        You may override `base_template` for instance. Only `view`
-        cannot be overriden.
-        """
+        """Get template render arguments. Only `view` cannot be overriden."""
         return {}
 
 
 class ObjectView[M: ViewedModel, F: Form](BaseObjectView[M]):
     """View objects."""
-
-    #: html template
-    template = "default/object_view.html"
 
     #: View form class. Form object used to show objects fields
     Form: type[F]

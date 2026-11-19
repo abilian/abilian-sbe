@@ -20,14 +20,10 @@ if TYPE_CHECKING:
 
 
 class CommentExtension:
-    """API for comments, installed as an application extension.
-
-    It is also available in templates as `comments`.
-    """
+    """API for comments, installed as an application extension."""
 
     def __init__(self, app: Flask) -> None:
         app.extensions["comments"] = self
-        app.add_template_global(self, "comments")
         app.register_blueprint(blueprint)
 
     def is_commentable(self, obj):

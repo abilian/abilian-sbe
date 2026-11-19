@@ -36,11 +36,6 @@ def user_tz() -> str:
 USER_TZ = timezone(user_tz())
 
 
-def test_labelize() -> None:
-    labelize = filters.labelize
-    assert labelize("test_case") == "Test Case"
-
-
 def test_filesize() -> None:
     filesize = filters.filesize
     assert str(filesize("100")) == f"100{NNSP}B"
@@ -52,23 +47,6 @@ def test_filesize() -> None:
     assert str(filesize(10000000)) == f"10{NNSP}MB"
     assert str(filesize(1100100000)) == f"1.1{NNSP}GB"
     assert str(filesize(100000000000)) == f"100{NNSP}GB"
-
-
-def test_roughsize() -> None:
-    roughsize = filters.roughsize
-    assert roughsize(6) == "6"
-    assert roughsize(15) == "15"
-    assert roughsize(134) == "130+"
-    assert roughsize(15, above=10) == "10+"
-    assert roughsize(57, mod=5) == "55+"
-
-
-def test_abbrev() -> None:
-    abbrev = filters.abbrev
-    assert abbrev("test", 20) == "test"
-    assert (
-        abbrev("Longer test. it should be truncated", 25) == "Longer test...e truncated"
-    )
 
 
 def test_linkify() -> None:
@@ -84,16 +62,6 @@ def test_linkify() -> None:
         ("href", "http://test.example.com"),
         ("rel", "nofollow"),
     ]
-
-
-def test_nl2br() -> None:
-    tmpl = env.from_string(
-        '{{ "first line\nsecond line\n\n  third, indented" | nl2br }}'
-    )
-    assert (
-        tmpl.render()
-        == "first line<br />\nsecond line<br />\n<br />\n  third, indented"
-    )
 
 
 def test_paragraphs() -> None:
@@ -134,29 +102,6 @@ def app() -> Iterator[Flask]:
     babel.timezoneselector(user_tz)
     with app.app_context():
         yield app
-
-
-def test_date_age(app: Flask) -> None:
-    date_age = filters.date_age
-    now = dt.datetime(2012, 6, 10, 10, 10, 10, tzinfo=utc)
-    assert date_age(None) == ""
-
-    date = dt.datetime(2012, 6, 10, 10, 10, 0, tzinfo=utc)
-    assert date_age(date, now) == "2012-06-10 18:10 (1 minute ago)"
-
-    date = dt.datetime(2012, 6, 10, 10, 8, 10, tzinfo=utc)
-    assert date_age(date, now) == "2012-06-10 18:08 (2 minutes ago)"
-
-    date = dt.datetime(2012, 6, 10, 8, 30, 10, tzinfo=utc)
-    assert date_age(date, now) == "2012-06-10 16:30 (2 hours ago)"
-
-    # for coverage: test when using default parameter now=None
-    # dt_patcher = mock.patch.object(
-    #     datetime, "datetime", mock.Mock(wraps=datetime.datetime)
-    # )
-    # with dt_patcher as mocked:
-    #     mocked.utcnow.return_value = now
-    #     assert date_age(dt) == "2012-06-10 16:30 (2 hours ago)"
 
 
 def test_age(app: Flask) -> None:

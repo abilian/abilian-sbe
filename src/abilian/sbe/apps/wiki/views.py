@@ -100,7 +100,6 @@ class BasePageView:
     Model = WikiPage
     pk = "title"
     Form = WikiPageForm
-    base_template = "wiki/_base.html"
     view_endpoint = ""
 
     #: the logged-in user, set by `prepare_args()`
@@ -119,11 +118,7 @@ class BasePageView:
 
     @property
     def template_kwargs(self) -> dict[str, WikiPageForm | WikiPage]:
-        """Template render arguments.
-
-        You can override `base_template` for instance. Only `view` and
-        `form` cannot be overriden.
-        """
+        """Template render arguments. Only `view` and `form` cannot be overriden."""
         kw = super().template_kwargs
         kw["page"] = self.obj
         kw["viewers"] = object_viewers(self.user, self.obj)

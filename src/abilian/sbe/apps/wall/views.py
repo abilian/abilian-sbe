@@ -17,7 +17,7 @@ from abilian.core.application import as_application
 from abilian.core.extensions.login import authenticated
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
 from abilian.sbe.apps.communities.models import MANAGER
-from abilian.sbe.apps.documents.models import Document, icon_for
+from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.main.feed import feed_item
 from abilian.services import get_service
@@ -102,10 +102,6 @@ class Attachment:
     date: datetime
     content_length: int | None
     content_type: str
-
-    @property
-    def icon(self):
-        return icon_for(self.content_type)
 
 
 def get_attachments_from_forum(community):

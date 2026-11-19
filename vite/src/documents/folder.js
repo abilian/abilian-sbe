@@ -195,7 +195,6 @@ function setUpMoveDialog(modal) {
 
     const selectable = data.current_folder_selectable;
     submit.disabled = !selectable;
-    submit.classList.toggle("disabled", !selectable);
   }
 
   modal.querySelector("#modal-move-files-directory-listing").addEventListener("click", (event) => {

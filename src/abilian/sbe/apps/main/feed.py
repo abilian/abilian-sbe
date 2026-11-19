@@ -12,12 +12,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+import bleach
+from markupsafe import Markup
+
 from abilian.i18n import _l
 from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import Community
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.forum.models import Post, Thread
-from abilian.sbe.apps.wall.presenters import excerpt
 from abilian.sbe.apps.wiki.models import WikiPage
 from abilian.web.util import url_for
 
@@ -124,6 +126,12 @@ def _content(obj: object) -> tuple[str, str, tuple[FeedFile, ...]]:
             return "", "", ()
         case _:
             return getattr(obj, "title", "") or getattr(obj, "name", ""), "", ()
+
+
+def excerpt(html: str, limit: int = 400) -> str:
+    """The text of user-written HTML, without its markup, cut at `limit` characters."""
+    text = Markup(bleach.clean(html, tags=set(), strip=True)).unescape()
+    return f"{text[:limit]}…" if len(text) > limit else text
 
 
 def _files(post: Post) -> tuple[FeedFile, ...]:

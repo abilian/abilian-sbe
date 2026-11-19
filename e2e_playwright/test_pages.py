@@ -343,48 +343,6 @@ def test_json_view_highlights_its_output(
     js_errors.assert_clean("the JSON view")
 
 
-def test_dynamic_rows_add_and_remove(
-    logged_in: Page, base_url: str, js_errors: JSErrors
-) -> None:
-    """No page in this application has a repeated field yet, so one is injected."""
-    page = logged_in
-    table = """
-      <table id="phones" class="js-widget" data-init-with="dynamicRowWidget"
-             data-prefix="phones">
-        <thead><tr><th>Number</th></tr></thead>
-        <tbody><tr><td>
-          <input id="phones-0-number" name="phones-0-number" value="555"
-                 data-short-name="number">
-          <select id="phones-0-kind" name="phones-0-kind"><option>home</option></select>
-        </td></tr></tbody>
-      </table>"""
-
-    def inject(route: Route) -> None:
-        response = route.fetch()
-        route.fulfill(
-            response=response,
-            body=response.text().replace("</body>", f"{table}</body>"),
-        )
-
-    page.route(f"{base_url}/communities/", inject)
-    page.goto(f"{base_url}/communities/", wait_until="networkidle")
-
-    rows = page.locator("#phones tbody tr")
-    page.locator('#phones thead button[aria-label="Add"]').click()
-    expect(rows).to_have_count(2)
-
-    added = rows.nth(1)
-    expect(added.locator("input")).to_have_attribute("name", "phones-1-number")
-    expect(added.locator("input")).to_have_value("")
-    expect(added.locator("select")).to_have_attribute("name", "phones-1-kind")
-
-    rows.first.locator('button[aria-label="Remove"]').click()
-    expect(rows).to_have_count(1)
-    expect(rows.first.locator("input")).to_have_attribute("name", "phones-1-number")
-
-    js_errors.assert_clean("the repeated field")
-
-
 def test_community_delete_asks_first_then_posts(
     logged_in: Page, base_url: str, js_errors: JSErrors
 ) -> None:

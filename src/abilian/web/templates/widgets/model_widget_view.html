@@ -1,6 +1,0 @@
-{%- for label, value in rows %} {# form could also be a formfield instance #}
-  <div class="grid grid-cols-12 gap-4 py-2 border-b border-gray-100 last:border-0">
-    <div class="col-span-3 text-sm text-gray-500">{{ label.text }}</div>
-    <div class="col-span-9 text-sm text-gray-900">{{ value }}</div>
-  </div>
-{%- endfor %}

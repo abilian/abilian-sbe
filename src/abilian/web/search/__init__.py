@@ -12,7 +12,6 @@ from abilian.web import url_for
 if TYPE_CHECKING:
     from abilian.app import Application
 
-# from .criterion import BaseCriterion, TextSearchCriterion
 
 # __all__ = ["BaseCriterion", "TextSearchCriterion"]
 
