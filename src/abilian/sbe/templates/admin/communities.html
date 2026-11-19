@@ -1,0 +1,61 @@
+{#- Every community, for the site's administrators, whether they are in it or not:
+    its managers, its members and documents, when it last moved; filtered by name;
+    a row's ⋯ for its settings and its members. No mockup: the mockup's tab led to
+    making one, which the button above does. -#}
+{% extends "admin/_ads.html" %}
+{% block page_title %}{{ _("Communities") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("Communities") }}{% endblock %}
+{% block actions %}<a class="ads-btn ads-btn--primary" href="{{ url_for('communities.new') }}">{{ icon("plus") }}{{ _("New community") }}</a>{% endblock %}
+{% block content %}
+<div class="ads-card">
+  <div class="ads-card__head ads-spread">
+    <span class="ads-muted">{{ ngettext("%(num)d community", "%(num)d communities", listing.total) }}</span>
+    <form method="get" action="{{ url_for('.communities') }}">
+      <span class="ads-input-icon">
+        <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+        <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Name') }}" aria-label="{{ _('Filter the communities by name') }}">
+      </span>
+      {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+    </form>
+  </div>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter ads-table--hover" id="communities-table">
+      <thead><tr>
+        {{ m.sort_th(listing, "name", _("Community")) }}
+        <th scope="col" class="ads-col--secondary">{{ _("Managers") }}</th>
+        {{ m.sort_th(listing, "members", _("Members"), "ads-end") }}
+        {{ m.sort_th(listing, "documents", _("Documents"), "ads-end ads-col--secondary") }}
+        {{ m.sort_th(listing, "last_active", _("Last activity"), "ads-end") }}
+        <th scope="col"><span class="sbe-sr-only">{{ _("Actions") }}</span></th>
+      </tr></thead>
+      <tbody>
+        {% for community in communities %}
+        <tr>
+          <td class="ads-full">
+            <span class="ads-media ads-gap-sm">{{ m.tile(community, "sbe-tile--sm") }}<a class="sbe-quiet ads-truncate" href="{{ url_for(community) }}"><strong>{{ community.name }}</strong></a></span>
+          </td>
+          <td class="ads-col--secondary">
+            {%- for manager in managers.get(community.id, []) %}<a class="sbe-quiet" href="{{ url_for('.users_user', user_id=manager.id) }}">{{ manager.name }}</a>{{ ", " if not loop.last }}{% else %}<span class="ads-muted">{{ _("None") }}</span>{% endfor -%}
+          </td>
+          <td class="ads-end">{{ community.membership_count }}</td>
+          <td class="ads-end ads-col--secondary">{{ community.document_count }}</td>
+          <td class="ads-end ads-muted">{{ m.time(community.last_active_at) }}</td>
+          <td class="ads-end">
+            <details class="ads-dropdown">
+              <summary class="ads-btn ads-btn--ghost ads-btn--sm" aria-label="{{ _('Actions on %(name)s', name=community.name) }}">{{ icon("dots") }}</summary>
+              <div class="ads-menu">
+                <a class="ads-menu__item" href="{{ url_for('communities.settings', community_id=community.slug) }}">{{ icon("settings") }}{{ _("Settings") }}</a>
+                <a class="ads-menu__item" href="{{ url_for('communities.members', community_id=community.slug) }}">{{ icon("users") }}{{ _("Members") }}</a>
+              </div>
+            </details>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="ads-muted">{{ _("No matching records found") }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ m.pagination(listing) }}
+</div>
+{% endblock %}

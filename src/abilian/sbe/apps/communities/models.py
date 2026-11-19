@@ -615,3 +615,19 @@ def community_counts(users: Iterable[User]) -> dict[int, int]:
         .group_by(Membership.user_id)
     )
     return dict(rows.tuples().all())
+
+
+def managers_of(communities: Iterable[Community]) -> dict[int, list[User]]:
+    """The managers of each of `communities`, by its id, by name; in one query,
+    for a table of communities."""
+    ids = [community.id for community in communities]
+    rows = db.session.execute(
+        sa.select(Membership.community_id, User)
+        .join(User, Membership.user_id == User.id)
+        .where(Membership.community_id.in_(ids), Membership.role == MANAGER)
+        .order_by(sa.func.lower(User.last_name), sa.func.lower(User.first_name))
+    )
+    managers: dict[int, list[User]] = {}
+    for community_id, user in rows.tuples():
+        managers.setdefault(community_id, []).append(user)
+    return managers

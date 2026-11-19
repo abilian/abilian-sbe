@@ -73,6 +73,7 @@ class DefaultConfig:
     ADMIN_PANELS = (
         "abilian.web.admin.panels.dashboard.DashboardPanel",
         "abilian.web.admin.panels.users.UsersPanel",
+        "abilian.sbe.apps.communities.admin.CommunitiesPanel",
         "abilian.web.admin.panels.groups.GroupsPanel",
         "abilian.web.admin.panels.audit.AuditPanel",
         "abilian.web.admin.panels.login_sessions.LoginSessionsPanel",

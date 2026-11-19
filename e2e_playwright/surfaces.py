@@ -32,6 +32,7 @@ PATHS = (
     "/admin/dashboard",
     "/admin/users",
     "/admin/users/new",
+    "/admin/communities",
     "/admin/groups",
     "/admin/audit",
     "/admin/login_sessions",

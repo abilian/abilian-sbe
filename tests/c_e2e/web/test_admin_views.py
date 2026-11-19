@@ -35,6 +35,7 @@ PANELS = [
     "admin.login_sessions",
     "admin.audit",
     "admin.settings",
+    "admin.communities",
 ]
 
 
@@ -185,6 +186,7 @@ def test_the_tabs_say_what_each_part_is(client: FlaskClient, admin_user: User) -
     assert names == [
         "Overview",
         "Accounts",
+        "Communities",
         "Log",
         "Sign-ins",
         "Settings",
