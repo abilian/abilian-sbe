@@ -33,11 +33,11 @@
 {% if entry.verb == "update" and e.changes %}{{ field_changes(e.changes) }}{% endif %}
 {%- endmacro %}
 
-{#- What a change changed: each field a person reads (`shown_fields`), its old value
+{#- What a change changed: each field a person reads (`Changes.shown_columns`), its old value
     struck out, then its new one; what was added to a list and what was taken from it.
     Long values are cut short. -#}
 {% macro field_changes(changes) -%}
-{% set keys = shown_fields(changes.columns) %}
+{% set keys = changes.shown_columns() %}
 {% if keys or changes.collections %}
 <ul class="sbe-changes ads-muted">
   {% for key in keys %}

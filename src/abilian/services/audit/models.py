@@ -13,6 +13,7 @@ TODO: In the future, we may decide to:
 from __future__ import annotations
 
 import pickle
+import re
 from datetime import datetime
 from typing import Any
 
@@ -31,6 +32,10 @@ CREATION = 0
 UPDATE = 1
 DELETION = 2
 RELATED = 1 << 7
+
+#: Fields the audit records for the application's own use: a document's history
+#: reads its content's id, the log shows none of them. A key, a type, a digest.
+TECHNICAL_FIELDS = re.compile(r"^_|_id$|_digest$")
 
 
 class Changes:
@@ -80,6 +85,13 @@ class Changes:
 
     def __bool__(self) -> bool:
         return bool(self.columns) or bool(self.collections)
+
+    def shown_columns(self) -> list[str]:
+        """The fields changed that a person reads, in order: not the technical
+        ones."""
+        return sorted(
+            name for name in self.columns if not TECHNICAL_FIELDS.search(name)
+        )
 
 
 class AuditEntry(db.Model):

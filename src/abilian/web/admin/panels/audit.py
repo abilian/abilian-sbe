@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+import csv
+import io
+from dataclasses import dataclass
+from datetime import datetime, timedelta
 from itertools import chain
 from typing import TYPE_CHECKING
 
@@ -10,6 +13,7 @@ import pytz
 import sqlalchemy as sa
 import sqlalchemy.orm
 from flask import (
+    Response,
     get_template_attribute,
     render_template,
     render_template_string,
@@ -32,6 +36,8 @@ from abilian.web.views.base import JSONView
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from werkzeug.datastructures import MultiDict
 
 
 class JSONUserSearch(JSONView):
@@ -85,50 +91,20 @@ class AuditPanel(AdminPanel):
 
     def install_additional_rules(self, add_url_rule: Callable) -> None:
         add_url_rule("/search_users", view_func=JSONUserSearch.as_view("search_users"))
+        add_url_rule("/export", "export", view_func=export_log)
 
     def get(self) -> str:
         LIMIT = 30
 
-        base_audit_q = AuditEntry.query
-        base_security_q = SecurityAudit.query
+        log = log_filter(request.args)
+        base_audit_q = log.audit_q
+        base_security_q = log.security_q
+        filter_user = log.user
+        filter_types = log.types
+        all_classes = log.all_classes
 
         before = request.args.get("before")
         after = request.args.get("after")
-
-        # filter on user
-        filter_user = None
-        user_id = request.args.get("user")
-        if user_id:
-            user_id = int(user_id)
-            filter_user = User.query.get(user_id)
-            base_audit_q = base_audit_q.filter(AuditEntry.user == filter_user)
-            base_security_q = base_security_q.filter(
-                SecurityAudit.manager == filter_user
-            )
-
-        # filter by types
-        all_classes = sorted(all_entity_classes(), key=lambda c: c.__name__)
-        all_types = {e.entity_type for e in all_classes}
-        filter_types = set(request.args.getlist("types")) & all_types
-        if filter_types:
-            if len(filter_types) == 1:
-                t = next(iter(filter_types))
-                audit_expr = AuditEntry.entity_type == t
-                sec_expr = sa.sql.or_(
-                    SecurityAudit.object == None, Entity._entity_type == t
-                )
-            else:
-                audit_expr = AuditEntry.entity_type.in_(filter_types)
-                sec_expr = sa.sql.or_(
-                    SecurityAudit.object == None, Entity._entity_type.in_(filter_types)
-                )
-
-            base_audit_q = base_audit_q.filter(audit_expr)
-            base_security_q = (
-                base_security_q.join(SecurityAudit.object)
-                .filter(sec_expr)
-                .reset_joinpoint()
-            )
 
         def after_query(q, model, date):
             return q.filter(model.happened_at > date).order_by(model.happened_at.asc())
@@ -230,9 +206,14 @@ class AuditPanel(AdminPanel):
             url_params["user"] = filter_user.id
         if filter_types:
             url_params["types"] = next(iter(filter_types))
+        if log.period:
+            url_params["period"] = log.period
 
         ctx = {
             "entries": entries,
+            "periods": PERIODS,
+            "period": log.period,
+            "total": base_audit_q.count() + base_security_q.count(),
             "filter_user": filter_user,
             "all_classes": [(c.__name__, c.entity_type) for c in all_classes],
             "filter_types": filter_types,
@@ -242,6 +223,171 @@ class AuditPanel(AdminPanel):
             "lowest_date": lowest_date,
         }
         return render_template("admin/audit.html", **ctx)
+
+
+#: The log's periods: the name in the address, what the page calls it.
+PERIODS = {
+    "week": _l("The last 7 days"),
+    "month": _l("The last 30 days"),
+    "year": _l("This year"),
+}
+
+
+@dataclass(frozen=True)
+class LogFilter:
+    """The changes and the roles given or taken that the log shows, filtered."""
+
+    audit_q: sa.orm.Query
+    security_q: sa.orm.Query
+    user: User | None
+    types: set[str]
+    period: str | None
+    all_classes: list[type[Entity]]
+
+
+def log_filter(args: MultiDict[str, str]) -> LogFilter:
+    """The log filtered as `args` say: by `user`, by `types` of object, by `period`."""
+    audit_q = AuditEntry.query
+    security_q = SecurityAudit.query
+
+    user = None
+    user_id = args.get("user")
+    if user_id:
+        user = User.query.get(int(user_id))
+        audit_q = audit_q.filter(AuditEntry.user == user)
+        security_q = security_q.filter(SecurityAudit.manager == user)
+
+    all_classes = sorted(all_entity_classes(), key=lambda c: c.__name__)
+    types = set(args.getlist("types")) & {c.entity_type for c in all_classes}
+    if types:
+        audit_q = audit_q.filter(AuditEntry.entity_type.in_(types))
+        security_q = (
+            security_q.join(SecurityAudit.object)
+            .filter(
+                sa.sql.or_(SecurityAudit.object == None, Entity._entity_type.in_(types))
+            )
+            .reset_joinpoint()
+        )
+
+    period = args.get("period") or None
+    start = period_start(period, datetime.utcnow())
+    if start is not None:
+        audit_q = audit_q.filter(AuditEntry.happened_at >= start)
+        security_q = security_q.filter(SecurityAudit.happened_at >= start)
+
+    return LogFilter(audit_q, security_q, user, types, period, all_classes)
+
+
+def period_start(period: str | None, now: datetime) -> datetime | None:
+    """Where `period` starts, counted back from `now`; None for the whole log."""
+    match period:
+        case None:
+            return None
+        case "week":
+            return now - timedelta(days=7)
+        case "month":
+            return now - timedelta(days=30)
+        case "year":
+            return datetime(now.year, 1, 1)
+    raise BadRequest
+
+
+#: The most lines an export holds: the latest.
+EXPORT_LIMIT = 10_000
+
+#: What a line of the export says was done, by kind of change.
+EXPORTED_ACTIONS = {
+    "create": _l("created"),
+    "update": _l("changed"),
+    "delete": _l("deleted"),
+    SecurityAudit.GRANT: _l("role given"),
+    SecurityAudit.REVOKE: _l("role taken back"),
+    SecurityAudit.SET_INHERIT: _l("inherited rights turned on"),
+    SecurityAudit.UNSET_INHERIT: _l("inherited rights turned off"),
+}
+
+
+def export_log() -> Response:
+    """The log as filtered, as a spreadsheet (CSV), the latest first."""
+    log = log_filter(request.args)
+    audit = log.audit_q.order_by(AuditEntry.happened_at.desc()).limit(EXPORT_LIMIT)
+    security = log.security_q.order_by(SecurityAudit.happened_at.desc()).limit(
+        EXPORT_LIMIT
+    )
+    rows = sorted(
+        chain(map(audit_row, audit), map(security_row, security)), reverse=True
+    )
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(
+        [
+            _("Date"),
+            _("Person"),
+            _("E-mail"),
+            _("Action"),
+            _("Kind"),
+            _("Object"),
+            _("Detail"),
+        ]
+    )
+    writer.writerows(
+        [spreadsheet_cell(cell) for cell in row[1:]] for row in rows[:EXPORT_LIMIT]
+    )
+    # The mark tells spreadsheets the file is in UTF-8.
+    return Response(
+        "\ufeff" + out.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=log.csv"},
+    )
+
+
+#: A line of the export, behind the moment that orders it.
+Row = tuple[datetime, str, str, str, str, str, str, str]
+
+
+def audit_row(entry: AuditEntry) -> Row:
+    """A change to an object, as a line of the export."""
+    verb = AuditEntryPresenter(entry).verb
+    detail = ", ".join(entry.changes.shown_columns()) if verb == "update" else ""
+    return (
+        *_when_and_who(entry.happened_at, entry.user),
+        str(EXPORTED_ACTIONS[verb]),
+        entry.entity_type.rsplit(".", 1)[-1],
+        entry.entity_name or "",
+        detail,
+    )
+
+
+def security_row(entry: SecurityAudit) -> Row:
+    """A role given or taken, or inherited rights turned on or off, as a line."""
+    principal = entry.user or entry.group
+    detail = f"{entry.role} → {principal.name}" if principal and entry.role else ""
+    return (
+        *_when_and_who(entry.happened_at, entry.manager),
+        str(EXPORTED_ACTIONS[entry.op]),
+        (entry.object_type or "").rsplit(".", 1)[-1],
+        entry.object_name or "",
+        detail,
+    )
+
+
+def _when_and_who(
+    happened_at: datetime | None, user: User | None
+) -> tuple[datetime, str, str, str]:
+    """The moment, to order lines by; when, as the site's time shows it; then who,
+    by name and address."""
+    # Set on insert by the columns' default; the models type them as nullable.
+    assert happened_at is not None
+    when = local_dt(happened_at).strftime("%Y-%m-%d %H:%M")
+    if user is None:
+        return happened_at, when, str(_("System")), ""
+    return happened_at, when, user.name, user.email
+
+
+def spreadsheet_cell(value: str) -> str:
+    """`value`, which a spreadsheet will not run as a formula: one that starts as a
+    formula does is read as text."""
+    return f"'{value}" if value[:1] in ("=", "+", "-", "@", "\t", "\r") else value
 
 
 #

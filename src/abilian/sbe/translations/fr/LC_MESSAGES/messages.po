@@ -1815,6 +1815,17 @@ msgstr "Événement"
 msgid "Start a discussion in one of my communities…"
 msgstr "Lancer une discussion dans l’une de mes communautés…"
 
+msgid "Filter by period"
+msgstr "Filtrer par période"
+
+msgid "Since the beginning"
+msgstr "Depuis le début"
+
+msgid "%(num)d change"
+msgid_plural "%(num)d changes"
+msgstr[0] "%(num)d modification"
+msgstr[1] "%(num)d modifications"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

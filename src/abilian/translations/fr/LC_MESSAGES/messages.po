@@ -1098,6 +1098,51 @@ msgstr "Connexions"
 msgid "System information"
 msgstr "Informations système"
 
+msgid "The last 7 days"
+msgstr "Les 7 derniers jours"
+
+msgid "The last 30 days"
+msgstr "Les 30 derniers jours"
+
+msgid "This year"
+msgstr "Cette année"
+
+msgid "changed"
+msgstr "modifié"
+
+msgid "deleted"
+msgstr "supprimé"
+
+msgid "role given"
+msgstr "rôle donné"
+
+msgid "role taken back"
+msgstr "rôle retiré"
+
+msgid "inherited rights turned on"
+msgstr "héritage des droits activé"
+
+msgid "inherited rights turned off"
+msgstr "héritage des droits désactivé"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Person"
+msgstr "Personne"
+
+msgid "E-mail"
+msgstr "Adresse"
+
+msgid "Kind"
+msgstr "Sorte"
+
+msgid "Object"
+msgstr "Objet"
+
+msgid "Detail"
+msgstr "Détail"
+
 #~ msgid "An entity with this name already exists in the database"
 #~ msgstr "Il y a déjà une entité avec ce nom dans la base de donnée"
 

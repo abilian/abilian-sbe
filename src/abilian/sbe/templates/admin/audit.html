@@ -1,8 +1,7 @@
 {#- The log of changes, to answer "who did this?": filtered by person, by kind of object
-    and from a day back; each line who, what, on which object, where, and what changed,
-    the days apart. Overrides Abilian Core's page; drawn in
-    `mockups/templates/admin-audit.html`. Without its export: nothing on the server
-    writes one. -#}
+    and by period, and from a day back; each line who, what, on which object, where,
+    and what changed, the days apart; the whole of it, as filtered, as a spreadsheet.
+    Overrides Abilian Core's page; drawn in `mockups/templates/admin-audit.html`. -#}
 {% extends "admin/_ads.html" %}
 {% import "admin/_ads_macros.html" as a with context %}
 {#- The kinds of objects people know, by their class, with what a line says of one. -#}
@@ -25,6 +24,7 @@
 } %}
 {% block page_title %}{{ _("Log") }} · {{ _("Administration") }}{% endblock %}
 {% block heading %}{{ _("Log of changes") }}{% endblock %}
+{% block actions %}<a class="ads-btn" href="{{ url_for('admin.audit_export', **url_params) }}" download>{{ icon("file-spreadsheet") }}{{ _("Export (spreadsheet)") }}</a>{% endblock %}
 
 {% macro pager() %}
 {% if top_date or lowest_date %}
@@ -47,7 +47,12 @@
       <option value="">{{ _("All objects") }}</option>
       {% for name, type in all_classes if name in kinds %}<option value="{{ type }}" {{ "selected" if type in filter_types }}>{{ kinds[name][0] }}</option>{% endfor %}
     </select>
+    <select class="ads-select" name="period" data-autosubmit aria-label="{{ _('Filter by period') }}">
+      {% for name, label in periods.items() %}<option value="{{ name }}" {{ "selected" if name == period }}>{{ label }}</option>{% endfor %}
+      <option value="" {{ "selected" if not period }}>{{ _("Since the beginning") }}</option>
+    </select>
     <input class="ads-input sbe-fit" type="date" id="date-chooser" value="{{ current_date or '' }}" aria-label="{{ _('Changes up to this day') }}">
+    <span class="ads-muted ads-push">{{ ngettext("%(num)d change", "%(num)d changes", total) }}</span>
   </form>
   {% for day, day_entries in entries %}
   <section aria-labelledby="day-{{ loop.index }}">
