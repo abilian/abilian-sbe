@@ -320,3 +320,32 @@ def test_the_invitation_speaks_the_language_of_whoever_is_invited(
     (message,) = outbox
     assert " vous invite dans " in message.subject
     assert "vous a ajouté à la communauté" in message.body
+
+
+def test_the_steps_say_which_is_current_and_each_row_whose_it_is(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    html = _post(
+        client,
+        people["manager"],
+        "communities.wizard_check_data",
+        community1,
+        **{"wizard-emails": "new@x.org", "role": "member"},
+    )
+
+    assert html.count('aria-current="step"') == 1
+    assert html.count('class="ads-step sbe-step--done"') == 2
+    assert 'aria-label="Role of new@x.org"' in html
+    assert 'aria-label="Remove new@x.org"' in html
+
+
+def test_typing_addresses_tells_a_screen_reader_the_count_only(
+    client: FlaskClient, community1: Community, people: dict[str, User]
+) -> None:
+    with client_login(client, people["manager"]):
+        page = client.get(
+            url_for("communities.wizard_data_insertion", community_id=community1.slug)
+        ).get_data(as_text=True)
+
+    assert 'role="status" data-preview-status="wizard-emails"' in page
+    assert "aria-live" not in page.split("data-preview=")[1].split(">")[0]

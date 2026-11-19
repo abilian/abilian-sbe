@@ -3,7 +3,7 @@
     found marked, who and when; beside it, the same words in other communities, and
     when. Overrides Abilian Core's page; drawn in `mockups/templates/search.html`. -#}
 {% extends "ads_base.html" %}
-{% block page_title %}« {{ q }} » · {{ _("Search") }}{% endblock %}
+{% block page_title %}{% if q %}{{ _("“%(q)s”", q=q) }} · {% endif %}{{ _("Search") }}{% endblock %}
 {% block pretitle %}{{ _("Search") }}{% endblock %}
 {% block heading %}{% if q %}{{ _("Results for “%(q)s”", q=q) }}{% else %}{{ _("Search") }}{% endif %}{% endblock %}
 

@@ -287,3 +287,13 @@ def test_the_month_grid_loads_only_its_own_days_events(
         loaded = {e.title for e in _events_in_grid(date(2026, 11, 1))}
 
     assert loaded == {"grid's first day", "in the month"}
+
+
+def test_today_is_said_in_the_month(
+    client: FlaskClient, community1: Community, member: User
+) -> None:
+    html = _page(
+        client, member, url_for("calendar.index", community_id=community1.slug)
+    )
+
+    assert html.count('aria-current="date"') == 1

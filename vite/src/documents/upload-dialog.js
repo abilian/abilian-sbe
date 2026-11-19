@@ -23,7 +23,10 @@ function setUp(dialog) {
   }
 
   function setBar(bar, fraction) {
+    const percent = Math.round(fraction * 100);
     bar.style.width = `${fraction * 100}%`;
+    // What the width shows, said to assistive technology too.
+    bar.setAttribute("aria-valuenow", String(percent));
   }
 
   function showPreview(row, file) {
@@ -110,7 +113,7 @@ function setUp(dialog) {
       const arrived = await sendFile(
         entry,
         (fraction) => setBar(totalBar, (index + fraction) / entries.length),
-        signal
+        signal,
       );
       somethingArrived ||= arrived;
       allArrived &&= arrived;

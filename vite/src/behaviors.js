@@ -53,7 +53,18 @@ if (navigator.clipboard) {
 document.addEventListener("click", (event) => {
   const dismiss = event.target.closest("[data-dismiss]");
   if (dismiss) {
-    dismiss.closest(".ads-alert").remove();
+    // The focus was on the button that goes: the next message's, or else the page's
+    // content, takes it, rather than the start of the page.
+    const alert = dismiss.closest(".ads-alert");
+    const next = alert.nextElementSibling?.querySelector("[data-dismiss]");
+    alert.remove();
+    if (next) {
+      next.focus();
+    } else {
+      const content = document.getElementById("content");
+      content?.setAttribute("tabindex", "-1");
+      content?.focus();
+    }
     return;
   }
 

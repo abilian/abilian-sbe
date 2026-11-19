@@ -25,8 +25,8 @@
 {% set check_url = url_for(".check_valid_name", community_id=g.community.slug) %}
 <div class="ads-field">
   <label class="ads-label" for="{{ prefix }}-title">{{ _("Name") }}</label>
-  <input class="ads-input {{ title_class }}" id="{{ prefix }}-title" type="text" name="title" value="{{ title }}" data-check-url="{{ check_url }}" required>
-  <span class="ads-error help-block" hidden></span>
+  <input class="ads-input {{ title_class }}" id="{{ prefix }}-title" type="text" name="title" value="{{ title }}" data-check-url="{{ check_url }}" data-check-failed="{{ _('The name could not be checked: try again.') }}" required aria-describedby="{{ prefix }}-title-error">
+  <span class="ads-error help-block" id="{{ prefix }}-title-error" aria-live="polite" hidden></span>
 </div>
 <div class="ads-field">
   <label class="ads-label" for="{{ prefix }}-description">{{ _("Description") }}</label>
@@ -53,7 +53,7 @@
             <span class="js-file-name ads-truncate"></span>
             <span class="js-file-size ads-muted"></span>
             <span class="js-file-error ads-error" hidden></span>
-            <span class="js-file-progress ads-progress" hidden><span class="ads-progress__bar" role="progressbar" aria-label="{{ _('Sent') }}"></span></span>
+            <span class="js-file-progress ads-progress" hidden><span class="ads-progress__bar" role="progressbar" aria-label="{{ _('Sent') }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span></span>
           </span>
           <span class="js-file-sent" hidden>{{ icon("circle-check", "ads-icon sbe-ok") }}</span>
           <span class="js-file-failed ads-error" hidden>{{ icon("alert-triangle") }}</span>
@@ -61,7 +61,7 @@
         </li>
       </template>
       <ul class="js-files ads-list sbe-uploads"></ul>
-      <span class="js-total-progress ads-progress" hidden><span class="ads-progress__bar" role="progressbar" aria-label="{{ _('Sent') }}"></span></span>
+      <span class="js-total-progress ads-progress" hidden><span class="ads-progress__bar" role="progressbar" aria-label="{{ _('Sent') }}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span></span>
       <label class="ads-check"><input type="checkbox" name="uncompress_files" value="true"> {{ _("Uncompress ZIP files") }}</label>
     </div>
     <div class="ads-modal__foot">

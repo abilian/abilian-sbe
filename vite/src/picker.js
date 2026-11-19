@@ -36,8 +36,10 @@ function attach(field) {
   box.id = field.id;
   box.className = field.className;
   box.placeholder = field.placeholder;
-  if (field.hasAttribute("aria-label")) {
-    box.setAttribute("aria-label", field.getAttribute("aria-label"));
+  // What names and explains the field goes with it to the box one types in.
+  for (const name of ["aria-label", "aria-describedby"]) {
+    if (field.hasAttribute(name))
+      box.setAttribute(name, field.getAttribute(name));
   }
   box.required = field.required;
   box.autocomplete = "off";

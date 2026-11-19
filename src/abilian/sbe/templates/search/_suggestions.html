@@ -9,7 +9,9 @@
 {% set opened = [] if q else recently_opened(user) %}
 {#- On an empty field with nothing searched or opened yet, nothing: the script opens no panel. -#}
 {% if q or recent_searches or opened %}
-<div class="ads-combobox__list sbe-suggest__panel" id="suggestions" role="listbox" aria-label="{{ _('Suggestions') }}">
+<div class="ads-combobox__list sbe-suggest__panel" id="suggestions">
+  {#- The options in the listbox, which the arrows move through; the foot after it. -#}
+  <div role="listbox" id="suggestions-list" aria-label="{{ _('Suggestions') }}">
   {% if not q %}
   {% if recent_searches %}
   <div role="group" aria-labelledby="suggest-recent">
@@ -31,6 +33,7 @@
     {% endfor %}
   </div>
   {% endif %}
+  </div>
   <div class="sbe-suggest__foot">
     <span class="ads-muted">{{ _("Type to search everywhere") }}</span>
     <span class="ads-muted ads-cluster ads-gap-sm sbe-suggest__keys" aria-hidden="true"><kbd class="ads-kbd">/</kbd> {{ _("from any page") }}</span>
@@ -61,6 +64,7 @@
   {% if elsewhere %}
   <a class="ads-combobox__option sbe-suggest__option sbe-suggest__elsewhere" role="option" id="suggestion-elsewhere" href="{{ url_for('search.search_main', q=q) }}" aria-selected="false">{{ icon("world") }}<span class="ads-fill">{{ ngettext("%(num)d result in your other communities", "%(num)d results in your other communities", elsewhere) }}</span>{{ icon("chevron-right") }}</a>
   {% endif %}
+  </div>
   <div class="sbe-suggest__foot">
     <a href="{{ results_url }}">{{ icon("search") }}{{ _("All the results for “%(q)s”", q=q) }}{% if total %} ({{ total }}){% endif %}</a>
     <span class="ads-muted ads-cluster ads-gap-sm sbe-suggest__keys" aria-hidden="true"><kbd class="ads-kbd">↑</kbd><kbd class="ads-kbd">↓</kbd> {{ _("choose") }} <kbd class="ads-kbd">↵</kbd> {{ _("open") }} <kbd class="ads-kbd">{{ _("Esc") }}</kbd> {{ _("close") }}</span>

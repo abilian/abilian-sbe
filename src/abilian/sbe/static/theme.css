@@ -849,3 +849,8 @@ pre.sbe-source { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
   .sbe-search__key { display: none; }
   .sbe-suggest__panel { position: fixed; inset: 3.5rem 0 0 0; width: auto; max-height: none; border-radius: 0; }
 }
+
+/* A step passed in a sequence: drawn as the current one, without its weight. ADS draws
+   only `[aria-current]`, which is for the current step alone. ADS request 35. */
+.ads-step.sbe-step--done { color: var(--ads-ink); }
+.ads-step.sbe-step--done::before, .ads-step.sbe-step--done::after { background: var(--ads-brand); color: var(--ads-brand-fg); }

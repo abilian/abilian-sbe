@@ -25,8 +25,8 @@
           <td><input type="hidden" name="account" value="{{ user.email }}">{{ user.email }}</td>
           <td><input class="ads-input wizard-required" type="text" name="first_name" value="{{ user.first_name }}" required aria-label="{{ _('First name of %(email)s', email=user.email) }}"></td>
           <td><input class="ads-input wizard-required" type="text" name="last_name" value="{{ user.last_name }}" required aria-label="{{ _('Last name of %(email)s', email=user.email) }}"></td>
-          <td>{{ wizard.role_select(selected=user.role) }}</td>
-          <td class="ads-end">{{ wizard.remove_button({"data-wizard-remove": ""}) }}</td>
+          <td>{{ wizard.role_select(user.email, selected=user.role) }}</td>
+          <td class="ads-end">{{ wizard.remove_button(user.email, {"data-wizard-remove": ""}) }}</td>
         </tr>
         {% endfor %}
         <tr data-wizard-empty {{ "hidden" if new_accounts }}><td colspan="5" class="ads-muted">{{ _("There is no new accounts") }}</td></tr>

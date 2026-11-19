@@ -38,8 +38,9 @@
         <div class="ads-calendar sbe-calendar--mini">
           {% for day, _events in weeks[0] %}<div class="ads-calendar__head">{{ day | dateformat("EEEEE", rebase=false) }}</div>{% endfor %}
           {% for week in weeks %}{% for day, todays in week %}
-          <div class="ads-calendar__day {{ 'ads-calendar__day--outside' if day.month != month.month }} {{ 'ads-calendar__day--today' if day == today }}">
-            <span class="ads-calendar__date">{{ day.day }}</span>
+          {#- Today and the days of the months around: said, not only coloured. -#}
+          <div class="ads-calendar__day {{ 'ads-calendar__day--outside' if day.month != month.month }} {{ 'ads-calendar__day--today' if day == today }}" {{ 'aria-current="date"' | safe if day == today }}>
+            <span class="ads-calendar__date">{{ day.day }}{% if day == today %}<span class="sbe-sr-only">, {{ _("today") }}</span>{% endif %}</span>
             {% for e in todays %}<a class="ads-calendar__event ads-tone-brand" href="{{ url_for(e) }}" title="{{ e.title }}"><span class="sbe-sr-only">{{ e.title }}</span></a>{% endfor %}
           </div>
           {% endfor %}{% endfor %}

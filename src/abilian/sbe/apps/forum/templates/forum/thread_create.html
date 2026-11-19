@@ -19,7 +19,7 @@
     <div class="ads-card__body ads-stack">
       <div class="ads-field">
         <label class="ads-label ads-label--required" for="{{ form.title.id }}">{{ _("Subject") }}</label>
-        <input class="ads-input" id="{{ form.title.id }}" name="{{ form.title.name }}" type="text" value="{{ form.title.data or '' }}" maxlength="150" required aria-describedby="subject-help" {{ fields.invalid(form.title) }}>
+        <input class="ads-input" id="{{ form.title.id }}" name="{{ form.title.name }}" type="text" value="{{ form.title.data or '' }}" maxlength="150" required {{ fields.invalid(form.title, "subject-help") }}>
         <small class="ads-help" id="subject-help">{{ _("A sentence that says what it is about: the members read it in their feed and in the email.") }}</small>
         {{ fields.errors(form.title) }}
       </div>

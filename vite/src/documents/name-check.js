@@ -15,15 +15,12 @@ function setUp(modal) {
   const help = modal.querySelector("span.help-block");
   let checked = false;
 
-  // The Tailwind classes are for the dialogs not yet on the design system.
+  // The message is tied to the field and said as it appears (its `aria-live`).
   function setError(message) {
     input.setAttribute("aria-invalid", message ? "true" : "false");
-    input.classList.toggle("border-red-500", Boolean(message));
     if (!help) return;
     help.textContent = message || "";
     help.hidden = !message;
-    help.classList.toggle("hidden", !message);
-    help.classList.toggle("text-red-600", Boolean(message));
   }
 
   submit.addEventListener("click", (event) => {
@@ -42,7 +39,10 @@ function setUp(modal) {
     });
 
     fetch(`${input.dataset.checkUrl}?${params}`, { credentials: "same-origin" })
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok) throw new Error(response.statusText);
+        return response.json();
+      })
       .then((data) => {
         if (data.valid) {
           setError(null);
@@ -51,7 +51,10 @@ function setUp(modal) {
         } else {
           setError(data.help_text);
         }
-      });
+      })
+      // A check that could not be made says so, rather than leave Save doing
+      // nothing; the name is unique in its folder, and only this checks it.
+      .catch(() => setError(input.dataset.checkFailed));
   });
 }
 

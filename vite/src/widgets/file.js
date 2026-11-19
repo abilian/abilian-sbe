@@ -11,6 +11,7 @@ export class FileInput {
     this.form = node.closest("form");
     this.button = node.querySelector(".js-file-button");
     this.listNode = node.querySelector(".selected-files");
+    this.removeLabel = node.dataset.removeLabel ?? "Remove";
 
     const input = this.button.querySelector("input");
     input.disabled = false;
@@ -67,10 +68,8 @@ export class FileInput {
     marker.name = button.dataset.name;
     marker.value = button.dataset.value;
 
+    // Its state is its `aria-pressed`, which the stylesheet draws.
     const mark = (deleting) => {
-      button.classList.toggle("active", deleting);
-      button.classList.toggle("btn-danger", deleting);
-      button.classList.toggle("btn-default", !deleting);
       button.setAttribute("aria-pressed", String(deleting));
       if (deleting) item.append(marker);
       else marker.remove();
@@ -78,13 +77,12 @@ export class FileInput {
 
     if (JSON.parse(button.dataset.deleted)) mark(true);
     button.addEventListener("click", () =>
-      mark(!button.classList.contains("active")),
+      mark(button.getAttribute("aria-pressed") !== "true"),
     );
   }
 
   setupRemoveLink(item) {
-    item.querySelector("a")?.addEventListener("click", (event) => {
-      event.preventDefault();
+    item.querySelector(".js-remove")?.addEventListener("click", () => {
       item.remove();
     });
   }
@@ -93,15 +91,18 @@ export class FileInput {
   createFileItem(file) {
     const item = document.createElement("div");
     item.className = "file-item";
+    const name = file.name.replace(/\\/g, "/").replace(/.*\//, "");
 
     const info = document.createElement("span");
     info.className = "file-info";
-    info.textContent = `${file.name.replace(/\\/g, "/").replace(/.*\//, "")} (${humanSize(file.size)})`;
+    info.textContent = `${name} (${humanSize(file.size)})`;
 
-    const remove = document.createElement("a");
-    remove.className = "close";
-    remove.href = "#";
+    const remove = document.createElement("button");
+    remove.type = "button";
+    remove.className = "ads-close js-remove";
     remove.textContent = "×";
+    // Named after the file it takes away, as the page's own buttons are.
+    remove.setAttribute("aria-label", `${this.removeLabel} ${name}`);
 
     const progress = document.createElement("div");
     progress.className = "progress";

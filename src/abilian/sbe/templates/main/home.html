@@ -18,7 +18,7 @@
 {% endblock %}
 {% block body %}
 <div class="ads-with-aside">
-  <div class="ads-stack" aria-label="{{ _('News of my communities') }}">
+  <section class="ads-stack" aria-label="{{ _('News of my communities') }}">
     {{ m.composer(communities=communities) }}
     <div class="ads-spread">
       <ul class="ads-pills" aria-label="{{ _('Which news') }}">
@@ -38,7 +38,7 @@
     {% else %}
     <div class="ads-card"><div class="ads-card__body ads-muted">{{ _("Nothing of this kind in your communities yet.") if kind else _("Nothing has happened in your communities yet.") }}</div></div>
     {% endfor %}
-  </div>
+  </section>
 
   <aside class="ads-stack" aria-label="{{ _('My communities and what is coming up') }}">
     <section class="ads-card" aria-labelledby="mine">

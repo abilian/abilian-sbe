@@ -20,40 +20,31 @@ const DEFAULTS = {
 export function confirmDialog(options) {
   const opts = { ...DEFAULTS, ...options };
 
-  // Two sets of classes, until every page is on the design system: ADS's, and
-  // Tailwind's for the others. Each page loads one stylesheet, so the other set
-  // does nothing there. m-auto matters on the Tailwind side: a native <dialog> is
-  // centred by the UA stylesheet's `margin: auto`, which Tailwind's preflight
-  // resets to 0.
+  // Named by its title, or else by its message: a screen reader says what it asks.
   const dialog = document.createElement("dialog");
-  dialog.className =
-    "ads-modal__panel sbe-dialog m-auto rounded-lg border border-gray-200 p-0 " +
-    "shadow-2xl backdrop:bg-black/50 w-full max-w-lg";
+  dialog.className = "ads-modal__panel sbe-dialog";
+  const id = `confirm-${Date.now()}`;
+  dialog.setAttribute(
+    "aria-labelledby",
+    opts.title ? `${id}-title` : `${id}-message`,
+  );
+  if (opts.title) dialog.setAttribute("aria-describedby", `${id}-message`);
 
-  const okClasses = opts.danger
-    ? "ads-btn--danger bg-red-600 hover:bg-red-700"
-    : "ads-btn--primary bg-blue-600 hover:bg-blue-700";
+  const okClass = opts.danger ? "ads-btn--danger" : "ads-btn--primary";
 
   dialog.innerHTML = `
     <form method="dialog">
       ${
         opts.title
-          ? `<div class="ads-modal__head flex items-center justify-between border-b border-gray-200 p-4">
-               <h3 class="ads-modal__title text-lg font-semibold text-gray-900">${opts.title}</h3>
+          ? `<div class="ads-modal__head">
+               <h2 class="ads-modal__title" id="${id}-title">${opts.title}</h2>
              </div>`
           : ""
       }
-      <div class="js-confirm-message ads-modal__body p-4 text-gray-700"></div>
-      <div class="ads-modal__foot flex items-center justify-end gap-2 border-t border-gray-200 p-4">
-        <button value="cancel"
-                class="ads-btn ads-btn--ghost rounded-md border border-gray-300 bg-white px-4
-                       py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-          ${opts.cancelLabel}
-        </button>
-        <button value="confirm"
-                class="ads-btn rounded-md px-4 py-2 text-sm font-medium text-white ${okClasses}">
-          ${opts.okLabel}
-        </button>
+      <div class="js-confirm-message ads-modal__body" id="${id}-message"></div>
+      <div class="ads-modal__foot">
+        <button value="cancel" class="ads-btn ads-btn--ghost">${opts.cancelLabel}</button>
+        <button value="confirm" class="ads-btn ${okClass}">${opts.okLabel}</button>
       </div>
     </form>
   `;

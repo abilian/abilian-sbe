@@ -286,3 +286,23 @@ def test_an_empty_field_suggests_what_one_may_still_read_of_what_one_opened(
     assert "Opened lately" in html
     assert "Our meeting" in html
     assert "Their meeting" not in html
+
+
+def test_the_suggestions_foot_is_beside_the_listbox_not_in_it(
+    indexed: User, client: FlaskClient
+) -> None:
+    html = _suggestions(client, indexed, q="budget")
+
+    listbox = html.split('role="listbox"')[1].split('<div class="sbe-suggest__foot">')[
+        0
+    ]
+    assert 'role="option"' in listbox
+    assert "All the results" not in listbox
+    assert "All the results" in html
+
+
+def test_an_empty_search_has_a_plain_title(indexed: User, client: FlaskClient) -> None:
+    with client_login(client, indexed):
+        html = client.get(url_for("search.search_main")).get_data(as_text=True)
+
+    assert "<title>Search ·" in html

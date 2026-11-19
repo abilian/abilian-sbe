@@ -10,7 +10,10 @@
       <h2 class="ads-card__title">{{ title }}</h2>
       <ol class="ads-steps" aria-label="{{ _('Steps') }}">
         {% for label in [_("Addresses"), _("Who joins"), _("New accounts")] %}
-        <li class="ads-step" {{ 'aria-current="step"' | safe if loop.index <= step }}>{{ label }}</li>
+        {#- The current step only is `aria-current`; those passed are done (ADS request 35). -#}
+        {% if loop.index == step %}<li class="ads-step" aria-current="step">{{ label }}</li>
+        {%- elif loop.index < step %}<li class="ads-step sbe-step--done">{{ label }}<span class="sbe-sr-only">, {{ _("done") }}</span></li>
+        {%- else %}<li class="ads-step">{{ label }}</li>{% endif %}
         {%- endfor %}
       </ol>
     </div>
@@ -19,13 +22,14 @@
 </div>
 {% endmacro %}
 
-{% macro role_select(attrs={}, selected="member") %}
-<select class="ads-select sbe-select--sm" name="role" aria-label="{{ _('Role') }}" {{ attrs | xmlattr }}>
+{#- A row's controls, named after the address of the row they act on. -#}
+{% macro role_select(email, attrs={}, selected="member") %}
+<select class="ads-select sbe-select--sm" name="role" aria-label="{{ _('Role of %(email)s', email=email) }}" {{ attrs | xmlattr }}>
   <option value="member" {{ "selected" if selected != "manager" }}>{{ _("Member") }}</option>
   <option value="manager" {{ "selected" if selected == "manager" }}>{{ _("Community manager") }}</option>
 </select>
 {% endmacro %}
 
-{% macro remove_button(attrs={}) %}
-<button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ _('Remove') }}" {{ attrs | xmlattr }}>{{ icon("x") }}</button>
+{% macro remove_button(email, attrs={}) %}
+<button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ _('Remove %(email)s', email=email) }}" {{ attrs | xmlattr }}>{{ icon("x") }}</button>
 {% endmacro %}

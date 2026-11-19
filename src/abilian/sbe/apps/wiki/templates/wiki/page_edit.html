@@ -28,9 +28,9 @@
     <div class="ads-grid ads-col-lg">
     <div class="ads-field">
       <label class="ads-label ads-label--required" for="{{ form.body_src.id }}">{{ _("Text") }}</label>
-      <textarea class="ads-textarea sbe-source" id="{{ form.body_src.id }}" name="{{ form.body_src.name }}" rows="18" required aria-describedby="body-help" {{ fields.invalid(form.body_src) }}>{{ form.body_src.data or "" }}</textarea>
+      <textarea class="ads-textarea sbe-source" id="{{ form.body_src.id }}" name="{{ form.body_src.name }}" rows="18" required {{ fields.invalid(form.body_src, "body-help") }}>{{ form.body_src.data or "" }}</textarea>
       <small class="ads-help" id="body-help">{{ _("In Markdown: **bold**, ## heading, - list, [[Title of a page]] for a link to another page.") }} <a href="{{ url_for('.wiki_help', community_id=g.community.slug) }}">{{ _("Syntax help") }}</a></small>
-      {% for error in form.body_src.errors %}<div class="ads-error" id="{{ form.body_src.id }}-error">{{ error }}</div>{% endfor %}
+      {{ fields.errors(form.body_src) }}
     </div>
     <section class="ads-field" aria-labelledby="preview-label">
       <span class="ads-label" id="preview-label">{{ _("Preview") }}</span>

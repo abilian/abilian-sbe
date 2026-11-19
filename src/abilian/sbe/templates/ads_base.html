@@ -63,7 +63,7 @@
       <label class="ads-chip ads-tone-neutral sbe-scope" title="{{ _('Only in %(name)s', name=here.name) }}"><input class="sbe-sr-only" type="checkbox" name="community" value="{{ here.slug }}" checked aria-label="{{ _('Only in %(name)s', name=here.name) }}"><span class="ads-truncate">{{ here.name }}</span>{{ icon("x") }}</label>
       {% endif %}
       <input type="search" name="q" placeholder="{{ _('Search') }}" aria-label="{{ _('Search') }}" autocomplete="off"
-             role="combobox" aria-autocomplete="list" aria-controls="suggestions" aria-expanded="false">
+             role="combobox" aria-autocomplete="list" aria-controls="suggestions-list" aria-expanded="false">
       <kbd class="ads-kbd sbe-search__key" title="{{ _('To search without the mouse') }}">/</kbd>
     </form>
   </div>

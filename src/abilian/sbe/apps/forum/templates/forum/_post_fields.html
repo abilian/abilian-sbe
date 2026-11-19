@@ -3,14 +3,17 @@
     input posts nothing: editor.js replaces the one, widgets/file.js uploads through the
     other. -#}
 
-{#- What the server refused in a field, said under it. -#}
+{#- What the server refused in a field, said under it: one element, one id, whatever
+    the number of errors. -#}
 {% macro errors(field) -%}
-{% for error in field.errors %}<span class="ads-error" id="{{ field.id }}-error">{{ error }}</span>{% endfor %}
+{% if field.errors %}<span class="ads-error" id="{{ field.id }}-error">{{ field.errors | join(" ") }}</span>{% endif %}
 {%- endmacro %}
 
-{#- The attributes that tie a field to its errors. -#}
-{% macro invalid(field) -%}
-{% if field.errors %}aria-invalid="true" aria-describedby="{{ field.id }}-error"{% endif %}
+{#- The attributes that tie a field to its help, if `help` names it, and its errors:
+    one `aria-describedby`, for a second one would be ignored. -#}
+{% macro invalid(field, help=none) -%}
+{% set ids = ([help] if help else []) + ([field.id ~ "-error"] if field.errors else []) %}
+{% if field.errors %}aria-invalid="true" {% endif %}{% if ids %}aria-describedby="{{ ids | join(' ') }}"{% endif %}
 {%- endmacro %}
 
 {#- The message, in the rich-text editor. Its tools are only those the server's
@@ -43,7 +46,7 @@
 {% macro attachments_field(field, existing=()) %}
 <div class="ads-field">
   <span class="ads-label">{{ _("Attachments") }}</span>
-  <div class="js-widget sbe-uploader" data-init-with="fileInput">
+  <div class="js-widget sbe-uploader" data-init-with="fileInput" data-remove-label="{{ _('Remove') }}">
     <label class="ads-btn js-file-button">{{ icon("paperclip") }}{{ _("Attach files") }}<input class="sbe-sr-only" type="file" name="{{ field.name }}" multiple></label>
     <div class="selected-files sbe-uploader__list">
       {% for a in existing %}

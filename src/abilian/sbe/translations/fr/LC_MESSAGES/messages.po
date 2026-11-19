@@ -1895,6 +1895,81 @@ msgstr "Une communauté garde au moins un responsable : nommez-en un autre d’a
 msgid "Added, but not told by e-mail, which could not be sent: {addresses}"
 msgstr "Ajoutés, mais pas prévenus par e-mail, qui n’a pas pu partir : {addresses}"
 
+msgid "The name could not be checked: try again."
+msgstr "Le nom n’a pas pu être vérifié : réessayez."
+
+msgid "Remove %(email)s"
+msgstr "Retirer %(email)s"
+
+msgid "Role of %(email)s"
+msgstr "Rôle de %(email)s"
+
+msgid "done"
+msgstr "terminée"
+
+msgid "Dismiss"
+msgstr "Fermer"
+
+msgid "Accounts registered, active and new, month by month; the figures of today are at the top of the page."
+msgstr "Les comptes inscrits, actifs et nouveaux, mois par mois ; les chiffres du jour sont en haut de la page."
+
+msgid "The people who signed in, by day, week or month; this month's are counted at the top of the page."
+msgstr "Les personnes qui se sont connectées, par jour, semaine ou mois ; celles du mois sont comptées en haut de la page."
+
+msgid "No role on the site."
+msgstr "Aucun rôle sur le site."
+
+msgid "The group"
+msgstr "Le groupe"
+
+msgid "Filter the groups by name"
+msgstr "Filtrer les groupes par nom"
+
+msgid "New group"
+msgstr "Nouveau groupe"
+
+msgid "Yes"
+msgstr "Oui"
+
+msgid "today"
+msgstr "aujourd’hui"
+
+msgid "“%(q)s”"
+msgstr "« %(q)s »"
+
+msgid "No tags have been created yet."
+msgstr "Aucune étiquette n’a encore été créée."
+
+msgid "Objects tagged"
+msgstr "Objets étiquetés"
+
+msgid "Tags are grouped by namespaces, so that different set of tags can be defined for different type of objects, or for a different purpose."
+msgstr "Les étiquettes sont regroupées par espaces de noms : des jeux différents pour des sortes d’objets ou des usages différents."
+
+msgid "Select"
+msgstr "Choisir"
+
+msgid "Zoom in"
+msgstr "Agrandir"
+
+msgid "Zoom out"
+msgstr "Réduire"
+
+msgid "Add a value"
+msgstr "Ajouter une valeur"
+
+msgid "Move %(label)s down"
+msgstr "Descendre %(label)s"
+
+msgid "Move %(label)s up"
+msgstr "Monter %(label)s"
+
+msgid "No vocabularies are defined. Vocabularies are declared in code, by subclassing BaseVocabulary; this page lists the ones an application registers."
+msgstr "Aucun vocabulaire n’est défini. Les vocabulaires se déclarent dans le code, en dérivant de BaseVocabulary ; cette page liste ceux qu’une application enregistre."
+
+msgid "Connections"
+msgstr "Connexions"
+
 #~ msgid "Your new group has been created"
 #~ msgstr "Votre nouveau groupe a été créé"
 

@@ -228,11 +228,13 @@ def test_the_audit_log_jumps_to_the_day_picked(logged_in: Page, base_url: str) -
 
 #: What the server answers as one types, for a test that needs no index.
 SUGGESTIONS = """
-<div class="ads-combobox__list sbe-suggest__panel" id="suggestions" role="listbox">
-  <a class="ads-combobox__option sbe-suggest__option" role="option" id="s-1"
-     href="/communities/e2e-community/forum/" aria-selected="false">First</a>
-  <a class="ads-combobox__option sbe-suggest__option" role="option" id="s-2"
-     href="/communities/" aria-selected="false">Second</a>
+<div class="ads-combobox__list sbe-suggest__panel" id="suggestions">
+  <div role="listbox" id="suggestions-list">
+    <a class="ads-combobox__option sbe-suggest__option" role="option" id="s-1"
+       href="/communities/e2e-community/forum/" aria-selected="false">First</a>
+    <a class="ads-combobox__option sbe-suggest__option" role="option" id="s-2"
+       href="/communities/" aria-selected="false">Second</a>
+  </div>
 </div>"""
 
 

@@ -6,14 +6,14 @@
 {% block page_title %}{{ g.community.name }}{% endblock %}
 {% block content %}
 <div class="ads-with-aside">
-  <div class="ads-stack" aria-label="{{ _('News of the community') }}">
+  <section class="ads-stack" aria-label="{{ _('News of the community') }}">
     {{ m.composer(community=g.community) }}
     {% for item in items %}
     {{ m.feed_entry(item, show_community=false) }}
     {% else %}
     <div class="ads-card"><div class="ads-card__body ads-muted">{{ _("Nothing has happened in this community yet.") }}</div></div>
     {% endfor %}
-  </div>
+  </section>
 
   <aside class="ads-stack" aria-label="{{ _('The community') }}">
     {% if documents %}
@@ -39,7 +39,7 @@
     <section class="ads-card" aria-labelledby="people">
       <div class="ads-card__head ads-spread">
         <h2 class="ads-card__title" id="people">{{ _("Members") }}</h2>
-        <a href="{{ url_for('communities.members', community_id=g.community.slug) }}">{{ g.community.membership_count }}</a>
+        <a href="{{ url_for('communities.members', community_id=g.community.slug) }}">{{ ngettext("%(num)d member", "%(num)d members", g.community.membership_count) }}</a>
       </div>
       <div class="ads-card__body ads-stack ads-gap-sm">
         <span class="ads-avatars">{% for user in members %}{{ m.avatar(user) }}{% endfor %}</span>
