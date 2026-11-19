@@ -69,13 +69,14 @@ class DefaultConfig:
     # Abilian-specific
     PRIVATE_SITE = False
     PLUGINS = ()
+    #: In the order of the administration's tabs.
     ADMIN_PANELS = (
         "abilian.web.admin.panels.dashboard.DashboardPanel",
+        "abilian.web.admin.panels.users.UsersPanel",
+        "abilian.web.admin.panels.groups.GroupsPanel",
         "abilian.web.admin.panels.audit.AuditPanel",
         "abilian.web.admin.panels.login_sessions.LoginSessionsPanel",
         "abilian.web.admin.panels.settings.SettingsPanel",
-        "abilian.web.admin.panels.users.UsersPanel",
-        "abilian.web.admin.panels.groups.GroupsPanel",
         "abilian.web.admin.panels.sysinfo.SysinfoPanel",
         "abilian.web.admin.panels.impersonate.ImpersonatePanel",
         "abilian.services.vocabularies.admin.VocabularyPanel",

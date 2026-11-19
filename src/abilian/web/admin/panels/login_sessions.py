@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from flask import render_template
 
-from abilian.i18n import _
+from abilian.i18n import _, _l
 from abilian.services.auth.models import LoginSession
 from abilian.web.admin import AdminPanel
 
@@ -13,7 +13,7 @@ from .geoip.ip_country_code import ip_to_country_code
 
 class LoginSessionsPanel(AdminPanel):
     id = "login_sessions"
-    label = "Session log"
+    label = _l("Sign-ins")
     icon = "sign-in"
 
     def get(self) -> str:

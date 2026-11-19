@@ -36,7 +36,7 @@ LAST_SEEN = 5
 class DashboardPanel(AdminPanel):
     id = "dashboard"
     path = ""
-    label = _l("Dashboard")
+    label = _l("Overview")
     icon = "eye"
 
     def get(self) -> str:

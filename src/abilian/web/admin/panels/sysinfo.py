@@ -9,6 +9,7 @@ from operator import itemgetter
 
 from flask import current_app, render_template
 
+from abilian.i18n import _l
 from abilian.web.admin import AdminPanel
 
 #: What a setting's name holds when its value is a secret: a key, a password, or
@@ -34,7 +35,7 @@ def installed_packages() -> list[dict[str, str]]:
 
 class SysinfoPanel(AdminPanel):
     id = "sysinfo"
-    label = "System information"
+    label = _l("System information")
     icon = "hdd-o"
 
     def get(self) -> str:

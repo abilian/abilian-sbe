@@ -1083,6 +1083,21 @@ msgstr "Annuler"
 msgid "Redo"
 msgstr "Rétablir"
 
+msgid "Overview"
+msgstr "Vue d’ensemble"
+
+msgid "Accounts"
+msgstr "Comptes"
+
+msgid "Log"
+msgstr "Journal"
+
+msgid "Sign-ins"
+msgstr "Connexions"
+
+msgid "System information"
+msgstr "Informations système"
+
 #~ msgid "An entity with this name already exists in the database"
 #~ msgstr "Il y a déjà une entité avec ce nom dans la base de donnée"
 

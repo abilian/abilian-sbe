@@ -172,3 +172,19 @@ def test_cores_other_pages_render_on_the_design_system(
     html = response.get_data(as_text=True)
     assert "/ads/ads.css" in html
     assert "font-awesome" not in html
+
+
+def test_the_tabs_say_what_each_part_is(client: FlaskClient, admin_user: User) -> None:
+    with client_login(client, admin_user):
+        html = client.get(url_for("admin.dashboard")).get_data(as_text=True)
+
+    tabs = html.split('<ul class="ads-tabs">')[1].split("</ul>")[0]
+    names = [part.split("</a>")[0].split(">")[-1] for part in tabs.split("<li>")[1:]]
+    assert names == [
+        "Overview",
+        "Accounts",
+        "Log",
+        "Sign-ins",
+        "Settings",
+        "System information",
+    ]

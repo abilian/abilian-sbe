@@ -35,7 +35,7 @@ class UsersPanel(AdminPanel):
     """User administration panel."""
 
     id = "users"
-    label = _l("Users")
+    label = _l("Accounts")
     icon = "user"
 
     def install_additional_rules(self, add_url_rule: Callable) -> None:

@@ -23,7 +23,7 @@ from abilian.core.entities import Entity, all_entity_classes
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 from abilian.core.util import local_dt
-from abilian.i18n import _
+from abilian.i18n import _, _l
 from abilian.services.audit import CREATION, DELETION, UPDATE, AuditEntry
 from abilian.services.security import SecurityAudit
 from abilian.web.admin import AdminPanel
@@ -80,7 +80,7 @@ class AuditPanel(AdminPanel):
     """
 
     id = "audit"
-    label = "Audit trail"
+    label = _l("Log")
     icon = "list-alt"
 
     def install_additional_rules(self, add_url_rule: Callable) -> None:
