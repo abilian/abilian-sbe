@@ -53,9 +53,11 @@ db = extensions.db
 
 def create_app(config: type | None = None, plugins=None, **kw: Any) -> Application:
     # The instance (files, search index, caches) lives next to the project unless
-    # the environment says otherwise: a test server keeps its own.
+    # the environment says otherwise: a test server keeps its own, a deployment its
+    # volume. Relative to where the app starts, as Flask wants it absolute.
     if os.environ.get("FLASK_INSTANCE_PATH"):
-        kw.setdefault("instance_path", os.environ["FLASK_INSTANCE_PATH"])
+        instance_path = Path(os.environ["FLASK_INSTANCE_PATH"]).resolve()
+        kw.setdefault("instance_path", str(instance_path))
     app = Application(**kw)
 
     # 1: Ensure app.config is properly set up
