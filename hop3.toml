@@ -2,13 +2,19 @@
 # Redis as addons; the instance (the files, the search index, the conversions'
 # cache) on a volume, which a redeploy keeps.
 #
-# Secrets are not here: the operator sets them with `hop3 env set --app sbe KEY=…`
-# (FLASK_MAIL_SERVER, FLASK_MAIL_PORT, FLASK_MAIL_USERNAME, FLASK_MAIL_PASSWORD,
-# FLASK_MAIL_USE_TLS, FLASK_MAIL_SENDER, FLASK_SENTRY_DSN).
+# Secrets are not here: the operator sets them with
+# `hop3 env set --app extranet-cnll KEY=…`: FLASK_MAIL_SERVER, FLASK_MAIL_PORT,
+# FLASK_MAIL_USERNAME, FLASK_MAIL_PASSWORD, FLASK_MAIL_USE_TLS, FLASK_MAIL_SENDER,
+# FLASK_SENTRY_DSN.
 
 [metadata]
-id = "sbe"
-title = "Abilian SBE"
+id = "extranet-cnll"
+title = "Extranet CNLL (Abilian SBE)"
+
+[domains]
+# The test deployment, before production moves: then extranet.cnll.fr, alone, since
+# the server name below takes the one host.
+list = ["extranet-cnll.hop3.abilian.com"]
 
 [build]
 # The Dockerfile at the root is a stub that runs `echo OK`; its presence alone would
@@ -85,13 +91,6 @@ FLASK_DRAMATIQ_BROKER_URL = "${REDIS_URL}"
 # Without these two, Dramatiq falls back to localhost:6379 without a word.
 FLASK_DRAMATIQ_ABORT_REDIS_URL = "${REDIS_URL}"
 FLASK_DRAMATIQ_RATE_LIMIT_REDIS_URL = "${REDIS_URL}"
-
-# To fill in: the production hostname. The worker and the scheduler build the links
-# in e-mails (invitations, digests) with no request to take a host from, so the
-# server name is needed as well.
-#
-# [domains]
-# list = ["extranet.example.org"]
-#
-# and, under [env.computed]:
-# FLASK_SERVER_NAME = "${HOST_NAME}"
+# The worker and the scheduler build the links in e-mails (invitations, digests)
+# with no request to take a host from.
+FLASK_SERVER_NAME = "${HOST_NAME}"
