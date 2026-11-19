@@ -7,6 +7,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
 from flask import Blueprint, redirect, render_template, request, url_for
 from werkzeug.exceptions import NotFound
 
@@ -16,6 +17,7 @@ from abilian.sbe.apps.calendar.models import Event
 from abilian.sbe.apps.communities.models import communities_of
 from abilian.sbe.apps.wall.util import get_recent_entries
 from abilian.services import get_service
+from abilian.services.activity import ActivityEntry
 
 from .feed import FILTERS, SECTIONS, feed_item
 
@@ -65,8 +67,24 @@ def home(user: User) -> str:
         kind=kind,
         communities=communities[:COMMUNITIES_SHOWN],
         communities_count=len(communities),
+        new_in=new_by_community(communities[:COMMUNITIES_SHOWN], seen),
         coming=events_to_come(communities),
     )
+
+
+def new_by_community(communities: list[Community], since: datetime) -> dict[int, int]:
+    """How many entries came in each of `communities` after `since`, by its id."""
+    # ponytail: counts what the feed would leave out too (a document in a folder one
+    # may not open); filter as `get_recent_entries` does if the counts mislead.
+    rows = db.session.execute(
+        sa.select(ActivityEntry.target_id, sa.func.count())
+        .where(
+            ActivityEntry.target_id.in_([c.id for c in communities]),
+            ActivityEntry.happened_at > since,
+        )
+        .group_by(ActivityEntry.target_id)
+    )
+    return dict(rows.tuples().all())
 
 
 def events_to_come(communities: list[Community]) -> list[Event]:

@@ -305,3 +305,17 @@ def test_a_communitys_home_starts_a_discussion_or_an_event_in_it(
     composer = html.split('class="ads-card__body sbe-composer"')[1].split("</div>")[0]
     assert f'href="{url_for("forum.new_thread", **here)}"' in composer
     assert f'href="{url_for("calendar.new_event", **here)}"' in composer
+
+
+def test_my_communities_say_how_much_is_new_in_each(
+    app: Application, db: SQLAlchemy, client: FlaskClient, community1: Community
+) -> None:
+    member = _news_then_older_news(db, community1)
+
+    with client_login(client, member):
+        html = client.get(url_for("main.home")).get_data(as_text=True)
+
+    mine = html.split('id="mine"')[1].split("</section>")[0]
+    assert f"<strong>{community1.name}</strong>" in mine
+    assert '<span class="ads-badge ads-tone-info" aria-hidden="true">1</span>' in mine
+    assert '<span class="sbe-sr-only">1 new</span>' in mine

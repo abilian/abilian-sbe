@@ -1,7 +1,8 @@
 {#- Mon fil: where to start a discussion, then the news of my communities, newest
     first, all of it or of one kind; what came since I last marked it read, marked
-    new, and a rule after it. Beside it, my communities, the most active first, and
-    the events to come. Drawn in `mockups/templates/home.html`. -#}
+    new, and a rule after it. Beside it, my communities, the most active first, with
+    how much is new in each, and the events to come. Drawn in
+    `mockups/templates/home.html`. -#}
 {% extends "ads_base.html" %}
 {% import "calendar/_events.html" as ev with context %}
 {% block page_title %}{{ _("My feed") }}{% endblock %}
@@ -48,10 +49,15 @@
           <a class="ads-fill ads-cluster ads-gap-sm" href="{{ url_for(c) }}">
             {{ m.tile(c) }}
             <span class="sbe-lines ads-fill">
-              <span class="ads-truncate">{{ c.name }}</span>
+              <span class="ads-truncate">{% if new_in[c.id] %}<strong>{{ c.name }}</strong>{% else %}{{ c.name }}{% endif %}</span>
               {#- One line: how long ago, the exact date on hover. -#}
               <span class="ads-muted ads-truncate">{{ ngettext("%(num)d member", "%(num)d members", c.membership_count) }} · <time datetime="{{ c.last_active_at.isoformat() }}" title="{{ c.last_active_at | datetimeformat('medium') }}">{{ c.last_active_at | age }}</time></span>
             </span>
+            {% if new_in[c.id] %}
+            {#- Up to 99, then "99+"; the exact number said to screen readers. -#}
+            <span class="ads-badge ads-tone-info" aria-hidden="true">{{ "99+" if new_in[c.id] > 99 else new_in[c.id] }}</span>
+            <span class="sbe-sr-only">{{ ngettext("%(num)d new", "%(num)d new", new_in[c.id]) }}</span>
+            {% endif %}
           </a>
         </li>
         {% else %}
