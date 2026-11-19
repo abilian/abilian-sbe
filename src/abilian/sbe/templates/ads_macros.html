@@ -163,3 +163,21 @@
 {% endif %}
 {% endwith %}
 {% endmacro %}
+
+{#- A form's files (a wiki page's, an event's), applied when it is saved
+    (`documents/form_files.py`): those it has, each to keep or, ticked, to remove,
+    with no script; and a field for new ones. The form posts multipart. -#}
+{% macro files_field(attachments) %}
+<div class="ads-field">
+  <label class="ads-label" for="attachments">{{ _("Attached files") }}</label>
+  {% if attachments %}
+  <ul class="ads-list sbe-uploads">
+    {% for attachment in attachments %}
+    <li>{{ file_icon(attachment.name) }}<span class="ads-fill sbe-lines"><span class="ads-truncate">{{ attachment.name }}</span><span class="ads-muted">{{ attachment.content_length | filesize }}</span></span>
+      <label class="ads-btn ads-btn--ghost ads-btn--sm sbe-toggle"><input type="checkbox" name="remove_attachment" value="{{ attachment.id }}" aria-label="{{ _('Remove %(name)s', name=attachment.name) }}"><span class="sbe-toggle__off">{{ icon("trash") }}{{ _("Remove") }}</span><span class="sbe-toggle__on">{{ icon("arrow-back-up") }}{{ _("Keep") }}</span></label></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <input class="ads-file-input" id="attachments" type="file" name="attachments" multiple>
+</div>
+{% endmacro %}

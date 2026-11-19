@@ -39,18 +39,7 @@
       <div class="sbe-preview-pane ads-prose" data-preview="{{ url_for('.page_preview', community_id=g.community.slug) }}" data-preview-of="{{ form.body_src.id }}"></div>
     </section>
     </div>
-    <div class="ads-field">
-      <label class="ads-label" for="attachments">{{ _("Attached files") }}</label>
-      {% if not creating and page.attachments %}
-      <ul class="ads-list sbe-uploads">
-        {% for attachment in page.attachments %}
-        <li>{{ file_icon(attachment.name) }}<span class="ads-fill sbe-lines"><span class="ads-truncate">{{ attachment.name }}</span><span class="ads-muted">{{ attachment.content_length | filesize }}</span></span>
-          <label class="ads-btn ads-btn--ghost ads-btn--sm sbe-toggle"><input type="checkbox" name="remove_attachment" value="{{ attachment.id }}" aria-label="{{ _('Remove %(name)s', name=attachment.name) }}"><span class="sbe-toggle__off">{{ icon("trash") }}{{ _("Remove") }}</span><span class="sbe-toggle__on">{{ icon("arrow-back-up") }}{{ _("Keep") }}</span></label></li>
-        {% endfor %}
-      </ul>
-      {% endif %}
-      <input class="ads-file-input" id="attachments" type="file" name="attachments" multiple>
-    </div>
+    {{ m.files_field([] if creating else page.attachments) }}
     <div class="ads-field">
       <label class="ads-label" for="{{ form.message.id }}">{{ _("What you changed") }}</label>
       <input class="ads-input" id="{{ form.message.id }}" name="{{ form.message.name }}" type="text" value="{{ form.message.data or '' }}" aria-describedby="message-help">

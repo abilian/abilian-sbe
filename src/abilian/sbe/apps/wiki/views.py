@@ -30,6 +30,11 @@ from abilian.i18n import _, _l, _n
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint, with_tool
 from abilian.sbe.apps.communities.common import object_viewers
 from abilian.sbe.apps.communities.views import default_view_kw as community_dv_kw
+from abilian.sbe.apps.documents.form_files import (
+    apply_form_files,
+    attach_files,
+    form_touches_files,
+)
 from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
@@ -43,7 +48,6 @@ from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
 if TYPE_CHECKING:
-    from werkzeug.datastructures import FileStorage
     from werkzeug.wrappers import Response
 
     from abilian.core.models.subjects import User
@@ -247,20 +251,14 @@ class PageEdit(BasePageView, ObjectEdit[WikiPage, WikiPageForm]):
 
     def after_populate_obj(self) -> None:
         """The files the form attached, and those it removed."""
-        attach_files(self.obj, request.files.getlist("attachments"))
-        removed = set(request.form.getlist("remove_attachment", type=int))
-        for attachment in [a for a in self.obj.attachments if a.id in removed]:
-            self.obj.attachments.remove(attachment)
+        apply_form_files(self.obj.attachments, WikiPageAttachment)
         super().after_populate_obj()
 
     # FIXME: does nothing !
     def redirect_if_no_change(self) -> Response | None:
         form = self.form
-        files_changed = any(
-            f.filename for f in request.files.getlist("attachments")
-        ) or request.form.getlist("remove_attachment")
         unchanged = all(f.data == f.object_data for f in (form.title, form.body_src))
-        if unchanged and not files_changed:
+        if unchanged and not form_touches_files():
             flash(_("You didn't make any change to this page."))
             return self.redirect(url_for(self.obj))
         return None
@@ -469,7 +467,9 @@ def attachment_upload() -> Response:
     except NoResultFound as e:
         raise NotFound from e
 
-    saved_count = attach_files(page, request.files.getlist("attachments"))
+    saved_count = attach_files(
+        page.attachments, request.files.getlist("attachments"), WikiPageAttachment
+    )
 
     if saved_count:
         db.session.commit()
@@ -486,18 +486,6 @@ def attachment_upload() -> Response:
         flash(_("No file uploaded."))
 
     return redirect(url_for(page))
-
-
-def attach_files(page: WikiPage, files: list[FileStorage]) -> int:
-    """Attach `files` to `page`; how many there were. A file field left empty
-    sends a file with no name, which is not one."""
-    named = [f for f in files if f.filename]
-    for f in named:
-        attachment = WikiPageAttachment(name=f.filename)
-        attachment.wikipage = page
-        attachment.set_content(f.read(), f.content_type)
-        db.session.add(attachment)
-    return len(named)
 
 
 @route("/attachments/delete", methods=["POST"])
