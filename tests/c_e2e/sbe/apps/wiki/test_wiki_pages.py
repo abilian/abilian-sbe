@@ -122,3 +122,29 @@ def test_a_new_page_starts_with_one_revision(
     assert response.status_code == 302
     page = WikiPage.query.filter_by(title="Minutes").one()
     assert [(r.number, r.body_src) for r in page.revisions] == [(0, "The minutes.")]
+
+
+def test_a_page_runs_no_script_its_writer_put_in(
+    member: User, community1: Community, client: FlaskClient, db: SQLAlchemy
+) -> None:
+    page = WikiPage(
+        title="Trap",
+        body_src=(
+            "## Heading\n\n<script>alert(1)</script>\n\n"
+            '<img src="x.png" onerror="alert(2)"> [here](javascript:alert(3))'
+        ),
+    )
+    page.community_id = community1.id
+    db.session.add(page)
+    db.session.commit()
+
+    with client_login(client, member):
+        html = client.get(
+            url_for("wiki.page", community_id=community1.slug, title="Trap")
+        ).get_data(as_text=True)
+
+    body = html.split('class="ads-card__body ads-prose">')[1].split("</div>")[0]
+    assert "<script" not in body
+    assert "onerror" not in body
+    assert "javascript:" not in body
+    assert '<h2 id="heading">Heading</h2>' in body

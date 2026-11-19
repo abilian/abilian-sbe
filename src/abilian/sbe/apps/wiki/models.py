@@ -123,11 +123,7 @@ class WikiPage(Entity):
     def body_html(self) -> str:
         from . import markup
 
-        html = markup.convert(self, self.body_src)
-        return html
-
-        # TODO: remove Javascript from content
-        # return bleach.clean(html, strip=True)
+        return markup.convert(self, self.body_src)
 
 
 @listens_for(WikiPage.name, "set", active_history=True)
