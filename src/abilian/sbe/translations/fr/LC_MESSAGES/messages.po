@@ -2797,3 +2797,6 @@ msgstr "%(name)s est membre, mais n’a pas pu être prévenu par e-mail."
 
 msgid "%(name)s will not join the community."
 msgstr "%(name)s ne rejoindra pas la communauté."
+
+msgid "Site name"
+msgstr "Nom du site"
