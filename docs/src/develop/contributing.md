@@ -12,7 +12,7 @@ There are many ways to get involved and contribute to the project:
 
 ## Architecture Decision Records (ADRs)
 
-A significant part of shaping the future of Abilian SBE involves participating in the review and creation of **[Architecture Decision Records](../notes/adrs) (ADRs)**. These documents capture major architectural decisions and guide the project’s long-term technical direction. Contributions that involve new features or significant changes should refer to, or propose, an ADR to ensure structured and transparent decision-making. Please consult the existing ADRs before suggesting changes that may affect the project’s architecture.
+A significant part of shaping the future of Abilian SBE involves participating in the review and creation of **[Architecture Decision Records](https://github.com/abilian/abilian-sbe-monorepo/tree/main/notes/adrs) (ADRs)**. These documents capture major architectural decisions and guide the project’s long-term technical direction. Contributions that involve new features or significant changes should refer to, or propose, an ADR to ensure structured and transparent decision-making. Please consult the existing ADRs before suggesting changes that may affect the project’s architecture.
 
 ## Code Contribution Process
 

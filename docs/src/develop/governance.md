@@ -1,6 +1,6 @@
 # Governance Policy
 
-This document delineates the governance policy for the Project. By appending their name to the [maintainers.md file](./maintainers.md), maintainers signify their consent to this policy and commit to observing all Project policies, including the [code of conduct](./policies/code-of-conduct.md).
+This document delineates the governance policy for the Project. By accepting the role, maintainers consent to this policy and commit to observing all Project policies.
 
 ## 1. Roles
 
@@ -9,7 +9,7 @@ The Project encompasses several roles, defined below. The Project reserves the r
 ### 1.1. Maintainers
 Maintainers are tasked with orchestrating the development, upkeep, and enhancement of the Project. They are also charged with achieving consensus among contributors. The Project can appoint or dismiss Maintainers based on the current Maintainers' consent.
 
-Additionally, Maintainers play a critical role in shaping the future of the platform through **[Architecture Decision Records (ADRs)](../notes/adrs)**. ADRs document key design decisions and proposals, guiding the technical evolution of the Project. Maintainers are responsible for reviewing, discussing, and approving ADRs in collaboration with Contributors.
+Additionally, Maintainers play a critical role in shaping the future of the platform through **[Architecture Decision Records (ADRs)](https://github.com/abilian/abilian-sbe-monorepo/tree/main/notes/adrs)**. ADRs document key design decisions and proposals, guiding the technical evolution of the Project. Maintainers are responsible for reviewing, discussing, and approving ADRs in collaboration with Contributors.
 
 ### 1.2. Contributors
 Contributors include individuals who have contributed to the Project, including submitting proposals, code, and feedback on ADRs. Contributors are encouraged to engage with the ADR process, as it offers a structured way to influence and guide the direction of the Project.

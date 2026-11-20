@@ -1,25 +1,5 @@
 # Roadmap for Abilian SBE
 
-<!-- toc -->
-
-- [Upcoming Releases](#upcoming-releases)
-  * [Version 1.2 (Q3 2026)](#version-12-q3-2026)
-    + [Focus Areas:](#focus-areas)
-  * [Version 1.3 (Q1 or Q2 2025)](#version-13-q1-or-q2-2025)
-    + [Focus Areas:](#focus-areas-1)
-    + [Tasks](#tasks)
-  * [See also:](#see-also)
-- [Completed Releases](#completed-releases)
-  * [Version 1.1 (Q1 2024)](#version-11-q1-2024)
-    + [Tasks](#tasks-1)
-    + [Achievements:](#achievements)
-  * [Version 1.1.x (Q2 2024)](#version-11x-q2-2024)
-    + [Achievements:](#achievements-1)
-  * [Version 1.1.x (Q3 2024)](#version-11x-q3-2024)
-    + [Achievements:](#achievements-2)
-
-<!-- tocstop -->
-
 ## Upcoming Releases
 
 ### Version 1.2 (Q3 2026)
@@ -37,7 +17,7 @@
    - [x] Upgrade critical dependencies like SQLAlchemy to their latest stable versions.
    - [x] Address vulnerabilities by removing deprecated or insecure dependencies, such as `sqlparse`.
 
-1. **UI Modernization** (see [the Sept 2026 plan](../notes/plan-2026-09.md)):
+1. **UI Modernization** (see [the Sept 2026 plan](https://github.com/abilian/abilian-sbe-monorepo/blob/main/notes/plan-2026-09.md)):
 
    - [x] Transition to modern UI frameworks: [Flask-Vite](https://github.com/abilian/flask-vite), [Tailwind CSS](https://tailwindcss.com/) and [Alpine.js](https://alpinejs.dev/). htmx was not adopted (see: ADR 006). Tailwind was then replaced by the Abilian Design System (ADR 012).
    - [x] Streamline the front-end development process: `make front` builds the assets, and they ship in the wheel.
@@ -96,14 +76,14 @@
 - [ ] Plugin architecture.
   - [ ] Pluggable search indexes (e.g. Typesense, ElasticSearch, etc.)
   - [ ] Pluggable file storage (e.g. S3, MinIO, etc.)
-    - See: [ADR 005](../notes/adrs/005-storage.md)
+    - See: [ADR 005](https://github.com/abilian/abilian-sbe-monorepo/blob/main/notes/adrs/005-storage.md)
 - [ ] Overhaul of the authentication and permissions system.
-  - See: [ADR 001](../notes/adrs/001-oidc.md), [ADR 002](../notes/adrs/002-scim.md), [ADR 003](../notes/adrs/003-rbac.md), [ADR 004](../notes/adrs/004-permissions.md).
+  - See: [ADR 001](https://github.com/abilian/abilian-sbe-monorepo/blob/main/notes/adrs/001-oidc.md), [ADR 002](https://github.com/abilian/abilian-sbe-monorepo/blob/main/notes/adrs/002-scim.md), [ADR 003](https://github.com/abilian/abilian-sbe-monorepo/blob/main/notes/adrs/003-rbac.md), [ADR 004](https://github.com/abilian/abilian-sbe-monorepo/blob/main/notes/adrs/004-permissions.md).
 
 
 ### See also:
 
-A significant part of shaping the future of Abilian SBE involves participating in the creation and review of **[Architecture Decision Records](../notes/adrs) (ADRs)**. These documents capture major architectural decisions and guide the project’s long-term technical direction.
+A significant part of shaping the future of Abilian SBE involves participating in the creation and review of **[Architecture Decision Records](https://github.com/abilian/abilian-sbe-monorepo/tree/main/notes/adrs) (ADRs)**. These documents capture major architectural decisions and guide the project’s long-term technical direction.
 
 
 ## Completed Releases
