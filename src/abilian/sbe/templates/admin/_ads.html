@@ -1,0 +1,15 @@
+{#- The site's administration on the Abilian Design System, for its administrators:
+    its panels as tabs, as a community's tools are. Signing in as someone is not a
+    panel: an account's page does it. Core's groups, vocabularies and tags are not
+    shown: people see communities, never groups, and SBE defines no vocabulary and
+    uses no tags. Drawn in `mockups/templates/admin_base.html`. -#}
+{% extends "ads_base.html" %}
+{% block pretitle %}{{ _("Administration") }}{% endblock %}
+{% block body %}
+<ul class="ads-tabs">
+  {% for tab in actions.for_category("navigation:admin:panel") if tab.name not in ("impersonate", "groups", "vocabularies", "tags") %}
+  <li><a class="ads-tab" href="{{ tab.url() }}" {{ 'aria-current="page"' | safe if tab.status == "active" }}>{{ tab.title }}</a></li>
+  {% endfor %}
+</ul>
+{% block content %}{% endblock %}
+{% endblock %}

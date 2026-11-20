@@ -1,0 +1,104 @@
+# Abilian SBE on Hop3: the web app, its Dramatiq worker and scheduler; PostgreSQL and
+# Redis as addons; the instance (the files, the search index, the conversions'
+# cache) on a volume, which a redeploy keeps.
+#
+# Secrets are not here: the operator sets them with
+# `hop3 env set --app extranet-cnll KEY=…`: FLASK_MAIL_SERVER, FLASK_MAIL_PORT,
+# FLASK_MAIL_USERNAME, FLASK_MAIL_PASSWORD, FLASK_MAIL_USE_TLS, FLASK_MAIL_SENDER,
+# FLASK_SENTRY_DSN.
+
+[metadata]
+id = "extranet-cnll"
+title = "Extranet CNLL (Abilian SBE)"
+
+[domains]
+# The test deployment, before production moves: then extranet.cnll.fr, alone, since
+# the server name below takes the one host.
+list = ["extranet-cnll.hop3.abilian.com"]
+
+[build]
+# The Dockerfile at the root is a stub that runs `echo OK`; its presence alone would
+# pick the Docker builder.
+builder = "local"
+toolchain = "python"
+# The pages' scripts are built by Vite, not committed (`static/vite/` is ignored).
+# Vite 7 wants Node 20.19 or 22.12 at least. hop3check calls this a redundant
+# install: the toolchain installs the root package.json, which holds only
+# markdown-toc, a docs tool; Vite's is in vite/.
+node-version = "22"
+before-build = "cd vite && npm ci && npm run build"
+
+[run]
+# Before any process starts: the translations compiled (git keeps the .po files, not
+# the .mo files the app reads: without them the site speaks no French); the schema
+# following the code (from production's 1f4631da751b, the migrations are all it
+# lacks); then the two data backfills that memberships from before need, both
+# idempotent.
+before-run = [
+    "pybabel -q compile -d src/abilian/translations",
+    "pybabel -q compile -d src/abilian/sbe/translations",
+    "flask db upgrade",
+    "flask backfill-community-roles",
+    "flask backfill-creator-memberships",
+]
+start = "gunicorn abilian.wsgi:app -b 0.0.0.0:$PORT --workers 4 --log-level info --log-file -"
+start-timeout = 180
+# What the previews and text extraction call: pdftotext and pdftoppm, convert, and
+# soffice for office documents. ClamAV is left out: without it the antivirus service
+# stands aside.
+packages = ["poppler-utils", "imagemagick", "libreoffice-nogui"]
+
+[run.workers]
+worker = "flask worker"
+scheduler = "flask scheduler"
+
+[healthcheck]
+# Answers 200 without signing in, on a private site too; the password field is this
+# app's sign-in form, not a proxy's default page or an error.
+path = "/user/login"
+contains = 'name="password"'
+
+[deploy]
+# Hop3 sees pyproject.toml and vite/package.json and calls the artifact
+# "multi-language", which no deployer claims: name the one that serves WSGI.
+deployer = "uwsgi"
+
+[[addons]]
+type = "postgres"
+
+[[addons]]
+type = "redis"
+
+[[volumes]]
+name = "instance"
+target = "instance"
+
+[proxy]
+# Documents are uploaded through the app; the proxy's default is 50m.
+max-body-size = "200m"
+
+[env]
+FLASK_APP = "abilian.wsgi"
+# Relative to where the processes start: the volume above.
+FLASK_INSTANCE_PATH = "instance"
+FLASK_SECRET_KEY = { generate = "hex", length = 64 }
+# Without it the daily digest is never sent.
+FLASK_PRODUCTION = "true"
+# What the CNLL layer (`extranet.app`) did, now plain settings: every page asks to
+# sign in, French first, attachments' names in ASCII in e-mails.
+FLASK_PRIVATE_SITE = "true"
+FLASK_BABEL_ACCEPT_LANGUAGES = '["fr", "en"]'
+FLASK_MAIL_ASCII_ATTACHMENTS = "true"
+FLASK_SITE_NAME = "Extranet CNLL"
+FLASK_PREFERRED_URL_SCHEME = "https"
+
+[env.computed]
+FLASK_SQLALCHEMY_DATABASE_URI = "${DATABASE_URL}"
+FLASK_REDIS_URI = "${REDIS_URL}"
+FLASK_DRAMATIQ_BROKER_URL = "${REDIS_URL}"
+# Without these two, Dramatiq falls back to localhost:6379 without a word.
+FLASK_DRAMATIQ_ABORT_REDIS_URL = "${REDIS_URL}"
+FLASK_DRAMATIQ_RATE_LIMIT_REDIS_URL = "${REDIS_URL}"
+# The worker and the scheduler build the links in e-mails (invitations, digests)
+# with no request to take a host from.
+FLASK_SERVER_NAME = "${HOST_NAME}"

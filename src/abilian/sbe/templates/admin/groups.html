@@ -1,0 +1,42 @@
+{#- Core's groups, for a site administrator: each with its members and its roles on the
+    site, filtered by name. No tab leads here (people see communities, never groups):
+    the page stays for what Core keeps. Overrides Abilian Core's page. -#}
+{% extends "admin/_ads.html" %}
+{% import "admin/_ads_macros.html" as a with context %}
+{% block page_title %}{{ _("Groups") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("Groups") }}{% endblock %}
+{% block actions %}<a class="ads-btn ads-btn--primary" href="{{ url_for('.groups_new') }}">{{ icon("plus") }}{{ _("New group") }}</a>{% endblock %}
+{% block content %}
+<div class="ads-card">
+  <form class="ads-card__head sbe-toolbar" method="get" action="{{ url_for('.groups') }}">
+    <span class="ads-input-icon">
+      <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+      <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Name') }}" aria-label="{{ _('Filter the groups by name') }}">
+    </span>
+    {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+  </form>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter" id="groups-table">
+      <thead><tr>
+        {{ m.sort_th(listing, "name", _("Name")) }}
+        <th scope="col" class="ads-end">{{ _("Members") }}</th>
+        <th scope="col" class="ads-col--secondary">{{ _("Roles") }}</th>
+        <th scope="col" class="ads-col--secondary">{{ _("Public") }}</th>
+      </tr></thead>
+      <tbody>
+        {% for group, members_count, roles in rows %}
+        <tr>
+          <td class="ads-full"><a class="sbe-quiet" href="{{ url_for('.groups_group', group_id=group.id) }}">{{ group.name }}</a></td>
+          <td class="ads-end">{{ members_count }}</td>
+          <td class="ads-col--secondary"><span class="ads-cluster ads-gap-sm">{% for role in roles %}<span class="ads-chip">{{ a.role_name(role) }}</span>{% endfor %}</span></td>
+          <td class="ads-col--secondary">{% if group.public %}{{ _("Yes") }}{% endif %}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="ads-muted">{{ _("No matching records found") }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ m.pagination(listing) }}
+</div>
+{% endblock %}

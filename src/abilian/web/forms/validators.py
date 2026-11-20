@@ -12,6 +12,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from PIL import Image
 from wtforms import Field, Form, validators
 
 from abilian.i18n import _, _n
@@ -19,6 +20,11 @@ from abilian.services import get_service
 
 if TYPE_CHECKING:
     from collections.abc import Callable
+
+    from werkzeug.datastructures import FileStorage
+
+IMAGE_EXTENSIONS = (".png", ".jpg", ".jpeg")
+IMAGE_FORMATS = ("PNG", "JPEG")
 
 __all__ = (
     "VALIDATORS",
@@ -31,6 +37,7 @@ __all__ = (
     "macaddress",
     "noneof",
     "numberrange",
+    "open_png_or_jpeg",
     "optional",
     "regexp",
     "renderempty",
@@ -78,7 +85,7 @@ class CorrectInputRequired(validators.DataRequired):
 
 
 class Required(CorrectInputRequired):
-    field_flags = ("required",)
+    field_flags = {"required": True}
 
     @property
     def rule(self):
@@ -187,7 +194,7 @@ class NoneOf(validators.NoneOf, Rule):
 class FlagHidden(Rule):
     """Flag the field as hidden."""
 
-    field_flags = ("hidden",)
+    field_flags = {"hidden": True}
 
     def __call__(self, form, field):
         pass
@@ -196,7 +203,7 @@ class FlagHidden(Rule):
 class AntiVirus(Rule):
     """Check content for viruses."""
 
-    field_flags = ("antivirus",)
+    field_flags = {"antivirus": True}
 
     def __call__(self, form, field):
         service = get_service("antivirus")
@@ -211,7 +218,7 @@ class AntiVirus(Rule):
 class RenderEmpty:
     """Force display."""
 
-    field_flags = ("render_empty",)
+    field_flags = {"render_empty": True}
 
     def __call__(self, form, field):
         pass
@@ -279,6 +286,30 @@ def siret_validator() -> Callable:
 
 # These are the canonical names that should be used.
 equalto = EqualTo
+
+
+def open_png_or_jpeg(data: FileStorage) -> Image.Image:
+    """Decode an uploaded PNG or JPEG image, or raise a validation error.
+
+    The format is read from the decoded image itself: the filename is checked
+    too, but only because it is what the user sees.
+    """
+    not_accepted = _("Only PNG or JPG image files are accepted")
+    if not data.filename or not data.filename.lower().endswith(IMAGE_EXTENSIONS):
+        raise validators.ValidationError(not_accepted)
+
+    try:
+        image = Image.open(data)
+        image.load()
+    except Exception as e:
+        raise validators.ValidationError(_("Could not decode image file")) from e
+    if image.format not in IMAGE_FORMATS:
+        raise validators.ValidationError(not_accepted)
+
+    data.seek(0)
+    return image
+
+
 length = Length
 numberrange = NumberRange
 optional = Optional

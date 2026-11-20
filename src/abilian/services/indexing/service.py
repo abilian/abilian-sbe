@@ -18,11 +18,10 @@ import contextlib
 import os
 from inspect import isclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Never
+from typing import TYPE_CHECKING, Any
 
 import sqlalchemy as sa
 from flask import Flask, appcontext_pushed, current_app, g
-from flask_login import current_user
 from loguru import logger
 from sqlalchemy import event
 from sqlalchemy.orm import Session
@@ -33,13 +32,20 @@ from whoosh.qparser import DisMaxParser
 from whoosh.writing import CLEAR, AsyncWriter
 
 from abilian.core import signals
+from abilian.core.application import as_application
 from abilian.core.dramatiq.singleton import dramatiq
 from abilian.core.entities import Entity, Indexable
 from abilian.core.extensions import db
 from abilian.core.models.subjects import Group, User
 from abilian.core.util import fqcn as base_fqcn, friendly_fqcn
 from abilian.services import Service, ServiceState
-from abilian.services.security import ANONYMOUS, AUTHENTICATED, Role, security
+from abilian.services.security import (
+    ANONYMOUS,
+    AUTHENTICATED,
+    Role,
+    is_site_admin,
+    security,
+)
 
 from .adapter import SAAdapter
 from .schema import DefaultSearchSchema, indexable_role
@@ -60,7 +66,9 @@ def url_for_hit(hit, default="#"):
     try:
         object_type = hit["object_type"]
         object_id = int(hit["id"])
-        return current_app.default_view.url_for(hit, object_type, object_id)
+        return as_application(current_app).default_view.url_for(
+            hit, object_type, object_id
+        )
     except KeyError:
         return default
     except Exception:
@@ -97,20 +105,7 @@ class IndexServiceState(ServiceState):
         setattr(g, PENDING_INDEXATION_ATTR, values)
 
 
-class IndexService(Service):
-    schemas: dict[str, DefaultSearchSchema]
-
-    def search(self, q: str, index_name: str = "default", **search_args) -> Never:
-        raise NotImplementedError
-
-    def register_search_filter(self, func) -> Never:
-        raise NotImplementedError
-
-    def register_value_provider(self, func) -> Never:
-        raise NotImplementedError
-
-
-class WhooshIndexService(IndexService):
+class WhooshIndexService(Service):
     """Index documents using whoosh."""
 
     name = "indexing"
@@ -151,11 +146,18 @@ class WhooshIndexService(IndexService):
         js_api["object_types"] = self.searchable_object_types()
 
     def register_search_filter(self, func) -> None:
-        """Register a function that returns a query used for filtering search
-        results. This query is And'ed with other filters.
+        """Register a filter narrowing search results for one user.
 
-        If no filtering should be performed the function must return
-        None.
+        Called as `func(user)` and And'ed with the other filters; return None to
+        add nothing. The user is passed rather than read from the request, so a
+        filter is callable outside one and its dependencies are in its
+        signature.
+
+        A filter is not asked to consider whether the user may see everything
+        anyway: `search` settles that once, before calling any of them. Both
+        this and the role filter below used to make that decision separately,
+        off `g.is_manager`, which is how one of them came to be written without
+        the guard.
         """
         self.app_state.search_filter_funcs.append(func)
 
@@ -252,12 +254,14 @@ class WhooshIndexService(IndexService):
     def search(
         self,
         q: str,
+        *,
         index_name: str = "default",
         fields: dict[str, float] | None = None,
         Models: Collection[type[Model]] = (),
         object_types: Collection[str] = (),
         prefix: bool = True,
         facet_by_type: bool = False,
+        user: User,
         **search_args,
     ):
         """Interface to search indexes.
@@ -294,9 +298,10 @@ class WhooshIndexService(IndexService):
         filters = [filters] if filters is not None else []
         del search_args["filter"]
 
-        if not hasattr(g, "is_manager") or not g.is_manager:
+        # One decision for every filter below: a site administrator sees
+        # everything, so none of them are applied.
+        if not is_site_admin(user):
             # security access filter
-            user = current_user
             roles = {indexable_role(user)}
             if not user.is_anonymous:
                 roles.add(indexable_role(ANONYMOUS))
@@ -307,6 +312,11 @@ class WhooshIndexService(IndexService):
                 [wq.Term("allowed_roles_and_users", role) for role in roles]
             )
             filters.append(filter_q)
+
+            for func in self.app_state.search_filter_funcs:
+                filter_q = func(user)
+                if filter_q is not None:
+                    filters.append(filter_q)
 
         object_types_set = set(object_types)
         for m in Models:
@@ -325,11 +335,6 @@ class WhooshIndexService(IndexService):
         # limit object_type
         filter_q = wq.Or([wq.Term("object_type", t) for t in object_types_set])
         filters.append(filter_q)
-
-        for func in self.app_state.search_filter_funcs:
-            filter_q = func()
-            if filter_q is not None:
-                filters.append(filter_q)
 
         if filters:
             filter_q = wq.And(filters) if len(filters) > 1 else filters[0]
@@ -365,9 +370,6 @@ class WhooshIndexService(IndexService):
                     ]
 
             return results
-
-    def search_for_class(self, query, cls, index="default", **search_args):
-        return self.search(query, Models=(fqcn(cls),), index=index, **search_args)
 
     def register_classes(self) -> None:
         state = self.app_state
@@ -428,7 +430,7 @@ class WhooshIndexService(IndexService):
         """
         if (
             not self.running
-            or session.transaction.nested  # inside a sub-transaction:
+            or session.in_nested_transaction()  # inside a sub-transaction:
             # not yet written in DB
             or session is not db.session()
         ):
@@ -473,11 +475,12 @@ class WhooshIndexService(IndexService):
         document = adapter.get_document(obj)
 
         for k, v in document.items():
-            if v is None:
-                del document[k]
-                continue
-            if isinstance(v, (User, Group, Role)):
-                document[k] = indexable_role(v)
+            match v:
+                case None:
+                    del document[k]
+                    continue
+                case User() | Group() | Role():
+                    document[k] = indexable_role(v)
 
         if not document.get("allowed_roles_and_users"):
             # no data for security: assume anybody can access the document
@@ -541,7 +544,7 @@ def index_update(index: str, items: list[tuple[str, str, int, dict]]) -> None:
     adapted = service.adapted
 
     # session = safe_session()
-    session = Session(bind=db.session.get_bind(None, None))
+    session = Session(bind=db.session.get_bind())
     updated = set()
     writer = AsyncWriter(index)
     try:

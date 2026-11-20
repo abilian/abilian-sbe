@@ -9,14 +9,14 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any
 
 import sqlalchemy as sa
-from flask import g
-from flask_login import current_user
 from sqlalchemy import sql
 from sqlalchemy.orm import Session, object_session, subqueryload
 
+from abilian.core.context import get_current_principal
 from abilian.core.entities import Entity
 from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, Principal, User
+from abilian.core.models.subjects import ROOT_USER_ID, Group, Principal, User
+from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import unwrap
 from abilian.services import Service, ServiceState
 from abilian.services.security.models import (
@@ -44,7 +44,7 @@ from abilian.services.security.models import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Collection
+    from collections.abc import Callable, Collection, Sequence
 
     from sqlalchemy.sql.selectable import Exists
 
@@ -181,15 +181,25 @@ class SecurityService(Service):
     def clear(self) -> None:
         pass
 
-    def _current_user_manager(self, session: Session | None = None) -> User:
-        """Return the current user, or SYSTEM user."""
+    def _current_user_manager(self, session: Session | None = None) -> User | None:
+        """Who is performing this change, for the security audit trail.
+
+        Falls back to the SYSTEM principal, so that a grant made by a
+        migration or the CLI is still attributed to something -- that is what
+        this did before, and changing it would silently rewrite what the audit
+        trail records.
+
+        SYSTEM does not always exist: it is created by `flask initdb`, not by
+        `create_all`. `None` is the honest answer then, and
+        `SecurityAudit.manager_id` is nullable to allow it -- which is how the
+        admin audit panel came to meet a null manager and raise on it.
+        """
         if session is None:
             session = db.session()
 
-        try:
-            user = g.user
-        except Exception:
-            return session.query(User).get(0)
+        user = get_current_principal()
+        if user is None:
+            return session.query(User).get(ROOT_USER_ID)
 
         if sa.orm.object_session(user) is not session:
             # this can happen when called from a task during development
@@ -216,7 +226,7 @@ class SecurityService(Service):
         assert isinstance(obj, Entity)
 
         obj.inherit_security = inherit_security
-        session = object_session(obj) if obj is not None else db.session
+        session = session_of(obj) if obj is not None else db.session()
         session.add(obj)
 
         manager = self._current_user_manager(session=session)
@@ -288,6 +298,7 @@ class SecurityService(Service):
     def get_principals(
         self,
         role: Role,
+        *,
         anonymous: bool = True,
         users: bool = True,
         groups: bool = True,
@@ -452,7 +463,7 @@ class SecurityService(Service):
 
     def has_role(
         self,
-        principal: Principal | Role | None,
+        principal: Principal | Role | AnonymousUser | None,
         role: Collection[Role] | Role | str,
         object: Model | None = None,
     ) -> bool:
@@ -473,8 +484,6 @@ class SecurityService(Service):
             return False
 
         principal = unwrap(principal)
-        if not self.running:
-            return True
 
         if isinstance(role, (Role, (str,))):
             role = (role,)
@@ -534,7 +543,7 @@ class SecurityService(Service):
         assert principal
 
         principal = unwrap(principal)
-        session = object_session(obj) if obj is not None else db.session
+        session = session_of(obj) if obj is not None else db.session()
         manager = self._current_user_manager(session=session)
         args = {
             "role": role,
@@ -597,7 +606,7 @@ class SecurityService(Service):
 
         assert principal
         principal = unwrap(principal)
-        session = object_session(object) if object is not None else db.session
+        session = session_of(object) if object is not None else db.session()
         manager = self._current_user_manager(session=session)
 
         args = {
@@ -638,12 +647,12 @@ class SecurityService(Service):
 
     @require_flush
     def get_role_assignements(self, obj: Model) -> list:
-        session = object_session(obj) if obj is not None else db.session
+        session = object_session(obj) if obj is not None else None
         if not session:
             session = db.session()
         query = session.query(RoleAssignment)
         query = query.filter(RoleAssignment.object == obj).options(
-            subqueryload("user.groups")
+            subqueryload(RoleAssignment.user).subqueryload(User.groups)
         )
 
         role_assignments = query.all()
@@ -668,7 +677,7 @@ class SecurityService(Service):
         permission: Permission | str,
         obj: Model | None = None,
         inherit: bool = False,
-        roles: None | Role | str | list[Role | str] = None,
+        roles: Role | str | list[Role | str] | None = None,
     ) -> bool:
         """
         :param obj: target object to check permissions.
@@ -681,9 +690,6 @@ class SecurityService(Service):
             assert permission in PERMISSIONS
             permission = Permission(permission)
         user = unwrap(user)
-
-        if not self.running:
-            return True
 
         session = None
         if obj is not None:
@@ -729,7 +735,12 @@ class SecurityService(Service):
 
         # first test global roles, then object local roles
         checked_objs = [None, obj]
-        if inherit and obj is not None:
+        # An object that is not an InheritSecurity has no chain to walk, which
+        # is an answer rather than a caller's mistake: `inherit=True` asks to
+        # follow the chain where there is one. This used to dereference
+        # `obj.inherit_security` regardless and raise AttributeError -- a
+        # Community, say, has no such attribute.
+        if inherit and isinstance(obj, InheritSecurity):
             while obj.inherit_security and obj.parent is not None:
                 obj = obj.parent
                 checked_objs.append(obj)
@@ -779,23 +790,20 @@ class SecurityService(Service):
         creator = Model.creator
         owner = Model.owner
 
-        if not self.running:
-            return sa.sql.exists([1])
-
         if user is None:
-            user = unwrap(current_user)
+            user = get_current_principal()
 
         # build role CTE
         principal_filter = RA.anonymous == True
 
-        if not user.is_anonymous:
+        if user is not None and not user.is_anonymous:
             principal_filter |= RA.user == user
 
-        if user.groups:
-            principal_filter |= RA.group_id.in_([g.id for g in user.groups])
+        if user is not None and user.groups:
+            principal_filter |= RA.group_id.in_([grp.id for grp in user.groups])
 
-        RA = sa.sql.select([RA], principal_filter).cte()
-        permission_exists = sa.sql.exists([1]).where(
+        RA = sa.sql.select(RA).where(principal_filter).cte()
+        permission_exists = sa.sql.exists().where(
             sa.sql.and_(
                 PA.permission == permission,
                 PA.object_id == id_column,
@@ -808,7 +816,7 @@ class SecurityService(Service):
         # role, but PermissionAssignment is not involved, thus it can match on
         # entities that don't have *any permission assignment*, whereas previous
         # expressions cannot.
-        is_admin = sa.sql.exists([1]).where(
+        is_admin = sa.sql.exists().where(
             sa.sql.and_(
                 RA.c.role == ADMIN,
                 (RA.c.object_id == id_column) | (RA.c.object_id == None),
@@ -819,7 +827,7 @@ class SecurityService(Service):
         filter_expr = permission_exists | is_admin
 
         if user and not user.is_anonymous:
-            is_owner_or_creator = sa.sql.exists([1]).where(
+            is_owner_or_creator = sa.sql.exists().where(
                 sa.sql.and_(
                     PA.permission == permission,
                     PA.object_id == id_column,
@@ -859,7 +867,7 @@ class SecurityService(Service):
         if permission:
             pa = pa.filter(PermissionAssignment.permission == permission)
 
-        results: dict[permission, set[Role]] = {}
+        results: dict[Permission, set[Role]] = {}
         for perm, role in pa.yield_per(1000):
             results.setdefault(perm, set()).add(role)
 
@@ -905,7 +913,7 @@ class SecurityService(Service):
         self,
         user: User,
         permission: Permission | str,
-        obj_list: list[Model],
+        obj_list: Sequence[Model],
         inherit=False,
     ):
         user = unwrap(user)
@@ -918,3 +926,24 @@ class SecurityService(Service):
 
 # Instanciate the service
 security = SecurityService()
+
+
+def is_site_admin(user: User | None = None) -> bool:
+    """Does `user` hold a site-wide administrative role?
+
+    True for ADMIN and for the site-wide MANAGER role: `has_role` seeds its
+    `valid_roles` with both, so either one answers True to any role asked
+    about. Which also makes the two-call form redundant -- `has_role(u, ADMIN)
+    or has_role(u, MANAGER)`, as AuthService used to compute, is the first call
+    twice.
+
+    Deliberately *not* the same question as `communities.security.can_manage`,
+    which asks about one community. Both used to be written to `g.is_manager`,
+    by two different producers, and read by seven call sites that could not tell
+    which of the two they had got.
+    """
+    if user is None:
+        user = get_current_principal()
+    if user is None or user.is_anonymous:
+        return False
+    return security.has_role(user, ADMIN)

@@ -87,7 +87,8 @@ _JSON_HTML = """
 
   <script src="{{ url_for('abilian_static',
     filename="highlightjs/highlight.min.js")  }}" ></script>
-  <script>hljs.initHighlightingOnLoad();</script>
+  <script src="{{ url_for('abilian_static',
+    filename="highlightjs/init.js")  }}" ></script>
 </body>
 </html>
 """

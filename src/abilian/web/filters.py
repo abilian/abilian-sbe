@@ -5,24 +5,18 @@
 from __future__ import annotations
 
 import re
-from calendar import timegm
-from datetime import date, datetime
+from datetime import datetime
 from functools import wraps
 from typing import TYPE_CHECKING, Any
 
 import bleach
 import dateutil.parser
 import flask_babel as babel
-from babel.dates import DateTimePattern, format_timedelta, parse_pattern
-from deprecated import deprecated
+from babel.dates import format_timedelta
 from jinja2 import Environment, pass_eval_context
 from markupsafe import Markup, escape
-from pytz import utc
-from werkzeug.routing import BuildError
 
-from abilian.core.util import local_dt, slugify, utc_dt
-
-from .util import url_for
+from abilian.core.util import utc_dt
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -46,13 +40,6 @@ def autoescape(filter_func: Callable) -> Callable:
     return _autoescape
 
 
-@autoescape
-def nl2br(value: str) -> Markup:
-    """Replace newlines with <br />."""
-    result = escape(value).replace("\n", Markup("<br />\n"))
-    return result
-
-
 _PARAGRAPH_RE = re.compile(r"(?:\r\n|\r|\n){2,}")
 
 
@@ -62,10 +49,6 @@ def paragraphs(value: str) -> str:
     paragraphs = _PARAGRAPH_RE.split(escape(value))
     paragraphs = [p.strip().replace("\n", Markup("<br />\n")) for p in paragraphs]
     return "\n\n".join(f"<p>{p}</p>" for p in paragraphs)
-
-
-def labelize(s: str) -> str:
-    return " ".join(w.capitalize() for w in s.split("_"))
 
 
 def filesize(d: int | str) -> Markup:
@@ -92,14 +75,6 @@ def filesize(d: int | str) -> Markup:
         s = f"{d / 1000000000.0:.0f}{NNSP}GB"
 
     return Markup(s)
-
-
-def roughsize(size: int, above: int = 20, mod: int = 10) -> str:
-    """6 -> '6' 15 -> '15' 134 -> '130+'."""
-    if size < above:
-        return str(size)
-
-    return f"{(size - size % mod):d}+"
 
 
 def datetimeparse(s) -> datetime | None:
@@ -176,117 +151,14 @@ def age(
     )
 
 
-def date_age(dt: datetime | None, now: datetime | None = None) -> str:
-    # Fail silently for now XXX
-    if not dt:
-        return ""
-
-    formatted_date = babel.format_datetime(dt, format="yyyy-MM-dd HH:mm")
-    return f"{formatted_date} ({age(dt, now)})"
-
-
-@deprecated
-def date_fmt(value, format="EE, d MMMM y"):
-    """
-    @deprecated: use flask_babel's dateformat filter instead.
-    """
-    if isinstance(value, date):
-        return babel.format_date(value, format)
-    return babel.format_date(local_dt(value), format)
-
-
-def babel2datepicker(pattern: DateTimePattern) -> str:
-    """Convert date format from babel (http://babel.pocoo.org/docs/dates/#date-
-    fields)) to a format understood by bootstrap-datepicker."""
-    if not isinstance(pattern, DateTimePattern):
-        pattern = parse_pattern(pattern)
-
-    map_fmt = {
-        # days
-        "d": "dd",
-        "dd": "dd",
-        "EEE": "D",
-        "EEEE": "DD",
-        "EEEEE": "D",  # narrow name => short name
-        # months
-        "M": "mm",
-        "MM": "mm",
-        "MMM": "M",
-        "MMMM": "MM",
-        # years
-        "y": "yyyy",
-        "yy": "yyyy",
-        "yyy": "yyyy",
-        "yyyy": "yyyy",
-        # time picker format
-        # hours
-        "h": "%I",
-        "hh": "%I",
-        "H": "%H",
-        "HH": "%H",
-        # minutes,
-        "m": "%M",
-        "mm": "%M",
-        # seconds
-        "s": "%S",
-        "ss": "%S",
-        # am/pm
-        "a": "%p",
-    }
-
-    return pattern.format % map_fmt
-
-
-# Doesn't work yet. TZ issues.
-def to_timestamp(dt):
-    utc_datetime = dt.astimezone(utc)
-    return timegm(utc_datetime.timetuple()) + utc_datetime.microsecond / 1e6
-
-
-def abbrev(s: str, max_size: int) -> str:
-    if len(s) <= max_size:
-        return s
-    h = max_size // 2 - 1
-    return f"{s[0:h]}...{s[-h:]}"
-
-
-def bool2check(val, true="\u2713", false=""):
-    """Filter value as boolean and show check mark (✓) or nothing."""
-    return true if val else false
-
-
 @autoescape
 def linkify(s: str) -> Markup:
     return Markup(bleach.linkify(s))
 
 
-def obj_to_url(obj):
-    """Find url for obj using :func:`url_for`, return empty string is not
-    found.
-
-    :func:`url_for` is also provided in jinja context, the filtering version is
-    forgiving when `obj` has no default view set.
-    """
-    try:
-        return url_for(obj)
-    except BuildError:
-        return ""
-
-
 def init_filters(env: Environment) -> None:
-    env.filters["nl2br"] = nl2br
-    env.filters["paragraphs"] = paragraphs
-    env.filters["date_age"] = date_age
     env.filters["datetimeparse"] = datetimeparse
     env.filters["age"] = age
-    env.filters["date"] = date_fmt
-    env.filters["babel2datepicker"] = babel2datepicker
-    env.filters["to_timestamp"] = to_timestamp
-    env.filters["url_for"] = obj_to_url
-    env.filters["abbrev"] = abbrev
     env.filters["filesize"] = filesize
-    env.filters["roughsize"] = roughsize
-    env.filters["labelize"] = labelize
     env.filters["linkify"] = linkify
-    env.filters["toslug"] = slugify
-    env.filters["bool2check"] = bool2check
+    env.filters["paragraphs"] = paragraphs

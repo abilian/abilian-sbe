@@ -81,6 +81,7 @@ class UniqueNameType(TypeDecorator):
     """
 
     impl = String
+    cache_ok = True  # allow caching
     Type: type
     default_max_length = 100
 

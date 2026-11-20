@@ -307,19 +307,20 @@ class SessionBlobStoreService(Service):
         - If parameter is a scoped_session instance, a new session will be
           instaniated.
         """
-        if model_or_session is None:
-            return db.session
+        match model_or_session:
+            case None:
+                return db.session()
 
-        if isinstance(model_or_session, Session):
-            return model_or_session
+            case Session():
+                return model_or_session
 
-        if isinstance(model_or_session, sa.orm.scoped_session):
-            return model_or_session()
+            case sa.orm.scoped_session():
+                return model_or_session()
 
         session = sa.orm.object_session(model_or_session)
 
         if session is None:
-            return db.session
+            return db.session()
 
         return session
 
@@ -489,7 +490,7 @@ class BlobStoreTransaction:
                 blob_store.delete(uuid)
 
         for uuid in self._set:
-            blob_store.set(uuid, self.uuid_path(uuid).open("rb"))
+            blob_store.set(uuid, self.uuid_path(uuid).read_bytes())
 
     def uuid_path(self, uuid: UUID) -> Path:
         return self.tmp_folder / str(uuid)

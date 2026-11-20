@@ -39,9 +39,3 @@ __all__ = (
     "conversion_service",
     "converter",
 )
-
-# converter.register_handler(AbiwordPDFHandler())
-# converter.register_handler(AbiwordTextHandler())
-
-# Needs to be rewriten
-# converter.register_handler(CloudoooPdfHandler())

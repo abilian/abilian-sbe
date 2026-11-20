@@ -1,294 +1,142 @@
-{% extends "community/_base.html" %}
+{#- Who may see and change a folder, for its managers: the community's members as on
+    the folder above (inheritance), or only the people given a role here; those people,
+    and those who have a role through the folder above; beside it, what changed. People
+    see communities and people here, never groups. -#}
+{% extends "ads_community.html" %}
+{% import "documents/_dialogs.html" as dialogs with context %}
+{% set kw = {"community_id": g.community.slug, "folder_id": folder.id} %}
+{% set roles = {"reader": _("Reader"), "writer": _("Writer"), "manager": _("Manager")} %}
+{% block page_title %}{{ _("Permissions") }} · {{ folder.title }} · {{ g.community.name }}{% endblock %}
 
-{% from "macros/box.html" import  m_box_content, m_box_menu with context %}
-{% from "macros/recent.html" import m_recent_items %}
-
-{% macro m_users_table(users_and_roles, controls) %}
-  {% set table_id = uuid() %}
-  <form method="POST">
-    {{ csrf.field() }}
-
-    <table class="table table-condensed table-striped" id="{{ table_id }}">
-      <thead>
+{#- A table of people and their role on the folder, filtered and sorted on its own;
+    with `controls`, each role may be taken back. -#}
+{% macro people(listing, rows, controls) %}
+<form class="ads-card__body sbe-toolbar" method="get" action="{{ request.path }}">
+  <span class="ads-input-icon">
+    <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+    <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Name or address') }}" aria-label="{{ _('Filter by name or address') }}">
+  </span>
+  {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+  <span class="ads-muted">{{ ngettext("%(num)d person", "%(num)d people", listing.total) }}</span>
+</form>
+<div class="ads-table-scroll">
+  <table class="ads-table ads-table--vcenter">
+    <thead><tr>
+      {{ m.sort_th(listing, "name", _("Name")) }}
+      {{ m.sort_th(listing, "role", _("Role")) }}
+      {% if controls %}<th scope="col"><span class="sbe-sr-only">{{ _("Actions") }}</span></th>{% endif %}
+    </tr></thead>
+    <tbody>
+      {% for user, role, has_access in rows %}
       <tr>
-        <th></th>
-        <th class="hide">Last Name</th>
-        <th class="hide">First Name</th>
-        <th>{{ _("Name") }}</th>
-        <th>{{ _("Role") }}</th>
+        <td class="ads-full">
+          <span class="ads-media ads-gap-sm">{{ m.avatar(user, "ads-avatar--xs") }}
+            <span class="sbe-lines">
+              <a class="sbe-quiet" href="{{ url_for('social.user', user_id=user.id) }}">{{ user.name }}</a>
+              <span class="ads-muted ads-truncate">{{ user.email }}</span>
+            </span>
+          </span>
+        </td>
+        <td>
+          <span class="ads-cluster ads-gap-sm">{{ roles.get(role | string, role) }}
+            {%- if not user.can_login %}<span class="ads-status ads-tone-neutral"><span class="ads-status__dot"></span>{{ _("Disabled") }}</span>
+            {%- elif controls and not has_access %}<span class="ads-status ads-tone-warning ads-tip" data-tip="{{ _('They may not open a folder on the way to this one') }}"><span class="ads-status__dot"></span>{{ _("Cannot reach it") }}</span>{% endif %}
+          </span>
+        </td>
         {% if controls %}
-          <th>{{ _("Action") }}</th>
+        <td class="ads-end">
+          <form method="post" action="{{ url_for('.permissions_update', **kw) }}">
+            {{ csrf.field() }}
+            <button class="ads-btn ads-btn--ghost ads-btn--sm" type="submit" name="delete-user-role" value="{{ role }}:{{ user.id }}" aria-label="{{ _('Take the role away from %(name)s', name=user.name) }}">{{ icon("trash") }}</button>
+          </form>
+        </td>
         {% endif %}
       </tr>
-      </thead>
-
-      <tbody>
-      {% for user, role, has_access in users_and_roles %}
-        <tr>
-          <td>{%- if not user.can_login %}
-            <i class="glyphicon glyphicon-lock" title="{{ _('account disabled') }}"></i>
-          {%- elif has_access %}
-            <i class="fa fa-check">&nbsp;</i>
-          {%- endif %}
-          </td>
-          <td class="hide">{{ user.last_name }}</td>
-          <td class="hide">{{ user.first_name }}</td>
-          <td>
-            {%- if not user.can_login %}<s title="{{ _('account disabled') }}">{%- endif %}
-            <a href="{{ url_for("social.user", user_id=user.id) }}">{{ user.name }}</a>
-            ({{ user.email }})
-            {%- if not user.can_login %}</s>{%- endif %}
-          </td>
-          <td>{{ role }}</td>
-          {%- if controls %}
-            <td>
-              <button type="submit" name="delete-user-role"
-                      value="{{ "%s:%s" % (role, user.id) }}"
-                      class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
-              </button>
-            </td>
-          {%- endif %}
-        </tr>
+      {% else %}
+      <tr><td colspan="3" class="ads-muted">{{ _("No matching records found") }}</td></tr>
       {% endfor %}
-      </tbody>
-    </table>
-  </form>
-
-  {%- deferJS %}
-    <script>
-      $(document).ready(function () {
-        var id = "#{{ table_id }}"; // Should be unique enough
-        $(id).dataTable({
-          aaSorting: [[3, "asc"]],
-          aoColumns: [
-            {bSortable: false}, // 0: has_access
-            {bVisible: false},  // 1: last_name
-            {bVisible: false}, // 2: first_name
-            {aDataSort: [1, 2], asSorting: ["asc", "desc"]}, // 3: fullname
-            {aDataSort: [4, 1, 2], asSorting: ["asc", "desc"]}, // 4: role - sort by role then name
-            {%- if controls %}
-              {bSortable: false}
-            {% endif %}
-          ],
-          sPaginationType: "bootstrap",
-          bFilter: true,
-          bLengthChange: false
-        });
-      });
-    </script>
-  {%- enddeferJS %}
-
-  <div style="clear: both;"></div>
+    </tbody>
+  </table>
+</div>
+{{ m.pagination(listing) }}
 {% endmacro %}
-
-{% macro m_groups_table(groups_and_roles, controls) %}
-  {% set table_id = uuid() %}
-  <form method="POST">
-    {{ csrf.field() }}
-    <table class="table table-condensed table-striped" id="{{ table_id }}">
-      <thead>
-      <tr>
-        <th>{{ _("Name") }}</th>
-        <th>{{ _("Role") }}</th>
-        {% if controls %}
-          <th>{{ _("Action") }}</th>
-        {% endif %}
-      </tr>
-      </thead>
-
-      <tbody>
-      {% for group, role in groups_and_roles %}
-        <tr>
-          <td><a
-              href="{{ url_for("social.group_home", group_id=group.id) }}">{{ group.name }}</a>
-          </td>
-          <td>{{ role }}</td>
-          {%- if controls %}
-            <td>
-              <button type="submit" name="delete-group-role"
-                      value="{{ role }}:{{ group.id }}"
-                      class="btn btn-small btn-danger"><i class="fa fa-trash"></i>
-              </button>
-            </td>
-          {% endif %}
-        </tr>
-      {% endfor %}
-      </tbody>
-    </table>
-  </form>
-
-  {%- deferJS %}
-    <script>
-      $(document).ready(function () {
-        var id = "#{{ table_id }}"; // Should be unique enough
-        $(id).dataTable({
-          aoColumns: [
-            {asSorting: ["asc", "desc"]},
-            {asSorting: ["asc", "desc"]},
-            {%- if controls %}
-              {asSorting: ["asc", "desc"]}
-            {% endif %}
-          ],
-          sPaginationType: "bootstrap",
-          bFilter: true,
-          bLengthChange: false
-        });
-      });
-    </script>
-  {%- enddeferJS %}
-  <div style="clear: both;"></div>
-{% endmacro %}
-
 
 {% block content %}
-  {% call m_box_content("Permissions") %}
-    <h2 style="margin-top: 0;">{{ _('Manage permissions on <em>{folder}</em>').format(folder=folder.title) }}</h2>
+<div class="ads-with-aside">
+  <div class="ads-stack">
+    <section class="ads-card" aria-labelledby="who">
+      <div class="ads-card__head ads-spread">
+        <div class="ads-stack ads-gap-sm">
+          <ol class="ads-breadcrumb">
+            {% for crumb in breadcrumbs %}<li><a href="{{ crumb.path }}">{{ crumb.label }}</a></li>{% endfor %}
+          </ol>
+          <h2 class="ads-card__title" id="who">{{ _("Who has access") }}</h2>
+        </div>
+        <a class="ads-btn" href="{{ url_for('.permissions_export', **kw) }}">{{ icon("file-spreadsheet") }}{{ _("Export (spreadsheet)") }}</a>
+      </div>
+      <form class="ads-card__body ads-spread" method="post" action="{{ url_for('.permissions_update', **kw) }}">
+        {{ csrf.field() }}
+        {% if folder.inherit_security %}
+        <span class="sbe-lines">
+          <span class="ads-status ads-status--success"><span class="ads-status__dot"></span>{{ _("The community's members, as on the folder above") }}</span>
+          <span class="ads-muted">{{ _("And the people given a role here.") }}</span>
+        </span>
+        <button class="ads-btn" id="deactivate_inheritance" type="submit" name="action" value="deactivate_inheritance">{{ _("Keep it to the people listed here") }}</button>
+        {% else %}
+        <span class="sbe-lines">
+          <span class="ads-status ads-tone-warning"><span class="ads-status__dot"></span>{{ _("Only the people given a role here") }}</span>
+          <span class="ads-muted">{{ _("The community's other members do not see it.") }}</span>
+        </span>
+        <button class="ads-btn" id="activate_inheritance" type="submit" name="action" value="activate_inheritance">{{ _("Open it to the community's members") }}</button>
+        {% endif %}
+      </form>
+    </section>
 
-    <a class="btn btn-default datatable-export"
-       href="{{ url_for('.permissions_export', folder_id=folder.id, community_id=folder.community.slug) }}"><i
-        class="fa fa-align-justify"></i>{{ _("Export to Excel") }}</a>
-
-    <hr/>
-
-    <h3>{{ _("Inheritance") }}</h3>
-
-    {% if folder.inherit_security %}
-      <i class="fa fa-check-circle-o"></i>{{ _("Activated") }}
-      <button class="btn btn-default"
-              id="deactivate_inheritance">{{ _("Deactivate") }}</button>
-    {% else %}
-      <i class="fa fa-ban"></i>{{ _("Deactivated") }}
-      <button class="btn btn-default" id="activate_inheritance">{{ _("Activate") }}</button>
-    {% endif %}
-
-    {#
-    <h3>Current local roles for groups</h3>
-
-    {% if groups_and_local_roles %}
-      {{ m_groups_table(groups_and_local_roles, controls=True) }}
-    {% else %}
-      {{ _("Nothing") }}.
-    {% endif %}
-
-    <p>
-      <button class="btn" href="#modal-add-group-local-role"
-          data-toggle="modal">
-        <i class="fa fa-plus"></i>{{ _("Add new local role") }}&hellip;</button>
-    </p>
-
-    <h3>{{ _("Current inherited roles for groups") }}</h3>
-
-    {% if folder.inherit_security %}
-      {% if groups_and_inherited_roles %}
-        {{ m_groups_table(groups_and_inherited_roles, controls=False) }}
-      {% else %}
-        {{ _("Nothing") }}.
-      {% endif %}
-    {% else %}
-      {{ _("Deactivated") }}
-    {% endif %}
-
-    <hr>
-    #}
-
-    <h3>{{ _("Current local roles for users") }}</h3>
-
-    {% if users_and_local_roles %}
-      {{ m_users_table(users_and_local_roles, controls=True) }}
-    {% else %}
-      {{ _("Nothing") }}.
-    {% endif %}
-
-    <p>
-      <button class="btn btn-default" href="#modal-add-user-local-role" data-toggle="modal">
-        <i class="fa fa-plus"></i>{{ _("Add new local role") }}&hellip;
-      </button>
-    </p>
-
-    <h3>{{ _("Current inherited roles for users") }}</h3>
+    <section class="ads-card" aria-labelledby="local">
+      <div class="ads-card__head ads-spread">
+        <h2 class="ads-card__title" id="local">{{ _("People given a role here") }}</h2>
+        <button class="ads-btn ads-btn--primary" type="button" data-modal-open="#modal-add-user-local-role">{{ icon("user-plus") }}{{ _("Give someone a role") }}</button>
+      </div>
+      {% if users_and_local_roles or local_listing.search %}{{ people(local_listing, users_and_local_roles, controls=True) }}
+      {% else %}<p class="ads-card__body ads-muted">{{ _("Nobody yet.") }}</p>{% endif %}
+    </section>
 
     {% if folder.inherit_security %}
-      {% if users_and_inherited_roles %}
-        {{ m_users_table(users_and_inherited_roles, controls=False) }}
-      {% else %}
-        {{ _("Nothing") }}.
-      {% endif %}
-    {% else %}
-      {{ _("Deactivated") }}
+    <section class="ads-card" aria-labelledby="inherited">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="inherited">{{ _("Through the folder above") }}</h2></div>
+      {% if users_and_inherited_roles or inherited_listing.search %}{{ people(inherited_listing, users_and_inherited_roles, controls=False) }}
+      {% else %}<p class="ads-card__body ads-muted">{{ _("Nobody.") }}</p>{% endif %}
+    </section>
     {% endif %}
+  </div>
 
-    <h3 class="main">{{ _("Audit Log") }}</h3>
-    <div style="margin-bottom: 25px;">
-      {% for entry in audit_entries %}
-        <div>{{ entry.msg }}</div>
-      {% endfor %}
-    </div>
-
-  {% endcall %}
-{% endblock %}
-
-
-{% block sidebar %}
-  {%- set content_actions = actions.for_category('documents:content') %}
-  {%- if content_actions %}
-    {% call m_box_menu() %}
-      <ul class="nav nav-list">
-        {%- for action in content_actions %}
-          <li>{{ action.render() }}</li>
-        {%- endfor %}
+  <aside class="ads-stack" aria-label="{{ _('Changes to the permissions') }}">
+    <section class="ads-card" aria-labelledby="changes">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="changes">{{ _("Changes to the permissions") }}</h2></div>
+      {% if audit_entries %}
+      <ul class="ads-list">
+        {% for entry in audit_entries %}<li><span class="ads-fill">{{ entry.msg }}</span></li>{% endfor %}
       </ul>
-    {% endcall %}
-  {%- endif %}
+      {% else %}<p class="ads-card__body ads-muted">{{ _("None yet.") }}</p>{% endif %}
+    </section>
+  </aside>
+</div>
 {% endblock %}
 
-
-{% block modals %}
-  {% include "documents/_modals_folder.html" %}
-  {% include "documents/_modals_roles.html" %}
-{% endblock %}
-
-{% block js %}
-  <script>
-    require(
-        ['Abilian', 'jquery'],
-        function (Abilian, $) {
-
-          Abilian.fn.onAppInit(function () {
-            $("#deactivate_inheritance").click(function () {
-              var form = $('<form>{{ csrf.field() }}<input type="text" name="action" value="deactivate_inheritance" /></form>');
-              form.attr("method", "post");
-              form.attr("action", "{{ request.path }}");
-              $(document.body).append(form);
-              form.submit();
-            });
-
-            $("#activate_inheritance").click(function () {
-              var form = $('<form>{{ csrf.field() }}<input type="text" name="action" value="activate_inheritance" /></form>');
-              form.attr("method", "post");
-              form.attr("action", "{{ request.path }}");
-              $(document.body).append(form);
-              form.submit();
-            });
-
-            $("#user-select").attr("style", "width: 220px").select2({
-              minimumInputLength: 2,
-              ajax: {
-                url: "{{ url_for("social.users_json") }}",
-                dataType: 'json',
-                quietMillis: 100,
-                data: function (term, page) {
-                  return {q: term};
-                },
-                results: function (data, page) {
-                  return {results: data.results, more: false};
-                }
-              },
-              allowClear: true
-            });
-            $("#s2id_user-select a span").text("");
-            $("input#user-select").attr("value", "");
-
-          });
-        });
-  </script>
+{% block overlays %}
+{% call dialogs.form_dialog("modal-add-user-local-role", _("Give someone a role on “%(name)s”", name=folder.title), _("Give the role"), url_for(".permissions_update", **kw), "add-user-role") %}
+<div class="ads-stack">
+  <div class="ads-field">
+    <label class="ads-label" for="user-select">{{ _("Person") }}</label>
+    <input class="ads-input" type="text" id="user-select" name="user" required data-picker="{{ url_for('social.users_json', with_membership=g.community.id) }}">
+  </div>
+  <div class="ads-field">
+    <label class="ads-label" for="role-select">{{ _("Role") }}</label>
+    <select class="ads-select" id="role-select" name="role">
+      {% for name, label in roles.items() %}<option value="{{ name }}">{{ label }}</option>{% endfor %}
+    </select>
+    <small class="ads-help">{{ _("A reader sees it; a writer also adds and changes; a manager also decides who has access.") }}</small>
+  </div>
+</div>
+{% endcall %}
 {% endblock %}

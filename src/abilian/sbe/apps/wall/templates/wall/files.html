@@ -1,28 +1,29 @@
-{% extends "wall/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% from "macros/activity.html" import m_activities %}
-
+{#- A community's files, from its documents and its discussions together, by month,
+    newest first (the last 50): each with its size, who added it, when. Reached from
+    the recent documents on the community's home. -#}
+{% extends "ads_community.html" %}
+{% block page_title %}{{ _("All the files") }} · {{ g.community.name }}{% endblock %}
 {% block content %}
-  {%- call m_box_content(_("Files")) %}
-
-    {% for month, docs in grouped_docs %}
-      <h2>{{ month }}</h2>
-
+<div class="ads-card">
+  <div class="ads-card__head"><h2 class="ads-card__title">{{ _("All the files") }}</h2></div>
+  {% for month, docs in grouped_docs %}
+  <section aria-labelledby="month-{{ loop.index }}">
+    <h3 class="ads-card__body sbe-section-title" id="month-{{ loop.index }}">{{ month }}</h3>
+    <ul class="ads-list">
       {% for doc in docs %}
-        <p>
-          <span class="attachment-item">
-            {{ doc.owner }} -
-
-            <img src="{{ doc.icon }}" style="vertical-align: middle;"
-                 alt=""/>
-            <a href="{{ doc.url }}">{{ doc.name }}</a>
-            {%- if doc.content_length %}
-              ({{ doc.content_length|filesize }})
-            {%- endif %}
-          </span>
-        </p>
+      <li>
+        {{ file_icon(doc.name) }}
+        <span class="ads-fill sbe-lines">
+          <span><a class="sbe-quiet" href="{{ doc.url }}">{{ doc.name }}</a>{% if doc.content_length %} <span class="ads-muted">{{ doc.content_length | filesize }}</span>{% endif %}</span>
+          <span class="ads-muted">{{ doc.owner }}</span>
+        </span>
+        <span class="ads-muted">{{ m.time(doc.date) }}</span>
+      </li>
       {% endfor %}
-    {% endfor %}
-  {%- endcall %}
+    </ul>
+  </section>
+  {% else %}
+  <p class="ads-card__body ads-muted">{{ _("No file in this community yet.") }}</p>
+  {% endfor %}
+</div>
 {% endblock %}

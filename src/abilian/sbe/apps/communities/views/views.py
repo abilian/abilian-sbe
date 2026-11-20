@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import contextlib
-import hashlib
+import smtplib
 from collections import Counter
-from functools import wraps
+from functools import cache, wraps
 from io import BytesIO
 from operator import attrgetter
-from pathlib import Path
 from time import gmtime, strftime
 from typing import TYPE_CHECKING, Any
 
@@ -19,43 +18,51 @@ from flask import (
     current_app,
     flash,
     g,
-    jsonify,
     redirect,
     render_template,
     request,
     session,
     url_for,
 )
-from flask_login import current_user, login_required
 from openpyxl.cell import WriteOnlyCell
-from werkzeug.exceptions import BadRequest, InternalServerError, NotFound
+from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.local import LocalProxy
 from whoosh.searching import Hit
 
 from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, User, UserQuery
+from abilian.core.extensions.login import authenticated, authenticated_user
+from abilian.core.models.subjects import User, UserQuery
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
-from abilian.i18n import _, _l
+from abilian.i18n import _, _l, _n
+from abilian.sbe.apps.communities import security as community_security
 from abilian.sbe.apps.communities.actions import register_actions
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.communities.decorators import can_manage, is_site_admin
 from abilian.sbe.apps.communities.forms import CommunityForm
-from abilian.sbe.apps.communities.models import Community, Membership
-from abilian.sbe.apps.communities.security import (
-    is_manager,
-    require_admin,
-    require_manage,
+from abilian.sbe.apps.communities.invitations import send_invitation
+from abilian.sbe.apps.communities.models import (
+    DEFAULT_IMAGE,
+    DEFAULT_IMAGE_MD5,
+    MANAGER,
+    MEMBER,
+    Community,
+    Membership,
+    MembershipRequest,
 )
 from abilian.sbe.apps.documents.models import Document
+from abilian.sbe.apps.documents.repository import content_repository
+from abilian.services import security as site_security
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
 from abilian.web import csrf, views
 from abilian.web.action import Endpoint
+from abilian.web.listing import Listing, by_name
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.views import images as image_views
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from datetime import datetime
 
     from flask.blueprints import BlueprintSetupState
     from werkzeug.wrappers.response import Response
@@ -63,12 +70,6 @@ if TYPE_CHECKING:
     from abilian.sbe.apps.communities.presenters import CommunityPresenter
 
 __all__ = ["BaseCommunityView", "communities", "default_view_kw", "route", "tab"]
-
-
-def seconds_since_epoch(dt: datetime | None) -> int:
-    if not dt:
-        return 0
-    return int(dt.timestamp())
 
 
 communities = CommunityBlueprint(
@@ -85,9 +86,25 @@ communities.record_once(register_actions)
 @communities.record_once
 def register_context_processors(state: BlueprintSetupState) -> None:
     @state.app.context_processor
-    def communities_context_processor() -> dict[str, Callable]:
-        # helper to get an url for community image
-        return {"community_image_url": image_url}
+    def communities_context_processor() -> dict[str, Any]:
+        # `can_manage_community` is supplied here rather than by each view that
+        # renders a members table. Left to the views, the wizard's three did not,
+        # and the header and the row disagreed about how many columns there were.
+        #
+        # Lazy, because every template renders with this context, the error pages
+        # included, and those run after the session that holds `g.community` is
+        # gone: asking the security service there turned a 500 into a raw one.
+        # Cached for this render, as each row of a members table reads it.
+        return {
+            "community_image_url": image_url,  # url for a community image
+            "can_manage_community": LocalProxy(cache(_can_manage_current_community)),
+        }
+
+
+def _can_manage_current_community() -> bool:
+    return hasattr(g, "community") and community_security.can_manage(
+        authenticated_user(), g.community
+    )
 
 
 def tab(tab_name: str) -> Callable:
@@ -144,8 +161,8 @@ def default_view_kw(
 # Routes
 #
 @route("/")
-@login_required
-def index() -> str:
+@authenticated
+def index(user: User) -> str:
     query = Community.query
     sort_order = request.args.get("sort", "").strip()
     if not sort_order:
@@ -158,11 +175,26 @@ def index() -> str:
 
     session["sort_communities_order"] = sort_order
 
-    if not current_user.has_role("admin"):
-        # Filter with permissions
-        query = query.join(Membership).filter(Membership.user == current_user)
+    search = request.args.get("q", "").strip()
+    if search:
+        query = query.filter(
+            sa.func.lower(Community.name).contains(search.lower(), autoescape=True)
+        )
 
-    ctx = {"my_communities": query.all(), "sort_order": sort_order}
+    # Not passed to the template: `is_admin` was one name for two different
+    # questions there -- site-wide here, group-scoped on a group's page, gone
+    # since -- which is how `g.is_manager` went wrong one layer down. The
+    # template asks `is_site_admin()` by name instead.
+    is_admin = site_security.is_site_admin(user)
+    if not is_admin:
+        # Filter with permissions
+        query = query.join(Membership).filter(Membership.user == user)
+
+    ctx = {
+        "my_communities": query.all(),
+        "sort_order": sort_order,
+        "search": search,
+    }
     return render_template("community/home.html", **ctx)
 
 
@@ -172,36 +204,12 @@ def community() -> Response:
     return redirect(url_for("wall.index", community_id=g.community.slug))
 
 
-@route("/json2")
-def list_json2():
-    """JSON endpoint, used for filling select boxes dynamically."""
-    # TODO: make generic ?
-    args = request.args
-
-    q = args.get("q", "").replace("%", " ")
-    if not q or len(q) < 2:
-        raise BadRequest
-
-    query = (
-        db.session.query(Community.id, Community.name)
-        .filter(Community.name.ilike(f"%{q}%"))
-        .distinct()
-        .order_by(Community.name)
-        .limit(50)
-    )
-    query_result = query.all()
-
-    result = {"results": [{"id": r[0], "text": r[1]} for r in query_result]}
-    return jsonify(result)
-
-
 # edit views
 class BaseCommunityView:
     Model = Community
     pk = "community_id"
     Form = CommunityForm
-    base_template = "community/_base.html"
-    decorators = [require_admin]
+    decorators = [is_site_admin]
     view_endpoint = ""
 
     def init_object(self, args: tuple[()], kwargs: dict) -> tuple[tuple[()], dict]:
@@ -222,10 +230,10 @@ class BaseCommunityView:
         return kwargs
 
 
-class CommunityEdit(BaseCommunityView, views.ObjectEdit):
+class CommunityEdit(BaseCommunityView, views.ObjectEdit[Community, CommunityForm]):
     template = "community/edit.html"
     title = _l("Edit community")
-    decorators = (*views.ObjectEdit.decorators, require_admin, tab("settings"))
+    decorators = (*views.ObjectEdit.decorators, can_manage, tab("settings"))
 
     def breadcrumb(self) -> BreadcrumbItem:
         url = Endpoint("communities.settings", community_id=g.community.slug)
@@ -245,14 +253,6 @@ class CommunityEdit(BaseCommunityView, views.ObjectEdit):
             self.obj.update_roles_on_folder()
         del form.type
 
-        self.linked_group = form.linked_group.data or None
-        if self.linked_group:
-            self.linked_group = Group.query.get(int(self.linked_group))
-        del form.linked_group
-
-    def after_populate_obj(self) -> None:
-        self.obj.group = self.linked_group
-
 
 add_url(
     "/<string:community_id>/settings",
@@ -264,14 +264,45 @@ add_url(
 )
 
 
-class CommunityCreate(views.ObjectCreate, CommunityEdit):
+class CommunityCreate(views.ObjectCreate[Community, CommunityForm], CommunityEdit):
     title = _l("Create community")
-    decorators = (*views.ObjectCreate.decorators, require_admin)
-    template = views.ObjectCreate.template
-    base_template = views.ObjectCreate.base_template
+    decorators = (*views.ObjectCreate.decorators, is_site_admin)
+    template = "community/new.html"
+    #: Who will run it: the person picked, or else whoever makes it.
+    manager: User | None = None
+
+    def validate(self) -> bool:
+        if not super().validate():
+            return False
+        manager_id = request.form.get("manager", type=int)
+        if manager_id is not None:
+            self.manager = User.query.get(manager_id)
+            if self.manager is None:
+                msg = f"Unknown manager: {manager_id}"
+                raise BadRequest(msg)
+        return True
 
     def breadcrumb(self) -> BreadcrumbItem:
         return BreadcrumbItem(label=_("Create new community"))
+
+    def commit_success(self) -> None:
+        """The person picked manages it, or else whoever creates it.
+
+        Recorded as a membership like anyone else's rather than as a special
+        case in a predicate. It used to be the latter -- `is_manager` alone
+        granted to `community.creator` -- so a creator was offered manage
+        actions and then refused by the views behind them, and "who manages
+        this" could not be read off the member list or revoked through it.
+
+        After the commit, not in `after_populate_obj`: adding a membership
+        fires the signal that grants the corresponding role on the community's
+        folder, and inside `no_autoflush` that folder has no id yet.
+        """
+        super().commit_success()
+        manager = self.manager or self.obj.creator
+        if manager:
+            self.obj.set_membership(manager, MANAGER)
+            db.session.commit()
 
     def message_success(self):
         return _("Community %(name)s created successfully", name=self.obj.name)
@@ -280,7 +311,7 @@ class CommunityCreate(views.ObjectCreate, CommunityEdit):
 add_url("/new", view_func=CommunityCreate.as_view("new", view_endpoint=".community"))
 
 
-class CommunityDelete(BaseCommunityView, views.ObjectDelete):
+class CommunityDelete(BaseCommunityView, views.ObjectDelete[Community, CommunityForm]):
     get_form_kwargs = views.ObjectDelete.get_form_kwargs
 
 
@@ -293,13 +324,9 @@ add_url(
 )
 
 # Community Image
-_DEFAULT_IMAGE = Path(__file__).parent / "data" / "community.png"
-_DEFAULT_IMAGE_MD5 = hashlib.md5(  # noqa: S324
-    _DEFAULT_IMAGE.open("rb").read()
-).hexdigest()
 route("/_default_image")(
     image_views.StaticImageView.as_view(
-        "community_default_image", set_expire=True, image=_DEFAULT_IMAGE
+        "community_default_image", set_expire=True, image=DEFAULT_IMAGE
     )
 )
 
@@ -324,7 +351,7 @@ route("/<string:community_id>/image")(image)
 def image_url(community: Community | CommunityPresenter, **kwargs: Any) -> str:
     """Return proper URL for image url."""
     if not community or not community.image:
-        kwargs["md5"] = _DEFAULT_IMAGE_MD5
+        kwargs["md5"] = DEFAULT_IMAGE_MD5
         return url_for("communities.community_default_image", **kwargs)
 
     kwargs["community_id"] = community.slug
@@ -338,7 +365,7 @@ def _members_query() -> UserQuery:
         "last_activity_date"
     )
     memberships = (
-        User.query.options(sa.orm.undefer("photo"))
+        User.query.options(sa.orm.undefer(User.photo))
         .join(Membership)
         .outerjoin(
             ActivityEntry,
@@ -365,61 +392,166 @@ def members() -> str:
             url=Endpoint("communities.members", community_id=g.community.slug),
         )
     )
-    memberships = _members_query().all()
     community_threads_users = [thread.creator for thread in g.community.threads]
     threads_count = Counter(community_threads_users)
+    sort_keys = {
+        "name": lambda row: by_name(row[0]),
+        "posts": lambda row: threads_count[row[0]],
+        "activity": lambda row: (row[3] is not None, row[3]),
+        "role": lambda row: (str(row[2]), by_name(row[0])),
+    }
+    rows = _members_query().all()
+    managers = [row for row in rows if str(row[2]) == "manager"]
+    only_managers = request.args.get("role") == "manager"
+
+    def text(row: tuple) -> str:
+        return f"{row[0].name} {row[0].email}"
+
+    listing, memberships = Listing.from_rows(
+        managers if only_managers else rows, sort_keys, "name", text=text
+    )
 
     ctx = {
-        "seconds_since_epoch": seconds_since_epoch,
-        "is_manager": is_manager(user=current_user),
+        "listing": listing,
         "memberships": memberships,
         "threads_count": threads_count,
+        "only_managers": only_managers,
+        "requests": g.community._model.membership_requests,
+        "counts": {
+            name: sum(listing.matches(text(row)) for row in group)
+            for name, group in (("all", rows), ("managers", managers))
+        },
     }
     return render_template("community/members.html", **ctx)
 
 
 @route("/<string:community_id>/members", methods=["POST"])
 @csrf.protect
-@require_manage
+@can_manage
 def members_post() -> Response:
     community = g.community._model
     action = request.form.get("action")
+    if action in SELECTION_ACTIONS:
+        return _act_on_selection(community, action)
+    if action in {"accept-request", "refuse-request"}:
+        return _answer_request(community, action == "accept-request")
 
     user_id = request.form.get("user")
     if not user_id:
         flash(_("You must provide a user."), "error")
         return redirect(url_for(".members", community_id=community.slug))
     user_id = int(user_id)
-    user = User.query.get(user_id)
+    user = User.query.get_or_404(user_id)
 
-    if action in ("add-user-role", "set-user-role"):
-        role = request.form["role"].lower()
+    match action:
+        case "add-user-role" | "set-user-role":
+            role = request.form["role"].lower()
+            if role != MANAGER and _leaves_no_manager(community, {user.id}):
+                return _refused_last_manager(community)
 
-        community.set_membership(user, role)
+            community.set_membership(user, role)
 
-        if action == "add-user-role":
+            if action == "add-user-role":
+                app = unwrap(current_app)
+                activity.send(app, actor=user, verb="join", object=community)
+
+            db.session.commit()
+            return redirect(url_for(".members", community_id=community.slug))
+
+        case "delete":
+            membership_id = int(request.form["membership"])
+            membership = Membership.query.get_or_404(membership_id)
+            if membership.user_id != user_id:
+                msg = "This membership is not the user's"
+                raise BadRequest(msg)
+
+            if _leaves_no_manager(community, {user.id}):
+                return _refused_last_manager(community)
+            community.remove_membership(user)
+
             app = unwrap(current_app)
-            activity.send(app, actor=user, verb="join", object=community)
+            activity.send(app, actor=user, verb="leave", object=community)
 
-        db.session.commit()
-        return redirect(url_for(".members", community_id=community.slug))
-
-    if action == "delete":
-        membership_id = int(request.form["membership"])
-        membership = Membership.query.get(membership_id)
-        if membership.user_id != user_id:
-            raise InternalServerError
-
-        community.remove_membership(user)
-
-        app = unwrap(current_app)
-        activity.send(app, actor=user, verb="leave", object=community)
-
-        db.session.commit()
-        return redirect(url_for(".members", community_id=community.slug))
+            db.session.commit()
+            return redirect(url_for(".members", community_id=community.slug))
 
     msg = f"Unknown action: {action!r}"
     raise BadRequest(msg)
+
+
+def _answer_request(community: Community, accepted: bool) -> Response:
+    """A request to join, answered: its person made a member and told so, or not."""
+    asking = MembershipRequest.query.filter_by(
+        id=request.form.get("request", type=int), community_id=community.id
+    ).first_or_404()
+    user = asking.user
+    db.session.delete(asking)
+    members = redirect(url_for(".members", community_id=community.slug))
+    if not accepted:
+        db.session.commit()
+        flash(_("%(name)s will not join the community.", name=user.name))
+        return members
+
+    community.set_membership(user, MEMBER)
+    activity.send(unwrap(current_app), actor=user, verb="join", object=community)
+    db.session.commit()
+    try:
+        send_invitation(user, community, authenticated_user(), "")
+    except (smtplib.SMTPException, OSError):
+        flash(
+            _("%(name)s is a member, but could not be told by e-mail.", name=user.name),
+            "warning",
+        )
+        return members
+    flash(_("%(name)s is a member now, and told so.", name=user.name), "success")
+    return members
+
+
+#: What the members' selection does: the role it gives, or None to remove them.
+def _leaves_no_manager(community: Community, user_ids: set[int]) -> bool:
+    """Whether taking `user_ids` from the community's managers leaves it with none,
+    where it had some: no one inside could run it any more."""
+    managers = {m.user_id for m in community.memberships if m.role == MANAGER}
+    return bool(managers) and managers <= user_ids
+
+
+def _refused_last_manager(community: Community) -> Response:
+    flash(
+        _("A community keeps at least one manager: name another one first."),
+        "error",
+    )
+    return redirect(url_for(".members", community_id=community.slug))
+
+
+SELECTION_ACTIONS = {
+    "selection-managers": MANAGER,
+    "selection-members": MEMBER,
+    "selection-remove": None,
+}
+
+
+def _act_on_selection(community: Community, action: str) -> Response:
+    """Give the selected members a role, or remove them: only members of
+    `community`, whatever else is posted."""
+    ids = request.form.getlist("selected", type=int)
+    members = (
+        User.query.join(Membership, Membership.user_id == User.id)
+        .filter(Membership.community_id == community.id, User.id.in_(ids))
+        .all()
+    )
+    role = SELECTION_ACTIONS[action]
+    if role != MANAGER and _leaves_no_manager(community, {u.id for u in members}):
+        return _refused_last_manager(community)
+    app = unwrap(current_app)
+    for user in members:
+        if role is None:
+            community.remove_membership(user)
+            activity.send(app, actor=user, verb="leave", object=community)
+        else:
+            community.set_membership(user, role)
+    db.session.commit()
+    flash(_n("%(num)d member changed.", "%(num)d members changed.", len(members)))
+    return redirect(url_for(".members", community_id=community.slug))
 
 
 MEMBERS_EXPORT_HEADERS = [
@@ -513,11 +645,16 @@ def members_excel_export():
 #
 # Hack to redirect from urls used by the search engine.
 #
+
+
 @route("/doc/<int:doc_id>")
-def doc(doc_id):
+@authenticated
+def doc(user: User, doc_id: int) -> Response:
     doc = Document.query.get(doc_id)
 
-    if doc is None:
+    # Not found either for a user who may not read it: the redirect would
+    # tell them which community the document is in.
+    if doc is None or not content_repository.has_access(user, doc):
         raise NotFound
 
     folder = doc.parent

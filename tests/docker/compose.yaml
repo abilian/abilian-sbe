@@ -1,0 +1,56 @@
+# Run the test suite against MariaDB or PostgreSQL, all in containers.
+# See README.md.
+
+# Shared by the tests-* services: one image, built once.
+x-tests: &tests
+  build:
+    context: ../..
+    dockerfile: tests/docker/Dockerfile
+  image: abilian-sbe-tests
+
+services:
+  # Databases keep their data in tmpfs: every `down` starts the next run from
+  # an empty database.
+  mariadb:
+    image: mariadb:11.4
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: sbe_test
+      MARIADB_USER: sbe
+      MARIADB_PASSWORD: sbe
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 2s
+      retries: 30
+
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_DB: sbe_test
+      POSTGRES_USER: sbe
+      POSTGRES_PASSWORD: sbe
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "sbe", "-d", "sbe_test"]
+      interval: 2s
+      retries: 30
+
+  tests-mariadb:
+    <<: *tests
+    environment:
+      SQLALCHEMY_DATABASE_URI: mysql+pymysql://sbe:sbe@mariadb/sbe_test?charset=utf8mb4
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  tests-postgres:
+    <<: *tests
+    environment:
+      SQLALCHEMY_DATABASE_URI: postgresql://sbe:sbe@postgres/sbe_test
+    depends_on:
+      postgres:
+        condition: service_healthy

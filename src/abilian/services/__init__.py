@@ -8,9 +8,11 @@ http://flask.pocoo.org/docs/extensiondev/ )
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Literal, overload
 
 from flask import current_app
+
+from abilian.core.application import as_application
 
 # This one must be imported first
 from .base import Service, ServiceState
@@ -22,11 +24,32 @@ assert Service, ServiceState
 # Import below are flagged as problematic due to the trick above.
 
 
-def get_service(service: str) -> Service:
-    from abilian.app import Application
+if TYPE_CHECKING:
+    from .antivirus.service import AntiVirusService
+    from .indexing.service import WhooshIndexService
+    from .preferences.service import PreferenceService
+    from .security.service import SecurityService
+    from .settings.service import SettingsService
+    from .vocabularies.service import VocabularyService
 
-    app = cast(Application, current_app)
-    return app.service_manager.get_service(service)
+
+# One overload per service looked up by name, so callers get its methods.
+@overload
+def get_service(service: Literal["antivirus"]) -> AntiVirusService: ...
+@overload
+def get_service(service: Literal["indexing"]) -> WhooshIndexService: ...
+@overload
+def get_service(service: Literal["preferences"]) -> PreferenceService: ...
+@overload
+def get_service(service: Literal["security"]) -> SecurityService: ...
+@overload
+def get_service(service: Literal["settings"]) -> SettingsService: ...
+@overload
+def get_service(service: Literal["vocabularies"]) -> VocabularyService: ...
+@overload
+def get_service(service: str) -> Service: ...
+def get_service(service: str) -> Service:
+    return as_application(current_app).service_manager.get_service(service)
 
 
 from .activity import ActivityService

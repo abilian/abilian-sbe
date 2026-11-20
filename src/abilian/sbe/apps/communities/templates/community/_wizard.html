@@ -1,0 +1,35 @@
+{#- What the two pages of inviting people from a spreadsheet share: where one is in
+    them, and the frame of a page. `vite/src/wizard.js` keeps the accounts that travel
+    between the steps in line with what is removed or changed. -#}
+
+{% macro frame(step, title) %}
+<div class="ads-card">
+  <div class="ads-card__head">
+    <div class="ads-stack ads-gap-sm ads-fill">
+      <ol class="ads-breadcrumb"><li><a href="{{ url_for('.members', community_id=g.community.slug) }}">{{ _("Members") }}</a></li></ol>
+      <h2 class="ads-card__title">{{ title }}</h2>
+      <ol class="ads-steps" aria-label="{{ _('Steps') }}">
+        {% for label in [_("Addresses"), _("Who joins")] %}
+        {#- The current step only is `aria-current`; those passed are done (ADS request 35). -#}
+        {% if loop.index == step %}<li class="ads-step" aria-current="step">{{ label }}</li>
+        {%- elif loop.index < step %}<li class="ads-step sbe-step--done">{{ label }}<span class="sbe-sr-only">, {{ _("done") }}</span></li>
+        {%- else %}<li class="ads-step">{{ label }}</li>{% endif %}
+        {%- endfor %}
+      </ol>
+    </div>
+  </div>
+  {{ caller() }}
+</div>
+{% endmacro %}
+
+{#- A row's controls, named after the address of the row they act on. -#}
+{% macro role_select(email, attrs={}, selected="member") %}
+<select class="ads-select sbe-select--sm" name="role" aria-label="{{ _('Role of %(email)s', email=email) }}" {{ attrs | xmlattr }}>
+  <option value="member" {{ "selected" if selected != "manager" }}>{{ _("Member") }}</option>
+  <option value="manager" {{ "selected" if selected == "manager" }}>{{ _("Community manager") }}</option>
+</select>
+{% endmacro %}
+
+{% macro remove_button(email, attrs={}) %}
+<button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ _('Remove %(email)s', email=email) }}" {{ attrs | xmlattr }}>{{ icon("x") }}</button>
+{% endmacro %}

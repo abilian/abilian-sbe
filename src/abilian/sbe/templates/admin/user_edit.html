@@ -1,0 +1,81 @@
+{#- One account, or a new one: who it is, what it does and where, what it may do
+    (sign in at all, run the site) and its password; beside it, its communities and
+    its last sign-ins. Signing in as the person is in sight. Overrides Abilian Core's
+    page; drawn in `mockups/templates/admin-user.html`. -#}
+{% extends "admin/_ads.html" %}
+{% import "admin/_ads_macros.html" as a with context %}
+{% import "forum/_post_fields.html" as fields %}
+{% set user = view.obj %}
+{% set creating = not user.id %}
+{% block page_title %}{{ _("New account") if creating else user.name }} · {{ _("Accounts") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{% if creating %}{{ _("New account") }}{% else %}<span class="ads-cluster ads-gap-sm">{{ m.avatar(user) }}<span>{{ user.name }}</span>{{ a.state(user) }}</span>{% endif %}{% endblock %}
+{% block actions %}{% if not creating and user.can_login and user != current_user %}{{ a.sign_in_as(user) }}{% endif %}{% endblock %}
+
+{#- A field, with what it says under it only when that helps: not Core's "ex: John". -#}
+{% macro input(field, type="text", label=none, autocomplete=none, help=false) %}
+{% set described = ([field.id ~ "-help"] if help else []) + ([field.id ~ "-error"] if field.errors else []) %}
+<div class="ads-field">
+  <label class="ads-label {{ 'ads-label--required' if field.flags.required }}" for="{{ field.id }}">{{ label or field.label.text }}</label>
+  <input class="ads-input" id="{{ field.id }}" name="{{ field.name }}" type="{{ type }}" {% if type != "password" %}value="{{ field.data or '' }}"{% endif %} {{ "required" if field.flags.required }} {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %} {% if field.errors %}aria-invalid="true"{% endif %} {% if described %}aria-describedby="{{ described | join(' ') }}"{% endif %}>
+  {% if help %}<small class="ads-help" id="{{ field.id }}-help">{{ field.description }}</small>{% endif %}
+  {{ fields.errors(field) }}
+</div>
+{% endmacro %}
+
+{% block content %}
+<div class="ads-with-aside">
+  <form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" aria-labelledby="account">
+    {{ form.csrf_token }}
+    <div class="ads-card__head"><h2 class="ads-card__title" id="account">{{ _("The account") }}</h2></div>
+    <div class="ads-card__body ads-stack">
+      <div class="ads-grid ads-col-sm">
+        {{ input(form.first_name, label=_("First name"), autocomplete="off") }}
+        {{ input(form.last_name, label=_("Last name"), autocomplete="off") }}
+        {{ input(form.job_title, label=_("Job title"), autocomplete="off") }}
+        {{ input(form.organization, label=_("Organization"), autocomplete="off") }}
+      </div>
+      {{ input(form.email, "email", _("Email address"), "off", help=true) }}
+      <label class="ads-switch"><input type="checkbox" name="{{ form.can_login.name }}" value="y" {{ "checked" if form.can_login.data }}><span class="ads-switch__track"></span><span>{{ _("May sign in") }}</span></label>
+      {% for value, label in form.roles.choices %}
+      <label class="ads-switch"><input type="checkbox" name="{{ form.roles.name }}" value="{{ value }}" {{ "checked" if form.roles.data and value in form.roles.data }}><span class="ads-switch__track"></span><span>{{ _("Site administrator: creates communities, manages accounts") if value == "admin" else label }}</span></label>
+      {% endfor %}
+      <div class="ads-grid ads-col-sm">
+        {{ input(form.password, "password", _("Password") if creating else _("New password"), "new-password", help=true) }}
+        {% if form.confirm_password %}{{ input(form.confirm_password, "password", _("The new password again"), "new-password") }}{% endif %}
+      </div>
+    </div>
+    <div class="ads-card__foot ads-cluster ads-gap-sm">
+      <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="{{ 'create' if creating else 'edit' }}">{{ _("Create") if creating else _("Save") }}</button>
+      <a class="ads-btn ads-btn--ghost" href="{{ url_for('.users') }}">{{ _("Cancel") }}</a>
+    </div>
+  </form>
+
+  {% if not creating %}
+  <aside class="ads-stack" aria-label="{{ _('Their activity') }}">
+    {% set communities = communities_of(user) %}
+    <section class="ads-card" aria-labelledby="communities">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="communities">{{ _("Their communities") }} ({{ communities | length }})</h2></div>
+      {% if communities %}
+      <ul class="ads-list">
+        {% for community in communities %}
+        <li>{{ m.tile(community) }}<a class="ads-fill sbe-quiet ads-truncate" href="{{ url_for('wall.index', community_id=community.slug) }}">{{ community.name }}</a>
+          {% if community.get_role(user) == "manager" %}<span class="ads-badge ads-tone-brand">{{ _("Manager") }}</span>{% else %}<span class="ads-muted">{{ _("Member") }}</span>{% endif %}</li>
+        {% endfor %}
+      </ul>
+      {% else %}<p class="ads-card__body ads-muted">{{ _("In no community.") }}</p>{% endif %}
+    </section>
+    <section class="ads-card" aria-labelledby="sessions">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="sessions">{{ _("Their sign-ins") }}</h2></div>
+      {% if sessions %}
+      <ul class="ads-list">
+        {% for session in sessions %}
+        <li><span class="ads-fill sbe-lines"><span class="ads-truncate">{{ session.user_agent or _("Unknown browser") }}</span><span class="ads-muted">{{ session.ip_address }}</span></span><span class="ads-muted">{{ m.time(session.started_at) }}</span></li>
+        {% endfor %}
+      </ul>
+      {% else %}<p class="ads-card__body ads-muted">{{ _("Never signed in.") }}</p>{% endif %}
+      <div class="ads-card__foot"><a href="{{ url_for('.audit', user=user.id) }}">{{ _("Their changes, in the log") }}</a></div>
+    </section>
+  </aside>
+  {% endif %}
+</div>
+{% endblock %}

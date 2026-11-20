@@ -1,0 +1,54 @@
+{#- Writing a wiki page, new or not: its title, its text in Markdown, its files, and a
+    word on what changed, which the history shows. If someone saved it meanwhile, the
+    error under the text says what each changed. The text shows beside it as the page
+    will, as it is typed (`vite/src/preview.js`). Files are attached or removed when
+    the page is saved: a file to remove is a ticked box, with no script. Drawn in
+    `mockups/templates/wiki-edit.html`. -#}
+{% extends "wiki/_base.html" %}
+{% import "wiki/macros.html" as w with context %}
+{% import "forum/_post_fields.html" as fields %}
+{% set creating = not (page and page.id) %}
+{% block wiki_title %}{{ _("New page") if creating else _("Edit the page") }}{% endblock %}
+{% block wiki_content %}
+<form class="ads-card" id="edit-form" method="post" action="{{ request.full_path }}" enctype="multipart/form-data" aria-labelledby="page-title">
+  {{ form.csrf_token }}{{ form.page_id }}{{ form.last_revision_id }}
+  <div class="ads-card__head">
+    <div class="ads-stack ads-gap-sm">
+      {% if creating %}
+      <ol class="ads-breadcrumb"><li><a href="{{ url_for('.index', community_id=g.community.slug) }}">{{ _("Wiki") }}</a></li></ol>
+      <h2 class="ads-card__title" id="page-title">{{ _("New page") }}</h2>
+      {% else %}{{ w.page_head(page, _("Edit the page")) }}{% endif %}
+    </div>
+  </div>
+  <div class="ads-card__body ads-stack">
+    <div class="ads-field">
+      <label class="ads-label ads-label--required" for="{{ form.title.id }}">{{ _("Title") }}</label>
+      <input class="ads-input" id="{{ form.title.id }}" name="{{ form.title.name }}" type="text" value="{{ form.title.data or '' }}" required {{ fields.invalid(form.title) }}>
+      {{ fields.errors(form.title) }}
+    </div>
+    {#- Side by side while both fit, the preview under the text on a narrow screen. -#}
+    <div class="ads-grid ads-col-lg">
+    <div class="ads-field">
+      <label class="ads-label ads-label--required" for="{{ form.body_src.id }}">{{ _("Text") }}</label>
+      <textarea class="ads-textarea sbe-source" id="{{ form.body_src.id }}" name="{{ form.body_src.name }}" rows="18" required {{ fields.invalid(form.body_src, "body-help") }}>{{ form.body_src.data or "" }}</textarea>
+      <small class="ads-help" id="body-help">{{ _("In Markdown: **bold**, ## heading, - list, [[Title of a page]] for a link to another page.") }} <a href="{{ url_for('.wiki_help', community_id=g.community.slug) }}">{{ _("Syntax help") }}</a></small>
+      {{ fields.errors(form.body_src) }}
+    </div>
+    <section class="ads-field" aria-labelledby="preview-label">
+      <span class="ads-label" id="preview-label">{{ _("Preview") }}</span>
+      <div class="sbe-preview-pane ads-prose" data-preview="{{ url_for('.page_preview', community_id=g.community.slug) }}" data-preview-of="{{ form.body_src.id }}"></div>
+    </section>
+    </div>
+    {{ m.files_field([] if creating else page.attachments) }}
+    <div class="ads-field">
+      <label class="ads-label" for="{{ form.message.id }}">{{ _("What you changed") }}</label>
+      <input class="ads-input" id="{{ form.message.id }}" name="{{ form.message.name }}" type="text" value="{{ form.message.data or '' }}" aria-describedby="message-help">
+      <small class="ads-help" id="message-help">{{ _("Optional. The page's history shows it, with your name and the date.") }}</small>
+    </div>
+  </div>
+  <div class="ads-card__foot ads-cluster ads-gap-sm">
+    <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="{{ 'create' if creating else 'edit' }}">{{ _("Save") }}</button>
+    <a class="ads-btn ads-btn--ghost" href="{{ url_for('.index', community_id=g.community.slug) if creating else url_for(page) }}">{{ _("Cancel") }}</a>
+  </div>
+</form>
+{% endblock %}

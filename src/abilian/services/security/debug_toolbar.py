@@ -71,16 +71,14 @@ class SecurityInfoDebugPanel(DebugPanel):
             else:
                 info["users"].add(principal)
 
-        for r in roles:
-            info = roles[r]
+        for info in roles.values():
             info["groups"] = [
-                f"{g} (id={{g.id}})"
-                for g in sorted(info["groups"], key=lambda g: g.name)
+                f"{g} (id={g.id})" for g in sorted(info["groups"], key=lambda g: g.name)
             ]
             users = sorted(
                 info["users"], key=lambda u: (u.last_name.lower(), u.first_name.lower())
             )
-            info["users"] = [f'{u} (id={{u.id}}, email="{{u.email}}")' for u in users]
+            info["users"] = [f'{u} (id={u.id}, email="{u.email}")' for u in users]
 
         jinja_env = current_app.jinja_env
         jinja_env.filters.update(self.jinja_env.filters)

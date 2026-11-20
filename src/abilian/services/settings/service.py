@@ -72,7 +72,7 @@ class SettingsService(Service):
 
         # don't use iteritems: 'value' require little processing whereas we only
         # want 'key'
-        return [i[0] for i in query.yield_per(1000).values(Setting.key)]
+        return [i[0] for i in query.yield_per(1000).with_entities(Setting.key)]
 
     def iteritems(self, prefix: str | None = None) -> Iterator[tuple[str, Any]]:
         """Like dict.iteritems."""

@@ -5,11 +5,10 @@
 # TODO: move to the activity service ?
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import sqlalchemy as sa
 from flask import g
-from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 
 from abilian.core.extensions import db
@@ -25,13 +24,17 @@ if TYPE_CHECKING:
 
 
 def get_recent_entries(
+    user: User,
     num: int = 20,
-    user: User | None = None,
+    actor: User | None = None,
     community: CommunityPresenter | None = None,
-) -> list[Any]:
+    kinds: tuple[type, ...] = (),
+) -> list[ActivityEntry]:
+    """What `user` may see of the latest activity, by `actor` or in `community`
+    if given, on objects of one of `kinds` if any."""
     # Check just in case
-    if not current_user.has_role(ADMIN):
-        if community and not community.has_member(current_user):
+    if not user.has_role(ADMIN):
+        if community and not community.has_member(user):
             raise Forbidden
 
     query = ActivityEntry.query.options(sa.orm.joinedload(ActivityEntry.object))
@@ -43,20 +46,27 @@ def get_recent_entries(
                 ActivityEntry.object == g.community,
             )
         )
-    if user:
-        query = query.filter(ActivityEntry.actor == user)
+    if actor:
+        query = query.filter(ActivityEntry.actor == actor)
+    if kinds:
+        query = query.filter(
+            ActivityEntry.object_type.in_([kind.entity_type for kind in kinds])
+        )
 
     # Security check
     #
     # we use communities ids instead of object because as of sqlalchemy 0.8 the
     # 'in_' operator cannot be used with relationships, only foreign keys values
-    if not community and not current_user.has_role(ADMIN):
-        community_ids = Membership.query.filter(
-            Membership.user_id == current_user.id
-        ).values(Membership.community_id)
-
-        # convert generator to list: we'll need it twice during query filtering
-        community_ids = list(community_ids)
+    if not community and not user.has_role(ADMIN):
+        # `.values()` yields Row tuples, so unpack them: binding a Row into the
+        # `in_()` below raises "type 'Row' is not supported".
+        # Listed because we need them twice during query filtering.
+        community_ids = [
+            community_id
+            for (community_id,) in Membership.query.filter(
+                Membership.user_id == user.id
+            ).values(Membership.community_id)
+        ]
         if not community_ids:
             return []
 
@@ -80,15 +90,16 @@ def get_recent_entries(
             break
 
         # Remove entries corresponding to deleted objects
-        if entry.object is None:
-            db.session.delete(entry)
-            deleted = True
-            continue
+        match entry.object:
+            case None:
+                db.session.delete(entry)
+                deleted = True
+                continue
 
-        if isinstance(entry.object, (Folder, Document)) and not has_permission(
-            current_user, READ, obj=entry.object, inherit=True
-        ):
-            continue
+            case Folder() | Document() if not has_permission(
+                user, READ, obj=entry.object, inherit=True
+            ):
+                continue
 
         entries.append(entry)
 

@@ -4,34 +4,32 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from flask_sqlalchemy import SQLAlchemy as SAExtension
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    """The models' base: Flask-SQLAlchemy builds `db.Model` on it.
+
+    Flask-SQLAlchemy types `db.Model` as its own class whatever the base, so
+    `SQLAlchemy.Model` below says what it is.
+    """
+
 
 if TYPE_CHECKING:
-    from flask import Flask
-    from sqlalchemy.engine.url import URL
+    from flask_sqlalchemy.model import Model as FlaskModel
+
+    class DeclaredModel(Base, FlaskModel):
+        """What `db.Model` is, for type checkers: the declarative base, typed
+        (constructor, `__table__`, `registry`), with Flask-SQLAlchemy's
+        `query`."""
+
+        __abstract__ = True
 
 
 class SQLAlchemy(SAExtension):
-    """Base subclass of :class:`flask_sqlalchemy.SQLAlchemy`.
+    """Base subclass of :class:`flask_sqlalchemy.SQLAlchemy`, typing its models."""
 
-    Add our custom driver hacks.
-    """
-
-    def apply_driver_hacks(
-        self, app: Flask, info: URL, options: dict[str, Any]
-    ) -> None:
-        super().apply_driver_hacks(app, info, options)
-
-        if info.drivername == "sqlite":
-            connect_args = options.setdefault("connect_args", {})
-
-            if "isolation_level" not in connect_args:
-                # required to support savepoints/rollback without error. It disables
-                # implicit BEGIN/COMMIT statements made by pysqlite (a COMMIT kills all
-                # savepoints made).
-                connect_args["isolation_level"] = None
-
-        elif info.drivername.startswith("postgres"):
-            options.setdefault("client_encoding", "utf8")
+    Model: type[DeclaredModel]

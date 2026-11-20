@@ -1,0 +1,22 @@
+Bonjour{% if user.first_name %} {{ user.first_name }}{% endif %},
+
+{{ inviter.name }} vous a ajouté à la communauté « {{ community.name }} » sur {{ config.SITE_NAME }}.
+{% if note %}
+Son message :
+
+{{ note | indent(2, first=true) }}
+{% endif %}
+{% if first_time %}
+Pour entrer, choisissez votre mot de passe à cette adresse, valable 24 heures :
+
+{{ link }}
+
+Passé ce délai, « Mot de passe oublié ? » sur la page de connexion vous en envoie une autre.
+{% else %}
+Vous trouverez la communauté ici :
+
+{{ link }}
+{% endif %}
+Cordialement,
+
+  {{ config.SITE_NAME }}

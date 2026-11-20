@@ -1,7 +1,38 @@
-<textarea name="{{ field.name }}" class="js-widget hide"
-    {%- if kw.rows is defined %} rows="{{ kw.rows }}"{%- endif %}
-    data-init-with="richtext"
-    data-profile="{{ kw.profile }}"
-    {%- if kw.allowed_tags is defined %} data-allowed-tags="{{ kw.allowed_tags | tojson |forceescape }}"{%- endif %}>
-  {{ value | safe }}
-</textarea>
+{#- The toolbar is here rather than in editor.js for its translated labels. It
+    stays hidden unless the editor loads: without it the textarea still works,
+    and what is typed in it goes through the same sanitiser. -#}
+{%- macro tool(command, label, icon=None, text=None, active=None, level=None) %}
+  <button type="button" class="richtext-tool" title="{{ label }}" aria-label="{{ label }}"
+          data-command="{{ command }}"
+          {%- if active %} data-active="{{ active }}" aria-pressed="false"{% endif %}
+          {%- if level %} data-level="{{ level }}"{% endif %}>
+    {%- if icon %}<i class="fa fa-{{ icon }}" aria-hidden="true"></i>{% else %}{{ text }}{% endif -%}
+  </button>
+{%- endmacro -%}
+
+<textarea id="{{ field.id }}" name="{{ field.name }}" rows="{{ kw.rows|default(10) }}"
+          aria-label="{{ field.label.text }}" data-richtext
+          class="block w-full px-3 py-2 border border-gray-300 rounded-md">{{ value }}</textarea>
+
+<div class="richtext" hidden>
+  <div class="richtext-toolbar" role="toolbar" aria-label="{{ _('Formatting') }}">
+    {{ tool("toggleBold", _("Bold"), icon="bold", active="bold") }}
+    {{ tool("toggleItalic", _("Italic"), icon="italic", active="italic") }}
+    {{ tool("toggleHeading", _("Heading"), text="H2", active="heading", level=2) }}
+    {{ tool("toggleHeading", _("Subheading"), text="H3", active="heading", level=3) }}
+    {{ tool("toggleBulletList", _("Bulleted list"), icon="list-ul", active="bulletList") }}
+    {{ tool("toggleOrderedList", _("Numbered list"), icon="list-ol", active="orderedList") }}
+    {{ tool("toggleBlockquote", _("Quote"), icon="quote-left", active="blockquote") }}
+    <button type="button" class="richtext-tool" title="{{ _('Link') }}" aria-label="{{ _('Link') }}"
+            data-link-prompt="{{ _('Link address') }}" data-active="link" aria-pressed="false">
+      <i class="fa fa-link" aria-hidden="true"></i>
+    </button>
+    {{ tool("unsetAllMarks", _("Clear formatting"), icon="eraser") }}
+    {{ tool("undo", _("Undo"), icon="undo") }}
+    {{ tool("redo", _("Redo"), icon="repeat") }}
+  </div>
+  <div class="richtext-content prose prose-sm max-w-none"></div>
+</div>
+
+{#- A page with several editors repeats this tag; a module only ever runs once. #}
+{{ vite_asset('src/editor.js') }}

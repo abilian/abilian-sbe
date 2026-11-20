@@ -22,6 +22,8 @@ from abilian.core.extensions import db
 from abilian.i18n import _, _l
 from abilian.services.auth.service import user_menu
 from abilian.services.base import Service, ServiceState
+from abilian.services.security import AUTHENTICATED
+from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem, NavItem
 
@@ -72,21 +74,13 @@ class PreferenceService(Service):
             for panel in panels:
                 self.register_panel(panel)
 
-    def get_preferences(self, user: User | None = None) -> dict[str, Any]:
+    def get_preferences(self, user: User) -> dict[str, Any]:
         """Return a string->value dictionnary representing the given user
-        preferences.
-
-        If no user is provided, the current user is used instead.
-        """
-        if user is None:
-            user = current_user
+        preferences."""
         return {pref.key: pref.value for pref in user.preferences}
 
-    def set_preferences(self, user: User | None = None, **kwargs: Any) -> None:
+    def set_preferences(self, user: User, **kwargs: Any) -> None:
         """Set preferences from keyword arguments."""
-        if user is None:
-            user = current_user
-
         d = {pref.key: pref for pref in user.preferences}
         for k, v in kwargs.items():
             if k in d:
@@ -95,11 +89,8 @@ class PreferenceService(Service):
                 d[k] = UserPreference(user=user, key=k, value=v)
                 db.session.add(d[k])
 
-    def clear_preferences(self, user: User | None = None) -> None:
+    def clear_preferences(self, user: User) -> None:
         """Clear the user preferences."""
-        if user is None:
-            user = current_user
-
         #  don't delete UserPreference 1 by 1 with session.delete, else
         #  user.preferences is not updated until commit() (not flush()). see
         #  http://docs.sqlalchemy.org/en/rel_0_7/orm/session.html#deleting-from-collections
@@ -130,11 +121,13 @@ class PreferenceService(Service):
         )
 
     def setup_blueprint(self, app: Flask) -> None:
-        bp = self.app_state.blueprint = Blueprint(
+        # Every panel edits the current user's own settings.
+        bp = self.app_state.blueprint = AccessControlBlueprint(
             "preferences",
             __name__,
             template_folder="templates",
             url_prefix="/preferences",
+            allowed_roles=AUTHENTICATED,
         )
 
         # we need to delay blueprint registration to allow adding more panels during
@@ -172,11 +165,6 @@ class PreferenceService(Service):
         @bp.route("/")
         def index():
             """Index redirects to the first accessible panel."""
-
-            # Work around unit test failure. FIXME.
-            if current_user.is_anonymous:
-                return "OK"
-
             for panel in self.app_state.panels:
                 if panel.is_accessible():
                     return redirect(url_for(f"preferences.{panel.id}"))

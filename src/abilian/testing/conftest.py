@@ -7,6 +7,7 @@ Reuses fixtures defined in abilian-core.
 
 from __future__ import annotations
 
+import os
 from typing import TYPE_CHECKING, Any
 
 from pytest import fixture
@@ -21,8 +22,10 @@ if TYPE_CHECKING:
     from flask import Flask
     from flask.ctx import AppContext, RequestContext
     from flask.testing import FlaskClient
-    from sqlalchemy.orm import Session
+    from flask_sqlalchemy.session import Session as FlaskSession
+    from sqlalchemy.orm import scoped_session
 
+    from abilian.app import Application
     from abilian.core.sqlalchemy import SQLAlchemy
 
 
@@ -37,7 +40,18 @@ class TestConfig:
     # WTF_CSRF_ENABLED = True
     WTF_CSRF_ENABLED = False
     BABEL_ACCEPT_LANGUAGES = ["en", "fr"]
-    SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        "SQLALCHEMY_DATABASE_URI", "sqlite:///:memory:"
+    )
+
+    #: In-memory broker: `pytest` must not need a redis on the machine running
+    #: it. Sends queue and go nowhere, which is what a test wants unless it is
+    #: testing the task -- and a task under test is run inline (see
+    #: TESTING_DIRECT_FUNCTION_CALL) rather than round-tripped through a queue.
+    #:
+    #: Deliberately no DRAMATIQ_BROKER_URL: flask_dramatiq passes it to the
+    #: broker constructor, and StubBroker takes no url.
+    DRAMATIQ_BROKER = "dramatiq.brokers.stub:StubBroker"
 
 
 @fixture(scope="module")
@@ -46,7 +60,7 @@ def config() -> Any:
 
 
 @fixture(scope="module")
-def app(config: Any) -> Flask:
+def app(config: Any) -> Application:
     # We currently return a fresh app for each test.
     # Using session-scoped app doesn't currently work.
     # Note: the impact on speed is minimal.
@@ -56,7 +70,7 @@ def app(config: Any) -> Flask:
 
 
 @fixture
-def db(app: Flask, app_context: AppContext) -> Iterator[SQLAlchemy]:
+def db(app: Application, app_context: AppContext) -> Iterator[SQLAlchemy]:
     """Return a fresh db for each test."""
     from abilian.core.extensions import db as _db
 
@@ -67,6 +81,8 @@ def db(app: Flask, app_context: AppContext) -> Iterator[SQLAlchemy]:
 
     cleanup_db(_db)
     _db.create_all()
+    # cleanup_db() committed: the blob store needs an open transaction.
+    _db.session.begin()
     yield _db
 
     _db.session.remove()
@@ -87,12 +103,12 @@ def test_request_context(app: Flask) -> Iterator[RequestContext]:
 
 
 @fixture
-def session(db: SQLAlchemy) -> Session:
+def session(db: SQLAlchemy) -> scoped_session[FlaskSession]:
     return db.session
 
 
 @fixture
-def db_session(db: SQLAlchemy) -> Session:
+def db_session(db: SQLAlchemy) -> scoped_session[FlaskSession]:
     return db.session
 
 
@@ -123,8 +139,17 @@ def admin_user(db: SQLAlchemy) -> User:
         password="admin",  # noqa: S106
         can_login=True,
     )
-    user.is_admin = True
     db.session.add(user)
+    db.session.flush()
+
+    # `user.is_admin = True` used to stand here, setting an attribute nothing
+    # reads. It went unnoticed because the security service answered True to
+    # everything when it was not running, so a fixture that granted nothing
+    # looked like it worked.
+    from abilian.services import security_service
+    from abilian.services.security import ADMIN
+
+    security_service.grant_role(user, ADMIN)
     db.session.flush()
     return user
 

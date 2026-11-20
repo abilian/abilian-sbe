@@ -1,0 +1,30 @@
+{#- What the site runs on, for whoever looks after it: the system, Python, the packages
+    and their versions, the application's configuration. Overrides Abilian Core's page. -#}
+{% extends "admin/_ads.html" %}
+{% block page_title %}{{ _("System") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("System information") }}{% endblock %}
+{#- A card of names and values, which scrolls when a value is long. -#}
+{% macro table(id, title) %}
+<section class="ads-card" aria-labelledby="{{ id }}">
+  <div class="ads-card__head"><h2 class="ads-card__title" id="{{ id }}">{{ title }}</h2></div>
+  <div class="ads-table-scroll" tabindex="0" aria-labelledby="{{ id }}">
+    <table class="ads-table ads-table--compact"><tbody>{{ caller() }}</tbody></table>
+  </div>
+</section>
+{% endmacro %}
+
+{% block content %}
+<div class="ads-stack">
+  <section class="ads-card" aria-labelledby="runs-on">
+    <div class="ads-card__head"><h2 class="ads-card__title" id="runs-on">{{ _("What the site runs on") }}</h2></div>
+    <dl class="ads-card__body sbe-pairs">
+      <dt>{{ _("System") }}</dt><dd><code class="sbe-wrap">{{ uname }}</code></dd>
+      <dt>Python</dt><dd><code class="sbe-wrap">{{ python_version }}</code></dd>
+    </dl>
+  </section>
+  <div class="ads-grid ads-col-lg">
+    {% call table("packages", _("Packages")) %}{% for package in packages %}<tr><th scope="row"><code>{{ package.name }}</code></th><td>{{ package.version }}</td></tr>{% endfor %}{% endcall %}
+    {% call table("config", _("Configuration")) %}{% for name, value in config_values %}<tr><th scope="row"><code>{{ name }}</code></th><td class="sbe-wrap">{{ value }}</td></tr>{% endfor %}{% endcall %}
+  </div>
+</div>
+{% endblock %}

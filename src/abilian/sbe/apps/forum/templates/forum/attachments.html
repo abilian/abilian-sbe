@@ -1,47 +1,29 @@
-{% extends "forum/_base.html" %}
-
-{% from "macros/box.html" import m_box_menu, m_box_content %}
-{% from "forum/_macros.html" import m_postattachments %}
-{% from "forum/_macros.html" import forum_menu %}
-
-{% block forumcontent %}
-  <div class="col-md-12">
-    {%- block forumsidebar %}
-
-      <div class="forum-menu-container">
-        <div class="forum-menu" role="group" style="width:100%;">
-          <span style="color:gray;">{{ _("Showing :") }}</span>
-          {%- set global_actions = actions.for_category('forum:global') %}
-          {{ forum_menu(global_actions) }}
-        </div>
-      </div>
-
-    {%- endblock %}
-
-    {% for month, posts in grouped_posts %}
-      <br>
-      <h2>{{ month }}</h2>
-      <table border="0" class="attachment-table">
-        <tr>
-          <th style="width:33%;">
-            {{ _("Topic") }}
-          </th>
-          <th style="width: 8.9%;text-align:center;">
-            {{ _("Owner") }}
-          </th>
-          <th style="float:left;position: relative;left: 5px;">
-            {{ _("Document") }}
-          </th>
-          <th>
-            {{ _("Size") }}
-          </th>
-        </tr>
-        {% for post in posts %}
-          {{ m_postattachments(post) }}
-        {% endfor %}
-      </table>
-    {% else %}
-      <p>{{ _("No attachment has been posted to this community yet") }}</p>
-    {% endfor %}
-  </div>
+{#- The files attached to a community's discussions, by month, newest first: each with
+    its size, who attached it, when, and in which discussion. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_head.html" as f with context %}
+{% block page_title %}{{ _("Attachments") }} · {{ _("Discussions") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  {{ f.head("attachments") }}
+  {% for month, posts in grouped_posts %}
+  <section aria-labelledby="month-{{ loop.index }}">
+    <h2 class="ads-card__body sbe-section-title" id="month-{{ loop.index }}">{{ month }}</h2>
+    <ul class="ads-list">
+      {% for post in posts %}{% for attachment in post.attachments %}
+      <li>
+        {{ file_icon(attachment.name) }}
+        <span class="ads-fill sbe-lines">
+          <span><a class="sbe-quiet" href="{{ url_for(attachment) }}">{{ attachment.name }}</a> <span class="ads-muted">{{ attachment.content_length | filesize }}</span></span>
+          <span class="ads-muted ads-cluster ads-gap-sm">{{ m.avatar(post.creator, "ads-avatar--xs") }}<span>{{ post.creator.name }} · {{ _("in") }} <a href="{{ url_for(post.thread) }}">{{ post.thread.title }}</a></span></span>
+        </span>
+        <span class="ads-muted">{{ m.time(post.created_at) }}</span>
+      </li>
+      {% endfor %}{% endfor %}
+    </ul>
+  </section>
+  {% else %}
+  <p class="ads-card__body ads-muted">{{ _("No file has been attached to a discussion in this community yet.") }}</p>
+  {% endfor %}
+</div>
 {% endblock %}

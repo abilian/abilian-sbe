@@ -1,0 +1,52 @@
+{#- A community's pages on the Abilian Design System. Its header carries what concerns
+    the community and nothing else; its tools are tabs (drawn in
+    `mockups/templates/community_base.html`). The tabs sit in one place on every page:
+    what differs, the home's description among it, comes under them. -#}
+{% extends "ads_base.html" %}
+{% set community = g.community %}
+{% set manager = can_manage(current_user, community) %}
+{% block pretitle %}{{ _("Community") }}{% endblock %}
+{% block heading %}<span class="ads-cluster ads-gap-sm">{{ m.tile(community) }}<span>{{ community.name }}</span></span>{% endblock %}
+{% block actions %}
+{% if manager %}
+<a class="ads-btn" href="{{ url_for('communities.wizard_data_insertion', community_id=community.slug) }}" {% if invite_page is not defined %}data-modal-open="#modal-invite" {% endif %}aria-label="{{ _('Invite members') }}">{{ icon("user-plus") }}<span class="sbe-wide-only">{{ _("Invite members") }}</span></a>
+<details class="ads-dropdown">
+  <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the community') }}">{{ icon("dots-vertical") }}</summary>
+  <div class="ads-menu">
+    <p class="ads-subheader sbe-menu-heading">{{ _("Running the community") }}</p>
+    <a class="ads-menu__item" href="{{ url_for('communities.settings', community_id=community.slug) }}">{{ icon("settings") }}{{ _("Settings") }}</a>
+    <a class="ads-menu__item" href="{{ url_for('communities.members', community_id=community.slug) }}">{{ icon("users") }}{{ _("Members and roles") }}</a>
+  </div>
+</details>
+{% endif %}
+{% endblock %}
+{% block body %}
+{#- The community's tools; its settings are in the header's menu. The current one
+    wears the community's colour, its tile's: where one is, at a glance. -#}
+<ul class="ads-tabs sbe-tabs-tinted {{ identity_class(community.id) }}">
+  {% for tab in actions.for_category("communities:tabs") if tab.name != "settings" %}
+  <li><a class="ads-tab" href="{{ tab.url() }}" {{ 'aria-current="page"' | safe if tab.is_current() }}>{{ tab.title }}</a></li>
+  {% endfor %}
+</ul>
+{% block content %}{% endblock %}
+{#- Inviting people, from any of the community's pages, for its managers; not on the
+    pages of inviting itself (they set `invite_page`): the first has the same fields,
+    and is where a spreadsheet goes. -#}
+{% if manager and invite_page is not defined %}
+{% import "community/_invite_fields.html" as invite with context %}
+<dialog class="ads-modal__panel sbe-dialog sbe-modal-wide" id="modal-invite" aria-labelledby="modal-invite-title">
+  <form method="post" action="{{ url_for('communities.wizard_check_data', community_id=community.slug) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-invite-title">{{ _("Invite members to %(name)s", name=community.name) }}</h2></div>
+    <div class="ads-modal__body ads-stack">
+      {{ invite.fields(community) }}
+      <small class="ads-help"><a href="{{ url_for('communities.wizard_data_insertion', community_id=community.slug) }}">{{ _("Or import a spreadsheet") }}</a></small>
+    </div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--primary" type="submit">{{ icon("user-plus") }}{{ _("Invite") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+{% endblock %}

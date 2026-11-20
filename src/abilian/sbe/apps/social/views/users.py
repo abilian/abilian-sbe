@@ -3,233 +3,158 @@
 from __future__ import annotations
 
 import pkgutil
-from html import escape
+from typing import TYPE_CHECKING
 
 import sqlalchemy as sa
 import sqlalchemy.exc
 import sqlalchemy.orm
-from flask import Response, flash, jsonify, redirect, render_template, request
-from flask_login import current_user
-from loguru import logger
-from sqlalchemy.sql.expression import and_, asc, desc, func, nullslast, or_
-from werkzeug.exceptions import InternalServerError
+from flask import jsonify, redirect, render_template, request
+from sqlalchemy.sql.expression import and_, func, or_
+from werkzeug.exceptions import BadRequest, Forbidden
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated
 from abilian.core.models.subjects import User
-from abilian.i18n import _, _l
-from abilian.sbe.apps.communities.models import Membership
-from abilian.sbe.apps.social.forms import UserProfileForm, UserProfileViewForm
-from abilian.sbe.apps.wall.presenters import ActivityEntryPresenter
+from abilian.sbe.apps.communities.models import Community, Membership
+from abilian.sbe.apps.communities.security import can_manage
+from abilian.sbe.apps.main.feed import feed_item
 from abilian.sbe.apps.wall.views import get_recent_entries
 from abilian.services import security_service
+from abilian.services.security import is_site_admin
 from abilian.web import url_for
-from abilian.web.filters import age
-from abilian.web.views import ObjectEdit, default_view
-from abilian.web.views.images import user_photo_url
+from abilian.web.listing import Listing
+from abilian.web.views import default_view
 
 from .social import social
+
+if TYPE_CHECKING:
+    from werkzeug.wrappers import Response
 
 DEFAULT_USER_MUGSHOT = pkgutil.get_data(
     "abilian.sbe", "static/images/silhouette_unknown.png"
 )
 
 
-def make_tabs(user: User) -> list[dict[str, str]]:
-    return [
-        {"id": "profile", "label": _("Profile"), "link": url_for(user, tab="profile")},
-        # dict(id='conversations', label=_(u'Conversations'), link=url_for(user), is_online=True),
-        {
-            "id": "documents",
-            "label": _("Documents"),
-            "link": url_for(user, tab="documents"),
-        },
-        {"id": "images", "label": _("Images"), "link": url_for(user, tab="images")},
-        {"id": "audit", "label": _("Audit"), "link": url_for(user, tab="audit")},
-    ]
+_NAME = (func.lower(User.last_name), func.lower(User.first_name))
+DIRECTORY_SORT_COLUMNS = {
+    "name": _NAME,
+    "created_at": (User.created_at, *_NAME),
+    "last_active": (User.last_active, *_NAME),
+}
+DIRECTORY_SEARCH_COLUMNS = (
+    User.first_name,
+    User.last_name,
+    User.job_title,
+    User.organization,
+)
 
 
 @social.route("/users/")
-def users() -> str:
-    query = request.args.get("query")
+@authenticated
+def users(user: User) -> str:
+    """The directory: the people I share a community with, or everyone.
 
-    if query:
-        query = query.replace("%", " ")
-        q = or_(
-            User.first_name.like(f"%{query}%"),
-            User.last_name.like(f"%{query}%"),
-        )
-        users = User.query.filter(q).limit(100).all()
-    else:
-        users = User.query.limit(100).all()
-    ctx = {"users": users}
-    return render_template("social/users.html", **ctx)
-
-
-@social.route("/users/dt_json")
-def users_dt_json():
-    """JSON call to fill a DataTable.
-
-    Needs some refactoring.
+    Mine first, when I am in a community; the communities each one shares with me.
     """
-    args = request.args
-
-    length = int(args.get("iDisplayLength", 0))
-    start = int(args.get("iDisplayStart", 0))
-    sort_col = int(args.get("iSortCol_0", 1))
-    sort_dir = args.get("sSortDir_0", "asc")
-    echo = int(args.get("sEcho", 0))
-    search = args.get("sSearch", "").replace("%", "").lower()
-
-    end = start + length
-
-    query = User.query
-    total_count = query.count()
-
-    if search:
-        # TODO: gérer les accents
-        filter = or_(
-            func.lower(User.first_name).like(f"%{search}%"),
-            func.lower(User.last_name).like(f"%{search}%"),
+    mine = [
+        community_id
+        for (community_id,) in Membership.query.filter(
+            Membership.user_id == user.id
+        ).values(Membership.community_id)
+    ]
+    neighbours = User.query.filter(
+        User.id.in_(
+            db.session.query(Membership.user_id).filter(
+                Membership.community_id.in_(mine)
+            )
         )
-        query = query.filter(filter).reset_joinpoint()
+    )
+    everyone = request.args.get("who") == "all" or not mine
+    listing, people = Listing.from_query(
+        User.query if everyone else neighbours,
+        DIRECTORY_SORT_COLUMNS,
+        "name",
+        DIRECTORY_SEARCH_COLUMNS,
+    )
+    found_mine = listing.filter(neighbours, DIRECTORY_SEARCH_COLUMNS).count()
+    found_all = listing.filter(User.query, DIRECTORY_SEARCH_COLUMNS).count()
+    return render_template(
+        "social/users.html",
+        listing=listing,
+        users=people,
+        everyone=everyone,
+        counts={"mine": found_mine if mine else 0, "all": found_all},
+        shared=communities_in_common(people, mine),
+    )
 
-    count = query.count()
-    SORT_COLS = {
-        1: [],  # will be set to [User.last_name, User.first_name]
-        2: [User.created_at],
-        3: [User.last_active],
-    }
-    columns = list(SORT_COLS.get(sort_col, []))
-    columns.extend([func.lower(User.last_name), func.lower(User.first_name)])
 
-    direction = asc if sort_dir == "asc" else desc
-    order_by = [direction(column) for column in columns]
-
-    # sqlite does not support 'NULLS FIRST|LAST' in ORDER BY clauses
-    engine = query.session.get_bind(User.__mapper__)
-    if engine.name != "sqlite":
-        order_by[0] = nullslast(order_by[0])
-
-    query = query.order_by(*order_by)
-
-    users = query.slice(start, end).all()
-
-    data = []
-    MUGSHOT_SIZE = 45
-    for user in users:
-        # TODO: this should be done on the browser.
-        user_url = url_for(".user", user_id=user.id)
-        mugshot = user_photo_url(user, size=MUGSHOT_SIZE)
-        name = escape(user.name or "")
-
-        cell0 = (
-            f'<a href="{user_url}"><img src="{mugshot}" width="{MUGSHOT_SIZE}" height="{MUGSHOT_SIZE}">'
-            "</a>"
-        )
-        cell1 = f'<div class="info"><a href="{user_url}">{name}</a></div>'
-        cell2 = age(user.created_at)
-        cell3 = age(user.last_active)
-        _cell4 = ""  # TODO: follow / unfollow?
-
-        data.append([cell0, cell1, cell2, cell3])
-
-    result = {
-        "sEcho": echo,
-        "iTotalRecords": total_count,
-        "iTotalDisplayRecords": count,
-        "aaData": data,
-    }
-    return jsonify(result)
+def communities_in_common(people: list[User], mine: list[int]) -> dict[int, list]:
+    """For each person, by id, the communities they are in that I am in too."""
+    shared: dict[int, list] = {person.id: [] for person in people}
+    memberships = Membership.query.filter(
+        Membership.user_id.in_(shared), Membership.community_id.in_(mine)
+    )
+    for membership in memberships:
+        shared[membership.user_id].append(membership.community)
+    return shared
 
 
 @social.route("/users/<int:user_id>")
 @default_view(social, User, "user_id")
-def user(user_id: int) -> str:
-    user = User.query.get(user_id)
+@authenticated
+def user(user: User, user_id: int) -> str:
+    """A person: how to reach them, what they did lately where `user` can see it,
+    and their communities."""
+    shown = User.query.get_or_404(user_id)
+    communities = [m.community for m in shown.communautes_membership]
+    in_common = user != shown and not security_service.has_role(user, "manager")
+    if in_common:
+        # Only those the viewer is in too (ticket 165).
+        communities = [c for c in communities if c.has_member(user)]
 
-    # FIXME: use user profiles
-    view_form = UserProfileViewForm(obj=user)
-
-    communities = [m.community for m in user.communautes_membership]
-    if current_user != user and (
-        not security_service.has_role(current_user, "manager")
-    ):
-        # filter visible communautes (ticket 165)
-        communities = [c for c in communities if c.has_member(current_user)]
-
-    view_form.communautes._set_data(communities)
-
-    # FIXME
-    contact = user
-    entries = get_recent_entries(user=user)
-    entries = ActivityEntryPresenter.wrap_collection(entries)
-    ctx = {
-        "user": user,
-        "contact": contact,
-        "view_form": view_form,
-        "can_edit": can_edit(user),
-        "tabs": make_tabs(user),
-        "activity_entries": entries,
-    }
-    return render_template("social/user.html", **ctx)
+    return render_template(
+        "social/user.html",
+        person=shown,
+        communities=communities,
+        in_common=in_common,
+        may_edit=can_edit(user, shown),
+        items=[feed_item(entry) for entry in get_recent_entries(user, actor=shown)],
+    )
 
 
-def can_edit(user: User) -> bool:
+def can_edit(user: User, profile_owner: User) -> bool:
+    """May `user` edit the profile of `profile_owner`?"""
     # TODO: introduce a "self" role?
-    return (user == current_user) or security_service.has_role(current_user, "admin")
+    return user == profile_owner or is_site_admin(user)
 
 
-class UserProfileEdit(ObjectEdit):
-    Model = User
-    Form = UserProfileForm
-    pk = "user_id"
-    _message_success = _l("Profile edited")
-
-    def init_object(self, args, kwargs):
-        args, kwargs = super().init_object(args, kwargs)
-        self.user = self.obj
-        return args, kwargs
-
-    def view_url(self):
-        return url_for(".user", user_id=self.user.id)
-
-    def edit(self):
-        if not can_edit(self.user):
-            return Response(status=403)
-        return super().edit()
-
-    def handle_commit_exception(self, exc):
-        db.session.rollback()
-        if isinstance(exc, sa.exc.IntegrityError):
-            log_msg = "Error saving user profile"
-        else:
-            log_msg = "Unexpected error while saving user profile"
-        logger.opt(exception=True).error(log_msg, extra={"stack": True})
-        flash(_("Error occured"), "error")
-        return self.redirect_to_view()
-
-
-social.route("/users/<int:user_id>/edit")(UserProfileEdit.as_view("user_edit"))
+@social.route("/users/<int:user_id>/edit")
+@authenticated
+def user_edit(user: User, user_id: int) -> Response:
+    """Editing a profile: one's own on one's account page, another's in the
+    administration, where only a site administrator goes."""
+    if user.id == user_id:
+        return redirect(url_for("preferences.user"))
+    if is_site_admin(user):
+        return redirect(url_for("admin.users_user", user_id=user_id))
+    raise Forbidden
 
 
 @social.route("/users/<int:user_id>", methods=["POST"])
-def user_post(user_id):
-    user = User.query.get(user_id)
+@authenticated
+def user_post(user: User, user_id: int) -> Response:
+    followed = User.query.get_or_404(user_id)
     action = request.form.get("action")
-    return_url = request.form.get("return_url")
 
-    if action == "follow":
-        current_user.follow(user)
-    elif action == "unfollow":
-        current_user.unfollow(user)
-    else:
-        msg = "Should not happen"
-        raise Exception(msg)
+    match action:
+        case "follow":
+            user.follow(followed)
+        case "unfollow":
+            user.unfollow(followed)
+        case _:
+            msg = f"Unknown action: {action}"
+            raise BadRequest(msg)
     db.session.commit()
-
-    if return_url:
-        # TODO: security check
-        return redirect(return_url)
     return redirect(url_for(".user_view", user_id=user_id))
 
 
@@ -237,11 +162,20 @@ def user_post(user_id):
 # Ad-hoc JSON endpoints, used by select boxes
 #
 @social.route("/users/json")
-def users_json():
-    q = request.args.get("q").replace("%", " ").lower()
-
-    if not q or len(q) < 2:
-        raise InternalServerError
+@authenticated
+def users_json(user: User) -> Response:
+    """The people whose name starts with `q`, with their address, for the pickers of
+    those who run something: a site administrator; or the manager of the community
+    `with_membership` names, who is told each one's role in it."""
+    q = request.args.get("q", "").replace("%", " ").strip().lower()
+    if len(q) < 2:
+        raise BadRequest
+    managed = request.args.get("with_membership", type=int)
+    community = db.session.get(Community, managed) if managed is not None else None
+    if not is_site_admin(user) and (
+        community is None or not can_manage(user, community)
+    ):
+        raise Forbidden
 
     query = User.query.filter(
         or_(
@@ -250,10 +184,9 @@ def users_json():
         )
     ).order_by(func.lower(User.last_name))
 
-    with_membership = request.args.get("with_membership")
+    with_membership = managed
     if with_membership is not None:
         # provide membership info for a community
-        with_membership = int(with_membership)
         query = (
             query.outerjoin(
                 Membership,
@@ -273,25 +206,27 @@ def users_json():
             ~Membership.query.filter(
                 Membership.user.expression, Membership.community_id == exclude_community
             )
-            .options(sa.orm.noload("user"), sa.orm.noload("community"))
+            .options(
+                sa.orm.noload(Membership.user), sa.orm.noload(Membership.community)
+            )
             .exists()
         )
         query = query.filter(exclude)
 
     results = []
-    for user in query.all():
+    for person in query.all():
         role = None
         if with_membership is not None:
-            user, role = user
+            person, role = person
 
         if role is not None:
             role = str(role)
 
         item = {
-            "id": user.id,
-            "text": f"{user.name} ({user.email})",
-            "name": user.name,
-            "email": user.email,
+            "id": person.id,
+            "text": f"{person.name} ({person.email})",
+            "name": person.name,
+            "email": person.email,
             "role": role,
         }
         results.append(item)

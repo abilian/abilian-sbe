@@ -212,7 +212,7 @@ class Converter:
         for line in output.split(b"\n"):
             if b":" in line:
                 key, value = line.strip().split(b":", 1)
-                key = str(key)
-                ret[f"PDF:{key}"] = str(value.strip(), errors="replace")
+                name = key.decode(errors="replace")
+                ret[f"PDF:{name}"] = value.strip().decode(errors="replace")
 
         return ret

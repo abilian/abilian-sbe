@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from . import upstream_info
 from .csrf import abilian_csrf, wtf_csrf as csrf
-from .jinjaext import DeferredJS
 from .login import login_manager
 from .mail import mail
 from .redis import Redis
@@ -24,5 +23,3 @@ __all__ = (
 )
 
 redis = Redis()
-
-deferred_js = DeferredJS()

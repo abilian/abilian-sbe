@@ -8,7 +8,9 @@ from flask_dramatiq import Dramatiq
 
 dramatiq = Dramatiq()
 
-# Remove prmeteus from middleware list
+# Remove prometheus from middleware list if present (default in dramatiq 1.x)
 # See:
 # https://groups.io/g/dramatiq-users/topic/disabling_prometheus/80745532?p=
-dramatiq.middleware = dramatiq.middleware[1:]
+dramatiq.middleware = [
+    m for m in dramatiq.middleware if type(m).__name__ != "Prometheus"
+]

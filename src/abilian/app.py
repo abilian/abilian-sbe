@@ -9,14 +9,14 @@ import errno
 import os
 import sys
 import warnings
-from functools import cached_property, partial
+from functools import cached_property, partial, update_wrapper
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import defusedxml
 import sqlalchemy as sa
 import sqlalchemy.exc
-from flask import Flask
+from flask import Flask, request
 from flask.config import ConfigAttribute
 from loguru import logger
 
@@ -24,6 +24,7 @@ import abilian.core.util
 import abilian.i18n
 from abilian.config import default_config
 from abilian.core import extensions, signals
+from abilian.core.application import as_application
 from abilian.core.plugin_manager import PluginManager
 from abilian.core.service_manager import ServiceManager
 from abilian.lib.scanner import scan_package
@@ -51,6 +52,12 @@ db = extensions.db
 
 
 def create_app(config: type | None = None, plugins=None, **kw: Any) -> Application:
+    # The instance (files, search index, caches) lives next to the project unless
+    # the environment says otherwise: a test server keeps its own, a deployment its
+    # volume. Relative to where the app starts, as Flask wants it absolute.
+    if os.environ.get("FLASK_INSTANCE_PATH"):
+        instance_path = Path(os.environ["FLASK_INSTANCE_PATH"]).resolve()
+        kw.setdefault("instance_path", str(instance_path))
     app = Application(**kw)
 
     # 1: Ensure app.config is properly set up
@@ -66,7 +73,60 @@ def create_app(config: type | None = None, plugins=None, **kw: Any) -> Applicati
     # 4: Perform post-registration actions
     signals.components_registered.send(app)
 
+    # Vite integration now handled in setup/extensions.py
+
     return app
+
+
+#: (directory, filename) -> version string. Static files do not change while
+#: the process runs, so this is computed once outside debug.
+_ASSET_VERSIONS: dict[tuple[str, str], str] = {}
+
+
+def _asset_version(directory: str, filename: str, debug: bool) -> str | None:
+    key = (directory, filename)
+    if not debug and key in _ASSET_VERSIONS:
+        return _ASSET_VERSIONS[key]
+
+    if ".." in filename:
+        return None
+
+    path = os.path.join(directory, filename)
+    # A URL for a file that is not there: let the request 404 rather than
+    # breaking url_for. Nor is a directory an asset: its URL is a base that
+    # file names are appended to, which a `?v=` would break.
+    if not os.path.isfile(path):
+        return None
+    stat = os.stat(path)
+
+    version = format(int(stat.st_mtime), "x")
+    _ASSET_VERSIONS[key] = version
+    return version
+
+
+def stamp_static_version(endpoint: str, values: dict[str, Any]) -> None:
+    """Add a cache-busting `v=` to static URLs.
+
+    Static assets are served with a long max-age, which is only safe if the URL
+    changes when the file does -- otherwise an upgrade leaves every browser on
+    the previously cached bundle until the cache expires.
+    """
+    from flask import current_app
+
+    filename = values.get("filename")
+    if not filename or "v" in values:
+        return
+
+    app = as_application(current_app)
+    directory = app.static_directories.get(endpoint)
+    if directory is None:
+        if endpoint != "static" or not app.static_folder:
+            return
+        directory = app.static_folder
+
+    version = _asset_version(directory, str(filename), app.debug)
+    if version:
+        values["v"] = version
 
 
 class Application(
@@ -82,8 +142,8 @@ class Application(
 
     default_config = default_config
 
-    #: If True all views will require by default an authenticated user, unless
-    #: Anonymous role is authorized. Static assets are always public.
+    #: If True, all views will require by default an authenticated user, unless
+    #: the Anonymous role is authorized. Static assets are always public.
     private_site = ConfigAttribute("PRIVATE_SITE")
 
     #: instance of :class:`.web.views.registry.Registry`.
@@ -104,6 +164,10 @@ class Application(
 
         self.default_view = ViewRegistry()
         self.js_api = {}
+        #: endpoint -> directory, for the static routes added by
+        #: `add_static_url`. Used to stamp asset URLs with a version.
+        self.static_directories: dict[str, str] = {}
+        self.url_defaults(stamp_static_version)
 
     @cached_property
     def data_dir(self) -> Path:
@@ -208,6 +272,29 @@ class Application(
         else:
             auth_state.add_bp_access_controller(name, func)
 
+    def process_response(self, response):
+        """Strip `Vary: Cookie` from cacheable static responses.
+
+        The access check on a static route reads `current_user`, so the session
+        is touched and Flask stamps `Vary: Cookie` in `save_session` -- after
+        the view and after every `after_request` hook, which is why this has to
+        happen here. That header keys each cached asset by the cookie value,
+        and the session cookie is re-signed as you browse, so every page view
+        missed the cache and refetched the whole asset set.
+
+        Only responses this app marked public and immutable are touched; those
+        bytes are identical for every user.
+        """
+        response = super().process_response(response)
+
+        cache_control = response.cache_control
+        if (
+            request.endpoint in self.static_directories or request.endpoint == "static"
+        ) and cache_control.public:
+            response.vary.discard("Cookie")
+
+        return response
+
     def add_static_url(
         self, url_path: str, directory: str, endpoint: str, roles: Collection[Role] = ()
     ) -> None:
@@ -228,11 +315,20 @@ class Application(
         With default setup it will serve content from directory
         `/path/to/myplugin/resources` from url `http://.../static/myplugin`
         """
+        self.static_directories[endpoint] = directory
         url_path = f"{self.static_url_path}/{url_path}/<path:filename>"
+        view_func = update_wrapper(
+            partial(
+                send_file_from_directory,
+                directory=directory,
+                max_age=self.config.get("STATIC_CACHE_MAX_AGE", 0) or None,
+            ),
+            send_file_from_directory,
+        )
         self.add_url_rule_with_role(
             url_path,
             endpoint=endpoint,
-            view_func=partial(send_file_from_directory, directory=directory),
+            view_func=view_func,
             roles=roles,
         )
         self.add_access_controller(

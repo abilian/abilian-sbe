@@ -101,13 +101,14 @@ def indexable_role(role_or_principal: Role | Principal) -> str:
         # transform anonymous user to anonymous role
         role_or_principal = ANONYMOUS
 
-    if isinstance(role_or_principal, Role):
-        return f"role:{role_or_principal.name}"
+    match role_or_principal:
+        case Role():
+            return f"role:{role_or_principal.name}"
 
-    if isinstance(role_or_principal, User):
-        return f"user:{role_or_principal.id:d}"
+        case User():
+            return f"user:{role_or_principal.id:d}"
 
-    if isinstance(role_or_principal, Group):
-        return f"group:{role_or_principal.id:d}"
+        case Group():
+            return f"group:{role_or_principal.id:d}"
 
     raise ValueError(repr(role_or_principal))

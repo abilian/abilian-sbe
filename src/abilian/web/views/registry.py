@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Any
 from flask import Blueprint, url_for
 from whoosh.searching import Hit
 
+from abilian.core.application import as_application
 from abilian.core.extensions import db
 
 if TYPE_CHECKING:
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
     from flask.blueprints import BlueprintSetupState
 
     from abilian.app import Application
-    from abilian.core.entities import Entity
+    from abilian.core.models.base import Model
 
 
 class Registry:
@@ -29,7 +30,7 @@ class Registry:
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         self._map: dict[str, Callable] = {}
 
-    def register(self, entity: Entity | type[Entity], url_func: Callable) -> None:
+    def register(self, entity: Model | type[Model], url_func: Callable) -> None:
         """Associate a `url_func` with entity's type.
 
         :param:entity: an :class:`abilian.core.extensions.db.Model` class or
@@ -96,13 +97,12 @@ class default_view:
     def __init__(
         self,
         app_or_blueprint: Application | Blueprint,
-        entity: Entity,
-        id_attr: str = "object_id",
+        entity: type[Model],
+        id_attr: str | None = "object_id",
         endpoint: Any | None = None,
         kw_func: Any | None = None,
     ) -> None:
         self.app_or_blueprint = app_or_blueprint
-        self.is_bp = isinstance(app_or_blueprint, Blueprint)
         self.entity = entity
         self.id_attr = id_attr
         self.endpoint = endpoint
@@ -113,13 +113,13 @@ class default_view:
 
         if endpoint is None:
             endpoint = view.__name__
-            if self.is_bp:
+            if isinstance(self.app_or_blueprint, Blueprint):
                 endpoint = f".{endpoint}"
 
         if endpoint[0] == ".":
             endpoint = self.app_or_blueprint.name + endpoint
 
-        def default_url(obj: Entity, obj_type: str, obj_id: int, **kwargs: Any) -> str:
+        def default_url(obj: Model, obj_type: str, obj_id: int, **kwargs: Any) -> str:
             kw = {}
             kw.update(kwargs)
             if self.id_attr is not None:
@@ -130,13 +130,16 @@ class default_view:
                 kw = self.kw_func(kw, obj, obj_type, obj_id, **kwargs)
             return url_for(endpoint, **kw)
 
-        if self.is_bp:
+        target = self.app_or_blueprint
+        if isinstance(target, Blueprint):
 
-            @self.app_or_blueprint.record_once
+            @target.record_once
             def set_default_view(state: BlueprintSetupState) -> None:
-                state.app.default_view.register(self.entity, default_url)
+                as_application(state.app).default_view.register(
+                    self.entity, default_url
+                )
 
         else:
-            self.app_or_blueprint.default_view.register(self.entity, default_url)
+            target.default_view.register(self.entity, default_url)
 
         return view

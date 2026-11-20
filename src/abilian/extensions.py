@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
-from abilian.web.assets.extension import AssetManager
+from flask_vite import Vite
 
-asset_manager = AssetManager()
+# Use Flask-Vite extension - standard, maintained Vite integration
+vite = Vite()

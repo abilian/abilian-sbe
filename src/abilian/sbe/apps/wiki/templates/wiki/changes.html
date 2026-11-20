@@ -1,33 +1,35 @@
+{#- A page's history: its revisions, newest first, who made each, when and what they
+    said; two of them ticked to compare. Drawn in `mockups/templates/wiki-history.html`,
+    with boxes where the mockup has two columns of buttons: the comparison takes any
+    two. -#}
 {% extends "wiki/_base.html" %}
-
-{% from "macros/box.html" import m_box_content %}
-
-{% block content %}
-  {% call m_box_content(_("(changes)")) %}
-    {% set show_controls = revisions|length > 1 %}
-    <form
-        action="{{ url_for(".page_compare", community_id=g.community.slug, title=page.title) }}">
-      <ul style="list-style: none;">
+{% import "wiki/macros.html" as w with context %}
+{% block wiki_title %}{{ _("History") }} · {{ page.title }}{% endblock %}
+{% block wiki_content %}
+<form class="ads-card" method="get" action="{{ url_for('.page_compare', community_id=g.community.slug) }}" aria-labelledby="page-title">
+  <input type="hidden" name="title" value="{{ page.title }}">
+  <div class="ads-card__head ads-spread">
+    <div class="ads-stack ads-gap-sm">{{ w.page_head(page, _("History")) }}</div>
+    {% if revisions | length > 1 %}<button class="ads-btn ads-btn--primary" type="submit" name="action" value="compare">{{ icon("git-compare") }}{{ _("Compare two revisions") }}</button>{% endif %}
+  </div>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter ads-table--hover">
+      <thead><tr>
+        {% if revisions | length > 1 %}<th scope="col"><span class="sbe-sr-only">{{ _("Compare") }}</span></th>{% endif %}
+        <th scope="col">{{ _("Revision") }}</th><th scope="col">{{ _("By") }}</th><th scope="col" class="ads-full">{{ _("What changed") }}</th><th scope="col" class="ads-end">{{ _("When") }}</th>
+      </tr></thead>
+      <tbody>
         {% for rev in revisions %}
-          <li>{% if show_controls %}<input type="checkbox" name="rev{{ rev.number }}">{% endif %} {{ rev.number }}: by
-            <a
-                href="{{ url_for("social.user", user_id=rev.author.id) }}">{{ rev.author }}</a>
-            at {{ rev.created_at|datetimeformat }}
-            ({{ rev.body_src|length }} {{ _("characters") }})
-          </li>
+        <tr>
+          {% if revisions | length > 1 %}<td><input class="ads-check" type="checkbox" name="rev{{ rev.number }}" {{ "checked" if loop.index <= 2 }} aria-label="{{ _('Compare revision %(num)d', num=rev.number) }}"></td>{% endif %}
+          <td>{{ rev.number }}{% if loop.first %} <span class="ads-badge ads-tone-success">{{ _("current") }}</span>{% endif %}</td>
+          <td>{% if rev.author %}<span class="ads-media ads-gap-sm">{{ m.avatar(rev.author, "ads-avatar--xs") }}<span class="ads-truncate">{{ rev.author.name }}</span></span>{% endif %}</td>
+          <td class="ads-full">{% if rev.message %}{{ rev.message }}{% else %}<span class="ads-muted">—</span>{% endif %}</td>
+          <td class="ads-end ads-muted">{{ m.time(rev.created_at) }}</td>
+        </tr>
         {% endfor %}
-      </ul>
-
-      <input type="hidden" name="title" value="{{ page.title }}">
-
-      {% if show_controls %}
-        <div class="form-actions">
-          <button type="submit" class="btn btn-primary" name="action"
-                  value="compare">
-            {{ _("Compare revisions") }}
-          </button>
-        </div>
-      {% endif %}
-    </form>
-  {% endcall %}
+      </tbody>
+    </table>
+  </div>
+</form>
 {% endblock %}

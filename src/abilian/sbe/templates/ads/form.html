@@ -1,0 +1,94 @@
+{# The form macros: abilian-ds's signatures, abilian-ds's classes.
+
+   These lived here emitting Bootstrap class names, and the lint gate could not see it
+   because Tabler's stylesheet was in the gate's own vocabulary. Nothing rendered against
+   that stylesheet any more; the macros had simply stopped being styled.
+
+   There is no `is-invalid` class. The invalid state is keyed off `aria-invalid="true"`
+   in form.css — the attribute the field must carry anyway — so a field cannot look wrong
+   without also announcing that it is wrong, and the two cannot drift apart.
+
+   These are for ordinary server-rendered Jinja. They cannot be used inside a situ
+   component: situ compiles the component's .html at source level, so a binder a macro
+   emits is never seen by the compiler. Macros render chrome; islands are hand-written. #}
+
+{%- macro _wiring(name, help, errors, required) -%}
+{%- set described = ([name ~ "-help"] if help else []) + ([name ~ "-error"] if errors else []) -%}
+{%- if described %} aria-describedby="{{ described | join(" ") }}"{% endif -%}
+{%- if errors %} aria-invalid="true"{% endif -%}
+{%- if required %} required{% endif -%}
+{%- endmacro -%}
+
+{%- macro _messages(name, help, errors) -%}
+{%- if help %}<small id="{{ name }}-help" class="ads-help">{{ help }}</small>{% endif -%}
+{%- if errors %}<small id="{{ name }}-error" class="ads-error">{{ errors | join(", ") }}</small>{% endif -%}
+{%- endmacro -%}
+
+{%- macro _wrapper(name, label, help, errors, required, class) -%}
+<div class="ads-field {{ class }}">
+  <label for="{{ name }}" class="ads-label {{ 'ads-label--required' if required else '' }}">{{ label }}</label>
+  {{ caller() }}
+  {{- _messages(name, help, errors) }}
+</div>
+{%- endmacro -%}
+
+{# A labelled text input. `errors` is a list of strings from server-side validation. #}
+{%- macro field(name, label, type="text", value="", help=none, errors=none,
+                required=false, placeholder=none, class="") -%}
+{%- call _wrapper(name, label, help, errors, required, class) -%}
+<input id="{{ name }}" name="{{ name }}" type="{{ type }}" value="{{ value }}" class="ads-input"
+       {%- if placeholder %} placeholder="{{ placeholder }}"{% endif %}
+       {{- _wiring(name, help, errors, required) }}>
+{%- endcall -%}
+{%- endmacro -%}
+
+{# A labelled select. `options` is a list of (value, label) pairs. #}
+{%- macro select(name, label, options, value="", help=none, errors=none,
+                 required=false, class="") -%}
+{%- call _wrapper(name, label, help, errors, required, class) -%}
+<select id="{{ name }}" name="{{ name }}" class="ads-select"
+        {{- _wiring(name, help, errors, required) }}>
+  {%- for option_value, option_label in options %}
+  <option value="{{ option_value }}"{{ " selected" if option_value == value }}>{{ option_label }}</option>
+  {%- endfor %}
+</select>
+{%- endcall -%}
+{%- endmacro -%}
+
+{# A labelled multi-line input. Same contract as field(). #}
+{%- macro textarea(name, label, value="", rows=4, help=none, errors=none,
+                   required=false, placeholder=none, class="") -%}
+{%- call _wrapper(name, label, help, errors, required, class) -%}
+<textarea id="{{ name }}" name="{{ name }}" rows="{{ rows }}" class="ads-textarea"
+          {%- if placeholder %} placeholder="{{ placeholder }}"{% endif %}
+          {{- _wiring(name, help, errors, required) }}>{{ value }}</textarea>
+{%- endcall -%}
+{%- endmacro -%}
+
+{# A checkbox with its label beside it. The input sits INSIDE the label, so the label is
+   implicit and needs no `for` — which is also why the a11y check has to understand the
+   wrapped form rather than looking for a matching `for`/`id` pair. #}
+{%- macro checkbox(name, label, checked=false, help=none, errors=none, class="") -%}
+<div class="ads-field {{ class }}">
+  <label class="ads-check">
+    <input id="{{ name }}" name="{{ name }}" type="checkbox"
+           {{- " checked" if checked }}{{ _wiring(name, help, errors, false) }}>
+    <span>{{ label }}</span>
+  </label>
+  {{- _messages(name, help, errors) }}
+</div>
+{%- endmacro -%}
+
+{%- set BUTTON_VARIANT = {
+  "primary":   "ads-btn ads-btn--primary",
+  "secondary": "ads-btn",
+  "ghost":     "ads-btn ads-btn--ghost",
+  "danger":    "ads-btn ads-btn--danger",
+} -%}
+{%- set BUTTON_SIZE = {"s": "ads-btn--sm", "m": ""} -%}
+
+{# A real <button>. #}
+{%- macro button(label, variant="primary", size="m", type="button", disabled=false, class="") -%}
+<button type="{{ type }}"{% if disabled %} disabled{% endif %}
+        class="{{ BUTTON_VARIANT[variant] }} {{ BUTTON_SIZE[size] }} {{ class }}">{{ label }}</button>
+{%- endmacro -%}

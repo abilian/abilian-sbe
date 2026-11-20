@@ -1,0 +1,88 @@
+{#- The accounts: who, their address, whether they may sign in and have, administrators
+    marked, how many communities, the last sign-in. Filtered by name or address, or by state;
+    a row's ⋯ for what can be done with it. Overrides Abilian Core's page; drawn in
+    `mockups/templates/admin-users.html`. -#}
+{% extends "admin/_ads.html" %}
+{% import "admin/_ads_macros.html" as a with context %}
+{% set kinds = [("all", _("All")), ("invited", _("Never signed in")), ("disabled", _("Disabled")), ("admins", _("Administrators"))] %}
+{% block page_title %}{{ _("Accounts") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("Accounts") }}{% endblock %}
+{% block actions %}<a class="ads-btn ads-btn--primary" href="{{ url_for('.users_new') }}">{{ icon("user-plus") }}{{ _("New account") }}</a>{% endblock %}
+{% block content %}
+<div class="ads-card">
+  <div class="ads-card__head ads-spread">
+    <ul class="ads-pills" aria-label="{{ _('Which accounts') }}">
+      {% for name, label in kinds %}
+      <li><a class="ads-pill" href="{{ url_for('.users', state=None if name == 'all' else name, q=listing.search or None) }}" {{ 'aria-current="page"' | safe if name == kind }}>{{ label }} ({{ counts[name] }})</a></li>
+      {% endfor %}
+    </ul>
+    <form method="get" action="{{ url_for('.users') }}">
+      <span class="ads-input-icon">
+        <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+        <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Name or address') }}" aria-label="{{ _('Filter the accounts by name or address') }}">
+      </span>
+      {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+    </form>
+  </div>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter ads-table--hover" id="users-table">
+      <thead><tr>
+        {{ m.sort_th(listing, "name", _("Name")) }}
+        <th scope="col" class="ads-col--secondary">{{ _("State") }}</th>
+        <th scope="col" class="ads-end ads-col--secondary">{{ _("Communities") }}</th>
+        {{ m.sort_th(listing, "last_active", _("Last sign-in"), "ads-end") }}
+        <th scope="col"><span class="sbe-sr-only">{{ _("Actions") }}</span></th>
+      </tr></thead>
+      <tbody>
+        {% set communities = community_counts(rows | map('first')) %}
+        {% for user, roles in rows %}
+        {% set user_url = url_for('.users_user', user_id=user.id) %}
+        <tr>
+          <td class="ads-full">
+            <span class="ads-media ads-gap-sm">{{ m.avatar(user) }}
+              <span class="sbe-lines">
+                <span class="ads-cluster ads-gap-sm"><a class="sbe-quiet" href="{{ user_url }}"><strong>{{ user.name }}</strong></a>{% if roles %}<span class="ads-badge ads-tone-brand">{{ _("Administrator") }}</span>{% endif %}</span>
+                <span class="ads-muted ads-truncate">{{ user.email }}</span>
+              </span>
+            </span>
+          </td>
+          <td class="ads-col--secondary">{{ a.state(user) }}</td>
+          <td class="ads-end ads-col--secondary">{{ communities.get(user.id, 0) }}</td>
+          <td class="ads-end ads-muted">{% if user.last_active %}{{ m.time(user.last_active) }}{% else %}{{ _("never") }}{% endif %}</td>
+          <td class="ads-end">
+            <details class="ads-dropdown">
+              <summary class="ads-btn ads-btn--ghost ads-btn--sm" aria-label="{{ _('Actions on the account of %(name)s', name=user.name) }}">{{ icon("dots") }}</summary>
+              <div class="ads-menu">
+                <a class="ads-menu__item" href="{{ user_url }}">{{ icon("pencil") }}{{ _("Edit") }}</a>
+                {% set account_url = url_for('.users_account', user_id=user.id) %}
+                {% if user.can_login %}
+                <form method="post" action="{{ account_url }}">
+                  {{ csrf.field() }}
+                  <button class="ads-menu__item" type="submit" name="action" value="send-link">{{ icon("mail") }}{{ _("Send a link to choose a password") }}</button>
+                </form>
+                {{ a.sign_in_as(user, "ads-menu__item") }}
+                {% endif %}
+                {% if user != current_user %}
+                <div class="ads-menu__sep"></div>
+                <form method="post" action="{{ account_url }}">
+                  {{ csrf.field() }}
+                  {% if user.can_login %}
+                  <button class="ads-menu__item ads-menu__item--danger" type="submit" name="action" value="disable">{{ icon("trash") }}{{ _("Disable the account") }}</button>
+                  {% else %}
+                  <button class="ads-menu__item" type="submit" name="action" value="enable">{{ icon("check") }}{{ _("Enable the account again") }}</button>
+                  {% endif %}
+                </form>
+                {% endif %}
+              </div>
+            </details>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="ads-muted">{{ _("No matching records found") }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ m.pagination(listing) }}
+</div>
+{% endblock %}

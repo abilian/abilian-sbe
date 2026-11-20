@@ -351,7 +351,7 @@ msgstr "Siguiente"
 #: abilian/web/admin/panels/groups/__init__.py:47
 #: abilian/web/admin/panels/users/__init__.py:45
 #: abilian/web/forms/widgets.py:351 abilian/web/forms/widgets.py:352
-msgid "Showing _START_ to _END_ of _TOTAL_ entries"
+msgid "Showing {start} to {end} of {total} entries"
 msgstr ""
 
 #: abilian/web/admin/panels/groups/__init__.py:48

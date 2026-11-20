@@ -5,21 +5,25 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from typing import TYPE_CHECKING, Any, cast
 
-from flask import Flask, current_app, g, redirect, request, url_for
-from flask_babel import lazy_gettext as _l
-from flask_login import current_user, login_user, user_logged_in, user_logged_out
-from loguru import logger
+from flask import current_app, g, redirect, request, url_for
+from flask_login import login_user, user_logged_in, user_logged_out
 from werkzeug.exceptions import Forbidden
 
 from abilian.core.extensions import db, login_manager
+from abilian.core.extensions.login import (
+    AnonymousUser,
+    authenticated_user,
+    current_user,
+)
 from abilian.core.models.subjects import User
 from abilian.core.signals import user_loaded
 from abilian.core.util import unwrap
+from abilian.i18n import _l
 from abilian.services import Service, ServiceState, get_service
-from abilian.web.action import DynamicIcon, actions
+from abilian.web.action import DynamicIcon, Endpoint, actions
 from abilian.web.nav import NavGroup, NavItem
 
-from .models import LoginSession
+from .models import IDLE_LIMIT, LoginSession
 from .views import login as login_views
 
 if TYPE_CHECKING:
@@ -43,32 +47,63 @@ def is_authenticated(context: dict[str, bool]) -> bool:
 def _user_photo_endpoint() -> str:
     from abilian.web.views import images  # lazy import: avoid circular import
 
-    return images.user_url_args(current_user, 16)[0]
+    return images.user_url_args(authenticated_user(), 16)[0]
 
 
 def _user_photo_icon_args(icon: DynamicIcon, url_args: dict) -> dict[str, Any]:
     from abilian.web.views import images  # lazy import avoid circular import
 
-    return images.user_url_args(current_user, max(icon.width, icon.height))[1]
+    return images.user_url_args(authenticated_user(), max(icon.width, icon.height))[1]
+
+
+def is_admin(context: dict[str, bool]) -> bool:
+    from abilian.services.security import is_site_admin  # lazy: circular import
+
+    if "admin" not in current_app.extensions:
+        return False
+    return is_authenticated(context) and is_site_admin()
+
+
+def _admin_endpoint(context: dict[str, bool]) -> Endpoint:
+    """The admin landing page, which is whichever panel registered first.
+
+    Resolved per request rather than at import: the endpoint depends on which
+    panels the app configured, and one process can serve several apps.
+    """
+    return current_app.extensions["admin"].nav_root.endpoint
 
 
 user_menu = NavGroup(
     "user",
     "authenticated",
-    title=lambda c: current_user.name,
+    # Shown to logged-in users only (`condition`), which is when these run.
+    title=lambda c: authenticated_user().name,
     icon=DynamicIcon(
         endpoint=_user_photo_endpoint,
         css="avatar",
-        size=20,
+        # Matches `nav .avatar` in vite/src/components/navbar.css; the value
+        # also picks the resolution the photo is fetched at.
+        size=36,
         url_args=_user_photo_icon_args,
     ),
     condition=is_authenticated,
     items=(
+        # The admin section used to be a second dropdown of its own in the top
+        # bar, holding nothing but the panel list the admin pages already show
+        # in their own sidebar. One entry here reaches the same place.
+        NavItem(
+            "user",
+            "admin",
+            title=_l("Admin"),
+            icon="wrench",
+            endpoint=_admin_endpoint,
+            condition=is_admin,
+        ),
         NavItem(
             "user",
             "logout",
             title=_l("Logout"),
-            icon="log-out",
+            icon="sign-out",
             url=lambda context: url_for("login.logout"),
             divider=True,
         ),
@@ -80,7 +115,7 @@ _ACTIONS = (
         "user",
         "login",
         title=_l("Login"),
-        icon="log-in",
+        icon="sign-in",
         url=lambda context: url_for("login.login_form"),
         condition=is_anonymous,
     ),
@@ -111,7 +146,7 @@ class AuthService(Service):
     AppStateClass = AuthServiceState
     login_url_prefix: str
 
-    def init_app(self, app: Flask) -> None:
+    def init_app(self, app: Application) -> None:
         login_manager.init_app(app)
         login_manager.login_view = "login.login_form"
 
@@ -131,21 +166,10 @@ class AuthService(Service):
 
     @login_manager.user_loader
     def load_user(user_id: str) -> User | None:
-        try:
-            user = User.query.get(user_id)
-
-            if not user or not user.can_login:
-                # if a user is edited and should not have access any more, this
-                # will ensure they cannot continue if he had an active session
-                return None
-        except Exception:
-            logger.opt(exception=True).warning("Error during login.")
-            session = db.session()
-            if not session.is_active:
-                # session is not usable, rollback should restore a usable
-                # session
-                session.rollback()
-
+        """The signed-in user, or None for an account gone or disabled since. A
+        database that fails here is a server error, not an anonymous visitor."""
+        user = User.query.get(user_id)
+        if not user or not user.can_login:
             return None
 
         app = unwrap(current_app)
@@ -161,24 +185,13 @@ class AuthService(Service):
         # `g.logged_user` is the actual user. In the future for example we may allow
         # a manager to see site as another user (impersonate), or propose a "see as
         # anonymous" function
-        from abilian.services import security_service
 
         g.user = g.logged_user = user
-        is_anonymous = user is None or user.is_anonymous
-        g.is_manager = (
-            user
-            and not is_anonymous
-            and (
-                security_service.has_role(user, "admin")
-                or security_service.has_role(user, "manager")
-            )
-        )
 
     def user_logged_out(self, app: Application, user: User) -> None:
         if hasattr(g, "user"):
             del g.user
             del g.logged_user
-            del g.is_manager
 
     def redirect_to_login(self, next_url=True) -> Response:
         kw = {}
@@ -220,11 +233,12 @@ class AuthService(Service):
 
         for access_controller in reversed(access_controllers):
             verdict = access_controller(user=user, roles=user_roles)
-            if verdict is None:
-                continue
+            match verdict:
+                case None:
+                    continue
 
-            if verdict is True:
-                return None
+                case True:
+                    return None
             if user.is_anonymous:
                 return self.redirect_to_login()
             raise Forbidden
@@ -237,7 +251,7 @@ class AuthService(Service):
 
     def update_user_session_data(self) -> None:
         user = current_user
-        if current_user.is_anonymous:
+        if isinstance(user, AnonymousUser):
             return
 
         # Update last_active every 60 seconds only so as to not stress
@@ -259,9 +273,9 @@ def refresh_login_session(user: User) -> None:
 
     from_now = now - session.last_active_at
 
-    if from_now > timedelta(hours=1):
+    if from_now > IDLE_LIMIT:
         session.ended_at = session.last_active_at
-        session = LoginSession.new()
+        session = LoginSession.new(user)
         db.session.add(session)
         db.session.commit()
 

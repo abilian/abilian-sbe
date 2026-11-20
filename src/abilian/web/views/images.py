@@ -6,23 +6,28 @@ from __future__ import annotations
 
 import colorsys
 import hashlib
+import zlib
 from importlib import resources as rso
 from pathlib import Path
 from typing import Any
 
 import sqlalchemy as sa
 import sqlalchemy.orm
-from flask import Blueprint, make_response, render_template, request
+from flask import make_response, render_template, request
 from werkzeug.exceptions import BadRequest, NotFound
 
 from abilian.core.models.blob import Blob
 from abilian.core.models.subjects import User
 from abilian.services.image import CROP, RESIZE_MODES, get_format, get_size, resize
+from abilian.services.security import AUTHENTICATED
+from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.util import url_for
 
 from .files import BaseFileDownload
 
-images_bp = Blueprint("images", __name__, url_prefix="/images")
+images_bp = AccessControlBlueprint(
+    "images", __name__, url_prefix="/images", allowed_roles=AUTHENTICATED
+)
 route = images_bp.route
 
 DEFAULT_AVATAR = rso.files("abilian.web") / "resources" / "img" / "avatar-default.png"
@@ -158,10 +163,6 @@ class BlobView(BaseImageView):
         return args, kwargs
 
 
-blob_image = BlobView.as_view("blob_image")
-route("/files/<int:object_id>")(blob_image)
-
-
 class UserMugshot(BaseImageView):
     expire_vary_arg = "md5"
 
@@ -191,20 +192,27 @@ class UserMugshot(BaseImageView):
         else:
             letter = "?"
         letter = letter.upper()
-        # generate bg color, pastel: sat=65% in hsl color space
-        id_hash = hash((user.name + user.email).encode("utf-8"))
-        hue = id_hash % 10
-        hue = (hue * 36) / 360.0  # 10 colors: 360 / 10
-        color = colorsys.hsv_to_rgb(hue, 0.65, 1.0)
-        color = [int(x * 255) for x in color]
-        color = f"rgb({color[0]}, {color[1]}, {color[2]})"
+        color = avatar_color(user.name, user.email)
         svg = render_template(
             "default/avatar.svg", color=color, letter=letter, size=size
         )
         response = make_response(svg)
         self.content_type = "image/svg+xml"
-        self.filename = f"avatar-{id_hash}.svg"
+        self.filename = f"avatar-{_avatar_key(user.name, user.email)}.svg"
         return response
+
+
+def avatar_color(name: str, email: str) -> str:
+    """One of ten pastel colours (65% saturation), fixed for a given user."""
+    hue = (_avatar_key(name, email) % 10) * 36 / 360.0
+    red, green, blue = (int(x * 255) for x in colorsys.hsv_to_rgb(hue, 0.65, 1.0))
+    return f"rgb({red}, {green}, {blue})"
+
+
+def _avatar_key(name: str, email: str) -> int:
+    # Not `hash()`: Python salts it per process, so the colour changed on every
+    # restart and between workers.
+    return zlib.crc32((name + email).encode("utf-8"))
 
 
 user_photo = UserMugshot.as_view("user_photo", set_expire=True, max_size=500)
@@ -214,11 +222,15 @@ route("/users/default")(
 )
 
 
-def user_url_args(user: User, size: int) -> tuple[str, dict[str, Any]]:
+def user_url_args(user: User | None, size: int) -> tuple[str, dict[str, Any]]:
     endpoint = "images.user_default"
     kwargs = {"s": size, "md5": DEFAULT_AVATAR_MD5}
 
-    if not user.is_anonymous:
+    # `None` is a real state, not a caller's mistake: AuditEntry.user_id is
+    # nullable, so an action taken outside a request -- a migration, the CLI,
+    # create_root_user -- has no acting user. The default avatar is exactly
+    # what it should get; the admin audit panel used to crash on it.
+    if user is not None:
         endpoint = "images.user_photo"
         kwargs["user_id"] = user.id
         content = user.photo or (user.name + user.email).encode("utf-8")

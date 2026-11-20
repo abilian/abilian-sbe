@@ -21,14 +21,12 @@ if TYPE_CHECKING:
     from collections.abc import Callable
 
     from flask.app import Flask
-    from flask_babel.speaklater import LazyString
 
 __all__ = (
     "ACTIVE",
     "DISABLED",
     "ENABLED",
     "Action",
-    "ActionDropDown",
     "ActionGroup",
     "ActionGroupItem",
     "ButtonAction",
@@ -101,9 +99,9 @@ class NamedIconBase(Icon):
 
 
 class Glyphicon(NamedIconBase):
-    """Renders markup for bootstrap's glyphicons."""
+    """Renders markup for bootstrap's glyphicons (deprecated, use FAIcon instead)."""
 
-    template = Template('<i class="glyphicon glyphicon-{{ name }}"></i>')
+    template = Template('<i class="fa fa-{{ name }}"></i>')
 
 
 class FAIcon(NamedIconBase):
@@ -150,13 +148,14 @@ class FAIconStacked(NamedIconBase):
 class DynamicIcon(Icon):
     template = Template(
         '<img {%- if css %} class="{{ css }}"{% endif %} '
-        'src="{{ url }}" '
+        'src="{{ url }}" alt="" '
         'width="{{ width }}" height="{{ height }}" />'
     )
 
     def __init__(
         self,
         endpoint: str | Callable | None = None,
+        *,
         width: int = 12,
         height: int = 12,
         css: str = "",
@@ -207,13 +206,21 @@ class StaticIcon(DynamicIcon):
     def __init__(
         self,
         filename: str,
+        *,
         endpoint: str = "static",
         width: int = 12,
         height: int = 12,
         css: str = "",
         size: int | None = None,
     ) -> None:
-        super().__init__(endpoint, width, height, css, size, filename=filename)
+        super().__init__(
+            endpoint,
+            width=width,
+            height=height,
+            css=css,
+            size=size,
+            filename=filename,
+        )
 
 
 class Endpoint:
@@ -244,7 +251,7 @@ class Action:
 
     Endpoint = Endpoint
 
-    _title: LazyString | str
+    _title: str
     _description: str
     _icon: str | Icon | None
     _url: str | Callable
@@ -262,7 +269,8 @@ class Action:
         self,
         category: str,
         name: str,
-        title: LazyString | str = "",
+        title: str = "",
+        *,
         description: str = "",
         icon: str | Icon | None = None,
         url: str | Callable = "",
@@ -297,7 +305,16 @@ class Action:
         self.name = name
 
         if button is not None:
-            self.CSS_CLASS += f" btn btn-{button}"
+            btn_colors = {
+                "default": "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50",
+                "primary": "text-white bg-blue-600 hover:bg-blue-700",
+                "success": "text-white bg-green-600 hover:bg-green-700",
+                "danger": "text-white bg-red-600 hover:bg-red-700",
+                "warning": "text-white bg-yellow-600 hover:bg-yellow-700",
+                "info": "text-white bg-cyan-600 hover:bg-cyan-700",
+            }
+            btn_class = btn_colors.get(button, btn_colors["default"])
+            self.CSS_CLASS += f" inline-flex items-center px-4 py-2 text-sm font-medium rounded-md {btn_class}"
         if css is not None:
             self.CSS_CLASS = f"{self.CSS_CLASS} {css}"
         self._build_css_class()
@@ -345,26 +362,31 @@ class Action:
         return value
 
     @property
-    def title(self) -> LazyString | str:
+    def title(self) -> str:
         return self._get_and_call("title")
 
     @title.setter
-    def title(self, title: LazyString | str) -> None:
+    def title(self, title: str) -> None:
         self._title = title
 
     def _build_css_class(self) -> None:
-        css_cat = self.CSS_CLASS.format(
-            action=self, category=self.category, name=self.name
+        # Sanitize only the interpolated identifiers. The utility classes appended
+        # to CSS_CLASS legitimately contain ":" (Tailwind variants such as
+        # "hover:bg-blue-700") and "/" (opacity modifiers such as "bg-black/50"),
+        # which sanitizing the whole string would silently mangle.
+        def sanitize(value: str) -> str:
+            return re.sub(r"[^ _a-zA-Z0-9-]", "-", str(value))
+
+        self.css_class = self.CSS_CLASS.format(
+            action=self, category=sanitize(self.category), name=sanitize(self.name)
         )
-        css_cat = re.sub(r"[^ _a-zA-Z0-9-]", "-", css_cat)
-        self.css_class = css_cat
 
     @property
-    def description(self) -> LazyString | str:
+    def description(self) -> str:
         return self._get_and_call("description")
 
     @description.setter
-    def description(self, description: LazyString | str) -> None:
+    def description(self, description: str) -> None:
         self._description = description
 
     @property
@@ -382,17 +404,18 @@ class Action:
             return None
 
         if not isinstance(endpoint, Endpoint):
-            if isinstance(endpoint, str):
-                endpoint = self.Endpoint(endpoint)
-            elif isinstance(endpoint, (tuple, list)):
-                assert len(endpoint) == 2
-                endpoint, kwargs = endpoint
-                assert isinstance(endpoint, str)
-                assert isinstance(kwargs, dict)
-                endpoint = self.Endpoint(endpoint, **kwargs)
-            else:
-                msg = f'Invalid endpoint specifier: "{endpoint!r}"'
-                raise TypeError(msg)
+            match endpoint:
+                case str():
+                    endpoint = self.Endpoint(endpoint)
+                case tuple() | list():
+                    assert len(endpoint) == 2
+                    endpoint, kwargs = endpoint
+                    assert isinstance(endpoint, str)
+                    assert isinstance(kwargs, dict)
+                    endpoint = self.Endpoint(endpoint, **kwargs)
+                case _:
+                    msg = f'Invalid endpoint specifier: "{endpoint!r}"'
+                    raise TypeError(msg)
 
         return endpoint
 
@@ -412,6 +435,17 @@ class Action:
         try:
             return self.pre_condition(context) and self._check_condition(context)
         except Exception:
+            # Fail closed, but not silently. An action whose condition raises
+            # used to disappear looking exactly like one the user is not
+            # allowed -- so a broken condition stayed broken for as long as
+            # nobody missed the button. Conditions are authorization; a bug in
+            # one must not be indistinguishable from a denial.
+            logger.exception(
+                "action {name!r} in category {category!r} raised from its "
+                "condition; treating it as unavailable",
+                name=self.name,
+                category=self.category,
+            )
             return False
 
     def pre_condition(self, context: dict[str, Any]) -> bool:
@@ -462,18 +496,56 @@ class Action:
 
 
 class ModalActionMixin:
+    """Mixin for actions that open a modal.
+
+    `url` names the dialog, e.g. `#modal-delete`; vite/src/modals.js opens it.
+    """
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        # `url` reaches the browser as a querySelector argument, so a real URL
+        # here is not a broken link but a thrown SyntaxError on click. The
+        # "Viewers list" action was a ModalAction pointing at a page for years,
+        # and only a browser could have noticed. Reject it at import time.
+        url = kwargs.get("url")
+        if not isinstance(url, str) or not url.startswith("#"):
+            msg = (
+                f"{type(self).__name__} url must be a dialog selector "
+                f'like "#modal-delete", got {url!r}'
+            )
+            raise ValueError(msg)
+
+        super().__init__(*args, **kwargs)
+
     template_string = (
-        '<a class="{{ action.css_class }}" href="{{ url }}" data-toggle="modal">'
+        '<button type="button" class="{{ action.css_class }}" '
+        'data-modal-open="{{ url }}">'
         "{%- if action.icon %}{{ action.icon}} {% endif %}"
         "{{ action.title }}"
-        "</a>"
+        "</button>"
     )
 
 
 class ButtonAction(Action):
+    # Tailwind button classes mapped by btn_class
+    BTN_CLASSES = {
+        "default": "text-gray-700 bg-white border border-gray-300 hover:bg-gray-50",
+        "primary": "text-white bg-blue-600 hover:bg-blue-700",
+        "success": "text-white bg-green-600 hover:bg-green-700",
+        "danger": "text-white bg-red-600 hover:bg-red-700",
+        "warning": "text-white bg-yellow-600 hover:bg-yellow-700",
+        "info": "text-white bg-cyan-600 hover:bg-cyan-700",
+    }
+
     template_string = (
         '<button type="submit" '
-        'class="btn btn-{{ action.btn_class }} {{ action.css_class}}" '
+        'class="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md '
+        '{% if action.btn_class == "primary" %}text-white bg-blue-600 hover:bg-blue-700'
+        '{% elif action.btn_class == "success" %}text-white bg-green-600 hover:bg-green-700'
+        '{% elif action.btn_class == "danger" %}text-white bg-red-600 hover:bg-red-700'
+        '{% elif action.btn_class == "warning" %}text-white bg-yellow-600 hover:bg-yellow-700'
+        '{% elif action.btn_class == "info" %}text-white bg-cyan-600 hover:bg-cyan-700'
+        "{% else %}text-gray-700 bg-white border border-gray-300 hover:bg-gray-50{% endif %}"
+        ' {{ action.css_class}}" '
         'name="{{ action.submit_name }}" '
         'value="{{ action.name }}">'
         "{%- if action.icon %}{{ action.icon }} {% endif %}"
@@ -500,7 +572,7 @@ class ActionGroup(Action):
     """A group of single actions."""
 
     template_string = (
-        '<div class="btn-group" role="group" aria-label="{{ action.name}}">'
+        '<div class="inline-flex rounded-md shadow-sm" role="group" aria-label="{{ action.name}}">'
         "{%- for entry in action_items %}"
         "{{ entry.render() }}"
         "{%- endfor %}"
@@ -515,28 +587,6 @@ class ActionGroup(Action):
         params = super().get_render_args(**kwargs)
         params["action_items"] = [a for a in self.items if a.available(params)]
         return params
-
-
-class ActionDropDown(ActionGroup):
-    """Renders as a button dropdown."""
-
-    template_string = """
-    <div class="btn-group">
-        <button type="button" class="{{ action.css_class }} dropdown-toggle"
-                data-toggle="dropdown" aria-expanded="false">
-        {%- if action.icon %}{{ action.icon }} {% endif %}
-        {{ action.title }}
-        <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu" role="menu">
-        {%- for entry in action_items %}
-            {%- if entry.divider %}<li class="divider"></li>{%- endif %}
-            <li>{{ entry.render() }}</a>
-            </li>
-        {%- endfor %}
-        </ul>
-    </div>
-    """
 
 
 class ActionGroupItem(Action):

@@ -11,12 +11,12 @@ from __future__ import annotations
 from collections import Counter
 from datetime import datetime
 from itertools import chain
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Column, ForeignKey, Integer, Unicode, UnicodeText
+from sqlalchemy import ForeignKey, Integer, Unicode, UnicodeText
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 from sqlalchemy.types import DateTime
 
 from abilian.core.entities import SEARCHABLE, Entity
@@ -59,9 +59,13 @@ class Thread(Entity):
     )
 
     #: The thread title (aka subject)
-    _title = Column("title", Unicode(255), nullable=False, default="", info=SEARCHABLE)
+    _title: Mapped[str] = mapped_column(
+        "title", Unicode(255), nullable=False, default="", info=SEARCHABLE
+    )
 
-    last_post_at = Column(DateTime, default=datetime.utcnow, nullable=True)
+    last_post_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=True
+    )
 
     # title is defined has an hybrid property to allow name <-> title sync (2
     # way)
@@ -110,7 +114,9 @@ class Thread(Entity):
 
         kw["name"] = self.name
         post = Post(**kw)
-        post.thread = self
+        # Appended rather than given `thread=self`: the collection cascades the
+        # post into the thread's session, a backref no longer does.
+        self.posts.append(post)
         return post
 
 
@@ -132,15 +138,22 @@ class Post(Entity):
     (= Post in DiscussionMessage in ICOM 1.0).
     """
 
+    if TYPE_CHECKING:
+        # Set at runtime by backrefs declared below or on the other class;
+        # declared here for type checkers.
+        attachments: Mapped[list[PostAttachment]]
+
     __tablename__ = "forum_post"
     __indexable__ = False  # content is indexed at thread level
 
     #: The thread this post belongs to
-    thread_id = Column(ForeignKey(Thread.id), nullable=False)
+    thread_id: Mapped[int] = mapped_column(ForeignKey(Thread.id), nullable=False)
     thread = relationship(Thread, foreign_keys=thread_id, back_populates="posts")
 
     #: The post this post is a reply to, if any (currently not used)
-    parent_post_id = Column(ForeignKey("forum_post.id"), nullable=True)
+    parent_post_id: Mapped[int | None] = mapped_column(
+        ForeignKey("forum_post.id"), nullable=True
+    )
     parent_post = relationship("Post", foreign_keys=[parent_post_id])
 
     #: Markup type (Markdown, Textile...)
@@ -151,7 +164,7 @@ class Post(Entity):
     # body_src = Column(UnicodeText, default=u"", nullable=False)
 
     #: HTML rendering of the post
-    body_html = Column(UnicodeText, default="", nullable=False)
+    body_html: Mapped[str] = mapped_column(UnicodeText, default="", nullable=False)
 
     @hybrid_property
     def title(self):
@@ -218,7 +231,9 @@ class PostAttachment(BaseContent):
 
     sbe_type = "forum_post:attachment"
 
-    _post_id = Column(Integer, ForeignKey(Post.id), nullable=True)
+    _post_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Post.id), nullable=True
+    )
     post = relationship(
         Post,
         primaryjoin=(_post_id == Post.id),

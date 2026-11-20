@@ -1,0 +1,74 @@
+{#- What the bar's search suggests as one types: the first matches of each kind, the
+    words found marked, where each is; what is elsewhere than the community searched,
+    in one line; all the results and the keys at the foot. On an empty field, what one
+    searched and opened lately, or nothing. A piece of a page: the bar's script
+    (`vite/src/suggest.js`) puts it under the field, and moves among the options.
+    Drawn in `mockups/templates/search-suggest.html` and `search-recent.html`. -#}
+{% import "ads_macros.html" as m with context %}
+{% set results_url = url_for("search.search_main", q=q, community=scope or none) %}
+{% set opened = [] if q else recently_opened(user) %}
+{#- On an empty field with nothing searched or opened yet, nothing: the script opens no panel. -#}
+{% if q or recent_searches or opened %}
+<div class="ads-combobox__list sbe-suggest__panel" id="suggestions">
+  {#- The options in the listbox, which the arrows move through; the foot after it. -#}
+  <div role="listbox" id="suggestions-list" aria-label="{{ _('Suggestions') }}">
+  {% if not q %}
+  {% if recent_searches %}
+  <div role="group" aria-labelledby="suggest-recent">
+    <p class="ads-subheader sbe-menu-heading" id="suggest-recent" role="presentation">{{ _("Recent searches") }}</p>
+    {% for search in recent_searches %}
+    <a class="ads-combobox__option sbe-suggest__option" role="option" id="suggestion-search-{{ loop.index }}" href="{{ url_for('search.search_main', q=search) }}" aria-selected="false">{{ icon("history") }}<span class="ads-fill ads-truncate">{{ search }}</span></a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if opened %}
+  <div role="group" aria-labelledby="suggest-opened">
+    <p class="ads-subheader sbe-menu-heading" id="suggest-opened" role="presentation">{{ _("Opened lately") }}</p>
+    {% for entity in opened %}
+    {% set kind = entity.__class__.__name__ %}
+    <a class="ads-combobox__option sbe-suggest__option" role="option" id="suggestion-opened-{{ loop.index }}" href="{{ url_for(entity) }}" aria-selected="false">
+      {% if kind == "Document" %}{{ file_icon(entity.name) }}{% else %}{{ icon({"Thread": "messages", "WikiPage": "book"}.get(kind, "file-text")) }}{% endif %}
+      <span class="ads-fill sbe-lines"><span class="ads-truncate">{{ entity.name }}</span><span class="ads-muted ads-truncate">{{ entity.community.name }}</span></span>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+  </div>
+  <div class="sbe-suggest__foot">
+    <span class="ads-muted">{{ _("Type to search everywhere") }}</span>
+    <span class="ads-muted ads-cluster ads-gap-sm sbe-suggest__keys" aria-hidden="true"><kbd class="ads-kbd">/</kbd> {{ _("from any page") }}</span>
+  </div>
+  {% else %}
+  {% for label, kind, hits in groups %}
+  <div role="group" aria-labelledby="suggest-{{ loop.index }}">
+    <p class="ads-subheader sbe-menu-heading" id="suggest-{{ loop.index }}" role="presentation">{{ label }}</p>
+    {% for hit in hits %}
+    {% set href = url_for_hit(hit) %}
+    {% if href %}
+    {% set community = communities.get(hit.get("community_id")) %}
+    <a class="ads-combobox__option sbe-suggest__option" role="option" id="suggestion-{{ kind }}-{{ loop.index }}" href="{{ href }}" aria-selected="false">
+      {% if kind == "Document" %}{{ file_icon(hit["name"]) }}
+      {% elif kind == "Folder" %}{{ folder_icon() }}
+      {% else %}{{ icon({"Thread": "messages", "WikiPage": "book", "User": "user", "Community": "users"}.get(kind, "file-text")) }}{% endif %}
+      <span class="ads-fill sbe-lines">
+        <span class="ads-truncate">{{ hit.highlights("name") | safe or hit["name"] }}</span>
+        {% if community or hit.get("updated_at") %}<span class="ads-muted ads-truncate">{{ community.name if community }}{% if community and hit.get("updated_at") %} · {% endif %}{% if hit.get("updated_at") %}{{ m.time(hit["updated_at"]) }}{% endif %}</span>{% endif %}
+      </span>
+    </a>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="ads-combobox__empty">{{ _("Nothing matches “%(q)s”.", q=q) }}</p>
+  {% endfor %}
+  {% if elsewhere %}
+  <a class="ads-combobox__option sbe-suggest__option sbe-suggest__elsewhere" role="option" id="suggestion-elsewhere" href="{{ url_for('search.search_main', q=q) }}" aria-selected="false">{{ icon("world") }}<span class="ads-fill">{{ ngettext("%(num)d result in your other communities", "%(num)d results in your other communities", elsewhere) }}</span>{{ icon("chevron-right") }}</a>
+  {% endif %}
+  </div>
+  <div class="sbe-suggest__foot">
+    <a href="{{ results_url }}">{{ icon("search") }}{{ _("All the results for “%(q)s”", q=q) }}{% if total %} ({{ total }}){% endif %}</a>
+    <span class="ads-muted ads-cluster ads-gap-sm sbe-suggest__keys" aria-hidden="true"><kbd class="ads-kbd">↑</kbd><kbd class="ads-kbd">↓</kbd> {{ _("choose") }} <kbd class="ads-kbd">↵</kbd> {{ _("open") }} <kbd class="ads-kbd">{{ _("Esc") }}</kbd> {{ _("close") }}</span>
+  </div>
+  {% endif %}
+</div>
+{% endif %}

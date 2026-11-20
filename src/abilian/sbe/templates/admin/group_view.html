@@ -1,0 +1,49 @@
+{#- One of Core's groups: what it is, its roles on the site, its members, adding and
+    removing one. Overrides Abilian Core's page. -#}
+{% extends "admin/_ads.html" %}
+{% import "admin/_ads_macros.html" as a with context %}
+{% set group = view.obj %}
+{% set edit_url = url_for('.groups_group_edit', group_id=group.id) %}
+{% block page_title %}{{ group.name }} · {{ _("Groups") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ group.name }}{% endblock %}
+{% block actions %}<a class="ads-btn" href="{{ edit_url }}">{{ icon("pencil") }}{{ _("Edit") }}</a>{% endblock %}
+{% block content %}
+<div class="ads-with-aside">
+  <section class="ads-card" aria-labelledby="members">
+    <div class="ads-card__head"><h2 class="ads-card__title" id="members">{{ _("Members") }} ({{ members | length }})</h2></div>
+    <form class="ads-card__body sbe-toolbar sbe-toolbar--wrap" id="add-user-role" method="post" action="{{ edit_url }}">
+      {{ csrf.field() }}
+      {#- No icon beside it: the picker wraps the field in its own box. -#}
+      <input class="ads-input sbe-grow" type="text" id="user-select" name="user" required placeholder="{{ _('Add someone who has an account') }}" aria-label="{{ _('Add someone who has an account') }}" data-picker="{{ url_for('users.json_list') }}">
+      <button class="ads-btn" type="submit" name="__action" value="add_user">{{ _("Add") }}</button>
+    </form>
+    {% if members %}
+    <ul class="ads-list">
+      {% for user in members %}
+      <li>
+        <span class="ads-media ads-gap-sm ads-fill">{{ m.avatar(user, "ads-avatar--xs") }}
+          <span class="sbe-lines"><a class="sbe-quiet" href="{{ url_for('.users_user', user_id=user.id) }}">{{ user.name }}</a><span class="ads-muted ads-truncate">{{ user.email }}</span></span>
+          {% if not user.can_login %}<span class="ads-status ads-tone-neutral"><span class="ads-status__dot"></span>{{ _("Disabled") }}</span>{% endif %}
+        </span>
+        <form method="post" action="{{ edit_url }}">
+          {{ csrf.field() }}
+          <input type="hidden" name="user" value="{{ user.id }}">
+          <button class="ads-btn ads-btn--ghost ads-btn--sm" type="submit" name="__action" value="remove_user" aria-label="{{ _('Remove %(name)s', name=user.name) }}">{{ icon("trash") }}</button>
+        </form>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}<p class="ads-card__body ads-muted">{{ _("Nobody yet.") }}</p>{% endif %}
+  </section>
+  <aside class="ads-stack" aria-label="{{ _('The group') }}">
+    <section class="ads-card" aria-labelledby="about">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="about">{{ _("The group") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        {% if group.description %}<p>{{ group.description }}</p>{% endif %}
+        <span class="ads-cluster ads-gap-sm">{% for role in roles %}<span class="ads-chip">{{ a.role_name(role) }}</span>{% else %}<span class="ads-muted">{{ _("No role on the site.") }}</span>{% endfor %}</span>
+        {% if group.public %}<span class="ads-muted">{{ _("Public") }}</span>{% endif %}
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

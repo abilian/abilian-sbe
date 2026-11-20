@@ -1,5 +1,3 @@
-exclude = []
-
 lint.select = ["ALL"]
 
 lint.extend-ignore = [
@@ -13,6 +11,8 @@ lint.extend-ignore = [
     "PGH", # pygrep-hooks
     "TD", # flake8-todos
     "DOC", # pydocstyle
+    # Must be there
+    "ISC001", # Conflicts with the formatter
 
     # Fix these
     "PTH", # Pathlib
@@ -25,7 +25,7 @@ lint.extend-ignore = [
     "E713", # Test for membership should be `not in`
     "PLR2044", # Line with empty comment
     "RET504", # Unnecessary variable assignment before `return` statement
-    "S101", # Use of `assert` detected
+    "S101", # Use of `assert` detected (assert are use throughout)
     "SIM102", # Use a single `if` statement instead of nested `if` statements
     "SIM108", # Use ternary operator
 
@@ -52,19 +52,17 @@ lint.extend-ignore = [
     "N805", # First argument of a method should be named `self`
     "N806", # Variable in function should be lowercase
     #
-    "PLC0206", # Extracting value from dictionnary without calling `.items()`
-    "PLC1901", # `x == ""` can be simplified to `not x` as an empty string is falsey
-    "PLR0911", # Too many return statements
-    "PLR0912", # Too many branches
-    "PLR0913", # Too many arguments in function definition
-    "PLR0915", # Too many statements
     "PLR2004", # Magic value used in comparison
-    "PLR6301", # Method could be a function, class method, or static method
-    "PLW2901", # `for` loop variable overwritten by assignment target
-    "PYI024", # Use `typing.NamedTuple` instead of `collections.namedtuple`
-    "RUF012", # Mutable class attributes should be annotated with `typing.ClassVar`
-    "SIM115", # Use context handler for opening files
-    "PLC0415",
+    "PLC0415", # import-outside-top-level
+    "RUF012", #  mutable-class-default
+    "PLW2901", # redefined-loop-name
+    "SIM115", #  open-file-with-context-handler
+    "PLR0913", # too-many-arguments
+    "PLR0912", # too-many-branches
+    "PLR0911", # too-many-return-statements
+    "PYI024", #  collections-named-tuple
+    "PLR0915", # too-many-statements
+    # "PLC0206", # dict-index-missing-items
     # Missing copyright
     "CPY001",
     #
@@ -85,8 +83,23 @@ lint.extend-ignore = [
 ]
 
 [lint.per-file-ignores]
-"tests/**/*.py" = ["INP001"] # implicit namespace packages
-"**/__init__.py" = ["F401"] # 'module' imported but unused
+"tests/**/*.py" = [
+    "INP001", # implicit namespace packages
+     "PLR0917", # too-many-positional-arguments
+]
+"e2e_playwright/**/*.py" = [
+    "INP001", # implicit namespace packages
+]
+"**/__init__.py" = [
+    "F401", # 'module' imported but unused
+]
+"migrations/**/*.py" = [
+    "E402", # module level import not at top of file
+    "INP001", # implicit namespace packages
+]
+"cloud/slapos/utils/*.py" = [
+    "INP001", # implicit namespace packages
+]
 
 [lint.mccabe]
 max-complexity = 10
@@ -94,3 +107,14 @@ max-complexity = 10
 [lint.isort]
 combine-as-imports = true
 required-imports = ["from __future__ import annotations"]
+
+# SQLAlchemy evaluates `Mapped[...]` annotations when it maps a model, so the
+# types they name must be imported at runtime, not under TYPE_CHECKING.
+[lint.flake8-type-checking]
+runtime-evaluated-base-classes = [
+    "sqlalchemy.orm.DeclarativeBase",
+    "abilian.core.sqlalchemy.extension.Base",
+    "abilian.core.extensions.db.Model",
+    "abilian.core.models.base.Model",
+    "abilian.core.entities.Entity",
+]

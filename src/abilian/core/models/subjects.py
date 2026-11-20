@@ -13,28 +13,43 @@ from __future__ import annotations
 import random
 import string
 from abc import ABC, abstractmethod
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, tzinfo
 from typing import TYPE_CHECKING
 
 import bcrypt
 import sqlalchemy as sa
+from babel import Locale
 from flask_login import UserMixin
 from flask_sqlalchemy.query import Query
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import backref, deferred, relationship
+from sqlalchemy.orm import (
+    Mapped,
+    backref,
+    column_property,
+    mapped_column,
+    relationship,
+)
 from sqlalchemy.schema import Column, ForeignKey, UniqueConstraint
-from sqlalchemy.types import Boolean, DateTime, Integer, LargeBinary, UnicodeText
+from sqlalchemy.types import (
+    Boolean,
+    DateTime,
+    Integer,
+    LargeBinary,
+    Unicode,
+    UnicodeText,
+)
 
 from abilian.core import sqlalchemy as sa_types
 from abilian.core.util import fqcn
 
-from .base import SEARCHABLE, SYSTEM, IdMixin, Indexable, TimestampedMixin, db
+from .base import SEARCHABLE, SYSTEM, IdMixin, Indexable, Model, TimestampedMixin, db
 
 if TYPE_CHECKING:
     from sqlalchemy.orm.mapper import Mapper
 
 __all__ = (
+    "ROOT_USER_ID",
     "ClearPasswordStrategy",
     "Group",
     "Principal",
@@ -87,6 +102,9 @@ administratorship = db.Table(
 
 _RANDOM_PASSWORD_CHARS = string.ascii_letters + string.digits + string.punctuation
 
+#: The longest job title or organization one may give.
+AFFILIATION_LENGTH = 200
+
 
 def gen_random_password(length=15):
     rg = random.SystemRandom()
@@ -96,15 +114,15 @@ def gen_random_password(length=15):
 class PasswordStrategy(ABC):
     @property
     @abstractmethod
-    def name(self):
+    def name(self) -> str:
         """Strategy name."""
 
     @abstractmethod
-    def authenticate(self, user, password):
+    def authenticate(self, user: User, password: str) -> bool:
         """Predicate to tell wether password match user's or not."""
 
     @abstractmethod
-    def process(self, user, password):
+    def process(self, user: User, password: str) -> str:
         """Return a string to be stored as user password."""
 
 
@@ -136,21 +154,15 @@ class BcryptPasswordStrategy(PasswordStrategy):
         return "bcrypt"
 
     def authenticate(self, user: User, password: str) -> bool:
-        assert isinstance(password, str)
-
-        current_passwd = user.password
-        # crypt work only on bytes, not str (Unicode)
-        if isinstance(current_passwd, str):
-            current_passwd = current_passwd.encode("utf-8")
-        if isinstance(password, str):
-            password = password.encode("utf-8")
-
-        return bcrypt.hashpw(password, current_passwd) == current_passwd
+        # A user without a password cannot log in with one.
+        if user.password is None:
+            return False
+        # bcrypt works on bytes, not str
+        current_passwd = user.password.encode("utf-8")
+        return bcrypt.hashpw(password.encode("utf-8"), current_passwd) == current_passwd
 
     def process(self, user: User, password: str) -> str:
-        if isinstance(password, str):
-            password = password.encode("utf-8")
-        return bcrypt.hashpw(password, bcrypt.gensalt()).decode("utf-8")
+        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 
 class UserQuery(Query):
@@ -185,28 +197,44 @@ def set_entity_type(cls: type[User | Group]) -> type[User | Group]:
 
 
 @set_entity_type
-class User(Principal, UserMixin, db.Model):
+class User(Principal, UserMixin, Model):
     __tablename__ = "user"
+
+    if TYPE_CHECKING:
+        # Set at runtime by backrefs declared below or on the other class;
+        # declared here for type checkers.
+        groups: Mapped[set[Group]]
+        followees: Mapped[list[User]]
     __editable__ = ["first_name", "last_name", "email", "password"]
     __exportable__ = [*__editable__, "created_at", "updated_at", "id"]
 
     __password_strategy__ = BcryptPasswordStrategy()
 
     # Basic information
-    first_name = Column(UnicodeText, info=SEARCHABLE)
-    last_name = Column(UnicodeText, info=SEARCHABLE)
-    # Should we add gender, salutation ?
+    first_name: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
+    last_name: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
+    #: What the person does, and where, as the directory shows it: both optional.
+    job_title: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
+    organization: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
 
     # System information
-    email = Column(UnicodeText, nullable=False)
-    can_login = Column(Boolean, nullable=False, default=True)
-    password = Column(UnicodeText, default="*", info={"audit_hide_content": True})
+    email: Mapped[str] = mapped_column(
+        Unicode(255), nullable=False
+    )  # for Mariadb set length of varchar
+    can_login: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    password: Mapped[str | None] = mapped_column(
+        UnicodeText, default="*", info={"audit_hide_content": True}
+    )
 
-    photo = deferred(Column(LargeBinary))
+    photo: Mapped[bytes | None] = mapped_column(LargeBinary, deferred=True)
 
-    last_active = Column(DateTime, info=SYSTEM)
-    locale = Column(sa_types.Locale, nullable=True, default=None)
-    timezone = Column(sa_types.Timezone, nullable=True, default=None)
+    last_active: Mapped[datetime | None] = mapped_column(DateTime, info=SYSTEM)
+    locale: Mapped[Locale | None] = mapped_column(
+        sa_types.Locale, nullable=True, default=None
+    )
+    timezone: Mapped[tzinfo | None] = mapped_column(
+        sa_types.Timezone, nullable=True, default=None
+    )
 
     __table_args__ = (UniqueConstraint("email"),)
 
@@ -279,15 +307,26 @@ class User(Principal, UserMixin, db.Model):
     #
     @property
     def name(self) -> str:
+        """First and last names. An account an invitation made has none until its
+        person names themselves: it goes by its address's first half meanwhile."""
         name = f"{(self.first_name or '')} {(self.last_name or '')}"
-        return name.strip() or "Unknown"
+        return name.strip() or self._unnamed
 
     @property
     def short_name(self):
         first_name = self.first_name or ""
         last_name = f"{self.last_name[0:1]}." if self.last_name else ""
         name = f"{first_name} {last_name}"
-        return name.strip() or "Unknown"
+        return name.strip() or self._unnamed
+
+    @property
+    def has_names(self) -> bool:
+        """Whether the person gave both their first and last names."""
+        return bool(self.first_name and self.last_name)
+
+    @property
+    def _unnamed(self) -> str:
+        return (self.email or "").partition("@")[0] or "Unknown"
 
     def __str__(self) -> str:
         return self.name
@@ -295,6 +334,11 @@ class User(Principal, UserMixin, db.Model):
     def __repr__(self) -> str:
         cls = self.__class__
         return f"<{cls.__module__}.{cls.__name__} id={self.id!r} email={self.email!r} at 0x{id(self):x}>"
+
+
+#: Whether the person has a photo, asked in the query that loads them: the photo
+#: itself is deferred, and reading it for each avatar of a list cost a query each.
+User.has_photo = column_property(User.__table__.c.photo.is_not(None))
 
 
 @listens_for(User, "mapper_configured", propagate=True)
@@ -310,16 +354,16 @@ def _add_user_indexes(mapper: Mapper, cls: type[User]) -> None:
 
 
 @set_entity_type
-class Group(Principal, db.Model):
+class Group(Principal, Model):
     __indexable__ = False
     __tablename__ = "group"
     __editable__ = ["name", "description"]
     __exportable__ = [*__editable__, "created_at", "updated_at", "id"]
 
-    name = Column(UnicodeText, nullable=False, info=SEARCHABLE)
-    description = Column(UnicodeText, info=SEARCHABLE)
-    photo = deferred(Column(LargeBinary))
-    public = Column(Boolean, default=False, nullable=False)
+    name: Mapped[str] = mapped_column(UnicodeText, nullable=False, info=SEARCHABLE)
+    description: Mapped[str | None] = mapped_column(UnicodeText, info=SEARCHABLE)
+    photo: Mapped[bytes | None] = mapped_column(LargeBinary, deferred=True)
+    public: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     members = relationship(
         "User",
@@ -336,18 +380,27 @@ class Group(Principal, db.Model):
     @members_count.expression
     def members_count(cls):
         return (
-            sa.sql.select([sa.sql.func.count(membership.c.user_id)])
+            sa.sql.select(sa.sql.func.count(membership.c.user_id))
             .where(membership.c.group_id == cls.id)
             .group_by(membership.c.group_id)
             .label("members_count")
         )
 
 
+#: The SYSTEM principal. Not a person: it is what actions taken with no acting
+#: user are attributed to. Created by `flask initdb`, not by `create_all`, so
+#: code that looks it up must cope with it being absent.
+ROOT_USER_ID = 0
+
+
 def create_root_user() -> User:
-    user = User.query.get(0)
+    user = User.query.get(ROOT_USER_ID)
     if user is None:
         user = User(
-            id=0, last_name="SYSTEM", email="system@example.com", can_login=False
+            id=ROOT_USER_ID,
+            last_name="SYSTEM",
+            email="system@example.com",
+            can_login=False,
         )
         db.session.add(user)
         db.session.commit()

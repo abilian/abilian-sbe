@@ -4,17 +4,16 @@
 
 from __future__ import annotations
 
-import sqlalchemy as sa
 from wtforms import BooleanField, StringField
-from wtforms.validators import ValidationError
+from wtforms.validators import Length, ValidationError
 
-from abilian.core.models.subjects import Group
+from abilian.core.models.subjects import AFFILIATION_LENGTH
 from abilian.i18n import _, _l
 from abilian.services.security.models import Role
 from abilian.web.forms import Form, widgets
-from abilian.web.forms.fields import QuerySelect2Field, Select2MultipleField
+from abilian.web.forms.fields import MultipleChoiceField
 from abilian.web.forms.filters import strip
-from abilian.web.forms.validators import optional, required
+from abilian.web.forms.validators import required
 
 
 class BaseUserAdminForm(Form):
@@ -37,6 +36,16 @@ class BaseUserAdminForm(Form):
         filters=(strip,),
         validators=[required()],
     )
+    job_title = StringField(
+        _l("Job title"),
+        filters=(strip,),
+        validators=[Length(max=AFFILIATION_LENGTH)],
+    )
+    organization = StringField(
+        _l("Organization"),
+        filters=(strip,),
+        validators=[Length(max=AFFILIATION_LENGTH)],
+    )
 
     can_login = BooleanField(
         _l("Login enabled"),
@@ -44,16 +53,7 @@ class BaseUserAdminForm(Form):
         widget=widgets.BooleanWidget(),
     )
 
-    groups = QuerySelect2Field(
-        _l("Groups"),
-        validators=(optional(),),
-        multiple=True,
-        collection_class=set,
-        query_factory=lambda: Group.query.order_by(sa.sql.func.lower(Group.name).asc()),
-        get_label="name",
-    )
-
-    roles = Select2MultipleField(
+    roles = MultipleChoiceField(
         _l("Roles"),
         description=_l(
             "Prefer groups to manage access rights. Directly assigning roles "

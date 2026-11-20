@@ -1,0 +1,45 @@
+{#- The communities to discover: those their managers opened, which one is not in,
+    by name; each with its initial (its image is for its members), what it is for, its
+    managers, its size, when it last moved; and the way in, at once or on request, as
+    its managers chose. No mockup: the bar's menu led here. -#}
+{% extends "ads_base.html" %}
+{% block page_title %}{{ _("Communities to discover") }}{% endblock %}
+{% block heading %}{{ _("Communities to discover") }}{% endblock %}
+{% block body %}
+<div class="ads-card">
+  {% if communities %}
+  <ul class="ads-list">
+    {% for community in communities %}
+    {% set its_managers = managers.get(community.id, []) %}
+    <li>
+      {{ m.tile(community, "sbe-tile--lg", image=false) }}
+      <span class="ads-fill sbe-lines">
+        <strong>{{ community.name }}</strong>
+        {% if community.description %}<span class="ads-muted">{{ community.description }}</span>{% endif %}
+        <span class="ads-muted ads-cluster ads-gap-sm">
+          {% if its_managers %}<span>{{ _("Managed by %(names)s", names=its_managers | map(attribute="name") | join(", ")) }}</span>{% endif %}
+          <span>{{ ngettext("%(num)d member", "%(num)d members", community.membership_count) }}</span>
+          <span>{{ _("Active") }} {{ m.time(community.last_active_at) }}</span>
+        </span>
+      </span>
+      {% if community.id in asked %}
+      <span class="ads-badge ads-tone-neutral">{{ _("Asked") }}</span>
+      {% else %}
+      <form method="post" action="{{ url_for('.discover') }}">
+        {{ csrf.field() }}
+        <input type="hidden" name="community" value="{{ community.slug }}">
+        {% if community.visibility == ON_REQUEST %}
+        <button class="ads-btn" type="submit" name="action" value="ask" aria-label="{{ _('Ask to join %(name)s', name=community.name) }}">{{ _("Ask to join") }}</button>
+        {% else %}
+        <button class="ads-btn ads-btn--primary" type="submit" name="action" value="join" aria-label="{{ _('Join %(name)s', name=community.name) }}">{{ icon("user-plus") }}{{ _("Join") }}</button>
+        {% endif %}
+      </form>
+      {% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="ads-card__body ads-muted">{{ _("No other community is open for now.") }}</p>
+  {% endif %}
+</div>
+{% endblock %}

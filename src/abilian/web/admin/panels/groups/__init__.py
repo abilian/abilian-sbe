@@ -6,11 +6,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
+import sqlalchemy.orm
 from flask import render_template
+from sqlalchemy.sql.expression import func
 
-from abilian.i18n import _, _l
+from abilian.core.models.subjects import Group
+from abilian.i18n import _l
+from abilian.services import get_security_service
 from abilian.web.admin.panel import AdminPanel
-from abilian.web.util import url_for
+from abilian.web.listing import Listing
 
 from . import views
 
@@ -23,10 +28,9 @@ class GroupsPanel(AdminPanel):
 
     id = "groups"
     label = _l("Groups")
-    icon = "grain"
+    icon = "th"
 
     def install_additional_rules(self, add_url_rule: Callable) -> None:
-        add_url_rule("/groups", view_func=views.JsonGroupsList.as_view("json_list"))
         add_url_rule("/new", view_func=views.GroupCreate.as_view("new"))
         add_url_rule("/<int:group_id>/", view_func=views.GroupView.as_view("group"))
         add_url_rule(
@@ -36,35 +40,21 @@ class GroupsPanel(AdminPanel):
             ),
         )
 
-    def get(self):
-        # FIXME: use widgets.AjaxMainTableView instead
-        datatable_options = {
-            "sDom": "lfFrtip",
-            "aaSorting": [[0, "asc"]],
-            "aoColumns": [
-                {"asSorting": ["asc", "desc"]},
-                {"bSortable": False},
-                {"bSortable": False},
-            ],
-            "bFilter": True,
-            "oLanguage": {
-                "sSearch": _("Filter records:"),
-                "sPrevious": _("Previous"),
-                "sNext": _("Next"),
-                "sInfo": _("Showing _START_ to _END_ of _TOTAL_ entries"),
-                "sInfoFiltered": _("(filtered from _MAX_ total entries)"),
-                "sAddAdvancedFilter": _("Add a filter"),
-            },
-            "bStateSave": False,
-            "bPaginate": True,
-            "sPaginationType": "bootstrap",
-            "bLengthChange": False,
-            "iDisplayLength": 30,
-            "bProcessing": True,
-            "bServerSide": True,
-            "sAjaxSource": url_for(".groups_json_list"),
-        }
-
-        return render_template(
-            "admin/groups.html", next=next, datatable_options=datatable_options
+    def get(self) -> str:
+        security = get_security_service()
+        query = Group.query.options(sa.orm.noload("*")).add_columns(Group.members_count)
+        listing, groups = Listing.from_query(
+            query,
+            {"name": (func.lower(Group.name),)},
+            "name",
+            (Group.name,),
         )
+        rows = [
+            (
+                group,
+                members_count or 0,
+                [role for role in security.get_roles(group) if role.assignable],
+            )
+            for group, members_count in groups
+        ]
+        return render_template("admin/groups.html", listing=listing, rows=rows)

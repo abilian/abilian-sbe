@@ -4,133 +4,37 @@
 
 from __future__ import annotations
 
-import html
-from typing import TYPE_CHECKING, cast
+from typing import Any
 
-import sqlalchemy as sa
-import sqlalchemy.orm
-from flask import render_template_string, request
-from flask_babel import format_datetime
-from flask_login import current_user
-from sqlalchemy.sql.expression import asc, desc, func, nullslast, or_
+from flask import flash, redirect, render_template_string, request
 from werkzeug.datastructures import MultiDict
+from werkzeug.exceptions import BadRequest
 
+from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.models.subjects import User, gen_random_password
 from abilian.i18n import _
 from abilian.services import get_service
+from abilian.services.auth.models import LoginSession
+from abilian.services.auth.views import send_reset_password_instructions
 from abilian.services.security.models import ADMIN, Role
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
-from abilian.web.views import base, object as views
-from abilian.web.views.images import user_photo_url
+from abilian.web.views import object as views
 
 from .forms import UserAdminForm, UserCreateForm
 
-if TYPE_CHECKING:
-    from abilian.services.security import SecurityService
-
 MUGSHOT_SIZE = 45
 
-
-class JsonUsersList(base.JSONView):
-    """JSON user list for datatable."""
-
-    def data(self, *args, **kw) -> dict:
-        security = cast("SecurityService", get_service("security"))
-        length = int(kw.get("iDisplayLength", 0))
-        start = int(kw.get("iDisplayStart", 0))
-        sort_col = int(kw.get("iSortCol_0", 1))
-        sort_dir = kw.get("sSortDir_0", "asc")
-        echo = int(kw.get("sEcho", 0))
-        search = kw.get("sSearch", "").replace("%", "").strip().lower()
-
-        end = start + length
-        query = User.query.options(
-            sa.orm.subqueryload("groups"), sa.orm.undefer("photo")
-        ).filter(User.id != 0)
-        total_count = query.count()
-
-        if search:
-            # TODO: gérer les accents
-            filter = or_(
-                func.lower(User.first_name).like(f"%{search}%"),
-                func.lower(User.last_name).like(f"%{search}%"),
-                func.lower(User.email).like(f"%{search}%"),
-            )
-            query = query.filter(filter)
-
-        count = query.count()
-        SORT_COLS = {
-            1: [],  # [User.last_name, User.first_name] will be added anyway
-            2: [func.lower(User.email)],
-            5: [User.last_active],
-        }
-        columns = list(SORT_COLS.get(sort_col, []))
-        columns.extend([func.lower(User.last_name), func.lower(User.first_name)])
-
-        direction = asc if sort_dir == "asc" else desc
-        order_by = list(map(direction, columns))
-
-        # sqlite does not support 'NULLS FIRST|LAST' in ORDER BY clauses
-        engine = query.session.get_bind(User.__mapper__)
-        if engine.name != "sqlite":
-            order_by[0] = nullslast(order_by[0])
-
-        query = query.order_by(*order_by)
-
-        users = query.slice(start, end).all()
-
-        data = []
-        for user in users:
-            # TODO: this should be done on the browser.
-            user_url = url_for(".users_user", user_id=user.id)
-            mugshot = user_photo_url(user, size=MUGSHOT_SIZE)
-            name = html.escape(user.name or "")
-            email = html.escape(user.email or "")
-            roles = [
-                r for r in security.get_roles(user, no_group_roles=True) if r.assignable
-            ]
-            columns = [
-                f'<a href="{user_url}"><img src="{mugshot}" width="{MUGSHOT_SIZE}" height="{MUGSHOT_SIZE}"></a>',
-                f'<a href="{user_url}">{name}</a>',
-                f'<a href="{user_url}"><em>{email}</em></a>',
-                "\u2713" if user.can_login else "",
-                render_template_string(
-                    """{%- for g in groups %}
-                        <span class="badge badge-default">{{ g.name }}</span>
-                    {%- endfor %}""",
-                    groups=sorted(user.groups),
-                ),
-                render_template_string(
-                    """{%- for role in roles %}
-                       <span class="badge badge-default">{{ role }}</span>
-                    {%- endfor %}""",
-                    roles=roles,
-                ),
-            ]
-
-            if user.last_active:
-                last_active = format_datetime(user.last_active)
-            else:
-                last_active = _("Never logged in")
-            columns.append(last_active)
-
-            data.append(columns)
-
-        return {
-            "sEcho": echo,
-            "iTotalRecords": total_count,
-            "iTotalDisplayRecords": count,
-            "aaData": data,
-        }
+#: How many of an account's sign-ins its page shows.
+LAST_SESSIONS = 5
 
 
 # User edit / create views
 class UserBase:
     Model = User
     pk = "user_id"
-    Form = UserAdminForm
-    base_template = "admin/_base.html"
+    template = "admin/user_edit.html"
 
     def index_url(self):
         return url_for(".users")
@@ -139,10 +43,24 @@ class UserBase:
         return self.index_url()
 
 
-class UserEdit(UserBase, views.ObjectEdit):
+class UserEdit(UserBase, views.ObjectEdit[User, UserAdminForm]):
+    Form = UserAdminForm
+
     def breadcrumb(self):
         label = render_template_string("<em>{{ u.email }}</em>", u=self.obj)
         return BreadcrumbItem(label=label, url="", description=self.obj.name)
+
+    @property
+    def template_kwargs(self) -> dict[str, Any]:
+        """The account's last sign-ins, beside its form."""
+        kw = super().template_kwargs
+        kw["sessions"] = (
+            LoginSession.query.filter(LoginSession.user_id == self.obj.id)
+            .order_by(LoginSession.started_at.desc())
+            .limit(LAST_SESSIONS)
+            .all()
+        )
+        return kw
 
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
@@ -155,7 +73,7 @@ class UserEdit(UserBase, views.ObjectEdit):
         if not super().validate():
             return False
 
-        if current_user == self.obj:
+        if authenticated_user() == self.obj:
             # self edit: don't let user shoot themself in the foot
             self.form.can_login.data = True
             roles = self.form.roles
@@ -186,7 +104,7 @@ class UserEdit(UserBase, views.ObjectEdit):
         return super().after_populate_obj()
 
 
-class UserCreate(UserBase, views.ObjectCreate):
+class UserCreate(UserBase, views.ObjectCreate[User, UserCreateForm]):
     Form = UserCreateForm
     chain_create_allowed = True
 
@@ -208,3 +126,35 @@ class UserCreate(UserBase, views.ObjectCreate):
         self.obj.set_password(self.form.password.data)
         del self.form.password
         return super().form_valid()
+
+
+def account_action(user_id: int):
+    """What the accounts' list does to one from its row: send a link to choose a
+    password (the password-reset e-mail: the invitation, which says who added them
+    to which community, comes from a community's managers), disable it, enable it
+    again. Not to one's own account, whose access an administrator keeps."""
+    user = db.get_or_404(User, user_id)
+    action = request.form.get("action")
+    if user == authenticated_user() and action == "disable":
+        msg = "One's own account stays enabled"
+        raise BadRequest(msg)
+
+    match action:
+        case "send-link" if user.can_login:
+            send_reset_password_instructions(user)
+            flash(
+                _("A link to choose a password is sent to %(email)s.", email=user.email)
+            )
+        case "disable":
+            user.can_login = False
+            db.session.commit()
+            flash(_("The account of %(name)s is disabled.", name=user.name))
+        case "enable":
+            user.can_login = True
+            db.session.commit()
+            flash(_("The account of %(name)s is enabled again.", name=user.name))
+        case _:
+            msg = f"Not an action on this account: {action!r}"
+            raise BadRequest(msg)
+
+    return redirect(url_for("admin.users"))

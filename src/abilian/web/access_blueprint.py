@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 from flask import Blueprint
 
+from abilian.core.application import as_application
 from abilian.services.security import ANONYMOUS, Role
 
 if TYPE_CHECKING:
@@ -49,7 +50,7 @@ class AccessControlBlueprint(Blueprint):
         self,
         name: str,
         import_name: str,
-        allowed_roles: None | str | Role | Collection[Role] = None,
+        allowed_roles: str | Role | Collection[Role] | None = None,
         **kwargs: Any,
     ) -> None:
         """
@@ -69,7 +70,7 @@ class AccessControlBlueprint(Blueprint):
 
         if allowed_roles:
             self.record_once(
-                lambda s: s.app.add_access_controller(
+                lambda s: as_application(s.app).add_access_controller(
                     self.name, allow_access_for_roles(allowed_roles)
                 )
             )

@@ -1,297 +1,223 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu with context %}
-{% from "documents/_macros_audit.html" import m_audit_log %}
-{% from "macros/table.html" import m_table %}
-{%- from "community/macros.html" import show_all_viewers -%}
-{% from "documents/_macros.html" import m_docs_table, m_breadcrumbs2 with context %}
-{%- from "community/macros.html" import viewers_snapshot -%}
-
-{% macro user_markup(user) %}
-  <a href="{{ url_for('social.user', user_id=user.id) }}"><img
-      style="border-radius: 22px;" alt=""
-      src="{{ user_photo_url(user, size=16) }}"/>
-    {{ user }}
-  </a>
-{% endmacro %}
-
-{% macro m_breadcrumbs_path(breadcrumbs) %}
-  {% for obj in breadcrumbs[0:-1] %}
-    <a href="{{ obj.path }}">{{ obj.label }}</a>
-    <span class="divider">/</span>
-  {% endfor %}
-
-  <span style="font-size: 14pt; color: gray;">{% if doc.lock %}
-    <i style="color:black;" class="fa fa-lock"></i>{% endif %}
-    {{ doc.title }}</span>
-{% endmacro %}
+{#- A document: what it is, its preview and what to do with it; beside it, the comments
+    on it, its history and, for the community's managers, who has read it. A button
+    gives the document the whole width. Drawn in `mockups/templates/document.html`. -#}
+{% extends "ads_community.html" %}
+{% import "documents/_dialogs.html" as dialogs with context %}
+{% set doc_kw = {"community_id": g.community.slug, "doc_id": doc.id} %}
+{% block page_title %}{{ doc.title }} · {{ _("Documents") }} · {{ g.community.name }}{% endblock %}
 
 {% block content %}
-  {#  <script>#}
-  {#    window.history.pushState("object or string", "Title", "{{ breadcrumbs[0]['path'] }}");#}
-  {#  </script>#}
-
-  {%- if doc.antivirus_required %}
-    <div style="margin: 5px 0;">
-      <i class="fa fa-file-o fa-lg"></i>
-      {{ m_breadcrumbs2(breadcrumbs) }}
-    </div>
-
-    <hr/>
-
-    <p class="small alert alert-warning">
-      <span class="fa-stack">
-        <i class="fa fa-search fa-stack-2x"></i>
-        <i class="fa fa-bug fa-stack-1x text-danger"></i>
-      </span>
-      {% trans %}Waiting for virus check...{% endtrans %}
-    </p>
-
-  {%- elif not doc.antivirus_ok %}
-    <p class="alert alert-danger">
-      <i class="fa fa-exclamation-triangle"></i>
-      {%- trans %}Virus found. Access disabled.{%- endtrans %}
-    </p>
-  {%- endif %}
-
-  <form name="folder-listing" style="margin-bottom: 0;" method="POST">
-    <input id="check_{{ doc.id }}" style="display:none;" type="checkbox" name="object-selected"
-           value="{{ doc.sbe_type }}:{{ doc.id }}" checked>
-  </form>
-
-  <div>
-    <h2>
-      {{ m_breadcrumbs_path(breadcrumbs) }}
-    </h2>
-    <br>
-    <a class="conversation-back-btn" href="{{ url_for('.index', community_id=g.community.slug) }}">
-      <i class="fa fa-arrow-left"></i> {{ _("Back to document list") }}
-    </a>
-
-    <div id="horizontal-doc-menu" class="document-horizontal-menu" style="display: inline; right:0px; top:0px;">
-      <div class="btn-group">
-        {%- if doc.antivirus_ok %}
-          <a class="btn btn-success btn-md pull-right"
-             href="{{ url_for('.document_download', community_id=doc.community.slug, doc_id=doc.id, attach=True) }}">
-            <i class="glyphicon glyphicon-download"></i>
-            {{ _('Download') }}
-            <small>({{ doc.content_length|filesize }})</small>
-          </a>
-        {%- endif %}
+<div class="ads-with-aside sbe-doc">
+  <article class="ads-card" aria-labelledby="doc-title">
+    {#- The document, and what to do with it: download first; a new version and the
+        lock, which working together depends on, in sight; the rest behind ⋮. -#}
+    <div class="ads-card__head ads-spread">
+      <div class="ads-stack ads-gap-sm">
+        <ol class="ads-breadcrumb">
+          {% for crumb in breadcrumbs[:-1] %}<li><a href="{{ crumb.path }}">{{ crumb.label }}</a></li>{% endfor %}
+        </ol>
+        <h2 class="ads-card__title ads-cluster ads-gap-sm" id="doc-title">{{ file_icon(doc.title) }}{{ doc.title }}</h2>
+        <span class="ads-muted ads-cluster ads-gap-sm">
+          {{- doc.content_length | filesize }}
+          {%- if doc.page_num and doc.page_num > 1 %} · {{ ngettext("%(num)d page", "%(num)d pages", doc.page_num) }}{% endif %} · {{ m.avatar(doc.creator, "ads-avatar--xs") }}{{ m.time(doc.created_at) }}
+          {%- if doc_comments %} · <a href="#comments">{{ ngettext("%(num)d comment", "%(num)d comments", doc_comments | length) }}</a>{% endif -%}
+        </span>
       </div>
-      <div class="btn-group">
-        <a onclick="edit_document()"
-           class="btn action action-documents-folder-listing action-documents-folder-listing-download btn-default"
-           href="#modal-edit" title="Download" data-toggle="modal"><i class="glyphicon glyphicon-pencil"></i></a>
-      </div>
-      <div class="btn-group">
-        <a onclick="email_document()"
-           class="btn action action-documents-folder-listing action-documents-folder-listing-move-files btn-default"
-           href="#modal-send-by-email" data-toggle="modal" title="Move to another folder"><i
-            class="glyphicon glyphicon-envelope"></i></a>
-      </div>
-      <div class="btn-group">
-        <a href="#modal-delete"
-           class="btn action action-documents-folder-listing action-documents-folder-listing-delete btn-danger"
-           data-toggle="modal" name="action" title="Delete"><i class="glyphicon glyphicon-trash"></i></a>
-      </div>
-      <div class="btn-group">
-        <div class="dropdown">
-          <button class="btn btn-default dropdown-toggle" type="button" id="dropdownMenu1" data-toggle="dropdown"
-                  aria-haspopup="true" aria-expanded="true">
-            <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <li>
-              <a class="" href="#modal-move-files" data-toggle="modal" role="button" title="Move to another folder">
-                <i class="glyphicon glyphicon-move"></i>
-                {{ _("Move") }}
-              </a>
-            </li>
-            <li>
-              <a onclick="replace_document()" class="" href="#modal-upload-new-version" data-toggle="modal"
-                 role="button"
-                 title="Move to another folder">
-                <i class="fa fa-refresh" aria-hidden="true"></i>
-                {{ _("Replace") }}
-              </a>
-            </li>
-            <li>
-              <form id="document_checkout"
-                    action="{{ url_for('.checkin_checkout', doc_id=doc.id, community_id=doc.community.slug) }}"
-                    method="POST" target="_new">
-                {{ csrf.field() }}
-                {% if doc.lock == None %}
-                  <input type="hidden" name="action" value="checkout"/>
-                  <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"
-                     class="btn btn-link"
-                     onclick="$('#document_checkout').submit(); setTimeout(function () { window.location = '{{ url_for(doc) }}'  }, 500);">
-                    <i class="glyphicon glyphicon-download"></i>
-                    {{ _("Checkout") }}
-                  </a>
-                {% else %}
-                  <input type="hidden" name="action" value="unlock"/>
-                  <a style="color: #262626;position: relative;left: 8px;text-decoration: none;" type="submit"
-                     class="btn btn-link" onclick="$('#document_checkout').submit();">
-                    <i class="fa fa-unlock"></i>
-                    {{ _("Unlock") }}
-                  </a>
-                {% endif %}
-              </form>
-            </li>
-            <li>
-              <a href="{{ url_for(doc) }}" data-toggle="modal" role="button" title="Move to another folder">
-                <i class="glyphicon glyphicon-refresh"></i>
-                {{ _("Refresh preview") }}
-              </a>
-            </li>
-          </ul>
-        </div>
-      </div>
-    </div>
-    <span onclick="view_info()" class="glyphicon glyphicon-chevron-right" id="view_info"
-          aria-hidden="true"
-          style="float: right; font-size: 18pt; position: relative; top: -72px; left: 283px; cursor: pointer; z-index:10;"></span>
-
-    <br><br>
-    <div>
-    </div>
-  </div>
-
-  {%- if doc.description %}
-    <p>{{ doc.description }}</p>
-    <p>&nbsp;</p>
-  {%- endif %}
-
-  <br>
-
-  <div style="border:1px solid silver; width:100%; padding-top: 10px; padding-bottom: 10px;">
-    <div class="preview-container" data-page-num="{{ doc.page_num }}">
-      <img src="{{ url_for('.document_preview_image',
-                        community_id=g.community.slug, doc_id=doc.id,
-                        size=doc.preview_size) }}"
-           alt="" class="preview" data-page="0"/>
-
-      {%- if has_preview %}
-        <a class="preview-nav-button preview-prev" title="{{ _('Previous') }}">
-          <i class="fa fa-chevron-circle-left fa-5x"></i>
-          <span class="sr-only">{{ _('Previous') }}</span>
-        </a>
-        <a class="preview-nav-button preview-next" title="{{ _('Next') }}">
-          <i class="fa fa-chevron-circle-right fa-5x"></i>
-          <span class="sr-only">{{ _('Next') }}</span>
-        </a>
-
-        {%- deferJS %}
-          <script>
-            require(
-                ['Abilian', 'SBEDocumentViewerSetup'],
-                function (Abilian, viewerSetup) {
-                  Abilian.fn.onAppInit(viewerSetup);
-                });
-          </script>
-        {%- enddeferJS %}
-
-      {%- else %}
-        {{ _("Document preview not yet available") }}
-      {%- endif %}
-    </div>
-  </div>
-
-  {%- if doc.extra_metadata %}
-    <h3 class="main collapsed" data-toggle="collapse"
-        href="#doc_extra_metadata">Extra Metadata</h3>
-
-    <div id="doc_extra_metadata" class="collapse">
-      {%- set sorted = doc.extra_metadata|dictsort %}
-      {{ m_table(sorted) }}
-    </div>
-  {%- endif %}
-
-{% endblock %}
-
-
-{% block sidebar %}
-  <br><br>
-  <div style="border: 1px solid #eee;padding: 14px;">
-    <small>
-      <p><b>{{ doc.title|truncate(32, False, '...', 0) }}</b></p>
-      <b>{{ _("Owner") }}</b> : {{ user_markup(doc.creator) }} <br>
-      {{ _('<b>Uploaded:</b> %(date)s (%(age)s)',
-               date=(doc.created_at | datetimeformat('short')),
-               age=doc.created_at | age(add_direction=False)) }}
-      {%- if doc.updated_at != doc.created_at %}
-        <br/>
-        {{ _('<b>Modified:</b> %(date_age)s', date_age=doc.updated_at|age(add_direction=False, date_threshold='day')) }}
-        {%- set lock = doc.lock %}
-        {%- if lock %}
-          <div class="lock">
-            <i class="fa fa-lock"></i>
-            {{ _('Locked for edition by %(user)s at %(date)s (%(age)s)',
-                  user=lock.user, date=lock.date | datetimeformat('short'), age=lock.date | age) }}
+      <div class="ads-cluster ads-gap-sm">
+        {% if doc.antivirus_ok %}
+        <a class="ads-btn ads-btn--primary" href="{{ url_for('.document_download', attach=True, **doc_kw) }}">{{ icon("download") }}{{ _("Download") }}</a>
+        {% endif %}
+        {% if may_replace %}
+        <button class="ads-btn" type="button" data-modal-open="#modal-upload-new-version" aria-label="{{ _('Upload new version') }}">{{ icon("upload") }}<span class="sbe-wide-only">{{ _("New version") }}</span></button>
+        {% endif %}
+        {% if may_write and not lock %}
+        <form method="post" action="{{ url_for('.checkin_checkout', **doc_kw) }}">
+          {{ csrf.field() }}
+          <button class="ads-btn ads-tip" type="submit" name="action" value="lock" aria-label="{{ _('Lock') }}"
+                  data-tip="{{ _('The others will not be able to upload a version while you work on it') }}">{{ icon("lock") }}<span class="sbe-wide-only">{{ _("Lock") }}</span></button>
+        </form>
+        {% endif %}
+        {% if may_write or may_manage %}
+        <details class="ads-dropdown">
+          <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the document') }}">{{ icon("dots-vertical") }}</summary>
+          <div class="ads-menu">
+            {% if may_write %}
+            {% if doc.antivirus_ok %}<button class="ads-menu__item" type="button" data-modal-open="#modal-send-by-email">{{ icon("mail") }}{{ _("Send by email") }}</button>{% endif %}
+            <button class="ads-menu__item" type="button" data-modal-open="#modal-edit">{{ icon("pencil") }}{{ _("Edit properties") }}</button>
+            <button class="ads-menu__item" type="button" data-modal-open="#modal-move-files">{{ icon("arrows-move") }}{{ _("Move") }}</button>
+            {% endif %}
+            {% if may_manage and doc.antivirus_ok %}<a class="ads-menu__item" href="{{ url_for('.refresh_preview', **doc_kw) }}">{{ icon("refresh") }}{{ _("Refresh preview") }}</a>{% endif %}
+            {% if may_write %}
+            <div class="ads-menu__sep"></div>
+            <button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-delete">{{ icon("trash") }}{{ _("Delete") }}</button>
+            {% endif %}
           </div>
-        {%- endif %}
-      {%- endif %}
-    </small>
-  </div>
-
-  {% if g.is_manager %}
-    <div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
-      <p style="color:gray;"><b>{{ _('Readers') }}</b></p>
-      {{ show_all_viewers(viewers,_("viewed by")) }}
+        </details>
+        {% endif %}
+      </div>
     </div>
-  {% endif %}
 
-  <div style="border-left: 1px solid #eee;border-right: 1px solid #eee;border-bottom: 1px solid #eee;padding: 14px;">
-    <p style="color:gray;"><b>{{ _('Last Changes') }}</b></p>
-    {{ m_audit_log(audit_entries) }}
-  </div>
+    <div class="ads-card__body ads-stack">
+      {% if doc.antivirus_required %}
+      <div class="ads-alert ads-tone-info" role="status">{{ icon("clock") }}<span>{{ _("Waiting for virus check...") }}</span></div>
+      {% elif not doc.antivirus_ok %}
+      <div class="ads-alert ads-tone-danger" role="alert">{{ icon("alert-triangle") }}<span>{{ _("Virus found. Access disabled.") }}</span></div>
+      {% endif %}
 
-  {%- deferJS %}
-    <script>
-      require(['Abilian', 'SBEFolderGalleryListingSetup'],
-          function (Abilian, setupFolderListing) {
-            Abilian.fn.onAppInit(setupFolderListing);
-          });
-    </script>
-  {%- enddeferJS %}
+      {% if lock %}
+      <div class="ads-alert ads-tone-warning ads-spread">
+        <span class="ads-cluster ads-gap-sm">{{ icon("lock") }}<span>{{ _("Locked by %(user)s, who is working on it (%(age)s).", user=lock.user, age=lock.date | age) }}</span></span>
+        {% if may_unlock %}
+        <form method="post" action="{{ url_for('.checkin_checkout', **doc_kw) }}">
+          {{ csrf.field() }}
+          <button class="ads-btn ads-btn--sm" type="submit" name="action" value="unlock">{{ icon("lock-open") }}{{ _("Unlock") }}</button>
+        </form>
+        {% endif %}
+      </div>
+      {% endif %}
 
-  <script>
-    var show = 0;
+      {% if doc.description %}<p>{{ doc.description }}</p>{% endif %}
 
-    function view_info() {
-      if (show === 0) {
-        $("#view_info").css("left", "0");
-        $("#sidebar").hide();
-        $("div[class='col-md-9']").attr("class", "col-md-12");
-        show = 1;
-      } else {
-        $("#view_info").css("left", "283px");
-        $("#sidebar").show();
-        $("div[class='col-md-12']").attr("class", "col-md-9");
-        show = 0;
-      }
-    }
+      {% if doc.antivirus_ok %}
+      <div class="sbe-toolbar">
+        {% if has_preview and doc.page_num and doc.page_num > 1 %}
+        <span class="ads-btn-group">
+          <button class="ads-btn ads-btn--sm" type="button" data-preview-step="-1" aria-label="{{ _('Previous page') }}" disabled>{{ icon("chevron-left") }}</button>
+          <button class="ads-btn ads-btn--sm" type="button" data-preview-step="1" aria-label="{{ _('Next page') }}">{{ icon("chevron-right") }}</button>
+        </span>
+        <span class="ads-muted" aria-live="polite">{{ _("Page") }} <span data-preview-page>1</span> / {{ doc.page_num }}</span>
+        {% endif %}
+        {#- A checkbox drawn as a button: the page hides the column when it is ticked
+            (`:has()`), with no script. -#}
+        <label class="ads-btn ads-btn--sm sbe-toggle ads-push">
+          <input type="checkbox" aria-controls="doc-details">
+          <span class="sbe-toggle__off">{{ icon("arrows-maximize") }}{{ _("Full width") }}</span>
+          <span class="sbe-toggle__on">{{ icon("arrows-minimize") }}{{ _("Details and comments") }}</span>
+        </label>
+      </div>
+      {#- An image is its own preview. -#}
+      <div class="sbe-preview" data-preview-pages="{{ doc.page_num or 1 }}">
+        {% if has_preview or doc.content_type.startswith("image/") %}
+        <img src="{{ url_for('.document_preview_image', size=doc.preview_size, **doc_kw) }}" alt="{{ _('Preview of %(name)s', name=doc.title) }}">
+        {% else %}
+        <p class="ads-muted">{{ _("Document preview not yet available") }}</p>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </article>
 
-    function email_document() {
-      var doc_url = "{{ url_for('.document_send', doc_id=doc.id, community_id=doc.community.slug) }}";
-      $("#modal-email-form").attr("action", doc_url);
-    }
+  <aside class="ads-stack" id="doc-details" aria-label="{{ _('About the document') }}">
+    {#- Comments on the document as a whole, oldest first; then where to add one. -#}
+    <section class="ads-card" aria-labelledby="comments">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="comments">{{ _("Comments") }}{% if doc_comments %} ({{ doc_comments | length }}){% endif %}</h2></div>
+      {% if doc_comments %}
+      <ul class="ads-list">
+        {% for c in doc_comments %}
+        <li id="comment-{{ c.id }}">
+          <div class="ads-media ads-fill">
+            {{ m.avatar(c.creator, "ads-avatar--xs") }}
+            <div class="ads-fill ads-stack ads-gap-sm">
+              <span class="ads-cluster ads-gap-sm"><strong>{{ c.creator.name }}</strong><span class="ads-muted">{{ m.time(c.created_at) }}</span></span>
+              <span class="sbe-comment">{{ c.body }}</span>
+            </div>
+            {% if c.id in editable_comments or c.id in deletable_comments %}
+            <details class="ads-dropdown">
+              <summary class="ads-btn ads-btn--ghost ads-btn--sm" aria-label="{{ _('Actions on the comment') }}">{{ icon("dots") }}</summary>
+              <div class="ads-menu">
+                {% if c.id in editable_comments %}<button class="ads-menu__item" type="button" data-modal-open="#modal-edit-comment-{{ c.id }}">{{ icon("pencil") }}{{ _("Edit") }}</button>{% endif %}
+                {% if c.id in deletable_comments %}<button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-delete-comment-{{ c.id }}">{{ icon("trash") }}{{ _("Delete") }}</button>{% endif %}
+              </div>
+            </details>
+            {% endif %}
+          </div>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% if may_comment %}
+      <form class="ads-card__body ads-stack ads-gap-sm" method="post" action="{{ url_for('comments.create', entity_id=doc.id) }}">
+        {{ csrf.field() }}
+        <textarea class="ads-textarea" name="body" rows="2" required placeholder="{{ _('Add a comment…') }}" aria-label="{{ _('Your comment on the document') }}"></textarea>
+        <div><button class="ads-btn ads-btn--sm ads-btn--primary" type="submit" name="__action" value="edit">{{ _("Post the comment") }}</button></div>
+      </form>
+      {% elif not doc_comments %}
+      <p class="ads-card__body ads-muted">{{ _("No comments yet.") }}</p>
+      {% endif %}
+    </section>
+    <section class="ads-card" aria-labelledby="history">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="history">{{ _("History") }}</h2></div>
+      <ul class="ads-list">
+        {% for change in history %}
+        <li>
+          <span class="ads-fill sbe-lines">
+            <span>{% if change.kind == "created" %}{{ _("Uploaded") }}{% elif change.kind == "new-version" %}{{ _("New version") }}{% else %}{{ _("Properties edited") }}{% endif %}</span>
+            <span class="ads-cluster ads-gap-sm ads-muted">{% if change.user %}{{ m.avatar(change.user, "ads-avatar--xs") }}{% endif %}{{ m.time(change.at) }}</span>
+          </span>
+        </li>
+        {% endfor %}
+      </ul>
+    </section>
+    {% if viewers %}
+    <section class="ads-card" aria-labelledby="readers">
+      <div class="ads-card__head ads-spread">
+        <h2 class="ads-card__title" id="readers">{{ ngettext("Read by %(num)d member", "Read by %(num)d members", viewers | length) }}</h2>
+        <a href="{{ url_for('.document_viewers', **doc_kw) }}">{{ _("See the dates") }}</a>
+      </div>
+      <div class="ads-card__body"><span class="ads-avatars">{% for v in viewers %}{{ m.avatar(v.user) }}{% endfor %}</span></div>
+    </section>
+    {% endif %}
+  </aside>
+</div>
 
-    function edit_document() {
-      var doc_url = "{{ url_for('.document_edit', doc_id=doc.id, community_id=doc.community.slug) }}";
-      $("#modal-edit-form").attr("action", doc_url);
-    }
-
-    function replace_document() {
-      var doc_url = "{{ url_for('.document_upload', doc_id=doc.id, community_id=doc.community.slug) }}";
-      $(".modal-replacedoc-form").attr("action", doc_url);
-    }
-  </script>
+{#- The move dialog moves the folder listing's selection: here, this document. -#}
+<form name="folder-listing" hidden>
+  <input type="checkbox" name="object-selected" value="{{ doc.sbe_type }}:{{ doc.id }}" aria-label="{{ doc.title }}" checked>
+</form>
 {% endblock %}
 
-{% block modals %}
-  {% include "documents/_modals_document.html" %}
-  {% include "documents/_modals_folder_move.html" %}
-  {% include "documents/_modals_document_upload_new_version.html" %}
+{% block overlays %}
+{% for c in doc_comments %}
+{% if c.id in editable_comments %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-edit-comment-{{ c.id }}" aria-labelledby="modal-edit-comment-{{ c.id }}-title">
+  <form method="post" action="{{ url_for('comments.edit', entity_id=doc.id, object_id=c.id) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-edit-comment-{{ c.id }}-title">{{ _("Edit the comment") }}</h2></div>
+    <div class="ads-modal__body"><textarea class="ads-textarea" name="body" rows="5" required aria-label="{{ _('The comment') }}">{{ c.body }}</textarea></div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="edit">{{ _("Save changes") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+{% if c.id in deletable_comments %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-delete-comment-{{ c.id }}" aria-labelledby="modal-delete-comment-{{ c.id }}-title">
+  <form method="post" action="{{ url_for('comments.delete', entity_id=doc.id, object_id=c.id) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-delete-comment-{{ c.id }}-title">{{ _("Delete the comment?") }}</h2></div>
+    <div class="ads-modal__body">{{ _("This cannot be undone.") }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit" name="__action" value="delete">{{ icon("trash") }}{{ _("Delete") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
+{% endfor %}
+{% if may_write %}
+{{ dialogs.document_dialogs(doc) }}
+{{ dialogs.move_dialog(doc.parent) }}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-delete" aria-labelledby="delete-title">
+  <form method="post" action="{{ url_for('.document_delete', **doc_kw) }}">
+    {{ csrf.field() }}
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="delete-title">{{ _("Delete “%(name)s”?", name=doc.title) }}</h2></div>
+    <div class="ads-modal__body">{{ _("It goes for everyone in the community. This cannot be undone.") }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit">{{ icon("trash") }}{{ _("Delete") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
 {% endblock %}

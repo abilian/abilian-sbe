@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import date
+from dataclasses import dataclass
+from datetime import date, datetime
 from itertools import groupby, islice
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import whoosh
 import whoosh.query as wq
@@ -12,15 +13,22 @@ from flask import current_app, g, render_template
 from flask_babel import format_date
 from sqlalchemy.orm import joinedload
 
+from abilian.core.application import as_application
+from abilian.core.extensions.login import authenticated
 from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
-from abilian.sbe.apps.documents.models import Document, icon_for
-from abilian.sbe.apps.forum.models import Thread
+from abilian.sbe.apps.communities.models import MANAGER
+from abilian.sbe.apps.documents.models import Document
+from abilian.sbe.apps.forum.models import Post, Thread
+from abilian.sbe.apps.main.feed import feed_item
 from abilian.services import get_service
 from abilian.web import url_for
 from abilian.web.action import actions
 
-from .presenters import ActivityEntryPresenter
 from .util import get_recent_entries
+
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
+    from abilian.services.activity.models import ActivityEntry
 
 wall = CommunityBlueprint(
     "wall", __name__, url_prefix="/wall", template_folder="templates"
@@ -33,16 +41,42 @@ def set_current_tab(endpoint: str, values: dict[Any, Any]) -> None:
     g.current_tab = "wall"
 
 
+#: What a community's home shows: its latest news, then beside it a few documents and
+#: a row of its members.
+FEED_LENGTH = 20
+DOCUMENTS_SHOWN = 4
+MEMBERS_SHOWN = 12
+
+
 @route("/")
-def index() -> str:
-    actions.context["object"] = g.community._model
-    entries = get_recent_entries(20, community=g.community)
-    entries = ActivityEntryPresenter.wrap_collection(entries)
-    return render_template("wall/index.html", entries=entries)
+@authenticated
+def index(user: User) -> str:
+    """A community's home: its feed, its recent documents, its members."""
+    community = g.community._model
+    actions.context["object"] = community
+    entries = get_recent_entries(user, FEED_LENGTH, community=g.community)
+    memberships = community.get_memberships()
+    return render_template(
+        "wall/index.html",
+        items=[feed_item(entry) for entry in entries],
+        documents=recent_documents(entries)[:DOCUMENTS_SHOWN],
+        members=[m.user for m in memberships[:MEMBERS_SHOWN]],
+        managers=[m.user for m in memberships if m.role == MANAGER],
+    )
+
+
+def recent_documents(entries: list[ActivityEntry]) -> list[Document]:
+    """The documents the latest entries posted or updated, each once, newest first.
+
+    The entries are those `user` may read, so the documents are too.
+    """
+    documents = (e.object for e in entries if isinstance(e.object, Document))
+    return list(dict.fromkeys(documents))
 
 
 @route("/files")
-def files():
+@authenticated
+def files(user: User):
     community = g.community._model
     actions.context["object"] = community
 
@@ -51,7 +85,7 @@ def files():
         all_files += get_attachments_from_forum(community)
 
     if community.has_documents:
-        all_files += get_attachments_from_dms(community)
+        all_files += get_attachments_from_dms(user, community)
 
     all_files = sorted(all_files, key=lambda doc: doc.date)
     all_files = islice(reversed(all_files), 0, 50)
@@ -60,25 +94,20 @@ def files():
     return render_template("wall/files.html", grouped_docs=grouped_docs)
 
 
+@dataclass(frozen=True)
 class Attachment:
-    def __init__(self, url, name, owner, date, content_length, content_type) -> None:
-        self.url = url
-        self.name = name
-        self.owner = owner
-        self.date = date
-        self.content_length = content_length
-        self.content_type = content_type
-
-    @property
-    def icon(self):
-        return icon_for(self.content_type)
+    url: str
+    name: str
+    owner: str
+    date: datetime
+    content_length: int | None
+    content_type: str
 
 
 def get_attachments_from_forum(community):
     all_threads = (
         Thread.query.filter(Thread.community_id == community.id)
-        .options(joinedload("posts"))
-        .options(joinedload("posts.attachments"))
+        .options(joinedload(Thread.posts).joinedload(Post.attachments))
         .order_by(Thread.created_at.desc())
         .all()
     )
@@ -95,7 +124,7 @@ def get_attachments_from_forum(community):
     attachments = []
     for post in posts_with_attachments:
         for att in post.attachments:
-            url = current_app.default_view.url_for(att)
+            url = as_application(current_app).default_view.url_for(att)
             attachment = Attachment(
                 url,
                 att.name,
@@ -110,7 +139,7 @@ def get_attachments_from_forum(community):
 
 
 # FIXME: significant performance issues here, needs major refactoring
-def get_attachments_from_dms(community):
+def get_attachments_from_dms(user: User, community):
     index_service = get_service("indexing")
     filters = wq.And(
         [
@@ -119,7 +148,9 @@ def get_attachments_from_dms(community):
         ]
     )
     sortedby = whoosh.sorting.FieldFacet("created_at", reverse=True)
-    documents = index_service.search("", filter=filters, sortedby=sortedby, limit=50)
+    documents = index_service.search(
+        "", filter=filters, sortedby=sortedby, limit=50, user=user
+    )
 
     attachments = []
     for doc in documents:

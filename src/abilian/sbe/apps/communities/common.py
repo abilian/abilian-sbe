@@ -7,20 +7,23 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+import sqlalchemy as sa
 from flask import g
 from flask_babel import format_date
 
 from abilian.i18n import _l
-from abilian.sbe.apps.communities.security import is_manager
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.services.viewtracker import viewtracker
+from abilian.services.viewtracker.models import Hit
 
 if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
     from abilian.sbe.apps.documents.models import Document
     from abilian.sbe.apps.wiki.models import WikiPage
 
 
-def object_viewers(entity: Document | WikiPage) -> list:
-    if is_manager():
+def object_viewers(user: User, entity: Document | WikiPage) -> list:
+    if can_manage(user, g.community):
         views = viewtracker.get_views(entity=entity)
         community_members_id = [
             user.id for user in g.community.members if user.id != entity.creator.id
@@ -31,7 +34,11 @@ def object_viewers(entity: Document | WikiPage) -> list:
                 viewers.append(
                     {
                         "user": view.user,
-                        "viewed_at": view.hits[-1].viewed_at,
+                        # order_by(None): the relationship's ORDER BY has no
+                        # place in an aggregate, and PostgreSQL refuses it.
+                        "viewed_at": view.hits.order_by(None)
+                        .with_entities(sa.func.max(Hit.viewed_at))
+                        .scalar(),
                     }
                 )
         return viewers
@@ -53,14 +60,15 @@ def activity_time_format(time: datetime, now: datetime | None = None) -> str:
         time_delta.seconds,
     )
 
-    if days == 0 and hours == 0 and minutes == 0:
-        return f"{seconds}{_l('s')}"
+    match days:
+        case 0 if hours == 0 and minutes == 0:
+            return f"{seconds}{_l('s')}"
 
-    if days == 0 and hours == 0:
-        return f"{minutes}{_l('m')}"
+        case 0 if hours == 0:
+            return f"{minutes}{_l('m')}"
 
-    if days == 0:
-        return f"{hours}{_l('h')}"
+        case 0:
+            return f"{hours}{_l('h')}"
 
     if days < 30:
         return f"{days}{_l('d')}"

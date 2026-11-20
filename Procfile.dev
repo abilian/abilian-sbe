@@ -1,3 +1,7 @@
 # worker: flask worker
 # scheduler: flask scheduler
 web: flask run --reload
+vite: flask vite start
+# Snapshots off and out of the repo: this is a dramatiq broker, not a store,
+# and plain `redis-server` drops a dump.rdb in the working directory.
+redis: redis-server --save '' --dir /tmp

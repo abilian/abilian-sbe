@@ -1,0 +1,83 @@
+{#- Pieces the administration's pages on the Abilian Design System share. -#}
+
+{#- Whether an account may sign in, and whether it ever has. -#}
+{% macro state(user) -%}
+{% if not user.can_login %}<span class="ads-status ads-status--danger"><span class="ads-status__dot"></span>{{ _("Disabled") }}</span>
+{%- elif user.last_active %}<span class="ads-status ads-status--success"><span class="ads-status__dot"></span>{{ _("Active") }}</span>
+{%- else %}<span class="ads-status ads-tone-neutral"><span class="ads-status__dot"></span>{{ _("Never signed in") }}</span>{% endif %}
+{%- endmacro %}
+
+{#- Signing in as someone, to see what they see. A POST: it changes who is signed in. -#}
+{% macro sign_in_as(user, class="ads-btn") -%}
+<form method="post" action="{{ url_for('admin.impersonate_post') }}">
+  {{ csrf.field() }}
+  <input type="hidden" name="user" value="{{ user.id }}">
+  <button class="{{ class }}" type="submit">{{ icon("user") }}{{ _("Sign in as %(name)s", name=user.name) }}</button>
+</form>
+{%- endmacro %}
+
+{#- A line of the log: who did what to which object, and where; what changed, under it.
+    `kinds` says, by class, how a line names an object of it. -#}
+{% macro audit_line(entry, kinds) -%}
+{% set e = entry.entry %}
+{% set class_name = e.entity_type.rsplit(".", 1)[-1] %}
+{% set obj = e.entity %}
+{% set who = person(e.user) %}
+{% set what %}{% if entry.entity_url %}<a href="{{ entry.entity_url }}">{{ obj.name or e.entity_name }}</a>{% else %}<span>{{ e.entity_name }}</span>{% endif %}{% endset %}
+{% set kind = kinds[class_name][1] if class_name in kinds else class_name %}
+<span>
+{%- if entry.verb == "create" %}{{ _("%(who)s created %(kind)s %(what)s", who=who, kind=kind, what=what) }}
+{%- elif entry.verb == "update" %}{{ _("%(who)s changed %(kind)s %(what)s", who=who, kind=kind, what=what) }}
+{%- else %}{{ _("%(who)s deleted %(kind)s %(what)s", who=who, kind=kind, what=what) }}{% endif %}
+{%- if obj and obj.community is defined and obj.community %} <span class="ads-muted">{{ _("in %(community)s", community=obj.community.name) }}</span>{% endif %}</span>
+{% if entry.verb == "update" and e.changes %}{{ field_changes(e.changes) }}{% endif %}
+{%- endmacro %}
+
+{#- What a change changed: each field a person reads (`Changes.shown_columns`), its old value
+    struck out, then its new one; what was added to a list and what was taken from it.
+    Long values are cut short. -#}
+{% macro field_changes(changes) -%}
+{% set keys = changes.shown_columns() %}
+{% if keys or changes.collections %}
+<ul class="sbe-changes ads-muted">
+  {% for key in keys %}
+  {% set values = changes.columns[key] %}
+  <li><strong>{{ key }}</strong> :
+    {% if values.columns is defined %}{{ field_changes(values) }}
+    {% else %}{% set old, new = values %}{% if old and old not in (NEVER_SET, NO_VALUE) %}<del>{{ old | string | truncate(60) }}</del> → {% endif %}<ins>{{ new | string | truncate(60) }}</ins>{% endif %}
+  </li>
+  {% endfor %}
+  {% for key, (added, removed) in changes.collections.items() %}
+  <li><strong>{{ key }}</strong> :{% for label in added %} <ins>+ {{ label }}</ins>{% endfor %}{% for label in removed %} <del>− {{ label }}</del>{% endfor %}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+{%- endmacro %}
+
+{#- Who did something, in a line of the log: their account, or the system itself (a
+    migration, the command line), which is no one's. -#}
+{% macro person(user) -%}
+{% if user and user.id != 0 %}<a class="sbe-quiet" href="{{ url_for('admin.users_user', user_id=user.id) }}"><strong>{{ user.name }}</strong></a>{% else %}<em>{{ _("The system") }}</em>{% endif %}
+{%- endmacro %}
+
+{#- A line of the log about permissions: a role given or taken, on an object or on the
+    whole site; an object made to inherit its permissions, or to stop. -#}
+{% macro permission_line(entry) -%}
+{% set e = entry.entry %}
+{% set who = person(e.manager) %}
+{% set role = role_name(e.role) if e.role else "" %}
+{% set principal %}{% if e.user %}{{ person(e.user) }}{% elif e.group %}{{ e.group.name }}{% endif %}{% endset %}
+{% set target %}{% if entry.object_url %}<a href="{{ entry.object_url }}">{{ e.object.name }}</a>{% else %}{{ e.object_name }}{% endif %}{% endset %}
+<span>
+{%- if e.op == "GRANT" %}{{ _("%(who)s gave the role %(role)s to %(principal)s", who=who, role=role, principal=principal) }}
+{%- elif e.op == "REVOKE" %}{{ _("%(who)s took the role %(role)s from %(principal)s", who=who, role=role, principal=principal) }}
+{%- elif e.op == "SET_INHERIT" %}{{ _("%(who)s made %(target)s inherit its permissions", who=who, target=target) }}
+{%- else %}{{ _("%(who)s stopped %(target)s inheriting its permissions", who=who, target=target) }}{% endif %}
+{%- if e.object_id and e.op in ("GRANT", "REVOKE") %} {{ _("on %(target)s", target=target) }}{% endif %}</span>
+{%- endmacro %}
+
+{#- A role, by its label; one without a translation keeps its key ("role_reader"),
+    and its name reads better. -#}
+{% macro role_name(role) -%}
+{% set label = role.label | string %}{{ role.name if label.startswith("role_") else label }}
+{%- endmacro %}

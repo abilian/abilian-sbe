@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import TYPE_CHECKING, Any, ClassVar
 
-from sqlalchemy.schema import Column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import DateTime, Integer
 from whoosh.fields import ID
 
@@ -16,6 +16,11 @@ from abilian.core.util import fqcn
 #: Base Model class.
 class Model(db.Model):
     __abstract__ = True
+
+    #: What the object's class is known as: in the index, in URLs, in the
+    #: registry of default views. Set on `Entity` subclasses by their
+    #: metaclass, and on `User` and `Group` by `set_entity_type`.
+    entity_type: ClassVar[str]
 
 
 class Info(dict):
@@ -51,18 +56,25 @@ SYSTEM = Info(editable=False, auditable=False)
 
 
 class IdMixin:
-    id = Column(Integer, primary_key=True, info=SYSTEM | SEARCHABLE)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, info=SYSTEM | SEARCHABLE)
+
+
+#: What `__index_to__` holds: (attribute, fields) pairs, each field a field
+#: name or a (name, whoosh field) pair.
+IndexTo = tuple[tuple[str, tuple[str | tuple[str, Any], ...]], ...]
 
 
 class Indexable:
     """Mixin with sensible defaults for indexable objects."""
 
     __indexable__ = True
-    __index_to__ = (
+    __index_to__: ClassVar[IndexTo] = (
         ("object_key", (("object_key", ID(stored=True, unique=True)),)),
         ("object_type", (("object_type", ID(stored=True)),)),
     )
-    id: int
+    if TYPE_CHECKING:
+        # Mapped by each indexable model; a bare `Mapped` here would map a column.
+        id: Mapped[int]
 
     @classmethod
     def _object_type(cls) -> str:
@@ -79,12 +91,16 @@ class Indexable:
 
 class TimestampedMixin:
     #: creation date
-    created_at = Column(DateTime, default=datetime.utcnow, info=SYSTEM | SEARCHABLE)
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.utcnow, info=SYSTEM | SEARCHABLE
+    )
     #: last modification date
-    updated_at = Column(
+    updated_at: Mapped[datetime | None] = mapped_column(
         DateTime,
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
         info=SYSTEM | SEARCHABLE,
     )
-    deleted_at = Column(DateTime, default=None, info=SYSTEM)
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=None, info=SYSTEM
+    )

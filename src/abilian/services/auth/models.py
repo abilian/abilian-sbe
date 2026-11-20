@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from flask import request
-from flask_login import current_user
 from flask_sqlalchemy.query import Query
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 
 _MARK = object()
+
+#: Idle this long, a sign-in is over: the next request starts another.
+IDLE_LIMIT = timedelta(hours=1)
 
 
 class LoginSessionQuery(Query):
@@ -60,32 +62,47 @@ class LoginSession(db.Model):
     query_class = LoginSessionQuery
     # query: LoginSessionQuery
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
 
-    started_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    last_active_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    ended_at = Column(DateTime)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    last_active_at: Mapped[datetime] = mapped_column(
+        DateTime, default=datetime.utcnow, nullable=False
+    )
+    ended_at: Mapped[datetime | None] = mapped_column(DateTime)
 
-    user_id = Column(ForeignKey(User.id), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey(User.id), nullable=False)
     user = relationship(User)
 
     #: IP addres, should work with both IPv4 and IPv6.
     # FIXME: define a custom type to use postgres inet when on postgres
     # http://www.postgresql.org/docs/9.1/static/datatype-net-types.html
-    ip_address = Column(String(39), default="", nullable=False)
+    ip_address: Mapped[str] = mapped_column(String(39), default="", nullable=False)
 
     #: Limited (somewhat artbitrarily) to 512 characters.
-    user_agent = Column(String(512), default="", nullable=False)
+    user_agent: Mapped[str] = mapped_column(String(512), default="", nullable=False)
+
+    @property
+    def end(self) -> datetime | None:
+        """When the sign-in ended, or None while it is still on.
+
+        One left idle ended at its last request, though it is only closed when its
+        user comes back.
+        """
+        if self.ended_at:
+            return self.ended_at
+        if datetime.utcnow() - self.last_active_at > IDLE_LIMIT:
+            return self.last_active_at
+        return None
 
     @staticmethod
-    def new() -> LoginSession:
+    def new(user: User) -> LoginSession:
         user_agent = request.environ.get("HTTP_USER_AGENT", "")
         forwared_for = request.headers.getlist("X-Forwarded-For")
         if not forwared_for:
             ip_address = request.remote_addr
         else:
             ip_address = forwared_for[0]
-        session = LoginSession(
-            user=current_user, user_agent=user_agent, ip_address=ip_address
-        )
+        session = LoginSession(user=user, user_agent=user_agent, ip_address=ip_address)
         return session

@@ -8,13 +8,15 @@ from typing import TYPE_CHECKING
 import defusedxml
 import sqlalchemy as sa
 import sqlalchemy.exc
+from flask import current_app, url_for
 from flask_migrate import Migrate
 from loguru import logger
+from markupsafe import Markup
 
 import abilian.core.util
 import abilian.i18n
 from abilian.core import extensions
-from abilian.extensions import asset_manager
+from abilian.extensions import vite
 from abilian.services import (
     activity_service,
     antivirus,
@@ -28,6 +30,7 @@ from abilian.services import (
     session_blob_store,
     vocabularies_service,
 )
+from abilian.services.security import is_site_admin
 from abilian.web import csrf
 from abilian.web.action import actions
 from abilian.web.admin import Admin
@@ -35,31 +38,77 @@ from abilian.web.admin import Admin
 if TYPE_CHECKING:
     from flask import Flask
 
+    from abilian.app import Application
+
 defusedxml.defuse_stdlib()
 
 db = extensions.db
+
+#: Vite dev server, used only when the app runs in debug mode.
+#: Must match `server.port` in vite/vite.config.js, which pins it with
+#: strictPort. Override with FLASK_VITE_DEV_SERVER if the port is taken.
+VITE_DEV_SERVER = "http://localhost:5180"
+
+
+def vite_asset(path: str) -> Markup:
+    """Render the tag loading a Vite-built asset.
+
+    In debug mode the asset is served by the Vite dev server. Otherwise it comes
+    from the build output shipped inside the package, which `make front` writes
+    to `abilian/sbe/static/vite/` and `abilian_sbe_static` serves.
+    """
+    filename = path.rsplit("/", 1)[-1]
+
+    if current_app.debug:
+        base = current_app.config.get("VITE_DEV_SERVER", VITE_DEV_SERVER)
+        url = f"{base}/{path}"
+        if filename.endswith(".css"):
+            # The dev server hands CSS back as a JS module, because that is how
+            # it drives HMR -- and a browser refuses that MIME type for
+            # <link rel="stylesheet">, leaving the page unstyled. `?direct`
+            # asks Vite for the plain text/css bytes instead.
+            url += "?direct"
+    else:
+        url = url_for("abilian_sbe_static", filename=f"vite/{filename}")
+
+    if filename.endswith(".css"):
+        return Markup(f'<link rel="stylesheet" href="{url}" />')
+    if filename.endswith(".js"):
+        return Markup(f'<script type="module" src="{url}"></script>')
+
+    msg = f"Don't know how to load Vite asset {path!r}: expected .css or .js"
+    raise ValueError(msg)
+
 
 # Silence those warnings for now.
 warnings.simplefilter("ignore", category=sa.exc.SAWarning)
 
 
-def init_extensions(app: Flask) -> None:
+def init_extensions(app: Application) -> None:
     """Initialize flask extensions, helpers and services."""
 
     extensions.redis.init_app(app)
     extensions.mail.init_app(app)
-    extensions.deferred_js.init_app(app)
     extensions.upstream_info.extension.init_app(app)
 
     actions.init_app(app)
 
-    # auth_service installs a `before_request` handler (actually it's
-    # flask-login). We want to authenticate user ASAP, so that sentry and
+    # auth_service installs a `before_request` handler (actually, it's
+    # flask-login). We want to authenticate the user ASAP, so that sentry and
     # logs can report which user encountered any error happening later,
     # in particular in a before_request handler (like csrf validator)
     auth_service.init_app(app)
 
-    asset_manager.init_app(app)
+    vite.init_app(app)
+    app.jinja_env.globals["vite_asset"] = vite_asset
+    # Templates ask the question by name. They used to read `g.is_manager`,
+    # which two producers wrote with two different meanings.
+    app.jinja_env.globals["is_site_admin"] = is_site_admin
+
+    # Initialize legacy assets for favicons and other static resources
+    from abilian.web import assets as legacy_assets
+
+    legacy_assets.init_app(app)
 
     init_babel(app)
 

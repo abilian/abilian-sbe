@@ -5,7 +5,7 @@
 from __future__ import annotations
 
 import contextlib
-from typing import Never
+from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 
 import sqlalchemy as sa
 import sqlalchemy.exc
@@ -13,9 +13,11 @@ import sqlalchemy.orm
 from flask import current_app, flash, g, redirect, render_template, request, url_for
 from loguru import logger
 from werkzeug.exceptions import BadRequest, NotFound
+from wtforms import Form
 
 from abilian.core.entities import ValidationError
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated_user
 from abilian.core.signals import activity
 from abilian.i18n import _, _l
 from abilian.services import get_service
@@ -25,21 +27,37 @@ from abilian.web.action import ButtonAction, Endpoint, actions
 
 from .base import JSONView, View
 
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
-class BaseObjectView(View):
+    from flask.typing import ResponseReturnValue
+    from werkzeug.datastructures import ImmutableMultiDict
+
+
+class ViewedModel(Protocol):
+    """What the object views need of a model: an id, and a query on the class."""
+
+    query: ClassVar[Any]
+
+    @property
+    def id(self) -> Any:
+        """The model's id: read only, so a mapped column fits."""
+
+
+class BaseObjectView[M: ViewedModel](View):
     """Base class common to all database objects views."""
 
     #: form title
     title: str
 
     #: Model class
-    Model: type
+    Model: type[M]
 
     #: primary key name to look for in url arguments
     pk = "object_id"
 
     #: object instance for this view
-    obj: object
+    obj: M
 
     #: object id
     object_id: int
@@ -47,20 +65,14 @@ class BaseObjectView(View):
     #: template to render
     template: str
 
-    #: default templates inherit from "base_template". This allows to use
-    #: generic templates with a custom base
-    base_template = "base.html"
-
-    def __init__(
-        self, Model=None, pk=None, base_template=None, *args, **kwargs
-    ) -> None:
+    def __init__(self, Model=None, pk=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        cls = self.__class__
-        self.pk = pk if pk is not None else cls.pk
-        self.Model = Model if Model is not None else cls.Model
-        self.base_template = (
-            base_template if base_template is not None else cls.base_template
-        )
+        # Override the class attributes only with what is given: a view may set
+        # them later, as one that builds its form for each object.
+        if Model is not None:
+            self.Model = Model
+        if pk is not None:
+            self.pk = pk
 
     def prepare_args(self, args, kwargs):
         args, kwargs = self.init_object(args, kwargs)
@@ -70,13 +82,15 @@ class BaseObjectView(View):
 
         return args, kwargs
 
-    def breadcrumb(self) -> None:
+    def breadcrumb(
+        self,
+    ) -> nav.BreadcrumbItem | Iterable[nav.BreadcrumbItem] | None:
         """Return :class:`..nav.BreadcrumbItem` instance for this object.
 
         This method may return a list of BreadcrumbItem instances.
         Return `None` if nothing.
         """
-        return
+        return None
 
     def init_object(self, args, kwargs):
         """This method is reponsible for setting :attr:`obj`.
@@ -90,53 +104,45 @@ class BaseObjectView(View):
 
         return args, kwargs
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> ResponseReturnValue:
         bc = self.breadcrumb()
         if bc is not None:
             bc = [bc] if isinstance(bc, nav.BreadcrumbItem) else list(bc)
             assert all(isinstance(b, nav.BreadcrumbItem) for b in bc)
             g.breadcrumb.extend(bc)
 
-        kwargs = {"base_template": self.base_template}
-        kwargs.update(self.template_kwargs)
+        kwargs = dict(self.template_kwargs)
         # forbid override "view"
         kwargs["view"] = self
         return render_template(self.template, **kwargs)
 
     @property
     def template_kwargs(self):
-        """Get template render arguments.
-
-        You may override `base_template` for instance. Only `view`
-        cannot be overriden.
-        """
+        """Get template render arguments. Only `view` cannot be overriden."""
         return {}
 
 
-class ObjectView(BaseObjectView):
+class ObjectView[M: ViewedModel, F: Form](BaseObjectView[M]):
     """View objects."""
 
-    #: html template
-    template = "default/object_view.html"
-
     #: View form class. Form object used to show objects fields
-    Form: type
+    Form: type[F]
 
     #: required permission. Must be an instance of
     #: :class:`abilian.services.security.Permission`
     permission = READ
 
     #: form instance for this view
-    # TODO
-    form: object
+    form: F
 
     def __init__(
         self, Model=None, pk=None, Form=None, template=None, *args, **kwargs
     ) -> None:
         super().__init__(Model, pk, *args, **kwargs)
-        cls = self.__class__
-        self.Form = Form if Form is not None else cls.Form
-        self.template = template if template is not None else cls.template
+        if Form is not None:
+            self.Form = Form
+        if template is not None:
+            self.template = template
 
     def prepare_args(self, args, kwargs):
         """
@@ -147,8 +153,8 @@ class ObjectView(BaseObjectView):
         self.form = self.Form(**form_kwargs)
         return args, kwargs
 
-    def get_form_kwargs(self):
-        kw = {"obj": self.obj}
+    def get_form_kwargs(self) -> dict[str, Any]:
+        kw: dict[str, Any] = {"obj": self.obj}
         if issubclass(self.Form, forms.Form) and self.permission:
             kw["permission"] = self.permission
         return kw
@@ -171,7 +177,6 @@ CANCEL_BUTTON = ButtonAction(
     "form",
     "cancel",
     title=_l("Cancel"),
-    # .cancel: if jquery.validate is used it will properly skip validation
     btn_class="default cancel",
 )
 
@@ -186,7 +191,7 @@ ADD_ANOTHER_BUTTON = ButtonAction(
 )
 
 
-class ObjectEdit(ObjectView):
+class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
     """Edit object."""
 
     template = "default/object_edit.html"
@@ -196,8 +201,8 @@ class ObjectEdit(ObjectView):
     #: :class:ButtonAction instance to show on form
     _buttons = ()
 
-    #: submitted form data
-    data = None
+    #: submitted form data, set by `prepare_args()`
+    data: ImmutableMultiDict[str, str]
 
     #: action name from form data
     action = None
@@ -218,10 +223,10 @@ class ObjectEdit(ObjectView):
         Model=None,
         pk=None,
         Form=None,
+        *args,
         template=None,
         view_endpoint=None,
         message_success=None,
-        *args,
         **kwargs,
     ) -> None:
         super().__init__(Model, pk, Form, *args, template=template, **kwargs)
@@ -294,7 +299,7 @@ class ObjectEdit(ObjectView):
     def edit(self, redirect_to=None):
         if self.validate():
             return self.form_valid(redirect_to=redirect_to)
-        if request.csrf_failed:
+        if csrf.has_failed():
             errors = self.form.errors
             csrf_failed = errors.pop("csrf_token", False)
             if csrf_failed and not errors:
@@ -329,7 +334,7 @@ class ObjectEdit(ObjectView):
         """Called after `self.obj` values have been updated, and `self.obj`
         attached to an ORM session."""
 
-    def handle_commit_exception(self, exc) -> None:
+    def handle_commit_exception(self, exc) -> ResponseReturnValue | None:
         """Hook point to handle exception that may happen during commit.
 
         It is the responsability of this method to perform a rollback if it is
@@ -393,7 +398,7 @@ class ObjectEdit(ObjectView):
                 return redirect(redirect_to)
             return self.redirect_to_view()
 
-    def form_invalid(self) -> None:
+    def form_invalid(self) -> ResponseReturnValue | None:
         """When a form doesn't validate this method is called.
 
         It may return a :class:`Flask.Response` instance, to handle specific
@@ -429,7 +434,7 @@ class ObjectEdit(ObjectView):
         )
 
     @property
-    def activity_target(self) -> None:
+    def activity_target(self) -> Any:
         """Return `target` to use when creating activity."""
         return
 
@@ -445,7 +450,7 @@ CHAIN_CREATE_BUTTON = ButtonAction(
 )
 
 
-class ObjectCreate(ObjectEdit):
+class ObjectCreate[M: ViewedModel, F: Form](ObjectEdit[M, F]):
     """Create a new object."""
 
     permission = CREATE
@@ -478,6 +483,13 @@ class ObjectCreate(ObjectEdit):
         self.obj = self.Model()
         return args, kwargs
 
+    def get(self, *args, **kwargs) -> ResponseReturnValue:
+        # The new object is not saved yet, but it hangs off saved ones (its
+        # community, its parent folder). A flush while the form renders would
+        # find it in their collections and refuse to save it.
+        with db.session.no_autoflush:
+            return super().get(*args, **kwargs)
+
     def get_form_kwargs(self):
         kw = super().get_form_kwargs()
         if request.method == "GET":
@@ -507,7 +519,7 @@ class ObjectCreate(ObjectEdit):
 DELETE_BUTTON = ButtonAction("form", "delete", title=_l("Delete"))
 
 
-class ObjectDelete(ObjectEdit):
+class ObjectDelete[M: ViewedModel, F: Form](ObjectEdit[M, F]):
     """Delete object.
 
     Supports the DELETE verb.
@@ -554,16 +566,17 @@ class ObjectDelete(ObjectEdit):
 
 
 class JSONBaseSearch(JSONView):
-    Model = None
+    #: Model class, set by a subclass or given to `as_view()`
+    Model: type[Any]
     minimum_input_length = 2
 
     def __init__(self, *args, **kwargs) -> None:
-        Model = kwargs.pop("Model", self.Model)
+        if "Model" in kwargs:
+            self.Model = kwargs.pop("Model")
         minimum_input_length = kwargs.pop(
             "minimum_input_length", self.minimum_input_length
         )
         super().__init__(*args, **kwargs)
-        self.Model = Model
         self.minimum_input_length = minimum_input_length
 
     def prepare_args(self, args, kwargs):
@@ -582,10 +595,10 @@ class JSONBaseSearch(JSONView):
 
         return {"results": results}
 
-    def get_results(self, q, *args, **kwargs) -> Never:
+    def get_results(self, q, *args, **kwargs) -> Iterable[Any]:
         raise NotImplementedError
 
-    def get_item(self, obj) -> Never:
+    def get_item(self, obj) -> dict[str, Any]:
         """Return a result item.
 
         :param obj: Instance object
@@ -597,7 +610,7 @@ class JSONBaseSearch(JSONView):
 class JSONModelSearch(JSONBaseSearch):
     """Base class for json sqlalchemy model search.
 
-    As used by select2 widgets for example.
+    As used by the user pickers for example.
     """
 
     def get_results(self, q, *args, **kwargs):
@@ -634,13 +647,13 @@ class JSONModelSearch(JSONBaseSearch):
 
 
 class JSONWhooshSearch(JSONBaseSearch):
-    """Base class for JSON Whoosh search, as used by select2 widgets for
+    """Base class for JSON Whoosh search, as used by the user pickers for
     example."""
 
     def get_results(self, q, *args, **kwargs):
         svc = get_service("indexing")
         search_kwargs = {"limit": 50, "Models": (self.Model,)}
-        results = svc.search(q, **search_kwargs)
+        results = svc.search(q, user=authenticated_user(), **search_kwargs)
 
         itemkey = None
         try:

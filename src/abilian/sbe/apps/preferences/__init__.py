@@ -8,7 +8,7 @@ import jinja2
 
 from abilian.services.preferences import preferences
 
-from .panels.sbe_notifications import SbeNotificationsPanel
+from .panels.account import AccountPanel
 
 if TYPE_CHECKING:
     from abilian.app import Application
@@ -17,4 +17,4 @@ if TYPE_CHECKING:
 def register_plugin(app: Application) -> None:
     loader = jinja2.PackageLoader("abilian.sbe.apps.preferences")
     app.register_jinja_loaders(loader)
-    preferences.register_panel(SbeNotificationsPanel(), app)
+    preferences.register_panel(AccountPanel(), app)

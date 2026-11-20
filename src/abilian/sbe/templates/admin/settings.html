@@ -1,0 +1,32 @@
+{#- The site's settings: its name, who its e-mails come from, the hour the daily digest
+    leaves. Overrides Abilian Core's page. -#}
+{% extends "admin/_ads.html" %}
+{% block page_title %}{{ _("Settings") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("Settings") }}{% endblock %}
+{% block content %}
+<form class="ads-card" method="post" aria-labelledby="settings-title">
+  {{ csrf.field() }}
+  <div class="ads-card__head"><h2 class="ads-card__title" id="settings-title">{{ _("The site") }}</h2></div>
+  <div class="ads-card__body ads-stack">
+    {% for key in keys %}
+    {% if key.hour is defined %}
+    <div class="ads-field">
+      <label class="ads-label" for="{{ key.id }}">{{ key.label }}</label>
+      <select class="ads-select sbe-fit" id="{{ key.id }}" name="{{ key.id }}" aria-describedby="{{ key.id }}-help">
+        <option value="off" {{ "selected" if not key.schedule }}>{{ _("Not sent") }}</option>
+        {% if key.schedule and key.hour is none %}<option value="" selected>{{ _("As configured: %(schedule)s", schedule=key.schedule) }}</option>{% endif %}
+        {% for hour in range(24) %}<option value="{{ hour }}" {{ "selected" if hour == key.hour }}>{{ "%02d:00" | format(hour) }}</option>{% endfor %}
+      </select>
+      <small class="ads-help" id="{{ key.id }}-help">{{ key.description }}</small>
+    </div>
+    {% else %}
+    <div class="ads-field">
+      <label class="ads-label" for="{{ key.id }}">{{ key.label }}</label>
+      <input class="ads-input" id="{{ key.id }}" name="{{ key.id }}" type="text" value="{{ config[key.id] or '' }}">
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  <div class="ads-card__foot"><button class="ads-btn ads-btn--primary" type="submit" name="action" value="save">{{ _("Save") }}</button></div>
+</form>
+{% endblock %}

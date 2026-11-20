@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import bleach
+from bleach.css_sanitizer import CSSSanitizer
 from wtforms import StringField, TextAreaField, URLField
 from wtforms.validators import ValidationError
 
@@ -49,13 +50,6 @@ ALLOWED_ATTRIBUTES = {
 
 ALLOWED_STYLES = ["text-align"]
 
-WIDGET_ALLOWED = {}
-for attr in ALLOWED_TAGS:
-    allowed = ALLOWED_ATTRIBUTES.get(attr, True)
-    if not isinstance(allowed, bool):
-        allowed = dict.fromkeys(allowed, True)
-    WIDGET_ALLOWED[attr] = allowed
-
 
 class EventForm(Form):
     title = StringField(label=_l("Title"), filters=(strip,), validators=[required()])
@@ -69,24 +63,21 @@ class EventForm(Form):
 
     description = TextAreaField(
         label=_l("Description"),
-        widget=RichTextWidget(allowed_tags=WIDGET_ALLOWED),
+        widget=RichTextWidget(),
         filters=(strip,),
         validators=[required()],
     )
 
     def validate_description(self, field) -> None:
+        css_sanitizer = CSSSanitizer(allowed_css_properties=ALLOWED_STYLES)
         field.data = bleach.clean(
             field.data,
             tags=ALLOWED_TAGS,
             attributes=ALLOWED_ATTRIBUTES,
-            styles=ALLOWED_STYLES,
+            css_sanitizer=css_sanitizer,
             strip=True,
         )
 
     def validate_end(self, field) -> None:
         if self.start.data > self.end.data:
             raise ValidationError(_l("End date/time must be after start"))
-
-
-EventForm.start.kwargs["raw_data"] = [" | 09:00"]
-EventForm.end.kwargs["raw_data"] = [" | 18:00"]

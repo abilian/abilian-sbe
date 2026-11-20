@@ -1,0 +1,93 @@
+{#- The administration's first page: the site at a glance (its accounts, its sign-ins,
+    its communities, its files), what it depends on and whether it answers
+    (`admin/panels/health.py`), the accounts and the sign-ins over time, what was
+    made lately; beside it, the settings that matter and who signed in last.
+    Overrides Abilian Core's page; drawn in `mockups/templates/admin.html`, which has
+    no charts. -#}
+{% extends "admin/_ads.html" %}
+{% set site = site_figures() %}
+{% set tiles = [
+  (accounts.all, _("accounts"), ngettext("%(num)d never signed in", "%(num)d never signed in", accounts.never_signed_in)),
+  (accounts.sign_ins, _("sign-ins in 30 days"), ngettext("%(num)d person", "%(num)d people", accounts.people)),
+  (site.communities, _("communities"), ngettext("%(num)d active this week", "%(num)d active this week", site.active_communities)),
+  (site.bytes | filesize, _("of files"), ngettext("%(num)d document", "%(num)d documents", site.documents)),
+] %}
+{% set periods = [("today", _("Today")), ("this_week", _("7 days")), ("this_month", _("30 days"))] %}
+{% set measures = [("active_users", _("Active accounts")), ("new_members", _("New accounts")), ("new_documents", _("New documents")), ("new_messages", _("New messages"))] %}
+{% block page_title %}{{ _("Overview") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("Overview") }}{% endblock %}
+{% block content %}
+<div class="ads-stack">
+  <div class="ads-grid ads-col-sm">
+    {% for value, label, note in tiles %}
+    <div class="ads-card"><div class="ads-card__body sbe-lines"><span class="ads-metric">{{ value }}</span><span>{{ label }}</span><span class="ads-muted">{{ note }}</span></div></div>
+    {% endfor %}
+  </div>
+  <div class="ads-with-aside">
+    <div class="ads-stack">
+      <section class="ads-card" aria-labelledby="system">
+        <div class="ads-card__head"><h2 class="ads-card__title" id="system">{{ _("What the site depends on") }}</h2></div>
+        <ul class="ads-list">
+          {% for check in health %}
+          <li>
+            <span class="ads-fill sbe-lines"><strong>{{ check.name }}</strong><span class="ads-muted">{{ check.note }}</span></span>
+            {% if check.ok %}<span class="ads-status ads-status--success"><span class="ads-status__dot"></span>{{ _("Running") }}</span>
+            {% else %}<span class="ads-status ads-tone-warning"><span class="ads-status__dot"></span>{{ _("To look at") }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      <section class="ads-card" aria-labelledby="chart-users-title">
+        <div class="ads-card__head"><h2 class="ads-card__title" id="chart-users-title">{{ _("Accounts") }}</h2></div>
+        <div class="ads-card__body"><p class="sbe-sr-only">{{ _("Accounts registered, active and new, month by month; the figures of today are at the top of the page.") }}</p><div id="chart-users" class="chart"></div></div>
+      </section>
+      <section class="ads-card" aria-labelledby="chart-connections-title">
+        <div class="ads-card__head"><h2 class="ads-card__title" id="chart-connections-title">{{ _("Unique connections") }}</h2></div>
+        <div class="ads-card__body"><p class="sbe-sr-only">{{ _("The people who signed in, by day, week or month; this month's are counted at the top of the page.") }}</p><div id="chart-connections" class="chart"></div></div>
+      </section>
+      <section class="ads-card" aria-labelledby="activity">
+        <div class="ads-card__head"><h2 class="ads-card__title" id="activity">{{ _("Recent activity") }}</h2></div>
+        <div class="ads-table-scroll">
+          <table class="ads-table">
+            <thead><tr><th scope="col"><span class="sbe-sr-only">{{ _("Measure") }}</span></th>{% for _period, label in periods %}<th scope="col" class="ads-end">{{ label }}</th>{% endfor %}</tr></thead>
+            <tbody>
+              {% for measure, label in measures %}
+              <tr><th scope="row">{{ label }}</th>{% for period, _label in periods %}<td class="ads-end">{{ stats[period][measure] }}</td>{% endfor %}</tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+    <aside class="ads-stack" aria-label="{{ _('Settings and sign-ins') }}">
+      <section class="ads-card" aria-labelledby="settings">
+        <div class="ads-card__head ads-spread"><h2 class="ads-card__title" id="settings">{{ _("Settings") }}</h2><a href="{{ url_for('.settings') }}">{{ _("Edit") }}</a></div>
+        <dl class="ads-card__body sbe-pairs">
+          <dt>{{ _("Site name") }}</dt><dd>{{ config.SITE_NAME }}</dd>
+          <dt>{{ _("E-mails come from") }}</dt><dd>{{ config.MAIL_SENDER or _("not set") }}</dd>
+          <dt>{{ _("Daily digest") }}</dt><dd>{% if not digest_schedule %}{{ _("not sent") }}{% elif digest_hour is not none %}{{ _("at %(hour)s", hour="%02d:00" | format(digest_hour)) }}{% else %}{{ digest_schedule }}{% endif %}</dd>
+          <dt>{{ _("New accounts") }}</dt><dd>{{ _("by invitation, from a community's managers or an administrator") }}</dd>
+        </dl>
+      </section>
+      <section class="ads-card" aria-labelledby="signins">
+        <div class="ads-card__head"><h2 class="ads-card__title" id="signins">{{ _("Last sign-ins") }}</h2></div>
+        {% if last_seen %}
+        <ul class="ads-list">
+          {% for user in last_seen %}
+          <li><span class="ads-media ads-gap-sm ads-fill">{{ m.avatar(user, "ads-avatar--xs") }}<a class="sbe-quiet ads-truncate" href="{{ url_for('.users_user', user_id=user.id) }}">{{ user.name }}</a></span><span class="ads-muted">{{ m.time(user.last_active) }}</span></li>
+          {% endfor %}
+        </ul>
+        {% else %}<p class="ads-card__body ads-muted">{{ _("Nobody has signed in yet.") }}</p>{% endif %}
+        <div class="ads-card__foot"><a href="{{ url_for('.users') }}">{{ _("All the accounts") }}</a></div>
+      </section>
+    </aside>
+  </div>
+</div>
+
+{#- Data, not code: a JSON block is never executed. charts.js reads it by id. -#}
+<script type="application/json" id="chart-users-data">{{ users | tojson }}</script>
+<script type="application/json" id="chart-connections-data">{{ connections | tojson }}</script>
+{% endblock %}
+{#- uPlot's own stylesheet first, so that the theme's rules for the charts win. -#}
+{% block stylesheet %}{{ vite_asset("src/charts-styles.css") }}{{ super() }}{% endblock %}
+{% block scripts %}{{ super() }}{{ vite_asset("src/charts.js") }}{% endblock %}

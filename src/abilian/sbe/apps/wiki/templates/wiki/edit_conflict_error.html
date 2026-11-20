@@ -1,21 +1,10 @@
-{%- from "wiki/macros.html" import m_difflines %}
-<span
-    class="text-muted">{{ _('Last edit by: %(user)s', user=current.author.name) }}, {{ current.created_at | datetimeformat }}</span>
-{{ _('Text has been replaced by last version.') }}<br/>
-<p class="text-center ">
-  {{ _('Here is a comparison of your edits and new version edits') }}
-</p>
-
-<span class="col-md-6">
-  {{ _('Your version') }}<br/>
-  <pre>
-    {{ m_difflines(edited_diff) }}
-  </pre>
-</span>
-
-<span class="col-md-6">
-  {{ _('Last version') }}<br/>
-  <pre>
-    {{ m_difflines(current_diff) }}
-  </pre>
-</span>
+{#- Under a page's text, when someone saved it while it was being edited: the text is
+    now theirs, and here is what each of the two changed. -#}
+{% import "wiki/macros.html" as w with context %}
+<div class="ads-stack ads-gap-sm">
+  <p>{{ _("Last edit by: %(user)s", user=current.author.name) }}, {{ current.created_at | datetimeformat }}. {{ _("Text has been replaced by last version.") }} {{ _("Here is a comparison of your edits and new version edits") }}</p>
+  <div class="ads-grid ads-col-lg">
+    <section aria-label="{{ _('Your version') }}"><h3 class="sbe-section-title">{{ _("Your version") }}</h3>{{ w.diff_lines(edited_diff, _("Your version")) }}</section>
+    <section aria-label="{{ _('Last version') }}"><h3 class="sbe-section-title">{{ _("Last version") }}</h3>{{ w.diff_lines(current_diff, _("Last version")) }}</section>
+  </div>
+</div>

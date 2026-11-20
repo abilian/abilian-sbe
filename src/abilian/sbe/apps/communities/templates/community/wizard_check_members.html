@@ -1,95 +1,71 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% import "community/members_macros.html" as macros with context %}
-{%- from "community/macros.html" import wizard_steps -%}
-{% from "macros/user.html" import m_user_link, m_user_photo %}
-
-{% block memberscontent %}
-  {% call m_box_content(_("Members Wizard")) %}
-
-    {{ wizard_steps(steps,2) }}
-    <br>
-
-    <div class="row">
-      <form class="form-horizontal" id="wizard-1">
-        <div style="margin-right: 8%;margin-left: 9.5%;">
-          <div class="tab-content col-sm-12">
-            <br>
-            <h3 class="titre">{{ _("Existing and new members") }}</h3>
-            <h4 class="sous_titre">
-              {{ _("Check if the user is already a member of the community and if he currently has an account on the platform") }}
-            </h4>
-            <br>
-            {% if existing_members_objects %}
-              <div style="border: 1px solid silver;padding-top: 19px;padding-left: 20px;width: 96.7%;">
-                <label class="">{{ _("Already a member of the community") }}</label>
-                <h6 class=" sous_titre_step2">
-                  {{ _("The users below are already members of the community :") }}
-                </h6>
-                <br>
-
-                <div style="position: relative;top: -13px;">
-                  {% for member in existing_members_objects %}
-                    <p>{% call m_user_link(member, css="media-object") %}
-                      {{ m_user_photo(member, size="32") }}{{ member }} ({{ member.email }})
-                    {%- endcall %}
-                    </p>
-                  {% endfor %}
-                </div>
-              </div>
-            {% endif %}
-            <br>
-            <div class="form-group bloc col-lg-12 col-sm-offset-1">
-              <label class="">{{ _("New member(s) of the community") }}
-                <div class="existing-account" style="color: silver; font-size: 11pt; font-weight: normal;">
-                  <h6 class=" sous_titre_step2">
-                    {{ _("The users below already have an account on the platform, and is going to be added to the community") }}
-                  </h6>
-                  <table class="table table-condensed table-striped col-lg-8"
-                         id="{{ table_id }}">
-                    <thead>
-                    {{ macros.wizard_thead() }}
-                    </thead>
-                    <tbody>
-                    {% for user in existing_accounts_object %}
-                      <tr>
-                        {{ macros.wizard_member_row(user) }}
-                      </tr>
-                    {% endfor %}
-                    </tbody>
-                  </table>
-                  <a onclick="wizard_next()" class="users-wizard-next btn default"
-                     style="float: right;color: white;background: yellowgreen;margin-bottom: 13px;">
-                    <i class="fa fa-check-circle"></i> {{ _('Next step') }}</a>
-                </div>
-              </label>
-            </div>
-          </div>
-        </div>
-      </form>
+{#- Inviting people from a spreadsheet, step 2: what will happen to each address.
+    Those already members are left alone; the others are added, each with a role, or
+    taken off the list: those with an account as they are, those without one with an
+    account made for them, named as the spreadsheet names them, or by themselves when
+    they arrive. -#}
+{% extends "ads_community.html" %}
+{% set invite_page = true %}
+{% import "community/_wizard.html" as wizard with context %}
+{% block page_title %}{{ _("Invite members") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+{% call wizard.frame(2, _("Who joins")) %}
+<div class="ads-card__body ads-stack">
+  {% if existing_members_objects %}
+  <section class="ads-stack ads-gap-sm" aria-labelledby="already">
+    <h3 class="sbe-section-title" id="already">{{ _("Already members: nothing to do") }}</h3>
+    <ul class="ads-list">
+      {% for member in existing_members_objects %}
+      <li><span class="ads-media ads-gap-sm">{{ m.avatar(member, "ads-avatar--xs") }}<span class="sbe-lines"><span>{{ member.name }}</span><span class="ads-muted">{{ member.email }}</span></span></span></li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+  <section class="ads-stack ads-gap-sm" aria-labelledby="accounts">
+    <h3 class="sbe-section-title" id="accounts">{{ _("They have an account: they will be added") }}</h3>
+    <div class="ads-table-scroll">
+      <table class="ads-table ads-table--vcenter">
+        <thead><tr><th scope="col">{{ _("Name") }}</th><th scope="col">{{ _("Role") }}</th><th scope="col"><span class="sbe-sr-only">{{ _("Remove") }}</span></th></tr></thead>
+        <tbody>
+          {% for user in existing_accounts_object %}
+          <tr data-wizard-row>
+            <td class="ads-full sbe-cell-person"><span class="ads-media ads-gap-sm">{{ m.avatar(user, "ads-avatar--xs") }}<span class="sbe-lines"><span>{{ user.name }}</span><span class="ads-muted ads-truncate">{{ user.email }}</span></span></span></td>
+            <td>{{ wizard.role_select(user.email, {"data-wizard-role": user.email}, csv_roles[user.email.lower()] if csv_roles else "member") }}</td>
+            <td class="ads-end">{{ wizard.remove_button(user.email, {"data-wizard-remove": user.email}) }}</td>
+          </tr>
+          {% endfor %}
+          <tr data-wizard-empty {{ "hidden" if existing_accounts_object }}><td colspan="3" class="ads-muted">{{ _("There is no existing accounts") }}</td></tr>
+        </tbody>
+      </table>
     </div>
-
-    {% set table_id = uuid() %}
-
-    <form method="POST" class="form-inline wizard-form"
-          action=" {{ url_for('.wizard_new_accounts',community_id=g.community.slug) }}">
-      {{ csrf.field() }}
-      <input id="wizard-emails" type="hidden" name="wizard-emails" value="{{ wizard_emails }}">
-    </form>
-
-    <script>
-      if ($(".table-condensed tr").length == 1) {
-        $(".table-condensed").closest('tr').remove();
-        $(".table-condensed").append("<tr><td id='wizard-msg' colspan='3' style='display:none;padding: 10px;color: gray;'> <i class='fa fa-check-circle' aria-hidden='true'></i> {{_('There is no existing accounts')}}</td></tr>");
-        $("#wizard-msg").fadeIn();
-      }
-
-      function wizard_next() {
-        $(".wizard-form").submit();
-      }
-    </script>
-
-    <div class="clearfix"></div>
-  {% endcall %}
+  </section>
+  <section class="ads-stack ads-gap-sm" aria-labelledby="new-accounts">
+    <h3 class="sbe-section-title" id="new-accounts">{{ _("No account: one will be made, and an invitation sent") }}</h3>
+    <div class="ads-table-scroll">
+      <table class="ads-table ads-table--vcenter">
+        <thead><tr><th scope="col">{{ _("Name") }}</th><th scope="col">{{ _("Role") }}</th><th scope="col"><span class="sbe-sr-only">{{ _("Remove") }}</span></th></tr></thead>
+        <tbody>
+          {% for account in new_accounts %}
+          {% set name = [account.first_name, account.last_name] | select | join(" ") %}
+          <tr data-wizard-row>
+            <td class="ads-full sbe-cell-person"><span class="sbe-lines">{% if name %}<span>{{ name }}</span><span class="ads-muted ads-truncate">{{ account.email }}</span>{% else %}<span class="ads-truncate">{{ account.email }}</span>{% endif %}</span></td>
+            <td>{{ wizard.role_select(account.email, {"data-wizard-role": account.email}, account.role) }}</td>
+            <td class="ads-end">{{ wizard.remove_button(account.email, {"data-wizard-remove": account.email}) }}</td>
+          </tr>
+          {% endfor %}
+          <tr data-wizard-empty {{ "hidden" if new_accounts }}><td colspan="3" class="ads-muted">{{ _("Nobody without an account") }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="ads-cluster ads-gap-sm">
+    <button class="ads-btn ads-btn--primary" type="submit" form="wizard-form">{{ icon("user-plus") }}{{ _("Invite") }}</button>
+    <a class="ads-btn ads-btn--ghost" href="{{ url_for('.members', community_id=g.community.slug) }}">{{ _("Cancel") }}</a>
+  </div>
+</div>
+{% endcall %}
+<form id="wizard-form" method="post" action="{{ url_for('.wizard_saving', community_id=g.community.slug) }}" hidden>
+  {{ csrf.field() }}
+  <input data-wizard-accounts type="hidden" name="wizard-emails" value="{{ wizard_emails }}">
+  <input type="hidden" name="note" value="{{ note }}">
+</form>
 {% endblock %}

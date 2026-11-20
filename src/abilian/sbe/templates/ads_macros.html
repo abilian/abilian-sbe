@@ -1,0 +1,184 @@
+{#- Pieces the pages on the Abilian Design System share. The mockups in `mockups/`
+    draw them first; `notes/ux/design-principles.md` says why they look so. -#}
+
+{#- A person: their photo, or else their initials on a tint of their colour; their
+    name on hover and for screen readers. `has_photo` is asked with the person, the
+    photo itself only by the browser. -#}
+{% macro avatar(user, size_class="ads-avatar--sm") -%}
+<span class="ads-avatar {{ size_class }} sbe-person {{ identity_class(user.name) }}" role="img" aria-label="{{ user.name }}" title="{{ user.name }}">
+  {%- if user.has_photo %}<img src="{{ url_for('users.photo', user_id=user.id) }}" alt="" loading="lazy">{% else %}{{ initials(user.name) }}{% endif -%}
+</span>
+{%- endmacro %}
+
+{#- A community: its image, or else its initial on its colour. Squares for places,
+    circles for people. Without `image` for who is not a member, whom the image's
+    address, inside the community, refuses. -#}
+{% macro tile(community, size_class="", image=true) -%}
+<span class="sbe-tile {{ size_class }} {{ identity_class(community.id) }}" aria-hidden="true">
+  {%- if image and community.own_image %}<img src="{{ community_image_url(community, s=64) }}" alt="" loading="lazy">{% else %}{{ initials(community.name)[:1] }}{% endif -%}
+</span>
+{%- endmacro %}
+
+{#- A moment: how long ago, the exact date on hover. -#}
+{% macro time(moment) -%}
+<time datetime="{{ moment.isoformat() }}" title="{{ moment | datetimeformat('medium') }}">{{ moment | age(date_threshold="day") }}</time>
+{%- endmacro %}
+
+{#- A file in a feed entry or a post: its name, its size, a link. -#}
+{% macro file(f) -%}
+<div class="ads-file">
+  <span class="ads-file__icon">{{ file_icon(f.name or "") }}</span>
+  <span class="ads-file__meta"><a class="ads-file__name" href="{{ f.url }}">{{ f.name }}</a>
+    <span class="ads-muted">{{ f.size | filesize }}</span></span>
+</div>
+{%- endmacro %}
+
+{#- What a person does, and where, as one line: "Treasurer, Acme"; either alone; or
+    nothing. -#}
+{% macro job(user) -%}
+{{ [user.job_title, user.organization] | select | join(", ") }}
+{%- endmacro %}
+
+{#- Where to start a discussion, at the top of a feed: in `community`, with an event
+    beside it, or, from Mon fil, in one of `communities`, chosen in a menu. Either
+    opens the new thread's form. A tool turned off in a community is not offered. -#}
+{% macro composer(community=none, communities=()) %}
+{% if not community or community.has_forum or community.has_calendar %}
+<div class="ads-card"><div class="ads-card__body sbe-composer">
+  {{ avatar(current_user) }}
+  {% if community %}
+  {% if community.has_forum %}<a class="ads-input sbe-prompt" href="{{ url_for('forum.new_thread', community_id=community.slug) }}">{{ _("Start a discussion in %(name)s…", name=community.name) }}</a>{% endif %}
+  {% if community.has_calendar %}<a class="ads-btn ads-btn--ghost" href="{{ url_for('calendar.new_event', community_id=community.slug) }}" aria-label="{{ _('Add an event') }}">{{ icon("calendar-plus") }}<span class="sbe-wide-only">{{ _("Event") }}</span></a>{% endif %}
+  {% else %}
+  <details class="ads-dropdown sbe-composer__pick">
+    <summary class="ads-input sbe-prompt">{{ _("Start a discussion in one of my communities…") }}</summary>
+    <div class="ads-menu sbe-menu-create">{{ start_in(communities) }}</div>
+  </details>
+  {% endif %}
+</div></div>
+{% endif %}
+{% endmacro %}
+
+{#- A menu's list of `communities` to start a discussion in, each opening its form:
+    those that have discussions. -#}
+{% macro start_in(communities) %}
+<p class="ads-subheader sbe-menu-heading">{{ _("Start a discussion in…") }}</p>
+{% for c in communities | selectattr("has_forum") %}
+<a class="ads-menu__item" href="{{ url_for('forum.new_thread', community_id=c.slug) }}">{{ tile(c, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ c.name }}</span></a>
+{% else %}
+<p class="ads-muted sbe-menu-heading">{{ _("None of your communities has discussions.") if communities else _("You are not a member of any community yet.") }}</p>
+{% endfor %}
+{% endmacro %}
+
+{#- An entry of a feed (`abilian.sbe.apps.main.feed.FeedItem`): who did what, where and
+    when, marked if `new`, then the thing itself. -#}
+{% macro feed_entry(item, show_community=true, new=false) %}
+<article class="ads-card">
+  <div class="ads-card__body ads-stack">
+    <div class="ads-media">
+      {{ avatar(item.actor) }}
+      <div class="ads-fill sbe-lines">
+        <span><strong>{{ item.actor.name }}</strong> {{ item.action }}</span>
+        <span class="ads-muted ads-cluster ads-gap-sm">
+          {%- if show_community and item.community %}{{ tile(item.community, "sbe-tile--sm") }}<a class="sbe-quiet" href="{{ url_for(item.community) }}">{{ item.community.name }}</a> ·{% endif %}
+          <span>{% if item.section %}{{ item.section }} · {% endif %}{{ time(item.happened_at) }}</span>
+        </span>
+      </div>
+      {% if new %}<span class="ads-badge ads-tone-info">{{ _("New") }}</span>{% endif %}
+    </div>
+    {% if item.title %}<h2 class="sbe-entry__title"><a class="sbe-quiet" href="{{ item.url }}">{{ item.title }}</a></h2>{% endif %}
+    {% if item.excerpt %}<p class="sbe-excerpt">{{ item.excerpt }}</p>{% endif %}
+    {% for f in item.files %}{{ file(f) }}{% endfor %}
+  </div>
+</article>
+{% endmacro %}
+
+{#- A community in a menu or a list: its tile and name; the one I am in, marked. -#}
+{% macro community_item(community, here=false, new=0) -%}
+<a class="ads-menu__item" href="{{ url_for(community) }}" {{ 'aria-current="page"' | safe if here }}>{{ tile(community, "sbe-tile--sm") }}<span class="ads-fill ads-truncate">{{ community.name }}</span>{% if here %}<span class="ads-muted">{{ _("here") }}</span>{% elif new %}{{ new_badge(new) }}{% endif %}</a>
+{%- endmacro %}
+
+{#- How many things are new: up to 99, then "99+"; the exact number said to screen
+    readers. -#}
+{% macro new_badge(count) -%}
+<span class="ads-badge ads-tone-info" aria-hidden="true">{{ "99+" if count > 99 else count }}</span><span class="sbe-sr-only">{{ ngettext("%(num)d new", "%(num)d new", count) }}</span>
+{%- endmacro %}
+
+{#- A thread as a row: the title, in bold with its count of new posts when some are
+    unread; who started it and when, how many took part; replies; the last post. -#}
+{% macro thread_row(thread, new=0) %}
+{% set last = thread.posts[-1] %}
+<tr>
+  <td class="ads-full">
+    <div class="sbe-lines">
+      <span><a class="sbe-quiet" href="{{ url_for(thread) }}">{% if new %}<strong>{{ thread.title }}</strong>{% else %}{{ thread.title }}{% endif %}</a>
+        {%- if new %} <span class="ads-badge ads-tone-info">{{ ngettext("%(num)d new", "%(num)d new", new) }}</span>{% endif %}</span>
+      <span class="ads-muted ads-cluster ads-gap-sm">
+        {{- avatar(thread.creator, "ads-avatar--xs") }}
+        <span>{{ time(thread.created_at) }} · {{ ngettext("%(num)d participant", "%(num)d participants", thread.posts | map(attribute="creator") | unique | list | length) }}
+          {%- if thread.closed %} · {{ icon("lock") }}{{ _("closed") }}{% endif %}</span>
+      </span>
+    </div>
+  </td>
+  <td class="ads-end ads-col--secondary"><span class="ads-muted">{{ thread.posts | length - 1 }}</span></td>
+  <td class="ads-end ads-col--secondary"><span class="sbe-inline ads-gap-sm">{{ avatar(last.creator, "ads-avatar--xs") }}{{ time(thread.last_post_at or thread.created_at) }}</span></td>
+</tr>
+{% endmacro %}
+
+{#- A column a `abilian.web.listing.Listing` sorts by: a link that sorts by it, ascending
+    first; the header says which way it is sorted. -#}
+{% macro sort_th(listing, key, label, class="") -%}
+<th class="{{ class }}" aria-sort="{{ ('descending' if listing.descending else 'ascending') if listing.sort == key else 'none' }}"><a class="ads-th-sort" href="{{ listing.sort_url(key) }}">{{ label }}</a></th>
+{%- endmacro %}
+
+{#- The pages of a `Listing`, when there is more than one. -#}
+{% macro pagination(listing) %}
+{% if listing.pages > 1 %}
+<nav class="ads-card__foot ads-spread" aria-label="{{ _('Pagination') }}">
+  <span class="ads-muted">{{ _("Showing {start} to {end} of {total} entries").format(start=listing.start + 1, end=listing.stop, total=listing.total) }}</span>
+  <ul class="ads-pagination">
+    {% if listing.page > 1 %}<li><a class="ads-page-link" rel="prev" href="{{ listing.page_url(listing.page - 1) }}" aria-label="{{ _('Previous') }}">{{ icon("chevron-left") }}</a></li>{% endif %}
+    {% for page in listing.page_links %}
+    <li><a class="ads-page-link" href="{{ listing.page_url(page) }}" {{ 'aria-current="page"' | safe if page == listing.page }}>{{ page }}</a></li>
+    {% endfor %}
+    {% if listing.page < listing.pages %}<li><a class="ads-page-link" rel="next" href="{{ listing.page_url(listing.page + 1) }}" aria-label="{{ _('Next') }}">{{ icon("chevron-right") }}</a></li>{% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endmacro %}
+
+{#- What the last action said (`flash()`): errors and warnings as alerts, the rest as a
+    status, each in its tone. They go with the next page. `class` places the whole, when there is
+    something to say. -#}
+{% macro flashes(class="") %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="{{ class }}">
+  {% for category, message in messages %}
+  {% set tone, glyph = {"error": ("ads-tone-danger", "alert-triangle"), "danger": ("ads-tone-danger", "alert-triangle"), "warning": ("ads-tone-warning", "alert-triangle"), "success": ("ads-tone-success", "circle-check")}.get(category, ("ads-tone-info", "info-circle")) %}
+  <div class="ads-alert {{ tone }}" role="{{ 'alert' if tone in ('ads-tone-danger', 'ads-tone-warning') else 'status' }}">{{ icon(glyph) }}<span class="ads-fill">{{ message }}</span>
+    {#- Shown by `behaviors.js`, which makes it work: without it, no button that does nothing. -#}
+    <button class="ads-close" type="button" data-dismiss hidden aria-label="{{ _('Dismiss') }}">{{ icon("x") }}</button></div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+{% endmacro %}
+
+{#- A form's files (a wiki page's, an event's), applied when it is saved
+    (`documents/form_files.py`): those it has, each to keep or, ticked, to remove,
+    with no script; and a field for new ones. The form posts multipart. -#}
+{% macro files_field(attachments) %}
+<div class="ads-field">
+  <label class="ads-label" for="attachments">{{ _("Attached files") }}</label>
+  {% if attachments %}
+  <ul class="ads-list sbe-uploads">
+    {% for attachment in attachments %}
+    <li>{{ file_icon(attachment.name) }}<span class="ads-fill sbe-lines"><span class="ads-truncate">{{ attachment.name }}</span><span class="ads-muted">{{ attachment.content_length | filesize }}</span></span>
+      <label class="ads-btn ads-btn--ghost ads-btn--sm sbe-toggle"><input type="checkbox" name="remove_attachment" value="{{ attachment.id }}" aria-label="{{ _('Remove %(name)s', name=attachment.name) }}"><span class="sbe-toggle__off">{{ icon("trash") }}{{ _("Remove") }}</span><span class="sbe-toggle__on">{{ icon("arrow-back-up") }}{{ _("Keep") }}</span></label></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  <input class="ads-file-input" id="attachments" type="file" name="attachments" multiple>
+</div>
+{% endmacro %}

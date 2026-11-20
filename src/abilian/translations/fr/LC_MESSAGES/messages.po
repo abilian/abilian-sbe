@@ -293,8 +293,8 @@ msgid "Monthly"
 msgstr "Mensuelles"
 
 #: abilian/web/admin/panels/dashboard.py:54
-msgid "New"
-msgstr "Nouveaux"
+msgid "Newcomers"
+msgstr "Nouveaux venus"
 
 #: abilian/web/admin/panels/dashboard.py:55
 msgid "Total"
@@ -367,8 +367,8 @@ msgstr "Suivante"
 #: abilian/web/admin/panels/groups/__init__.py:47
 #: abilian/web/admin/panels/users/__init__.py:45
 #: abilian/web/forms/widgets.py:351 abilian/web/forms/widgets.py:352
-msgid "Showing _START_ to _END_ of _TOTAL_ entries"
-msgstr "Affiche de _START_ à _END_ sur _TOTAL_ entrées"
+msgid "Showing {start} to {end} of {total} entries"
+msgstr "Affiche de {start} à {end} sur {total} entrées"
 
 #: abilian/web/admin/panels/groups/__init__.py:48
 #: abilian/web/admin/panels/users/__init__.py:46
@@ -676,7 +676,7 @@ msgid ""
 "(%(code)s)"
 msgstr ""
 "Ce SIRET ressemble à un SIRET spécial, mais le code géographique semble "
-"invalide (%s)"
+"invalide (%(code)s)"
 
 #: abilian/web/forms/validators.py:268
 msgid "SIRET number is invalid (length is ok: verify numbers)"
@@ -1031,6 +1031,118 @@ msgstr "Objet supprimé"
 msgid "This entity is referenced by another object and cannot be deleted."
 msgstr "Cette entité est référencée par un autre objet et ne peut être supprimée."
 
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Formatting"
+msgstr "Mise en forme"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Bold"
+msgstr "Gras"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Italic"
+msgstr "Italique"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Heading"
+msgstr "Titre"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Subheading"
+msgstr "Sous-titre"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Bulleted list"
+msgstr "Liste à puces"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Numbered list"
+msgstr "Liste numérotée"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Quote"
+msgstr "Citation"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Link"
+msgstr "Lien"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Link address"
+msgstr "Adresse du lien"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Clear formatting"
+msgstr "Effacer la mise en forme"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Undo"
+msgstr "Annuler"
+
+#: src/abilian/web/templates/widgets/richtext.html
+msgid "Redo"
+msgstr "Rétablir"
+
+msgid "Overview"
+msgstr "Vue d’ensemble"
+
+msgid "Accounts"
+msgstr "Comptes"
+
+msgid "Log"
+msgstr "Journal"
+
+msgid "Sign-ins"
+msgstr "Connexions"
+
+msgid "System information"
+msgstr "Informations système"
+
+msgid "The last 7 days"
+msgstr "Les 7 derniers jours"
+
+msgid "The last 30 days"
+msgstr "Les 30 derniers jours"
+
+msgid "This year"
+msgstr "Cette année"
+
+msgid "changed"
+msgstr "modifié"
+
+msgid "deleted"
+msgstr "supprimé"
+
+msgid "role given"
+msgstr "rôle donné"
+
+msgid "role taken back"
+msgstr "rôle retiré"
+
+msgid "inherited rights turned on"
+msgstr "héritage des droits activé"
+
+msgid "inherited rights turned off"
+msgstr "héritage des droits désactivé"
+
+msgid "Date"
+msgstr "Date"
+
+msgid "Person"
+msgstr "Personne"
+
+msgid "E-mail"
+msgstr "Adresse"
+
+msgid "Kind"
+msgstr "Sorte"
+
+msgid "Object"
+msgstr "Objet"
+
+msgid "Detail"
+msgstr "Détail"
+
 #~ msgid "An entity with this name already exists in the database"
 #~ msgstr "Il y a déjà une entité avec ce nom dans la base de donnée"
 
@@ -1123,3 +1235,19 @@ msgstr "Cette entité est référencée par un autre objet et ne peut être supp
 
 #~ msgid "Total users"
 #~ msgstr "utilisateurs actifs"
+
+msgid "Your password must be at least 8 characters including one uppercase, one lowercase and a number."
+msgstr "Votre mot de passe doit contenir au moins 8 caractères, dont au moins une majuscule, une minuscule et un chiffre."
+
+# The search page's kinds and periods (web/search/views.py)
+msgid "People"
+msgstr "Personnes"
+
+msgid "In the last 30 days"
+msgstr "Ces 30 derniers jours"
+
+msgid "In the last year"
+msgstr "Cette année écoulée"
+
+msgid "Any time"
+msgstr "N’importe quand"

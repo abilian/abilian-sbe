@@ -1,102 +1,70 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-"""Decorators and helpers to check access to communities."""
+"""The rules: who may do what in a community.
+
+The route guards that enforce them are in `decorators.py`, one line
+each. Nothing here reads a decorator and nothing there holds a rule.
+"""
 
 from __future__ import annotations
 
-from functools import wraps
 from typing import TYPE_CHECKING, Any
 
 from flask import g
-from flask_login import current_user
 from werkzeug.exceptions import Forbidden
 
+from abilian.core.util import BasePresenter
+from abilian.sbe.apps.communities.models import VALID_ROLES
 from abilian.services import security_service
 from abilian.services.security import MANAGE
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from werkzeug.wrappers import Response
-
     from abilian.core.models.subjects import User
     from abilian.sbe.apps.communities.presenters import CommunityPresenter
 
 
-def require_admin(func: Callable) -> Callable:
-    @wraps(func)
-    def decorated_view(*args: Any, **kwargs: Any) -> str | Response:
-        is_admin = security_service.has_role(current_user, "admin")
-        if not is_admin:
-            raise Forbidden
-        return func(*args, **kwargs)
+def _unwrap(community: Any) -> Any:
+    """`g.community` is a presenter, and the engine takes entities.
 
-    return decorated_view
-
-
-def require_manage(func: Callable) -> Callable:
-    @wraps(func)
-    def decorated_view(*args: Any, **kwargs: Any) -> Response:
-        community = g.community
-        if community and community.has_permission(current_user, MANAGE):
-            return func(*args, **kwargs)
-        is_admin = security_service.has_role(current_user, "admin")
-        if not is_admin:
-            raise Forbidden
-        return func(*args, **kwargs)
-
-    return decorated_view
+    `BasePresenter.__getattr__` forwards everything, which is why the old
+    role-reading body never noticed -- but `has_role` asserts its object is an
+    `Entity`, and a presenter is not one however well it forwards.
+    """
+    return community._model if isinstance(community, BasePresenter) else community
 
 
-def require_access(func):
-    @wraps(func)
-    def decorated_view(*args, **kwargs):
-        check_access()
-        return func(*args, **kwargs)
-
-    return decorated_view
-
-
-def check_access(
-    community: CommunityPresenter | None = None, user: User | None = None
-) -> None:
-    if not has_access(community, user):
+def check_membership(user: User, community: CommunityPresenter | None = None) -> None:
+    if not is_member(user, community):
         raise Forbidden
 
 
-def has_access(
-    community: CommunityPresenter | None = None, user: User | None = None
-) -> bool:
-    if not user:
-        user = current_user
-    if user.is_anonymous:
-        return False
+def is_member(user: User, community: CommunityPresenter | None = None) -> bool:
+    """Does `user` hold any role in `community`?
 
-    is_admin = security_service.has_role(user, "admin")
-    if is_admin:
-        return True
-
+    Any of them: MANAGER, MEMBER, READER and WRITER all mean membership, which
+    is why this asks `has_role` with the set rather than naming one. `has_role`
+    seeds its valid roles with ADMIN and MANAGER, so a site admin passes
+    without being a member -- as it did when that was a separate clause here.
+    """
     if not community:
         community = getattr(g, "community", None)
-
-    if community is not None:
-        return community.get_role(user) is not None
-
-    return False
+    return security_service.has_role(user, VALID_ROLES, _unwrap(community))
 
 
-def is_manager(context: dict[str, Any] | None = None, user: User | None = None) -> bool:
-    if not user:
-        user = current_user
-    if user.is_anonymous:
-        return False
+def can_manage(user: User, community: Any) -> bool:
+    """May `user` manage `community`?
 
-    if context:
-        community = context.get("object").community  # type: ignore
-    else:
-        community = g.community
+    Asked of the policy engine, which is the point: `can_` promises a
+    permission, and this used to be two role tests reading the member list --
+    `is_site_admin(user) or community.get_role(user) == MANAGER`. Memberships
+    are recorded as roles on the community itself now (`communities/events.py`),
+    and MANAGE belongs to `{ADMIN, MANAGER}` in the engine's default matrix, so
+    the engine can answer it.
 
-    if community.has_permission(user, MANAGE) or user == community.creator:
-        return True
-
-    return security_service.has_role(user, "admin")
+    A site admin still passes without being a member, and still passes with no
+    community at all: ADMIN is in every permission's role set, and
+    `has_permission` checks global roles before object-local ones. That last
+    case matters -- the route guard falls through to here when `g.community` is
+    unset, and an admin must not start getting 403s there.
+    """
+    return security_service.has_permission(user, MANAGE, _unwrap(community))

@@ -1,0 +1,132 @@
+{#- The application frame: skip link, sidebar, top bar, page header, content.
+
+     Extend it. Everything an application owns is a block, and everything the SYSTEM owns is
+     the markup between them — the class names, their nesting, and the four layouts that all
+     render this same DOM. A project that hand-writes this frame has forked the part of the
+     design system that is hardest to keep in step, which is the whole reason this file exists.
+
+     Navigation arrives as DATA rather than markup, because markup is what drifts:
+
+         nav = [{"section": "Directory",
+                 "items": [{"href": "/contacts", "label": "Contacts", "icon": "users"}]}]
+
+     A group with no `section` renders its items flat. `icon` is optional and is only used if
+     the application has registered an `icon()` global — the package ships no icon set, on
+     purpose (see the docs). For anything the data cannot express, override `{% block nav %}`
+     and write the `ads-nav` markup yourself.
+
+     Context it reads, all optional:
+       nav             the groups above
+       current         the path of the page being rendered, for `aria-current`
+       layout_class    "", "ads-app--folded", "ads-app--right" or "ads-app--horizontal".
+                       The reader can fold and unfold the sidebar with the top bar's menu
+                       button; their choice is remembered and wins over this one.
+       container_class "", "ads-container--narrow" or "ads-container--fluid"
+       stylesheet      where the vendored ads.css is served from
+       shell_script    where the vendored shell.js is served from
+       restore_script  where the vendored restore.js is served from
+-#}
+{% import "ads/nav.html" as ads_nav with context %}
+<!doctype html>
+<html lang="{% block lang %}en{% endblock %}"{% block html_attrs %}{% endblock %}>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}{% endblock %}</title>
+{% block stylesheet %}
+<link rel="stylesheet" href="{{ stylesheet | default('/static/css/ads/ads.css') }}">
+{% endblock %}
+{# Blocking on purpose: `shell.js` is deferred, and a theme restored after first paint is a
+   white flash on every navigation for anyone who chose dark. A file, not inline code, so a
+   strict Content-Security-Policy runs it. #}
+{% block theme_restore %}
+<script src="{{ restore_script | default('/static/css/ads/restore.js') }}"></script>
+{% endblock %}
+{# A separate slot from `head` on purpose: `head` is the one PAGES override, and a favicon
+   declared there disappears from every page that wants a stylesheet of its own. Site-wide
+   links belong to the site. #}
+{% block icon %}{% endblock %}
+{% block head %}{% endblock %}
+</head>
+<body {% block body_attrs %}{% endblock %}>
+{# First focusable thing on the page, and the reason `<main>` carries the id it jumps to. A
+   keyboard reader should not walk thirty navigation links to reach the content. #}
+<a href="#content" class="ads-skip">{% block skip %}Skip to main content{% endblock %}</a>
+
+<div class="ads-app {{ layout_class | default('') }}">
+{# Blocking for the same reason as the theme: a fold restored after first paint is the whole
+   page jumping sideways on every navigation. The same file as in <head>: here, as the first
+   child of `.ads-app`, it restores the fold. #}
+{% block fold_restore %}
+<script src="{{ restore_script | default('/static/css/ads/restore.js') }}"></script>
+{% endblock %}
+
+  <aside class="ads-sidebar" id="ads-sidebar">
+    <div class="ads-sidebar__inner">
+      {% block brand %}
+      {# A link, not a heading: the page's one <h1> is its title, and a screen reader that
+         lists headings should not open every page on the application's name. #}
+      <div class="ads-brand"><a href="{% block brand_href %}/{% endblock %}">
+        {% block brand_mark %}{% endblock %}<span>{% block brand_name %}{% endblock %}</span></a></div>
+      {% endblock %}
+      {% block nav %}
+      {{ ads_nav.menu(nav | default([]), current | default(''), layout_class | default('')) }}
+      {% endblock %}
+      {% block sidebar_foot %}{% endblock %}
+    </div>
+  </aside>
+
+  <div class="ads-main">
+    {% block topbar %}
+    <header class="ads-topbar">
+      {% block menu_button %}
+      <button type="button" class="ads-btn ads-btn--ghost ads-topbar__menu" data-ads-sidebar
+              aria-controls="ads-sidebar" aria-expanded="false" aria-label="{% block menu_label %}Menu{% endblock %}">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      {% endblock %}
+      {% block topbar_start %}{% endblock %}
+      <div class="ads-cluster ads-gap-sm ads-push">{% block topbar_end %}{% endblock %}</div>
+    </header>
+    {% endblock %}
+
+    {# The page's header is the start of its main content: inside `<main>`, a landmark, where
+       the skip link lands on the title. Outside it, the title and the page's actions sat in
+       no landmark at all, which axe-core reports ("region"). Reported by SBE. #}
+    <main id="content" class="ads-page">
+    {% block page_header %}
+    <div class="ads-page-header"><div class="ads-container {{ container_class | default('') }} ads-spread">
+      <div>
+        <div class="ads-pretitle">{% block pretitle %}{% endblock %}</div>
+        {% set page_heading %}{% block heading %}{% endblock %}{% endset %}
+        {% if page_heading | trim %}<h1 class="ads-page-title">{{ page_heading }}</h1>{% endif %}
+      </div>
+      <div class="ads-cluster ads-gap-sm">{% block actions %}{% endblock %}</div>
+    </div></div>
+    {% endblock %}
+
+    <div class="ads-page-body"><div class="ads-container {{ container_class | default('') }} ads-stack">
+      {% block body %}{% endblock %}
+    </div></div>
+    </main>
+
+    {% block page_foot %}{% endblock %}
+  </div>
+</div>
+
+{# Anything an application puts here — a lightbox, a cookie notice, a toast region — has to
+   come BEFORE the script that wires it, because a script looks its elements up by id when it
+   runs and an element declared later does not exist yet. #}
+{% block overlays %}{% endblock %}
+
+{# The behaviour the components need: dropdowns that close, drawers that open, the theme
+   toggle, and a sidebar that remembers which groups you left open. `.ads-dropdown` and
+   `.ads-drawer` are not usable without it, so it is vendored by `abilian-ds sync` next to the
+   stylesheet rather than left as an exercise. #}
+{% block shell_script %}
+<script src="{{ shell_script | default('/static/css/ads/shell.js') }}" defer></script>
+{% endblock %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -161,6 +161,7 @@ class JSON(sa.types.TypeDecorator):
     """
 
     impl = sa.types.Text
+    cache_ok = True
 
     def process_bind_param(self, value: Any, dialect: Dialect) -> str | None:
         if value is not None:
@@ -177,6 +178,8 @@ class JSON(sa.types.TypeDecorator):
 
 class JSONUniqueListType(JSON):
     """Store a list in JSON format, with items made unique and sorted."""
+
+    cache_ok = True
 
     @property
     def python_type(self):
@@ -221,14 +224,17 @@ class UUID(sa.types.TypeDecorator):
     """
 
     impl = sa.types.CHAR
+    cache_ok = True
 
     def load_dialect_impl(self, dialect: Dialect) -> CHAR:
         if dialect.name == "postgresql":
-            return dialect.type_descriptor(sa.dialects.postgresql.UUID())
+            # Strings in and out, as this type converts them itself: SQLAlchemy
+            # 2.0's PostgreSQL UUID would hand back uuid.UUID objects.
+            return dialect.type_descriptor(sa.dialects.postgresql.UUID(as_uuid=False))
         return dialect.type_descriptor(sa.types.CHAR(32))
 
     def process_bind_param(
-        self, value: None | str | uuid.UUID, dialect: Dialect
+        self, value: str | uuid.UUID | None, dialect: Dialect
     ) -> str | None:
         if value is None:
             return value
@@ -254,6 +260,7 @@ class Locale(sa.types.TypeDecorator):
     """Store a :class:`babel.Locale` instance."""
 
     impl = sa.types.UnicodeText
+    cache_ok = True
 
     @property
     def python_type(self):
@@ -285,6 +292,7 @@ class Timezone(sa.types.TypeDecorator):
     """Store a :class:`pytz.tzfile.DstTzInfo` instance."""
 
     impl = sa.types.UnicodeText
+    cache_ok = True
 
     @property
     def python_type(self):

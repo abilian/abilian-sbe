@@ -1,9 +1,0 @@
-{% extends "base.html" %}
-
-{% block main %}
-  <h1>Forbidden</h1>
-
-  {{ error.description|default("You don't have the permission to access the requested
-resource. It is either read-protected or not readable by the server.") }}
-
-{% endblock %}

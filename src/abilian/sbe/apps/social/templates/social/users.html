@@ -1,110 +1,53 @@
-{% extends "social/base.html" %}
-
-{% from "social/macros.html" import m_box %}
-
-{% block content %}
-
-  {% call m_box(_("User directory")) %}
-
-    <form style="margin-bottom: 0;" method="POST">
-
-      <table class="table table-striped table-condensed" id="users-table">
-        <thead>
+{#- The directory: people as rows, to find someone by name or organization; whom I
+    share a community with first, and those communities; what each does, and where;
+    when each was last seen. Drawn in `mockups/templates/people.html`. -#}
+{% extends "ads_base.html" %}
+{% block page_title %}{{ _("Directory") }}{% endblock %}
+{% block heading %}{{ _("Directory") }}{% endblock %}
+{% block body %}
+<div class="ads-card">
+  {% if counts.mine %}
+  <div class="ads-card__head">
+    <ul class="ads-pills" aria-label="{{ _('Whom to list') }}">
+      <li><a class="ads-pill" href="{{ url_for('.users', q=listing.search or none) }}" {{ 'aria-current="page"' | safe if not everyone }}>{{ _("My communities") }} ({{ counts.mine }})</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.users', who='all', q=listing.search or none) }}" {{ 'aria-current="page"' | safe if everyone }}>{{ _("Everyone") }} ({{ counts.all }})</a></li>
+    </ul>
+  </div>
+  {% endif %}
+  <form class="sbe-toolbar" method="get" action="{{ url_for('.users') }}">
+    <span class="ads-input-icon">
+      <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+      <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Name or organization') }}" aria-label="{{ _('Filter people by name or organization') }}">
+    </span>
+    {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+    <span class="ads-muted">{{ ngettext("%(num)d person", "%(num)d people", listing.total) }}</span>
+    {% if listing.search %}<a href="{{ url_for('.users', who=request.args.get('who')) }}">{{ _("Show all") }}</a>{% endif %}
+  </form>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter ads-table--hover" id="users-table">
+      <thead><tr>
+        {{ m.sort_th(listing, "name", _("Name")) }}
+        <th class="ads-col--secondary">{{ _("Organization") }}</th>
+        <th class="ads-col--secondary">{{ _("Communities in common") }}</th>
+        {{ m.sort_th(listing, "last_active", _("Last seen"), "ads-end") }}
+      </tr></thead>
+      <tbody>
+        {% for person in users %}
         <tr>
-          <th style="width: 8%;"></th>
-          <th style="width: 56%;">Nom</th>
-          <th style="width: 18%;">Inscription</th>
-          <th style="width: 18%;">Dernière activité</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        <tr>
-          <td colspan="4">
-            Loading data...
+          <td class="ads-full"><span class="ads-media ads-gap-sm">{{ m.avatar(person) }}<span class="sbe-lines"><a class="sbe-quiet" href="{{ url_for('.user', user_id=person.id) }}"><strong>{{ person.name }}</strong></a>{% if person.job_title %}<span class="ads-muted">{{ person.job_title }}</span>{% endif %}</span></span></td>
+          <td class="ads-col--secondary">{{ person.organization or "" }}</td>
+          <td class="ads-col--secondary">
+            {% set common = shared[person.id] %}
+            <span class="sbe-inline ads-gap-sm">{% for c in common[:4] %}<span role="img" aria-label="{{ c.name }}" title="{{ c.name }}">{{ m.tile(c, "sbe-tile--sm") }}</span>{% endfor %}{% if common | length > 4 %}<span class="ads-muted">+{{ common | length - 4 }}</span>{% endif %}</span>
           </td>
+          <td class="ads-end ads-muted">{% if person.last_active %}{{ m.time(person.last_active) }}{% else %}{{ _("never") }}{% endif %}</td>
         </tr>
-
-        {#
-          <a href="{{ url_for(".user", user_id=user.id) }}"><img src="{{ url_for(".mugshot", user_id=user.id, s=45)  }}"></a>
-        </td>
-
-        <td class="identity">
-          <div class="info">
-            <a href="{{ url_for(".user", user_id=user.id) }}">{{ user.name }}</a>
-          </div>
-        </td>
-
-        <td>
-          {{ user.created_at|age }}
-        </td>
-
-        <td>
-          {{ user.last_active|age }}
-        </td>
-
-        <td>
-          {% if user != g.user %}
-            <form action="{{ user._url }}" method="post">
-              <input type="hidden" name="return_url" value="{{ request.url }}">
-              {% if not g.user.is_following(user) %}
-                <button class="btn btn-small btn-primary" name="action" value="follow">{{ _("Follow") }}</button>
-              {% else %}
-                <button class="btn btn-small btn-danger" name="action" value="unfollow">{{ _("Unfollow") }}</button>
-              {% endif %}
-            </form>
-          {% endif %}
-        </td>
-      </tr>
-    {% endfor %}
-#}
-        </tbody>
-        <tfoot>
-        <tr>
-          <th style="width: 8%;"></th>
-          <th style="width: 56%;">Nom</th>
-          <th style="width: 18%;">Inscription</th>
-          <th style="width: 18%;">Dernière activité</th>
-        </tr>
-        </tfoot>
-      </table>
-    </form>
-
-    {%- deferJS %}
-      <script>
-        'use strict';
-        require(
-            ['Abilian', 'jquery', 'jquery.dataTables'],
-            function (Abilian, $, jqDT) {
-
-              function initUsersTable() {
-                var users_table = $('#users-table').dataTable({
-                  aoColumns: [
-                    {asSorting: []},
-                    {asSorting: ["asc", "desc"]},
-                    {asSorting: ["asc", "desc"]},
-                    {asSorting: ["asc", "desc"]}
-                  ],
-                  {# see http://datatables.net/ref #}
-                  sPaginationType: "bootstrap",
-                  bFilter: true,
-                  bLengthChange: false,
-                  bStateSave: true,
-                  iDisplayLength: 50,
-                  //sDom:           'lrtip',
-                  bProcessing: true,
-                  bServerSide: true,
-                  sAjaxSource: "{{ url_for(".users_dt_json") }}"
-                });
-              }
-
-              Abilian.fn.onAppInit(initUsersTable)
-            }
-        );
-      </script>
-    {%- enddeferJS %}
-
-    <div style="clear: both;"></div>
-  {% endcall %}
-
+        {% else %}
+        <tr><td colspan="4" class="ads-muted">{{ _("No matching records found") }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {{ m.pagination(listing) }}
+</div>
 {% endblock %}

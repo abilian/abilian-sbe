@@ -4,28 +4,28 @@
 
 from __future__ import annotations
 
-from flask import Flask, current_app
-from flask_login import current_user
+from typing import TYPE_CHECKING
 
 from abilian.core.models import attachment as attachments
-from abilian.services.security import READ, WRITE, security
+from abilian.services.security import CREATE, DELETE, READ, WRITE, security
 from abilian.web import url_for
 
 from .forms import AttachmentForm
 from .views import UPLOAD_BUTTON, bp as blueprint
 
+if TYPE_CHECKING:
+    from flask import Flask
+
+    from abilian.core.models.subjects import User
+
 _MANAGER_ATTR = "__attachments_manager__"
 
 
 class AttachmentExtension:
-    """API for comments, installed as an application extension.
-
-    It is also available in templates as `attachments`.
-    """
+    """API for comments, installed as an application extension."""
 
     def __init__(self, app: Flask) -> None:
         app.extensions["attachments"] = self
-        app.add_template_global(self, "attachments")
         app.register_blueprint(blueprint)
 
     def manager(self, obj):
@@ -59,41 +59,20 @@ class AttachmentExtension:
         return self.manager(obj).get_form_context(obj)
 
 
-_DEFAULT_TEMPLATE = "macros/attachment_default.html"
-
-
 class AttachmentsManager:
-    """Allow customization of attachments form, display macros, etc.
+    """Allow customization of attachments form.
 
     can be used as class decorator
     """
 
     Form = AttachmentForm
-    macros_template = "macros/attachment.html"
 
-    def __init__(
-        self, Form=AttachmentForm, macros_template="macros/attachment_default.html"
-    ) -> None:
+    def __init__(self, Form=AttachmentForm) -> None:
         self.Form = Form
-        self.macros_template = macros_template
 
     def __call__(self, Model):
         setattr(Model, _MANAGER_ATTR, self)
         return Model
-
-    @property
-    def macros(self):
-        default_template = current_app.jinja_env.get_template(_DEFAULT_TEMPLATE)
-        template = current_app.jinja_env.get_template(self.macros_template)
-        default = default_template.module
-        m = template.module
-        return {
-            "m_attachments": getattr(m, "m_attachments", default.m_attachments),
-            "m_attachment": getattr(m, "m_attachment", default.m_attachment),
-            "m_attachment_form": getattr(
-                m, "m_attachment_form", default.m_attachment_form
-            ),
-        }
 
     def supports_attachments(self, obj):
         return attachments.supports_attachments(obj)
@@ -123,18 +102,23 @@ class AttachmentsManager:
     #
     # current user capabilities
     #
-    def can_view(self, entity):
-        """True if user can view attachments on entity."""
-        return security.has_permission(current_user, READ, obj=entity)
+    def can_read(self, user: User, entity):
+        """True if `user` can read attachments on entity."""
+        return security.has_permission(user, READ, obj=entity)
 
-    def can_edit(self, entity):
-        """True if user can edit attachments on entity."""
-        return security.has_permission(current_user, WRITE, obj=entity)
+    def can_write(self, user: User, entity):
+        """True if `user` can write attachments on entity."""
+        return security.has_permission(user, WRITE, obj=entity)
 
-    def can_create(self, entity):
-        """True if user can add attachments."""
-        return security.has_permission(current_user, WRITE, obj=entity)
+    # These asked WRITE, so "may add" and "may remove" were one question while
+    # the names said two. CREATE, DELETE and WRITE share a default role set --
+    # {ADMIN, MANAGER, WRITER}, service.py:71 -- so asking each its own
+    # permission answers the same today, and lets a PermissionAssignment
+    # separate them without touching this code.
+    def can_create(self, user: User, entity):
+        """True if `user` can add attachments."""
+        return security.has_permission(user, CREATE, obj=entity)
 
-    def can_delete(self, entity):
-        """True if user can delete attachments."""
-        return security.has_permission(current_user, WRITE, obj=entity)
+    def can_delete(self, user: User, entity):
+        """True if `user` can delete attachments."""
+        return security.has_permission(user, DELETE, obj=entity)

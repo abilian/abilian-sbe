@@ -6,19 +6,31 @@ from __future__ import annotations
 
 import operator
 from collections import OrderedDict
-from functools import partial
+from dataclasses import dataclass
+from datetime import timedelta
+from typing import TYPE_CHECKING
 
 import whoosh
 import whoosh.highlight
 import whoosh.searching
 import whoosh.sorting
-from flask import Blueprint, current_app, g, render_template, request, url_for
+from flask import current_app, g, render_template, request, url_for
+from whoosh import query as wq
 
-from abilian.i18n import _
+from abilian.core.entities import Entity
+from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated, authenticated_user
+from abilian.core.util import utcnow
+from abilian.i18n import _, _l
 from abilian.services import get_service
+from abilian.services.security import AUTHENTICATED, is_site_admin, security
 from abilian.web import views
+from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
+
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
 
 BOOTSTRAP_MARKUP_HIGHLIGHTER = whoosh.highlight.HtmlFormatter(
     tagname="mark", classname="", termclass="term-", between="[…]"
@@ -32,8 +44,11 @@ RESULTS_FRAGMENTER = whoosh.highlight.SentenceFragmenter()
 PAGE_SIZE = 20
 MAX_LIVE_RESULTS_PER_CLASS = 5
 
-search = Blueprint(
-    "search", __name__, url_prefix="/search", template_folder="templates"
+search = AccessControlBlueprint(
+    "search",
+    __name__,
+    url_prefix="/search",
+    allowed_roles=AUTHENTICATED,
 )
 route = search.route
 
@@ -88,88 +103,170 @@ def install_hit_to_url():
 _COUNT_OBJECT_TYPE_FACET = whoosh.sorting.FieldFacet(
     "object_type", maptype=whoosh.sorting.Count
 )
+#: The index fields SBE adds to community content (`sbe/apps/communities/search.py`),
+#: and its communities' type, named rather than imported: Abilian Core imports none
+#: of SBE.
+_COUNT_COMMUNITY_FACET = whoosh.sorting.FieldFacet(
+    "community_id", maptype=whoosh.sorting.Count
+)
+COMMUNITY_TYPE = "abilian.sbe.apps.communities.models.Community"
+
+#: What each kind of result is called on the page, by its class name; another kind
+#: keeps its class name.
+KIND_LABELS = {
+    "Thread": _l("Discussions"),
+    "Document": _l("Documents"),
+    "Folder": _l("Folders"),
+    "WikiPage": _l("Wiki"),
+    "User": _l("People"),
+    "Community": _l("Communities"),
+}
+
+#: How far back a search may look: its parameter, its label, its length.
+PERIODS = (
+    ("30d", _l("In the last 30 days"), timedelta(days=30)),
+    ("year", _l("In the last year"), timedelta(days=365)),
+)
+
+
+@dataclass(frozen=True)
+class Choice:
+    """A way to narrow the results, as a link: what it says, how many, where."""
+
+    label: str
+    count: int | None
+    url: str
+    active: bool
 
 
 @route("")
-def search_main(q="", page=1):
+@authenticated
+def search_main(user: User, q="", page=1):
+    """Results for `q`, narrowed by kind, community and period, a page at a time."""
     svc = get_service("indexing")
     q = q.strip()
-    page = int(request.args.get("page", page))
-    search_kwargs = {"limit": page * PAGE_SIZE}
-    page_url_kw = OrderedDict(q=q)
+    if q:
+        remember_search(user, q)
+    scope = request.args.get("community", "")
+    since = request.args.get("since", "")
+    object_types = sorted(request.args.getlist("object_type"))
+    params = {"q": q, "object_type": object_types, "community": scope, "since": since}
 
-    search_kwargs["groupedby"] = _COUNT_OBJECT_TYPE_FACET
-    results = svc.search(q, **search_kwargs)
+    def url(**changes) -> str:
+        kw = {k: v for k, v in {**params, **changes}.items() if v}
+        return url_for(".search_main", **kw)
 
-    filtered_by_type = sorted(request.args.getlist("object_type"))
-    if filtered_by_type:
-        page_url_kw["object_type"] = filtered_by_type
+    period = next((p for p in PERIODS if p[0] == since), None)
+    recent = wq.DateRange("updated_at", utcnow() - period[2], None) if period else None
+    in_scope = wq.Term("community_slug", scope) if scope else None
 
-    page_url = partial(url_for, ".search_main", **page_url_kw)
+    def run(*filters, types=()):
+        """The search, narrowed by what is given, counted by kind and community."""
+        kept = [f for f in filters if f is not None]
+        return svc.search(
+            q,
+            user=user,
+            object_types=types,
+            limit=page * PAGE_SIZE,
+            groupedby={
+                "object_type": _COUNT_OBJECT_TYPE_FACET,
+                "community_id": _COUNT_COMMUNITY_FACET,
+            },
+            filter=wq.And(kept) if len(kept) > 1 else (kept[0] if kept else None),
+        )
 
-    # get facets groups
-    by_object_type = []
-    try:
-        facet_group = results.groups("object_type")
-    except KeyError:
-        pass
-    else:
-        for typename, count in facet_group.items():
-            is_active = typename in filtered_by_type
-            classname = friendly_fqcn(typename)
-            link = page_url(object_type=typename)
-            by_object_type.append((classname, count, link, is_active))
+    # Counted before the kind is chosen, so each kind says what choosing it gives.
+    unfiltered = run(in_scope, recent)
+    by_type = _groups(unfiltered, "object_type")
+    kinds = [
+        Choice(str(_("All")), len(unfiltered), url(object_type=()), not object_types)
+    ]
+    kinds += sorted(
+        (
+            Choice(
+                str(KIND_LABELS.get(friendly_fqcn(name), friendly_fqcn(name))),
+                count,
+                url(object_type=[name]),
+                name in object_types,
+            )
+            for name, count in by_type.items()
+        ),
+        key=operator.attrgetter("label"),
+    )
 
-        by_object_type.sort(key=operator.itemgetter(0))
-
-    if by_object_type:
-        # Insert 'all' to clear all filters
-        is_active = len(filtered_by_type) == 0
-        all_types = (_("All"), len(results), page_url(object_type=()), is_active)
-        by_object_type.insert(0, all_types)
-
-    if filtered_by_type:
-        # FIXME: sanitize input
-        results = svc.search(q, object_types=filtered_by_type, **search_kwargs)
+    # Where else the same words are, of the kind chosen: the communities, with the
+    # scope set aside.
+    everywhere = (
+        run(recent, types=object_types) if scope or object_types else unfiltered
+    )
+    community_counts = _groups(everywhere, "community_id")
+    results = run(in_scope, recent, types=object_types) if object_types else unfiltered
 
     results.formatter = BOOTSTRAP_MARKUP_HIGHLIGHTER
     results.fragmenter = RESULTS_FRAGMENTER
-
-    # paginate results
     results_count = len(results)
-
-    # results.pagecount must be ignored when query is filtered: it ignores
-    # filtered_count
-    pagecount = 1 + results_count // PAGE_SIZE
+    pagecount = max(1, -(-results_count // PAGE_SIZE))
     page = min(page, pagecount)
     results = whoosh.searching.ResultsPage(results, page, PAGE_SIZE)
-    page = results.pagenum
-    first_page = page_url(page=1)
-    last_page = page_url(page=pagecount)
-    prev_page = page_url(page=page - 1) if page > 1 else None
-    next_page = page_url(page=page + 1) if page < pagecount else None
 
-    page_min = max(page - 2, 1)
-    page_max = min(page + 4, pagecount)
-    next_pages_numbered = [
-        (index, page_url(page=index)) for index in range(page_min, page_max + 1)
-    ]
+    ids = set(community_counts) | {hit.get("community_id") for hit in results}
+    communities = {
+        c.id: c for c in Entity.query.filter(Entity.id.in_(ids - {None})).all()
+    }
+    # Looked up on its own: a search with no result in it still says where it looked,
+    # to those who are in it; the others learn nothing of it, not even its name.
+    scope_community = (
+        Entity.query.filter(
+            Entity.slug == scope, Entity._entity_type == COMMUNITY_TYPE
+        ).first()
+        if scope
+        else None
+    )
+    if scope_community is not None and not (
+        is_site_admin(user) or security.get_roles(user, scope_community)
+    ):
+        scope_community = None
+    elsewhere = sorted(
+        (
+            (communities[cid], count, url(community=communities[cid].slug))
+            for cid, count in community_counts.items()
+            if cid in communities and communities[cid] is not scope_community
+        ),
+        key=lambda row: -row[1],
+    )
 
     ctx = {
         "q": q,
         "results": results,
         "results_count": results_count,
-        "pagecount": pagecount,
-        "filtered_by_type": filtered_by_type,
-        "by_object_type": by_object_type,
-        "prev_page": prev_page,
-        "next_page": next_page,
-        "first_page": first_page,
-        "last_page": last_page,
-        "next_pages_numbered": next_pages_numbered,
+        "kinds": kinds,
+        "scope": scope_community,
+        "everywhere_url": url(community=""),
+        "everywhere_count": len(everywhere) if scope else None,
+        "elsewhere": elsewhere,
+        "periods": [Choice(str(_("Any time")), None, url(since=""), not period)]
+        + [
+            Choice(str(label), None, url(since=key), key == since)
+            for key, label, _d in PERIODS
+        ],
+        "communities": communities,
+        "pages": [
+            (n, url(page=n))
+            for n in range(max(page - 2, 1), min(page + 4, pagecount) + 1)
+        ],
+        "prev_page": url(page=page - 1) if page > 1 else None,
+        "next_page": url(page=page + 1) if page < pagecount else None,
         "friendly_fqcn": friendly_fqcn,
     }
     return render_template("search/search.html", **ctx)
+
+
+def _groups(results, name: str) -> dict:
+    """A facet's counts, or none when nothing was indexed with it."""
+    try:
+        return {k: v for k, v in results.groups(name).items() if k is not None}
+    except KeyError:
+        return {}
 
 
 class Live(views.JSONView):
@@ -180,8 +277,8 @@ class Live(views.JSONView):
             q = ""
         svc = get_service("indexing")
         url_for_hit = svc.app_state.url_for_hit
-        search_kwargs = {"facet_by_type": 5}
-        results = svc.search(q, **search_kwargs)
+        search_kwargs = {"facet_by_type": True}
+        results = svc.search(q, user=authenticated_user(), **search_kwargs)
         datasets = {}
 
         for typename, docs in results.items():
@@ -204,3 +301,83 @@ class Live(views.JSONView):
 
 
 route("/live")(Live.as_view("live"))
+
+
+#: Where a person's last searches are kept, among their preferences, and how many.
+RECENT_SEARCHES_KEY = "search:recent"
+RECENT_SEARCHES = 3
+
+
+def recent_searches(user: User) -> list[str]:
+    """What `user` searched last, latest first."""
+    preferences = get_service("preferences").get_preferences(user)
+    return preferences.get(RECENT_SEARCHES_KEY, [])
+
+
+def remember_search(user: User, q: str) -> None:
+    """`q` first among `user`'s last searches, once."""
+    searches = [q, *(s for s in recent_searches(user) if s != q)]
+    get_service("preferences").set_preferences(
+        user, **{RECENT_SEARCHES_KEY: searches[:RECENT_SEARCHES]}
+    )
+    db.session.commit()
+
+
+#: How many suggestions of each kind the bar's search shows as one types.
+SUGGESTIONS = 3
+
+#: The kinds the suggestions show first, in this order; the others follow.
+SUGGESTED_KINDS = ("Thread", "Document", "WikiPage", "Folder", "Community", "User")
+
+
+@route("/suggest")
+@authenticated
+def suggest(user: User, q: str = "", page: int = 1) -> str:
+    """What the bar's search suggests as one types `q`: the first matches of each
+    kind, in the community searched (`community`) when there is one, and how many
+    results there are, here and elsewhere. A piece of a page, which the bar's script
+    puts under the field. `q` and `page` come from the blueprint's preprocessor,
+    which gives them to every view of its; the suggestions have no page."""
+    q = q.strip()
+    scope = request.args.get("community", "")
+    if not q:
+        return render_template(
+            "search/_suggestions.html",
+            q=q,
+            groups=[],
+            user=user,
+            recent_searches=recent_searches(user),
+        )
+
+    svc = get_service("indexing")
+    in_scope = wq.Term("community_slug", scope) if scope else None
+    # Grouped, the index keeps five of each kind, whatever the limit asked.
+    by_type = svc.search(q, user=user, facet_by_type=True, filter=in_scope)
+    groups = sorted(
+        (
+            (friendly_fqcn(fqcn), hits[:SUGGESTIONS])
+            for fqcn, hits in by_type.items()
+            if hits
+        ),
+        key=lambda group: (
+            SUGGESTED_KINDS.index(group[0])
+            if group[0] in SUGGESTED_KINDS
+            else len(SUGGESTED_KINDS)
+        ),
+    )
+    total = len(svc.search(q, user=user, limit=1, filter=in_scope))
+    elsewhere = len(svc.search(q, user=user, limit=1)) - total if scope else 0
+
+    ids = {hit.get("community_id") for _kind, hits in groups for hit in hits}
+    communities = {
+        c.id: c for c in Entity.query.filter(Entity.id.in_(ids - {None})).all()
+    }
+    return render_template(
+        "search/_suggestions.html",
+        q=q,
+        scope=scope,
+        groups=[(KIND_LABELS.get(kind, kind), kind, hits) for kind, hits in groups],
+        communities=communities,
+        total=total,
+        elsewhere=elsewhere,
+    )

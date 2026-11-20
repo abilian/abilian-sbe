@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from abilian.sbe.apps.communities.models import VALID_ROLES, Community, Membership
+from abilian.sbe.apps.communities.roles import clear_roles, set_exclusive_role
 from abilian.sbe.apps.communities.signals import membership_removed, membership_set
-from abilian.services.security import MANAGER, READER, WRITER, security
+from abilian.services.security import MANAGER, READER, WRITER
 
 from .search import reindex_tree
+
+if TYPE_CHECKING:
+    from abilian.sbe.apps.communities.models import Community, Membership
 
 
 @membership_set.connect
@@ -24,16 +27,7 @@ def new_community_member(
     if role == MANAGER:
         local_role = MANAGER
 
-    current_roles = set(security.get_roles(user, community.folder, no_group_roles=True))
-    current_roles &= VALID_ROLES  # ensure we don't remove roles not managed
-    # by us
-
-    for role_to_ungrant in current_roles - {local_role}:
-        security.ungrant_role(user, role_to_ungrant, community.folder)
-
-    if local_role not in current_roles:
-        security.grant_role(user, local_role, community.folder)
-
+    set_exclusive_role(user, local_role, community.folder)
     reindex_tree(community.folder)
 
 
@@ -44,10 +38,5 @@ def remove_community_member(
     if not community.folder:
         return
 
-    user = membership.user
-    roles = set(security.get_roles(user, community.folder, no_group_roles=True))
-    roles &= VALID_ROLES  # ensure we don't remove roles not managed by us
-    for role in roles:
-        security.ungrant_role(user, role, community.folder)
-
+    clear_roles(membership.user, community.folder)
     reindex_tree(community.folder)

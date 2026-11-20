@@ -13,7 +13,7 @@ from typing import IO, TYPE_CHECKING
 
 import sqlalchemy as sa
 from sqlalchemy.event import listens_for
-from sqlalchemy.schema import Column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.types import Integer
 
 from abilian.core.models.base import Model
@@ -35,9 +35,11 @@ class Blob(Model):
 
     __tablename__ = "blob"
 
-    id = Column(Integer(), primary_key=True, autoincrement=True)
-    uuid = Column(UUID(), unique=True, nullable=False, default=uuid.uuid4)
-    meta = Column(JSONDict(), nullable=False, default=dict)
+    id: Mapped[int] = mapped_column(Integer(), primary_key=True, autoincrement=True)
+    uuid: Mapped[uuid.UUID] = mapped_column(
+        UUID(), unique=True, nullable=False, default=uuid.uuid4
+    )
+    meta: Mapped[dict] = mapped_column(JSONDict(), nullable=False, default=dict)
 
     def __init__(self, value=None, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)

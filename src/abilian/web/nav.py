@@ -16,11 +16,11 @@ from flask import Flask, g, request
 from jinja2 import Template
 from markupsafe import Markup
 
+from abilian.i18n import _l
+
 from .action import ACTIVE, ENABLED, Action, Glyphicon, getset
 
 if typing.TYPE_CHECKING:
-    from flask_babel.speaklater import LazyString
-
     from abilian.web.action import Endpoint, Status
 
 
@@ -41,7 +41,11 @@ def init_breadcrumbs() -> None:
     This happens during `request_started` event, which is triggered
     before any url_value_preprocessor and `before_request` handlers.
     """
-    g.breadcrumb.append(BreadcrumbItem(icon="home", url=f"/{request.script_root}"))
+    g.breadcrumb.append(
+        BreadcrumbItem(
+            icon="home", url=f"/{request.script_root}", description=_l("Home")
+        )
+    )
 
 
 class NavItem(Action):
@@ -74,23 +78,22 @@ class NavItem(Action):
 
 
 class NavGroup(NavItem):
-    """A navigation group renders a list of items."""
+    """A navigation group: a disclosure, its items in a list."""
 
     template_string = """
-    <ul class="nav navbar-nav {{ action.css_class }}">
-      <li class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown">
-          {%- if action.icon %}{{ action.icon }}{% endif %}
-          {{ action.title }} <b class="caret"></b>
-        </a>
-        <ul class="dropdown-menu">
-          {%- for item in action_items %}
-          {%- if item.divider %}<li class="divider"></li>{%- endif %}
-          <li class="{{ item.status|safe }}">{{ item.render() }}</li>
-          {%- endfor %}
-        </ul>
-      </li>
-    </ul>
+    <details class="{{ action.css_class }}">
+      {#- The icon speaks for the group when there is one (the user menu's avatar);
+          the title stays as its accessible name, the avatar's alt being empty. #}
+      <summary>
+        {%- if action.icon %}{{ action.icon }}<span class="sbe-sr-only">{{ action.title }}</span>
+        {%- else %}{{ action.title }}{%- endif %}
+      </summary>
+      <ul class="nav-menu">
+        {%- for item in action_items %}
+        <li{% if item.status == 'active' %} aria-current="page"{% endif %}>{{ item.render() }}</li>
+        {%- endfor %}
+      </ul>
+    </details>
     """
 
     def __init__(
@@ -143,7 +146,9 @@ class BreadcrumbItem:
     _url = None
 
     template_string = (
-        '{%- if url %}<a href="{{ url }}">{%- endif %}'
+        '{%- if url %}<a href="{{ url }}"'
+        "{%- if item.description and not item.label %}"
+        ' aria-label="{{ item.description | e }}"{% endif %}>{%- endif %}'
         "{%- if item.icon %}{{ item.icon }}\u00a0{%- endif %}"
         "{{ item.label }}"
         "{%- if url %}</a>{%- endif %}"
@@ -151,7 +156,7 @@ class BreadcrumbItem:
 
     def __init__(
         self,
-        label: LazyString | str = "",
+        label: str = "",
         url: str | Endpoint = "#",
         icon: str | None = None,
         description: Any | None = None,

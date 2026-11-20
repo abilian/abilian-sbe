@@ -1,0 +1,52 @@
+{#- Navigation, rendered from data. Used by `ads/shell.html`; usable on its own.
+
+     Each group is `{"section": str | None, "items": [{"href", "label", "icon"?, "image"?}]}`.
+     A group with no section renders its items flat. `image` is a URL (a project's favicon,
+     a customer's logo) shown where an icon would be; an entry with neither shows its
+     initial in the folded rail.
+
+     A section is a `<details>`, which is what lets ONE markup serve all four layouts: open in
+     a column it is a heading and its links; closed in a bar it is a dropdown trigger and its
+     menu. Twenty destinations in a single row is the wrong shape whatever the CSS does.
+-#}
+
+{% macro item(entry, current="") %}
+<li><a class="ads-nav__link" href="{{ entry.href }}"
+       {{ 'aria-current="page"' | safe if entry.href == current }}>
+  {#- the icon is optional, and so is the application having an `icon()` at all -#}
+  {% if entry.image is defined and entry.image %}
+  <span class="ads-nav__icon"><img src="{{ entry.image }}" alt=""></span>
+  {% elif icon is defined and entry.icon is defined and entry.icon %}
+  <span class="ads-nav__icon">{{ icon(entry.icon) }}</span>
+  {% else %}
+  <span class="ads-nav__icon ads-nav__initial" aria-hidden="true">{{ entry.label[:1] }}</span>
+  {% endif %}
+  <span>{{ entry.label }}</span></a></li>
+{% endmacro %}
+
+{% macro menu(groups, current="", layout_class="", label="Menu") %}
+<nav class="ads-nav" aria-label="{{ label }}">
+  <ul class="ads-nav__list">
+    {% for group in groups %}
+      {% if group.section %}
+      {#- Open the group you are IN, and nothing else. Every group open puts thirty links in a
+          sidebar that shows about twenty. This is the answer with no JavaScript, and also the
+          right first impression; `shell.js` then restores whatever the reader last chose. In
+          the bar layout these are dropdown menus, so they start closed regardless. -#}
+      {% set inside = group['items'] | selectattr('href', 'equalto', current) | list | length > 0 %}
+      <li class="ads-nav__group">
+        <details data-nav-group="{{ group.section }}"
+                 {{ "open" if inside and layout_class != "ads-app--horizontal" }}>
+          <summary class="ads-nav__section">{{ group.section }}</summary>
+          <ul class="ads-nav__sub">
+            {% for entry in group['items'] %}{{ item(entry, current) }}{% endfor %}
+          </ul>
+        </details>
+      </li>
+      {% else %}
+      {% for entry in group['items'] %}{{ item(entry, current) }}{% endfor %}
+      {% endif %}
+    {% endfor %}
+  </ul>
+</nav>
+{% endmacro %}

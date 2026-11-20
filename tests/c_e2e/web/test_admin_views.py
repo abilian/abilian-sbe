@@ -1,0 +1,206 @@
+# Copyright (c) 2012-2024, Abilian SAS
+
+"""The admin panels, and who may see them.
+
+These used to make no request as any user at all, and assert 200. They passed
+because the security service answered True to every question while it was not
+running, so what they proved was that the templates render -- not that the
+panels are protected. With the service always enforcing, the anonymous case is
+what it always should have been, and the interesting assertions are possible
+for the first time.
+"""
+
+from __future__ import annotations
+
+from datetime import timedelta
+from typing import TYPE_CHECKING
+from uuid import uuid4
+
+import pytest
+from flask import url_for
+
+from abilian.core.models.subjects import Group, User
+from abilian.web.admin.panels.dashboard import stats_since
+from abilian.web.admin.panels.sysinfo import HIDDEN, installed_packages
+from tests.util import client_login
+
+if TYPE_CHECKING:
+    from flask.testing import FlaskClient
+
+
+#: Every panel registered by abilian core.
+PANELS = [
+    "admin.dashboard",
+    "admin.sysinfo",
+    "admin.login_sessions",
+    "admin.audit",
+    "admin.settings",
+    "admin.communities",
+]
+
+
+def test_list_packages() -> None:
+    packages = installed_packages()
+    assert isinstance(packages, list)
+
+
+def test_the_system_page_hides_the_secrets(
+    app, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    secret = uuid4().hex
+    app.config["MAIL_PASSWORD"] = secret
+    app.config["BROKER_URI"] = f"redis://:{secret}@cache/0"
+    app.config["DRAMATIQ_BROKER_URL"] = f"redis://:{secret}@cache/1"
+    with client_login(client, admin_user):
+        html = client.get(url_for("admin.sysinfo")).get_data(as_text=True)
+
+    assert secret not in html
+    assert HIDDEN in html
+    assert "SITE_NAME" in html
+
+
+@pytest.mark.parametrize("endpoint", PANELS)
+def test_panel_renders_for_an_admin(
+    endpoint: str, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    with client_login(client, admin_user):
+        response = client.get(url_for(endpoint))
+
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("endpoint", PANELS)
+def test_panel_refuses_a_plain_user(
+    endpoint: str, client: FlaskClient, user: User, db_session
+) -> None:
+    """The assertion none of these could make before."""
+    with client_login(client, user):
+        response = client.get(url_for(endpoint))
+
+    assert response.status_code == 403
+
+
+@pytest.mark.parametrize("endpoint", PANELS)
+def test_panel_refuses_an_anonymous_visitor(
+    endpoint: str, client: FlaskClient, db_session
+) -> None:
+    response = client.get(url_for(endpoint))
+
+    assert response.status_code == 403
+
+
+@pytest.mark.parametrize("args", [{}, {"q": "a"}, {"q": "%"}])
+def test_user_search_refuses_a_missing_or_short_query(
+    args: dict[str, str], client: FlaskClient, admin_user: User, db_session
+) -> None:
+    """A query the audit page would never send is the client's mistake: 400,
+    not the 500 it used to be."""
+    with client_login(client, admin_user):
+        response = client.get(url_for("admin.audit_search_users", **args))
+
+    assert response.status_code == 400
+
+
+def test_user_search_finds_a_user_by_name(
+    client: FlaskClient, admin_user: User, user: User, db_session
+) -> None:
+    with client_login(client, admin_user):
+        response = client.get(
+            url_for("admin.audit_search_users", q=user.first_name[:3]),
+            headers={"Accept": "application/json"},
+        )
+
+    assert response.status_code == 200
+    assert [r["id"] for r in response.json["results"]] == [user.id]
+
+
+def test_the_audit_log_shows_everything_when_all_contents_is_picked(
+    client: FlaskClient, admin_user: User, db_session
+) -> None:
+    """The filter form always sends `types`, empty for "All contents".
+
+    The base Entity class was offered as a type of its own, with an empty
+    entity type, so that empty value matched it and filtered on it, and the
+    log came back empty. Picking a day or a user submits the form, so any use
+    of the filters emptied the log.
+    """
+    with client_login(client, admin_user):
+        unfiltered = client.get(url_for("admin.audit")).get_data(as_text=True)
+        submitted = client.get(url_for("admin.audit", types="", user=""))
+
+    entry = '<span class="sbe-audit-icon'
+    assert entry in unfiltered
+    assert submitted.get_data(as_text=True).count(entry) == unfiltered.count(entry)
+
+
+def test_saving_settings_with_a_missing_field_is_a_bad_request(
+    app, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    # Answer as in production: in debug mode, Flask raises the error instead.
+    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    with client_login(client, admin_user):
+        response = client.post(url_for("admin.settings"), data={"action": "save"})
+
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize("action", ["add_user", "remove_user"])
+def test_group_member_action_without_a_user_is_a_bad_request(
+    action: str, app, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    # Answer as in production: in debug mode, Flask raises the error instead.
+    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    group = Group(name="Editors")
+    db_session.add(group)
+    db_session.commit()
+    url = url_for("admin.groups_group_edit", group_id=group.id)
+
+    with client_login(client, admin_user):
+        response = client.post(url, data={"__action": action})
+
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize(
+    "endpoint", ["admin.vocabularies", "admin.tags", "admin.groups", "admin.groups_new"]
+)
+def test_cores_other_pages_render_on_the_design_system(
+    endpoint: str, client: FlaskClient, admin_user: User, db_session
+) -> None:
+    """No tab leads to them, but a site administrator still reaches them."""
+    with client_login(client, admin_user):
+        response = client.get(url_for(endpoint))
+
+    assert response.status_code == 200
+    html = response.get_data(as_text=True)
+    assert "/ads/ads.css" in html
+    assert "font-awesome" not in html
+
+
+def test_the_tabs_say_what_each_part_is(client: FlaskClient, admin_user: User) -> None:
+    with client_login(client, admin_user):
+        html = client.get(url_for("admin.dashboard")).get_data(as_text=True)
+
+    tabs = html.split('<ul class="ads-tabs">')[1].split("</ul>")[0]
+    names = [part.split("</a>")[0].split(">")[-1] for part in tabs.split("<li>")[1:]]
+    assert names == [
+        "Overview",
+        "Accounts",
+        "Communities",
+        "Log",
+        "Sign-ins",
+        "Settings",
+        "System information",
+    ]
+
+
+def test_the_overview_counts_the_accounts_made_lately(
+    app, admin_user: User, db_session
+) -> None:
+    before = stats_since(timedelta(days=1))["new_members"]
+    db_session.add(
+        User(email=f"{uuid4().hex}@example.com", password=uuid4().hex, can_login=True)
+    )
+    db_session.flush()
+
+    assert stats_since(timedelta(days=1))["new_members"] == before + 1

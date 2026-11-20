@@ -1,52 +1,22 @@
-{% extends "forum/_base.html" %}
-
-{% from "macros/box.html" import m_box_menu, m_box_content %}
-{% from "forum/_macros.html" import forum_menu %}
-
-{% block forumcontent %}
-  {%- block forumsidebar %}
-    <div class="forum-menu-container">
-      <div class="forum-menu" role="group" style="width:100%;">
-        <span style="color:gray;">{{ _("Showing :") }}</span>
-        {%- set global_actions = actions.for_category('forum:global') %}
-        {{ forum_menu(global_actions) }}
-      </div>
-    </div>
-  {%- endblock %}
-
+{#- All of a community's discussions, by the month they started, newest first. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_head.html" as f with context %}
+{% block page_title %}{{ _("By month") }} · {{ _("Discussions") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  {{ f.head("archives") }}
   {% for month, threads in grouped_threads %}
-    <h2>{{ month }}</h2>
-
-    <table border="0" class="thread-table">
-      <tr>
-        <th style="width:3.5%;"></th>
-        <th>
-          {{ _("Topic") }}
-        </th>
-        <th style="width: 3.9%;">
-          {{ _("Replies") }}
-        </th>
-      </tr>
-      {% for thread in threads %}
-        {{ m_thread(thread) }}
-      {% endfor %}
-    </table>
+  <section aria-labelledby="month-{{ loop.index }}">
+    <h2 class="ads-card__body sbe-section-title" id="month-{{ loop.index }}">{{ month }}</h2>
+    <div class="ads-table-scroll">
+      <table class="ads-table ads-table--vcenter">
+        <thead><tr><th scope="col">{{ _("Subject") }}</th><th scope="col" class="ads-end ads-col--secondary">{{ _("Replies") }}</th><th scope="col" class="ads-end ads-col--secondary">{{ _("Last post") }}</th></tr></thead>
+        <tbody>{% for thread in threads %}{{ m.thread_row(thread) }}{% endfor %}</tbody>
+      </table>
+    </div>
+  </section>
   {% else %}
-    <p>{{ _("No message has been posted to this community yet") }}</p>
+  <p class="ads-card__body ads-muted">{{ _("No discussion has been started in this community yet.") }}</p>
   {% endfor %}
+</div>
 {% endblock %}
-
-
-{% macro m_thread(thread) %}
-  {%- set thread_href = url_for(".thread", thread_id=thread.id, community_id=g.community.slug) %}
-  {%- set thread_length = thread.posts|length %}
-  <tr>
-    <td></td>
-    <td><a href="{{ thread_href }}" class="thread-title">{{ thread.title }}</a>
-      <p style="color:silver;">{{ thread.posts[0].body_html|safe|striptags|truncate(155, False, '...', 0) }}</p>
-    </td>
-    <td style="text-align:center;">
-      {{ thread_length-1 }}
-    </td>
-  </tr>
-{% endmacro %}

@@ -1,0 +1,16 @@
+# `cd e2e_playwright && honcho start` boots everything AND runs the suite:
+# honcho starts all three processes; when `tests` finishes it tears the others
+# down and exits with pytest's status. (`honcho run <cmd>` is one-off only.)
+#
+# Both ports are chosen at start by pick-ports.sh, which `make test-e2e` evals
+# before honcho runs -- two sibling processes share each port, so neither can
+# pick it. A bare `honcho start` falls back to 8899 and 6399.
+#
+# Redis runs on its own port with persistence off, so a developer's own
+# redis-server and its data are left alone. The app needs it at startup:
+# dramatiq connects while the Flask app is being built. It creates $E2E_DIR
+# itself: serve.sh does too, but starts at the same moment, and redis refuses a
+# --dir that does not exist yet.
+redis: mkdir -p ${E2E_DIR:-/tmp/abilian-sbe-e2e} && exec redis-server --port ${E2E_REDIS_PORT:-6399} --save '' --dir ${E2E_DIR:-/tmp/abilian-sbe-e2e}
+web: sh serve.sh
+tests: sh run_tests.sh

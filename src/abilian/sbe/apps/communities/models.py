@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import hashlib
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -22,7 +23,7 @@ from sqlalchemy import (
     and_,
 )
 from sqlalchemy.event import listens_for
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 from sqlalchemy.orm.attributes import OP_APPEND, OP_REMOVE, Event
 from sqlalchemy.sql.schema import Column
 
@@ -32,15 +33,12 @@ from abilian.core.models import NOT_AUDITABLE, SEARCHABLE
 from abilian.core.models.blob import Blob
 from abilian.core.models.subjects import Group, User
 from abilian.i18n import _l
-from abilian.sbe.apps.documents.models import Folder
+from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.documents.repository import content_repository
 from abilian.services.indexing import indexable_role
 from abilian.services.security import (
-    ADMIN,
     MANAGER,
-    READ,
     READER,
-    WRITE,
     WRITER,
     Permission,
     Role,
@@ -51,9 +49,17 @@ from abilian.services.security import (
 from . import signals
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from werkzeug.local import LocalProxy
 
 MEMBER = Role("member", label=_l("role_member"), assignable=False)
+
+#: The image a community is given when it is made, until it has its own.
+DEFAULT_IMAGE = Path(__file__).parent / "views" / "data" / "community.png"
+DEFAULT_IMAGE_MD5 = hashlib.md5(
+    DEFAULT_IMAGE.read_bytes(), usedforsecurity=False
+).hexdigest()
 VALID_ROLES = frozenset([READER, WRITER, MANAGER, MEMBER])
 
 
@@ -62,17 +68,23 @@ class Membership(db.Model):
 
     __tablename__ = "community_membership"
 
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
-    user_id = Column(ForeignKey("user.id"), index=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("user.id"), index=True, nullable=False
+    )
     user = relationship(
         User, lazy="joined", backref=backref("communautes_membership", lazy="select")
     )
 
-    community_id = Column(ForeignKey("community.id"), index=True, nullable=False)
+    community_id: Mapped[int] = mapped_column(
+        ForeignKey("community.id"), index=True, nullable=False
+    )
     community = relationship("Community", lazy="joined")
 
-    role = Column(RoleType())  # should be either 'member' or 'manager'
+    role: Mapped[Role | None] = mapped_column(
+        RoleType()
+    )  # should be either 'member' or 'manager'
 
     __table_args__ = (UniqueConstraint("user_id", "community_id"),)
 
@@ -81,7 +93,7 @@ class Membership(db.Model):
             f"<Membership user={self.user!r}, "
             f"community={self.community!r}, "
             f"role={self.role!s}>"
-        ).encode()
+        )
 
 
 def community_content(cls: type) -> Any:
@@ -119,6 +131,11 @@ def indexable_roles_and_users(community: Community) -> str:
     return " ".join(indexable_role(user) for user in community.members)
 
 
+#: A community's `visibility`: the values are the column's, from before they were read.
+CLOSED, ON_REQUEST, OPEN = "secret", "public", "open"
+VISIBILITIES = (CLOSED, ON_REQUEST, OPEN)
+
+
 class Community(Entity):
     """Ad-hoc objects that hold properties about a community."""
 
@@ -128,14 +145,16 @@ class Community(Entity):
     is_community_content = True
 
     # : A public description.
-    description = Column(Unicode(500), default="", nullable=False, info=SEARCHABLE)
+    description: Mapped[str] = mapped_column(
+        Unicode(500), default="", nullable=False, info=SEARCHABLE
+    )
 
     #: An image or logo for this community.
-    image_id = Column(ForeignKey(Blob.id), index=True)
+    image_id: Mapped[int | None] = mapped_column(ForeignKey(Blob.id), index=True)
     image = relationship(Blob, lazy="joined")
 
     #: The root folder for this community.
-    folder_id = Column(
+    folder_id: Mapped[int | None] = mapped_column(
         Integer,
         ForeignKey(Folder.id, use_alter=True, name="fk_community_root_folder"),
         unique=True,
@@ -150,7 +169,9 @@ class Community(Entity):
 
     #: The group this community is linked to, if any. Memberships are then
     #: reflected
-    group_id = Column(ForeignKey(Group.id), nullable=True, unique=True)
+    group_id: Mapped[int | None] = mapped_column(
+        ForeignKey(Group.id), nullable=True, unique=True
+    )
     group = relationship(Group, foreign_keys=group_id, lazy="select")
 
     #: Memberships for this community.
@@ -165,39 +186,49 @@ class Community(Entity):
     )
 
     #: Number of members in this community.
-    membership_count = Column(Integer, default=0, nullable=False, info=NOT_AUDITABLE)
+    membership_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, info=NOT_AUDITABLE
+    )
 
     #: Number of documents in this community.
-    document_count = Column(Integer, default=0, nullable=False, info=NOT_AUDITABLE)
+    document_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False, info=NOT_AUDITABLE
+    )
 
     #: Last time something happened in this community
-    last_active_at = Column(
+    last_active_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, nullable=False, info=NOT_AUDITABLE
     )
 
     # Various features for this community:
 
     #: True if this community has a document management space
-    has_documents = Column(Boolean, nullable=False, default=True)
+    has_documents: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     #: True if this community has a wiki
-    has_wiki = Column(Boolean, nullable=False, default=True)
+    has_wiki: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     #: True if this community has a forum
-    has_forum = Column(Boolean, nullable=False, default=True)
+    has_forum: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
 
     #: One of 'participative' or 'informative
-    type = Column(String(20), nullable=False, default="informative")
+    type: Mapped[str] = mapped_column(String(20), nullable=False, default="informative")
 
-    #: One of 'secret', 'public', 'open' (currently not used)
-    visibility = Column(String(20), nullable=False, default="secret")
+    #: Who sees it and joins: `CLOSED` to all but its members, as every community
+    #: was; or listed among the communities to discover, joined on request
+    #: (`ON_REQUEST`) or freely (`OPEN`). Its managers choose.
+    visibility: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="secret"
+    )
 
     #: Used for segmenting communities. Not used currently.
-    category = Column(String(20), nullable=False, default="")
+    category: Mapped[str] = mapped_column(String(20), nullable=False, default="")
 
     #: True if regular members can send stuff by email to all members
     # Not used anymore.
-    members_can_send_by_email = Column(Boolean, nullable=False, default=False)
+    members_can_send_by_email: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
 
     def __init__(self, **kw) -> None:
         self.has_documents = True
@@ -213,18 +244,34 @@ class Community(Entity):
                 # subfolder, we don't want empty names on folders since they must be
                 # unique among siblings
                 name = f"{self.__class__.__name__}_{self.id!s}-{time.asctime()}"
-            self.folder = content_repository.root_folder.create_subfolder(name)
+            root = content_repository.root_folder
+            folder = Folder(title=name)
+            if sa.inspect(root).persistent:
+                # By key: through the relationship, the folder would be in the
+                # root's subfolders now, whether the community is saved or not.
+                folder._parent_id = root.id
+            else:
+                # A new database: the root is saved along with the folder.
+                folder.parent = root
+            self.folder = folder
             # if not self.group:
             #   self.group = Group(name=self.name)
 
         if not self.image:
-            fn = Path(__file__).parent / "views" / "data" / "community.png"
-            self.image = Blob(fn.open("rb").read())
+            self.image = Blob(DEFAULT_IMAGE.read_bytes())
+
+    @property
+    def own_image(self) -> Blob | None:
+        """Its image, unless it is the default one every community is given when
+        it is made: a community without its own shows its initial."""
+        if self.image and self.image.md5 != DEFAULT_IMAGE_MD5:
+            return self.image
+        return None
 
     @property
     def has_calendar(self) -> bool:
-        config = current_app.config
-        return bool(config.get("ENABLE_CALENDAR"))
+        """The calendar is every community's tool, unless the site turns it off."""
+        return bool(current_app.config.get("ENABLE_CALENDAR", True))
 
     def rename(self, name: str) -> None:
         self.name = name
@@ -316,16 +363,20 @@ class Community(Entity):
     def has_member(self, user) -> bool:
         return self.get_role(user) is not None
 
-    def has_permission(self, user: LocalProxy, permission: Permission) -> bool:
-        if not isinstance(permission, Permission):
-            assert isinstance(permission, str)
-            permission = Permission(permission)
+    def has_permission(self, user: User, permission: Permission) -> bool:
+        """Sugar over the policy engine, with no rule of its own.
 
-        if user.has_role(ADMIN):
-            return True
+        It used to carry a second role -> permission table (MANAGER: anything,
+        MEMBER: read and write) alongside the security service's, which is how
+        a community manager could come to be granted more than the service
+        would have granted them. It then answered only MANAGE and raised for
+        everything else, because community roles lived in `Membership` where
+        the engine could not see them. They are recorded on the community now,
+        so there is nothing left for this to do but ask.
+        """
+        from abilian.services.security import security
 
-        role = self.get_role(user)
-        return role == MANAGER or (role == MEMBER and permission in (READ, WRITE))
+        return security.has_permission(user, permission, self)
 
     def touch(self) -> None:
         self.last_active_at = datetime.utcnow()
@@ -529,3 +580,100 @@ def _on_group_members_replace(group, value, oldvalue, initiator) -> None:
             continue
         setattr(u, _PROCESSED_ATTR, OP_APPEND)
         community.set_membership(u, MEMBER)
+
+
+def communities_of(user: User) -> list[Community]:
+    """The communities `user` is a member of, the most recently active first."""
+    return (
+        Community.query.join(Membership)
+        .filter(Membership.user_id == user.id)
+        .order_by(Community.last_active_at.desc())
+        .all()
+    )
+
+
+def site_figures() -> dict[str, int]:
+    """The communities, those active this week, the documents and their bytes:
+    the site at a glance, for its administrators."""
+    week_ago = datetime.utcnow() - timedelta(days=7)
+    documents, size = db.session.execute(
+        sa.select(
+            sa.func.count(Document.id),
+            sa.func.coalesce(sa.func.sum(Document.content_length), 0),
+        ).select_from(Document)
+    ).one()
+    return {
+        "communities": Community.query.count(),
+        "active_communities": Community.query.filter(
+            Community.last_active_at > week_ago
+        ).count(),
+        "documents": documents,
+        "bytes": size,
+    }
+
+
+def community_counts(users: Iterable[User]) -> dict[int, int]:
+    """How many communities each of `users` is a member of, by user id; in one
+    query, for a table of accounts."""
+    ids = [user.id for user in users]
+    rows = db.session.execute(
+        sa.select(Membership.user_id, sa.func.count())
+        .where(Membership.user_id.in_(ids))
+        .group_by(Membership.user_id)
+    )
+    return dict(rows.tuples().all())
+
+
+def managers_of(communities: Iterable[Community]) -> dict[int, list[User]]:
+    """The managers of each of `communities`, by its id, by name; in one query,
+    for a table of communities."""
+    ids = [community.id for community in communities]
+    rows = db.session.execute(
+        sa.select(Membership.community_id, User)
+        .join(User, Membership.user_id == User.id)
+        .where(Membership.community_id.in_(ids), Membership.role == MANAGER)
+        .order_by(sa.func.lower(User.last_name), sa.func.lower(User.first_name))
+    )
+    managers: dict[int, list[User]] = {}
+    for community_id, user in rows.tuples():
+        managers.setdefault(community_id, []).append(user)
+    return managers
+
+
+class MembershipRequest(db.Model):
+    """Someone asking to join a community open on request, until a manager answers."""
+
+    __tablename__ = "community_membership_request"
+    __table_args__ = (UniqueConstraint("community_id", "user_id"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    community_id: Mapped[int] = mapped_column(
+        ForeignKey(Community.id, ondelete="CASCADE"), nullable=False
+    )
+    community = relationship(
+        Community,
+        backref=backref(
+            "membership_requests",
+            order_by="MembershipRequest.created_at",
+            cascade="all, delete-orphan",
+        ),
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey(User.id, ondelete="CASCADE"), nullable=False
+    )
+    user = relationship(User)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, default=datetime.utcnow
+    )
+
+
+def communities_to_discover(user: User) -> list[Community]:
+    """The communities open to `user`, who is not in them, by name."""
+    mine = sa.select(Membership.community_id).where(Membership.user_id == user.id)
+    return (
+        Community.query.filter(
+            Community.visibility.in_((ON_REQUEST, OPEN)), Community.id.not_in(mine)
+        )
+        .order_by(sa.func.lower(Community.name))
+        .all()
+    )

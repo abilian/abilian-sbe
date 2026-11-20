@@ -1,74 +1,63 @@
 [project]
 name = "abilian-sbe"
-version = "1.1.15"
+version = "2.0.0"
 description = "Social Business platform (entreprise collaboration and information management)"
 readme = "README.md"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.12"
 license = "LGPL-2.0-or-later"
 authors = [{ name = "Abilian SAS", email = "sales@abilian.com" }]
 dependencies = [
     # Flask and friends
-    "flask>=3.0.2,<3.1.0",
-    "jinja2>=3.1.3,<3.2.0",
-    "werkzeug>=3.1.0,<3.2",
-    "markupSafe>=2.1.4,<2.2.0",
+    "flask>=3.1.0",
+    "jinja2>=3.1.3",
+    "werkzeug>=3.1.0",
+    "markupSafe>=2.1.4",
     # Flask extensions
-    "flask-babel>=1.0.0,<1.1.0",
-    "flask-assets==2.1.0",
+    "flask-babel>=1.0.0,<2.0.0",
     "flask-mail>=0.9.1",
-    "flask-migrate>=4.0.5,<4.1.0",
-    "flask-login>=0.6.3,<0.7.0",
+    "flask-migrate>=4.0.5",
+    "flask-login>=0.6.3",
     "flask-super>=0.2.8",
-    "flask-talisman>=1.1.0,<1.2.0",
+    "flask-talisman>=1.1.0",
     # Transitive dependencies, but called explicitly in our code
     "Babel",
     "blinker>=1.6.2",
     "click>=8.1.3",
     "itsdangerous>=2.1.2",
-    "numpy>=1.26.3,<2.0.0",
     "pytz",
     # Persistence
-    "sqlalchemy==1.4.35",
-    "flask-sqlalchemy==3.0.1",
-    "psycopg2>=2.9.9,<3.0.0",
+    "sqlalchemy>=2.0,<2.1",
+    "flask-sqlalchemy>=3.1,<3.2",
+    "pymysql>=1.1.0,<2.0.0",
     # Forms
-    "flask-wtf==1.2.0",
-    "wtforms==3.1.2",
-    "WTForms-Alchemy==0.18.0",
-    "wtforms-sqlalchemy>=0.4.1,<0.5.0",
-    # Web assets
-    "webassets==2.0",
-    "jsmin",
-    "cssmin",
-    "closure==20161201",
+    "flask-wtf>=1.2.0",
+    "wtforms>=3.1.2",
+    "WTForms-Alchemy>=0.18.0",
+    "wtforms-sqlalchemy>=0.4.1",
     #
-    "python-dateutil>=2.8.2,<3.0.0",
+    "python-dateutil>=2.8.2",
     # Search
     "whoosh-reloaded>=2.7.5,<3.0.0",
     # task queue
-    "dramatiq>=1.15.0,<2.0.0",
-    "redis>=4.6.0,<5.0",
-    "flask-dramatiq>=0.6.0,<0.7.0",
+    "dramatiq>=1.15.0",
+    "redis>=4.6.0",
+    "flask-dramatiq>=0.6.0",
     "dramatiq-abort>=1.1.0,<2.0.0",
     "apscheduler>=3.10.4,<4.0.0",
     # Infra
     "loguru>=0.7.2,<0.8.0",
-    "filelock>=3.15,<4.0",
+    "filelock>=3.15",
     # Security
     "bleach[css]>=6.2.0,<7.0.0",
-    "bcrypt",
+    "bcrypt==4.3.0",             # current version 5.0.0 need to be tested on Slapos
     "defusedxml>=0.7.1,<0.8.0",
     # Various libs
-    "deprecated",
-    "lxml",
     "tqdm",
     "python-magic",
     "pillow",
-    "pandas>=2.2.0",
     "validate_email",
     "toolz",
-    "html2text>=2024,<2025",
-    "devtools",
+    "html2text>=2024",
     "svcs>=24.1.0",
     "attrs>=24.2.0",
     # Markdown support for Wiki
@@ -84,17 +73,24 @@ dependencies = [
     "sentry-sdk[flask]",
     # Geoip DB
     "maxminddb",
-    "certifi",
+    # Only used by the (disabled) update_ip_country.py script
+    # "certifi",
     # "mmdb_writer",
     # "netaddr",
     #
     "pytest>=8.3.3",
     "hyperlink>=21.0.0",
-    "python-dotenv>=1.0.1",
+    "python-dotenv>=1.2.4",
+    "flask-vite>=0.6.1",
 ]
 
 [project.urls]
 Repository = "https://github.com/abilian/abilian-sbe"
+
+[project.optional-dependencies]
+postgres = [
+    "psycopg2-binary>=2.9.13",
+]
 
 [build-system]
 requires = ["hatchling"]
@@ -102,22 +98,34 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/abilian"]
+# The Vite build output is gitignored, and hatchling honours VCS ignores, so it
+# has to be force-included. Shipping it means `pip install abilian-sbe` yields a
+# styled app with no Node and no build step at deploy time. Run `make front`
+# before building a wheel.
+artifacts = ["src/abilian/sbe/static/vite/*"]
 
 [dependency-groups]
+doc = [
+    # Documentation
+    "mkdocs-material>=9.5.4,<10.0.0",
+]
 dev = [
-    "abilian-devtools>=0.7,<0.8",
-    "mypy>=1.5.1,<2.0.0",
-    "Flask-DebugToolbar",
+    # The PostgreSQL driver is an extra, which a plain `uv sync` leaves out:
+    # development runs against PostgreSQL, so the dev group asks for it.
+    "abilian-sbe[postgres]",
+    "abilian-devtools",
+    # "flask-debugtoolbar",
     # "sqlparse>=0.4.4,<0.5.0",
     # Dev server
     "honcho",
     # Testing
     "html5lib",
     "hyperlink",
-    "pytest>=8,<9",
-    "tox>=4.5.1,<5.0.0",
+    "pytest>=8.3.3",
+    "tox>=4.5.1",
     "pytest-flask",
     "flask-linktester",
+    "pillow>=13.0.0",   # to replace imghdr
     # Type hints
     "types-bleach",
     "types-deprecated",
@@ -133,9 +141,6 @@ dev = [
     # Tools
     "pyupgrade",
     "deptry",
-    # Documentation
-    "mkdocs-material>=9.5.4,<10.0.0",
-    "pip-outdated>=0.7.0",
     "flynt>=1.0.1",
     "snoop>=0.6.0",
     "pytest-archon>=0.0.6",
@@ -143,15 +148,27 @@ dev = [
     "auto-type-annotate>=1.1.1",
     "ty>=0.0.0a7",
     "pyrefly>=0.32.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.16.5",
+    "nox>=2026.8.17",
+    "pre-commit>=4.6.2",
+    "import-linter>=2.15",
+    "zuban>=0.10.2",
+    "abilian-ds==0.3.0",
 ]
+
+[tool.uv]
+default-groups = ["doc", "dev"]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 filterwarnings = [
     'ignore::DeprecationWarning',
     'ignore::sqlalchemy.exc.SAWarning',
+    # Later entries win. An object left out of the session is never saved.
+    'error:Object of type .* not in session:sqlalchemy.exc.SAWarning',
 ]
-# addopts = "-ra -q"
+addopts = "-ra -q --tb=short"
 testpaths = ["tests"]
 python_files = ["test_*.py", "tests.py", "test.py", "*_tests.py"]
 # norecursedirs = .* env* _build *.egg *.egg-info tools deploy etc docs demo bin
@@ -164,23 +181,26 @@ python_files = ["test_*.py", "tests.py", "test.py", "*_tests.py"]
 DEP002 = [
     # Used by Flask
     "python-dotenv",
-    # Used (implicitly) by Flask-Migrate
-    'alembic',
-    # Used by webassets
-    'jsmin',
-    'cssmin',
-    'closure',
-    # Used implicitly by SQLA
-    'psycopg2',
+    # Database drivers: SQLAlchemy loads them from the database URL
+    'pymysql',
+    'psycopg2-binary',
     # Web
     'gunicorn',
 ]
 
 # X imported but missing from the dependency definitions
-DEP001 = ['pkg_resources']
+DEP001 = [
+    'pkg_resources',
+    # Optional: antivirus scanning no-ops when clamd is absent, and the package
+    # is useless without a clamav daemon listening on the host's unix socket.
+    'clamd',
+    # Optional too: the toolbar panels are orphaned and setup/debug.py guards
+    # its import, so it is not declared as a dependency at all.
+    'flask_debugtoolbar',
+]
 
 # X imported but declared as a dev dependency
-DEP004 = ['flask_debugtoolbar', 'html5lib']
+DEP004 = ['html5lib']
 
 # -----------------------------------------------------------------------------
 
@@ -195,105 +215,108 @@ reportPrivateImportUsage = false
 
 # -----------------------------------------------------------------------------
 
-[tool.mypy]
-python_version = "3.10"
-
+[tool.zuban]
+python_version = "3.12"
 ignore_missing_imports = true
-#warn_redundant_casts = true
-#warn_no_return = true
-#warn_return_any = true
-#strict_optional = true
-#warn_unused_ignores = true
-
-# exclude = [
-#     '^file1\.py$',  # TOML literal string (single-quotes, no escaping necessary)
-#     "^file2\\.py$",  # TOML basic string (double-quotes, backslash and other characters need escaping)
-# ]
 
 # -----------------------------------------------------------------------------
 
-[tool.pyanalyze]
-paths = ["src/"]
-import_paths = ["."]
-
-# Enable or disable some checks
-add_import = true
-already_declared = true
-bad_async_yield = true
-bad_evaluator = true
-bad_except_handler = true
-bad_exception = true
-bad_format_string = true
-bad_global = true
-bad_match = true
-bad_nonlocal = true
-
-attribute_is_never_set = false
-
-bad_star_import = true
-bad_super_call = true
-bad_unpack = false
-bad_yield_from = false
-bare_ignore = false
-cant_import = false
-class_variable_redefinition = false
-condition_always_true = false
-duplicate_dict_key = false
-duplicate_enum_member = false
-duplicate_yield = false
-implicit_any = false
-implicit_non_ascii_string = false
-implicit_reexport = false
-import_failed = false
-impossible_pattern = false
-impure_async_call = false
-incompatible_argument = false
-incompatible_assignment = false
-incompatible_call = false
-incompatible_default = false
-incompatible_override = false
-incompatible_return_value = false
-incompatible_yield = false
-inference_failure = false
-internal_error = false
-invalid_annotated_assignment = false
-invalid_annotation = false
-invalid_context_manager = false
-invalid_method_return_type = false
-invalid_typeddict_key = false
-method_first_arg = false
-missing_asynq = false
-missing_await = false
-missing_f = false
-missing_parameter_annotation = false
-missing_return = false
-missing_return_annotation = false
-mixing_bytes_and_text = false
-no_return_may_return = false
-non_boolean_in_boolean_context = false
-not_callable = false
-possibly_undefined_name = false
-suggested_parameter_type = false
-suggested_return_type = false
-task_needs_yield = false
-type_always_true = false
-type_does_not_support_bool = false
-undefined_attribute = false
-undefined_name = false
-unexpected_node = false
-unhashable_key = false
-unnecessary_yield = false
-unsupported_operation = false
-unused_assignment = false
-unused_ignore = false
-unused_variable = false
-use_floor_div = false
-use_fstrings = false
-value_always_true = false
-yield_in_comprehension = false
-yield_without_value = false
-
-# -----------------------------------------------------------------------------
-
-[tool.bandit]
+[tool.pyrefly]
+python-version = "3.12"
+ignore-missing-imports = ["*"]
 # nothing
+
+[tool.tepyd]
+# Generated by `tepyd init` — review and adjust.
+src_root = "src/abilian"
+src_package = "abilian"
+units = ["*"]
+# counter = "internal"   # or "cloc"
+
+# Source units to exclude from analysis (a reason is required):
+# [tool.tepyd.exclude]
+# faker = "why this is not tested"
+
+# Tiers, cheapest first. Add `expects = [...]` to a tier to scope it to
+# the source units it should test (glob patterns over unit names); units
+# outside the scope are reported n/a, not as gaps. Use it when layers map
+# to tiers — e.g. integration `expects = ["repositories/*", "infra/*"]`,
+# e2e `expects = ["web/*"]`. Omit it and the tier is checked against all.
+
+[[tool.tepyd.tiers]]
+name = "a_unit"
+root = "tests/a_unit"
+label = "unit"
+target_share = 0.6
+
+[[tool.tepyd.tiers]]
+name = "b_integration"
+root = "tests/b_integration"
+label = "integration"
+
+[[tool.tepyd.tiers]]
+name = "integration"
+root = "tests/integration"
+label = "integration"
+
+[[tool.tepyd.tiers]]
+name = "c_e2e"
+root = "tests/c_e2e"
+label = "e2e"
+
+[[tool.tepyd.tiers]]
+name = "core"
+root = "tests/core"
+label = "core"
+
+[[tool.tepyd.tiers]]
+name = "sbe"
+root = "tests/sbe"
+label = "sbe"
+
+[[tool.tepyd.tiers]]
+name = "services"
+root = "tests/services"
+label = "services"
+
+[[tool.tepyd.tiers]]
+name = "web"
+root = "tests/web"
+label = "web"
+
+# -----------------------------------------------------------------------------
+
+[tool.importlinter]
+root_package = "abilian"
+include_external_packages = true
+
+# `allow_indirect_imports` throughout: the rule is "this module does not itself
+# reach for the framework", not "nothing it calls ever touches Flask" -- the
+# latter is untrue by construction, since the seam below imports Flask on
+# everyone's behalf.
+
+[[tool.importlinter.contracts]]
+name = "The policy engine does not know it is running on Flask"
+type = "forbidden"
+source_modules = ["abilian.services.security.service"]
+forbidden_modules = ["flask", "flask_login"]
+allow_indirect_imports = true
+
+[[tool.importlinter.contracts]]
+name = "Domain models take their subject, they do not reach for one"
+type = "forbidden"
+source_modules = ["abilian.core.models.owned"]
+forbidden_modules = ["flask", "flask_login"]
+allow_indirect_imports = true
+
+[tool.abilian-ds]
+# `abilian-ds sync` writes ADS's files here; nobody edits them by hand. `abilian-ds lint`
+# checks the markup of the templates listed, and the stylesheets. App templates join the
+# list as they move to ADS.
+theme = "src/abilian/sbe/static/ads"
+components = "src/abilian/sbe/templates/ads"
+templates = ["mockups/templates", "src/abilian/sbe/templates/ads_base.html", "src/abilian/sbe/templates/ads_macros.html", "src/abilian/sbe/templates/ads_community.html", "src/abilian/sbe/templates/ads_centered.html", "src/abilian/sbe/templates/_error.html", "src/abilian/sbe/templates/error403.html", "src/abilian/sbe/templates/error404.html", "src/abilian/sbe/templates/error500.html", "src/abilian/sbe/templates/search", "src/abilian/sbe/apps/social/templates/social/users.html", "src/abilian/sbe/apps/social/templates/social/user.html", "src/abilian/sbe/apps/communities/templates/community/members.html", "src/abilian/sbe/apps/communities/templates/community/edit.html", "src/abilian/sbe/apps/communities/templates/community/_fields.html", "src/abilian/sbe/apps/communities/templates/community/new.html", "src/abilian/sbe/apps/communities/templates/community/home.html", "src/abilian/sbe/apps/communities/templates/community/discover.html", "src/abilian/sbe/apps/communities/templates/community/_wizard.html", "src/abilian/sbe/apps/wiki/templates/wiki", "src/abilian/sbe/apps/calendar/templates/calendar", "src/abilian/sbe/apps/communities/templates/community/wizard_add_emails.html", "src/abilian/sbe/apps/communities/templates/community/wizard_check_members.html", "src/abilian/sbe/templates/login", "src/abilian/sbe/templates/admin", "src/abilian/sbe/templates/main", "src/abilian/sbe/apps/preferences/templates/preferences/account.html", "src/abilian/sbe/apps/wall/templates/wall/index.html", "src/abilian/sbe/apps/forum/templates/forum/index.html", "src/abilian/sbe/apps/forum/templates/forum/_head.html", "src/abilian/sbe/apps/forum/templates/forum/archives.html", "src/abilian/sbe/apps/forum/templates/forum/attachments.html", "src/abilian/sbe/apps/wall/templates/wall/files.html", "src/abilian/sbe/apps/forum/templates/forum/thread.html", "src/abilian/sbe/apps/forum/templates/forum/thread_create.html", "src/abilian/sbe/apps/forum/templates/forum/post_edit.html", "src/abilian/sbe/apps/forum/templates/forum/_post_fields.html", "src/abilian/sbe/apps/documents/templates/documents/folder.html", "src/abilian/sbe/apps/documents/templates/documents/_dialogs.html", "src/abilian/sbe/apps/documents/templates/documents/document.html", "src/abilian/sbe/apps/documents/templates/documents/document_viewers.html", "src/abilian/sbe/apps/documents/templates/documents/descendants.html", "src/abilian/sbe/apps/documents/templates/documents/permissions.html"]
+stylesheet = [
+    "src/abilian/sbe/static/ads/ads.css",
+    "src/abilian/sbe/static/theme.css",
+]

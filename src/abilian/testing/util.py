@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING
 from flask_login import login_user, logout_user
 from hyperlink import URL
 from redis import Redis
+from sqlalchemy import text
 from sqlalchemy.exc import DatabaseError
 
 from abilian.services import get_service
@@ -89,18 +90,48 @@ def login(user, remember=False, force=False):
 
 def cleanup_db(db: SQLAlchemy) -> None:
     """Drop all the tables, in a way that doesn't raise integrity errors."""
+    if db.engine.name in ("mysql", "mariadb"):
+        _delete_tables(db)
+        db.session.remove()
+        return
 
-    # Need to run this sequence twice for some reason
-    _delete_tables(db)
-    _delete_tables(db)
-    # One more time, just in case ?
-    db.drop_all()
+    # The rows can form a cycle -- a community's root folder, a wiki page of
+    # that community, an attachment of that page -- which no table order can
+    # delete. So the tables are dropped, not emptied: PostgreSQL drops the
+    # constraints first, and SQLite, which checks them on DROP TABLE, does it
+    # with its foreign keys off.
+    #
+    # The session goes first: drop_all() runs on its own connection and, on
+    # PostgreSQL, would wait forever for the locks of an open transaction.
+    db.session.remove()
+    is_sqlite = db.engine.name == "sqlite"
+    with db.engine.connect() as connection:
+        # Not in a transaction, where SQLite ignores this pragma.
+        if is_sqlite:
+            connection.exec_driver_sql("PRAGMA foreign_keys=OFF")
+        db.metadata.drop_all(connection)
+        connection.commit()
+        if is_sqlite:
+            connection.exec_driver_sql("PRAGMA foreign_keys=ON")
 
 
 def _delete_tables(db: SQLAlchemy) -> None:
+    """Empty every table, on MySQL and MariaDB."""
+    db.session.execute(text("SET FOREIGN_KEY_CHECKS=0;"))
     for table in reversed(db.metadata.sorted_tables):
         with contextlib.suppress(DatabaseError):
             db.session.execute(table.delete())
+    rows = db.session.execute(
+        text(
+            "SELECT TABLE_NAME FROM information_schema.TABLES "
+            "WHERE TABLE_SCHEMA = DATABASE() AND AUTO_INCREMENT > 1;"
+        )
+    ).fetchall()
+    for (tbl_name,) in rows:
+        with contextlib.suppress(DatabaseError):
+            db.session.execute(text(f"ALTER TABLE `{tbl_name}` AUTO_INCREMENT = 1;"))
+    db.session.execute(text("SET FOREIGN_KEY_CHECKS=1;"))
+    db.session.commit()
 
 
 def ensure_services_started(services: list[str]) -> None:

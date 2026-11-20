@@ -23,11 +23,11 @@ class ErrorManagerMixin(Flask):
         assert self.logger
 
     def handle_user_exception(self, e):
-        # If session.transaction._parent is None, then exception has occured in
+        # Outside a nested transaction, the exception may have occured in
         # after_commit(): doing a rollback() raises an error and would hide
         # actual error.
         session = db.session()
-        if session.is_active and session.transaction._parent is not None:
+        if session.is_active and session.in_nested_transaction():
             # Inconditionally forget all DB changes, and ensure clean session
             # during exception handling.
             session.rollback()

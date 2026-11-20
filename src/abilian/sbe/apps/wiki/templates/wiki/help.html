@@ -1,11 +1,9 @@
+{#- How to write a wiki page: Markdown, and links between pages. -#}
 {% extends "wiki/_base.html" %}
-
-{% from "macros/box.html" import m_box_content %}
-
-{% block content %}
-  {% call m_box_content(_("Help")) %}
-
-    {{ body }}
-
-  {% endcall %}
+{% block wiki_title %}{{ _("Syntax help") }}{% endblock %}
+{% block wiki_content %}
+<article class="ads-card" aria-labelledby="help-title">
+  <div class="ads-card__head"><h2 class="ads-card__title" id="help-title">{{ _("Syntax help") }}</h2></div>
+  <div class="ads-card__body ads-prose">{{ body }}</div>
+</article>
 {% endblock %}

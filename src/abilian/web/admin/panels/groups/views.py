@@ -2,84 +2,21 @@
 
 from __future__ import annotations
 
-import html
-
 import sqlalchemy as sa
 import sqlalchemy.orm
 from flask import render_template_string, request
-from sqlalchemy.sql.expression import asc, desc, func, nullslast
 
 from abilian.core.models.subjects import Group, User
+from abilian.core.sqlalchemy.session import session_of
 from abilian.i18n import _l
 from abilian.services import get_security_service
 from abilian.services.security.models import Role
 from abilian.web.action import ButtonAction, FAIcon
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
-from abilian.web.views import base, object as views
+from abilian.web.views import object as views
 
 from .forms import GroupAdminForm
-
-
-class JsonGroupsList(base.JSONView):
-    """JSON group list for datatable."""
-
-    def data(self, *args, **kw) -> dict:
-        security = get_security_service()
-        length = int(kw.get("iDisplayLength", 0))
-        start = int(kw.get("iDisplayStart", 0))
-        sort_dir = kw.get("sSortDir_0", "asc")
-        echo = int(kw.get("sEcho", 0))
-        search = kw.get("sSearch", "").replace("%", "").strip().lower()
-
-        end = start + length
-        query = Group.query.options(sa.orm.noload("*"))
-        total_count = query.count()
-
-        if search:
-            # TODO: gérer les accents
-            query = query.filter(func.lower(Group.name).like(f"%{search}%"))
-
-        count = query.count()
-        columns = [func.lower(Group.name)]
-        direction = asc if sort_dir == "asc" else desc
-        order_by = list(map(direction, columns))
-
-        # sqlite does not support 'NULLS FIRST|LAST' in ORDER BY clauses
-        engine = query.session.get_bind(Group.__mapper__)
-        if engine.name != "sqlite":
-            order_by[0] = nullslast(order_by[0])
-
-        query = query.order_by(*order_by).add_columns(Group.members_count)
-        groups = query.slice(start, end).all()
-        data = []
-
-        for group, members_count in groups:
-            # TODO: this should be done on the browser.
-            group_url = url_for(".groups_group", group_id=group.id)
-            name = html.escape(group.name or "")
-            roles = [r for r in security.get_roles(group) if r.assignable]
-
-            columns = [
-                f'<a href="{group_url}">{name}</a>',
-                str(members_count or 0),
-                render_template_string(
-                    """{%- for role in roles %}
-                        <span class="badge badge-default">{{ role }}</span>
-                        {%- endfor %}""",
-                    roles=roles,
-                ),
-                "\u2713" if group.public else "",
-            ]
-
-            data.append(columns)
-
-        return {
-            "sEcho": echo,
-            "iTotalRecords": total_count,
-            "iTotalDisplayRecords": count,
-            "aaData": data,
-        }
 
 
 # Group edit / create views
@@ -87,7 +24,6 @@ class GroupBase:
     Model = Group
     Form = GroupAdminForm
     pk = "group_id"
-    base_template = "admin/_base.html"
 
     def index_url(self):
         return url_for(".groups")
@@ -116,7 +52,7 @@ REMOVE_USER_BUTTON = ButtonAction(
 )
 
 
-class GroupView(GroupBase, views.ObjectView):
+class GroupView(GroupBase, views.ObjectView[Group, GroupAdminForm]):
     template = "admin/group_view.html"
 
     def breadcrumb(self):
@@ -138,7 +74,9 @@ class GroupView(GroupBase, views.ObjectView):
         return kw
 
 
-class GroupEdit(GroupBase, views.ObjectEdit):
+class GroupEdit(GroupBase, views.ObjectEdit[Group, GroupAdminForm]):
+    template = "admin/object_edit.html"
+
     def breadcrumb(self):
         label = render_template_string("<em>{{ g }}</em>", g=self.obj.name)
         return BreadcrumbItem(label=label, url="", description=self.obj.name)
@@ -173,19 +111,20 @@ class GroupEdit(GroupBase, views.ObjectEdit):
         return super().after_populate_obj()
 
     def add_user(self, *args, **kwargs):
-        user_id = int(request.form.get("user"))
+        user_id = int(request.form["user"])
         user = User.query.options(sa.orm.joinedload(User.groups)).get(user_id)
         self.obj.members.add(user)
-        sa.orm.object_session(self.obj).commit()
+        session_of(self.obj).commit()
         return self.redirect_to_view()
 
     def remove_user(self, *args, **kwargs):
-        user_id = int(request.form.get("user"))
+        user_id = int(request.form["user"])
         user = User.query.options(sa.orm.joinedload(User.groups)).get(user_id)
         self.obj.members.discard(user)
-        sa.orm.object_session(self.obj).commit()
+        session_of(self.obj).commit()
         return self.redirect_to_view()
 
 
-class GroupCreate(GroupBase, views.ObjectCreate):
+class GroupCreate(GroupBase, views.ObjectCreate[Group, GroupAdminForm]):
+    template = "admin/object_edit.html"
     chain_create_allowed = True

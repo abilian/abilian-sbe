@@ -5,9 +5,8 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta
-from typing import Never
 
-from flask import Response, request, send_file
+from flask import Response, request
 from werkzeug.exceptions import BadRequest
 
 from abilian.core.util import utc_dt
@@ -68,15 +67,15 @@ class BaseFileDownload(View):
         kwargs["attach"] = request.args.get("attach", self.as_attachment, type=bool)
         return args, kwargs
 
-    def make_response(self, *args, **kwargs) -> Never:
+    def make_response(self, *args, **kwargs) -> Response:
         # for example: return flask.make_response(...)
         # or: return flask.send_file(...)
         raise NotImplementedError
 
-    def get_filename(self, *args, **kwargs) -> Never:
+    def get_filename(self, *args, **kwargs) -> str:
         raise NotImplementedError
 
-    def get_content_type(self, *args, **kwargs) -> Never:
+    def get_content_type(self, *args, **kwargs) -> str:
         raise NotImplementedError
 
     def get(self, attach: bool, *args, **kwargs):
@@ -102,30 +101,3 @@ class BaseFileDownload(View):
             response.cache_control.private = True
             response.cache_control.max_age = int(self.expire_offset.total_seconds())
             response.expires = utc_dt(datetime.utcnow() + self.expire_offset)
-
-
-class BaseBlobDownload(BaseFileDownload):
-    def get_blob(self, *args, **kwargs) -> Never:
-        raise NotImplementedError
-
-    def prepare_args(self, args, kwargs):
-        args, kwargs = super().prepare_args(args, kwargs)
-        self.blob = self.get_blob(*args, **kwargs)
-        metadata = self.blob.meta
-        self.filename = metadata.get("filename", self.obj.name)
-        self.content_type = metadata.get("mimetype")
-        return args, kwargs
-
-    def get_filename(self, *args, **kwargs):
-        return self.filename
-
-    def get_content_type(self, *args, **kwargs):
-        return self.content_type
-
-    def make_response(self, *args, **kwargs):
-        blob = self.blob
-        stream = blob.file.open("rb")
-
-        return send_file(
-            stream, mimetype=self.content_type, cache_timeout=0, add_etags=False
-        )

@@ -17,9 +17,9 @@ class GroupAdminForm(Form):
     name = StringField(_l("Name"), filters=(strip,), validators=[required()])
     description = StringField(_l("Description"), filters=(strip,))
 
-    public = BooleanField(_l("Public"), widget=widgets.BooleanWidget(on_off_mode=True))
+    public = BooleanField(_l("Public"), widget=widgets.BooleanWidget())
 
-    roles = fields.Select2MultipleField(
+    roles = fields.MultipleChoiceField(
         _l("Roles"),
         choices=lambda: [(r.name, r.label) for r in Role.assignable_roles()],
     )

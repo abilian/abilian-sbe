@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 from urllib.parse import quote
 
-import sqlalchemy as sa
 from flask import (
     current_app,
     flash,
@@ -17,7 +16,6 @@ from flask import (
     render_template,
     request,
 )
-from flask_login import current_user
 from markdown import markdown
 from markupsafe import Markup
 from sqlalchemy.orm.exc import NoResultFound
@@ -25,12 +23,18 @@ from werkzeug.exceptions import NotFound
 from whoosh.searching import Hit
 
 from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated, authenticated_user
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _l, _n
-from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.communities.blueprint import CommunityBlueprint, with_tool
 from abilian.sbe.apps.communities.common import object_viewers
 from abilian.sbe.apps.communities.views import default_view_kw as community_dv_kw
+from abilian.sbe.apps.documents.form_files import (
+    apply_form_files,
+    attach_files,
+    form_touches_files,
+)
 from abilian.services.viewtracker import viewtracker
 from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
@@ -39,12 +43,14 @@ from abilian.web.util import url_for
 from abilian.web.views import ObjectCreate, ObjectEdit, ObjectView, default_view
 from abilian.web.views.base import Redirect
 
+from . import markup
 from .forms import WikiPageForm
 from .models import WikiPage, WikiPageAttachment, WikiPageRevision
 
 if TYPE_CHECKING:
     from werkzeug.wrappers import Response
 
+    from abilian.core.models.subjects import User
     from abilian.sbe.apps.communities.models import Community
     from abilian.sbe.apps.communities.presenters import CommunityPresenter
     from abilian.services.security.models import Permission
@@ -53,6 +59,13 @@ wiki = CommunityBlueprint(
     "wiki", __name__, url_prefix="/wiki", template_folder="templates"
 )
 route = wiki.route
+wiki.before_request(with_tool("has_wiki"))
+
+
+@wiki.context_processor
+def wiki_titles() -> dict[str, list[str]]:
+    """Every page of the wiki has the titles of its pages beside it."""
+    return {"wiki_titles": [page.title for page in community_pages()]}
 
 
 @wiki.url_value_preprocessor
@@ -92,8 +105,17 @@ class BasePageView:
     Model = WikiPage
     pk = "title"
     Form = WikiPageForm
-    base_template = "wiki/_base.html"
     view_endpoint = ""
+
+    #: the logged-in user, set by `prepare_args()`
+    user: User
+
+    def prepare_args(
+        self, args: tuple[Any], kwargs: dict[str, Any]
+    ) -> tuple[tuple[Any], dict[str, Any]]:
+        # Before the parent's: it loads the page, and may create one.
+        self.user = authenticated_user()
+        return super().prepare_args(args, kwargs)
 
     @property
     def is_home_page(self):
@@ -101,14 +123,10 @@ class BasePageView:
 
     @property
     def template_kwargs(self) -> dict[str, WikiPageForm | WikiPage]:
-        """Template render arguments.
-
-        You can override `base_template` for instance. Only `view` and
-        `form` cannot be overriden.
-        """
+        """Template render arguments. Only `view` and `form` cannot be overriden."""
         kw = super().template_kwargs
         kw["page"] = self.obj
-        kw["viewers"] = object_viewers(self.obj)
+        kw["viewers"] = object_viewers(self.user, self.obj)
         return kw
 
     def init_object(
@@ -120,7 +138,7 @@ class BasePageView:
                 self.obj = get_page_by_title(title)
             except NoResultFound:
                 if title == "Home":
-                    self.obj = create_home_page()
+                    self.obj = create_home_page(self.user)
                 else:
                     flash(
                         _("This page doesn't exit. You must create it first."),
@@ -142,12 +160,9 @@ class BasePageView:
         )
 
 
-class PageView(BasePageView, ObjectView):
+class PageView(BasePageView, ObjectView[WikiPage, WikiPageForm]):
     template = "wiki/page.html"
     view_endpoint = ".page"
-    decorators = [
-        default_view(wiki, WikiPage, id_attr=None, kw_func=wiki_page_default_view_kw)
-    ]
 
     def init_object(
         self, args: tuple[Any], kwargs: dict[str, Any]
@@ -156,17 +171,23 @@ class PageView(BasePageView, ObjectView):
         if not self.obj:
             title = kwargs["title"]
             if title == "Home":
-                self.obj = create_home_page()
+                self.obj = create_home_page(self.user)
             else:
                 url = url_for(".page_edit", title=title, community_id=g.community.slug)
                 raise Redirect(url)
 
         actions.context["object"] = self.obj
-        viewtracker.record_hit(entity=self.obj, user=current_user)
+        viewtracker.record_hit(entity=self.obj, user=self.user)
         return args, kwargs
 
 
-route("/page/")(PageView.as_view("page"))
+# Registered here, not in `decorators`: `PageViewers` would inherit those, and
+# become the default view of a page in its place.
+route("/page/")(
+    default_view(wiki, WikiPage, id_attr=None, kw_func=wiki_page_default_view_kw)(
+        PageView.as_view("page")
+    )
+)
 
 
 class PageViewers(PageView):
@@ -176,10 +197,10 @@ class PageViewers(PageView):
 route("/viewers")(PageViewers.as_view("page_viewers"))
 
 
-class PageEdit(BasePageView, ObjectEdit):
-    # template = 'wiki/page_edit.html'
+class PageEdit(BasePageView, ObjectEdit[WikiPage, WikiPageForm]):
+    template = "wiki/page_edit.html"
     title = _("Edit page")
-    last_revision: int = None
+    last_revision: WikiPageRevision | None = None
     _message_success = _l("Wiki page successfully edited.")
 
     def init_object(
@@ -191,7 +212,11 @@ class PageEdit(BasePageView, ObjectEdit):
         page_id = request.form.get("page_id") or None
         if page_id is not None:
             page_id = int(page_id)
-            self.obj = WikiPage.query.get_or_404(page_id)
+            # In this community: the number is the form's, and any number may be
+            # posted.
+            self.obj = WikiPage.query.filter(
+                WikiPage.id == page_id, WikiPage.community_id == g.community.id
+            ).first_or_404()
             actions.context["object"] = self.obj
 
         return args, kwargs
@@ -222,12 +247,18 @@ class PageEdit(BasePageView, ObjectEdit):
     def before_populate_obj(self) -> None:
         self.redirect_if_no_change()
         form = self.form
-        self.obj.create_revision(form.body_src.data, form.message.data)
+        self.obj.create_revision(self.user, form.body_src.data, form.message.data)
+
+    def after_populate_obj(self) -> None:
+        """The files the form attached, and those it removed."""
+        apply_form_files(self.obj.attachments, WikiPageAttachment)
+        super().after_populate_obj()
 
     # FIXME: does nothing !
     def redirect_if_no_change(self) -> Response | None:
         form = self.form
-        if all(f.data == f.object_data for f in (form.title, form.body_src)):
+        unchanged = all(f.data == f.object_data for f in (form.title, form.body_src))
+        if unchanged and not form_touches_files():
             flash(_("You didn't make any change to this page."))
             return self.redirect(url_for(self.obj))
         return None
@@ -282,7 +313,7 @@ class PageEdit(BasePageView, ObjectEdit):
 route("/edit")(PageEdit.as_view("page_edit", view_endpoint=".page"))
 
 
-class PageCreate(PageEdit, ObjectCreate):
+class PageCreate(PageEdit, ObjectCreate[WikiPage, WikiPageForm]):
     title = _l("Create page")
     _message_success = _l("Wiki page successfully created.")
 
@@ -291,17 +322,29 @@ class PageCreate(PageEdit, ObjectCreate):
     def init_object(
         self, args: tuple[Any], kwargs: dict[str, Any]
     ) -> tuple[tuple[Any], dict[str, Any]]:
-        args, kwargs = ObjectCreate.init_object(self, args, kwargs)
-        self.obj.community = g.community
-        session = sa.orm.object_session(self.obj)
-        if session:
-            sa.orm.session.make_transient(self.obj)
-            for rev in self.obj.revisions:
-                sa.orm.session.make_transient(rev)
+        self.obj = WikiPage(author=self.user)
         return args, kwargs
+
+    def before_populate_obj(self) -> None:
+        # Attached to its community only now, when it is saved: in the
+        # community's collection, an unsaved page would stay there for the rest
+        # of the session.
+        self.obj.community = g.community
+        # The constructor wrote an empty first revision: the text written is that
+        # revision, not a second one after it.
+        first = self.obj.revisions[0]
+        self.obj.body_src = first.body_src = self.form.body_src.data
+        first.message = self.form.message.data
 
 
 route("/new")(PageCreate.as_view("page_new", view_endpoint=".page"))
+
+
+@route("/preview", methods=["POST"])
+def page_preview() -> Markup:
+    """The text being written, as the page will show it: the form that writes a page
+    shows it beside the text (`vite/src/preview.js`)."""
+    return Markup(markup.convert(g.community, request.form["body_src"]))
 
 
 @route("/source/")
@@ -371,7 +414,8 @@ def page_compare() -> str | Response:
 
 
 @route("/delete/", methods=["POST"])
-def page_delete() -> Response:
+@authenticated
+def page_delete(user: User) -> Response:
     title = request.form["title"].strip()
     try:
         page = get_page_by_title(title)
@@ -383,7 +427,7 @@ def page_delete() -> Response:
 
     app = unwrap(current_app)
     community = g.community._model
-    activity.send(app, actor=current_user, verb="delete", object=page, target=community)
+    activity.send(app, actor=user, verb="delete", object=page, target=community)
 
     db.session.commit()
     flash(_("Page %(title)s deleted.", title=title))
@@ -399,9 +443,11 @@ def attachment_download() -> Response:
     except NoResultFound as e:
         raise NotFound from e
 
-    attachment = WikiPageAttachment.query.get(attachment_id)
-    assert attachment is not None
-    assert attachment.wikipage is page
+    # The page is looked up in this community: an attachment of any other page
+    # is not found here.
+    attachment = WikiPageAttachment.query.get_or_404(attachment_id)
+    if attachment.wikipage is not page:
+        raise NotFound
 
     response = make_response(attachment.content)
     response.headers["content-length"] = attachment.content_length
@@ -421,20 +467,9 @@ def attachment_upload() -> Response:
     except NoResultFound as e:
         raise NotFound from e
 
-    files = request.files.getlist("attachments")
-    saved_count = 0
-
-    for f in files:
-        name = f.filename
-        # FIXME: do something instead of just skipping the attachement
-        if not name:
-            continue
-
-        attachment = WikiPageAttachment(name=name)
-        attachment.wikipage = page
-        attachment.set_content(f.read(), f.content_type)
-        db.session.add(attachment)
-        saved_count += 1
+    saved_count = attach_files(
+        page.attachments, request.files.getlist("attachments"), WikiPageAttachment
+    )
 
     if saved_count:
         db.session.commit()
@@ -443,7 +478,7 @@ def attachment_upload() -> Response:
                 "One new document successfully uploaded",
                 "%(num)d new documents successfully uploaded",
                 count=saved_count,
-                num=len(files),
+                num=saved_count,
             ),
             "success",
         )
@@ -463,9 +498,11 @@ def attachment_delete():
     except NoResultFound as e:
         raise NotFound from e
 
-    attachment = WikiPageAttachment.query.get(attachment_id)
-    assert attachment is not None
-    assert attachment.wikipage is page
+    # The page is looked up in this community: an attachment of any other page
+    # is not found here.
+    attachment = WikiPageAttachment.query.get_or_404(attachment_id)
+    if attachment.wikipage is not page:
+        raise NotFound
 
     if request.form.get("action") == "delete":
         name = attachment.name
@@ -481,12 +518,7 @@ def attachment_delete():
 #
 @route("/pages")
 def wiki_pages():
-    pages = (
-        WikiPage.query.filter(WikiPage.community_id == g.community.id)
-        .order_by(WikiPage.title)
-        .all()
-    )
-    return render_template("wiki/all_pages.html", pages=pages)
+    return render_template("wiki/all_pages.html", pages=community_pages())
 
 
 @route("/help")
@@ -505,6 +537,15 @@ def wiki_export() -> str:
 #
 # Util
 #
+def community_pages() -> list[WikiPage]:
+    """The community's wiki pages, by title."""
+    return (
+        WikiPage.query.filter(WikiPage.community_id == g.community.id)
+        .order_by(WikiPage.title)
+        .all()
+    )
+
+
 def get_page_by_title(title: str) -> WikiPage:
     title = title.strip()
     page = WikiPage.query.filter(
@@ -513,10 +554,10 @@ def get_page_by_title(title: str) -> WikiPage:
     return page
 
 
-def create_home_page() -> WikiPage:
+def create_home_page(user: User) -> WikiPage:
     path = Path(__file__).parent / "data" / "default_page.txt"
-    default_src = path.open("rt").read()
-    page = WikiPage(title="Home", body_src=default_src)
+    default_src = path.read_text(encoding="utf-8")
+    page = WikiPage(title="Home", body_src=default_src, author=user)
     page.community_id = g.community.id
     db.session.add(page)
     db.session.commit()

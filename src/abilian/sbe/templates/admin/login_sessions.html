@@ -1,0 +1,36 @@
+{#- The last sign-ins: who, when, for how long (or still on: an hour idle ends one),
+    from where. Overrides Abilian Core's page. -#}
+{% extends "admin/_ads.html" %}
+{% block page_title %}{{ _("Sign-ins") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("The last sign-ins") }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter">
+      <thead><tr>
+        <th scope="col">{{ _("Person") }}</th>
+        <th scope="col">{{ _("Signed in") }}</th>
+        <th scope="col">{{ _("Signed out") }}</th>
+        <th scope="col" class="ads-end ads-col--secondary">{{ _("Length") }}</th>
+        <th scope="col" class="ads-col--secondary">{{ _("From") }}</th>
+      </tr></thead>
+      <tbody>
+        {% for session in sessions %}
+        <tr>
+          <td class="ads-full">
+            <span class="ads-media ads-gap-sm">{{ m.avatar(session.user, "ads-avatar--xs") }}<a class="sbe-quiet ads-truncate" href="{{ url_for('.users_user', user_id=session.user.id) }}">{{ session.user.name }}</a></span>
+          </td>
+          <td class="ads-muted">{{ m.time(session.started_at) }}</td>
+          {% set end = session.end %}
+          <td>{% if end %}<span class="ads-muted">{{ m.time(end) }}</span>{% else %}<span class="ads-status ads-status--success"><span class="ads-status__dot"></span>{{ _("Still signed in") }}</span>{% endif %}</td>
+          <td class="ads-end ads-muted ads-col--secondary">{% if end %}{{ (end - session.started_at) | timedeltaformat }}{% endif %}</td>
+          <td class="ads-muted ads-col--secondary">{{ session.ip_address or "" }}{% if session.country is defined %} ({{ session.country }}){% endif %}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="ads-muted">{{ _("Nobody has signed in yet.") }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

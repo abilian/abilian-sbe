@@ -7,12 +7,12 @@ from __future__ import annotations
 import typing
 
 from flask import current_app, send_file
-from flask_login import current_user
 from flask_wtf.file import FileField, file_required
 from werkzeug.exceptions import BadRequest, NotFound
 from werkzeug.utils import secure_filename
 
-from abilian.core.util import unwrap
+from abilian.core.extensions.login import authenticated_user
+from abilian.services.security import AUTHENTICATED
 from abilian.web import csrf, url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.forms import Form
@@ -23,7 +23,9 @@ if typing.TYPE_CHECKING:
     from abilian.web.uploads import FileUploadsExtension
 
 
-ac_blueprint = AccessControlBlueprint("uploads", __name__, url_prefix="/upload")
+ac_blueprint = AccessControlBlueprint(
+    "uploads", __name__, url_prefix="/upload", allowed_roles=AUTHENTICATED
+)
 
 
 class UploadForm(Form):
@@ -37,7 +39,7 @@ class BaseUploadsView:
     def prepare_args(self, args, kwargs):
         args, kwargs = super().prepare_args(args, kwargs)
         self.uploads = current_app.extensions["uploads"]
-        self.user = unwrap(current_user)
+        self.user = authenticated_user()
         return args, kwargs
 
 
@@ -60,7 +62,7 @@ class NewUploadView(BaseUploadsView, JSONView):
             msg = "File is missing."
             raise BadRequest(msg)
 
-        uploaded = form["file"].data[0]
+        uploaded = form["file"].data
         filename = secure_filename(uploaded.filename)
         mimetype = uploaded.mimetype
         self.handle = self.uploads.add_file(
@@ -97,8 +99,8 @@ class UploadView(BaseUploadsView, View):
             as_attachment=True,
             download_name=filename,
             mimetype=content_type,
-            cache_timeout=0,
-            add_etags=False,
+            max_age=0,
+            etag=False,
         )
 
     def delete(self, handle, *args, **kwargs) -> dict:

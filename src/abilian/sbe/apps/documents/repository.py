@@ -4,9 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import sqlalchemy as sa
-import sqlalchemy.orm
-
+from abilian.core.sqlalchemy.session import session_of
 from abilian.services.security import READ, Permission, security
 
 from .models import BaseContent, CmisObject, Document, Folder
@@ -82,7 +80,7 @@ class ContentRepository:
     #
     # Path based navigation
     #
-    def get_object_by_path(self, path: str) -> BaseContent | None:
+    def get_object_by_path(self, path: str) -> Folder | Document | None:
         """Gets the CMIS object (document or folder) with the given `path`.
 
         Returns None if the object doesn't exist.
@@ -95,9 +93,7 @@ class ContentRepository:
         Returns None if the folder doesn't exist.
         """
         obj = self.root_folder.get_object_by_path(path)
-        if obj is None or not obj.is_folder:
-            return None
-        return obj
+        return obj if isinstance(obj, Folder) else None
 
     def get_document_by_path(self, path: str) -> Document | None:
         """Gets the document with the given `path`.
@@ -105,38 +101,50 @@ class ContentRepository:
         Returns None if the document doesn't exist.
         """
         obj = self.root_folder.get_object_by_path(path)
-        if obj is None or not obj.is_document:
-            return None
-        return obj
+        return obj if isinstance(obj, Document) else None
 
     #
     # COPY / MOVE support
     #
     def copy_object(
-        self, obj: BaseContent, dest_folder: Folder, dest_title: str | None = None
-    ) -> Document | Folder:
-        new_obj = obj.clone(title=dest_title, parent=dest_folder)
-        if obj.is_folder:
-            for child in obj.children:
-                self.copy_object(child, new_obj)
-        return new_obj
+        self, obj: Folder | Document, dest_folder: Folder, dest_title: str | None = None
+    ) -> Folder | Document:
+        # Appended to the destination's collection, which cascades the copy into
+        # its session: a backref (`parent=dest_folder`) no longer does.
+        match obj:
+            case Folder():
+                new_folder = obj.clone(title=dest_title)
+                dest_folder.subfolders.append(new_folder)
+                for child in obj.children:
+                    self.copy_object(child, new_folder)
+                return new_folder
+            case Document():
+                new_document = obj.clone(title=dest_title)
+                dest_folder.documents.append(new_document)
+                return new_document
+            case _:
+                msg = f"Only folders and documents can be copied, not {obj!r}"
+                raise TypeError(msg)
 
     def move_object(
-        self, obj: BaseContent, dest_folder: Folder, dest_title: str | None = None
+        self, obj: CmisObject, dest_folder: Folder, dest_title: str | None = None
     ) -> None:
         obj.parent = dest_folder
+        # Leaving its old folder expunges an object not yet flushed
+        # (delete-orphan), and a backref no longer adds it back: add it.
+        session_of(dest_folder).add(obj)
         if dest_title:
             obj.title = dest_title
 
-    def rename_object(self, obj: BaseContent, title: str) -> None:
+    def rename_object(self, obj: CmisObject, title: str) -> None:
         obj.title = title
 
-    def delete_object(self, obj: BaseContent) -> None:
+    def delete_object(self, obj: CmisObject) -> None:
         if obj.is_root_folder:
             msg = "Can't delete root folder."
             raise Exception(msg)
 
-        session = sa.orm.object_session(obj)
+        session = session_of(obj)
         obj.__path_before_delete = obj.path  # for audit log.
         parent = obj.parent
         collection = parent.subfolders if obj.is_folder else parent.documents
@@ -162,12 +170,12 @@ class ContentRepository:
     # Security / access rights
     #
     def has_permission(
-        self, user: User, permission: Permission, obj: BaseContent
+        self, user: User, permission: Permission, obj: CmisObject
     ) -> bool:
         assert isinstance(permission, Permission)
         return security.has_permission(user, permission, obj, inherit=True)
 
-    def has_access(self, user: User, obj: BaseContent) -> bool:
+    def has_access(self, user: User, obj: CmisObject) -> bool:
         """Checks that user has actual right to reach this object, 'read'
         permission on each of object's parents."""
         current = obj

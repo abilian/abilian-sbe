@@ -1,0 +1,3622 @@
+/* The one stylesheet a consumer links.
+ *
+ * The parts were enumerated in every page template — four lists that had to be edited in
+ * step to add a file, and they had already drifted (the auth shell hand-picked a subset,
+ * so a component used there was styled on one page and not the next). The order IS the
+ * cascade, and an order that lives in five places is not an order.
+ *
+ * Knobs first (the overridable surface), then everything computed from them, then the
+ * reset, then the parts. A part never depends on another part — only on the tokens — so
+ * among the parts the order is alphabetical and means nothing.
+ *
+ * `layout.css` is the exception, and it goes LAST on purpose. Its classes are the
+ * composable set — `.ads-grid`, `.ads-stack`, `.ads-cluster`, `.ads-fill`, `.ads-muted` —
+ * and they are meant to be put ON a component: `class="ads-card__foot ads-grid"`. Both
+ * selectors are one class, so with layout first the component's own `display: flex` won
+ * on file order alone and the grid silently did nothing. A layout primitive that loses to
+ * the thing it is applied to is not a primitive.
+ */
+/* The overridable surface. Everything else in the system derives from these.
+ *
+ * Defaults are Tabler's measured values, so an app that overrides nothing looks like
+ * Tabler, except `--ads-contrast`, which defaults to a palette that meets WCAG AA. Each
+ * knob is a single number or colour, and the derivations in derive.css keep the rest
+ * coherent when it moves — which is the whole point. A system where
+ * `--shadow-md` and `--shadow-lg` are independent literals cannot answer "less shadow".
+ *
+ * Tabler already works this way for three of these (radius-scale, shadow-color, brand);
+ * it has no knob for whitespace or type, whose values it leaves as independent literals.
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ---- brand ------------------------------------------------------------
+   * One colour. Hover, active, tint and foreground are computed from it, so a
+   * rebrand is this line. */
+  --ads-brand: #066fd1;
+
+  /* How far the palette is pushed towards legibility, from Tabler's to crisp.
+   *
+   * 0 is the reference's own values, and below WCAG AA: measured on its own tint, Tabler's
+   * success reads 2.48:1, its warning 2.73:1, its info 2.77:1; the floor for body text is
+   * 4.5. Muted text is 4.39:1 and a control's edge 1.24:1.
+   *
+   * 1 is the default, because a design system whose defaults fail AA on its own components
+   * hands every adopter the same audit finding (notes/issues/03). It pushes each intent's
+   * ink to clear the floor (success 4.97, warning 5.39, info 5.44), muted text to 4.6 and
+   * control edges to 4.85, and it firms what makes a page read as pale: body ink from
+   * n-700 to n-800, the soft hairline from 12% to 18%, and in dark mode a brand ink lifted
+   * further towards white, so a deep brand colour still reads. Fills and tints stay where
+   * they were. Calibration against Tabler sets it to 0. A scalar, so a project can sit
+   * anywhere between the two.
+   */
+  --ads-contrast: 1;
+  --ads-brand-fg: #f9fafb;       /* text on a filled brand surface, Tabler's light */
+
+  /* Neutrals are a hue and a chroma MULTIPLIER, not thirty hex codes. 1 is
+   * Tabler; 0 gives pure grey; 2 doubles the colour in the chrome. The per-step
+   * saturation is not flat — a good ramp gets more saturated as it darkens, which
+   * derive.css encodes — so this scales the curve rather than replacing it. */
+  --ads-neutral-hue: 220;
+  --ads-neutral-chroma: 1;
+
+  /* How far the page ground stands back from the surfaces on it. 1 is Tabler: a grey page
+   * under white cards. 0 puts content on the surface colour, with cards as hairline frames;
+   * pair it with `--ads-shadow-strength: 0` for a flat look. */
+  --ads-page-contrast: 1;
+
+  /* Status colours; their tints derive the same way the brand's do. */
+  --ads-success: #2fb344;
+  --ads-warning: #f76707;
+  --ads-danger:  #d63939;
+  --ads-info:    #4299e1;
+
+  /* ---- shape ------------------------------------------------------------
+   * 1 is Tabler. 0 squares every corner, 2 doubles them, and every radius in
+   * the system moves together. */
+  --ads-radius-scale: 1;
+  --ads-border-width: 1px;
+
+  /* ---- depth ------------------------------------------------------------
+   * Strength multiplies the opacity of every shadow. 0 is a flat design, 1 is
+   * Tabler, 2 is heavy. The colour is separate so a warm shadow stays possible. */
+  --ads-shadow-strength: 1;
+  --ads-shadow-color: light-dark(rgb(18 18 23), rgb(0 0 0));
+
+  /* ---- space ------------------------------------------------------------
+   * The knob Tabler lacks. 1 is Tabler's density; 1.25 is comfortable, 0.875
+   * is compact, and every padding, gap and margin in the system follows. */
+  --ads-space-scale: 1;
+  --ads-space-unit: 0.25rem;
+  /* The padding above and below every row (table cells, list rows, tree nodes, accordion
+   * summaries) on top of the space scale, so a reader can pick a density without the
+   * rest of the page moving. 1 is Tabler's; each component keeps its own proportion. */
+  --ads-row-scale: 1;
+
+  /* ---- type -------------------------------------------------------------
+   * One knob: the body size. Every other step is a fixed multiple of it, so
+   * changing this scales the whole scale proportionally.
+   *
+   * There is deliberately no --text-ratio. Tabler's steps are 10/12/14/16/20/24,
+   * whose successive ratios are 1.200, 1.167, 1.143, 1.250, 1.200 — not a
+   * geometric scale, so a single ratio cannot reproduce the spec. The spec wins
+   * over the tidier abstraction; the multipliers live in derive.css. */
+  --ads-text-base: 0.875rem;     /* 14px, Tabler's body size */
+  --ads-line-height: 1.4285714286;
+
+  /* ---- shell ------------------------------------------------------------ */
+  --ads-sidebar-width: 16rem;
+  /* what the sidebar narrows to in the folded layout: wide enough for an icon and its
+     padding, and nothing else */
+  --ads-sidebar-folded: 4rem;   /* Tabler's */
+  /* Still knobs — override either and it takes the value you give it — but their DEFAULTS
+   * are derived, so an avatar and an icon follow the density everything else follows. A
+   * literal 2.5rem here would be a component that quietly ignores the one knob whose whole
+   * point is that everything moves together. At the defaults these are 40px and 20px. */
+  --ads-avatar-size: var(--ads-control);
+  --ads-icon-size: var(--ads-control-xs);
+  --ads-container: 82rem;
+
+  --ads-font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* the face for headline figures (`.ads-metric`): a dashboard often wants a condensed or
+     display face for numbers, distinct from the text */
+  --ads-font-figures: var(--ads-font);
+  --ads-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --ads-weight-normal: 400;
+  --ads-weight-medium: 500;
+  --ads-weight-bold: 600;
+
+  /* The small labels: a table header, a pretitle, a nav section, a subheader, a datagrid
+   * or board title, a ribbon. Tabler sets them in capitals, slightly tracked; a brand with
+   * a sentence-case voice sets `none` and `normal`. */
+  --ads-label-case: uppercase;
+  --ads-label-tracking: .04em;
+}
+/* Everything computed from knobs.css. Nothing here is meant to be overridden — move a
+ * knob instead, and these stay in proportion. */
+
+/* Declared for the document AND for any [data-ads-scope] subtree. A custom property is
+ * substituted at computed-value time, so a knob overridden deeper down only reaches the
+ * derived values if the derivations are declared there too. That is what makes a compact
+ * region, or a differently-branded panel, possible inside one page. */
+:root,
+[data-ads-scope] {
+  /* ---- neutrals -------------------------------------------------------
+   * Lightness and saturation per step are Tabler's, measured. The saturation
+   * climbs from 14% to 71% as the ramp darkens; that curve is what stops dark
+   * surfaces reading as flat charcoal, so it is kept and only scaled. */
+  --ads-n-0:   hsl(var(--ads-neutral-hue) calc(0%  * var(--ads-neutral-chroma)) 100%);
+  --ads-n-50:  hsl(var(--ads-neutral-hue) calc(20% * var(--ads-neutral-chroma)) 98%);
+  --ads-n-100: hsl(var(--ads-neutral-hue) calc(14% * var(--ads-neutral-chroma)) 96%);
+  --ads-n-200: hsl(var(--ads-neutral-hue) calc(13% * var(--ads-neutral-chroma)) 91%);
+  --ads-n-300: hsl(var(--ads-neutral-hue) calc(12% * var(--ads-neutral-chroma)) 84%);
+  --ads-n-400: hsl(var(--ads-neutral-hue) calc(11% * var(--ads-neutral-chroma)) 65%);
+  --ads-n-500: hsl(var(--ads-neutral-hue) calc(9%  * var(--ads-neutral-chroma)) 46%);
+  --ads-n-600: hsl(var(--ads-neutral-hue) calc(14% * var(--ads-neutral-chroma)) 34%);
+  --ads-n-700: hsl(var(--ads-neutral-hue) calc(19% * var(--ads-neutral-chroma)) 27%);
+  --ads-n-800: hsl(var(--ads-neutral-hue) calc(28% * var(--ads-neutral-chroma)) 17%);
+  --ads-n-900: hsl(var(--ads-neutral-hue) calc(39% * var(--ads-neutral-chroma)) 11%);
+  --ads-n-950: hsl(var(--ads-neutral-hue) calc(71% * var(--ads-neutral-chroma)) 4%);
+
+  /* ---- roles: what a colour is FOR, in both themes at once -------------- */
+  --ads-page:     light-dark(
+      color-mix(in oklab, var(--ads-n-0), var(--ads-n-100) calc(min(var(--ads-page-contrast), 1) * 100%)),
+      color-mix(in oklab, var(--ads-n-900), var(--ads-n-950) calc(min(var(--ads-page-contrast), 1) * 100%)));
+  --ads-surface:  light-dark(var(--ads-n-0),   var(--ads-n-900));
+  --ads-raised:   light-dark(var(--ads-n-0),   var(--ads-n-800));
+  --ads-sunken:   light-dark(var(--ads-n-50),  var(--ads-n-950));
+  /* one step deeper than sunken: inline code, a key cap, a cell that has to read as
+     "not editable" next to something that is */
+  --ads-sunken-strong: light-dark(var(--ads-n-100), var(--ads-n-900));
+  --ads-line:     light-dark(var(--ads-n-200), var(--ads-n-800));
+  --ads-line-strong: light-dark(var(--ads-n-300), var(--ads-n-700));
+  /* The edge of a control, which has to be FOUND rather than felt. An unchecked checkbox
+   * or an empty input has no glyph and no fill of its own: the border is the whole
+   * component, and WCAG 1.4.11 asks 3:1 for it. `--ads-line` is a hairline at 1.2:1, which
+   * is right for a divider and wrong for this — note issues/01.
+   *
+   * n-500 clears 3:1 in both themes on every surface a form sits on (4.85 on a light card,
+   * 3.07 on a dark raised one). Dark takes it outright, as the inks do. Light takes it
+   * through `--ads-contrast`, because Tabler's input border is n-200 and 0 is the
+   * reference. */
+  /* A share past 100% (or under 0%) is clamped by Chromium and by Firefox from 155, but
+   * Firefox 153 drew the colour at half opacity, so every text in `--ads-ink` went grey at
+   * `--ads-contrast: 1.5`. Each share that the knobs can push out of range is clamped here:
+   * above 1 these mixes stay at their darker end in every engine. */
+  --ads-line-input: light-dark(
+      color-mix(in oklab, var(--ads-n-200), var(--ads-n-500) calc(min(var(--ads-contrast), 1) * 100%)),
+      var(--ads-n-500));
+  /* a card's edge is the ink at low opacity, so it sits on any surface; 12% is Tabler's,
+     which `--ads-contrast` firms to 18% */
+  --ads-line-soft: color-mix(in srgb, light-dark(var(--ads-n-800), var(--ads-n-0))
+      calc(12% + var(--ads-contrast) * 6%), transparent);
+  /* Body text is gray-700 in Tabler, which softens it and lets headings hold the contrast.
+   * `--ads-contrast` takes it to n-800. */
+  --ads-ink:       light-dark(
+      color-mix(in oklab, var(--ads-n-700), var(--ads-n-800) calc(min(var(--ads-contrast), 1) * 100%)),
+      var(--ads-n-100));
+  --ads-ink-strong: light-dark(var(--ads-n-900), var(--ads-n-0));
+  /* Muted text sits at 4.39:1 on the page's own ground — close, and under. It needs far
+   * less of a push than an intent does because it starts far closer. */
+  --ads-ink-muted: light-dark(
+      color-mix(in oklab, var(--ads-n-500), black calc(var(--ads-contrast) * 12%)),
+      var(--ads-n-400));
+  /* quieter than muted: a key cap, a table caption, a disabled row. Tabler reaches for
+     the same grey at 75% rather than a fourth step down the ramp. */
+  --ads-ink-soft: color-mix(in srgb, var(--ads-ink-muted) 75%, transparent);
+
+  /* ---- brand and status tints, all computed from the one colour --------- */
+  --ads-brand-hover:  color-mix(in oklab, var(--ads-brand) 88%, black);
+  --ads-brand-active: color-mix(in oklab, var(--ads-brand) 76%, black);
+  --ads-brand-ink:   light-dark(
+      color-mix(in oklab, var(--ads-brand), black calc(var(--ads-contrast) * 25%)),
+      color-mix(in oklab, var(--ads-brand) max(55% - var(--ads-contrast) * 20%, 0%), white));
+  --ads-brand-wash:   color-mix(in srgb, var(--ads-brand) 8%, transparent);
+  --ads-brand-edge:   color-mix(in oklab, var(--ads-brand) 30%, transparent);
+  --ads-ring:         color-mix(in oklab, var(--ads-brand) 35%, transparent);
+
+  /* Four shades per intent, one rule each, so a new intent is four lines and not a hunt
+   * through the parts. `-tint` is transparent (it lies over whatever is behind it);
+   * `-fill` and `-line` resolve against the surface, because an alert sits on a card as
+   * often as on the page and a translucent wash would show the card through it.
+   *
+   * `-ink` is the one that is not a mix, and it is the one dark mode needs. A brand blue
+   * chosen to read on white is 3.5:1 against a near-black surface — below the floor, on
+   * every link, badge, chip and alert heading in the system. The knob stays ONE colour,
+   * which is the whole point of a knob; the ink is derived from it and lifted towards
+   * white in dark mode until it reads. Anything using an intent as TEXT uses `-ink`;
+   * anything using it as a solid fill behind `--ads-brand-fg` keeps the knob. */
+  --ads-brand-tint:   color-mix(in srgb, var(--ads-brand) 10%, transparent);
+  --ads-brand-fill:   color-mix(in srgb, var(--ads-brand) 8%, var(--ads-surface));
+  --ads-brand-line:   color-mix(in srgb, var(--ads-brand) 20%, var(--ads-surface));
+  --ads-success-ink:   light-dark(
+      color-mix(in oklab, var(--ads-success), black calc(var(--ads-contrast) * 25%)),
+      color-mix(in oklab, var(--ads-success) 55%, white));
+  --ads-success-tint: color-mix(in srgb, var(--ads-success) 10%, transparent);
+  --ads-success-fill: color-mix(in srgb, var(--ads-success) 8%, var(--ads-surface));
+  --ads-success-line: color-mix(in srgb, var(--ads-success) 20%, var(--ads-surface));
+  --ads-warning-ink:   light-dark(
+      color-mix(in oklab, var(--ads-warning), black calc(var(--ads-contrast) * 25%)),
+      color-mix(in oklab, var(--ads-warning) 55%, white));
+  --ads-warning-tint: color-mix(in srgb, var(--ads-warning) 10%, transparent);
+  --ads-warning-fill: color-mix(in srgb, var(--ads-warning) 8%, var(--ads-surface));
+  --ads-warning-line: color-mix(in srgb, var(--ads-warning) 20%, var(--ads-surface));
+  --ads-danger-ink:   light-dark(
+      color-mix(in oklab, var(--ads-danger), black calc(var(--ads-contrast) * 25%)),
+      color-mix(in oklab, var(--ads-danger) 55%, white));
+  --ads-danger-tint:  color-mix(in srgb, var(--ads-danger) 10%, transparent);
+  --ads-danger-fill:  color-mix(in srgb, var(--ads-danger) 8%, var(--ads-surface));
+  --ads-danger-line:  color-mix(in srgb, var(--ads-danger) 20%, var(--ads-surface));
+  --ads-info-ink:   light-dark(
+      color-mix(in oklab, var(--ads-info), black calc(var(--ads-contrast) * 25%)),
+      color-mix(in oklab, var(--ads-info) 55%, white));
+  --ads-info-tint:    color-mix(in srgb, var(--ads-info) 10%, transparent);
+  --ads-info-fill:    color-mix(in srgb, var(--ads-info) 8%, var(--ads-surface));
+  --ads-info-line:    color-mix(in srgb, var(--ads-info) 20%, var(--ads-surface));
+  /* The absence of an intent still needs a colour: an archived row, a draft, a "none". */
+  --ads-neutral:      var(--ads-ink-muted);
+  --ads-neutral-ink:  var(--ads-ink-muted);
+  --ads-neutral-tint: light-dark(var(--ads-n-100), var(--ads-n-800));
+  --ads-neutral-fill: var(--ads-sunken);
+  --ads-neutral-line: var(--ads-line);
+
+  /* A solid fill carrying `--ads-brand-fg`. Only danger needs the push — brand under
+   * off-white is already 5.2:1 — and it needs less than an ink does, because the label is
+   * near-white rather than the colour itself: 4.46 to 5.3 at ten per cent. */
+  --ads-danger-solid: color-mix(in oklab, var(--ads-danger), black calc(var(--ads-contrast) * 10%));
+  --ads-danger-hover: color-mix(in oklab, var(--ads-danger) 88%, black);
+
+  /* The intent a toned component reads. A component styles itself once against
+   * `--ads-tone*`; a `.ads-tone-<name>` class on it (or on any ancestor) says which one.
+   * Without this every toned component grows its own `--success/--warning/--danger`
+   * modifier trio, and the fifth intent means editing all of them. */
+  --ads-tone:       var(--ads-brand-ink);
+  --ads-tone-solid: var(--ads-brand);
+  --ads-tone-tint: var(--ads-brand-tint);
+  --ads-tone-fill: var(--ads-brand-fill);
+  --ads-tone-line: var(--ads-brand-line);
+
+  /* ---- radii: one scale ------------------------------------------------- */
+  --ads-radius-xs:  calc(2px * var(--ads-radius-scale));
+  --ads-radius-sm:  calc(4px * var(--ads-radius-scale));
+  --ads-radius:     calc(6px * var(--ads-radius-scale));
+  --ads-radius-lg:  calc(8px * var(--ads-radius-scale));
+  --ads-radius-xl:  calc(12px * var(--ads-radius-scale));
+  --ads-radius-pill: calc(100rem * var(--ads-radius-scale));
+
+  /* ---- shadows: geometry fixed, opacity on the strength knob ------------ */
+  /* controls at rest sit at 5%; a raised surface at 12% */
+  --ads-shadow-xs: 0 1px 2px 0 color-mix(in srgb, var(--ads-shadow-color) calc(5% * var(--ads-shadow-strength)), transparent);
+  /* Past the smallest step, every shadow is LAYERED. A single blur is the giveaway of a
+   * hand-rolled scale: real elevation is a tight contact shadow plus a wide ambient one,
+   * and one blur cannot be both. Tabler's geometry, with its percentages folded through
+   * its own 0.4-alpha shadow colour so ours (solid) lands on the same pixels. */
+  --ads-shadow-sm:
+    0 1px 3px 0 color-mix(in srgb, var(--ads-shadow-color) calc(10% * var(--ads-shadow-strength)), transparent),
+    0 1px 2px 0 color-mix(in srgb, var(--ads-shadow-color) calc(6% * var(--ads-shadow-strength)), transparent);
+  --ads-shadow:
+    0 2px 4px -1px color-mix(in srgb, var(--ads-shadow-color) calc(6% * var(--ads-shadow-strength)), transparent),
+    0 4px 6px -1px color-mix(in srgb, var(--ads-shadow-color) calc(8% * var(--ads-shadow-strength)), transparent);
+  --ads-shadow-md:
+    0 4px 6px -2px color-mix(in srgb, var(--ads-shadow-color) calc(5% * var(--ads-shadow-strength)), transparent),
+    0 10px 15px -3px color-mix(in srgb, var(--ads-shadow-color) calc(8% * var(--ads-shadow-strength)), transparent);
+  --ads-shadow-lg:
+    0 10px 10px -5px color-mix(in srgb, var(--ads-shadow-color) calc(4% * var(--ads-shadow-strength)), transparent),
+    0 20px 25px -5px color-mix(in srgb, var(--ads-shadow-color) calc(10% * var(--ads-shadow-strength)), transparent);
+  /* What floats over the page: a dropdown, a menu, a popover. Four layers and a hairline
+   * ring, which is what draws the panel's edge — so an overlay needs no border of its own,
+   * and does not get one that would double up against the ring. */
+  --ads-shadow-overlay:
+    0 2px 4px 0 color-mix(in srgb, var(--ads-shadow-color) calc(4% * var(--ads-shadow-strength)), transparent),
+    0 5px 8px 0 color-mix(in srgb, var(--ads-shadow-color) calc(4% * var(--ads-shadow-strength)), transparent),
+    0 10px 18px 0 color-mix(in srgb, var(--ads-shadow-color) calc(3% * var(--ads-shadow-strength)), transparent),
+    0 24px 48px 0 color-mix(in srgb, var(--ads-shadow-color) calc(3% * var(--ads-shadow-strength)), transparent),
+    0 0 0 1px color-mix(in srgb, var(--ads-shadow-color) calc(10% * var(--ads-shadow-strength)), transparent);
+
+  /* ---- space: one scale, eight steps ------------------------------------ */
+  --ads-space-1: calc(var(--ads-space-unit) * 1 * var(--ads-space-scale));
+  --ads-space-2: calc(var(--ads-space-unit) * 2 * var(--ads-space-scale));
+  --ads-space-3: calc(var(--ads-space-unit) * 3 * var(--ads-space-scale));
+  --ads-space-4: calc(var(--ads-space-unit) * 4 * var(--ads-space-scale));
+  --ads-space-5: calc(var(--ads-space-unit) * 5 * var(--ads-space-scale));
+  --ads-space-6: calc(var(--ads-space-unit) * 6 * var(--ads-space-scale));
+  --ads-space-8: calc(var(--ads-space-unit) * 8 * var(--ads-space-scale));
+  --ads-space-12: calc(var(--ads-space-unit) * 12 * var(--ads-space-scale));
+  --ads-space-16: calc(var(--ads-space-unit) * 16 * var(--ads-space-scale));
+
+  /* ---- type: Tabler's steps, as multiples of the one knob ---------------- */
+  --ads-text-xs: calc(var(--ads-text-base) * 0.714);   /* 10px */
+  --ads-text-sm: calc(var(--ads-text-base) * 0.857);   /* 12px */
+  --ads-text:    var(--ads-text-base);                 /* 14px */
+  --ads-text-md: calc(var(--ads-text-base) * 1.143);   /* 16px */
+  --ads-text-lg: calc(var(--ads-text-base) * 1.429);   /* 20px */
+  --ads-text-xl: calc(var(--ads-text-base) * 1.714);   /* 24px */
+  --ads-line-sm: calc(var(--ads-text-base) * 1.143);   /* 16px: small controls */
+  --ads-line-control: calc(var(--ads-text-base) * 1.429); /* 20px: default controls */
+  --ads-line-heading: calc(var(--ads-text-base) * 2);   /* 28px: a heading's leading */
+
+  /* ---- controls: height follows space and type -------------------------- */
+  --ads-control-pad-y: calc(var(--ads-space-2) + 1px);
+  --ads-control-pad-x: var(--ads-space-4);
+
+  /* Four control heights, all derived, because a design system whose checkbox is
+   * `1.25rem` has a checkbox that ignores the density knob — and the whole argument for
+   * having knobs is that ONE change stays coherent. Every one of these was a literal rem
+   * until it was measured against the reference and found to be a multiple of the line
+   * box plus a step of the space scale:
+   *
+   *   xs  the line box itself         a checkbox, a switch: one line of text, squared off
+   *   sm  + one step                  a chip, a small badge-like thing
+   *   md  + three steps               a small button, a compact segment
+   *   (default) + five steps          an input, a button, a segmented control
+   *
+   * At the default knobs these are 20 / 24 / 32 / 40px, which is what Tabler measures. */
+  --ads-control-xs: var(--ads-line-control);
+  --ads-control-sm: calc(var(--ads-line-control) + var(--ads-space-1));
+  --ads-control-md: calc(var(--ads-line-control) + var(--ads-space-3));
+  --ads-control:    calc(var(--ads-line-control) + var(--ads-space-5));
+  /* a square that holds a control-sized thing with room around it: a modal's close
+     button, a timeline dot, a page-header action */
+  --ads-control-lg: calc(var(--ads-control) + var(--ads-space-4));
+
+  /* The smallest a thing you have to hit may be (WCAG 2.5.8). Deliberately NOT derived
+   * from the space scale, although it equals `--ads-control-sm` at the default knobs:
+   * the density knob is taste, and turning taste down must not make a control too small
+   * for a finger. It is stated in `rem` and not `px` so that a person who enlarges text
+   * gets larger targets with it, which is the same person asking for both. */
+  --ads-tap: 1.5rem;
+}
+
+[data-theme="light"] { color-scheme: light; }
+[data-theme="dark"]  { color-scheme: dark; }
+
+/* One class per intent, read by every toned component. Not on `:root` — these are meant
+ * to be set on an element and inherited by its subtree. */
+.ads-tone-brand   { --ads-tone: var(--ads-brand-ink); --ads-tone-solid: var(--ads-brand);   --ads-tone-tint: var(--ads-brand-tint);   --ads-tone-fill: var(--ads-brand-fill);   --ads-tone-line: var(--ads-brand-line); }
+.ads-tone-success { --ads-tone: var(--ads-success-ink); --ads-tone-solid: var(--ads-success); --ads-tone-tint: var(--ads-success-tint); --ads-tone-fill: var(--ads-success-fill); --ads-tone-line: var(--ads-success-line); }
+.ads-tone-warning { --ads-tone: var(--ads-warning-ink); --ads-tone-solid: var(--ads-warning); --ads-tone-tint: var(--ads-warning-tint); --ads-tone-fill: var(--ads-warning-fill); --ads-tone-line: var(--ads-warning-line); }
+.ads-tone-danger  { --ads-tone: var(--ads-danger-ink); --ads-tone-solid: var(--ads-danger);  --ads-tone-tint: var(--ads-danger-tint);  --ads-tone-fill: var(--ads-danger-fill);  --ads-tone-line: var(--ads-danger-line); }
+.ads-tone-info    { --ads-tone: var(--ads-info-ink); --ads-tone-solid: var(--ads-info);    --ads-tone-tint: var(--ads-info-tint);    --ads-tone-fill: var(--ads-info-fill);    --ads-tone-line: var(--ads-info-line); }
+.ads-tone-neutral { --ads-tone: var(--ads-neutral-ink); --ads-tone-solid: var(--ads-neutral); --ads-tone-tint: var(--ads-neutral-tint); --ads-tone-fill: var(--ads-neutral-fill); --ads-tone-line: var(--ads-neutral-line); }
+/* Reset and document defaults. Depends only on tokens. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* Anything with an intrinsic size of its own — an image, a video, a file input — will
+ * happily be wider than the box it is in, and the page scrolls sideways rather than the
+ * element shrinking. The browser gives `<input type="file">` a width from its default
+ * `size`, which is how one of these ended up 295px wide in a 192px grid cell. */
+img, svg, video, canvas, iframe, input[type="file"] { max-width: 100%; }
+
+/* `[hidden]` is only `display: none` by UA default, so ANY explicit display beats it —
+ * and nearly every component here sets one. Without this, the hidden attribute silently
+ * does nothing: situ's `:show` binder, a server-rendered `hidden`, a script toggling it.
+ * The `!important` is load-bearing; this is the one place it is correct. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  font-family: var(--ads-font);
+  font-size: var(--ads-text);
+  line-height: var(--ads-line-height);
+  color: var(--ads-ink);
+  background: var(--ads-page);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 { margin: 0 0 var(--ads-space-2); font-weight: var(--ads-weight-bold);
+                 line-height: 1.25; color: var(--ads-ink-strong); }
+h1 { font-size: var(--ads-text-xl); }
+h2 { font-size: var(--ads-text-lg); }
+h3 { font-size: var(--ads-text-md); }
+h4 { font-size: var(--ads-text); }
+p  { margin: 0 0 var(--ads-space-3); }
+small { font-size: var(--ads-text-sm); color: var(--ads-ink-muted); }
+code, pre { font-family: var(--ads-font-mono); font-size: var(--ads-text-sm); }
+/* the ink variant, not the knob: a brand chosen to read on white is below the
+ * contrast floor on a dark surface, and a link is the commonest text there is */
+a { color: var(--ads-brand-ink); }
+/* A link that is a name rather than part of a sentence (a row's title in a table, a card's
+ * title, the page header's breadcrumbs or actions) is told apart by being alone in its
+ * place, as a whole list row is (content.css). Underlined, a dense page read as noise
+ * (SourceLab). In running text, help, alerts and everything else, a link keeps its
+ * underline, because colour alone does not set it apart from the words beside it
+ * (WCAG 1.4.1). */
+:is(.ads-table :is(td, th), .ads-card__head, .ads-page-header) a:not(.ads-btn) { text-decoration: none; }
+:is(.ads-table :is(td, th), .ads-card__head, .ads-page-header) a:not(.ads-btn):hover { text-decoration: underline; }
+
+/* One focus treatment for everything, so it cannot be forgotten per component. */
+:focus-visible {
+  outline: 2px solid var(--ads-brand);
+  outline-offset: 2px;
+}
+@media (forced-colors: active) {
+  :focus-visible { outline: 2px solid Highlight; }
+}
+
+/* Print.
+ *
+ * A business application prints: invoices, reports, a filtered list someone takes into a
+ * meeting. The application chrome is not part of that document, and a sidebar down the
+ * left of a PDF is the giveaway that nobody tried it. This is the document's own concern,
+ * not a component's, so it lives here rather than in `parts/`.
+ *
+ * `.ads-no-print` opts anything else out — a toolbar, a filter bar, an action column.
+ */
+@media print {
+  .ads-sidebar,
+  .ads-topbar,
+  .ads-skip,
+  .ads-toasts,
+  .ads-no-print { display: none !important; }
+
+  /* the shell is a two-column grid; on paper there is one column and no viewport */
+  .ads-app { display: block; }
+  .ads-main { overflow: visible; }
+  .ads-container { max-width: none; padding: 0; }
+
+  /* paper has no viewport, so a scroll container would print only what fits in it */
+  .ads-table-scroll, .ads-board, .ads-split > *, .ads-log { overflow: visible; max-height: none; }
+
+  /* ink is expensive and paper has no elevation */
+  body { background: #fff; }
+  .ads-card { border: 0; box-shadow: none; }
+  .ads-card,
+  .ads-table tr { break-inside: avoid; }
+
+  /* a link whose target the reader cannot click is worth spelling out, but only for
+   * real destinations — an in-page anchor or a javascript: handler prints as noise */
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: var(--ads-text-xs); }
+}
+
+/* Every inline icon in the system, and neither declaration is decorative. An `<svg>` is
+ * a flex item like any other, `min-width: auto` resolves to zero for a replaced element
+ * with an intrinsic ratio, and a button in a narrow table cell squashed its icon to
+ * nothing: an 18px-wide "Actions" control with nothing visible inside it. And the reset
+ * at the top caps an SVG at its box, which a table cell's minimum width then ignores:
+ * beside an `ads-full` cell an icon alone shrank to nothing, and an icon before text
+ * spilled into the next cell (SourceLab). Size stays with the SVG's own attributes, which
+ * are the reference's. */
+/* In a line of text an icon sat on the baseline and rode high (SourceLab). Tabler's
+ * `.icon` is `vertical-align: bottom`: at the reference's sizes the icon fills the line
+ * box. A flex row ignores it, which is where most icons are. */
+.ads-icon { flex: none; max-width: none; vertical-align: bottom; }
+
+/* A small thing in a row (a button, an avatar, a chip, a status, a sparkline) reaches into
+ * the row's padding by what it has over the line, centred on the line and never past the
+ * padding, so a one-line row is one height whatever it holds (SourceLab measured 19 to
+ * 44px across one application). Each row publishes `--ads-row-pad`; each small thing
+ * publishes its height as `--ads-own`. One that is taller than line and padding together
+ * makes the row grow, as it must. */
+:is(.ads-table :is(td, th), .ads-list > li, .ads-tree__node, .ads-accordion summary)
+  > :is(.ads-btn--sm, .ads-avatar, .ads-chip, .ads-status, .ads-badge, .ads-sparkline, .ads-switch, .ads-check, input[type="checkbox"], input[type="radio"]),
+:is(.ads-table :is(td, th), .ads-list > li, .ads-tree__node, .ads-accordion summary)
+  > .ads-cluster > :is(.ads-btn--sm, .ads-avatar, .ads-chip, .ads-status, .ads-badge, .ads-sparkline, .ads-switch, .ads-check, input[type="checkbox"], input[type="radio"]) {
+  vertical-align: top;
+  margin-block: max(calc((var(--ads-line-control) - var(--ads-own, var(--ads-line-control))) / 2),
+                    calc(-1 * var(--ads-row-pad)));
+}
+
+/* The application shell: sidebar, main column, page header, page body.
+ *
+ * Tabler specifies the measurements; the mechanism here is ours. Tabler positions the
+ * sidebar fixed and pushes the content with a margin, then uses a :has() rule keyed on a
+ * document attribute to decide which of two navbars to hide — a layout that silently
+ * disappears if the attribute is missing. A two-column grid says the same thing with no
+ * attribute and no hidden dependency.
+ */
+
+.ads-app {
+  display: grid;
+  grid-template-columns: var(--ads-sidebar-width) minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.ads-sidebar {
+  /* Sticky and self-scrolling, because navigation is not page content. Without this the
+     column's height IS the document's: a sidebar taller than the article made every page
+     scroll, and how far a page scrolled depended on which nav groups the reader had left
+     open. Tabler's own is `position: fixed` with its own overflow; sticky is the same
+     behaviour without taking the column out of the grid that sizes it. */
+  position: sticky;
+  inset-block-start: 0;
+  /* A fixed height, not `align-self: start`. Both stop the column inflating the grid row,
+     but shrinking to content leaves the sidebar's surface and edge stopping short of the
+     page — measured against Tabler, 132px where it should be the full 700. */
+  height: 100vh;
+  overflow-y: auto;
+  background: var(--ads-surface);
+  /* an inset shadow, not a border: the edge costs no width, so the grid column and the
+     sidebar agree without anyone subtracting a pixel */
+  box-shadow: inset calc(-1 * var(--ads-border-width)) 0 0 0 var(--ads-line);
+}
+/* No padding: the nav links run edge to edge so an active row is a full-width pill, and
+ * the brand carries its own inset instead. */
+.ads-sidebar__inner { display: flex; flex-direction: column; height: 100%; padding: 0; }
+
+.ads-brand {
+  margin: 0;
+  /* set here, not inherited from an <h1>: the brand is a link in the sidebar, not a heading */
+  font-weight: var(--ads-weight-bold);
+  padding: var(--ads-space-3) var(--ads-space-4);
+  font-size: var(--ads-text-lg);
+  line-height: var(--ads-line-control);
+  color: var(--ads-ink);
+}
+.ads-brand a { display: flex; align-items: center; gap: var(--ads-space-2);
+                color: inherit; text-decoration: none; font-weight: var(--ads-weight-bold); }
+/* The square half of the lockup. It is what survives a folded rail — a name clipped to
+ * "Abil" reads as a bug, and a mark reads as a mark. */
+.ads-brand__mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--ads-control-md);
+  height: var(--ads-control-md);
+  font-size: var(--ads-text);
+  color: var(--ads-brand-fg);
+  background: var(--ads-brand);
+  border-radius: var(--ads-radius);
+}
+/* A real logo brings its own colours and shape: the glyph's tile goes, the image fills the
+ * square. */
+.ads-brand__mark:has(> img, > svg) { background: none; border-radius: 0; }
+.ads-brand__mark > :is(img, svg) { width: 100%; height: 100%; object-fit: contain; }
+
+.ads-nav { flex: 1; }
+/* the 8px inset that makes an active row a pill rather than a full-bleed band */
+.ads-nav__list { list-style: none; margin: 0; padding: 0 var(--ads-space-2); }
+/* A heading inside the menu. Past about eight entries a flat list stops being scannable,
+ * and a business app's sidebar is always past eight. */
+.ads-nav__section {
+  padding: var(--ads-space-4) var(--ads-space-3) var(--ads-space-1);
+  font-size: var(--ads-text-xs);
+  font-weight: var(--ads-weight-medium);
+  letter-spacing: var(--ads-label-tracking);
+  text-transform: var(--ads-label-case);
+  color: var(--ads-ink-muted);
+  /* It is a <summary>, so it is a real control: clicking collapses the group and a
+   * keyboard reaches it. In a column that is a bonus; in a bar it is the whole mechanism
+   * — which is why it takes a control's minimum height and not a heading's. The first one
+   * in the list drops its top padding and was an 18px strip of clickable nothing. */
+  list-style: none;
+  cursor: pointer;
+  min-height: var(--ads-tap);
+  /* a row, so the disclosure chevron below can be pushed to the far end */
+  display: flex;
+  align-items: center;
+}
+/* `:where()` deliberately: this is a DEFAULT, not an assertion. Written as
+ * `.ads-nav__group:first-child .ads-nav__section` it scores 0,3,0 and beats every
+ * layout rule that addresses the section by class — so the bar layout's own padding lost
+ * to it and the first menu in the row sat eight pixels above the other four. Wrapping the
+ * qualifier in `:where()` drops it to 0,1,0, which is what a default should weigh. */
+:where(.ads-nav__group:first-child) .ads-nav__section { padding-top: 0; }
+.ads-nav__section::-webkit-details-marker { display: none; }
+/* A collapsed group has to look openable, or it reads as a dead heading — which is exactly
+ * what these were until the sidebar stopped opening every group at once. Same chevron the
+ * accordion draws, at the small end of the scale: the control's own state, not content, so
+ * there is nothing in the markup to flip. */
+.ads-nav__section::after {
+  content: "";
+  margin-inline-start: auto;
+  width: .375rem;
+  height: .375rem;
+  border: 1.5px solid currentColor;
+  border-inline-start: 0;
+  border-block-start: 0;
+  rotate: 45deg;
+  transition: rotate .15s;
+  opacity: .5;
+}
+.ads-nav__group > details[open] > .ads-nav__section::after { rotate: 225deg; }
+.ads-nav__section:hover { color: var(--ads-ink); }
+@media (prefers-reduced-motion: reduce) { .ads-nav__section::after { transition: none; } }
+/* folded, the heading is a divider and a chevron on a 1px line is noise */
+.ads-app--folded .ads-sidebar:not(:hover):not(:focus-within) .ads-nav__section::after {
+  display: none;
+}
+.ads-nav__sub { list-style: none; margin: 0; padding: 0; }
+
+.ads-nav__link {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-space-3);
+  color: var(--ads-ink);
+  text-decoration: none;
+  border-radius: var(--ads-radius);
+  font-size: var(--ads-text);
+}
+.ads-nav__icon {
+  display: inline-flex;
+  flex: none;
+  width: var(--ads-icon-size);
+  height: var(--ads-icon-size);
+  color: var(--ads-ink-muted);
+}
+.ads-nav__icon :is(svg, img) { width: 100%; height: 100%; }
+.ads-nav__icon img { object-fit: contain; border-radius: var(--ads-radius-xs); }
+/* An entry with no icon and no image is a label alone, which a folded rail cannot show:
+ * there it gets the label's initial. Open, the label is enough. */
+.ads-nav__initial { display: none; }
+.ads-app--folded .ads-sidebar:not(:hover):not(:focus-within) .ads-nav__initial {
+  display: grid;
+  place-items: center;
+  font-size: var(--ads-text-xs);
+  font-weight: var(--ads-weight-bold);
+  color: var(--ads-ink-muted);
+  background: var(--ads-sunken-strong);
+  border-radius: var(--ads-radius-xs);
+}
+.ads-nav__link:hover { background: var(--ads-sunken); }
+.ads-nav__link[aria-current] {
+  color: var(--ads-ink);
+  background: var(--ads-brand-wash);
+  font-weight: var(--ads-weight-medium);
+}
+
+.ads-main { display: flex; flex-direction: column; min-width: 0; }
+/* `<main>`: the page's header and its body. A column that takes the height the top bar
+ * leaves, as the body took it before the header joined it. */
+.ads-page { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+.ads-container { width: 100%; max-width: var(--ads-container); margin-inline: auto; padding-inline: var(--ads-space-4); }
+
+.ads-page-header { padding-block: 0; margin-block: var(--ads-space-6) 0; }
+.ads-pretitle {
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-medium);
+  color: var(--ads-ink-muted);
+  text-transform: var(--ads-label-case);
+  letter-spacing: var(--ads-label-tracking);
+}
+.ads-page-title {
+  margin: 0;
+  font-size: var(--ads-text-lg);
+  line-height: calc(var(--ads-text-base) * 2);
+  font-weight: var(--ads-weight-bold);
+  color: var(--ads-ink);
+}
+.ads-page-body {
+  flex: 1;
+  padding-block: 0;
+  margin-block: var(--ads-space-6);
+  /* A flex item's cross-axis min-size is `auto`, i.e. min-content, so a child that
+   * scrolls its own overflow (`.ads-board`, `.ads-table-scroll`) still widened THIS box
+   * to fit its content — and the page scrolled sideways while the component that was
+   * supposed to absorb it sat there with an unused scrollbar. */
+  min-width: 0;
+}
+
+/* The other half of `.ads-split--fill` (see `layout.css`): the main column is exactly the
+ * viewport, and the page body takes what the top bar and the page header leave. Only where
+ * the sidebar is a column of its own and the viewport is tall enough to give a pane a useful
+ * height; below either, the page scrolls as a document.
+ *
+ * `overflow-y: auto` is for the one case the two queries disagree: a wide window at 200% text
+ * is tall and wide enough to bound the column, while the split's container query, in rem,
+ * says there is no room to fill. The column then scrolls as the page would have. */
+@media (min-width: 48em) and (min-height: 30em) {
+  .ads-app:has(.ads-split--fill) { min-height: 100dvh; }
+  .ads-main:has(.ads-split--fill) { height: 100dvh; overflow-y: auto; }
+  .ads-page:has(.ads-split--fill) { min-height: 0; }
+  .ads-page-body:has(.ads-split--fill) { display: flex; flex-direction: column; min-height: 0; }
+}
+/* The page body is the container `.ads-split--fill` measures, and under the same two
+ * conditions every box between it and the split becomes a column that hands its height on.
+ * A split is not part of the chain (it is a row), and nor is a pane (the split sizes it). */
+.ads-page-body:has(.ads-split--fill) { container-type: inline-size; }
+@container (width >= 50rem) {
+  @media (min-height: 30em) {
+    .ads-container:has(.ads-split--fill),
+    .ads-container :has(.ads-split--fill):not(.ads-split) {
+      display: flex; flex-direction: column; min-height: 0;
+    }
+    .ads-container:has(.ads-split--fill),
+    .ads-container :has(.ads-split--fill):not(.ads-split, .ads-split > *) { flex: 1; }
+  }
+}
+
+/* ---- Layouts -------------------------------------------------------------------------
+ *
+ * One application, four shapes. Which one a product uses is a decision taken once, so it
+ * is a class on the shell rather than a knob — but the measurements it moves are all
+ * knobs, so a folded sidebar in a dense theme is still coherent.
+ *
+ * All four share the same markup. That is the constraint that makes them worth having:
+ * a page cannot be written "for the folded layout", and switching costs one class.
+ */
+
+/* Folded: icons only, expanding over the content on hover or keyboard focus.
+ *
+ * Two wrong versions before this one, and both are worth recording because they are the
+ * two obvious ideas.
+ *
+ * `opacity: 0` on the label leaves it occupying its width inside the flex row, so the
+ * icon gets squeezed into whatever is left of the rail — invisible, pushed around by
+ * ghosts. Clipping the whole sidebar with `overflow: hidden` instead fixes the squeeze
+ * and cuts every label mid-word, which reads as a rendering bug rather than a design.
+ *
+ * `display: none` would do it, and takes the label out of the ACCESSIBILITY TREE with it:
+ * the link is then an icon with `aria-hidden` on its svg and no accessible name at all.
+ * The visually-hidden pattern is the one that satisfies both — out of the layout, still
+ * announced — and it is why the labels here are positioned rather than hidden.
+ */
+.ads-app--folded { grid-template-columns: var(--ads-sidebar-folded) minmax(0, 1fr); }
+.ads-app--folded .ads-sidebar {
+  position: relative;
+  z-index: 20;
+  width: var(--ads-sidebar-folded);
+  transition: width .15s ease-out;
+}
+.ads-app--folded .ads-sidebar:hover,
+.ads-app--folded .ads-sidebar:focus-within {
+  width: var(--ads-sidebar-width);
+  box-shadow: var(--ads-shadow);
+}
+
+/* everything below applies only while it is actually folded */
+.ads-app--folded .ads-sidebar:not(:hover):not(:focus-within) :is(.ads-nav__link, .ads-brand a) > :not(.ads-nav__icon):not(.ads-brand__mark) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.ads-app--folded .ads-sidebar:not(:hover):not(:focus-within) :is(.ads-nav__link, .ads-brand a) {
+  justify-content: center;
+  padding-inline: 0;
+}
+/* A section heading clipped to four characters reads as a mistake, so folded it becomes
+ * what it actually is — a divider. Still `text-indent` rather than `display: none`,
+ * because the heading is the only thing naming that group to a screen reader. */
+.ads-app--folded .ads-sidebar:not(:hover):not(:focus-within) .ads-nav__section {
+  height: var(--ads-border-width);
+  /* the open heading's tap-target floor, which would otherwise win over `height` and leave
+   * a 24px grey block where a hairline belongs */
+  min-height: 0;
+  margin: var(--ads-space-3) var(--ads-space-3) var(--ads-space-2);
+  padding: 0;
+  overflow: hidden;
+  text-indent: -999em;
+  background: var(--ads-line-soft);
+}
+.ads-app--folded .ads-sidebar:not(:hover):not(:focus-within) .ads-nav__section:first-child { margin-top: 0; }
+
+/* Sidebar on the trailing edge. `order` rather than a second markup order, so the DOM
+ * still reads navigation-then-content — which is what a screen reader follows. */
+.ads-app--right { grid-template-columns: minmax(0, 1fr) var(--ads-sidebar-width); }
+.ads-app--right .ads-sidebar {
+  order: 2;
+  box-shadow: inset var(--ads-border-width) 0 0 0 var(--ads-line);
+}
+
+/* Horizontal: no sidebar column at all, the same nav laid out as a bar under the top bar.
+ * For an application with few enough destinations that a column is wasted width. */
+/* Two rows, the bar its own height: on a page shorter than the window, a grid with no rows
+ * declared shared the spare height and the bar grew 190px (SourceLab). */
+.ads-app--horizontal { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+/* one column, so source order does the stacking: the nav bar, then the main column with
+ * its top bar and content. No grid-row anywhere — the topbar is inside `.ads-main`, not a
+ * child of the shell, and a rule addressing it as one would be a rule that does nothing. */
+.ads-app--horizontal .ads-sidebar {
+  box-shadow: inset 0 calc(-1 * var(--ads-border-width)) 0 0 var(--ads-line);
+  /* a bar, not a column: it is as tall as its own content and scrolls nothing */
+  position: static;
+  height: auto;
+  overflow: visible;
+}
+.ads-app--horizontal .ads-sidebar__inner {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--ads-space-4);
+  width: 100%;
+  max-width: var(--ads-container);
+  margin-inline: auto;
+  padding-inline: var(--ads-space-4);
+}
+/* One row, and it does NOT scroll: the row holds five section menus, not twenty links, so
+ * it fits. It mattered that it stopped scrolling — a scroll container clips its children's
+ * overflow on both axes, so an absolutely-positioned dropdown inside one is invisible. */
+.ads-app--horizontal .ads-nav__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ads-space-1);
+  padding: 0;
+}
+.ads-app--horizontal .ads-nav__link { white-space: nowrap; }
+/* A bar shows five sections, not twenty destinations. The group's own list becomes the
+ * menu it was already grouping — no second markup, and nothing to keep in step. */
+.ads-app--horizontal .ads-nav__group { position: relative; }
+.ads-app--horizontal .ads-nav__group > details { position: static; }
+.ads-app--horizontal .ads-nav__section {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-space-2) var(--ads-space-3);
+  font-size: var(--ads-text);
+  font-weight: var(--ads-weight-normal);
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--ads-ink);
+  border-radius: var(--ads-radius);
+  white-space: nowrap;
+}
+.ads-app--horizontal .ads-nav__section:hover { background: var(--ads-sunken); }
+.ads-app--horizontal .ads-nav__section::after {
+  content: "";
+  width: .4em; height: .4em;
+  border: 2px solid currentColor;
+  border-inline-start: 0; border-block-start: 0;
+  rotate: 45deg;
+  translate: 0 -.1em;
+  color: var(--ads-ink-muted);
+}
+.ads-app--horizontal .ads-nav__sub {
+  position: absolute;
+  inset-block-start: 100%;
+  inset-inline-start: 0;
+  z-index: 30;
+  min-width: 14rem;
+  padding: var(--ads-space-1) 0;
+  background: var(--ads-raised);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-overlay);
+}
+/* closed by default in a bar: the group is a menu, and a menu that is open is a list */
+.ads-app--horizontal .ads-nav__group > details:not([open]) > .ads-nav__sub { display: none; }
+.ads-app--horizontal .ads-nav__sub .ads-nav__link { border-radius: 0; }
+.ads-app--horizontal .ads-brand { flex: none; padding-inline: 0; }
+.ads-app--horizontal .ads-nav { min-width: 0; }
+@media (max-width: 47.99em) { .ads-app--horizontal .ads-sidebar__inner { overflow-x: auto; } }
+
+/* The container is already a knob (`--ads-container`); these are the two ends of it. */
+.ads-container--fluid { max-width: none; }
+.ads-container--narrow { max-width: 48rem; }
+
+/* Below the breakpoint there is no room for a sidebar column in ANY of these shapes, so
+ * the collapse is stated once, for all of them, and last — a variant that redefined the
+ * columns after it would keep a 56px rail on a phone and push the content off the side.
+ * Which is exactly what the folded layout did until this rule moved down here. */
+@media (max-width: 47.99em) {
+  .ads-app,
+  .ads-app--folded,
+  .ads-app--right,
+  .ads-app--horizontal { grid-template-columns: minmax(0, 1fr); grid-template-rows: none; }
+  /* ...but the bar is in the flow: a row of its own height, the page under it, so a short
+     page doesn't share the window's height with the bar (SBE, at 390px). */
+  .ads-app--horizontal { grid-template-rows: auto 1fr; }
+  .ads-app--folded .ads-sidebar { width: auto; }
+  .ads-app--right .ads-sidebar { order: 0; }
+
+  /* ...and the sidebar leaves the flow for a panel that slides in from the start edge. In
+   * the flow, sticky and a viewport tall, it was the whole first screen of every page: a
+   * phone opened on the menu and nothing else. Open is the menu button's `aria-expanded`,
+   * so the panel cannot be open without the button saying so. The bar layout keeps its
+   * scrolling row. */
+  .ads-app:not(.ads-app--horizontal) .ads-sidebar {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 30;
+    width: min(var(--ads-sidebar-width), 85vw);
+    height: auto;
+    box-shadow: var(--ads-shadow-lg);
+    transition: translate .2s ease-out;
+  }
+  .ads-app:not(.ads-app--horizontal):not(:has([data-ads-sidebar][aria-expanded="true"])) .ads-sidebar {
+    translate: -100% 0;
+    visibility: hidden;
+  }
+  .ads-app:not(.ads-app--horizontal):not(:has([data-ads-sidebar][aria-expanded="true"])) .ads-sidebar:dir(rtl) {
+    translate: 100% 0;
+  }
+  /* the backdrop: a click on it lands outside the sidebar, which is what closes it */
+  .ads-app:not(.ads-app--horizontal):has([data-ads-sidebar][aria-expanded="true"])::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 20;
+    background: color-mix(in srgb, var(--ads-n-950) 45%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) { .ads-sidebar { transition: none; } }
+
+/* The menu button in the top bar. Wide, it folds the sidebar to a rail and back; narrow, it
+ * opens the panel above. A bar has no sidebar to fold. */
+.ads-topbar__menu { flex: none; }
+.ads-app--horizontal .ads-topbar__menu { display: none; }
+/* Alert — an opaque wash over the surface, with the intent colour carrying the text.
+ * A translucent tint would show whatever sits behind it; these sit on cards and pages
+ * alike, so the mix resolves against the surface instead.
+ *
+ * The intent comes from `.ads-tone-danger` & co., not from an `--danger` modifier here:
+ * see the tone block in derive.css. Default (no tone class) is brand. */
+.ads-alert {
+  display: flex;
+  flex-direction: row;
+  gap: var(--ads-space-4);
+  padding: var(--ads-space-3) var(--ads-space-4);
+  margin-bottom: var(--ads-space-4);
+  border: var(--ads-border-width) solid var(--ads-tone-line);
+  border-radius: var(--ads-radius);
+  color: var(--ads-tone);
+  background: var(--ads-tone-fill);
+}
+.ads-alert__heading {
+  margin: 0 0 var(--ads-space-1);
+  font-size: var(--ads-text);
+  line-height: var(--ads-line-control);
+  font-weight: var(--ads-weight-medium);
+  color: inherit;
+}
+.ads-alert__desc { color: var(--ads-ink-muted); font-size: var(--ads-text); }
+/* Button. Tokens only — no literal colour, radius, space or size below. */
+
+.ads-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-control-pad-y) var(--ads-control-pad-x);
+  font: inherit;
+  font-size: var(--ads-text);
+  font-weight: var(--ads-weight-medium);
+  line-height: var(--ads-line-control);
+  /* a label that breaks makes a two-line button beside one-line ones (libera-place) */
+  white-space: nowrap;
+  color: var(--ads-ink);
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-xs);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color .12s, border-color .12s;
+}
+.ads-btn:hover { background: var(--ads-sunken); }
+.ads-btn:active { transform: translateY(1px); }
+.ads-btn:disabled, .ads-btn[aria-disabled="true"] {
+  color: var(--ads-ink-muted);
+  background: var(--ads-sunken);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.ads-btn--primary {
+  color: var(--ads-brand-fg);
+  background: var(--ads-brand);
+  border-color: transparent;
+}
+.ads-btn--primary:hover { background: var(--ads-brand-hover); border-color: var(--ads-brand-hover); }
+.ads-btn--primary:active { background: var(--ads-brand-active); }
+
+.ads-btn--danger {
+  color: var(--ads-brand-fg);
+  background: var(--ads-danger-solid);
+  border-color: transparent;
+}
+.ads-btn--danger:hover { background: var(--ads-danger-hover); border-color: var(--ads-danger-hover); }
+
+.ads-btn--ghost,
+.ads-btn--mark {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--ads-ink-muted);
+}
+.ads-btn--ghost:hover { background: var(--ads-brand-tint); color: var(--ads-brand); }
+
+.ads-btn--sm {
+  --ads-own: calc(2 * (var(--ads-space-1) + 1px) + var(--ads-line-sm) + 2 * var(--ads-border-width));
+  padding: calc(var(--ads-space-1) + 1px) var(--ads-space-2);
+  font-size: var(--ads-text-sm);
+  line-height: var(--ads-line-sm);
+  border-radius: var(--ads-radius-sm);
+}
+.ads-btn--pill { border-radius: var(--ads-radius-pill); }
+
+/* Button group — buttons that act as one control: a toolbar's alignment set, a paging
+ * pair, a split action. They share edges, so only the group's outer corners are round and
+ * the border between two of them is one line rather than two.
+ *
+ * Not a segmented control, which looks similar and is not the same thing: a segment picks
+ * a view and exactly one is always chosen, while these are separate actions that happen to
+ * sit together. Using one for the other is the commonest reason a toolbar reads wrong.
+ */
+/* `wrap`, because a row of joined buttons is still a row of buttons: three of them with
+   an icon and a label are 355px wide, and a 320px screen has to put them somewhere.
+   The group used to fit only because every icon inside it was being squashed to zero
+   width — see `.ads-icon`. The seam between a wrapped row and the one above it is
+   cosmetic; a button off the side of the screen is not. */
+.ads-btn-group { display: inline-flex; flex-wrap: wrap; max-width: 100%; }
+.ads-btn-group > .ads-btn { border-radius: 0; }
+.ads-btn-group > .ads-btn:first-child { border-start-start-radius: var(--ads-radius); border-end-start-radius: var(--ads-radius); }
+.ads-btn-group > .ads-btn:last-child { border-start-end-radius: var(--ads-radius); border-end-end-radius: var(--ads-radius); }
+/* the shared edge: pull the next button onto the previous one's border */
+.ads-btn-group > .ads-btn + .ads-btn { margin-inline-start: calc(-1 * var(--ads-border-width)); }
+/* A toggle inside a group. `.is-active` used to do this and it set `z-index` and nothing
+   else — the chosen button in a view switcher looked exactly like the two beside it.
+   Keyed on `aria-pressed`, so the state a screen reader reads and the state an eye reads
+   are the same attribute. */
+.ads-btn[aria-pressed="true"] { background: var(--ads-sunken); color: var(--ads-ink-strong); }
+/* a hovered or pressed button has to be above its neighbour, or its own border is covered */
+.ads-btn-group > .ads-btn:hover,
+.ads-btn-group > .ads-btn:focus-visible,
+.ads-btn-group > .ads-btn[aria-pressed="true"] { position: relative; z-index: 1; }
+
+/* Mark — a toggle that marks the thing it sits on (a star, a flag, a pin), as opposed to
+ * choosing a mode. The pressed box above is right for a mode: the chosen view in a switcher.
+ * A mark's convention is the glyph itself, outline when off and filled when on, so pressed
+ * changes the glyph and not the box.
+ *
+ * The colour is the tone, so one modifier serves every kind of mark: `ads-tone-warning` on a
+ * star, `ads-tone-danger` on a flag, nothing on a pin. The glyph has to be an outline icon for
+ * the fill to say anything: a `★` is filled either way, and a state carried by colour alone
+ * is not carried (WCAG 1.4.1). `fill` from CSS overrides an icon's `fill="none"`. */
+.ads-btn--mark:hover { background: var(--ads-tone-tint); color: var(--ads-tone); }
+.ads-btn--mark[aria-pressed="true"] { background: transparent; color: var(--ads-tone); }
+.ads-btn--mark[aria-pressed="true"] svg { fill: currentColor; }
+/* Card, and the surfaces that sit on it. */
+
+.ads-card {
+  /* the containing block for anything a card positions on itself — the ribbon, a corner
+   * action, a status strip. Without it `inset-inline-end: -4px` resolves against the
+   * viewport and the decoration lands off the side of the page. */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line-soft);
+  border-radius: var(--ads-radius-lg);
+  box-shadow: var(--ads-shadow-xs);
+}
+.ads-card__head,
+.ads-card__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-5);
+}
+.ads-card__head {
+  /* Heads of one height, so the content of cards in a grid starts on one line: every head
+   * is at least a title head. */
+  min-height: calc(var(--ads-space-5) * 2 + var(--ads-text-base) * 1.714 + var(--ads-border-width));
+  /* a tab list in a card head joins the card's body, not the page */
+  --ads-tab-bg: var(--ads-surface);
+  border-bottom: var(--ads-border-width) solid var(--ads-line-soft);
+  border-radius: var(--ads-radius-lg) var(--ads-radius-lg) 0 0;
+}
+.ads-card__foot { border-top: var(--ads-border-width) solid var(--ads-line-soft); margin-top: auto; }
+.ads-card__title {
+  margin: 0;
+  font-size: var(--ads-text-md);
+  line-height: calc(var(--ads-text-base) * 1.714);
+  font-weight: var(--ads-weight-medium);
+  color: var(--ads-ink-strong);
+}
+.ads-card__body { padding: var(--ads-space-5); }
+
+/* the headline figure on a stat card; tabular so a row of them, or one that updates, does
+ * not shift with each digit */
+.ads-metric { font-family: var(--ads-font-figures); font-size: var(--ads-text-xl);
+              font-weight: var(--ads-weight-bold); line-height: 1.2;
+              font-variant-numeric: tabular-nums; }
+
+
+.ads-card--sm .ads-card__body { padding: var(--ads-space-3) var(--ads-space-4); }
+.ads-card--lg .ads-card__body { padding: var(--ads-space-8); }
+.ads-card__subtitle { margin: var(--ads-space-1) 0 0; font-size: var(--ads-text-sm); color: var(--ads-ink-muted); }
+/* A table that runs edge to edge inside a card, its outer cells lined up with the card's
+ * padding. Bare or in its scroll wrapper, which is how a table should arrive: a rule that
+ * only matched the bare one left 16px under the last row and the first column out of line
+ * with the card's title. */
+:is(.ads-card, .ads-card > .ads-table-scroll) > .ads-table { margin-bottom: 0; }
+:is(.ads-card, .ads-card > .ads-table-scroll) > .ads-table :is(th, td):first-child { padding-inline-start: var(--ads-space-5); }
+:is(.ads-card, .ads-card > .ads-table-scroll) > .ads-table :is(th, td):last-child { padding-inline-end: var(--ads-space-5); }
+
+/* Corners. The card cannot clip its content (a dropdown inside it would be cut off), so
+ * whatever paints edge to edge at its top or bottom rounds itself to the card's inner
+ * radius: a table header or a hovered row would otherwise draw a square corner over a
+ * round one. The scroll wrapper already clips, so it takes the radius; a list rounds its
+ * end rows. */
+.ads-card > .ads-table-scroll:first-child,
+.ads-card > .ads-list:first-child > li:first-child {
+  border-start-start-radius: calc(var(--ads-radius-lg) - var(--ads-border-width));
+  border-start-end-radius: calc(var(--ads-radius-lg) - var(--ads-border-width));
+}
+.ads-card > .ads-table-scroll:last-child,
+.ads-card > .ads-list:last-child > li:last-child {
+  border-end-start-radius: calc(var(--ads-radius-lg) - var(--ads-border-width));
+  border-end-end-radius: calc(var(--ads-radius-lg) - var(--ads-border-width));
+}
+
+/* Ribbon — a corner flag on a card: "recommended", "new", a count. Absolutely positioned,
+ * so its card needs `position: relative`; `.ads-card` already has it.
+ *
+ * Tabler's: 0.75rem from the top, hanging 0.25rem past the trailing edge, with the fold
+ * drawn underneath in a darker shade of the same colour. */
+.ads-ribbon {
+  position: absolute;
+  inset-block-start: var(--ads-space-3);
+  inset-inline-end: -.25rem;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--ads-control-md);
+  padding: var(--ads-space-1) var(--ads-space-3);
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-bold);
+  line-height: 1;
+  text-transform: var(--ads-label-case);
+  color: var(--ads-brand-fg);
+  background: var(--ads-tone);
+  border-radius: var(--ads-radius) 0 var(--ads-radius) var(--ads-radius);
+}
+/* the card's own padding absorbs the overhang, so a ribbon never reaches the page edge */
+/* A ribbon sits ON the card's first content, so the content has to make room for it. Done
+ * here rather than with a modifier at the call site: the card already knows whether it has
+ * one, and a class you must remember to pair with another is a class you will forget. */
+/* A head that holds tabs gives up its own bottom rule and its bottom padding: the tab
+ * list already draws a rule at exactly that line, and two of them a few pixels apart is
+ * the giveaway. The active tab then erases that one line and joins the body below. */
+.ads-card__head:has(> .ads-tabs) { border-bottom: 0; padding-bottom: 0; align-items: flex-end; }
+/* A head holding a control gives back the control's extra height from its padding, so it
+ * comes out the height of a title head (see the minimum above). */
+.ads-card__head:has(.ads-btn, .ads-segmented, .ads-input, .ads-select):not(:has(> .ads-tabs)) {
+  padding-block: calc(var(--ads-space-5) - (var(--ads-control) - var(--ads-text-base) * 1.714) / 2);
+}
+
+.ads-card:has(> .ads-ribbon) > .ads-card__head,
+.ads-card:has(> .ads-ribbon) > .ads-card__body:first-child { padding-inline-end: var(--ads-space-16); }
+/* the fold: a triangle under the trailing edge, in a darkened copy of the ribbon colour */
+.ads-ribbon::before {
+  content: "";
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-end: 100%;
+  border: .125rem solid color-mix(in oklab, var(--ads-tone) 70%, black);
+  border-inline-end-color: transparent;
+  border-block-start-color: transparent;
+}
+/* Blocks that hold content rather than take input: empty state, definition grid,
+ * timeline, list group, and the two separators that keep turning up. */
+
+/* The screen nobody designs until it ships. It says what to do next, not just that
+ * there is nothing. */
+/* Tabler's: a centred column filling its container, 1rem of padding that opens up to 3rem
+ * once there is room. `height: 100%` is what makes it centre inside a card or a page
+ * rather than hugging the top of whatever it is dropped into. */
+.ads-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--ads-space-4);
+  text-align: center;
+}
+@media (min-width: 48em) { .ads-empty { padding: var(--ads-space-12); } }
+.ads-empty__header { font-size: calc(var(--ads-text-base) * 3); font-weight: var(--ads-weight-bold);
+                     line-height: 1; color: var(--ads-ink-muted); margin-bottom: var(--ads-space-4); }
+.ads-empty__icon { display: inline-grid; place-items: center;
+                   width: var(--ads-space-16); height: var(--ads-space-16);
+                   margin-bottom: var(--ads-space-4); border-radius: var(--ads-radius-pill);
+                   background: var(--ads-sunken); color: var(--ads-ink-muted); }
+.ads-empty__icon > svg { width: calc(var(--ads-icon-size) * 1.6); height: calc(var(--ads-icon-size) * 1.6); }
+.ads-empty__title { margin: 0 0 var(--ads-space-2); font-size: var(--ads-text-lg);
+                    line-height: var(--ads-line-heading);
+                    font-weight: var(--ads-weight-bold); color: var(--ads-ink); }
+.ads-empty__subtitle { margin: 0 0 var(--ads-space-2); color: var(--ads-ink); }
+
+/* Label-and-value pairs that reflow: the shape a detail panel always wants. */
+.ads-datagrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--ads-space-5);
+}
+.ads-datagrid__title {
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-medium);
+  text-transform: var(--ads-label-case);
+  letter-spacing: var(--ads-label-tracking);
+  color: var(--ads-ink-muted);
+  margin-bottom: var(--ads-space-1);
+}
+
+/* Activity and audit trails. */
+.ads-timeline { list-style: none; margin: 0 0 var(--ads-space-4); padding: 0; display: flex;
+                flex-direction: column; gap: var(--ads-space-4); }
+.ads-timeline__event { position: relative; padding-inline-start: calc(var(--ads-control) + var(--ads-space-4)); }
+.ads-timeline__event::before {
+  content: "";
+  position: absolute;
+  /* the centre of the 2.5rem dot, so the connector runs through it */
+  inset-inline-start: calc(var(--ads-control) / 2 - 1px);
+  inset-block: var(--ads-control) calc(-1 * var(--ads-space-4));
+  width: 2px;
+  background: var(--ads-line);
+}
+.ads-timeline__event:last-child::before { display: none; }
+.ads-timeline__icon {
+  position: absolute;
+  inset-inline-start: 0;
+  /* Flush with the top of the event's text. This was `--ads-space-2`, correct when the
+   * dot was a 1.5rem circle beside a single line and eight pixels too low from the moment
+   * it became a 2.5rem square — which also put the connector's start inside it. */
+  inset-block-start: 0;
+  display: grid;
+  place-items: center;
+  width: var(--ads-control);
+  height: var(--ads-control);
+  border-radius: var(--ads-radius);
+  background: var(--ads-sunken);
+  color: var(--ads-ink-muted);
+}
+/* a toned event colours its own dot; an untoned one is the quiet default above */
+.ads-timeline__icon.ads-tone-brand, .ads-timeline__icon.ads-tone-success,
+.ads-timeline__icon.ads-tone-warning, .ads-timeline__icon.ads-tone-danger,
+.ads-timeline__icon.ads-tone-info, .ads-timeline__icon.ads-tone-neutral {
+  background: var(--ads-tone-tint);
+  color: var(--ads-tone);
+}
+
+/* A list that is a list, not a table. */
+.ads-list { list-style: none; margin: 0; padding: 0; }
+.ads-list > li {
+  --ads-row-pad: calc(var(--ads-space-3) * var(--ads-row-scale));
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  padding: var(--ads-row-pad) var(--ads-space-5);
+  /* one body line at least, so a row of smaller text (a hash in monospace) is not shorter */
+  min-height: calc(var(--ads-line-control) + 2 * var(--ads-row-pad));
+  border-top: var(--ads-border-width) solid var(--ads-line-soft);
+}
+.ads-list > li:first-child { border-top: 0; }
+/* Columns: each row a subgrid of the list, so cells line up across rows; after status
+ * chips of different widths the text of each row starts in one place. One leading cell,
+ * the row's main cell marked `.ads-fill`, and up to four trailing cells. Cells align on
+ * their first line. On a phone the leading cell takes a line of its own, above the main
+ * cell and whatever trails it. */
+.ads-list--columns { display: grid; grid-template-columns: minmax(0, 1fr) repeat(4, auto); }
+.ads-list--columns > li {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  column-gap: 0;
+  row-gap: var(--ads-space-1);
+  align-items: baseline;
+}
+.ads-list--columns > li > * + * { margin-inline-start: var(--ads-space-3); }
+/* a ghost button at the end gives back its padding, so its label lines up with the edge */
+.ads-list--columns > li > .ads-btn--ghost:last-child { margin-inline-end: calc(-1 * var(--ads-control-pad-x)); }
+@media (width < 48em) {
+  .ads-list--columns > li > :first-child:not(.ads-fill) { grid-column: 1 / -1; justify-self: start; }
+  .ads-list--columns > li > :first-child + .ads-fill { margin-inline-start: 0; }
+}
+@media (min-width: 48em) {
+  .ads-list--columns { grid-template-columns: [lead] auto [main] minmax(0, 1fr) [trail] repeat(4, auto); }
+  .ads-list--columns > li > .ads-fill { grid-column: main; }
+}
+/* A list inside a card body rather than running edge to edge: it has the body's padding
+ * already, so it gives back its own INLINE padding and keeps only the rules between rows.
+ *
+ * It gives back nothing vertically. That was `:first-child { padding-block-start: 0 }` once,
+ * which cropped the first row's hover tint at its own cap height, and then a negative margin
+ * on the list, which did not crop anything but ate the gap above it — so a search box sitting
+ * over a mail list had its bottom edge touching the first message. A row's block padding is
+ * the row's; whatever sits above the list is the stack's business. */
+.ads-list--plain > li { padding-inline: 0; align-items: flex-start; gap: var(--ads-space-5); }
+/* ...except a row you can pick, which keeps its inline padding: the hover tint, the
+ * selected tint and the 3px marker all need somewhere to land, and a marker sitting
+ * underneath the row's first child is not a marker. */
+.ads-list--plain > li:has(> a, > button:not(.ads-btn)) { padding-inline: var(--ads-space-5); }
+/* A row that is entirely a link is still a row: it takes the list's own ink, not the
+ * link colour. Blue-and-underlined is for a link INSIDE a sentence, where it has to be
+ * told apart from the words either side; a whole row has nothing to be told apart from,
+ * and colouring it reads as a page full of links rather than a list of things. */
+/* ...and a row that selects something WITHOUT navigating is a <button>, not a link — which a
+ * client-side master-detail pane always is. It needs the browser's button chrome removed on top
+ * of the same treatment; found by porting a mail client onto this vocabulary. */
+/* `:not(.ads-btn)` is what tells the two apart. A bare <button> IS the row and takes the
+ * width; an `.ads-btn` is an ACTION sitting in the row — a star, a delete — and must keep
+ * its own size. Without the guard every action button in a list row got `flex: 1` and ate
+ * half of it, which the mail port showed the moment a row had both. */
+.ads-list > li > a,
+.ads-list > li > button:not(.ads-btn) { color: inherit; text-decoration: none; }
+.ads-list > li > button:not(.ads-btn) {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  text-align: start;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+/* Only a row you can pick lights up: a static row that highlights under the pointer is
+ * telling the reader it does something, and it does not. The `:not()` is load-bearing —
+ * `:has(> a, > button)` outweighs the selected rule below, so without it hover paints
+ * over the one answer the list exists to give: which row am I looking at. */
+.ads-list > li:hover:has(> a, > button:not(.ads-btn)):not(:has([aria-current])) {
+  background: var(--ads-sunken);
+}
+/* The selected row of a list-detail pair. `aria-current` rather than a class, because the
+ * thing that makes it selected is exactly what a screen reader needs to be told. */
+.ads-list > li:has([aria-current]) {
+  background: var(--ads-brand-fill);
+  box-shadow: inset 3px 0 0 0 var(--ads-brand);
+}
+
+/* Separators. `divide` puts a rule between siblings without a class on each one; `rule`
+ * is the labelled horizontal rule that keeps appearing in forms and settings panels. */
+.ads-divide > * + * { border-top: var(--ads-border-width) solid var(--ads-line-soft);
+                      padding-top: var(--ads-space-3); margin-top: var(--ads-space-3); }
+.ads-rule {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  margin: var(--ads-space-4) 0;
+  font-size: var(--ads-text-sm);
+  color: var(--ads-ink-muted);
+}
+.ads-rule::before, .ads-rule::after { content: ""; flex: 1; height: var(--ads-border-width); background: var(--ads-line); }
+
+/* A small label above a figure. */
+.ads-subheader { font-size: var(--ads-text-sm); font-weight: var(--ads-weight-medium);
+                 text-transform: var(--ads-label-case); letter-spacing: var(--ads-label-tracking); color: var(--ads-ink-muted); }
+
+/* Disclosure: a <details> that looks like part of the page rather than a browser widget. */
+
+/* Accordion — `<details>`, so it works with JavaScript off, survives a server render with
+ * one section open, and is keyboard-operable without a roving tabindex to get wrong.
+ *
+ * Give every `<details>` the same `name` and the browser makes them exclusive (only one
+ * open at a time) with no code at all. Leave the name off for independent sections. */
+/* The border belongs to each item, not the group: an accordion is a stack of bordered
+ * panels that happen to share edges, which is what lets one be lifted out or reordered
+ * without the container knowing. Tabler's 1rem / 1.25rem rhythm. */
+.ads-accordion > details { border: var(--ads-border-width) solid var(--ads-line); }
+.ads-accordion > details + details { border-top: 0; }
+.ads-accordion summary {
+  font-weight: var(--ads-weight-medium);
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  --ads-row-pad: calc(var(--ads-space-4) * var(--ads-row-scale));
+  padding: var(--ads-row-pad) var(--ads-space-5);
+  /* the summary IS the section heading, and reads at heading size */
+  font-size: var(--ads-text-lg);
+  line-height: var(--ads-line-heading);
+  color: var(--ads-ink);
+  cursor: pointer;
+  list-style: none;
+}
+/* Compact: the summary at text size with a row's padding, for the steps of a job or a group
+ * of settings, where heading-size summaries read as a column of headings (SourceLab). */
+.ads-accordion--compact summary {
+  --ads-row-pad: calc(var(--ads-space-2) * var(--ads-row-scale));
+  font-size: var(--ads-text);
+  line-height: var(--ads-line-control);
+}
+.ads-accordion summary::-webkit-details-marker { display: none; }
+.ads-accordion summary:hover { background: var(--ads-sunken); }
+.ads-accordion summary:focus-visible { outline: 2px solid var(--ads-brand); outline-offset: -2px; }
+/* the chevron is drawn here rather than shipped as an icon per row: it is the control's
+ * own state, not content, and an icon in the markup would need flipping in two places */
+.ads-accordion summary::after {
+  content: "";
+  margin-inline-start: auto;
+  width: .5rem;
+  height: .5rem;
+  border: 2px solid currentColor;
+  border-inline-start: 0;
+  border-block-start: 0;
+  rotate: 45deg;
+  transition: rotate .15s;
+  color: var(--ads-ink-muted);
+}
+.ads-accordion details[open] > summary::after { rotate: 225deg; }
+.ads-accordion details > :not(summary) { margin: 0; padding: 0 var(--ads-space-5) var(--ads-space-4);
+                                        color: var(--ads-ink-muted); }
+
+/* Price — a number that has to read as the headline of its card. Big, tight, with the
+ * unit beside it at body size rather than shrunk to a superscript nobody can read. */
+.ads-price {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--ads-space-2);
+  font-size: var(--ads-text-xl);
+  font-weight: var(--ads-weight-bold);
+  line-height: var(--ads-line-control);
+  color: var(--ads-ink-strong);
+}
+.ads-price > span { font-size: var(--ads-text); font-weight: var(--ads-weight-normal); }
+
+/* Checklist — what a plan includes, what a task still needs. A list whose marker is an
+ * icon in the markup, so it can be a tick, a cross or a dash per line, and so the icon
+ * inherits its colour from whatever tone the line carries. */
+.ads-checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column;
+                 gap: var(--ads-space-2); }
+.ads-checklist > li { display: flex; align-items: flex-start; gap: var(--ads-space-2); }
+.ads-checklist > li > svg { flex: none; width: var(--ads-icon-size); height: var(--ads-icon-size);
+                            color: var(--ads-tone); }
+
+/* Log — machine output. Monospace, its own scroll, tone per line. It is a `<pre>` because
+ * the line breaks are the data: reflowing a stack trace to the container width destroys
+ * the one property that makes it readable. */
+.ads-log {
+  margin: 0;
+  max-height: 20rem;
+  overflow: auto;
+  padding: var(--ads-space-3) var(--ads-space-4);
+  font-family: var(--ads-font-mono);
+  font-size: var(--ads-text-sm);
+  line-height: var(--ads-line-control);
+  color: var(--ads-ink-muted);
+  background: var(--ads-sunken);
+  border-radius: var(--ads-radius);
+}
+.ads-log code { color: var(--ads-tone); }
+
+/* A frame showing another page at card size.
+ *
+ * The iframe lays out at a real desktop width and is then scaled down, so what you see is
+ * the layout doing its own reflow rather than a narrow rendering pretending to be a wide
+ * one — which is the only way a preview of a LAYOUT is evidence of anything.
+ *
+ * The width is a unitless custom property so the same value can be a length (`* 1px`) and
+ * a divisor. The scale is not a number anyone chose: it is the container's own width over
+ * the width the frame renders at, so the preview fills whatever card it lands in. */
+.ads-frame {
+  --ads-frame-width: 1280;
+  position: relative;
+  overflow: hidden;
+  /* the frame is its own query container, so the scale below can be "however much of a
+     desktop width fits here" rather than a number someone guessed for one card size */
+  container-type: inline-size;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: var(--ads-page);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+}
+.ads-frame > iframe {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: calc(var(--ads-frame-width) * 1px);
+  height: calc(var(--ads-frame-width) * 1px / (16 / 10));
+  /* the reset gives every replaced element `max-width: 100%` so it cannot overflow its
+     box. This one is MEANT to: it lays out at a desktop width and is scaled back down. */
+  max-width: none;
+  border: 0;
+  transform-origin: top left;
+  scale: calc(100cqw / (var(--ads-frame-width) * 1px));
+}
+/* right-to-left flips the origin with it, or the frame paints off its own edge */
+[dir="rtl"] .ads-frame > iframe { transform-origin: top right; }
+
+/* Prose — a block of authored text: a changelog, terms, a help page, the body of a note.
+ *
+ * Everywhere else in an application, vertical rhythm is the layout primitive's job — a
+ * stack sets one gap and its children have no margins of their own. Prose is the one place
+ * that fails: the spacing between a heading and the paragraph under it is not the spacing
+ * between two paragraphs, and a list is closer to its introduction than to what follows.
+ * So this block puts the margins back, scoped so they cannot leak into the application.
+ *
+ * `--ads-prose` is a reading measure, not a container width: 65 characters or so. A line
+ * of body text three hundred pixels longer than that is measurably harder to return from.
+ */
+.ads-prose { max-width: var(--ads-prose, 68ch); }
+.ads-prose > * { margin-block: 0; }
+.ads-prose > * + * { margin-block-start: var(--ads-space-4); }
+/* a heading belongs to what follows it, so its space goes above */
+.ads-prose > :is(h1, h2, h3, h4) + * { margin-block-start: var(--ads-space-2); }
+.ads-prose > * + :is(h1, h2, h3, h4) { margin-block-start: var(--ads-space-8); }
+.ads-prose > :is(ul, ol) { padding-inline-start: var(--ads-space-6); }
+.ads-prose > :is(ul, ol) > li + li { margin-block-start: var(--ads-space-2); }
+.ads-prose > blockquote {
+  padding-inline-start: var(--ads-space-4);
+  border-inline-start: 2px solid var(--ads-line);
+  color: var(--ads-ink-muted);
+}
+.ads-prose > hr { border: 0; border-top: var(--ads-border-width) solid var(--ads-line); }
+.ads-prose > pre {
+  padding: var(--ads-space-3) var(--ads-space-4);
+  overflow-x: auto;
+  background: var(--ads-sunken-strong);
+  border-radius: var(--ads-radius);
+}
+.ads-prose :not(pre) > code {
+  padding: 1px var(--ads-space-1);
+  color: var(--ads-ink);
+  background: var(--ads-sunken-strong);
+  border-radius: var(--ads-radius-sm);
+}
+.ads-prose > table { width: 100%; border-collapse: collapse; }
+.ads-prose > table :is(th, td) {
+  padding: var(--ads-space-2) var(--ads-space-3);
+  text-align: start;
+  border-bottom: var(--ads-border-width) solid var(--ads-line-soft);
+}
+
+/* Calendar — a month as a grid of days. The one shape a business application keeps
+ * needing that no layout primitive covers: seven columns whatever the month, days that
+ * are click targets, and a cell that has to hold a list without changing the grid. */
+.ads-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--ads-border-width);
+  background: var(--ads-line-soft);
+  border: var(--ads-border-width) solid var(--ads-line-soft);
+  border-radius: var(--ads-radius);
+  overflow: hidden;
+}
+.ads-calendar__head {
+  padding: var(--ads-space-2);
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-medium);
+  color: var(--ads-ink-muted);
+  text-align: center;
+  background: var(--ads-sunken);
+}
+.ads-calendar__day {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ads-space-1);
+  min-height: 6rem;
+  padding: var(--ads-space-2);
+  background: var(--ads-surface);
+}
+/* a day outside the month still occupies the grid — removing it would move every other
+   day — so it is dimmed rather than emptied */
+.ads-calendar__day--outside { background: var(--ads-sunken); color: var(--ads-ink-muted); }
+.ads-calendar__date {
+  align-self: flex-start;
+  display: grid;
+  place-items: center;
+  min-width: var(--ads-control-sm);
+  height: var(--ads-control-sm);
+  font-size: var(--ads-text-sm);
+  border-radius: var(--ads-radius-pill);
+}
+.ads-calendar__day--today .ads-calendar__date { color: var(--ads-brand-fg); background: var(--ads-brand); }
+.ads-calendar__event {
+  padding: 1px var(--ads-space-2);
+  font-size: var(--ads-text-sm);
+  color: var(--ads-tone);
+  background: var(--ads-tone-tint);
+  border-radius: var(--ads-radius-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Chat — a thread of messages. A support conversation, a comment trail on a record, the
+ * thing every business application grows once two people have to discuss one row.
+ *
+ * Tabler's measurements: a 1rem gap between bubbles, 1rem of padding inside one, the
+ * author's name above the body with a quarter of that below it.
+ *
+ * The bubble is not aligned by a float or a margin-left: `align-self` on the row means
+ * "mine" is a property of the message, not of the space around it, so a thread reads the
+ * same whichever end it is rendered from — which matters when the same markup renders a
+ * transcript for an agent and for the customer. */
+.ads-thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ads-space-4);
+  overflow-y: auto;
+  padding: var(--ads-space-5);
+}
+.ads-message { display: flex; gap: var(--ads-space-3); align-items: flex-end; max-width: 42rem; }
+.ads-message--mine { align-self: flex-end; flex-direction: row-reverse; }
+.ads-message__bubble {
+  padding: var(--ads-space-4);
+  background: var(--ads-sunken);
+  border-radius: var(--ads-radius-lg);
+}
+.ads-message--mine .ads-message__bubble { background: var(--ads-brand-tint); }
+.ads-message__title { display: flex; gap: var(--ads-space-2); margin-bottom: var(--ads-space-1);
+                      font-size: var(--ads-text-sm); }
+.ads-message__author { font-weight: var(--ads-weight-bold); }
+.ads-message__date { color: var(--ads-ink-muted); }
+.ads-message__body > :last-child { margin-bottom: 0; }
+/* A day marker is not a message: it is a rule with a label on it, and it must not be read
+ * as something someone said. */
+.ads-message--divider {
+  align-self: stretch;
+  max-width: none;
+  align-items: center;
+  gap: var(--ads-space-3);
+  font-size: var(--ads-text-sm);
+  color: var(--ads-ink-muted);
+}
+.ads-message--divider::before,
+.ads-message--divider::after {
+  content: "";
+  flex: 1;
+  height: var(--ads-border-width);
+  background: var(--ads-line-soft);
+}
+
+/* The composer sits at the end of the thread rather than floating over it: a bar fixed to
+ * the bottom of a scrolling column covers the last message on a short screen. */
+/* A message box with its send button beside it. It wraps, and the field carries a basis to
+ * wrap AT: `.ads-fill` is `flex: 1` with a zero basis, so in a row that cannot wrap the
+ * textarea is the thing that gives, and at 390px it gave until it was two characters wide
+ * with the buttons intact beside it. A composer whose buttons survive and whose message box
+ * does not has it exactly backwards. */
+.ads-composer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-4) var(--ads-space-5);
+  border-top: var(--ads-border-width) solid var(--ads-line-soft);
+}
+.ads-composer .ads-textarea { min-height: var(--ads-control); resize: vertical; }
+.ads-composer > .ads-field { flex: 1 1 16rem; min-width: 0; }
+
+/* Setup checklist — the first screen of a product, and the one a design system usually
+ * never shows. A screen full of data teaches nothing about the day there is none.
+ *
+ * Each step is its own row with its own action, and a done step keeps its place rather
+ * than disappearing: a list that shortens as you work loses the sense of how much is left,
+ * and re-orders under the pointer. */
+.ads-steplist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--ads-space-3); }
+.ads-steplist > li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ads-space-4);
+  padding: var(--ads-space-4);
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line-soft);
+  border-radius: var(--ads-radius);
+}
+.ads-steplist__mark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--ads-control-md);
+  height: var(--ads-control-md);
+  font-weight: var(--ads-weight-medium);
+  color: var(--ads-ink-muted);
+  background: var(--ads-sunken);
+  border-radius: var(--ads-radius-pill);
+}
+.ads-steplist > li.is-done { background: var(--ads-sunken); }
+.ads-steplist > li.is-done .ads-steplist__mark { color: var(--ads-brand-fg); background: var(--ads-success); }
+.ads-steplist > li.is-done .ads-steplist__title { text-decoration: line-through; color: var(--ads-ink-muted); }
+.ads-steplist__title { font-weight: var(--ads-weight-medium); color: var(--ads-ink-strong); }
+
+/* Tree — a hierarchy of arbitrary depth. Added because a proof-of-concept needed one and the
+ * system had no way to show nesting at all: an org chart, a category tree, a file browser.
+ *
+ * The guide rule is on the NESTED list rather than on each node, so it is one line per level
+ * instead of one per row, and it survives a row being added or removed without renumbering.
+ * Labels dim one step per level — the child selector applies cumulatively, so depth reads
+ * without a class per depth. */
+.ads-tree { list-style: none; margin: 0; padding: 0; }
+.ads-tree__node {
+  --ads-row-pad: calc(var(--ads-space-1) / 2 * var(--ads-row-scale));
+  padding-block: var(--ads-row-pad);
+}
+.ads-tree--nested {
+  margin-inline-start: var(--ads-space-2);
+  padding-inline-start: var(--ads-space-4);
+  border-inline-start: var(--ads-border-width) solid var(--ads-line);
+}
+.ads-tree__label { color: var(--ads-ink); }
+/* A label that is a link takes the row's padding, so the whole row is the target
+ * (SourceLab had to set this themselves). */
+.ads-tree__node:has(> a.ads-tree__label) { padding-block: 0; }
+a.ads-tree__label { display: block; padding-block: var(--ads-row-pad); text-decoration: none; }
+.ads-tree__node .ads-tree__node .ads-tree__label { color: var(--ads-ink-muted); }
+/* Form controls. The wrapper owns the label/help/error relationship. */
+
+/* Spacing is per element, not a uniform gap: the spec puts more room under a label
+ * than under a control, and a single gap cannot say both. */
+.ads-field { margin-bottom: var(--ads-space-3); }
+/* A group of radios or checkboxes is a `<fieldset>` with a `<legend>`, which a screen reader
+ * announces with each control in it. The browser's groove, padding and legend notch made
+ * people build it from a `div` with `role="group"` instead (SourceLab); without them the
+ * native element is the quiet group it should be, and its legend reads as a label. */
+fieldset { min-width: 0; margin: 0; padding: 0; border: 0; }
+legend { padding: 0; }
+.ads-label, legend {
+  display: block;
+  margin-bottom: var(--ads-space-2);
+  font-size: var(--ads-text);
+  line-height: var(--ads-line-control);
+  font-weight: var(--ads-weight-medium);
+}
+.ads-label--required::after { content: " *"; color: var(--ads-danger-ink); }
+.ads-help, .ads-error { display: block; margin-top: var(--ads-space-2); font-size: var(--ads-text-sm); }
+.ads-help { color: var(--ads-ink-muted); }
+.ads-error { color: var(--ads-danger-ink); }
+
+.ads-input,
+.ads-select,
+.ads-textarea {
+  width: 100%;
+  padding: var(--ads-control-pad-y) var(--ads-control-pad-x);
+  font: inherit;
+  font-size: var(--ads-text);
+  line-height: var(--ads-line-control);
+  color: var(--ads-ink);
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line-input);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-xs);
+}
+/* The select draws its own chevron and reserves 3rem for it. The UA arrow is a different
+ * glyph on every platform and cannot be recoloured, so a form mixing selects and inputs
+ * never quite lines up; `appearance: none` plus one background image does. */
+.ads-select {
+  appearance: none;
+  padding-inline-end: var(--ads-space-12);
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M4 6l4 4l4 -4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right var(--ads-space-4) center;
+  background-size: 16px 12px;
+}
+/* The one place in the system that needs a direction. Every length here is logical, so
+ * right-to-left costs nothing anywhere else — but `background-position` has no logical
+ * form, and the chevron would sit on top of the text once the padding flipped. */
+[dir="rtl"] .ads-select { background-position: left var(--ads-space-4) center; }
+/* A placeholder is an example, not a value, so it must read lighter than what is typed.
+ * It used the muted ink, which `--ads-contrast` darkens, and at 1.5 an example ("CN, RU")
+ * read like an answer (notes/issues/03). It stays at the reference grey whatever the knob:
+ * n-500 is 4.85:1 on a field's white, over the 4.5 floor already, and n-400 in dark mode
+ * is 6.9:1. */
+.ads-input::placeholder, .ads-textarea::placeholder { color: light-dark(var(--ads-n-500), var(--ads-n-400)); }
+.ads-input:focus-visible, .ads-select:focus-visible, .ads-textarea:focus-visible {
+  border-color: var(--ads-brand);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ads-ring);
+}
+.ads-input[aria-invalid="true"],
+.ads-select[aria-invalid="true"],
+.ads-textarea[aria-invalid="true"] { border-color: var(--ads-danger); }
+
+/* The box is drawn rather than borrowed. `accent-color` recolours the OS control and
+ * stops there: no size, no radius, no border, no shadow — and the OS control is 13px on
+ * one platform and 16 on another, so a form never lines up the same way twice.
+ *
+ * Tabler's: 1.25rem square, our radius and border, the surface behind it, an input's
+ * shadow, and the tick as a background image so it scales with the box.
+ *
+ * Keyed on the CONTROL and not on `.ads-check`, which is what it was. A wrapper class
+ * is a promise that every author remembers to write it, and three did not: the choice
+ * card, the table's select column and the wizard all shipped a 13px native radio next
+ * to our 20px drawn one. A checkbox is a checkbox wherever it is. The three places that
+ * genuinely want the native box gone — a rating, a segmented control, a switch — say so
+ * with their own rule, and a class beats an element selector without needing to. */
+/* The <label> is the target — clicking the words toggles the box — so it is the label
+   and not the 20px box that has to be reachable. */
+.ads-check { --ads-own: var(--ads-tap); display: flex; align-items: center; gap: var(--ads-space-3);
+             min-height: var(--ads-tap); cursor: pointer; }
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: none;
+  flex: none;
+  width: var(--ads-control-xs);
+  height: var(--ads-control-xs);
+  margin: 0;
+  background-color: var(--ads-surface);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: var(--ads-control-xs);
+  border: var(--ads-border-width) solid var(--ads-line-input);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-xs);
+  line-height: var(--ads-control-xs);
+  cursor: pointer;
+}
+input[type="radio"] { border-radius: var(--ads-radius-pill); }
+input:checked { background-color: var(--ads-brand); border-color: var(--ads-brand-ink); }
+/* the mark is white on the brand fill; `stroke='white'` rather than currentColor because a
+   background image has no colour of its own to inherit */
+input[type="checkbox"]:checked {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' width='16' height='16'><path fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 8.5l2.5 2.5l5.5 -5.5'/></svg>");
+}
+input[type="radio"]:checked {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><circle r='3' fill='white' cx='8' cy='8'/></svg>");
+}
+/* Qualified, because `:indeterminate` also matches a RADIO whose group has nothing checked
+   yet — which is every unanswered question on a form, painted as though answered. */
+input[type="checkbox"]:indeterminate {
+  background-color: var(--ads-brand);
+  border-color: var(--ads-brand);
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/></svg>");
+}
+input[type="checkbox"]:focus-visible, input[type="radio"]:focus-visible { border-color: var(--ads-brand); outline: none; box-shadow: 0 0 0 3px var(--ads-ring); }
+input[type="checkbox"]:disabled, input[type="radio"]:disabled { opacity: .5; cursor: not-allowed; }
+
+/* A control with an icon inside it — search, mostly. */
+.ads-input-icon { position: relative; display: flex; align-items: center; }
+.ads-input-icon__addon {
+  position: absolute;
+  inset-inline-start: 0;
+  display: grid;
+  place-items: center;
+  width: calc(var(--ads-space-8) + var(--ads-space-1));
+  color: var(--ads-ink-muted);
+  pointer-events: none;
+}
+.ads-input-icon__addon svg { width: var(--ads-icon-size); height: var(--ads-icon-size); }
+.ads-input-icon .ads-input { padding-inline-start: calc(var(--ads-space-8) + var(--ads-space-1)); }
+/* A field that fills a wrapping row asks for room to wrap at. `.ads-fill` has a zero
+ * basis, so a query box beside its filter menus shrank to "is:open m" on a phone before
+ * the row ever wrapped (SourceLab). Text in a fill can truncate; a field cannot. */
+.ads-cluster > :is(.ads-input-icon, .ads-input, .ads-select).ads-fill { flex-basis: 16rem; }
+
+/* A radio or checkbox presented as a card, for a choice that deserves room. */
+.ads-choice {
+  display: flex;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-3);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+  cursor: pointer;
+}
+.ads-choice:hover { background: var(--ads-sunken); }
+.ads-choice:has(input:checked) { border-color: var(--ads-brand); background: var(--ads-brand-wash); }
+.ads-choice__note { display: block; color: var(--ads-ink-muted); font-size: var(--ads-text-sm); }
+
+/* A switch: a checkbox for a setting that takes effect immediately. */
+.ads-switch { --ads-own: var(--ads-tap); display: inline-flex; align-items: center; gap: var(--ads-space-3);
+              min-height: var(--ads-tap); cursor: pointer; }
+/* The input covers the track rather than collapsing to nothing: a 0×0 focusable element
+ * has no box for a browser to scroll to or an assistive technology to point at, and the
+ * pointer target should be the thing you can see anyway. */
+.ads-switch input {
+  position: absolute;
+  width: 2rem;
+  height: 1.25rem;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+/* Tabler's track: 2rem wide, 1.25rem tall — the same height as the drawn checkbox, so a
+ * form mixing the two keeps one baseline. Off is a white pill with a grey knob, not a
+ * grey pill with a white one: the switch reads as a control in the same family as the
+ * checkbox beside it, rather than as a filled thing that is somehow "off". */
+.ads-switch__track {
+  position: relative;
+  width: calc(var(--ads-control-xs) * 1.6);
+  height: var(--ads-control-xs);
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line-input);
+  border-radius: var(--ads-radius-pill);
+  box-shadow: var(--ads-shadow-xs);
+  transition: background-color .15s;
+}
+.ads-switch__track::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 1px;
+  inset-inline-start: 1px;
+  width: calc(var(--ads-control-xs) - 6px);
+  height: calc(var(--ads-control-xs) - 6px);
+  background: var(--ads-line-input);
+  border-radius: var(--ads-radius-pill);
+  transition: translate .15s, background-color .15s;
+}
+.ads-switch input:checked + .ads-switch__track { background: var(--ads-brand); border-color: var(--ads-brand-ink); }
+.ads-switch input:checked + .ads-switch__track::after {
+  background: var(--ads-n-0);
+  translate: calc(2rem - 1.25rem + 2px) 0;
+}
+.ads-switch input:focus-visible + .ads-switch__track { outline: 2px solid var(--ads-brand); outline-offset: 2px; }
+
+/* A drop target for files. The dashed edge is the whole affordance. */
+.ads-dropzone {
+  display: grid;
+  place-items: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-space-8);
+  text-align: center;
+  color: var(--ads-ink-muted);
+  background: var(--ads-sunken);
+  border: 2px dashed var(--ads-line-strong);
+  border-radius: var(--ads-radius-lg);
+}
+.ads-dropzone.is-over { border-color: var(--ads-brand); background: var(--ads-brand-wash); }
+
+/* A one-time-code box: a single character, centred, in a row of its siblings. */
+.ads-otp { width: calc(var(--ads-space-8) + var(--ads-space-2)); text-align: center;
+           font-size: var(--ads-text-lg); padding-inline: 0; }
+
+/* A file being uploaded: name, size, and how far along it is. */
+.ads-file {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-2) var(--ads-space-3);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+}
+.ads-file__icon { display: grid; place-items: center; width: var(--ads-space-8); height: var(--ads-space-8);
+                  color: var(--ads-ink-muted); background: var(--ads-sunken); border-radius: var(--ads-radius-sm); }
+.ads-file__meta { flex: 1; min-width: 0; }
+.ads-file__name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* A combobox: a text input that filters a list.
+ *
+ * The CSS is the whole contribution here. Filtering as you type, keyboard navigation and
+ * announcing the active option are behaviour, and behaviour is situ's job — situ_ui
+ * already ships a compiled Combobox. What this gives that widget is somewhere to land. */
+.ads-combobox { position: relative; }
+.ads-combobox__list {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: calc(100% + var(--ads-space-1));
+  z-index: 10;
+  max-height: 16rem;
+  overflow-y: auto;
+  padding: var(--ads-space-1);
+  background: var(--ads-raised);
+  border: var(--ads-border-width) solid var(--ads-line-soft);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-lg);
+}
+.ads-combobox__option {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-space-2) var(--ads-space-3);
+  border-radius: var(--ads-radius-sm);
+  cursor: pointer;
+}
+.ads-combobox__option:hover, .ads-combobox__option[aria-selected="true"] { background: var(--ads-sunken); }
+.ads-combobox__option[aria-selected="true"]::after { content: "✓"; margin-inline-start: auto; color: var(--ads-brand-ink); }
+.ads-combobox__empty { padding: var(--ads-space-3); color: var(--ads-ink-muted); }
+
+/* Range. The UA widget is styled per engine, so the track and thumb are set for both
+ * rather than left to whatever the browser ships. */
+/* 1.5rem tall, not the 16px the browser gives it: the thumb is the target, and a
+   slider you have to hit exactly is a slider nobody can use. */
+.ads-range { width: 100%; height: var(--ads-tap); accent-color: var(--ads-brand-ink); }
+
+/* Password strength — four segments that fill as the password improves. The tone is set
+ * by whoever judges the password; the bar itself makes no judgement. */
+.ads-strength { display: flex; gap: var(--ads-space-1); }
+.ads-strength > i {
+  flex: 1;
+  height: 4px;
+  background: var(--ads-line);
+  border-radius: 2px;
+}
+.ads-strength > i.is-on { background: var(--ads-tone); }
+
+/* The native controls, styled rather than replaced.
+ *
+ * `<input type="date">` is a date picker: it is keyboard-operable, it is localised by the
+ * browser (so our six languages cost nothing), it works on a phone with the OS picker,
+ * and it is announced correctly without anyone writing an ARIA attribute. A JavaScript
+ * calendar is 40 KB to get all of that wrong. The same argument runs for `time`,
+ * `datetime-local`, `month`, `week`, `color` and `file`.
+ *
+ * Where native genuinely runs out — a date RANGE with a two-month view, a rich text
+ * field — the answer is a vendor widget behind this same class contract, not a hand-
+ * written one. That boundary is the whole point of naming it here.
+ */
+
+/* the UA's calendar / clock button: give it our ink and a pointer, since by default it is
+ * a low-contrast glyph that does not look like anything you can press */
+.ads-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: .55;
+  filter: var(--ads-icon-filter, none);
+}
+.ads-input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+
+/* a colour input is a swatch, not a text box: the chrome belongs to the colour */
+.ads-color {
+  inline-size: calc(var(--ads-control) + var(--ads-space-1));
+  block-size: var(--ads-control-md);
+  padding: 2px;
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line-input);
+  border-radius: var(--ads-radius);
+  cursor: pointer;
+}
+.ads-color::-webkit-color-swatch-wrapper { padding: 0; }
+.ads-color::-webkit-color-swatch { border: 0; border-radius: calc(var(--ads-radius) - 2px); }
+.ads-color::-moz-color-swatch { border: 0; border-radius: calc(var(--ads-radius) - 2px); }
+
+/* a file input is a button plus a filename; only the button is ours to style */
+.ads-file-input { font: inherit; color: var(--ads-ink-muted); }
+.ads-file-input::file-selector-button {
+  margin-inline-end: var(--ads-space-3);
+  padding: var(--ads-space-2) var(--ads-space-3);
+  font: inherit;
+  color: var(--ads-ink-strong);
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-xs);
+  cursor: pointer;
+}
+.ads-file-input::file-selector-button:hover { background: var(--ads-sunken); }
+
+/* Editor — the box a rich-text widget lives in.
+ *
+ * The system owns the BOX: the border, the radius, the focus ring, the toolbar strip,
+ * the body's padding and type. It does not own the widget: Quill, TipTap and ProseMirror
+ * each generate their own DOM and their own class names, and no design system is going
+ * to out-argue them about it.
+ *
+ * So the boundary is drawn here, deliberately: this class is the contract, and a
+ * per-vendor adapter (which necessarily selects the vendor's own classes) maps one widget
+ * into it. That adapter belongs to the application, not to the system — one
+ * small file per vendor, in one place, instead of vendor class names leaking into every
+ * template that has a description field. See `poc/static/vendor-quill.css`.
+ */
+.ads-editor {
+  display: flex;
+  flex-direction: column;
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line-input);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-xs);
+  overflow: hidden;
+}
+.ads-editor:focus-within { border-color: var(--ads-brand); box-shadow: 0 0 0 3px var(--ads-ring); }
+/* There is deliberately no `.ads-editor__toolbar` or `__body`: the vendor generates both
+ * and names them itself, so classes here for them would be classes no markup ever writes.
+ * `.ads-editor` is the whole contract — the adapter maps the widget's own parts into it. */
+/* The small things that say what state something is in: badge, avatar, status, progress. */
+
+.ads-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: calc(var(--ads-space-1) - 1px) calc(var(--ads-space-2) - 2px);
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-medium);
+  line-height: var(--ads-text-sm);
+  border: var(--ads-border-width) solid transparent;
+  border-radius: var(--ads-radius);
+  background: var(--ads-tone-tint);
+  color: var(--ads-tone);
+}
+
+.ads-avatar {
+  --ads-own: var(--ads-avatar-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ads-avatar-size);
+  height: var(--ads-avatar-size);
+  font-size: var(--ads-text);
+  line-height: var(--ads-text);
+  font-weight: var(--ads-weight-medium);
+  color: var(--ads-ink-muted);
+  background: var(--ads-sunken);
+  border-radius: var(--ads-radius-pill);
+  box-shadow: inset 0 0 0 var(--ads-border-width) var(--ads-line-soft);
+  user-select: none;
+}
+.ads-avatar--sm { --ads-avatar-size: var(--ads-control-md); font-size: var(--ads-text-sm); line-height: var(--ads-text-sm); }
+.ads-avatar--lg { --ads-avatar-size: calc(var(--ads-control) + var(--ads-space-2)); font-size: var(--ads-text-lg); line-height: var(--ads-text-lg); }
+
+.ads-status {
+  --ads-own: calc(2 * var(--ads-space-1) + var(--ads-text));
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-space-1) var(--ads-space-3);
+  font-size: var(--ads-text);
+  line-height: var(--ads-text);
+  font-weight: var(--ads-weight-medium);
+  border-radius: var(--ads-radius-pill);
+  /* Like the badge and the alert, the status chip reads the tone rather than growing a
+   * modifier per intent — `class="ads-status ads-tone-warning"`. An unqualified chip
+   * takes the default tone, which is brand: this block used to name `--ads-ink-muted`
+   * and `--ads-sunken` and then a second `.ads-status` block overrode both, so grey has
+   * not been the default since the tone landed. Write `ads-tone-neutral` for grey. */
+  color: var(--ads-tone);
+  background: var(--ads-tone-tint);
+}
+/* An icon is the size of the status's text, so the chip is as tall as it says it is: at
+ * its own 20px an icon grew the chip, and the row holding it, by a pixel (SourceLab). */
+.ads-status > .ads-icon { width: 1em; height: 1em; }
+.ads-status__dot { width: .5rem; height: .5rem; border-radius: var(--ads-radius-pill); background: currentColor; }
+/* The two `--success` / `--danger` spellings stay because they are in use and cost two
+ * lines; new intents go through the tone, which is why there is no `--warning` to match. */
+.ads-status--success { color: var(--ads-success-ink); background: var(--ads-success-tint); }
+.ads-status--danger  { color: var(--ads-danger-ink);  background: var(--ads-danger-tint); }
+
+.ads-progress {
+  display: flex;
+  height: .5rem;
+  overflow: hidden;
+  font-size: var(--ads-text-xs);
+  line-height: .5rem;
+  background: var(--ads-line);
+  border-radius: var(--ads-radius-sm);
+  box-shadow: inset 0 1px 2px 0 color-mix(in srgb, var(--ads-shadow-color) calc(7.5% * var(--ads-shadow-strength)), transparent);
+}
+.ads-progress__bar {
+  /* the length is data and arrives at render time, through a named channel */
+  width: var(--bar, 0);
+  font-size: var(--ads-text-xs);
+  line-height: .5rem;
+  color: var(--ads-n-0);
+  /* an `.ads-tone-*` on the track colours the bar; brand is the default tone */
+  background: var(--ads-tone);
+}
+
+.ads-avatar--xs { --ads-avatar-size: 1.5rem; font-size: var(--ads-text-xs); line-height: var(--ads-text-xs); }
+
+/* Waiting states. A spinner says "soon" (below); a placeholder says "this shape, soon". */
+.ads-placeholder {
+  display: block;
+  width: var(--bar, 100%);
+  min-height: 1em;
+  background: var(--ads-line);
+  border-radius: var(--ads-radius-sm);
+}
+
+/* Chip — a removable token: a label on a record, a value in a filter bar, an entry in a
+ * tag input. One component for all three; there was briefly a second one called `.ads-tag`
+ * with the same job and a different skin, which is how a vocabulary stops being one.
+ *
+ * The default is the neutral outline. An `.ads-tone-*` on the chip (or on the group)
+ * swaps it for the tinted form, which is what a label carrying a meaning wants. */
+.ads-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--ads-space-1); }
+/* Tabler's measurements: 1.5rem tall, no vertical padding (the height does the work),
+ * 0.5rem either side, a 0.5rem gap, on the surface rather than the sunken tone, with the
+ * same shadow an input carries. */
+.ads-chip {
+  --ads-own: var(--ads-control-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ads-space-2);
+  height: var(--ads-control-sm);
+  padding: 0 var(--ads-space-2);
+  font-size: var(--ads-text);
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-xs);
+}
+.ads-tone-brand > .ads-chip, .ads-tone-success > .ads-chip, .ads-tone-warning > .ads-chip,
+.ads-tone-danger > .ads-chip, .ads-tone-info > .ads-chip, .ads-tone-neutral > .ads-chip,
+.ads-chip.ads-tone-brand, .ads-chip.ads-tone-success, .ads-chip.ads-tone-warning,
+.ads-chip.ads-tone-danger, .ads-chip.ads-tone-info, .ads-chip.ads-tone-neutral {
+  color: var(--ads-tone);
+  background: var(--ads-tone-tint);
+  border-color: transparent;
+  box-shadow: none;
+}
+/* The × is 9px of glyph, and 9px is not something a thumb can hit. It keeps its size —
+ * a chip is small and a big × would own it — and gains an invisible `--ads-tap` square
+ * centred on it, which is the target the pointer actually sees. */
+.ads-chip__x { position: relative; display: grid; place-items: center; background: none;
+               border: 0; padding: 0; font: inherit; line-height: 1; color: inherit;
+               opacity: .6; cursor: pointer; }
+.ads-chip__x::after {
+  content: "";
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  width: var(--ads-tap);
+  height: var(--ads-tap);
+  translate: -50% -50%;
+}
+.ads-chip__x:hover { opacity: 1; color: var(--ads-danger-ink); }
+
+/* The same group wearing input chrome: a tag input. The `<input>` inside it is a real
+ * input — typing, autofill and form submission all work — and its own border is removed,
+ * because the box around it is the control now and two nested borders is the giveaway
+ * that nobody looked. */
+.ads-chips--input {
+  padding: calc(var(--ads-space-1) + 1px) var(--ads-space-3);
+  min-height: var(--ads-control-md);
+  gap: var(--ads-space-2);
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-xs);
+}
+.ads-chips--input:focus-within { border-color: var(--ads-brand); box-shadow: 0 0 0 3px var(--ads-ring); }
+.ads-chips--input > input {
+  flex: 1;
+  min-width: 6rem;
+  min-height: var(--ads-tap);
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  outline: none;
+}
+
+/* A key a user is meant to press. Tabler's: 0.25rem/0.5rem, medium weight, the small
+ * type step, the code background, muted ink — and no shadow. The raised "keycap" look is
+ * a different design; this one reads as inline code, which is what it is. */
+.ads-kbd {
+  display: inline-block;
+  padding: var(--ads-space-1) var(--ads-space-2);
+  font-family: var(--ads-font-mono);
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-medium);
+  line-height: var(--ads-text-sm);
+  color: var(--ads-ink-soft);
+  background: var(--ads-sunken-strong);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+}
+
+/* A card's status strip: the fastest way to colour a whole card by state. The state is an
+ * `ads-tone-*` class like every other toned component; brand when there is none. */
+.ads-card--status { border-top: 3px solid var(--ads-tone-solid); }
+
+/* Skeleton — the shape of the content before the content. Not a spinner: a spinner says
+ * "something is happening", a skeleton says "this is what will be here", so the layout
+ * does not jump when it arrives.
+ *
+ * It takes its size from whatever it stands in for, so `.ads-skeleton` goes ON the element
+ * (a heading, an avatar, a table cell) rather than replacing it with a generic grey box. */
+.ads-skeleton {
+  color: transparent !important;
+  background: var(--ads-neutral-tint);
+  border-radius: var(--ads-radius-sm);
+  user-select: none;
+  animation: ads-pulse 1.4s ease-in-out infinite;
+}
+.ads-skeleton * { visibility: hidden; }
+@keyframes ads-pulse { 50% { opacity: .45; } }
+/* Someone who gets motion sick from a pulsing page still needs to know it is loading, so
+ * the animation stops and the placeholder stays. */
+@media (prefers-reduced-motion: reduce) { .ads-skeleton { animation: none; } }
+
+/* Sparkline — a trend small enough to sit in a table cell, drawn from bars rather than a
+ * charting library. A real chart costs ~130 KB of JavaScript and owns its DOM; this is
+ * a flex row of divs, so it survives a region swap and prints.
+ *
+ * Each bar's height is data and arrives through `--v` (0–1), the same named channel the
+ * progress bar uses for `--bar`. */
+.ads-sparkline {
+  --ads-own: var(--ads-sparkline-height, var(--ads-control-sm));
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 1px;
+  height: var(--ads-sparkline-height, var(--ads-control-sm));
+  vertical-align: middle;
+}
+.ads-sparkline > i {
+  display: block;
+  width: 3px;
+  height: calc(var(--v, 0) * 100%);
+  min-height: 1px;
+  background: var(--ads-tone);
+  border-radius: 1px;
+}
+
+/* Uptime bar — one cell per period, coloured by state. The shape every status page uses,
+ * and the one thing a sparkline cannot say: not "how much" but "was it up".
+ *
+ * Tabler's measurements: 1.5rem tall, a 2px gap, a 4px floor under each cell. Ninety of
+ * those have a 538px minimum, which is wider than a phone — so the bar scrolls inside its
+ * own box rather than shrinking cells to invisibility or widening the page. Same reasoning
+ * as `.ads-table-scroll`: some content has a floor, and the question is only who absorbs
+ * it. `min-width: 0` is what lets it: without it the flex parent sizes to min-content and
+ * the scroll container never has anything to scroll. */
+.ads-uptime {
+  display: flex;
+  gap: 2px;
+  height: var(--ads-control-sm);
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.ads-uptime > i { flex: 1; min-width: .25rem; background: var(--ads-tone); border-radius: var(--ads-radius-xs); }
+
+/* Spinner — "something is happening and I cannot tell you how much of it". Use a progress
+ * bar when you know the fraction and a skeleton when you know the shape; this is for the
+ * case where you know neither.
+ *
+ * `currentColor` with one transparent edge, so it takes the colour of whatever it sits in
+ * — a button's label, a muted cell — without a variant per context. */
+.ads-spinner {
+  display: inline-block;
+  width: var(--ads-control-sm);
+  height: var(--ads-control-sm);
+  vertical-align: -0.125em;
+  border: 2px solid currentColor;
+  border-inline-end-color: transparent;
+  border-radius: var(--ads-radius-pill);
+  animation: ads-spin .75s linear infinite;
+}
+.ads-spinner--sm { width: var(--ads-text); height: var(--ads-text); border-width: 1px; }
+@keyframes ads-spin { to { rotate: 360deg; } }
+/* Someone who gets motion sick still needs to know it is working, so the ring stops
+ * turning and pulses instead — the same substitution the skeleton makes. */
+@media (prefers-reduced-motion: reduce) {
+  .ads-spinner { animation: ads-pulse 1.4s ease-in-out infinite; }
+}
+
+/* A progress bar for the same case: length unknown, so it sweeps instead of filling. */
+.ads-progress--indeterminate .ads-progress__bar {
+  width: 33%;
+  animation: ads-sweep 1.4s ease-in-out infinite;
+}
+@keyframes ads-sweep { from { translate: -100% 0; } to { translate: 300% 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .ads-progress--indeterminate .ads-progress__bar { animation: none; width: 100%; opacity: .4; }
+}
+
+/* Avatar list — who is on this thing. Stacked when the count matters more than the faces,
+ * which is most of the time; the ring is the surface behind, so they read as overlapping
+ * rather than merged. */
+.ads-avatars { display: flex; flex-wrap: wrap; gap: var(--ads-space-2); }
+.ads-avatars--stacked { gap: 0; }
+.ads-avatars--stacked > .ads-avatar + .ads-avatar { margin-inline-start: calc(var(--ads-avatar-size) / -3); }
+.ads-avatars--stacked > .ads-avatar {
+  box-shadow: inset 0 0 0 var(--ads-border-width) var(--ads-line-soft),
+              0 0 0 2px var(--ads-surface);
+}
+
+/* Legend — what a colour on a chart means. Small, and its absence is the commonest way a
+ * chart says nothing: four coloured series and no key is a picture, not a reading. */
+.ads-legend { display: flex; flex-wrap: wrap; gap: var(--ads-space-4); margin: 0; padding: 0; list-style: none; }
+.ads-legend > li { display: flex; align-items: center; gap: var(--ads-space-2); font-size: var(--ads-text-sm); }
+.ads-legend__swatch {
+  flex: none;
+  width: var(--ads-space-3);
+  height: var(--ads-space-3);
+  background: var(--ads-tone);
+  border-radius: var(--ads-radius-xs);
+}
+.ads-legend__value { color: var(--ads-ink-muted); }
+
+/* Change: a delta as toned text with an arrow, for a table with a change in every row,
+ * where a badge pill per row shouts. The tone says good or bad (`ads-tone-success`,
+ * `-danger`, `-neutral`); the modifier says which way, because a fall in errors is good
+ * news. The sign in the text is what a screen reader hears, so the arrow is silent. */
+.ads-change {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .25em;
+  font-weight: var(--ads-weight-medium);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--ads-tone);
+}
+.ads-change--up::before { content: "▲" / ""; font-size: .7em; }
+.ads-change--down::before { content: "▼" / ""; font-size: .7em; }
+
+/* Figure band: several headline figures in one row, divided by hairlines, no card each.
+ * The top of an analytics or monitoring page. Items wrap and grow, so a short last row
+ * fills its width. An item can be a `<button aria-pressed>` that picks what a chart below
+ * shows. The hairlines are the band's ground showing through a 1px gap. */
+.ads-band {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ads-border-width);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--ads-line-soft);
+}
+.ads-band > * {
+  display: flex;
+  flex: 1 1 10rem;
+  flex-direction: column;
+  gap: var(--ads-space-1);
+  padding: var(--ads-space-4) var(--ads-space-5);
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  background: var(--ads-surface);
+  border: 0;
+}
+.ads-band > button { cursor: pointer; }
+.ads-band > button:hover { background: var(--ads-sunken); }
+/* the picked figure is underlined, like a current tab; a tinted ground would take the
+ * muted label under it below AA */
+.ads-band > [aria-pressed="true"] { box-shadow: inset 0 -2px 0 0 var(--ads-brand); }
+
+/* Share: a row's share of the whole as a pale fill behind it, the usual look of a top-N
+ * list. The fraction is data, through `--share` (a percentage), like `--bar` and `--v`.
+ * Toned like everything else; brand by default. */
+.ads-share {
+  background: linear-gradient(to right, var(--ads-tone-tint) var(--share, 0), transparent 0);
+}
+.ads-share:dir(rtl) {
+  background: linear-gradient(to left, var(--ads-tone-tint) var(--share, 0), transparent 0);
+}
+
+/* Rating — stars as radio buttons, so the value is a form field and the keyboard works
+ * without a roving tabindex. `direction: rtl` on the row is the trick that lets a plain
+ * sibling selector light up every star BEFORE the checked one: later siblings in source
+ * order are earlier on screen. */
+.ads-rating { display: inline-flex; flex-direction: row-reverse; justify-content: flex-end; gap: 2px; }
+.ads-rating input { position: absolute; opacity: 0; pointer-events: none; }
+.ads-rating label {
+  /* An empty star is still a control someone has to see before they can choose it, so it
+   * takes the muted INK rather than a border colour — `--ads-line-strong` is tuned to be
+   * a hairline against a surface, which is 1.7:1 on a dark one. */
+  color: var(--ads-ink-muted);
+  cursor: pointer;
+  line-height: 1;
+  font-size: var(--ads-text-md);
+}
+.ads-rating label:hover,
+.ads-rating label:hover ~ label,
+.ads-rating input:checked ~ label { color: var(--ads-warning-ink); }
+.ads-rating input:focus-visible + label { outline: 2px solid var(--ads-brand); outline-offset: 2px; }
+.ads-rating--readonly label { cursor: default; }
+
+/* Flag — a locale's own square, drawn from its two-letter code rather than an image per
+ * country. An emoji flag is one glyph, it scales with the type, and it needs no request;
+ * where a platform has no flag emoji the code itself is a reasonable fallback, which is
+ * why the code is the content and never an `alt`. */
+.ads-flag {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--ads-control-sm);
+  height: var(--ads-control-sm);
+  font-size: var(--ads-text-md);
+  line-height: 1;
+  border-radius: var(--ads-radius-xs);
+  overflow: hidden;
+}
+/* Pagination, breadcrumbs, tabs.
+ *
+ * Every "this is the one" in this file is keyed on `[aria-current]` and not on a class.
+ * It used to be `.is-active`, and a sweep of the rendered pages found TEN kinds of
+ * current-item marked in CSS and nowhere else: a nav link, a tab, a pill, a page number,
+ * a segment, a wizard step. To a screen reader each of those was an ordinary link, on a
+ * page where the only thing that said otherwise was a colour.
+ *
+ * Some places did set `aria-current` and some did not, which is the same shape as the
+ * checkbox keyed on `.ads-check`: two spellings of one fact, and the one an author can
+ * forget is the one that matters. Keyed on the attribute, the highlight cannot exist
+ * without the semantics — there is nothing left to remember.
+ *
+ * `[aria-current]` bare, not `[aria-current="page"]`: the right token depends on what the
+ * set is (`page` for links, `step` for a wizard, `true` for a view switch), and every one
+ * of them should light up. A template says which by omitting the attribute when it does
+ * not apply, never by writing `aria-current="false"`. */
+.ads-pagination { display: flex; gap: var(--ads-space-1); list-style: none; margin: 0; padding: 0; }
+.ads-page-link {
+  display: flex;
+  align-items: center;
+  padding: var(--ads-space-1);
+  min-width: var(--ads-space-8);
+  min-height: var(--ads-space-8);
+  justify-content: center;
+  border: var(--ads-border-width) solid transparent;
+  color: var(--ads-ink);
+  text-decoration: none;
+  border-radius: var(--ads-radius-sm);
+  font-size: var(--ads-text);
+}
+.ads-page-link:hover { background: var(--ads-sunken); }
+.ads-page-link[aria-current] {
+  color: var(--ads-n-0);
+  background: var(--ads-brand);
+  border-color: var(--ads-brand);
+}
+
+/* Tabs — a row of links over panels, the active one tied to the content below. */
+/* `--ads-tab-bg` is the surface the panel below is drawn on: the active tab wears it, so
+ * the two read as one shape. A card head sets it to the card's own surface (card.css); on
+ * its own, a tab list sits on the page's ground. */
+/* One line, scrolling when short of room. Wrapped, a second row of boxed tabs no longer
+ * read as tabs, and the current tab joined the panel only from the last row (SourceLab).
+ * A scroller clips what pokes past its edge, so the bottom rule is an inset shadow drawn
+ * under the tabs, where the current tab's own bottom border covers it. */
+.ads-tabs { display: flex; gap: var(--ads-space-1); list-style: none; margin: 0; padding: 0;
+            overflow-x: auto;
+            --ads-tab-bg: var(--ads-sunken);
+            box-shadow: inset 0 calc(-1 * var(--ads-border-width)) var(--ads-line); }
+.ads-tabs > * { flex: none; }
+/* The boxed tab, which is what Tabler's cards use. An underline tab was the first
+ * implementation here and it is a different design — pretty, but not the reference.
+ *
+ * The tab carries a transparent border on all four sides, so an ACTIVE tab's own bottom
+ * border lands on the list's bottom rule and covers it. That is what joins the tab to the
+ * panel below. */
+.ads-tab {
+  display: block;
+  padding: var(--ads-space-2) var(--ads-space-3);
+  color: var(--ads-ink-muted);
+  text-decoration: none;
+  border: var(--ads-border-width) solid transparent;
+  border-radius: var(--ads-radius) var(--ads-radius) 0 0;
+}
+.ads-tab:hover { color: var(--ads-ink); }
+/* inside the scroller, so the ring is drawn inward or it would be clipped */
+.ads-tab:focus-visible { outline-offset: -2px; }
+.ads-tab[aria-current] {
+  color: var(--ads-ink);
+  background: var(--ads-tab-bg);
+  border-color: var(--ads-line);
+  border-bottom-color: var(--ads-tab-bg);
+}
+.ads-tabpanel { display: none; padding-top: var(--ads-space-4); }
+.ads-tabpanel.is-active { display: block; }
+
+/* Pills — the same job where the group is a filter rather than a section. */
+.ads-pills { display: flex; flex-wrap: wrap; gap: var(--ads-space-1); list-style: none; margin: 0; padding: 0; }
+.ads-pill {
+  display: block;
+  padding: var(--ads-space-1) var(--ads-space-3);
+  color: var(--ads-ink-muted);
+  text-decoration: none;
+  border-radius: var(--ads-radius);
+}
+.ads-pill:hover { background: var(--ads-sunken); }
+.ads-pill[aria-current] { color: var(--ads-brand-fg); background: var(--ads-brand); }
+/* On a brand fill a tone is unreadable (green on navy), so toned text inside a filled
+ * current item or a primary button takes the fill's foreground. Tints keep their tone:
+ * a chip or badge brings its own ground. */
+:is(.ads-pill[aria-current], .ads-page-link[aria-current], .ads-btn--primary)
+  :is(.ads-toned, .ads-change) { color: inherit; }
+
+/* Breadcrumbs — where you are, when the sidebar cannot say it. The separator is a
+ * pseudo-element so it never lands in a copy-paste or a screen reader's output.
+ *
+ * Body size, not the small step: Tabler's is 14px, and a trail of links that has to be
+ * squinted at is a trail nobody follows. The current page is the one in bold. */
+.ads-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: var(--ads-ink);
+}
+.ads-breadcrumb > li + li { padding-inline-start: var(--ads-space-2); }
+.ads-breadcrumb > li + li::before {
+  content: "/";
+  padding-inline-end: var(--ads-space-2);
+  color: var(--ads-ink-muted);
+}
+.ads-breadcrumb a { color: inherit; text-decoration: none; }
+.ads-breadcrumb a:hover { text-decoration: underline; }
+.ads-breadcrumb [aria-current="page"] { font-weight: var(--ads-weight-bold); }
+
+.ads-steps { display: flex; gap: var(--ads-space-1); counter-reset: ads-step; list-style: none;
+              margin: 0; padding: 0; width: 100%; }
+/* A step that is not the current one is the body colour at 40%, not the muted grey: it is
+ * the same text, dimmed, rather than a different kind of text. */
+.ads-step {
+  flex: 1 1 0;
+  position: relative;
+  padding-top: var(--ads-space-6);
+  text-align: center;
+  color: color-mix(in srgb, var(--ads-ink) 40%, transparent);
+}
+.ads-step::before {
+  counter-increment: ads-step;
+  content: counter(ads-step);
+  position: absolute;
+  /* above the connector: both are positioned pseudo-elements, and `::after` paints last,
+     so without this the line is drawn straight across the circle it connects to */
+  z-index: 1;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  display: grid;
+  place-items: center;
+  width: var(--ads-space-6);
+  height: var(--ads-space-6);
+  border-radius: var(--ads-radius-pill);
+  background: var(--ads-line);
+  color: var(--ads-ink-muted);
+}
+.ads-step::after {
+  content: "";
+  position: absolute;
+  inset-block-start: calc(var(--ads-space-3) - 1px);
+  inset-inline-start: -50%;
+  width: 100%;
+  height: 2px;
+  background: var(--ads-line);
+}
+.ads-step:first-child::after { display: none; }
+.ads-step[aria-current] { color: var(--ads-ink); font-weight: var(--ads-weight-bold); }
+.ads-step[aria-current]::before { background: var(--ads-brand); color: var(--ads-brand-fg); }
+.ads-step[aria-current]::after { background: var(--ads-brand); }
+
+/* The application's own top bar. */
+.ads-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-2) var(--ads-space-4);
+  background: var(--ads-surface);
+  box-shadow: inset 0 calc(-1 * var(--ads-border-width)) 0 0 var(--ads-line);
+}
+/* A search in the top bar gives way first. It kept its width on a phone, and the buttons
+ * beside it wrapped into a 112px bar at 390px (SourceLab). Shrinking does not fix that: the
+ * cluster takes its share of any shrink, and a fraction of a pixel wraps its last item.
+ * So the search asks for 5rem and grows into the room left, and on a screen too narrow
+ * for even that, the bar wraps and the cluster moves down whole. */
+.ads-topbar > .ads-input-icon { flex: 1 1 5rem; max-width: 24rem; }
+
+/* Segmented control — a small set of mutually exclusive views: list/board, day/week/month,
+ * all/mine/archived. It is a toolbar control, not page navigation, which is why it reads
+ * as one pill rather than a row of tabs.
+ *
+ * Tabler's measurements: 2.5rem tall, 2px of padding around the track, 6px on the thumb
+ * (so the track's radius is 6+2), a 0.25rem gap, 0.75rem of padding either side of a link.
+ *
+ * Two markup forms, because the right one depends on what it drives: `<a>` when each
+ * segment is a URL (the server re-renders, and the state survives a reload), and a radio
+ * `<input>` + `<label>` when it is a form field or client state — that one needs no
+ * JavaScript at all, since `:checked` does the work. */
+.ads-segmented {
+  display: inline-flex;
+  /* one line, scrolling when short of room: wrapped, five periods read as two controls */
+  max-width: 100%;
+  overflow-x: auto;
+  gap: var(--ads-space-1);
+  padding: 2px;
+  list-style: none;
+  margin: 0;
+  background: var(--ads-sunken);
+  border-radius: calc(var(--ads-radius) + 2px);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ads-shadow-color) 4%, transparent);
+}
+.ads-segmented__item {
+  display: inline-flex;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ads-space-1);
+  min-width: calc(var(--ads-control) - 4px);
+  height: calc(var(--ads-control) - 4px);
+  padding: 0 calc(var(--ads-space-3) - 2px);
+  font: inherit;
+  color: var(--ads-ink-muted);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  background: transparent;
+  border: var(--ads-border-width) solid transparent;
+  border-radius: var(--ads-radius);
+  transition: background-color .12s, color .12s;
+}
+.ads-segmented__item:hover { color: var(--ads-ink-strong); background: var(--ads-neutral-tint); }
+.ads-segmented__item svg { width: var(--ads-icon-size); height: var(--ads-icon-size); }
+.ads-segmented__item[aria-current],
+.ads-segmented input:checked + .ads-segmented__item {
+  color: var(--ads-ink);
+  background: var(--ads-surface);
+  border-color: var(--ads-line);
+}
+.ads-segmented input { position: absolute; opacity: 0; pointer-events: none; }
+.ads-segmented--sm .ads-segmented__item {
+  min-width: calc(var(--ads-control-md) - 4px);
+  height: calc(var(--ads-control-md) - 4px);
+  padding: 0 calc(var(--ads-space-2) - 2px);
+  font-size: var(--ads-text-sm);
+  border-radius: var(--ads-radius-sm);
+}
+.ads-segmented--sm { border-radius: calc(var(--ads-radius-sm) + 2px); }
+
+
+/* Section nav — the links beside a long document, with the visible section marked. The
+ * marking is behaviour (an IntersectionObserver in the shell), the styling is here.
+ *
+ * `position: sticky` and not `fixed`: the nav belongs to its column, so it stops at the
+ * column's end instead of floating over whatever comes next. */
+.ads-subnav {
+  position: sticky;
+  inset-block-start: var(--ads-space-6);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-inline-start: 2px solid var(--ads-line-soft);
+}
+.ads-subnav a {
+  display: block;
+  padding: var(--ads-space-2) var(--ads-space-4);
+  margin-inline-start: -2px;
+  color: var(--ads-ink-muted);
+  text-decoration: none;
+  border-inline-start: 2px solid transparent;
+}
+.ads-subnav a:hover { color: var(--ads-ink); }
+.ads-subnav a[aria-current] {
+  color: var(--ads-brand-ink);
+  border-inline-start-color: var(--ads-brand);
+  font-weight: var(--ads-weight-medium);
+}
+/* Things that sit above the page: dropdown, modal, toast.
+ *
+ * None of them needs JavaScript from us. A dropdown is a <details>, a modal is shown by a
+ * class, a toast by presence. The host decides how the class gets there — a compiled
+ * island, a handler, a server render — and the CSS does not care.
+ */
+
+.ads-dropdown { position: relative; display: inline-block; }
+.ads-dropdown > summary { list-style: none; cursor: pointer; }
+.ads-dropdown > summary::-webkit-details-marker { display: none; }
+.ads-menu {
+  position: absolute;
+  inset-inline-end: 0;
+  inset-block-start: 100%;
+  z-index: 10;
+  min-width: 12rem;
+  /* vertical padding only: an item spans the menu's full width, so its hover is a bar
+     rather than a floating pill with a gap either side. Tabler's metrics. */
+  padding: var(--ads-space-1) 0;
+  background: var(--ads-raised);
+  border-radius: var(--ads-radius);
+  /* no border: the overlay shadow's last layer IS the edge, and a border on top of it
+     reads as two lines at slightly different greys */
+  box-shadow: var(--ads-shadow-overlay);
+}
+.ads-dropdown:not([open]) > .ads-menu { display: none; }
+.ads-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-2);
+  width: 100%;
+  padding: var(--ads-space-2) var(--ads-space-3);
+  font: inherit;
+  font-size: var(--ads-text);
+  color: var(--ads-ink);
+  text-align: start;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+.ads-menu__item:hover { background: var(--ads-sunken); }
+.ads-menu__item--danger { color: var(--ads-danger-ink); }
+.ads-menu__sep { height: var(--ads-border-width); margin: var(--ads-space-2) 0; background: var(--ads-line); }
+
+.ads-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: color-mix(in srgb, var(--ads-n-950) 45%, transparent);
+}
+.ads-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: var(--ads-space-4);
+}
+.ads-backdrop:not(.is-open), .ads-modal:not(.is-open) { display: none; }
+/* Tabler's modal, measured: a 1.5rem rhythm, a 3.5rem header whose close button is
+ * absolutely positioned in the corner (so the header reserves 3.5rem on its trailing side
+ * rather than laying the button out), and a footer on the sunken tone. The panel carries a
+ * transparent border so the inner radius arithmetic has a border-width to subtract. */
+.ads-modal__panel {
+  position: relative;
+  width: 100%;
+  max-width: 32rem;
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid transparent;
+  border-radius: var(--ads-radius-lg);
+  box-shadow: var(--ads-shadow);
+}
+.ads-modal__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  min-height: var(--ads-control-lg);
+  padding-block: 0;
+  padding-inline: var(--ads-space-6) 3.5rem;
+  border-bottom: var(--ads-border-width) solid var(--ads-line);
+  border-radius: calc(var(--ads-radius-lg) - var(--ads-border-width)) calc(var(--ads-radius-lg) - var(--ads-border-width)) 0 0;
+}
+.ads-modal__head > .ads-close {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  width: var(--ads-control-lg);
+  height: var(--ads-control-lg);
+  padding: 0;
+  margin: 0;
+}
+.ads-modal__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--ads-space-3);
+  /* 0.75rem down the block axis, 1.5rem less half the gap across it: the footer is
+     shallower than the body, so a row of buttons does not read as its own panel */
+  padding: var(--ads-space-3) calc(var(--ads-space-6) - var(--ads-space-3) * .5);
+  background: var(--ads-sunken);
+  border-top: var(--ads-border-width) solid var(--ads-line);
+  border-radius: 0 0 calc(var(--ads-radius-lg) - var(--ads-border-width)) calc(var(--ads-radius-lg) - var(--ads-border-width));
+}
+/* The consent notice borrows this: an overlay's heading is an overlay's heading, and naming
+   it twice would be four duplicated declarations. Named here rather than left to
+   `.ads-modal__title` alone, because a `__title` outside its block is a name that lies —
+   which is what the browser gate's containment check reports. */
+.ads-modal__title,
+.ads-cookies__title {
+  margin: 0;
+  font-size: var(--ads-text-md);
+  font-weight: var(--ads-weight-bold);
+  line-height: var(--ads-line-height);
+  color: var(--ads-ink-strong);
+}
+.ads-modal__body { padding: var(--ads-space-6); }
+
+.ads-toasts {
+  position: fixed;
+  inset-block-end: var(--ads-space-4);
+  inset-inline-end: var(--ads-space-4);
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ads-space-2);
+}
+.ads-toast {
+  /* never wider than the screen it has to appear on, insets included */
+  width: min(18rem, calc(100vw - var(--ads-space-8)));
+  background: var(--ads-raised);
+  border: var(--ads-border-width) solid var(--ads-line-soft);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow);
+}
+/* The header is the quiet half — muted, normal weight, on the sunken tone — so the
+ * `<strong>` inside it and the body below read as the message. */
+.ads-toast__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-2);
+  padding: var(--ads-space-2) var(--ads-space-3);
+  color: var(--ads-ink-muted);
+  /* translucent, so the body's surface shows through and the two read as one panel */
+  background: color-mix(in srgb, var(--ads-sunken) 85%, transparent);
+  border-bottom: var(--ads-border-width) solid var(--ads-line-soft);
+  border-radius: calc(var(--ads-radius) - var(--ads-border-width)) calc(var(--ads-radius) - var(--ads-border-width)) 0 0;
+}
+.ads-toast__body { padding: var(--ads-space-3); color: var(--ads-ink); }
+
+/* A close control: the one button that is only an icon. */
+.ads-close {
+  display: grid;
+  place-items: center;
+  width: var(--ads-space-6);
+  height: var(--ads-space-6);
+  padding: 0;
+  color: var(--ads-ink-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--ads-radius-sm);
+  cursor: pointer;
+}
+.ads-close:hover { background: var(--ads-sunken); color: var(--ads-ink); }
+
+/* Drawer — a panel that slides in from an edge. The modal's sibling: same backdrop, same
+ * `is-open`, but it keeps the page visible behind it, which is what a filter panel, a
+ * detail peek or a bulk-edit form wants. Tabler's offcanvas is 400px; ours is a knob.
+ *
+ * It comes from the trailing edge, which is where an inspector belongs. A navigation
+ * drawer from the leading edge is the same box with `inset-inline` flipped — two lines,
+ * added the day a screen needs one rather than today. */
+.ads-drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-end: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: min(var(--ads-drawer-width, 25rem), 100vw);
+  background: var(--ads-surface);
+  box-shadow: var(--ads-shadow-lg);
+  transition: translate .2s ease-out;
+}
+/* closed = pushed off its own edge, so the transition has something to animate. `display:
+ * none` would jump. `visibility` keeps it out of the tab order while it is off-screen. */
+.ads-drawer:not(.is-open) { translate: 100% 0; visibility: hidden; }
+.ads-drawer__head, .ads-drawer__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-4) var(--ads-space-5);
+}
+.ads-drawer__head { border-bottom: var(--ads-border-width) solid var(--ads-line-soft); }
+.ads-drawer__foot { border-top: var(--ads-border-width) solid var(--ads-line-soft); margin-block-start: auto; }
+.ads-drawer__title { margin: 0; font-size: var(--ads-text-md); font-weight: var(--ads-weight-medium); }
+.ads-drawer__body { flex: 1; overflow-y: auto; padding: var(--ads-space-5); }
+
+/* Tooltip — CSS only, from a `data-tip` attribute, so there is no second element to keep
+ * in sync with the thing it describes and nothing to initialise.
+ *
+ * It is `aria-hidden` by construction: a tooltip built from `content` is not in the
+ * accessibility tree at all. That is the right default for a *hint* that repeats a
+ * visible label, and the wrong one for information only the tooltip carries — so when
+ * the text matters, it belongs in `aria-label` or `aria-describedby` too, and this is
+ * decoration on top. */
+.ads-tip { position: relative; }
+.ads-tip::after {
+  /* `display: none` rather than `opacity: 0`, and this is the whole reason: a transparent
+   * box still takes part in layout, so a hidden tooltip on a card near the right edge was
+   * silently widening the document by its own 16rem and the page scrolled sideways with
+   * nothing visible to explain it. Same for `visibility: hidden`. Losing the fade is the
+   * price; a tooltip that appears at once is not a defect. */
+  display: none;
+  content: attr(data-tip);
+  position: absolute;
+  inset-block-end: calc(100% + var(--ads-space-2));
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  z-index: 50;
+  width: max-content;
+  max-width: 16rem;
+  padding: var(--ads-space-1) var(--ads-space-2);
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-normal);
+  line-height: var(--ads-line-control);
+  color: var(--ads-n-0);
+  background: var(--ads-n-900);
+  border-radius: var(--ads-radius-sm);
+  pointer-events: none;
+}
+/* `:focus-visible` as well as `:hover`: a hint only a mouse can reach is not a hint */
+.ads-tip:hover::after, .ads-tip:focus-visible::after { display: block; }
+
+/* Popover — a tooltip's larger sibling, and a different component rather than a bigger
+ * one: a tooltip is a hint the mouse reveals and takes away, a popover holds content a
+ * person reads and can interact with, so it stays until dismissed and can contain a link.
+ *
+ * `<details>` again, so opening it needs no script and Escape and click-outside are the
+ * shell's existing dismissal — the same two lines that close every dropdown. */
+.ads-popover { position: relative; display: inline-block; }
+.ads-popover > summary { list-style: none; cursor: pointer; }
+.ads-popover > summary::-webkit-details-marker { display: none; }
+.ads-popover__panel {
+  position: absolute;
+  inset-inline-start: 0;
+  inset-block-start: calc(100% + var(--ads-space-2));
+  z-index: 50;
+  width: max-content;
+  max-width: 20rem;
+  padding: var(--ads-space-4);
+  font-weight: var(--ads-weight-normal);
+  color: var(--ads-ink);
+  text-align: start;
+  background: var(--ads-raised);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-overlay);
+}
+.ads-popover:not([open]) > .ads-popover__panel { display: none; }
+.ads-popover__title { margin: 0 0 var(--ads-space-2); font-size: var(--ads-text);
+                      font-weight: var(--ads-weight-medium); color: var(--ads-ink-strong); }
+
+/* Cookie banner — the notice an EU application has to show.
+ *
+ * It was a non-modal `<dialog>`, on the reasoning that a `<div>` is what everyone builds
+ * badly and `<dialog>` is the element for the job. Measuring it said otherwise. `show()`
+ * runs the dialog focusing steps exactly as `showModal()` does, so every one of fifty
+ * page loads moved the keyboard user to a button near the END of the document — and from
+ * there Tab goes forward into the browser's own chrome, not back into the page. Nothing
+ * was gained for it: a non-modal dialog is not in the top layer, Escape does not close
+ * it, and `::backdrop` was already switched off.
+ *
+ * So it is a labelled region that the reader reaches when they reach it. `hidden` opens
+ * and closes it, the buttons are real buttons, and nothing takes focus it was not given. */
+.ads-cookies {
+  position: fixed;
+  /* bottom-trailing corner. `inset: auto 16px 16px` sets the LEADING inset too, and a
+     fixed box with both insets and a width resolves the leftover to the trailing side —
+     which put the notice over the sidebar. `auto` on the leading edge is the fix. */
+  inset: auto var(--ads-space-4) var(--ads-space-4) auto;
+  z-index: 60;
+  width: min(32rem, calc(100vw - var(--ads-space-8)));
+  padding: var(--ads-space-5);
+  color: var(--ads-ink);
+  background: var(--ads-raised);
+  border-radius: var(--ads-radius-lg);
+  box-shadow: var(--ads-shadow-overlay);
+}
+.ads-cookies__actions { display: flex; flex-wrap: wrap; gap: var(--ads-space-2); margin-top: var(--ads-space-4); }
+/* Accept and refuse are the same weight on purpose: a design that makes one of them a
+ * ghost button is a dark pattern, and in several jurisdictions an unlawful one. */
+.ads-cookies__actions > .ads-btn { flex: 1; }
+
+/* Lightbox — an attachment at full size. A modal `<dialog>`, because looking at a scan of
+ * an invoice IS a modal task: there is one thing to do and Escape ends it.
+ *
+ * `showModal()` here, against the cookie notice's `show()`, and the difference is the
+ * rule: a dialog that interrupts to ask permission must leave the page usable, a dialog
+ * the person deliberately opened should take the focus and give it back on close. */
+.ads-lightbox {
+  width: min(64rem, 92vw);
+  max-width: none;
+  max-height: 92vh;
+  padding: 0;
+  color: var(--ads-ink);
+  background: var(--ads-surface);
+  border: 0;
+  border-radius: var(--ads-radius-lg);
+  box-shadow: var(--ads-shadow-lg);
+  overflow: hidden;
+}
+.ads-lightbox::backdrop { background: color-mix(in srgb, var(--ads-n-950) 65%, transparent); }
+.ads-lightbox__head {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-3) var(--ads-space-4);
+  border-bottom: var(--ads-border-width) solid var(--ads-line-soft);
+}
+.ads-lightbox__body {
+  display: grid;
+  place-items: center;
+  padding: var(--ads-space-4);
+  background: var(--ads-sunken-strong);
+}
+/* the image decides the height up to the dialog's cap, and never overflows it */
+.ads-lightbox__body > img { max-height: calc(92vh - 8rem); object-fit: contain; }
+
+/* Tour — a sequence of coach marks over the real interface. The one onboarding pattern
+ * that is a design-system component rather than a page: it appears on top of screens the
+ * system did not write, so its chrome has to be the system's or it looks bolted on.
+ *
+ * The card is FIXED, not anchored to the target. An anchored bubble has to be flipped and
+ * shifted to stay on screen — the whole reason `anchor-position` is being standardised —
+ * and gets it wrong on the one viewport nobody tested. A card in a corner plus a ring on
+ * the target says the same thing and cannot be positioned wrongly. */
+.ads-tour {
+  position: fixed;
+  inset: auto var(--ads-space-4) var(--ads-space-4) auto;
+  z-index: 70;
+  width: min(24rem, calc(100vw - var(--ads-space-8)));
+  padding: var(--ads-space-5);
+  background: var(--ads-raised);
+  border-radius: var(--ads-radius-lg);
+  box-shadow: var(--ads-shadow-overlay);
+}
+.ads-tour__step { font-size: var(--ads-text-sm); color: var(--ads-ink-muted); }
+.ads-tour__title { margin: var(--ads-space-1) 0 var(--ads-space-2); font-size: var(--ads-text-md);
+                   font-weight: var(--ads-weight-bold); color: var(--ads-ink-strong); }
+.ads-tour__actions { display: flex; gap: var(--ads-space-2); margin-top: var(--ads-space-4); }
+/* The ring is drawn on the target itself rather than as a cut-out overlay: a four-panel
+ * mask has to be recomputed on every scroll and resize, and is wrong during both. */
+.ads-tour-target {
+  position: relative;
+  z-index: 69;
+  border-radius: var(--ads-radius);
+  box-shadow: 0 0 0 3px var(--ads-brand), 0 0 0 9999px color-mix(in srgb, var(--ads-n-950) 45%, transparent);
+}
+/* Table. */
+.ads-table {
+  width: 100%;
+  border-color: var(--ads-line-soft);
+  margin-bottom: var(--ads-space-4);
+  border-collapse: collapse;
+  color: var(--ads-ink);
+  font-size: var(--ads-text);
+}
+.ads-table th {
+  --ads-row-pad: calc(var(--ads-space-2) * var(--ads-row-scale));
+  padding: var(--ads-row-pad) var(--ads-space-3);
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-medium);
+  color: var(--ads-ink-muted);
+  border-color: var(--ads-line-soft);
+  text-align: start;
+  text-transform: var(--ads-label-case);
+  letter-spacing: var(--ads-label-tracking);
+  background: var(--ads-sunken);
+  border-bottom: var(--ads-border-width) solid var(--ads-line-soft);
+}
+/* `.ads-table th` outweighs the alignment classes, so a figures column kept its header at
+ * the start while its values sat at the end */
+.ads-table th.ads-end { text-align: end; }
+.ads-table th.ads-center { text-align: center; }
+.ads-table td {
+  --ads-row-pad: calc(var(--ads-space-3) * var(--ads-row-scale));
+  padding: var(--ads-row-pad) var(--ads-space-3);
+  /* figures in a column line up whatever the font */
+  font-variant-numeric: tabular-nums;
+  border-top: var(--ads-border-width) solid var(--ads-line-soft);
+}
+.ads-table tr { border-color: var(--ads-line-soft); }
+.ads-table--vcenter td, .ads-table--vcenter th { vertical-align: middle; }
+.ads-table tbody tr:hover { background: var(--ads-sunken); }
+
+/* Variants. Each is one decision: how rows are separated, whether they respond to the
+ * pointer, whether a header stays put, and how a too-wide table behaves. */
+.ads-table--striped tbody tr:nth-child(odd) { background: var(--ads-sunken); }
+.ads-table--hover tbody tr:hover { background: var(--ads-brand-wash); }
+.ads-table--selectable tbody tr { cursor: pointer; }
+.ads-table--selectable tbody tr.is-selected { background: var(--ads-brand-wash); }
+.ads-table--sticky thead th { position: sticky; inset-block-start: 0; z-index: 1; }
+.ads-table--compact :is(th, td) {
+  --ads-row-pad: calc(var(--ads-space-1) * var(--ads-row-scale));
+  padding: var(--ads-row-pad) var(--ads-space-2);
+}
+/* Rows of one height on a narrow screen: cells keep to one line and the table scrolls
+ * inside `.ads-table-scroll`. */
+.ads-table--nowrap :is(th, td) { white-space: nowrap; }
+/* Beside the main column, the short cells (a result, an age, a size) keep to one line and
+ * the `ads-full` cell is the one that wraps (SourceLab). */
+.ads-table td:has(~ td.ads-full), .ads-table td.ads-full ~ td { white-space: nowrap; }
+
+/* A scroll container for a table too wide for its column.
+ *
+ * An overflow ancestor clips an absolutely-positioned child, so a row's action menu opens
+ * into a sliver. This handed the overflow back above 62em to avoid that, and it was the
+ * wrong trade twice over. A media query's `em` is the INITIAL font size and not the
+ * root's, so `min-width: 62em` is 992px whether or not the reader has doubled their text
+ * — which means that at 200% text a 1280px window counted as roomy while its content was
+ * twice the size, the scroller was off, and six pages pushed the whole document sideways.
+ * That is WCAG 1.4.4, and it is the one case the rule was supposed to serve.
+ *
+ * The scroller stays on, and the clipping is lifted only for the moment it is in the way:
+ * while a menu inside the table is open. Nothing else needs the overflow, and a menu is
+ * open for a second at a time. */
+.ads-table-scroll { overflow-x: auto; }
+/* Column priorities, on a column's `th` and `td`. The wrapper is the container, so the
+ * room a sidebar or a split leaves is what counts, not the window.
+ *
+ * A size container ignores its content when its own width is worked out, so in a parent
+ * that shrinks to fit (a dialog, a flex item, an inline block) it came out 0px wide and
+ * the table vanished. Only a table that uses priorities pays for the container, and it
+ * asks for the width at which every column shows: the parent's room, if that is less. */
+.ads-table-scroll:has(:is(.ads-col--secondary, .ads-col--tertiary)) {
+  container-type: inline-size;
+  contain-intrinsic-inline-size: 40rem;
+}
+@container (width < 40rem) { .ads-col--secondary { display: none; } }
+@container (width < 30rem) { .ads-col--tertiary { display: none; } }
+.ads-table-scroll:has(details[open]) { overflow: visible; }
+
+/* A sortable header is a button, not a link with a decoration. */
+.ads-th-sort {
+  display: inline-flex;
+  align-items: center;
+  /* the header's own padding is not the control's: the button was 17px tall, and two of
+     them side by side leave no room to miss */
+  min-height: var(--ads-tap);
+  gap: var(--ads-space-1);
+  font: inherit;
+  color: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+.ads-th-sort::after { content: "↕"; opacity: .4; }
+.ads-th-sort[aria-sort="ascending"]::after { content: "↑"; opacity: 1; }
+.ads-th-sort[aria-sort="descending"]::after { content: "↓"; opacity: 1; }
+.ads-table tfoot td { border-top: var(--ads-border-width) solid var(--ads-line); font-weight: var(--ads-weight-medium); }
+
+/* A datatable: a table with a selection column and a bar that appears when anything is
+ * selected. The bar's visibility is `:has()`, not JavaScript — the checkboxes already
+ * hold the state, so nothing needs to mirror it. */
+.ads-datatable { position: relative; }
+
+/* The bar that replaces a toolbar while something is selected: "3 selected — Close, Reopen".
+ *
+ * It was `.ads-datatable__bulk`, `display: none`, revealed only by the datatable's own
+ * `:has(tbody input:checked)`. That made it unusable anywhere the selection is not table
+ * checkboxes — a list, a board, a grid of cards — because the ONE mechanism that could
+ * reveal it was written into its own rule. Found by porting an issue tracker whose
+ * selection is a set in application state.
+ *
+ * So the bar is visible by default and the author hides it with `hidden`, which is the
+ * platform's answer and what base.css already forces to win. Inside a datatable the
+ * selection cells' checkboxes still decide and the author writes no state at all. */
+.ads-bulkbar {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-2) var(--ads-space-5);
+  background: var(--ads-brand-wash);
+  border-bottom: var(--ads-border-width) solid var(--ads-line-soft);
+}
+.ads-datatable .ads-bulkbar { display: none; }
+.ads-datatable:has(.ads-table__select input:checked) .ads-bulkbar { display: flex; }
+.ads-datatable:has(.ads-table__select input:checked) .ads-datatable__idle { display: none; }
+.ads-table tbody tr:has(.ads-table__select input:checked) { background: var(--ads-brand-wash); }
+.ads-table__select { width: 1%; }
+
+/* Layout primitives.
+ *
+ * The demo's markup leans on ~500 uses of Bootstrap utilities — `row`, `col-lg-4`,
+ * `d-flex`, `align-items-center`, `ms-auto`, `mb-3`. Reimplementing that is ~200 atomic
+ * classes, and atomic classes do not compose: `d-flex align-items-center gap-2 ms-auto`
+ * is four decisions spelled at the call site, every time, with nothing to name.
+ *
+ * These are the four shapes that markup actually keeps making. Each takes its spacing
+ * from the scale, so the whitespace knob reaches them, and each is one class at the call
+ * site instead of four.
+ */
+
+/* Vertical flow. The most common thing in any page: things stacked, evenly spaced. */
+.ads-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ads-gap, var(--ads-space-4));
+}
+
+/* Horizontal group that wraps rather than overflows — toolbars, button groups, tag lists. */
+.ads-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ads-gap, var(--ads-space-3));
+}
+
+/* Two things pushed apart: a title and its actions. The single most common toolbar. */
+.ads-spread {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ads-gap, var(--ads-space-3));
+}
+
+/* Responsive columns without breakpoint classes at the call site: the columns fit
+ * themselves to the available width, so one class replaces `col-12 col-md-6 col-lg-4`. */
+.ads-grid {
+  display: grid;
+  /* `min(…, 100%)` is the whole idiom. A bare `minmax(22rem, 1fr)` states a track that is
+   * 352px WIDE AT MINIMUM, so at 320 CSS pixels — a 1280 window at 400% zoom, which
+   * WCAG 1.4.10 requires to reflow — the track simply overflows and the page scrolls
+   * sideways. With the `min()` the floor gives way once the container is smaller than it. */
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--ads-col, 16rem), 100%), 1fr));
+  gap: var(--ads-gap, var(--ads-space-4));
+}
+
+/* The handful of one-off adjustments that genuinely have no better home. Deliberately
+ * few: every addition here is a decision that failed to find a component. */
+.ads-push { margin-inline-start: auto; }   /* shove the rest of a cluster to the end */
+.ads-fill { flex: 1; min-width: 0; }       /* take the remaining room, allow truncation */
+.ads-full { width: 100%; }
+.ads-muted { color: var(--ads-ink-muted); }
+/* The other half of the tone mechanism: `.ads-tone-*` says WHICH intent, this says paint
+ * with it. They are separate because most toned things want the tone as a background or a
+ * border and only some want it as ink — and an icon, which inherits `currentColor`,
+ * needs exactly this and nothing else. */
+.ads-toned { color: var(--ads-tone); }
+.ads-end { text-align: end; }
+.ads-center { text-align: center; }
+/* `min-width: 0` is what makes this work at all. A flex item's automatic minimum is its
+ * min-content, and for `white-space: nowrap` that is the whole string — so a truncating item
+ * in a flex row refuses to shrink and overflows instead of eliding. Every use of this class
+ * here is in a flex row, and every one of them happened to also carry `.ads-fill`, which
+ * supplies the zero: the class has never had to work on its own, and did not. */
+.ads-truncate { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ads-col-sm { --ads-col: 12rem; }
+.ads-col-lg { --ads-col: 22rem; }
+
+/* The skip link: visible only when focused, which is the one time it matters. */
+.ads-skip {
+  position: absolute;
+  inset-inline-start: var(--ads-space-2);
+  inset-block-start: var(--ads-space-2);
+  z-index: 50;
+  padding: var(--ads-space-2) var(--ads-space-3);
+  background: var(--ads-surface);
+  border-radius: var(--ads-radius);
+  box-shadow: var(--ads-shadow-lg);
+  translate: 0 -200%;
+}
+.ads-skip:focus { translate: 0 0; }
+
+/* A page with no application chrome: sign-in, errors, anything before the app proper. */
+.ads-centered {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--ads-space-4);
+  background: var(--ads-page);
+}
+.ads-centered__inner { width: 100%; max-width: 26rem; }
+
+/* Main content beside a narrower panel — a form and its explanation, a list and its
+ * filters, a record and its summary. Tabler spells this `col-lg-8` + `col-lg-4`, which
+ * states a breakpoint the content does not actually care about: what matters is whether
+ * the main column still has room. Here the two flex bases decide, so the pair sits side
+ * by side while both fit and stacks when they do not — no breakpoint at the call site. */
+.ads-with-aside {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--ads-gap, var(--ads-space-4));
+}
+/* `min-width: 0` on both halves, and it is load-bearing: a flex item's minimum is its
+ * min-content, so a pane holding a table refuses to shrink below the table's natural
+ * width even when the table has its own scroll container to absorb it — and the PAGE
+ * scrolls sideways instead. The same rule the shell's page body needs, for the same
+ * reason, which is how often this one costs an afternoon. */
+/* The main column takes essentially all the spare room — `flex-grow: 999` against the
+ * aside's 1 — rather than the two splitting it evenly, which is what `flex: 1 1` on both
+ * does and which left a data table on 57% of its row. The aside keeps a grow of 1 so that
+ * when the pair WRAPS, each one is alone on its line and fills it. No breakpoint: the
+ * bases decide when to wrap, the grows decide the share when they do not. */
+.ads-with-aside > :first-child { flex: 999 1 var(--ads-main, 30rem); min-width: 0; }
+.ads-with-aside > :last-child  { flex: 1 1 var(--ads-aside, 18rem); min-width: 0; }
+
+/* Split — a list beside what the selected row shows. The inbox shape, and also every
+ * "pick one of these, edit it here" screen a business app has.
+ *
+ * The panes used to carry `overflow-y: auto`, on the claim that each half scrolls
+ * independently. Nothing ever bounded their height, so neither ever scrolled — the page did,
+ * and `overflow-y: auto` with nothing to overflow is not a scroller. It is a scroll container
+ * that swallows `position: sticky` inside it, which is why a pane could not keep its own
+ * header in view. The page scrolls; the header sticks to the page. */
+.ads-split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ads-gap, var(--ads-space-8));
+  align-items: stretch;
+  min-height: 0;
+}
+
+/* The same bargain as `.ads-with-aside` above, and for the same reason. This was a grid with
+ * `@media (max-width: 61.99em)`, which is the breakpoint that note argues against — and it was
+ * wrong twice over. A split lives inside a card inside a shell, so it never has the viewport's
+ * width; and a split nested in another split has HALF what its parent has at the same
+ * breakpoint, so a three-pane mailbox stayed three panes long after the third had stopped
+ * being readable. The two bases decide instead: side by side while both fit, stacked when they
+ * do not, per instance, with no breakpoint at the call site and none to keep in step.
+ *
+ * `--ads-detail` is the second pane's floor. It is what makes the pair wrap while the detail
+ * still has room to be a detail, rather than when the window happens to cross a number. */
+.ads-split > :first-child { flex: 1 1 var(--ads-split, 22rem); min-width: 0; }
+/* the detail takes essentially all the spare room — grow 999 against the list's 1 — and keeps
+ * a grow of its own so that each pane fills its line once they wrap */
+.ads-split > :last-child { flex: 999 1 var(--ads-detail, 26rem); min-width: 0; }
+
+/* A pane's own header — a search box, a toolbar — which stays put while the pane scrolls
+ * under it. Without it the search box in a mail list scrolls away with the messages, which
+ * is the one control you still want when the list is long enough to need scrolling. */
+.ads-split__head {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 1;
+  padding-block-end: var(--ads-space-3);
+  background: var(--ads-surface);
+}
+
+/* Fill — a split whose panes each scroll on their own, under a page that does not.
+ *
+ * The inbox shape needs it: you scroll the list to find a message and the one you are reading
+ * stays put; you scroll the message and the list stays. Panes can only scroll on their own if
+ * something above them has a definite height, so filling is a contract with the shell: one
+ * class here, and `shell.css` bounds the main column when the page contains it — one class
+ * rather than a second one on the shell that every author has to remember to keep in step.
+ *
+ * It is an enhancement, not a mode. Out of the queries below, `--fill` is an ordinary split:
+ * it wraps by its bases and the page scrolls, so reflow at 320px and at 400% zoom holds by
+ * construction. It fills only when there is room both ways:
+ *
+ *   width   a CONTAINER query on the page body, in rem. A media query's rem is the initial
+ *           font size and cannot see a reader's text-only zoom; a container query's rem is
+ *           the root's computed size, so at 200% text the threshold doubles with the text.
+ *           50rem is the default bases side by side (22 + 26) plus the gap; a project that
+ *           widens `--ads-split` or `--ads-detail` does not move it, because a custom property
+ *           cannot appear in a query.
+ *   height  a media query, the same one `shell.css` bounds the column under. A viewport-tall
+ *           pane under a top bar and a page header is sixty pixels at 400% zoom.
+ *
+ * Every box between the page body and the split has to pass the height down — `shell.css`
+ * builds that chain — so the split is the page's content, and a split nested in a filling
+ * split's pane fills too. Whatever else the page holds keeps its own height. */
+@container (width >= 50rem) {
+  @media (min-height: 30em) {
+    /* a split that is not itself a pane takes the height its column hands it; a pane is
+       sized by the split above it. The column chain down to here is `shell.css`'s. */
+    .ads-split--fill:not(.ads-split > *) { flex: 1; }
+    .ads-split--fill { flex-wrap: nowrap; min-height: 0; }
+    .ads-split--fill > * { overflow-y: auto; min-height: 0; }
+  }
+}
+
+/* Board — columns of cards, scrolling sideways as a unit. A kanban, a pipeline, a roadmap.
+ * The columns are a fixed width on purpose: an auto-fit board reflows while you drag. */
+.ads-board {
+  display: flex;
+  gap: var(--ads-gap, var(--ads-space-4));
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: var(--ads-space-2);
+}
+.ads-board__col {
+  flex: 0 0 var(--ads-board-col, 18rem);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ads-space-3);
+  padding: var(--ads-space-3);
+  background: var(--ads-sunken);
+  border-radius: var(--ads-radius-lg);
+}
+.ads-board__title {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-2);
+  margin: 0;
+  padding: 0 var(--ads-space-1);
+  font-size: var(--ads-text-sm);
+  font-weight: var(--ads-weight-medium);
+  color: var(--ads-ink-muted);
+  text-transform: var(--ads-label-case);
+  letter-spacing: var(--ads-label-tracking);
+}
+
+/* A board whose cards move. `dragging` and `drop-target` are situ's own state classes —
+ * the shim adds them, so they never appear in a template and carry no prefix. Ours is the
+ * styling, scoped to the components they land on, which is the honest division: the
+ * behaviour layer names the state, the design system says what it looks like. */
+.ads-board__card { cursor: default; }
+/* The card being dragged lifts rather than fading: it is still the thing you are holding,
+ * so it keeps its contents legible and gains the shadow of something off the surface. */
+.ads-board__card.dragging {
+  box-shadow: var(--ads-shadow-lg);
+  rotate: 1.5deg;
+  cursor: grabbing;
+}
+.ads-board__col.drop-target { background: var(--ads-brand-fill); }
+/* The gap the card would land in. situ inserts it at the index the drop would use and
+ * moves it as the pointer moves — an outline round the column says "in here", and the
+ * question a drag has to answer is "where". */
+[data-sortplaceholder] {
+  border: 2px dashed var(--ads-brand-line);
+  border-radius: var(--ads-radius-lg);
+  background: var(--ads-brand-tint);
+}
+/* While a drag is running, nothing else on the page should look draggable or select. */
+body.is-dragging { cursor: grabbing; user-select: none; }
+.ads-board__grip {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--ads-control-sm);
+  height: var(--ads-control-sm);
+  color: var(--ads-ink-muted);
+  border-radius: var(--ads-radius-sm);
+  cursor: grab;
+  touch-action: none;   /* or the browser scrolls instead of letting the card be dragged */
+}
+.ads-board__grip:hover { background: var(--ads-sunken); color: var(--ads-ink); }
+.ads-board__grip:active { cursor: grabbing; }
+
+/* Viewport — a fixed-height pane that scrolls its own overflow, for a list too long to put
+ * in the document. Added for a virtualised grid of 20,000 rows, where the browser renders a
+ * window of about thirty and a spacer holds the scrollbar honest.
+ *
+ * Three numbers here are render-time DATA rather than design: how tall the pane is, how tall
+ * the full list would be, and how tall one row is (a virtual scroller computes its window
+ * from that, so the CSS and the server have to agree on it). They arrive as custom
+ * properties, which is the one thing `style=` may carry — see the `inline-style` rule.
+ *
+ * Three names rather than one `--h`: custom properties inherit, so a single name would have
+ * the rows silently taking the pane's height whenever one forgot to set its own. */
+.ads-viewport {
+  height: var(--pane, 24rem);
+  overflow: auto;
+  position: relative;
+  background: var(--ads-surface);
+  border: var(--ads-border-width) solid var(--ads-line);
+  border-radius: var(--ads-radius);
+}
+/* the spacer that gives the scrollbar the full list's extent */
+.ads-viewport__sizer { position: relative; height: var(--extent, auto); }
+.ads-viewport__row {
+  display: flex;
+  align-items: center;
+  gap: var(--ads-space-4);
+  height: var(--row, var(--ads-control-md));
+  padding-inline: var(--ads-space-4);
+  border-bottom: var(--ads-border-width) solid var(--ads-line-soft);
+}
+
+/* Media — a figure (an avatar, an icon, a thumbnail) beside a block of text that reads from
+ * the figure's top: a mail row, a notification, a comment, a search result.
+ *
+ * Not `.ads-cluster` with another alignment. A cluster centres, which puts a three-line
+ * row's avatar beside the second line, and a cluster WRAPS, which at a narrow width drops the
+ * text under its own figure. A figure beside its text never does either. The text takes the
+ * rest of the row with `.ads-fill`, which already means exactly that. */
+.ads-media {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--ads-gap, var(--ads-space-3));
+}
+
+/* Gap is a property of the container, not a class per size — and these set `gap`, not
+ * `--ads-gap`, because a custom property INHERITS and `gap` does not.
+ *
+ * They set the variable once. `--ads-gap` then reached every layout primitive below the
+ * element that carried the class, so a `.ads-stack.ads-gap-sm` wrapping a page silently put
+ * 8px between the panes of every `.ads-split` inside it — and the split's own default, which
+ * is three times that, was never once used. The comment above this block already said gap
+ * belongs to the container; the implementation made it belong to the subtree.
+ *
+ * They live at the END of the file so they win against the primitives' own `gap`, which is
+ * what "a utility" has to do and what the variable was buying before.
+ */
+.ads-gap-sm { gap: var(--ads-space-2); }
+.ads-gap-lg { gap: var(--ads-space-6); }
+
+/* Last, and that is the point: it restores meaning that the parts expressed with colour,
+ * so every rule it overrides has to have been read already. Written at the end of the
+ * reset instead, it lost to `parts/button.css` and the primary button stayed unmarked. */
+/* Forced colours — Windows high contrast, and any other mode where the user has replaced
+ * the palette because ours does not work for them.
+ *
+ * Everything a stylesheet says about colour is discarded there, which is the point. What
+ * has to survive is MEANING that was carried by colour alone, and in this system that is
+ * three things: which button is the primary one, which row of a navigation is the current
+ * one, and edges drawn with a shadow rather than a border.
+ *
+ * `Highlight` / `HighlightText` are the user's own selection colours. Using them for "this
+ * is the one" is the whole convention, and it is why a forced-colours block is short: the
+ * right answer is almost always to say less, in the system's vocabulary.
+ */
+@media (forced-colors: active) {
+  /* An edge drawn with a shadow is not drawn at all here — shadows are dropped. Anything
+   * whose boundary matters gets a real border instead. */
+  .ads-card, .ads-avatar, .ads-menu, .ads-modal__panel, .ads-drawer, .ads-toast,
+  .ads-popover__panel, .ads-lightbox, .ads-cookies, .ads-segmented,
+  .ads-chips--input, .ads-editor {
+    border: 1px solid CanvasText;
+  }
+
+  /* The primary action, and "you are here", are marked with a BORDER rather than by
+   * inverting the fill.
+   *
+   * Inverting is the usual advice — `background: Highlight; color: HighlightText` — and
+   * it is what this block did first. The trouble is the text backplate: a browser paints
+   * a solid `Canvas` rectangle behind text it thinks sits on an uncertain background, and
+   * `Highlight` is not opaque in every implementation. When that happens the fill is
+   * drawn, the backplate covers it, and the label disappears into white on white. A
+   * border cannot be hidden by a backplate, and it reads the same whichever palette the
+   * person has chosen. */
+  .ads-btn--primary { border: 2px solid Highlight; }
+  .ads-btn:disabled { color: GrayText; border-color: GrayText; }
+
+  /* "You are here", in every shape the system has for saying it. */
+  .ads-segmented input:checked + .ads-segmented__item,
+  .ads-list > li:has([aria-current]),
+  [aria-current]:not([aria-current="false"]),
+  [aria-pressed="true"] {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
+
+  /* Where the colour IS the information and the system has no token for it: a status dot,
+   * a bar's length, a series in a chart, the checked state of a control we drew ourselves
+   * because the platform's could not be sized. `forced-color-adjust: none` is the
+   * sanctioned escape for exactly this, and it is a promise that these carry their own
+   * contrast — which the contrast gate checks in both themes. */
+  .ads-status__dot,
+  .ads-progress__bar,
+  .ads-sparkline > i,
+  .ads-uptime > i,
+  .ads-legend__swatch,
+  .ads-check input,
+  .ads-switch__track,
+  .ads-switch__track::after {
+    forced-color-adjust: none;
+  }
+
+  /* A skeleton and a placeholder are texture, and texture is noise here. */
+  .ads-skeleton { background: GrayText; }
+}

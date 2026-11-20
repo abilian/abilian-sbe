@@ -7,6 +7,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from flask import g, redirect, render_template, request
+from werkzeug.exceptions import NotFound
 
 from abilian.core.extensions import db
 from abilian.i18n import _, _l
@@ -21,20 +22,20 @@ from .forms import EditForm
 if TYPE_CHECKING:
     from collections.abc import Callable
 
+    from .models import BaseVocabulary
+
 _MARKER = object()
 
 
 class ViewBase:
     title = _l("Vocabulary entry")
-    base_template = "admin/_base.html"
     Form = EditForm
-    Model = None
+    #: the vocabulary, which the URL names
+    Model: type[BaseVocabulary]
 
     def prepare_args(self, args, kwargs):
-        if self.Model is None:
-            self.Model = kwargs.get("Model")
-            if hasattr(self.Model, "__form__"):
-                self.Form = self.Model.__form__
+        self.Model = kwargs["Model"]
+        self.Form = getattr(self.Model, "__form__", self.Form)
         return args, kwargs
 
     def index_url(self):
@@ -42,6 +43,8 @@ class ViewBase:
 
 
 class Edit(ViewBase, views.ObjectEdit):
+    template = "admin/object_edit.html"
+
     def prepare_args(self, args, kwargs):
         args, kwargs = ViewBase.prepare_args(self, args, kwargs)
         return views.ObjectEdit.prepare_args(self, args, kwargs)
@@ -55,6 +58,8 @@ class Edit(ViewBase, views.ObjectEdit):
 
 
 class Create(views.ObjectCreate, Edit):
+    template = "admin/object_edit.html"
+
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         self.obj.active = True  # do this because default value seems ignored?
@@ -120,11 +125,12 @@ class VocabularyPanel(AdminPanel):
         if return_to is not None:
             return_endpoint += f"_{return_to}"
 
-        if return_to == "group":
-            return_args["group"] = group or "_"
-        elif return_to == "model":
-            return_args["group"] = Model.Meta.group or "_"
-            return_args["Model"] = Model.Meta.name
+        match return_to:
+            case "group":
+                return_args["group"] = group or "_"
+            case "model":
+                return_args["group"] = Model.Meta.group or "_"
+                return_args["Model"] = Model.Meta.name
 
         if "up" in data:
             cmp_op = Model.position.__lt__
@@ -213,6 +219,8 @@ class VocabularyPanel(AdminPanel):
         if model_name is not None:
             svc = get_service("vocabularies")
             Model = svc.get_vocabulary(name=model_name, group=group)
+            if Model is None:
+                raise NotFound
             g.breadcrumb.append(
                 BreadcrumbItem(
                     label=Model.Meta.group if group else _("Global"),

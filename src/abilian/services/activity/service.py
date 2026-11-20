@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import sqlalchemy as sa
-from sqlalchemy.orm import object_session
 
 from abilian.core.entities import Entity
 from abilian.core.signals import activity
+from abilian.core.sqlalchemy.session import session_of
 from abilian.services import Service
 
 from .models import ActivityEntry
@@ -44,7 +44,7 @@ class ActivityService(Service):
             # only for Entities
             return
 
-        session = object_session(object)
+        session = session_of(object)
         kwargs = {"actor": actor, "verb": verb, "object_type": object.entity_type}
 
         if sa.inspect(object).deleted:

@@ -2,30 +2,31 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+import csv
+import io
+from dataclasses import dataclass
+from datetime import date, datetime, time, timedelta
 from itertools import chain
 from typing import TYPE_CHECKING
 
 import pytz
 import sqlalchemy as sa
 import sqlalchemy.orm
+from babel.dates import LOCALTZ
 from flask import (
-    get_template_attribute,
+    Response,
     render_template,
-    render_template_string,
     request,
 )
-from flask_babel import format_date, get_locale
-from markupsafe import Markup
-from werkzeug.exceptions import InternalServerError
+from werkzeug.exceptions import BadRequest
 from werkzeug.routing import BuildError
 
 from abilian.core.entities import Entity, all_entity_classes
 from abilian.core.extensions import db
 from abilian.core.models.subjects import User
 from abilian.core.util import local_dt
-from abilian.i18n import _
-from abilian.services.audit import AuditEntry
+from abilian.i18n import _, _l
+from abilian.services.audit import CREATION, DELETION, UPDATE, AuditEntry
 from abilian.services.security import SecurityAudit
 from abilian.web.admin import AdminPanel
 from abilian.web.util import url_for
@@ -34,23 +35,16 @@ from abilian.web.views.base import JSONView
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-
-def format_date_for_input(date):
-    date_fmt = get_locale().date_formats["short"].pattern
-    # force numerical months
-    date_fmt = date_fmt.replace("MMMM", "MM").replace("MMM", "MM")
-    return format_date(date, date_fmt)
+    from werkzeug.datastructures import MultiDict
 
 
 class JSONUserSearch(JSONView):
     """Search users by fullname."""
 
     def data(self, *args, **kwargs) -> dict:
-        q: str = kwargs["q"]
-        q = q.replace("%", " ").strip().lower()
-
-        if not q or len(q) < 2:
-            raise InternalServerError
+        q = kwargs.get("q", "").replace("%", " ").strip().lower()
+        if len(q) < 2:
+            raise BadRequest
 
         query = User.query
         lower = sa.sql.func.lower
@@ -83,62 +77,34 @@ class JSONUserSearch(JSONView):
 class AuditPanel(AdminPanel):
     """Global audit log.
 
-    Can receive one out of two possible GET parameter, datetime type:
+    Can receive one out of three possible GET parameters:
 
+    * day: events up to the end of that day, in the site's time zone
     * before: events that happened immediately before 't' (less recent than 't')
     * after: events that happened immediately after 't' (more recent than 't')
     """
 
     id = "audit"
-    label = "Audit trail"
+    label = _l("Log")
     icon = "list-alt"
 
     def install_additional_rules(self, add_url_rule: Callable) -> None:
         add_url_rule("/search_users", view_func=JSONUserSearch.as_view("search_users"))
+        add_url_rule("/export", "export", view_func=export_log)
 
     def get(self) -> str:
         LIMIT = 30
 
-        base_audit_q = AuditEntry.query
-        base_security_q = SecurityAudit.query
+        log = log_filter(request.args)
+        base_audit_q = log.audit_q
+        base_security_q = log.security_q
+        filter_user = log.user
+        filter_types = log.types
+        all_classes = log.all_classes
 
-        before = request.args.get("before")
-        after = request.args.get("after")
-
-        # filter on user
-        filter_user = None
-        user_id = request.args.get("user")
-        if user_id:
-            user_id = int(user_id)
-            filter_user = User.query.get(user_id)
-            base_audit_q = base_audit_q.filter(AuditEntry.user == filter_user)
-            base_security_q = base_security_q.filter(
-                SecurityAudit.manager == filter_user
-            )
-
-        # filter by types
-        all_classes = sorted(all_entity_classes(), key=lambda c: c.__name__)
-        all_types = {e.entity_type for e in all_classes}
-        filter_types = set(request.args.getlist("types")) & all_types
-        if filter_types:
-            if len(filter_types) == 1:
-                t = next(iter(filter_types))
-                audit_expr = AuditEntry.entity_type == t
-                sec_expr = sa.sql.or_(
-                    SecurityAudit.object == None, Entity._entity_type == t
-                )
-            else:
-                audit_expr = AuditEntry.entity_type.in_(filter_types)
-                sec_expr = sa.sql.or_(
-                    SecurityAudit.object == None, Entity._entity_type.in_(filter_types)
-                )
-
-            base_audit_q = base_audit_q.filter(audit_expr)
-            base_security_q = (
-                base_security_q.join(SecurityAudit.object)
-                .filter(sec_expr)
-                .reset_joinpoint()
-            )
+        day = request.args.get("day")
+        before = day_end(day) if day else request.args.get("before")
+        after = None if day else request.args.get("after")
 
         def after_query(q, model, date):
             return q.filter(model.happened_at > date).order_by(model.happened_at.asc())
@@ -147,15 +113,11 @@ class AuditPanel(AdminPanel):
             return q.filter(model.happened_at < date).order_by(model.happened_at.desc())
 
         if after:
-            after = datetime.strptime(after, "%Y-%m-%dT%H:%M:%S.%f")
+            after = page_moment(after)
             audit_q = after_query(base_audit_q, AuditEntry, after)
             security_q = after_query(base_security_q, SecurityAudit, after)
         else:
-            before = (
-                datetime.strptime(before, "%Y-%m-%dT%H:%M:%S.%f")
-                if before
-                else datetime.utcnow()
-            )
+            before = page_moment(before) if before else datetime.utcnow()
             audit_q = before_query(base_audit_q, AuditEntry, before)
             security_q = before_query(base_security_q, SecurityAudit, before)
 
@@ -202,9 +164,8 @@ class AuditPanel(AdminPanel):
         lowest_date = ""
 
         if entries:
-            # top_date and lowest_date are converted to naive datetime (from UTC), so
-            # that isoformat does not include TZ shift (else we should fix strptime
-            # above)
+            # top_date and lowest_date are converted to naive datetimes (from UTC):
+            # their isoformat then carries no zone, as the entries are stored.
             top_date = entries[0][1][0].date.astimezone(pytz.utc).replace(tzinfo=None)
             lowest_date = (
                 entries[-1][1][-1].date.astimezone(pytz.utc).replace(tzinfo=None)
@@ -232,7 +193,7 @@ class AuditPanel(AdminPanel):
 
         current_date = None
         if entries:
-            current_date = format_date_for_input(entries[0][0])
+            current_date = entries[0][0].isoformat()
 
         # build prev/next urls
         url_params = {}
@@ -240,9 +201,14 @@ class AuditPanel(AdminPanel):
             url_params["user"] = filter_user.id
         if filter_types:
             url_params["types"] = next(iter(filter_types))
+        if log.period:
+            url_params["period"] = log.period
 
         ctx = {
             "entries": entries,
+            "periods": PERIODS,
+            "period": log.period,
+            "total": base_audit_q.count() + base_security_q.count(),
             "filter_user": filter_user,
             "all_classes": [(c.__name__, c.entity_type) for c in all_classes],
             "filter_types": filter_types,
@@ -254,18 +220,197 @@ class AuditPanel(AdminPanel):
         return render_template("admin/audit.html", **ctx)
 
 
+#: The log's periods: the name in the address, what the page calls it.
+PERIODS = {
+    "week": _l("The last 7 days"),
+    "month": _l("The last 30 days"),
+    "year": _l("This year"),
+}
+
+
+@dataclass(frozen=True)
+class LogFilter:
+    """The changes and the roles given or taken that the log shows, filtered."""
+
+    audit_q: sa.orm.Query
+    security_q: sa.orm.Query
+    user: User | None
+    types: set[str]
+    period: str | None
+    all_classes: list[type[Entity]]
+
+
+def log_filter(args: MultiDict[str, str]) -> LogFilter:
+    """The log filtered as `args` say: by `user`, by `types` of object, by `period`."""
+    audit_q = AuditEntry.query
+    security_q = SecurityAudit.query
+
+    user = None
+    user_id = args.get("user")
+    if user_id:
+        if not user_id.isdigit():
+            raise BadRequest
+        user = User.query.get(int(user_id))
+        audit_q = audit_q.filter(AuditEntry.user == user)
+        security_q = security_q.filter(SecurityAudit.manager == user)
+
+    all_classes = sorted(all_entity_classes(), key=lambda c: c.__name__)
+    types = set(args.getlist("types")) & {c.entity_type for c in all_classes}
+    if types:
+        audit_q = audit_q.filter(AuditEntry.entity_type.in_(types))
+        security_q = (
+            security_q.join(SecurityAudit.object)
+            .filter(
+                sa.sql.or_(SecurityAudit.object == None, Entity._entity_type.in_(types))
+            )
+            .reset_joinpoint()
+        )
+
+    period = args.get("period") or None
+    start = period_start(period, datetime.utcnow())
+    if start is not None:
+        audit_q = audit_q.filter(AuditEntry.happened_at >= start)
+        security_q = security_q.filter(SecurityAudit.happened_at >= start)
+
+    return LogFilter(audit_q, security_q, user, types, period, all_classes)
+
+
+def day_end(value: str) -> str:
+    """The end of a day, in the site's time zone, as a page's edge (UTC, naive,
+    which is how the log is stored)."""
+    try:
+        day = date.fromisoformat(value)
+    except ValueError as e:
+        raise BadRequest from e
+    midnight = LOCALTZ.localize(datetime.combine(day + timedelta(days=1), time()))
+    return midnight.astimezone(pytz.utc).replace(tzinfo=None).isoformat()
+
+
+def page_moment(value: str) -> datetime:
+    """A page's edge in the address: an ISO date, with or without its fraction of a
+    second (an entry at a whole second has none)."""
+    try:
+        return datetime.fromisoformat(value)
+    except ValueError as e:
+        raise BadRequest from e
+
+
+def period_start(period: str | None, now: datetime) -> datetime | None:
+    """Where `period` starts, counted back from `now`; None for the whole log."""
+    match period:
+        case None:
+            return None
+        case "week":
+            return now - timedelta(days=7)
+        case "month":
+            return now - timedelta(days=30)
+        case "year":
+            return datetime(now.year, 1, 1)
+    raise BadRequest
+
+
+#: The most lines an export holds: the latest.
+EXPORT_LIMIT = 10_000
+
+#: What a line of the export says was done, by kind of change.
+EXPORTED_ACTIONS = {
+    "create": _l("created"),
+    "update": _l("changed"),
+    "delete": _l("deleted"),
+    SecurityAudit.GRANT: _l("role given"),
+    SecurityAudit.REVOKE: _l("role taken back"),
+    SecurityAudit.SET_INHERIT: _l("inherited rights turned on"),
+    SecurityAudit.UNSET_INHERIT: _l("inherited rights turned off"),
+}
+
+
+def export_log() -> Response:
+    """The log as filtered, as a spreadsheet (CSV), the latest first."""
+    log = log_filter(request.args)
+    audit = log.audit_q.order_by(AuditEntry.happened_at.desc()).limit(EXPORT_LIMIT)
+    security = log.security_q.order_by(SecurityAudit.happened_at.desc()).limit(
+        EXPORT_LIMIT
+    )
+    rows = sorted(
+        chain(map(audit_row, audit), map(security_row, security)), reverse=True
+    )
+    out = io.StringIO()
+    writer = csv.writer(out)
+    writer.writerow(
+        [
+            _("Date"),
+            _("Person"),
+            _("E-mail"),
+            _("Action"),
+            _("Kind"),
+            _("Object"),
+            _("Detail"),
+        ]
+    )
+    writer.writerows(
+        [spreadsheet_cell(cell) for cell in row[1:]] for row in rows[:EXPORT_LIMIT]
+    )
+    # The mark tells spreadsheets the file is in UTF-8.
+    return Response(
+        "\ufeff" + out.getvalue(),
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=log.csv"},
+    )
+
+
+#: A line of the export, behind the moment that orders it.
+Row = tuple[datetime, str, str, str, str, str, str, str]
+
+
+def audit_row(entry: AuditEntry) -> Row:
+    """A change to an object, as a line of the export."""
+    verb = AuditEntryPresenter(entry).verb
+    detail = ", ".join(entry.changes.shown_columns()) if verb == "update" else ""
+    return (
+        *_when_and_who(entry.happened_at, entry.user),
+        str(EXPORTED_ACTIONS[verb]),
+        entry.entity_type.rsplit(".", 1)[-1],
+        entry.entity_name or "",
+        detail,
+    )
+
+
+def security_row(entry: SecurityAudit) -> Row:
+    """A role given or taken, or inherited rights turned on or off, as a line."""
+    principal = entry.user or entry.group
+    detail = f"{entry.role} → {principal.name}" if principal and entry.role else ""
+    return (
+        *_when_and_who(entry.happened_at, entry.manager),
+        str(EXPORTED_ACTIONS[entry.op]),
+        (entry.object_type or "").rsplit(".", 1)[-1],
+        entry.object_name or "",
+        detail,
+    )
+
+
+def _when_and_who(
+    happened_at: datetime | None, user: User | None
+) -> tuple[datetime, str, str, str]:
+    """The moment, to order lines by; when, as the site's time shows it; then who,
+    by name and address."""
+    # Set on insert by the columns' default; the models type them as nullable.
+    assert happened_at is not None
+    when = local_dt(happened_at).strftime("%Y-%m-%d %H:%M")
+    if user is None:
+        return happened_at, when, str(_("System")), ""
+    return happened_at, when, user.name, user.email
+
+
+def spreadsheet_cell(value: str) -> str:
+    """`value`, which a spreadsheet will not run as a formula: one that starts as a
+    formula does is read as text."""
+    return f"'{value}" if value[:1] in ("=", "+", "-", "@", "\t", "\r") else value
+
+
 #
 #  Presenters for audit entries listing
 #
 class BaseEntryPresenter:
-    _USER_FMT = (
-        '<a href="{{ url_for("social.user", user_id=user.id) }}"> {{ user.name }}</a>'
-    )
-    _GROUP_FMT = (
-        '<a href="{{ url_for("social.group_home", group_id=group.id)'
-        ' }}">{{ group.name }}</a>'
-    )
-
     def __init__(self, user, date) -> None:
         self.user = user
         self.date = local_dt(date)
@@ -280,9 +425,6 @@ class BaseEntryPresenter:
     def model(model_name):
         return db.Model.registry._class_registry.get(model_name)
 
-    def render(self) -> str:
-        raise NotImplementedError
-
 
 class AuditEntryPresenter(BaseEntryPresenter):
     def __init__(self, entry: AuditEntry) -> None:
@@ -291,112 +433,44 @@ class AuditEntryPresenter(BaseEntryPresenter):
         self.entry = entry
         self.entity_deleted = entry.entity is None
 
-    def render(self) -> str:
-        render = render_template_string
+    @property
+    def verb(self) -> str:
+        """What was done: "create", "update" (a related object's change is one
+        too) or "delete"."""
         e = self.entry
-        user = render(self._USER_FMT, user=e.user)
-        entity_html = e.entity_name
+        if e.type == CREATION:
+            return "create"
+        if e.related or e.op == UPDATE:
+            return "update"
+        if e.op == DELETION:
+            return "delete"
+        msg = f"Bad entry type: {e.type}"
+        raise ValueError(msg)
 
-        if not self.entity_deleted:
-            try:
-                entity_url = url_for(e.entity)
-            except (BuildError, ValueError):
-                pass
-            else:
-                entity_html = Markup(
-                    render(
-                        '<a href="{{ url }}">{{ entity.path or entity.name }}</a>',
-                        url=entity_url,
-                        entity=e.entity,
-                    )
-                )
-
-        if e.type == 0:
-            msg = _('{user} created {entity_type} {entity_id} "{entity}"')
-        elif e.related or e.op == 1:
-            msg = _('{user} made changes on {entity_type} {entity_id} "{entity}"')
-        elif e.op == 2:
-            msg = _('{user} has deleted {entity_type}: {entity_id} "{entity}"')
-        else:
-            msg = f"Bad entry type: {e.type}"
-            raise Exception(msg)
-
-        self.msg = Markup(
-            msg.format(
-                user=user,
-                entity=entity_html,
-                entity_type=e.entity_type.rsplit(".", 1)[-1],
-                entity_id=e.entity_id,
-            )
-        )
-        tmpl = get_template_attribute("admin/_macros.html", "m_audit_entry")
-        return tmpl(self)
+    @property
+    def entity_url(self) -> str | None:
+        """Where the object is seen, if it still is and has a page of its own."""
+        return None if self.entity_deleted else _url_or_none(self.entry.entity)
 
 
 class SecurityEntryPresenter(BaseEntryPresenter):
+    #: A role given or taken, or permissions inherited or not.
+    verb = "permissions"
+
+    @property
+    def object_url(self) -> str | None:
+        """Where the object is seen, if there is one and it has a page."""
+        return _url_or_none(self.entry.object) if self.entry.object else None
+
     def __init__(self, entry: SecurityAudit) -> None:
         assert isinstance(entry, SecurityAudit)
         super().__init__(entry.manager, entry.happened_at)
         self.entry = entry
 
-    def render(self) -> str:
-        render = render_template_string
-        e = self.entry
 
-        manager = render(
-            '<img class="avatar" '
-            'src="{{ user_photo_url(user=e.manager, size=16) }}" alt="" />'
-            '<a href="'
-            '{{ url_for("social.user", user_id=e.manager.id) }}">'
-            "{{ e.manager.name }}</a>",
-            e=e,
-        )
-
-        if self.entry.user:
-            principal = render(self._USER_FMT, user=self.entry.user)
-        elif self.entry.group:
-            principal = render(self._GROUP_FMT, group=self.entry.group)
-        else:
-            principal = ""
-
-        entity = ""
-        if e.object_id:
-            entity_url = None
-            entity_name = e.object_name
-            if e.object:
-                entity_name = getattr(e.object, "path", e.object.name)
-                entity_url = url_for(e.object)
-
-            entity = render(
-                '{%- if url %}<a href="{{ url }}">{%- endif %}'
-                "{{ name }}{%- if url %}</a>{%- endif %}",
-                url=entity_url,
-                name=entity_name,
-            )
-
-            if e.op == e.SET_INHERIT:
-                msg = _("{manager} has activated inheritance on {entity}")
-            elif e.op == e.UNSET_INHERIT:
-                msg = _("{manager} has deactivated inheritance on {entity}")
-            elif e.op == e.GRANT:
-                msg = _('{manager} has given role "{role}" to {principal} on {entity}')
-            elif e.op == e.REVOKE:
-                msg = _(
-                    '{manager} has revoked role "{role}" from {principal} on {entity}'
-                )
-            else:
-                msg = f"Invalid entity op: {e.op}"
-                raise Exception(msg)
-        elif e.op == e.GRANT:
-            msg = _('{manager} has given role "{role}" to {principal}')
-        elif e.op == e.REVOKE:
-            msg = _('{manager} has revoked role "{role}" from {principal}')
-        else:
-            msg = f"Invalid entity op: {e.op}"
-            raise Exception(msg)
-
-        self.msg = Markup(
-            msg.format(manager=manager, principal=principal, role=e.role, entity=entity)
-        )
-        tmpl = get_template_attribute("admin/_macros.html", "m_security_entry")
-        return tmpl(self)
+def _url_or_none(obj: Entity) -> str | None:
+    """`obj`'s page, or None for an object that has none."""
+    try:
+        return url_for(obj)
+    except (BuildError, ValueError):
+        return None

@@ -36,13 +36,13 @@ from itsdangerous import (
 )
 from loguru import logger
 from sqlalchemy import sql
-from sqlalchemy.orm.exc import NoResultFound
 
 from abilian.core.extensions import csrf, db
 from abilian.core.models.subjects import User
 from abilian.core.signals import auth_failed
 from abilian.core.util import md5, unwrap
 from abilian.i18n import _, render_template_i18n
+from abilian.services.auth.passwords import weakness
 from abilian.services.security import ANONYMOUS
 from abilian.web.access_blueprint import AccessControlBlueprint
 
@@ -88,21 +88,14 @@ def do_login(form: dict[str, Any] | ImmutableMultiDict) -> dict[str, Any]:
         res["code"] = 401
         return res
 
-    try:
-        user = User.query.filter(
-            sql.func.lower(User.email) == email, User.can_login == True
-        ).one()
-    except NoResultFound:
+    user = User.query.filter(
+        sql.func.lower(User.email) == email, User.can_login == True
+    ).one_or_none()
+    # One answer for an unknown address and a wrong password: else the form would
+    # tell anyone which addresses have an account.
+    if user is None or not user.authenticate(password):
         auth_failed.send(unwrap(current_app), email=email)
-        res["error"] = _(
-            "Sorry, we couldn't find an account for email '{email}'."
-        ).format(email=email)
-        res["code"] = 401
-        return res
-
-    if user and not user.authenticate(password):
-        auth_failed.send(unwrap(current_app), email=email)
-        res["error"] = _("Sorry, wrong password.")
+        res["error"] = _("Wrong email address or password.")
         res["code"] = 401
         return res
 
@@ -169,7 +162,7 @@ def forgotten_pw_form() -> str:
 
 @route("/forgotten_pw", methods=["POST"])
 @csrf.exempt
-def forgotten_pw(new_user: bool = False) -> str | Response | tuple[str, int]:
+def forgotten_pw(new_user: bool = False) -> str | Response:
     """Reset password for users who have already activated their accounts."""
     email = request.form.get("email", "").lower()
 
@@ -181,34 +174,30 @@ def forgotten_pw(new_user: bool = False) -> str | Response | tuple[str, int]:
         flash(_("You must provide your email address."), "error")
         return render_template("login/forgotten_password.html")
 
-    try:
-        user = User.query.filter(
-            sql.func.lower(User.email) == email, User.can_login == True
-        ).one()
-    except NoResultFound:
-        flash(
-            _("Sorry, we couldn't find an account for email '{email}'.").format(
-                email=email
-            ),
-            "error",
-        )
-        return render_template("login/forgotten_password.html"), 401
+    user = User.query.filter(
+        sql.func.lower(User.email) == email, User.can_login == True
+    ).one_or_none()
+    if user is not None:
+        if not user.password:
+            user.set_password(random_password())
+            db.session.commit()
+        send_reset_password_instructions(user)
 
-    if user.can_login and not user.password:
-        user.set_password(random_password())
-        db.session.commit()
-
-    send_reset_password_instructions(user)
+    # The same answer whether the address has an account or not: else the form
+    # would tell anyone which addresses do.
     flash(
-        _("Password reset instructions have been sent to your email address."), "info"
+        _(
+            "If an account uses this address, a link to choose a password "
+            "has been sent to it."
+        ),
+        "info",
     )
-
     return redirect(url_for("login.login_form"))
 
 
 @route("/reset_password/<token>")
 def reset_password(token: str) -> str | Response:
-    expired, invalid, _user = reset_password_token_status(token)
+    expired, invalid, user = reset_password_token_status(token)
     if invalid:
         flash(_("Invalid reset password token."), "error")
     elif expired:
@@ -216,7 +205,7 @@ def reset_password(token: str) -> str | Response:
     if invalid or expired:
         return redirect(url_for("login.forgotten_pw"))
 
-    return render_template_i18n("login/password_reset.html")
+    return render_template("login/password_reset.html", user=user)
 
 
 @route("/reset_password/<token>", methods=["POST"])
@@ -241,21 +230,19 @@ def reset_password_post(token: str) -> Response:
         flash(_("You must provide a password."), "error")
         return redirect(url_for("login.reset_password_post", token=token))
 
-    # TODO: check entropy
-    if len(password) < 7:
-        flash(_("Your new password must be at least 8 characters long"), "error")
+    problem = weakness(password)
+    if problem:
+        flash(problem, "error")
         return redirect(url_for("login.reset_password_post", token=token))
 
-    if password.lower() == password:
-        flash(
-            _("Your new password must contain upper case and lower case letters"),
-            "error",
-        )
-        return redirect(url_for("login.reset_password_post", token=token))
-
-    if not len([x for x in password if x.isdigit()]) > 0:
-        flash(_("Your new password must contain at least one digit"), "error")
-        return redirect(url_for("login.reset_password_post", token=token))
+    # An account an invitation made has no name yet: its person gives it here.
+    if not user.has_names:
+        first_name = request.form.get("first_name", "").strip()
+        last_name = request.form.get("last_name", "").strip()
+        if not (first_name and last_name):
+            flash(_("You must give your first and last names."), "error")
+            return redirect(url_for("login.reset_password_post", token=token))
+        user.first_name, user.last_name = first_name, last_name
 
     user.set_password(password)
     db.session.commit()
@@ -287,15 +274,19 @@ def send_reset_password_instructions(user: User) -> None:
 
     :param user: The user to send the instructions to
     """
-    token = generate_reset_password_token(user)
-    url = url_for("login.reset_password", token=token)
-    reset_link = request.url_root[:-1] + url
-
     subject = _("Password reset instruction for {site_name}").format(
         site_name=current_app.config.get("SITE_NAME")
     )
     mail_template = "password_reset_instructions"
-    send_mail(subject, user.email, mail_template, user=user, reset_link=reset_link)
+    send_mail(
+        subject, user.email, mail_template, user=user, reset_link=password_link(user)
+    )
+
+
+def password_link(user: User) -> str:
+    """The address where `user` chooses a new password, for a day."""
+    token = generate_reset_password_token(user)
+    return request.url_root[:-1] + url_for("login.reset_password", token=token)
 
 
 def generate_reset_password_token(user: User) -> str:
@@ -338,6 +329,10 @@ def get_token_status(
 
     if data:
         user = User.query.get(data[0])
+        # The token carries the password it was made for: once the password is
+        # changed through it, or otherwise, it opens nothing.
+        if user is not None and data[1] != md5(user.password):
+            invalid = True
 
     expired = expired and (user is not None)
     return expired, invalid, user
@@ -370,7 +365,7 @@ def send_mail(subject: str, recipient: str, template: str, **context: Any) -> No
 #
 @user_logged_in.connect
 def log_session_start(app: Flask, user: User) -> None:
-    session = LoginSession.new()
+    session = LoginSession.new(user)
     db.session.add(session)
     db.session.commit()
 

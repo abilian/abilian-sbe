@@ -21,7 +21,6 @@ def scan_package(package_name: str) -> None:
     assert isinstance(package_name, str)
 
     for module_name in _iter_module_names(package_name):
-        print(module_name)
         importlib.import_module(module_name)
 
 

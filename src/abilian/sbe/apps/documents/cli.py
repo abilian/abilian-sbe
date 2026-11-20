@@ -17,9 +17,9 @@ def antivirus() -> None:
     """Schedule documents to antivirus scan."""
 
     documents = Document.query.filter(Document.content_blob != None).options(
-        sa.orm.noload("creator"),
-        sa.orm.noload("owner"),
-        sa.orm.joinedload("content_blob"),
+        sa.orm.noload(Document.creator),
+        sa.orm.noload(Document.owner),
+        sa.orm.joinedload(Document.content_blob),
     )
 
     total = 0

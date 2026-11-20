@@ -1,0 +1,108 @@
+/* Abilian Design System — the situ_ui bridge.
+ *
+ * situ_ui's public API is a `ui-*` class contract, and `ui.css` is one swappable
+ * implementation of it over ~51 `--ui-*` tokens. Both projects already resolve
+ * dark mode the same way (`light-dark()` against a cascading `color-scheme`), so
+ * the two token layers are the same idea in two vocabularies.
+ *
+ * This file retargets `--ui-*` at ours. It is not a reskin: `ui.css` keeps
+ * supplying all 168 class bodies, including the runtime surface `widgets.js`
+ * manufactures, which is the half no compile-time rewrite can reach. Forty lines
+ * of aliases get colour parity; re-implementing the bodies with `@apply` would be
+ * ~600 lines duplicating work situ_ui has already done.
+ *
+ * Load order matters — after ui.css, so these win:
+ *   <link rel="stylesheet" href="/ui/ui.css">
+ *   <link rel="stylesheet" href="/static/css/ads/situ.css">
+ */
+
+:root {
+  /* ---- surfaces --------------------------------------------------------
+   * Read situ_ui's ladder by VALUE and not by name. `--ui-surface` is the white
+   * card; `-2` (#f7f8fa) and `-3` (#eef0f3) are progressively greyer, so they are
+   * RECESSED strips inside a card, not further elevations — this file mapped them
+   * to our card and overlay for a year on the strength of the numbering. */
+  --ui-bg:           var(--ads-page);
+  --ui-surface:      var(--ads-surface);
+  --ui-surface-2:    var(--ads-sunken);
+  --ui-surface-3:    var(--ads-sunken-strong);
+
+  --ui-border:        var(--ads-line);
+  --ui-border-strong: var(--ads-line-strong);
+
+  /* situ_ui has three text levels and we have four. Matched on value, which lands
+     each one on its own: #1b2733 is our heading ink, #44515f our body, #6b7785 our
+     muted. `--ads-ink-soft` is translucent and stays out of it — a bridge must not
+     put a widget's label below the contrast floor. */
+  --ui-text:       var(--ads-ink-strong);
+  --ui-text-2:     var(--ads-ink);
+  --ui-text-muted: var(--ads-ink-muted);
+
+  /* ---- intent ----------------------------------------------------------
+   * --ui-ring derives from --ui-primary in ui.css, so it follows for free. */
+  --ui-primary:        var(--ads-brand);
+  --ui-primary-hover:  var(--ads-brand-hover);
+  --ui-primary-active: var(--ads-brand-active);
+  --ui-primary-fg:     var(--ads-brand-fg);
+  --ui-primary-soft:   var(--ads-brand-tint);
+  --ui-primary-border: var(--ads-brand-line);
+
+  /* The `-ink` shade, not the knob: situ_ui paints these as TEXT as well as fill,
+     and the knob's own value is the one that fails on a dark surface (notes/18). */
+  --ui-success: var(--ads-success-ink);  --ui-success-soft: var(--ads-success-tint);
+  --ui-warn:    var(--ads-warning-ink);  --ui-warn-soft:    var(--ads-warning-tint);
+  --ui-danger:  var(--ads-danger-ink);   --ui-danger-soft:  var(--ads-danger-tint);
+  --ui-info:    var(--ads-info-ink);     --ui-info-soft:    var(--ads-info-tint);
+
+  --ui-on-accent: var(--ads-brand-fg);
+
+  /* ---- families --------------------------------------------------------- */
+  --ui-font: var(--ads-font);
+  --ui-mono: var(--ads-font-mono);
+
+  /* ---- elevation --------------------------------------------------------
+   * `ui.css` composes `--ui-shadow: var(--ui-shadow-1), var(--ui-shadow-2)`, because
+   * `light-dark()` cannot wrap a comma-separated shadow list. Ours are multi-layer
+   * already, so aliasing both halves would hand that composition six layers and
+   * paint the shadow twice. `--ui-shadow` is therefore set directly, and the two
+   * halves are aliased only for whatever reads them on their own. */
+  --ui-shadow-sm: var(--ads-shadow-xs);
+  --ui-shadow-1:  var(--ads-shadow-sm);
+  --ui-shadow-2:  var(--ads-shadow-md);
+  --ui-shadow:    var(--ads-shadow-md);
+  --ui-shadow-lg: var(--ads-shadow-lg);
+}
+
+/* ---- deliberately not mapped -------------------------------------------
+ *
+ * situ_ui is dense enterprise on purpose: 13px base type, 32px control heights,
+ * 4-6px radii. Ours is 14px, and it now HAS the metrics this block used to say it
+ * lacked — `--ads-control-md` is 32px exactly, and `--ads-radius`/`--ads-radius-sm`
+ * are real tokens. What is left is a product decision rather than a gap, so this
+ * file still does not overwrite it quietly. Left at situ_ui's values:
+ *
+ *   --ui-fs --ui-fs-sm --ui-fs-xs --ui-fs-lg --ui-fs-title
+ *   --ui-h --ui-h-sm --ui-h-lg --ui-control-h
+ *   --ui-radius --ui-radius-sm --ui-radius-pill --ui-radius-circle
+ *   --ui-border-w --ui-gap --ui-space-card --ui-space-card-body
+ *   --ui-tooltip-bg --ui-backdrop
+ *
+ * To adopt our metrics as well, uncomment. `--ui-fs-xs`, `--ui-radius-circle`, the
+ * tooltip surface and the backdrop scrim have no counterpart on our side; add the
+ * tokens before reaching for them.
+ *
+ *   :root {
+ *     --ui-fs:          var(--ads-text);
+ *     --ui-fs-sm:       var(--ads-text-sm);
+ *     --ui-fs-lg:       var(--ads-text-md);
+ *     --ui-fs-title:    var(--ads-text-lg);
+ *     --ui-h:           var(--ads-control-md);
+ *     --ui-h-sm:        var(--ads-control-sm);
+ *     --ui-h-lg:        var(--ads-control);
+ *     --ui-radius:      var(--ads-radius);
+ *     --ui-radius-sm:   var(--ads-radius-sm);
+ *     --ui-radius-pill: var(--ads-radius-pill);
+ *     --ui-border-w:    var(--ads-border-width);
+ *     --ui-gap:         var(--ads-space-2);
+ *   }
+ */

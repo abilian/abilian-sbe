@@ -1,0 +1,68 @@
+{#- The fields of a message, shared by a reply, a new discussion and an edit, on the
+    Abilian Design System. Without their scripts, the textarea is the field and the file
+    input posts nothing: editor.js replaces the one, widgets/file.js uploads through the
+    other. -#}
+
+{#- What the server refused in a field, said under it: one element, one id, whatever
+    the number of errors. -#}
+{% macro errors(field) -%}
+{% if field.errors %}<span class="ads-error" id="{{ field.id }}-error">{{ field.errors | join(" ") }}</span>{% endif %}
+{%- endmacro %}
+
+{#- The attributes that tie a field to its help, if `help` names it, and its errors:
+    one `aria-describedby`, for a second one would be ignored. -#}
+{% macro invalid(field, help=none) -%}
+{% set ids = ([help] if help else []) + ([field.id ~ "-error"] if field.errors else []) %}
+{% if field.errors %}aria-invalid="true" {% endif %}{% if ids %}aria-describedby="{{ ids | join(' ') }}"{% endif %}
+{%- endmacro %}
+
+{#- The message, in the rich-text editor. Its tools are only those the server's
+    sanitiser keeps (`forum/forms.py`). -#}
+{% macro message_field(field, label, rows=6) %}
+<div class="ads-field">
+  <label class="ads-label ads-label--required" for="{{ field.id }}">{{ label }}</label>
+  <textarea class="ads-textarea" id="{{ field.id }}" name="{{ field.name }}" rows="{{ rows }}" aria-label="{{ label }}" data-richtext required {{ invalid(field) }}>{{ field.data or "" }}</textarea>
+  <div class="ads-editor" hidden>
+    <div class="sbe-editor__toolbar richtext-toolbar" role="toolbar" aria-label="{{ _('Formatting') }}">
+      {% for command, title, glyph, active, level in [
+           ("toggleBold", _("Bold"), "bold", "bold", none),
+           ("toggleItalic", _("Italic"), "italic", "italic", none),
+           ("toggleHeading", _("Heading"), "heading", "heading", 2),
+           ("toggleBulletList", _("Bulleted list"), "list", "bulletList", none),
+           ("toggleOrderedList", _("Numbered list"), "list-numbers", "orderedList", none),
+           ("toggleBlockquote", _("Quote"), "quote", "blockquote", none)] %}
+      <button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ title }}" title="{{ title }}" data-command="{{ command }}" data-active="{{ active }}" aria-pressed="false" {% if level %}data-level="{{ level }}"{% endif %}>{{ icon(glyph) }}</button>
+      {% endfor %}
+      <button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" aria-label="{{ _('Link') }}" title="{{ _('Link') }}" data-link-prompt="{{ _('Link address') }}" data-active="link" aria-pressed="false">{{ icon("link") }}</button>
+    </div>
+    <div class="sbe-editor__body ads-prose richtext-content"></div>
+  </div>
+  {{ errors(field) }}
+</div>
+{% endmacro %}
+
+{#- Files, each sent as soon as it is picked. A message's own files, when it is edited,
+    are listed first, each with a button that marks it to be removed on saving. -#}
+{% macro attachments_field(field, existing=()) %}
+<div class="ads-field">
+  <span class="ads-label">{{ _("Attachments") }}</span>
+  <div class="js-widget sbe-uploader" data-init-with="fileInput" data-remove-label="{{ _('Remove') }}">
+    <label class="ads-btn js-file-button">{{ icon("paperclip") }}{{ _("Attach files") }}<input class="sbe-sr-only" type="file" name="{{ field.name }}" multiple></label>
+    <div class="selected-files sbe-uploader__list">
+      {% for a in existing %}
+      <div class="file-item file-item-existing">
+        <span class="file-info">{{ a.name }} · {{ a.content_length | filesize }}</span>
+        <button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" data-name="__{{ field.name }}_delete__" data-value="{{ loop.index0 }}" data-deleted="false" aria-pressed="false" aria-label="{{ _('Remove %(name)s', name=a.name) }}">{{ icon("trash") }}</button>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endmacro %}
+
+{#- Offered where the view allows it (`BaseThreadView.can_send_by_mail`). -#}
+{% macro send_by_email(form) %}
+{% if "send_by_email" in form %}
+<label class="ads-check"><input type="checkbox" name="{{ form.send_by_email.name }}" {{ "checked" if form.send_by_email.data }}> {{ _("Also send it to the members by email") }}</label>
+{% endif %}
+{% endmacro %}

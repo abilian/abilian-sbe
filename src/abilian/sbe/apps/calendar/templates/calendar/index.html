@@ -1,23 +1,52 @@
-{% extends "calendar/_base.html" %}
-
-{% from "macros/box.html" import m_box_menu, m_box_content %}
-
+{#- A community's calendar: its events to come, or past, by month, each with its date,
+    title, hours and place; making one; the month at a glance beside it, a dot on the
+    days an event starts. Drawn in `mockups/templates/calendar.html`. -#}
+{% extends "ads_community.html" %}
+{% import "calendar/_events.html" as ev with context %}
+{% set kw = {"community_id": g.community.slug} %}
+{% block page_title %}{{ _("Calendar") }} · {{ g.community.name }}{% endblock %}
 {% block content %}
-  {% call m_box_content(_("Upcoming events")) %}
-    {% for group in groups %}
-      <h3>{{ group[0]|dateformat("MMMM YYY")|capitalize }}</h3>
-
-      <ul>
-        {% for event in group[1] %}
-          <li>{{ event.start | dateformat }}: <a href="{{ url_for(event) }}">{{ event.title }}</a></li>
-        {% endfor %}
+<div class="ads-with-aside">
+  <section class="ads-card" aria-labelledby="events">
+    <div class="ads-card__head ads-spread">
+      <ul class="ads-pills" aria-label="{{ _('Which events') }}">
+        <li><a class="ads-pill" href="{{ url_for('.index', **kw) }}" {{ 'aria-current="page"' | safe if not past }}>{{ _("To come") }}</a></li>
+        <li><a class="ads-pill" href="{{ url_for('.archives', **kw) }}" {{ 'aria-current="page"' | safe if past }}>{{ _("Past") }}</a></li>
       </ul>
+      <a class="ads-btn ads-btn--primary" href="{{ url_for('.new_event', **kw) }}">{{ icon("calendar-plus") }}{{ _("New event") }}</a>
+    </div>
+    <h2 class="sbe-sr-only" id="events">{{ _("The events past") if past else _("The events to come") }}</h2>
+    {% for month, events in months %}
+    <h3 class="ads-rule sbe-month">{{ month | dateformat("MMMM y", rebase=false) | capitalize }}</h3>
+    <ul class="ads-list">{% for e in events %}{{ ev.event_row(e) }}{% endfor %}</ul>
     {% else %}
-      <p>{{ _("There are no upcoming events on this calendar yet.") }}</p>
+    <p class="ads-card__body ads-muted">{{ _("No event has been posted to this calendar yet.") if past else _("There are no upcoming events on this calendar yet.") }}</p>
     {% endfor %}
+  </section>
 
-    <p>
-      [<a href="{{ url_for(".archives", community_id=g.community.slug) }}">Archives</a>]
-    </p>
-  {% endcall %}
+  <aside class="ads-stack" aria-label="{{ _('The month') }}">
+    <section class="ads-card" aria-labelledby="month">
+      <div class="ads-card__head ads-spread">
+        <h2 class="ads-card__title" id="month">{{ month | dateformat("MMMM y", rebase=false) | capitalize }}</h2>
+        {% set here = request.endpoint.rpartition(".")[2] %}
+        <span class="ads-btn-group">
+          <a class="ads-btn ads-btn--sm" href="{{ url_for('.' ~ here, month=previous.strftime('%Y-%m'), **kw) }}" aria-label="{{ _('Previous month') }}">{{ icon("chevron-left") }}</a>
+          <a class="ads-btn ads-btn--sm" href="{{ url_for('.' ~ here, month=following.strftime('%Y-%m'), **kw) }}" aria-label="{{ _('Next month') }}">{{ icon("chevron-right") }}</a>
+        </span>
+      </div>
+      <div class="ads-card__body">
+        <div class="ads-calendar sbe-calendar--mini">
+          {% for day, _events in weeks[0] %}<div class="ads-calendar__head">{{ day | dateformat("EEEEE", rebase=false) }}</div>{% endfor %}
+          {% for week in weeks %}{% for day, todays in week %}
+          {#- Today and the days of the months around: said, not only coloured. -#}
+          <div class="ads-calendar__day {{ 'ads-calendar__day--outside' if day.month != month.month }} {{ 'ads-calendar__day--today' if day == today }}" {{ 'aria-current="date"' | safe if day == today }}>
+            <span class="ads-calendar__date">{{ day.day }}{% if day == today %}<span class="sbe-sr-only">, {{ _("today") }}</span>{% endif %}</span>
+            {% for e in todays %}<a class="ads-calendar__event ads-tone-brand" href="{{ url_for(e) }}" title="{{ e.title }}"><span class="sbe-sr-only">{{ e.title }}</span></a>{% endfor %}
+          </div>
+          {% endfor %}{% endfor %}
+        </div>
+      </div>
+    </section>
+  </aside>
+</div>
 {% endblock %}

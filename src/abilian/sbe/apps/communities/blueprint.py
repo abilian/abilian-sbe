@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-from flask import Blueprint, g
+from flask import Blueprint, g, request
 from werkzeug.exceptions import NotFound
 
+from abilian.core.extensions import db
+from abilian.core.extensions.login import authenticated_user
 from abilian.i18n import _l
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
@@ -14,6 +16,9 @@ from abilian.web.nav import BreadcrumbItem
 from . import security
 from .models import Community
 from .presenters import CommunityPresenter
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class CommunityBlueprint(Blueprint):
@@ -46,13 +51,19 @@ class CommunityBlueprint(Blueprint):
         super().__init__(*args, **kwargs)
         self.url_value_preprocessor(pull_community)
         self.url_value_preprocessor(init_current_tab)
-        self.before_request(check_access)
+        self.before_request(check_membership)
 
 
-def check_access() -> None:
+def check_membership() -> None:
+    """Every route needs a logged-in user, and one inside a community a member.
+
+    The login is asked first, and of every route: the routes outside a
+    community (`communities.index`, for one) are not members-only, but they
+    are not open to anonymous visitors either.
+    """
+    user = authenticated_user()
     if hasattr(g, "community"):
-        # communities.index is not inside a community, for example
-        security.check_access(g.community)
+        security.check_membership(user, g.community)
 
 
 def init_current_tab(endpoint: str, values: dict[str, int]) -> None:
@@ -79,3 +90,32 @@ def pull_community(endpoint: str, values: dict[str, Any]) -> None:
             raise NotFound
     except KeyError:
         pass
+
+
+def in_community(param: str, model: type) -> Callable[[], None]:
+    """A guard for a blueprint's routes that name an object of `model` by `param`:
+    not found unless it belongs to the community in the URL. Membership of one
+    community is checked by the blueprint; without this, its URL would show, and
+    act on, any other community's object given its number."""
+
+    def check() -> None:
+        object_id = (request.view_args or {}).get(param)
+        if object_id is None:
+            return
+        obj = db.session.get(model, object_id)
+        if obj is None or obj.community_id != g.community.id:
+            raise NotFound
+
+    return check
+
+
+def with_tool(flag: str) -> Callable[[], None]:
+    """A guard for a tool's blueprint: not found in a community that has the tool
+    turned off (`flag`, such as `has_forum`), whatever the address. The tabs and
+    menus leave it out; without this, its address would still reach it."""
+
+    def check() -> None:
+        if hasattr(g, "community") and not getattr(g.community, flag):
+            raise NotFound
+
+    return check

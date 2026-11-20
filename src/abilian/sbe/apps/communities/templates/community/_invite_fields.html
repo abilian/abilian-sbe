@@ -1,0 +1,27 @@
+{#- What one fills in to invite people, in the dialog every page of a community has
+    for its managers and on the first page of inviting: the addresses, what will
+    happen to each as they are typed (`community/_invitees.html`), one role for all,
+    and a word to go with the e-mail (`NOTE_LENGTH` characters at most). Drawn in
+    `mockups/templates/members-add.html`. -#}
+{% macro fields(community) %}
+<div class="ads-field">
+  <label class="ads-label" for="wizard-emails">{{ _("Email addresses") }}</label>
+  <textarea class="ads-textarea" id="wizard-emails" name="wizard-emails" rows="4" aria-describedby="wizard-emails-help"></textarea>
+  <small class="ads-help" id="wizard-emails-help">{{ _("One per line, or separated by commas or spaces. What will happen to each shows as you type.") }}</small>
+</div>
+{#- The list is read at will; what a screen reader is told as one types is the count
+    alone (`data-preview-says`), not the whole list again at each pause. -#}
+<div data-preview="{{ url_for('communities.wizard_preview', community_id=community.slug) }}" data-preview-of="wizard-emails"></div>
+<p class="sbe-sr-only" role="status" data-preview-status="wizard-emails"></p>
+<div class="ads-field">
+  <label class="ads-label" for="invite-role">{{ _("Role") }}</label>
+  <select class="ads-select sbe-fit" id="invite-role" name="role">
+    <option value="member" selected>{{ _("Member") }}</option>
+    <option value="manager">{{ _("Community manager") }}</option>
+  </select>
+</div>
+<div class="ads-field">
+  <label class="ads-label" for="invite-note">{{ _("A word to go with the invitation") }}</label>
+  <textarea class="ads-textarea" id="invite-note" name="note" rows="2" placeholder="{{ _('Optional') }}"></textarea>
+</div>
+{% endmacro %}

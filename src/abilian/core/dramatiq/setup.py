@@ -5,7 +5,10 @@ from __future__ import annotations
 import dramatiq_abort.backends
 import redis
 from dramatiq.rate_limits import BucketRateLimiter
-from dramatiq.rate_limits.backends import RedisBackend as RateLimitRedisBackend
+from dramatiq.rate_limits.backends import (
+    RedisBackend as RateLimitRedisBackend,
+    StubBackend as RateLimitStubBackend,
+)
 from dramatiq_abort import Abortable
 from loguru import logger
 
@@ -45,8 +48,10 @@ def init_dramatiq_engine(app) -> None:
 
 def _setup_rate_limiter(app) -> None:
     # logger.debug("Add dramatiq rate limiter")
-    redis_client = _rate_limiter_redis_client(app)
-    backend = RateLimitRedisBackend(client=redis_client)
+    if app.testing:
+        backend = RateLimitStubBackend()
+    else:
+        backend = RateLimitRedisBackend(client=_rate_limiter_redis_client(app))
     # rate limit is 6/min
     limiter = BucketRateLimiter(backend, "mail-limit", limit=6, bucket=60_000)
     RATE_LIMITER.append(limiter)
@@ -93,8 +98,12 @@ def _add_dramatiq_abortable(app) -> None:
     abort(message.message_id, mode=AbortMode.ABORT, abort_timeout=2000)
     """
     # logger.debug("Add dramatiq abortable")
-    redis_client = _abortable_redis_client(app)
-    backend = dramatiq_abort.backends.RedisBackend(client=redis_client)
+    if app.testing:
+        backend = dramatiq_abort.backends.StubBackend()
+    else:
+        backend = dramatiq_abort.backends.RedisBackend(
+            client=_abortable_redis_client(app)
+        )
     abortable = Abortable(backend=backend)
     dramatiq.broker.add_middleware(abortable)
 

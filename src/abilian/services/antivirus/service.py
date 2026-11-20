@@ -11,6 +11,7 @@ import pathlib
 from loguru import logger
 
 from abilian.core.models.blob import Blob
+from abilian.i18n import _
 from abilian.services.base import Service
 
 try:
@@ -19,6 +20,9 @@ try:
     clamd = ClamdUnixSocket()
 except ImportError:
     clamd = None
+
+#: How long ClamAV has to say it answers, in seconds.
+PING_TIMEOUT = 2
 
 CLAMD_CONF = {"StreamMaxLength": "25M", "MaxFileSize": "25M"}
 CLAMD_STREAMMAXLENGTH = 26214400
@@ -63,6 +67,18 @@ class AntiVirusService(Service):
 
     name = "antivirus"
 
+    def problem(self) -> str | None:
+        """Why files are not scanned, or None when ClamAV answers."""
+        if not clamd:
+            return _("ClamAV is not installed")
+        try:
+            # A socket of its own, which waits briefly: a stalled daemon must not
+            # hold the page that asks. Scanning a file may take longer.
+            ClamdUnixSocket(timeout=PING_TIMEOUT).ping()
+        except (ClamdError, OSError) as e:
+            return str(e)
+        return None
+
     def scan(self, file_or_stream):
         """
         :param file_or_stream: :class:`Blob` instance, filename or file object
@@ -83,15 +99,18 @@ class AntiVirusService(Service):
 
     def _scan(self, file_or_stream):
         content = file_or_stream
-        if isinstance(file_or_stream, Blob):
-            try:
-                file_or_stream = bytes(file_or_stream.file)
-            except TypeError as e:
-                self.logger.warning("Error during content scan: {error}", error=str(e))
-                return None
+        match file_or_stream:
+            case Blob():
+                try:
+                    file_or_stream = bytes(file_or_stream.file)
+                except TypeError as e:
+                    self.logger.warning(
+                        "Error during content scan: {error}", error=str(e)
+                    )
+                    return None
 
-        elif isinstance(file_or_stream, str):
-            file_or_stream = file_or_stream.encode(os.fsencode)
+            case str():
+                file_or_stream = os.fsencode(file_or_stream)
 
         if isinstance(file_or_stream, bytes):
             content = open(file_or_stream, "rb")

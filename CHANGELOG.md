@@ -2,6 +2,184 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+SQLAlchemy 2.0, and a pass over who may reach what. Every route now refuses an anonymous visitor unless it is public on purpose, and the code below the views takes the user as a parameter instead of reading `current_user`, so the type checker can tell where a logged-in user is required.
+
+### Upgrade steps
+
+1. Install the new dependencies: SQLAlchemy 2.0 and Flask-SQLAlchemy 3.1. No migration: the schema is unchanged.
+2. Rebuild the front end (`make front`, or `npm run build` in `vite/`) before building or installing the package: the PDF viewer is now part of it, with its worker and data files. Without it, a PDF opens on an empty page.
+3. Remove `SOCIAL_REST_API` from the configuration, if set: the API it enabled is gone.
+4. Downstream code: see the API changes below. Most of them are a new first parameter, the user.
+
+### Security
+
+- The PDF viewer was a vendored copy of PDF.js 1.1, from 2015, open to CVE-2024-4367: a crafted PDF could run JavaScript in the page of whoever opened it, though only with the Content Security Policy off. It is replaced by the current PDF.js (6.5), built with the front end, running with neither eval nor WebAssembly, and without the PDFs' own scripts.
+- Anyone could fetch any image stored in the database, those of private communities' documents and attachments included, by counting ids at `/images/files/<id>`. The route is gone, and user photos need a login.
+- Anonymous visitors could upload files, into one directory every anonymous visitor shared. Uploads need a login.
+- The attachment, comment and tag views asked for no login.
+- The tag management views (`/tags/manage/...`) were open to anyone; they are removed, since the admin tags panel does their job.
+- Any logged-in user could edit the tags of any entity. It now takes write permission on the entity.
+- Any logged-in user could open another user's profile editor, prefilled; only saving was refused.
+- The admin pages answered 404 or 403 depending on whether the vocabulary in the URL existed, to anyone.
+- Any logged-in user could see a private group's page, member list and photo, and join it by posting `action=join`, which the page does not offer. A private group is now seen only by its members and administrators, and only a public group can be joined.
+- The communities' JSON list (`/communities/json2`) gave anyone, anonymous visitors included, the names of all communities, private ones too; nothing used it, and it is removed. `/communities/doc/<id>` told anyone which community a document is in; it is now a 404 unless the user may read the document. Every route of the community blueprints now needs a login.
+- Two tests now request every route, one as an anonymous visitor and one as a logged-in user with no role and no membership, and fail on any route that does not refuse them and is not listed as open on purpose.
+
+### Changed
+
+- Search needs a login: everything worth finding is members-only.
+- An anonymous visitor reaching a page that needs a user is sent to the login page.
+
+### Removed
+
+- The social REST API and its `SOCIAL_REST_API` setting. It was unused and broken, and, turned on, let any logged-in user change or delete any account.
+
+### Breaking — framework API
+
+| was | is |
+|---|---|
+| `can_manage(community, user=None)` | `can_manage(user, community)` |
+| `is_member(community=None, user=None)` | `is_member(user, community=None)` |
+| `check_membership(community=None, user=None)` | `check_membership(user, community=None)` |
+| `forum.security.can_write(post, user=None)` | `can_write(user, post)` |
+| `Lock.new()`, `lock.is_owner(user=None)`, `doc.set_lock(user=None)` | the user is required |
+| `folder.filtered_children`, `.filtered_subfolders` (properties) | methods taking the user |
+| `WikiPage(...)`, `page.create_revision(body_src, message)` | `WikiPage(..., author=user)`, `create_revision(author, body_src, message)` |
+| `get_recent_entries(num, user=None, community=None)` | `get_recent_entries(user, num, actor=None, community=None)` |
+| comments' and attachments' `can_read(entity)` and the like | `can_read(user, entity)` and the like |
+| `indexing.search(q, ..., user=None)` | `user=` is required |
+| `preferences.get_preferences(user=None)` and the like | the user is required |
+| `LoginSession.new()` | `LoginSession.new(user)` |
+| the document view helpers (`get_document`, `check_read_access`, ...) | the user first |
+| `ScopedSession` | removed; use `db.session()` |
+
+`abilian.core.extensions.login` adds `@authenticated`, which hands a view the logged-in user as its first argument, and `authenticated_user()` for class-based views and hooks. Its `current_user` is typed as the `User | AnonymousUser` it stands for. `security.has_permission` and `filter_with_permission` take a `User`; `has_role` still accepts an anonymous visitor.
+
+Models declare their columns as `Mapped[...]`, and `db.Model` is built on a typed declarative base. `session_of(obj)` gives an object's session. `get_object_by_path` returns None for a missing path, as documented, instead of raising `StopIteration`.
+
+### Fixed
+
+- The "my groups" tab crashed.
+- `Document.set_lock(user)` locked the document for the current user, whoever it was given.
+- Changing the owner of documents to a missing or unknown user cleared their owner and reported success.
+- Downloading or deleting a wiki attachment checked with `assert`s that it belonged to the page in the URL; with asserts disabled, any attachment was reachable through any page.
+- Removing a community member with an unknown id, or a membership that is not the user's, was a 500.
+- An unknown group or user in the social pages was a 500, not a 404.
+- Removing a role on a folder was always a 500, and the role forms crashed on an unknown user or group.
+- Listing the inherited roles of the repository root crashed: it read a parent the root does not have.
+- An email reply to a deleted forum thread raised, and was retried twenty times; it is now logged and dropped.
+- Logging in to an account with an empty password column was a 500.
+- The query for a community's last views failed on PostgreSQL.
+- A group or user form posted with a missing or unknown action was a 500, not a 400.
+- Uploading or deleting a wiki attachment ended on the page's viewers list instead of the page.
+- With Sentry configured for the browser, the Content Security Policy refused the reports sent to the DSN's host.
+
+## [1.2.0] - 2026-11-15
+
+The Tailwind front-end migration, an authorization convergence, MariaDB support and a type cleanup that found a score of bugs. Large, and it changes framework API that downstream applications may import.
+
+### Upgrade steps
+
+Run in this order. The backfills ship *with* this release, so they cannot run before it is installed — install, backfill, then serve traffic.
+
+1. Run Python 3.12 or later. On PostgreSQL, install the `postgres` extra (`abilian-sbe[postgres]`): psycopg2 is no longer a required dependency, so without the extra the application has no PostgreSQL driver. MariaDB and MySQL use PyMySQL, which is required.
+2. `flask db current`, then `flask db upgrade` — no new migrations in this release, but run it anyway. A database created by `flask initdb` records no version: `current` prints no revision and `upgrade` fails with `relation "sbe_event" already exists`, leaving the database unchanged. Run `flask db stamp head` once on such a database instead of `upgrade`. The two migrations date from 2017, and `initdb` already creates what they add.
+3. `flask backfill-community-roles` — **required.** Community memberships used to be recorded only on the community's folder; permissions are now asked of the community itself. Until this runs, every existing community manager loses MANAGE on their community. Idempotent, and `--dry-run` lists what it would change.
+4. `flask backfill-creator-memberships` — recommended. Makes each community's creator a MANAGER member. Skips creators who already hold a role, so a deliberate demotion is not undone.
+5. Rebuild assets: the front end is Vite + Tailwind now, and `flask assets build` no longer does anything.
+6. If `TRACKING_CODE` is set, make sure it loads its script by URL from an allowed origin: the Content Security Policy now refuses inline scripts.
+
+### Security
+
+- Any member of a community could edit any other member's forum post: the route enforced nothing, and the Edit link was merely hidden from them.
+- Any member of a community could promote themselves to manager through the member wizard, which carried only a membership check.
+- Group administration — including adding and removing administrators — was guarded by `assert`, which `python -O` removes entirely.
+- The attachment and comment routes carried no authorization at all. Not exploitable, since no model is registered attachable or commentable, but they are now checked rather than left armed for whoever registers one.
+- The policy engine had an off switch: `has_role`, `has_permission` and `query_entity_with_permission` returned True when the service was not running.
+- Anonymous search raised rather than returning results.
+- A community manager could not edit their own community's settings, nor moderate its forum. Both are theirs now.
+- Anyone who could read a document could lock or unlock it, which stops others uploading a new version. It now takes write access.
+
+### Breaking — framework API
+
+| was | is |
+|---|---|
+| `is_manager(context, user)` | `can_manage(community, user)` |
+| `@require_manage` | `@can_manage` |
+| `@require_admin` | `@is_site_admin` |
+| `@require_access` | removed — the community blueprint already gates every route |
+| `has_access(community, user)` | `is_member(community, user)` |
+| `check_access(...)` | `check_membership(...)` |
+| `can_administrate(context)` | `is_admin(context)` |
+| `AttachmentsManager.can_view` / `.can_edit` | `.can_read` / `.can_write` |
+| template variable `is_manager` | `can_manage_community` |
+| `Select2Field`, `Select2MultipleField`, `QuerySelect2Field` | `ChoiceField`, `MultipleChoiceField`, `QuerySelectField`: native selects |
+| `JsonSelect2Field`, `Select2Ajax`, `Select2`, `Chosen`, `TagInput` | removed; pick a user with `<input data-picker="url">` |
+| `{% deferJS %}`, `{% block js %}`, `form.js`, `window.Abilian` | removed; the scripts are ES modules in `vite/src/` |
+| `g.is_manager` | removed — ask `is_site_admin()` or `can_manage(community)` |
+
+`Community.has_permission(user, permission)` no longer raises for anything but MANAGE; it answers all five permissions. `AttachmentsManager.can_create` and `.can_delete` ask CREATE and DELETE rather than both asking WRITE — the same answer under the default role matrix, but now separable by a `PermissionAssignment`.
+
+### Added
+
+- MariaDB support. Listings sort empty values last without `NULLS LAST`, which MariaDB lacks.
+- Dependencies upgraded: Flask 3.1, WTForms 3.3, Flask-WTF 1.3, Dramatiq 2.2, SQLAlchemy 1.4.54. Python 3.12 to 3.15 are tested.
+
+### Front end
+
+- Bootstrap and all 115 LESS files replaced by Tailwind v4 and Vite.
+- Removed: jQuery, select2, bootstrap-tagsinput, DataTables, CKEditor, RequireJS, twitter typeahead, Hogan, bootstrap-switch, d3 3.5 and nvd3, the flask-assets pipeline, and the Bootstrap compatibility shim.
+- No inline scripts or event handlers, and neither `'unsafe-inline'` nor `'unsafe-eval'` for scripts in the Content Security Policy. A normal page loads 97K of JavaScript.
+- Charts are uPlot (24K) rather than d3 + nvd3 (147K gzipped); the admin dashboard was rebuilt on correct data.
+- Modals are native `<dialog>`; live search is a native combobox.
+- Static URLs are versioned and served with a far-future cache.
+- `pandas` and `numpy` dropped from the dependencies.
+
+### Fixed
+
+- Selecting rows in a folder offers Download again. The action declared no permission, its check raised on the empty default, and the exception hid the button.
+- A server error inside a community shows the error page again rather than a raw 500.
+- The translation catalogs compile without errors: the French and Dutch SIRET messages used a placeholder that did not match the source.
+- File uploads work again with WTForms 3.3, and downloads are sent without an ETag or a cache lifetime.
+- The document views served a folder or document of another community under any community's URL, and crashed on the repository root. Both are now a 404. Access was still checked on the object itself, so nothing was disclosed.
+- Saving a calendar event with a description crashed: it called bleach with an argument bleach 6 removed.
+- The tag edit page (`/tags/entity/<id>/edit`) crashed on every request.
+- An unknown vocabulary in an admin URL is a 404 rather than a 500.
+- Forms with a missing field are a 400 rather than a 500: the folder role forms, the admin settings, the group admin's add and remove member, and the folder name check.
+- `repr()` of a community membership raised `TypeError`.
+- The security debug panel showed `{g.id}` literally instead of ids and emails.
+- The wiki page and community tab actions resolve their URL like other actions; a wiki action given a callable URL returned the function itself.
+- The antivirus scan of a path given as a string raised `TypeError`.
+
+### Removed
+
+Code that nothing reached, much of it broken:
+
+- The WebDAV interface (`documents/webdav`) and the CMIS AtomPub interface (`documents/cmis`): neither blueprint was registered. CMIS's authentication hook was commented out. `lxml`, used only by CMIS, is no longer a dependency.
+- The invite views (`social/views/invites.py`) and their `Invite` model, never imported.
+- The entity tag list, add and remove views (`/tags/entity/<id>/list|add|remove`), which crashed on every request.
+- Five conversion handlers never registered: Abiword (two), Unoconv, Cloudooo and wvWare.
+- `BaseBlobDownload`, `IndexService` and `WhooshIndexService.search_for_class()`.
+- A Flask-SQLAlchemy 2 driver override, `apply_driver_hacks`, that has not run since Flask-SQLAlchemy 3.0.
+- The GitHub Actions workflow: CI runs on sourcehut.
+
+### Testing
+
+- Playwright browser suite (97 tests) — `make test-e2e`, which now picks free ports rather than hardcoding 8899 and 6399.
+- `pytest` no longer needs a Redis running on the machine.
+- import-linter contracts keep Flask out of the policy engine and the domain models.
+- `make test-postgres-docker` and `make test-mariadb-docker` run the suite against each database in Docker; run `make front` first.
+- pyrefly checks against Python 3.12: 768 errors down to 348, and what is left is third-party typing.
+
+## [1.1.16] - 2025-12-4
+
+### Chore
+- Update dependencies and SlapOS configuration files
+- Update requirements.txt and sync dependencies
+- Add requirements_no_dev.txt file
+
 ## [1.1.15] - 2025-09-12
 
 ### Bug Fixes

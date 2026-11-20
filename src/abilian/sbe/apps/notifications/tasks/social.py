@@ -196,14 +196,15 @@ class CommunityDigest:
         # TODO ?
         # target = activity.target
 
-        if activity.verb == "join":
-            self._update_for_join(actor)
+        match activity.verb:
+            case "join":
+                self._update_for_join(actor)
 
-        elif activity.verb == "post":
-            self._update_for_post(actor, obj, user)
+            case "post":
+                self._update_for_post(actor, obj, user)
 
-        elif activity.verb == "update":
-            self._update_for_update(actor, obj, user)
+            case "update":
+                self._update_for_update(actor, obj, user)
 
     def _update_for_join(self, actor) -> None:
         self.new_members.append(actor)
@@ -216,41 +217,43 @@ class CommunityDigest:
 
         self.seen_entities.add(obj.id)
 
-        if isinstance(obj, Document) and content_repository.has_access(user, obj):
-            self.new_documents.append(obj)
-        elif isinstance(obj, WikiPage):
-            self.new_wiki_pages.append(obj)
-        elif isinstance(obj, Thread):
-            self.new_conversations.append(obj)
-        elif isinstance(obj, Post):
-            if obj.thread.id not in self.seen_entities:
-                # save actor and oldest/first modified Post in thread
-                # oldest post because Activities are ordered_by
-                # Asc(A.happened_at)
-                self.updated_conversations[obj.thread] = {
-                    "actors": [actor],
-                    "post": obj,
-                }
-                # Mark this post's Thread as seen to avoid duplicates
-                self.seen_entities.add(obj.thread.id)
-            elif obj.thread not in self.new_conversations:
-                # this post's Thread has already been seen in another Activity
-                # exclude it to avoid duplicates but save the Post's actor
-                self.updated_conversations[obj.thread]["actors"].append(actor)
+        match obj:
+            case Document() if content_repository.has_access(user, obj):
+                self.new_documents.append(obj)
+            case WikiPage():
+                self.new_wiki_pages.append(obj)
+            case Thread():
+                self.new_conversations.append(obj)
+            case Post():
+                if obj.thread.id not in self.seen_entities:
+                    # save actor and oldest/first modified Post in thread
+                    # oldest post because Activities are ordered_by
+                    # Asc(A.happened_at)
+                    self.updated_conversations[obj.thread] = {
+                        "actors": [actor],
+                        "post": obj,
+                    }
+                    # Mark this post's Thread as seen to avoid duplicates
+                    self.seen_entities.add(obj.thread.id)
+                elif obj.thread not in self.new_conversations:
+                    # this post's Thread has already been seen in another Activity
+                    # exclude it to avoid duplicates but save the Post's actor
+                    self.updated_conversations[obj.thread]["actors"].append(actor)
 
     def _update_for_update(self, actor, obj, user) -> None:
-        if obj is None:
-            return
-        # special case for Wikipage, we want to know each updater
-        if isinstance(obj, WikiPage):
-            if obj in self.updated_wiki_pages:
-                page = self.updated_wiki_pages[obj]
-                if actor in page:
-                    page[actor] += 1
+        match obj:
+            case None:
+                return
+            # special case for Wikipage, we want to know each updater
+            case WikiPage():
+                if obj in self.updated_wiki_pages:
+                    page = self.updated_wiki_pages[obj]
+                    if actor in page:
+                        page[actor] += 1
+                    else:
+                        page[actor] = 1
                 else:
-                    page[actor] = 1
-            else:
-                self.updated_wiki_pages[obj] = {actor: 1}
+                    self.updated_wiki_pages[obj] = {actor: 1}
 
         # fast return for all other objects
         if obj.id in self.seen_entities:

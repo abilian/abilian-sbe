@@ -10,7 +10,8 @@ import sqlalchemy as sa
 import sqlalchemy.event
 import sqlalchemy.orm
 from flask_sqlalchemy.query import Query
-from sqlalchemy import Column
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm.decl_api import DeclarativeAttributeIntercept
 
 from abilian.core.extensions import db
 from abilian.core.util import slugify
@@ -18,7 +19,8 @@ from abilian.core.util import slugify
 if TYPE_CHECKING:
     from flask_sqlalchemy.model import Model
 
-_BaseMeta = db.Model.__class__
+# The metaclass of `db.Model`, built on a `DeclarativeBase`.
+_BaseMeta = DeclarativeAttributeIntercept
 
 
 class VocabularyQuery(Query):
@@ -55,7 +57,7 @@ class _VocabularyMeta(_BaseMeta):
         bases: tuple[type[Model], ...],
         d: dict[str, Any],
     ) -> type[BaseVocabulary]:
-        meta = d.get("Meta")
+        meta = d["Meta"]
         group = slugify(meta.group or "", "_")
         if group:
             table_prefix = f"vocabulary_{group}_"
@@ -76,15 +78,17 @@ class BaseVocabulary(db.Model, metaclass=_VocabularyMeta):
     __abstract__ = True
     query_class = VocabularyQuery
 
-    id = Column(sa.Integer(), primary_key=True, autoincrement=True, nullable=False)
-    label = Column(sa.UnicodeText(), nullable=False, unique=True)
-    active = Column(
+    id: Mapped[int] = mapped_column(
+        sa.Integer(), primary_key=True, autoincrement=True, nullable=False
+    )
+    label: Mapped[str] = mapped_column(sa.Unicode(255), nullable=False, unique=True)
+    active: Mapped[bool] = mapped_column(
         sa.Boolean(), nullable=False, server_default=sa.sql.true(), default=True
     )
-    default = Column(
+    default: Mapped[bool] = mapped_column(
         sa.Boolean(), nullable=False, server_default=sa.sql.false(), default=False
     )
-    position = Column(sa.Integer, nullable=False, unique=True)
+    position: Mapped[int] = mapped_column(sa.Integer, nullable=False, unique=True)
 
     __table_args__ = (sa.CheckConstraint(sa.sql.func.trim(sa.sql.text("label")) != ""),)
 
@@ -93,6 +97,8 @@ class BaseVocabulary(db.Model, metaclass=_VocabularyMeta):
     #     return {"order_by": [cls.__table__.c.position.asc()]}
 
     class Meta:
+        # Set by Vocabulary(), which makes the concrete classes.
+        name: str
         label = None
         group = None
 
@@ -130,7 +136,7 @@ def _before_insert(mapper, connection, target) -> None:
     if target.position is None:
         func = sa.sql.func
         stmt = sa.select(
-            [func.coalesce(func.max(mapper.persist_selectable.c.position), -1)]
+            func.coalesce(func.max(mapper.persist_selectable.c.position), -1)
         )
         target.position = connection.execute(stmt).scalar() + 1
 

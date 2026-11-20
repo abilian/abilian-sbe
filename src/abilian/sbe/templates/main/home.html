@@ -1,0 +1,73 @@
+{#- Mon fil: where to start a discussion, then the news of my communities, newest
+    first, all of it or of one kind; what came since I last marked it read, marked
+    new, and a rule after it. Beside it, my communities, the most active first, with
+    how much is new in each, and the events to come. Drawn in
+    `mockups/templates/home.html`. -#}
+{% extends "ads_base.html" %}
+{% import "calendar/_events.html" as ev with context %}
+{% block page_title %}{{ _("My feed") }}{% endblock %}
+{% block pretitle %}{{ _("Hello %(name)s", name=current_user.first_name or current_user.name) }}{% endblock %}
+{% block heading %}{{ _("My feed") }}{% endblock %}
+{% block actions %}
+{% if new_count %}
+<form method="post" action="{{ url_for('.feed_read') }}">
+  {{ csrf.field() }}{% if kind %}<input type="hidden" name="kind" value="{{ kind }}">{% endif %}
+  <button class="ads-btn" type="submit">{{ icon("checks") }}{{ _("Mark all as read") }}</button>
+</form>
+{% endif %}
+{% endblock %}
+{% block body %}
+<div class="ads-with-aside">
+  <section class="ads-stack" aria-label="{{ _('News of my communities') }}">
+    {{ m.composer(communities=communities) }}
+    <div class="ads-spread">
+      <ul class="ads-pills" aria-label="{{ _('Which news') }}">
+        <li><a class="ads-pill" href="{{ url_for('.home') }}" {{ 'aria-current="page"' | safe if not kind }}>{{ _("All") }}</a></li>
+        {% for name, label in filters.items() %}
+        <li><a class="ads-pill" href="{{ url_for('.home', kind=name) }}" {{ 'aria-current="page"' | safe if kind == name }}>{{ label }}</a></li>
+        {% endfor %}
+      </ul>
+      {% if new_count %}<span class="ads-muted">{{ ngettext("%(num)d new since %(date)s", "%(num)d new since %(date)s", new_count, date=read_until | dateformat("EEEE d MMMM")) }}</span>{% endif %}
+    </div>
+    {% for item in items %}
+    {% set new = item.happened_at > read_until %}
+    {% if loop.previtem is defined and loop.previtem.happened_at > read_until and not new %}
+    <div class="ads-rule">{{ _("Read already") }}</div>
+    {% endif %}
+    {{ m.feed_entry(item, new=new) }}
+    {% else %}
+    <div class="ads-card"><div class="ads-card__body ads-muted">{{ _("Nothing of this kind in your communities yet.") if kind else _("Nothing has happened in your communities yet.") }}</div></div>
+    {% endfor %}
+  </section>
+
+  <aside class="ads-stack" aria-label="{{ _('My communities and what is coming up') }}">
+    <section class="ads-card" aria-labelledby="mine">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="mine">{{ _("My communities") }}</h2></div>
+      <ul class="ads-list">
+        {% for c in communities %}
+        <li>
+          <a class="ads-fill ads-cluster ads-gap-sm" href="{{ url_for(c) }}">
+            {{ m.tile(c) }}
+            <span class="sbe-lines ads-fill">
+              <span class="ads-truncate">{% if new_in[c.id] %}<strong>{{ c.name }}</strong>{% else %}{{ c.name }}{% endif %}</span>
+              {#- One line: how long ago, the exact date on hover. -#}
+              <span class="ads-muted ads-truncate">{{ ngettext("%(num)d member", "%(num)d members", c.membership_count) }} · <time datetime="{{ c.last_active_at.isoformat() }}" title="{{ c.last_active_at | datetimeformat('medium') }}">{{ c.last_active_at | age }}</time></span>
+            </span>
+            {% if new_in[c.id] %}{{ m.new_badge(new_in[c.id]) }}{% endif %}
+          </a>
+        </li>
+        {% else %}
+        <li class="ads-muted">{{ _("You are not a member of any community yet.") }}</li>
+        {% endfor %}
+      </ul>
+      <div class="ads-card__foot"><a href="{{ url_for('communities.index') }}">{{ _("All my communities (%(num)d)", num=communities_count) }}</a></div>
+    </section>
+    {% if coming %}
+    <section class="ads-card" aria-labelledby="coming">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="coming">{{ _("Coming up") }}</h2></div>
+      <ul class="ads-list">{% for e in coming %}{{ ev.event_row(e) }}{% endfor %}</ul>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

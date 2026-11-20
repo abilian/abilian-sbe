@@ -1,0 +1,8 @@
+{#- An object's form in the administration (a group, a vocabulary's entry, a tag).
+    Overrides Abilian Core's. -#}
+{% extends "admin/_ads.html" %}
+{% import "_object_form.html" as of with context %}
+{% set title = view.title or (view.obj.name if view.obj else "") %}
+{% block page_title %}{{ title }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block content %}{{ of.object_form(form, view, title) }}{% endblock %}

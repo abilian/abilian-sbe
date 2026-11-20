@@ -1,14 +1,19 @@
+{#- What changed between two revisions of a page, line by line: the lines gone and the
+    lines new marked, the rest kept for context. Drawn in
+    `mockups/templates/wiki-compare.html`. -#}
 {% extends "wiki/_base.html" %}
-
-{% from "macros/box.html" import m_box_content %}
-{% from "wiki/macros.html" import m_difflines %}
-
-{% block content %}
-  {% call m_box_content(_("(changes)")) %}
-    <p>Changes between revisions {{ rev1.number }} and {{ rev2.number }}.</p>
-    <pre>
-      {{ m_difflines(diff) }}
-    </pre>
-
-  {% endcall %}
+{% import "wiki/macros.html" as w with context %}
+{% set view = _("From revision %(old)d to revision %(new)d", old=rev1.number, new=rev2.number) %}
+{% block wiki_title %}{{ view }} · {{ page.title }}{% endblock %}
+{% block wiki_content %}
+<article class="ads-card" aria-labelledby="page-title">
+  <div class="ads-card__head ads-spread">
+    <div class="ads-stack ads-gap-sm">
+      {{ w.page_head(page, view) }}
+      {% if rev2.author %}<span class="ads-muted ads-cluster ads-gap-sm">{{ m.avatar(rev2.author, "ads-avatar--xs") }}{{ rev2.author.name }}, {{ m.time(rev2.created_at) }}{% if rev2.message %} : « {{ rev2.message }} »{% endif %}</span>{% endif %}
+    </div>
+    <a class="ads-btn" href="{{ url_for('.page_changes', community_id=g.community.slug, title=page.title) }}">{{ icon("history") }}{{ _("History") }}</a>
+  </div>
+  <div class="ads-card__body">{{ w.diff_lines(diff, _("The text, line by line")) }}</div>
+</article>
 {% endblock %}

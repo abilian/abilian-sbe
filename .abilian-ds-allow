@@ -1,0 +1,29 @@
+# Classes the app's scripts look for (vite/src/), not styles: ADS's linter knows them.
+js-widget          # widgets/registry.js: a node a widget mounts on
+js-file-button     # widgets/file.js: the button holding the file input
+selected-files     # widgets/file.js: where the files picked are listed
+file-item-existing # widgets/file.js: a file already saved, which a button marks for removal
+richtext-toolbar   # editor.js: the formatting buttons
+richtext-content   # editor.js: where Tiptap writes the text
+doc-check-all      # documents/folder.js: ticks every item at once
+help-block         # documents/name-check.js: where a name's refusal is said
+breadcrumb         # documents/folder.js: the move dialog's path
+selected-items     # documents/folder.js: the selection, copied into a dialog
+form-folder-title  # documents/folder.js: a dialog's fields, filled from a row
+form-folder-description
+form-document-title
+form-document-description
+js-file-tpl        # documents/upload-dialog.js: a file on its way, and its parts
+js-files
+js-file-preview
+js-file-name
+js-file-size
+js-file-error
+js-file-progress
+js-file-sent
+js-file-failed
+js-file-remove
+js-total-progress
+js-upload
+wizard-warning     # wizard.js: says that a new account lacks a name
+wizard-required    # wizard.js: a new account's fields it checks before saving

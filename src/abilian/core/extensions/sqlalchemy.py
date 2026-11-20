@@ -11,6 +11,7 @@ import sqlalchemy.event
 import sqlalchemy.orm
 
 from abilian.core.sqlalchemy import SQLAlchemy
+from abilian.core.sqlalchemy.extension import Base
 
 if TYPE_CHECKING:
     from sqlalchemy.engine import Connection
@@ -18,7 +19,12 @@ if TYPE_CHECKING:
 
 __all__ = ("db",)
 
-db = SQLAlchemy()
+# The session behaves as in SQLAlchemy 2.0. Notably, an object no longer joins
+# the session through a backref: adding a child to a parent's collection, or
+# giving it a parent, does not save it; add it to the session.
+
+
+db = SQLAlchemy(model_class=Base, session_options={"future": True})
 
 
 @sa.event.listens_for(db.metadata, "before_create")

@@ -1,122 +1,29 @@
-{% extends "community/_base.html" %}
+{#- A community's wiki on the Abilian Design System: a page, or one of its views, in a
+    card; the wiki's pages beside it. Drawn in `mockups/templates/wiki-page.html` and
+    its siblings. -#}
+{% extends "ads_community.html" %}
+{% block page_title %}{% block wiki_title %}{% endblock %} · {{ _("Wiki") }} · {{ g.community.name }}{% endblock %}
 
-{% from "macros/box.html" import m_box_menu %}
-
-{% block sidebar %}
-  {% call m_box_menu() %}
-    <ul class="nav nav-list">
-      {%- set content_actions = actions.for_category('wiki:page') %}
-      {%- set global_actions = actions.for_category('wiki:global') %}
-
-      {%- for action in content_actions %}
-        <li>{{ action.render() }}</li>
-      {%- endfor %}
-
-      {% if content_actions and global_actions %}
-        <li class="divider"></li>
-      {% endif %}
-
-      {%- for action in global_actions %}
-        <li>{{ action.render() }}</li>
-      {%- endfor %}
-    </ul>
-  {% endcall %}
-{% endblock %}
-
-{% block modals %}
-  {%- if page %}
-    {#  FIXME: copy-pasted from Documents. #}
-    <div class="modal fade" id="modal-delete" role="dialog"
-         data-keyboard="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-
-          <form
-              action="{{ url_for(".page_delete", community_id=g.community.slug) }}"
-              method="POST" style="margin-bottom: 0;">
-            {{ csrf.field() }}
-            <input type="hidden" name="title" value="{{ page.title }}">
-
-            <div class="modal-header">
-              <button class="close" data-dismiss="modal">&times;</button>
-              <h3>{{ _("Delete Wiki Page") }}</h3>
-            </div>
-            <div class="modal-body">
-              {{ _('Are you sure you want to delete the page "{title}" ?').format(title=page.title) }}
-            </div>
-            <div class="modal-footer">
-              <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
-              <button type="submit"
-                      class="btn btn-danger">{{ _("Really Delete") }}</button>
-            </div>
-          </form>
-        </div>
+{% block content %}
+<div class="ads-with-aside">
+  <div class="ads-stack">{% block wiki_content %}{% endblock %}</div>
+  <aside class="ads-stack" aria-label="{{ _('The wiki') }}">
+    <nav class="ads-card" aria-labelledby="wiki-pages">
+      <div class="ads-card__head ads-spread">
+        <h2 class="ads-card__title" id="wiki-pages">{{ _("Pages") }} ({{ wiki_titles | length }})</h2>
+        <a class="ads-btn ads-btn--sm" href="{{ url_for('.page_new', community_id=g.community.slug) }}">{{ icon("plus") }}{{ _("New page") }}</a>
       </div>
-    </div>
-
-    {#  FIXME: copy-pasted from crm/view_with_attachments.html #}
-    <div class="modal fade" id="upload-files" role="dialog">
-      <div class="modal-dialog">
-        <div class="modal-content">
-
-          <form method="POST"
-                action="{{ url_for(".attachment_upload", community_id=g.community.slug, title=page.title) }}"
-                enctype="multipart/form-data" style="margin-bottom: 0;">
-            {{ csrf.field() }}
-            <div class="modal-header">
-              <button class="close" data-dismiss="modal">&times;</button>
-              <h3>{{ _("Upload new files") }}</h3>
-            </div>
-
-            <div class="modal-body">
-              <input type="file" name="attachments" multiple="multiple"/>
-            </div>
-
-            <div class="modal-footer">
-              <button data-dismiss="modal" class="btn">{{ _("Cancel") }}</button>
-              <button class="btn btn-primary" type="submit" name="action"
-                      value="upload">{{ _("Upload") }}</button>
-            </div>
-          </form>
-        </div>
+      <div class="ads-card__body">
+        <ul class="ads-tree sbe-tree">
+          {% for title in wiki_titles %}
+          <li class="ads-tree__node"><a class="ads-tree__label" href="{{ url_for('.page', community_id=g.community.slug, title=title) }}" {{ 'aria-current="page"' | safe if page is defined and page and page.title == title }}>{{ icon("file-text") }}<span class="ads-truncate">{{ title }}</span></a></li>
+          {% endfor %}
+        </ul>
       </div>
-    </div>
-
-    {%- deferJS %}
-      <script>
-        require(
-            ['Abilian', 'jquery', 'bootbox'],
-            function (Abilian, $, bootbox) {
-              function setupDeleteButtons() {
-                $('#attachments li form > button[value="delete"]')
-                .click(function (e) {
-                  e.preventDefault();
-                  var $button = $(this);
-                  var button_form = $(this.form);
-                  var filename = $button.closest('li').find('a').text();
-                  var msg = '<h2>"' + filename + '"</h2>'
-                      + '<p class="lead">{{ _("Delete attachment?") }}</p>';
-                  bootbox.confirm(msg,
-                      function (confirm) {
-                        if (confirm) {
-                          var action_val = $('<input />',
-                              {
-                                'type': 'hidden',
-                                'name': 'action',
-                                'value': $button.attr('value')
-                              });
-                          button_form.append(action_val);
-                          button_form.submit();
-                        }
-                      });
-                })
-                .removeAttr('disabled');
-              }
-
-              Abilian.fn.onAppInit(setupDeleteButtons);
-            }
-        );
-      </script>
-    {%- enddeferJS %}
-  {%- endif %}
+      <div class="ads-card__foot ads-cluster ads-gap-sm">
+        <a href="{{ url_for('.wiki_help', community_id=g.community.slug) }}">{{ _("Syntax help") }}</a>
+      </div>
+    </nav>
+  </aside>
+</div>
 {% endblock %}

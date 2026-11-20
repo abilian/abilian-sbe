@@ -1,65 +1,50 @@
-{% extends "community/_base.html" %}
-
-{% from "macros/box.html" import m_box, m_box_menu with context %}
-
-{% block header %}{% endblock %}
-
-{% block content %}
-  {%- call m_box(title=_("My communities")) %}
-    {%- set is_admin = current_user.has_role('admin') %}
-
-    <div class="form-group pull-right">
-      <form action=".">
-        <select name="sort" class="form-control" onchange="this.form.submit()">
-          <option value="alpha"
-                  {% if not sort_order=='activity' %}selected{% endif %}>{{ _("Sort alphabetically") }}</option>
-          <option value="activity"
-                  {% if sort_order=='activity' %}selected{% endif %}>{{ _("Sort by activity") }}</option>
-        </select>
+{#- The communities: mine, or all of them for a site administrator, by name or by
+    activity, filtered by name (as the bar's menu does too); each with its image or
+    initial, what it is for, its members and documents, when it last moved. A site
+    administrator makes a new one from here. -#}
+{% extends "ads_base.html" %}
+{% set admin = is_site_admin() %}
+{% block page_title %}{{ _("Communities") if admin else _("My communities") }}{% endblock %}
+{% block heading %}{{ _("Communities") if admin else _("My communities") }}{% endblock %}
+{% block actions %}<a class="ads-btn ads-btn--ghost" href="{{ url_for('.discover') }}">{{ icon("world") }}{{ _("Discover the other communities") }}</a>{% if admin %}<a class="ads-btn ads-btn--primary" href="{{ url_for('.new') }}">{{ icon("plus") }}{{ _("New community") }}</a>{% endif %}{% endblock %}
+{% block body %}
+<div class="ads-card">
+  <div class="ads-card__head ads-spread">
+    <ul class="ads-pills" aria-label="{{ _('Order') }}">
+      <li><a class="ads-pill" href="{{ url_for('.index', sort='alpha', q=search or none) }}" {{ 'aria-current="page"' | safe if sort_order != "activity" }}>{{ _("By name") }}</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.index', sort='activity', q=search or none) }}" {{ 'aria-current="page"' | safe if sort_order == "activity" }}>{{ _("By activity") }}</a></li>
+    </ul>
+    <span class="ads-cluster ads-gap-sm">
+      <span class="ads-muted">{{ ngettext("%(num)d community", "%(num)d communities", my_communities | length) }}</span>
+      <form method="get" action="{{ url_for('.index') }}">
+        <span class="ads-input-icon">
+          <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+          <input class="ads-input" type="search" name="q" value="{{ search }}" placeholder="{{ _('Name') }}" aria-label="{{ _('Filter the communities by name') }}">
+        </span>
       </form>
-    </div>
-
-    {%- if my_communities %}
-      <table class="table table-striped table-condensed community-list">
-        {%- for community in my_communities %}
-          <tr>
-            <td class="logo">
-              <a href="{{ url_for(community) }}">
-                <img src="{{ community_image_url(community, s=65) }}" alt=""/>
-              </a>
-            </td>
-            <td>
-              <a href="{{ url_for(community) }}">
-                <div class="profile">
-                  <div class="name">{{ community.name }}</div>
-                  <div class="description">{{ community.description }}</div>
-                  <div class="stats">
-                    <i class="fa fa-user"></i> {{ community.membership_count }}
-                    -
-                    <i class="fa fa-file"></i> {{ community.document_count }}
-                    -
-                    <i class="fa fa-time"></i> {{ community.last_active_at | age }}
-                  </div>
-                </div>
-              </a>
-            </td>
-          </tr>
-        {%- endfor %}
-      </table>
-    {% else %}
-      {{ _("You're not a member of a community yet.") }}
-    {% endif %}
-
-  {% endcall %}
-{% endblock %}
-
-{% block sidebar %}
-  {% if current_user.has_role("admin") %}
-    {% call m_box_menu() %}
-      <div style="padding: 15px;">
-        <a class="btn btn-default" style="white-space: normal;"
-           href="{{ url_for(".new") }}">{{ _("Create new community") }}</a>
-      </div>
-    {% endcall %}
+    </span>
+  </div>
+  {% if my_communities %}
+  <ul class="ads-list">
+    {% for community in my_communities %}
+    <li>
+      {{ m.tile(community, "sbe-tile--lg") }}
+      <span class="ads-fill sbe-lines">
+        <a class="sbe-quiet" href="{{ url_for(community) }}"><strong>{{ community.name }}</strong></a>
+        {% if community.description %}<span class="ads-muted">{{ community.description }}</span>{% endif %}
+        <span class="ads-muted ads-cluster ads-gap-sm">
+          <span>{{ ngettext("%(num)d member", "%(num)d members", community.membership_count) }}</span>
+          <span>{{ ngettext("%(num)d document", "%(num)d documents", community.document_count) }}</span>
+          <span>{{ _("Active") }} {{ m.time(community.last_active_at) }}</span>
+        </span>
+      </span>
+    </li>
+    {% endfor %}
+  </ul>
+  {% elif search %}
+  <p class="ads-card__body ads-muted">{{ _("No community has “%(search)s” in its name.", search=search) }}</p>
+  {% else %}
+  <p class="ads-card__body ads-muted">{{ _("You're not a member of a community yet.") }}</p>
   {% endif %}
+</div>
 {% endblock %}

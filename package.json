@@ -1,16 +1,7 @@
 {
-  "name": "extranet-cnll-front",
+  "name": "abilian-sbe",
   "private": true,
-  "engines": {
-    "node": ">= 4.0.0",
-    "npm": ">= 3.0.0"
-  },
-  "devDependencies": {
-    "htmlhint": "^1.1.4",
-    "less": "^4.2.1"
-  },
   "dependencies": {
-    "lessc": "^1.0.2",
     "markdown-toc": "^1.2.0"
   }
 }

@@ -10,6 +10,7 @@ import re
 import sys
 import tempfile
 import traceback
+from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
 from io import StringIO
@@ -33,26 +34,26 @@ from flask import (
     send_file,
     session,
 )
-from flask_login import current_user
 from loguru import logger
-from markupsafe import Markup
-from sqlalchemy import func
-from werkzeug.exceptions import InternalServerError
+from markupsafe import Markup, escape
+from werkzeug.exceptions import BadRequest, InternalServerError
 from xlwt import Workbook, easyxf
 
 from abilian.core.extensions import db
-from abilian.core.models.subjects import Group, User
+from abilian.core.extensions.login import authenticated
+from abilian.core.models.subjects import User
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
 from abilian.i18n import _, _n
 from abilian.sbe.apps.communities.views import default_view_kw
-from abilian.sbe.apps.documents.models import Document, Folder, icon_for, icon_url
+from abilian.sbe.apps.documents.models import Document, Folder
 from abilian.sbe.apps.documents.repository import content_repository
 from abilian.sbe.apps.documents.search import reindex_tree
 from abilian.services import get_service
-from abilian.services.security import READ, WRITE, Role, security
+from abilian.services.security import MANAGE, READ, WRITE, Role, security
 from abilian.web import csrf, http, url_for
 from abilian.web.action import actions
+from abilian.web.listing import Listing, by_name
 from abilian.web.views import default_view
 
 from .util import (
@@ -70,7 +71,7 @@ from .util import (
 from .views import community_blueprint
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterable, Iterator
 
     from werkzeug.datastructures import FileStorage
     from werkzeug.wrappers import Response
@@ -100,30 +101,99 @@ def index() -> Response:
     return redirect(url)
 
 
+#: Folders come first until asked otherwise, and count as empty for their size.
+#: "age" is how long ago: the youngest has the smallest.
+FOLDER_SORT_KEYS = {
+    "title": lambda content: (content.is_document, content.title.lower()),
+    "size": lambda content: content.content_length if content.is_document else 0,
+    "owner": lambda content: by_name(content.owner),
+    "age": lambda content: -content.created_at.timestamp(),
+}
+
+
+def _user_roles_listing(
+    rows: Iterable[tuple[User, Role, bool]], prefix: str
+) -> tuple[Listing, list[tuple[User, Role, bool]]]:
+    return Listing.from_rows(
+        rows,
+        {
+            "name": lambda row: by_name(row[0]),
+            "role": lambda row: (str(row[1]), by_name(row[0])),
+        },
+        "name",
+        text=lambda row: f"{row[0].name} {row[0].email}",
+        prefix=prefix,
+    )
+
+
+@dataclass(frozen=True)
+class TreeNode:
+    """A folder in the tree beside a folder's page."""
+
+    folder: Folder
+    children: tuple[TreeNode, ...]
+    #: On the way to the folder shown: its subfolders are listed open.
+    expanded: bool
+    current: bool
+
+
+def folder_tree(top: Folder, user: User, current: Folder) -> tuple[TreeNode, ...]:
+    """`top` and the folders under it that `user` may read, open down to `current`."""
+    on_path = {folder.id for folder in current._iter_to_root()}
+
+    # ponytail: one permission check per folder of the community; load the tree in
+    # one query if a community's folders run into the thousands.
+    def nodes(folders: Iterable[Folder]) -> tuple[TreeNode, ...]:
+        return tuple(
+            TreeNode(
+                folder,
+                nodes(folder.filtered_subfolders(user)),
+                expanded=folder.id in on_path,
+                current=folder is current,
+            )
+            for folder in folders
+        )
+
+    return nodes([top])
+
+
 @default_view(community_blueprint, Folder, id_attr="folder_id", kw_func=default_view_kw)
 @route("/folder/<int:folder_id>")
-def folder_view(folder_id):
-    folder = get_folder(folder_id)
-    bc = breadcrumbs_for(folder)
+@authenticated
+def folder_view(user: User, folder_id):
+    folder = get_folder(user, folder_id)
     actions.context["object"] = folder
-    ctx = {"folder": folder, "children": folder.filtered_children, "breadcrumbs": bc}
-
-    view_style = session.get("sbe_doc_view_style", "thumbnail_view")
-    if view_style == "thumbnail_view":
-        resp = render_template("documents/folder.html", **ctx)
-    elif view_style == "gallery_view":
-        resp = render_template("documents/folder_gallery_view.html", **ctx)
-    else:
-        msg = "Unknown value for sbe_doc_view_style"
-        raise InternalServerError(msg)
-
-    return resp
+    listing, children = Listing.from_rows(
+        folder.filtered_children(user),
+        FOLDER_SORT_KEYS,
+        "title",
+        text=lambda content: content.title,
+    )
+    return render_template(
+        "documents/folder.html",
+        folder=folder,
+        breadcrumbs=breadcrumbs_for(folder),
+        listing=listing,
+        children=children,
+        gallery=session.get("sbe_doc_view_style") == "gallery_view",
+        # What each subfolder holds, for its size.
+        counts={
+            child.id: len(child.filtered_children(user))
+            for child in children
+            if child.is_folder
+        },
+        tree=folder_tree(g.community.folder, user, folder),
+        may_write=security.has_permission(user, WRITE, folder, inherit=True),
+        may_manage=security.has_permission(user, MANAGE, folder, inherit=True),
+    )
 
 
 @route("/folder/change_view_style/<int:folder_id>", methods=["GET", "POST"])
 @csrf.protect
-def change_view_style(folder_id):
-    folder = get_folder(folder_id)
+@authenticated
+def change_view_style(user: User, folder_id):
+    # The folder is not used, but must be visible here.
+    get_folder(user, folder_id)
     if request.method == "POST":
         view_style = request.form["view_style"]
         if view_style == "gallery_view":
@@ -131,34 +201,29 @@ def change_view_style(folder_id):
         else:
             session["sbe_doc_view_style"] = "thumbnail_view"
         return redirect(
-            url_for(
-                ".folder_view", folder_id=folder_id, community_id=folder.community.slug
-            )
+            url_for(".folder_view", folder_id=folder_id, community_id=g.community.slug)
         )
     return redirect(
-        url_for(".folder_view", folder_id=folder_id, community_id=folder.community.slug)
+        url_for(".folder_view", folder_id=folder_id, community_id=g.community.slug)
     )
 
 
 @route("/folder/<int:folder_id>/json")
-def folder_json(folder_id):
+@authenticated
+def folder_json(user: User, folder_id):
     """Return parent folder + subfolders."""
 
-    folder = get_folder(folder_id)
+    folder = get_folder(user, folder_id)
     folder_url = partial(url_for, ".folder_json")
     result = {}
     has_permission = security.has_permission
     result["current_folder_selectable"] = has_permission(
-        current_user, WRITE, folder, inherit=True
+        user, WRITE, folder, inherit=True
     )
     folders = result["folders"] = []
     bc = result["breadcrumbs"] = []
     subfolders = sorted(
-        (
-            f
-            for f in folder.subfolders
-            if has_permission(current_user, READ, f, inherit=True)
-        ),
+        (f for f in folder.subfolders if has_permission(user, READ, f, inherit=True)),
         key=lambda f: f.title,
     )
 
@@ -171,23 +236,22 @@ def folder_json(folder_id):
 
         data = {
             "id": parent.id,
-            "url": folder_url(folder_id=parent.id, community_id=parent.community.slug),
+            "url": folder_url(folder_id=parent.id, community_id=g.community.slug),
             "title": parent.title,
         }
         bc.append(data)
 
+    # Below the community's top folder, a way one level up; the top folder itself
+    # takes documents like any other.
     if folder.parent is not None and not folder.parent.is_root_folder:
-        # not at root folder: allow to go 1 level up
         data = bc[-2].copy()
         data["title"] = ".."
         folders.append(data)
-    else:
-        result["current_folder_selectable"] = False
 
     for folder in subfolders:
         data = {
             "id": folder.id,
-            "url": folder_url(folder_id=folder.id, community_id=folder.community.slug),
+            "url": folder_url(folder_id=folder.id, community_id=g.community.slug),
             "title": folder.title,
         }
         folders.append(data)
@@ -196,8 +260,9 @@ def folder_json(folder_id):
 
 
 @route("/folder/<int:folder_id>/members")
-def members(folder_id):
-    folder = get_folder(folder_id)
+@authenticated
+def members(user: User, folder_id):
+    folder = get_folder(user, folder_id)
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
     members = folder.members()
@@ -207,9 +272,10 @@ def members(folder_id):
 
 @route("/folder/<int:folder_id>/permissions")
 @http.nocache
-def permissions(folder_id):
-    folder = get_folder(folder_id)
-    check_manage_access(folder)
+@authenticated
+def permissions(user: User, folder_id):
+    folder = get_folder(user, folder_id)
+    check_manage_access(user, folder)
 
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
@@ -217,40 +283,30 @@ def permissions(folder_id):
     principals = {p for p, r in local_roles_assignments}
     security._fill_role_cache_batch(principals)
 
-    users_and_local_roles = [
-        (user, role, content_repository.has_access(user, folder))
-        for user, role in local_roles_assignments
-        if isinstance(user, User)
-    ]
-    groups_and_local_roles = [
-        t for t in local_roles_assignments if isinstance(t[0], Group)
-    ]
-
-    users_and_inherited_roles = groups_and_inherited_roles = ()
-
-    if folder.inherit_security:
-        inherited_roles_assignments = folder.get_inherited_roles_assignments()
-        users_and_inherited_roles = [
-            (user, role, False)
-            for user, role in inherited_roles_assignments
-            if isinstance(user, User)
-        ]
-        groups_and_inherited_roles = [
-            t for t in inherited_roles_assignments if isinstance(t[0], Group)
-        ]
-
-    query = Group.query
-    query = query.order_by(func.lower(Group.name))
-    all_groups = query.all()
+    local_listing, users_and_local_roles = _user_roles_listing(
+        (
+            (principal, role, content_repository.has_access(principal, folder))
+            for principal, role in local_roles_assignments
+            if isinstance(principal, User)
+        ),
+        "local_",
+    )
+    inherited_roles_assignments = (
+        folder.get_inherited_roles_assignments() if folder.inherit_security else ()
+    )
+    inherited_listing, users_and_inherited_roles = _user_roles_listing(
+        (
+            (principal, role, False)
+            for principal, role in inherited_roles_assignments
+            if isinstance(principal, User)
+        ),
+        "inherited_",
+    )
 
     class EntryPresenter:
         _USER_FMT = (
             '<a href="{{ url_for("social.user", user_id=user.id) }}">'
             "{{ user.name }}</a>"
-        )
-        _GROUP_FMT = (
-            '<a href="{{ url_for("social.group_home", group_id=group.id)'
-            ' }}">{{ group.name }}</a>'
         )
 
         def __init__(self, e) -> None:
@@ -282,7 +338,7 @@ def permissions(folder_id):
             if self.entry.user:
                 principal = render(self._USER_FMT, user=self.entry.user)
             elif self.entry.group:
-                principal = render(self._GROUP_FMT, group=self.entry.group)
+                principal = escape(self.entry.group.name)
 
             self.msg = Markup(
                 msg.format(
@@ -297,12 +353,11 @@ def permissions(folder_id):
 
     ctx = {
         "folder": folder,
+        "local_listing": local_listing,
         "users_and_local_roles": users_and_local_roles,
+        "inherited_listing": inherited_listing,
         "users_and_inherited_roles": users_and_inherited_roles,
-        "groups_and_local_roles": groups_and_local_roles,
-        "groups_and_inherited_roles": groups_and_inherited_roles,
         "audit_entries": audit_entries,
-        "all_groups": all_groups,
         "breadcrumbs": bc,
     }
     return render_template("documents/permissions.html", **ctx)
@@ -310,9 +365,10 @@ def permissions(folder_id):
 
 @route("/folder/<int:folder_id>/permissions", methods=["POST"])
 @csrf.protect
-def permissions_update(folder_id):
-    folder = content_repository.get_folder_by_id(folder_id)
-    check_manage_access(folder)
+@authenticated
+def permissions_update(user: User, folder_id):
+    folder = get_folder(user, folder_id)
+    check_manage_access(user, folder)
     has_permission = security.has_permission
     action = request.form.get("action")
 
@@ -320,8 +376,7 @@ def permissions_update(folder_id):
         inherit_security = action == "activate_inheritance"
 
         if not (
-            inherit_security
-            or has_permission(current_user, "manage", folder, inherit=False)
+            inherit_security or has_permission(user, "manage", folder, inherit=False)
         ):
             # don't let user shoot himself in the foot
             flash(
@@ -335,7 +390,7 @@ def permissions_update(folder_id):
                 url_for(
                     ".permissions",
                     folder_id=folder_id,
-                    community_id=folder.community.slug,
+                    community_id=g.community.slug,
                 )
             )
 
@@ -344,114 +399,70 @@ def permissions_update(folder_id):
         reindex_tree(folder)
         db.session.commit()
         return redirect(
-            url_for(
-                ".permissions", folder_id=folder_id, community_id=folder.community.slug
-            )
+            url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
         )
 
     if action == "add-user-role":
-        role = request.form.get("role").lower()
-        user_id = int(request.form.get("user"))
-        user = User.query.get(user_id)
+        role = request.form["role"].lower()
+        user_id = int(request.form["user"])
+        member = User.query.get_or_404(user_id)
 
-        security.grant_role(user, role, folder)
+        security.grant_role(member, role, folder)
         reindex_tree(folder)
         db.session.commit()
         return redirect(
-            url_for(
-                ".permissions", folder_id=folder_id, community_id=folder.community.slug
-            )
+            url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
         )
 
-    if action == "add-group-role":
-        role = request.form.get("role").lower()
-        group_id = int(request.form.get("group"))
-        group = Group.query.get(group_id)
-
-        security.grant_role(group, role, folder)
-        reindex_tree(folder)
-        db.session.commit()
-        return redirect(
-            url_for(
-                ".permissions", folder_id=folder_id, community_id=folder.community.slug
-            )
-        )
-
-    action, args = request.form.items()[0]
-    role, object_id = args.split(":")
+    # The delete buttons send their action as their name, "role:id" as value.
+    if "delete-user-role" not in request.form:
+        msg = f"Unknown action: {request.form.get('action')!r}"
+        raise BadRequest(msg)
+    role, object_id = request.form["delete-user-role"].split(":")
     role = role.lower()
     object_id = int(object_id)
 
-    if action == "delete-user-role":
-        user = User.query.get(object_id)
-        # remove role in a subtransaction, to prevent manager shoot himself in the
-        # foot
-        transaction = db.session.begin_nested()
-        security.ungrant_role(user, role, folder)
+    member = User.query.get_or_404(object_id)
+    # remove role in a subtransaction, to prevent manager shoot himself in the
+    # foot
+    transaction = db.session.begin_nested()
+    security.ungrant_role(member, role, folder)
 
-        if (
-            user == current_user
-            and role == "manager"
-            and not has_permission(current_user, "manage", folder, inherit=True)
-        ):
-            transaction.rollback()
-            flash(
-                _(
-                    'Cannot remove "manager" local role for yourself: you '
-                    'don\'t have "manager" role (either by security inheritance '
-                    "or by group membership)"
-                ),
-                "error",
-            )
-        else:
-            reindex_tree(folder)
-            transaction.commit()
-            flash(
-                _("Role {role} for user {user} removed on folder {folder}").format(
-                    role=role, user=user.name, folder=folder.name
-                ),
-                "success",
-            )
-    elif action == "delete-group-role":
-        group = Group.query.get(object_id)
-        # remove role in a subtransaction, to prevent manager shoot himself in the
-        # foot
-        transaction = db.session.begin_nested()
-        security.ungrant_role(group, role, folder)
-
-        if role == "manager" and not has_permission(
-            current_user, "manage", folder, inherit=True
-        ):
-            transaction.rollback()
-            flash(
-                _(
-                    'Cannot remove "manager" local role for group "{group}": you'
-                    ' don\'t have "manager" role by security inheritance or by '
-                    "local role"
-                ).format(group=group.name),
-                "error",
-            )
-        else:
-            flash(
-                _("Role {role} for group {group} removed on folder {folder}").format(
-                    role=role, group=group.name, folder=folder.name
-                ),
-                "success",
-            )
-            reindex_tree(folder)
-            transaction.commit()
+    if (
+        member == user
+        and role == "manager"
+        and not has_permission(user, "manage", folder, inherit=True)
+    ):
+        transaction.rollback()
+        flash(
+            _(
+                "You cannot take the manager role away from yourself here: you "
+                "would no longer manage this folder."
+            ),
+            "error",
+        )
+    else:
+        reindex_tree(folder)
+        transaction.commit()
+        flash(
+            _("Role {role} for user {user} removed on folder {folder}").format(
+                role=role, user=member.name, folder=folder.name
+            ),
+            "success",
+        )
 
     db.session.commit()
     return redirect(
-        url_for(".permissions", folder_id=folder_id, community_id=folder.community.slug)
+        url_for(".permissions", folder_id=folder_id, community_id=g.community.slug)
     )
 
 
 @route("/folder/<int:folder_id>/permissions_export")
 @http.nocache
-def permissions_export(folder_id):
-    folder = content_repository.get_folder_by_id(folder_id)
-    check_manage_access(folder)
+@authenticated
+def permissions_export(user: User, folder_id):
+    folder = get_folder(user, folder_id)
+    check_manage_access(user, folder)
 
     wb = Workbook()
     ws = wb.add_sheet("Sheet 1")
@@ -486,7 +497,7 @@ def permissions_export(folder_id):
         ws.write(0, c, val, header_style)
 
     # data
-    permissions = iter_permissions(folder, current_user)
+    permissions = iter_permissions(folder, user)
     row_offset = 0
     current_community = None
     for r, row in enumerate(permissions, 1):
@@ -591,32 +602,33 @@ def iter_permissions(folder, user):
 #
 @route("/folder/<int:folder_id>", methods=["POST"])
 @csrf.protect
-def folder_post(folder_id: int) -> Response:
+@authenticated
+def folder_post(user: User, folder_id: int) -> Response:
     """A POST on a folder can result on several different actions (depending on
     the `action` parameter)."""
-    folder = get_folder(folder_id)
+    folder = get_folder(user, folder_id)
     action = request.form.get("action")
 
     if action == "edit":
-        return folder_edit(folder)
+        return folder_edit(user, folder)
 
     if action == "upload":
-        return upload_new(folder)
+        return upload_new(user, folder)
 
     if action == "download":
-        return download_multiple(folder)
+        return download_multiple(user, folder)
 
     if action == "delete":
-        return delete_multiple(folder)
+        return delete_multiple(user, folder)
 
     if action == "new":
-        return create_subfolder(folder)
+        return create_subfolder(user, folder)
 
     if action == "move":
-        return move_multiple(folder)
+        return move_multiple(user, folder)
 
     if action == "change-owner":
-        return change_owner(folder)
+        return change_owner(user, folder)
 
     # Probably an error or a hack attempt.
     # Logger will inform sentry if enabled
@@ -627,8 +639,8 @@ def folder_post(folder_id: int) -> Response:
     return redirect(url_for(folder))
 
 
-def folder_edit(folder):
-    check_write_access(folder)
+def folder_edit(user: User, folder):
+    check_write_access(user, folder)
 
     changed = edit_object(folder)
 
@@ -698,8 +710,8 @@ def explore_archive(
             yield filepath, zip_fd
 
 
-def upload_new(folder: Folder) -> Response:
-    check_write_access(folder)
+def upload_new(user: User, folder: Folder) -> Response:
+    check_write_access(user, folder)
     session = db.session()
     base_folder = folder
     uncompress_files = "uncompress_files" in request.form
@@ -732,7 +744,7 @@ def upload_new(folder: Folder) -> Response:
                 session.flush()
                 path_cache[path] = folder
 
-            create_document(folder, fd)
+            create_document(user, folder, fd)
             created_count += 1
 
     flash(
@@ -748,8 +760,8 @@ def upload_new(folder: Folder) -> Response:
     return redirect(url_for(folder))
 
 
-def download_multiple(folder: Folder) -> Response:
-    folders, docs = get_selected_objects(folder)
+def download_multiple(user: User, folder: Folder) -> Response:
+    folders, docs = get_selected_objects(user, folder)
     if not folders:
         folders = [folder]
 
@@ -761,7 +773,7 @@ def download_multiple(folder: Folder) -> Response:
             doc_path = rel_path(path, doc)
             zipfile.writestr(doc_path, doc.content or b"")
 
-        for subfolder in folder.filtered_subfolders:
+        for subfolder in folder.filtered_subfolders(user):
             zip_folder(zipfile, subfolder, rel_path(path, subfolder))
         return zipfile
 
@@ -796,17 +808,15 @@ def download_multiple(folder: Folder) -> Response:
     return resp
 
 
-def delete_multiple(folder):
-    check_write_access(folder)
+def delete_multiple(user: User, folder):
+    check_write_access(user, folder)
 
-    folders, docs = get_selected_objects(folder)
+    folders, docs = get_selected_objects(user, folder)
 
     for obj in docs + folders:
         app = unwrap(current_app)
         community = g.community._model
-        activity.send(
-            app, actor=current_user, verb="delete", object=obj, target=community
-        )
+        activity.send(app, actor=user, verb="delete", object=obj, target=community)
         content_repository.delete_object(obj)
 
     if docs + folders:
@@ -837,8 +847,8 @@ def delete_multiple(folder):
     return redirect(url_for(folder))
 
 
-def move_multiple(folder: Folder) -> Response:
-    folders, docs = get_selected_objects(folder)
+def move_multiple(user: User, folder: Folder) -> Response:
+    folders, docs = get_selected_objects(user, folder)
     objects = folders + docs
 
     count_f = len(folders)
@@ -871,12 +881,12 @@ def move_multiple(folder: Folder) -> Response:
         )
         return redirect(current_folder_url)
 
-    if not security.has_permission(current_user, "write", folder, inherit=True):
+    if not security.has_permission(user, "write", folder, inherit=True):
         # this should not happen: this is just defensive programming
         flash(_("You are not allowed to move elements from this folder"), "error")
         return redirect(current_folder_url)
 
-    if not security.has_permission(current_user, "write", target_folder, inherit=True):
+    if not security.has_permission(user, "write", target_folder, inherit=True):
         flash(
             _('You are not allowed to write in folder "{folder}"').format(
                 folder=target_folder.title
@@ -887,7 +897,7 @@ def move_multiple(folder: Folder) -> Response:
 
     for item in objects:
         # FIXME: maybe too brutal
-        check_write_access(item)
+        check_write_access(user, item)
 
     # verify we are not trying to move a folder inside itself or one of its
     # descendants
@@ -945,8 +955,8 @@ def objects_which_exist_in_dest(objects, dest):
     return exist_in_dest
 
 
-def create_subfolder(folder: Folder) -> Response:
-    check_write_access(folder)
+def create_subfolder(user: User, folder: Folder) -> Response:
+    check_write_access(user, folder)
 
     title = request.form.get("title", "")
     description = request.form.get("description", "")
@@ -957,15 +967,20 @@ def create_subfolder(folder: Folder) -> Response:
     return redirect(url_for(folder))
 
 
-def change_owner(folder):
-    check_manage_access(folder)
-    items = itertools.chain(*get_selected_objects(folder))
+def change_owner(user: User, folder):
+    check_manage_access(user, folder)
+    items = itertools.chain(*get_selected_objects(user, folder))
 
     user_id = request.form.get("new_owner", type=int)
-    user = User.query.get(user_id)
+    if user_id is None:
+        msg = "No new owner given"
+        raise BadRequest(msg)
+    # An unknown id is a 404: it used to set every selected item's owner to
+    # None, and report success.
+    new_owner = User.query.get_or_404(user_id)
 
     for item in items:
-        item.owner = user
+        item.owner = new_owner
 
     db.session.commit()
     return redirect(url_for(folder))
@@ -973,16 +988,17 @@ def change_owner(folder):
 
 @route("/folder/check_valid_name")
 @http.nocache
-def check_valid_name():
+@authenticated
+def check_valid_name(user: User):
     """Check if name is valid for content creation in this folder."""
 
-    object_id = int(request.args.get("object_id"))
+    object_id = int(request.args["object_id"])
     action = request.args.get("action")
     title = request.args.get("title")
 
     get_object = get_document if action == "document-edit" else get_folder
-    obj = get_object(object_id)
-    check_read_access(obj)
+    obj = get_object(user, object_id)
+    check_read_access(user, obj)
 
     if action == "new":
         parent = obj
@@ -1008,8 +1024,9 @@ def check_valid_name():
 
 
 @route("/folder/<int:folder_id>/descendants")
-def descendants_view(folder_id):
-    folder = get_folder(folder_id)
+@authenticated
+def descendants_view(user: User, folder_id):
+    folder = get_folder(user, folder_id)
     bc = breadcrumbs_for(folder)
     actions.context["object"] = folder
 
@@ -1018,7 +1035,7 @@ def descendants_view(folder_id):
 
     filters = wq.And(
         [
-            wq.Term("community_id", folder.community.id),
+            wq.Term("community_id", g.community.id),
             wq.Term("parent_ids", root_path_ids),
             wq.Or(
                 [
@@ -1029,12 +1046,13 @@ def descendants_view(folder_id):
         ]
     )
 
-    results = index_service.search("", filter=filters, limit=None)
+    results = index_service.search("", filter=filters, limit=None, user=user)
     by_path = {}
     owner_ids = set()
     for hit in results:
         by_path.setdefault(hit["parent_ids"], []).append(hit)
-        owner_type, owner_id = hit["owner"].split(":")
+        # An object may have no owner, and its hit then no `owner` field.
+        owner_type, _, owner_id = hit.get("owner", "").partition(":")
         if owner_type == "user":
             try:
                 owner_id = int(owner_id)
@@ -1050,43 +1068,26 @@ def descendants_view(folder_id):
             )
         )
 
-    descendants = []
+    def children_of(path_id: str) -> list[tuple[Any, str, list]]:
+        """The hits under `path_id`, folders first: each, its kind ("folder" or
+        "document"), and what it holds."""
+        tree = []
+        for child in by_path.get(path_id, ()):
+            if child["object_type"] == Folder.entity_type:
+                below = f"{child['parent_ids']}/{child['id']}"
+                tree.append((child, "folder", children_of(below)))
+            else:
+                tree.append((child, "document", []))
+        return tree
 
-    def visit(path_id, level=0) -> None:
-        children = by_path.get(path_id, ())
-
-        for child in children:
-            is_folder = child["object_type"] == Folder.entity_type
-            type_letter = "F" if is_folder else "D"
-            descendants.append((level, type_letter, child))
-
-            if is_folder:
-                path_id = f"{child['parent_ids']}/{child['id']}"
-                visit(path_id, level + 1)
-
-    visit(root_path_ids, 0)
-
-    owners = {}
-    owners_query = User.query.filter(User.id.in_(owner_ids)).add_column(
-        sa.sql.func.concat("user:", User.id).label("key")
-    )
-    for user, key in owners_query:
-        owners[key] = user
+    owners = {
+        f"user:{owner.id}": owner for owner in User.query.filter(User.id.in_(owner_ids))
+    }
 
     ctx = {
         "folder": folder,
-        "descendants": descendants,
+        "tree": children_of(root_path_ids),
         "owners": owners,
         "breadcrumbs": bc,
-        "get_icon": get_icon_for_hit,
     }
     return render_template("documents/descendants.html", **ctx)
-
-
-def get_icon_for_hit(hit):
-    if hit["object_type"] == Folder.entity_type:
-        return icon_url("folder.png")
-
-    content_type = hit["content_type"]
-    icon = icon_for(content_type)
-    return icon

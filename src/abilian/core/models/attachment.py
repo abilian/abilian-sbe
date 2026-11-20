@@ -8,8 +8,8 @@ import abc
 
 import sqlalchemy as sa
 import sqlalchemy.event
-from sqlalchemy import Column, ForeignKey, Integer, UnicodeText
-from sqlalchemy.orm import backref, relationship
+from sqlalchemy import ForeignKey, Integer, UnicodeText
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
 from abilian.core.entities import Entity, EntityQuery
 
@@ -76,7 +76,9 @@ class Attachment(Entity):
     __tablename__ = "attachment"
     __auditable_entity__ = ("entity", "attachment", ("id", "name"))
 
-    entity_id = Column(Integer, ForeignKey(Entity.id), nullable=False)
+    entity_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey(Entity.id), nullable=False
+    )
 
     #: owning entity
     entity = relationship(
@@ -91,11 +93,13 @@ class Attachment(Entity):
         ),
     )
 
-    blob_id = Column(Integer, sa.ForeignKey(Blob.id), nullable=False)
+    blob_id: Mapped[int] = mapped_column(
+        Integer, sa.ForeignKey(Blob.id), nullable=False
+    )
     #: file. Stored in a :class:`Blob`
     blob = relationship(Blob, cascade="all, delete", foreign_keys=[blob_id])
 
-    description = Column(UnicodeText(), nullable=False, default="", server_default="")
+    description: Mapped[str] = mapped_column(UnicodeText(), nullable=False, default="")
 
     query_class = AttachmentQuery
 

@@ -1,0 +1,9 @@
+# Send only what the test image needs (the repo root holds .venv, node_modules...).
+*
+!pyproject.toml
+!uv.lock
+!README.md
+!src
+!tests
+**/__pycache__
+src/instance

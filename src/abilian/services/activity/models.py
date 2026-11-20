@@ -14,8 +14,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy.orm import relationship
-from sqlalchemy.schema import Column, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.schema import ForeignKey
 from sqlalchemy.types import DateTime, Integer, String, Text
 
 from abilian.core.entities import Entity, db
@@ -46,22 +46,32 @@ class ActivityEntry(db.Model):
 
     __tablename__ = "activity_entry"
 
-    id = Column(Integer, primary_key=True)
-    happened_at = Column(DateTime, default=datetime.utcnow)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    happened_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
 
-    verb = Column(Text)
+    verb: Mapped[str | None] = mapped_column(Text)
 
-    actor_id = Column(Integer, ForeignKey(User.id))
+    actor_id: Mapped[int | None] = mapped_column(Integer, ForeignKey(User.id))
     actor = relationship(User, foreign_keys=actor_id)
 
-    object_type = Column(String(1000))
-    object_id = Column(Integer, default=_default_from("_fk_object_id"))
-    _fk_object_id = Column(Integer, ForeignKey(Entity.id, ondelete="SET NULL"))
+    object_type: Mapped[str | None] = mapped_column(String(1000))
+    object_id: Mapped[int | None] = mapped_column(
+        Integer, default=_default_from("_fk_object_id")
+    )
+    _fk_object_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Entity.id, ondelete="SET NULL")
+    )
     object = relationship(Entity, foreign_keys=_fk_object_id)
 
-    target_type = Column(String(1000))
-    target_id = Column(Integer, default=_default_from("_fk_target_id"))
-    _fk_target_id = Column(Integer, ForeignKey(Entity.id, ondelete="SET NULL"))
+    target_type: Mapped[str | None] = mapped_column(String(1000))
+    target_id: Mapped[int | None] = mapped_column(
+        Integer, default=_default_from("_fk_target_id")
+    )
+    _fk_target_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(Entity.id, ondelete="SET NULL")
+    )
     target = relationship(Entity, foreign_keys=_fk_target_id)
 
     def __repr__(self) -> str:

@@ -9,13 +9,14 @@ import collections
 import re
 from datetime import datetime
 from inspect import isclass
-from typing import TYPE_CHECKING, Any, Never, cast
+from typing import TYPE_CHECKING, Any, Self, cast
 
 import sqlalchemy as sa
 from flask import current_app
 from sqlalchemy import event
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import Mapper, Session, mapper
+from sqlalchemy.orm import Mapped, Mapper, Session, mapped_column, mapper
+from sqlalchemy.orm.decl_api import DeclarativeAttributeIntercept
 from sqlalchemy.schema import Column, ForeignKey
 from sqlalchemy.types import Integer, String, UnicodeText
 
@@ -141,10 +142,13 @@ class _EntityInherit:
     #     return cls.__name__.lower()
 
     @declared_attr
-    def id(cls) -> Column:
-        return Column(
+    def id(cls) -> Mapped[int]:
+        # One name per table: MariaDB/MySQL require foreign key names to be
+        # unique in the whole database, not just in their table.
+        fk_name = f"fk_{cls.__tablename__}_entity_id"
+        return mapped_column(
             Integer,
-            ForeignKey("entity.id", use_alter=True, name="fk_inherited_entity_id"),
+            ForeignKey("entity.id", use_alter=True, name=fk_name),
             primary_key=True,
             info=SYSTEM | SEARCHABLE,
         )
@@ -157,7 +161,8 @@ class _EntityInherit:
         }
 
 
-BaseMeta = db.Model.__class__
+# The metaclass of `db.Model`, built on a `DeclarativeBase`.
+BaseMeta = DeclarativeAttributeIntercept
 
 
 class EntityQuery(db.Model.query_class):
@@ -194,7 +199,9 @@ class EntityMeta(BaseMeta):
         if d["__module__"] != EntityMeta.__module__ or classname != "Entity":
             if not any(issubclass(b, _EntityInherit) for b in bases):
                 bases = (_EntityInherit, *bases)
-                d["id"] = _EntityInherit.id
+                # The declared_attr itself (not `.id`, which would evaluate it
+                # on the mixin), so that it runs once per mapped class.
+                d["id"] = _EntityInherit.__dict__["id"]
 
             if d.get("entity_type") is None:
                 entity_type_base = d.get("ENTITY_TYPE_BASE")
@@ -324,10 +331,13 @@ class Entity(Indexable, BaseMixin, Model, metaclass=EntityMeta):
 
     #: The name is a string that is shown to the user; it could be a title
     #: for document, a folder name, etc.
-    name = Column("name", UnicodeText())
-    name.info = EDITABLE | SEARCHABLE | {"index_to": ("name", "name_prefix", "text")}
+    name: Mapped[str | None] = mapped_column(
+        "name",
+        UnicodeText(),
+        info=EDITABLE | SEARCHABLE | {"index_to": ("name", "name_prefix", "text")},
+    )
 
-    slug = Column("slug", UnicodeText(), info=SEARCHABLE)
+    slug: Mapped[str | None] = mapped_column("slug", UnicodeText(), info=SEARCHABLE)
     """
     The slug attribute may be used in URLs to reference the entity, but
     uniqueness is not enforced, even within same entity type. For example
@@ -339,10 +349,12 @@ class Entity(Indexable, BaseMixin, Model, metaclass=EntityMeta):
     friendly entity_type with concatenated with entity's id.
     """
 
-    _entity_type = Column("entity_type", String(1000), nullable=False)
+    _entity_type: Mapped[str] = mapped_column(
+        "entity_type", String(1000), nullable=False
+    )
     entity_type = ""
 
-    meta = Column(JSONDict(), nullable=False, default=dict, server_default="{}")
+    meta: Mapped[dict] = mapped_column(JSONDict(), nullable=False, default=dict)
     """
     A dictionnary of simple values (JSON-serializable) to conveniently annotate
     the entity.
@@ -476,7 +488,7 @@ class Entity(Indexable, BaseMixin, Model, metaclass=EntityMeta):
     def _indexable_tag_text(self) -> str:
         return " ".join(str(tag.label) for tag in self._indexable_tags)
 
-    def clone(self) -> Never:
+    def clone(self) -> Self:
         """Copy an entity: copy every field, except the id and sqlalchemy
         internals, without forgetting about the n-n relationships.
 
@@ -536,5 +548,7 @@ def all_entity_classes():
     of Entity."""
     persistent_classes = Entity.registry._class_registry.values()
     return [
-        cls for cls in persistent_classes if isclass(cls) and issubclass(cls, Entity)
+        cls
+        for cls in persistent_classes
+        if isclass(cls) and issubclass(cls, Entity) and cls is not Entity
     ]

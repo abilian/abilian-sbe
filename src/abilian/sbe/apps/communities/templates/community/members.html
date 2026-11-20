@@ -1,160 +1,170 @@
-{% extends "community/_base.html" %}
+{#- A community's members: who, their role, their posts, when they were last active
+    here. Its managers add someone who has an account, change a role in place, remove
+    someone after saying so, and do the same to several at once through the selection
+    (ADS's datatable shows its bar once a box is ticked); inviting new people is the
+    community's action, in its header. Above them, for its managers, who asks to
+    join, if it is open on request: accepted or refused. Drawn in
+    `mockups/templates/members.html`. -#}
+{% extends "ads_community.html" %}
+{% block page_title %}{{ _("Members") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+{% if can_manage_community and requests %}
+<section class="ads-card" aria-labelledby="asking">
+  <div class="ads-card__head"><h2 class="ads-card__title" id="asking">{{ _("Asking to join") }} ({{ requests | length }})</h2></div>
+  <ul class="ads-list">
+    {% for asking in requests %}
+    <li>
+      <span class="ads-media ads-gap-sm ads-fill">{{ m.avatar(asking.user) }}<span class="sbe-lines"><strong>{{ asking.user.name }}</strong><span class="ads-muted">{{ asking.user.email }} · {{ m.time(asking.created_at) }}</span></span></span>
+      <form class="ads-cluster ads-gap-sm" method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+        {{ csrf.field() }}
+        <input type="hidden" name="request" value="{{ asking.id }}">
+        <button class="ads-btn ads-btn--primary ads-btn--sm" type="submit" name="action" value="accept-request" aria-label="{{ _('Accept %(name)s', name=asking.user.name) }}">{{ icon("check") }}{{ _("Accept") }}</button>
+        <button class="ads-btn ads-btn--ghost ads-btn--sm" type="submit" name="action" value="refuse-request" aria-label="{{ _('Refuse %(name)s', name=asking.user.name) }}">{{ _("Refuse") }}</button>
+      </form>
+    </li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+<div class="ads-card ads-datatable">
+  <div class="ads-card__head ads-spread">
+    <ul class="ads-pills" aria-label="{{ _('Whom to list') }}">
+      <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug, q=listing.search or none) }}" {{ 'aria-current="page"' | safe if not only_managers }}>{{ _("All") }} ({{ counts.all }})</a></li>
+      <li><a class="ads-pill" href="{{ url_for('.members', community_id=g.community.slug, role='manager', q=listing.search or none) }}" {{ 'aria-current="page"' | safe if only_managers }}>{{ _("Managers") }} ({{ counts.managers }})</a></li>
+    </ul>
+    {% if can_manage_community %}
+    <details class="ads-dropdown">
+      <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the members') }}">{{ icon("dots-vertical") }}</summary>
+      <div class="ads-menu">
+        <a class="ads-menu__item" href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">{{ icon("file-spreadsheet") }}{{ _("Export the list (spreadsheet)") }}</a>
+      </div>
+    </details>
+    {% endif %}
+  </div>
 
-{% from "macros/box.html" import m_box_content, m_box_menu %}
-{% import "community/members_macros.html" as macros with context %}
+  {% if can_manage_community %}
+  {#- Someone who has an account already; new people go through the invitation. -#}
+  <form class="ads-card__body sbe-toolbar sbe-toolbar--wrap" id="add-user-role" method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+    {{ csrf.field() }}
+    {#- No icon beside it: the picker wraps the field in its own box. -#}
+    <input class="ads-input sbe-grow" id="user-select" type="text" name="user" required placeholder="{{ _('Add someone who has an account') }}" aria-label="{{ _('Add someone who has an account') }}"
+           data-picker="{{ url_for('social.users_json', with_membership=g.community.id) }}">
+    <select class="ads-select" id="role-select" name="role" aria-label="{{ _('Role') }}">
+      <option value="member" selected>{{ _("Member") }}</option>
+      <option value="manager">{{ _("Community manager") }}</option>
+    </select>
+    <button class="ads-btn" type="submit" name="action" value="add-user-role">{{ _("Add") }}</button>
+  </form>
+  {% endif %}
 
-{% block memberscontent %}
-  <div class="col-md-12">
-    {% call m_box_content(_("Members")) %}
-      {%- if is_manager %}
-        <div style="
-    position: relative;top: -9px;">
-          <div class="btn-group" role="group" aria-label="..." style="float:right;position: relative;
-top: 39px;">
-            <a href="{{ url_for('.wizard_data_insertion', community_id=g.community.slug) }}"
-                class="btn btn-default"
-               style="background: ghostwhite;color: gray;"><i class="fa fa-rocket" aria-hidden="true"></i>
-              {{ _("Add members") }}</a>
-            <a class="btn btn-info pull-right"
-               href="{{ url_for('.members_excel_export', community_id=g.community.slug) }}">
-              <i class="glyphicon glyphicon-download-alt"></i> {{ _('Download list') }}
-            </a>
-          </div>
+  <form class="ads-datatable__idle sbe-toolbar" method="get" action="{{ url_for('.members', community_id=g.community.slug) }}">
+    <span class="ads-input-icon">
+      <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+      <input class="ads-input" type="search" name="{{ listing.param('q') }}" value="{{ listing.search }}" placeholder="{{ _('Filter the members') }}" aria-label="{{ _('Filter the members by name or address') }}">
+    </span>
+    {% for name, value in listing.filter_fields() %}<input type="hidden" name="{{ name }}" value="{{ value }}">{% endfor %}
+    <span class="ads-muted">{{ ngettext("%(num)d member", "%(num)d members", listing.total) }}</span>
+    {% if listing.search %}<a href="{{ url_for('.members', community_id=g.community.slug, role=request.args.get('role')) }}">{{ _("Show all") }}</a>{% endif %}
+  </form>
+  {% if can_manage_community %}
+  {#- The rows' boxes belong to this form (`form="members-selection"`): each row has a
+      form of its own, for its role, and forms do not nest. -#}
+  <form class="ads-bulkbar" id="members-selection" method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+    {{ csrf.field() }}
+    <strong>{{ _("Selection") }}</strong>
+    <button class="ads-btn ads-btn--sm" type="submit" name="action" value="selection-managers">{{ icon("users") }}{{ _("Make community managers") }}</button>
+    <button class="ads-btn ads-btn--sm" type="submit" name="action" value="selection-members">{{ icon("user") }}{{ _("Make members") }}</button>
+    <button class="ads-btn ads-btn--sm ads-btn--danger" type="button" data-modal-open="#modal-remove-selection">{{ icon("trash") }}{{ _("Remove from the community") }}</button>
+  </form>
+  {% endif %}
 
-          {{ add_member() }}
-        </div>
-      {%- endif %}
-
-      <p class="clearfix"
-         style="border-bottom: 1px dashed #eeeeee;position: relative;top: 17px;margin-bottom: 32px;"></p>
-
-      {% set table_id = uuid() %}
-      <table class="table table-condensed table-striped members-table" id="{{ table_id }}">
-        <thead>
-        {{ macros.thead() }}
-        </thead>
-
-        <tbody>
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter ads-table--hover" id="members-table">
+      <thead><tr>
+        {% if can_manage_community %}<th class="ads-table__select"><input class="ads-check" type="checkbox" data-select-all="selected" aria-label="{{ _('Select all') }}"></th>{% endif %}
+        {{ m.sort_th(listing, "name", _("Name")) }}
+        {{ m.sort_th(listing, "role", _("Role")) }}
+        {{ m.sort_th(listing, "posts", _("Discussions started"), "ads-end ads-col--secondary") }}
+        {{ m.sort_th(listing, "activity", _("Last active here"), "ads-end ads-col--secondary") }}
+        {% if can_manage_community %}<th scope="col"><span class="sbe-sr-only">{{ _("Actions") }}</span></th>{% endif %}
+      </tr></thead>
+      <tbody>
         {% for user, m_id, role, last_activity_date in memberships %}
-          <tr>
-            {{ macros.member_row(user, m_id, role, last_activity_date) }}
-          </tr>
+        <tr>
+          {% if can_manage_community %}<td class="ads-table__select"><input class="ads-check" type="checkbox" form="members-selection" name="selected" value="{{ user.id }}" aria-label="{{ _('Select %(name)s', name=user.name) }}"></td>{% endif %}
+          <td class="ads-full sbe-cell-person">
+            <span class="ads-media ads-gap-sm">{{ m.avatar(user) }}
+              <span class="sbe-lines">
+                <span class="ads-cluster ads-gap-sm"><a class="sbe-quiet" href="{{ url_for('social.user', user_id=user.id) }}"><strong>{{ user.name }}</strong></a></span>
+                {% if m.job(user) %}<span class="ads-truncate">{{ m.job(user) }}</span>{% endif %}
+                <span class="ads-muted ads-truncate">{{ user.email }}</span>
+              </span>
+            </span>
+          </td>
+          <td>
+            {% if can_manage_community %}
+            <form method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+              {{ csrf.field() }}
+              <input type="hidden" name="user" value="{{ user.id }}">
+              <input type="hidden" name="action" value="set-user-role">
+              <select class="ads-select sbe-select--sm" name="role" data-autosubmit aria-label="{{ _('Role of %(name)s', name=user.name) }}">
+                <option value="member" {{ "selected" if role == "member" }}>{{ _("Member") }}</option>
+                <option value="manager" {{ "selected" if role == "manager" }}>{{ _("Community manager") }}</option>
+              </select>
+            </form>
+            {% elif role == "manager" %}<span class="ads-badge ads-tone-brand">{{ _("Community manager") }}</span>
+            {% else %}<span class="ads-muted">{{ _("Member") }}</span>{% endif %}
+          </td>
+          <td class="ads-end ads-col--secondary">{{ threads_count[user] }}</td>
+          <td class="ads-end ads-col--secondary ads-muted">{% if last_activity_date %}{{ m.time(last_activity_date) }}{% else %}{{ _("never") }}{% endif %}</td>
+          {% if can_manage_community %}
+          <td class="ads-end">
+            <details class="ads-dropdown">
+              <summary class="ads-btn ads-btn--ghost ads-btn--sm" aria-label="{{ _('Actions on %(name)s', name=user.name) }}">{{ icon("dots") }}</summary>
+              <div class="ads-menu">
+                <a class="ads-menu__item" href="mailto:{{ user.email }}">{{ icon("mail") }}{{ _("Write") }}</a>
+                <div class="ads-menu__sep"></div>
+                <button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-remove-{{ m_id }}">{{ icon("trash") }}{{ _("Remove from the community") }}</button>
+              </div>
+            </details>
+          </td>
+          {% endif %}
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="ads-muted">{{ _("No matching records found") }}</td></tr>
         {% endfor %}
-        </tbody>
-      </table>
-      <script type="application/json">
-       {{ macros.table_config() }}
-
-      </script>
-
-      {%- deferJS %}
-        <script>
-          'use strict';
-          require(
-              ['Abilian', 'jquery', 'jquery.dataTables'],
-              function (Abilian, $, jqDT) {
-
-                function initMembersTable() {
-                  var id = "#{{ table_id }}",
-                      table = $(id),
-                      configNode = table.get(0).nextElementSibling,
-                      config = JSON.parse(configNode.textContent);
-
-                  $(id).dataTable(config);
-                }
-
-                Abilian.fn.onAppInit(initMembersTable);
-              }
-          );
-        </script>
-      {%- enddeferJS %}
-      <div class="clearfix"></div>
-    {% endcall %}
+      </tbody>
+    </table>
   </div>
+  {{ m.pagination(listing) }}
+</div>
 {% endblock %}
 
-{% block sidebar %}
-  {%- set actions = actions.for_category('members:menu') %}
-  {%- if actions %}
-    {% call m_box_menu() %}
-      <ul class="nav nav-list">
-        {%- for action in actions %}
-          <li>{{ action.render() }}</li>
-        {%- endfor %}
-      </ul>
-    {% endcall %}
-  {%- endif %}
-{% endblock %}
-
-
-{% macro add_member() %}
-  <h2 class="members-title">{{ _("Add a member") }}</h2>
-
-  <div id="add-user-role" role="dialog">
-    <form method="POST" class="form-inline" enctype="multipart/form-data" role="form">
-      {{ csrf.field() }}
-
-      <div class="form-group">
-        <label for="user-select">{{ _('User') }}</label>
-        <input class="form-control" type="text" id="user-select" name="user"/>
-      </div>
-
-      <div class="form-group">
-        <label for="role-select">{{ _('Role') }}</label>
-        <select id="role-select" name="role" class="form-control" style="width: auto;">
-          <option value="member" default="default">{{ _("Member") }}</option>
-          <option value="manager">{{ _("Manager") }}</option>
-        </select>
-      </div>
-
-      <button class="btn btn-primary" type="submit" name="action"
-              value="add-user-role">{{ _("Add") }}</button>
-    </form>
+{% block overlays %}
+{% if can_manage_community %}
+{#- One per member shown, filled by the server: no script needed. -#}
+{% for user, m_id, role, last_activity_date in memberships %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-remove-{{ m_id }}" aria-labelledby="modal-remove-{{ m_id }}-title">
+  <form method="post" action="{{ url_for('.members_post', community_id=g.community.slug) }}">
+    {{ csrf.field() }}
+    <input type="hidden" name="user" value="{{ user.id }}">
+    <input type="hidden" name="membership" value="{{ m_id }}">
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-remove-{{ m_id }}-title">{{ _("Remove %(name)s from the community?", name=user.name) }}</h2></div>
+    <div class="ads-modal__body">{{ _("They will no longer see its discussions and documents. What they wrote stays.") }}</div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit" name="action" value="delete">{{ icon("trash") }}{{ _("Remove") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endfor %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-remove-selection" aria-labelledby="modal-remove-selection-title">
+  <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-remove-selection-title">{{ _("Remove the selected members from the community?") }}</h2></div>
+  <div class="ads-modal__body">{{ _("They will no longer see its discussions and documents. What they wrote stays.") }}</div>
+  <div class="ads-modal__foot">
+    <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+    <button class="ads-btn ads-btn--danger" type="submit" form="members-selection" name="action" value="selection-remove">{{ icon("trash") }}{{ _("Remove") }}</button>
   </div>
-
-  {%- deferJS %}
-    <script>
-      require(
-          ['Abilian', 'jquery'],
-          function (Abilian, $) {
-
-            Abilian.fn.onAppInit(
-                function () {
-                  $("#user-select")
-                  .attr("style", "min-width: 220px")
-                  .select2({
-                    minimumInputLength: 2,
-                    ajax: {
-                      url: "{{ url_for("social.users_json") }}",
-                      dataType: 'json',
-                      quietMillis: 100,
-                      data: function (term, page) {
-                        return {q: term, with_membership: {{ g.community.id | tojson }}};
-                      },
-                      results: function (data, page) {
-                        return {results: data.results, more: false};
-                      }
-                    },
-                    allowClear: true,
-                    formatResult: function (state, container, query, escapeMarkup) {
-                      var markup = [], text;
-                      window.Select2.util.markMatch(state.name, query.term, markup, escapeMarkup);
-                      text = '<b>' + markup.join("") + '</b>';
-                      if (state.role) {
-                        text += ' <small class="label label-default pull-right">' + escapeMarkup(state.role) + '</small> ';
-                      }
-
-                      if (state.email) {
-                        text += ' <br /><i>' + escapeMarkup(state.email) + '</i> ';
-                      }
-                      return text;
-                    }
-                  });
-
-                  $("#s2id_user-select a span").text("");
-                  $("input#user-select").attr("value", "");
-                });
-          });
-    </script>
-  {%- enddeferJS %}
-{% endmacro %}
+</dialog>
+{% endif %}
+{% endblock %}

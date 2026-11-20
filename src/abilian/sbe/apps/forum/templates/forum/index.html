@@ -1,116 +1,35 @@
-{% extends "forum/_base.html" %}
-
-{%- from "macros/user.html" import m_user_link, m_user_photo %}
-{% from "macros/box.html" import m_box_menu, m_box_content %}
-{% from "forum/_macros.html" import forum_menu %}
-
-{% block forumcontent %}
-  <div class="col-md-12">
-    <div class="forum-menu-container">
-      <div class="forum-menu" role="group" style="width:100%;">
-        <span style="color:gray;">{{ _("Showing :") }}</span>
-        {%- set global_actions = actions.for_category('forum:global') %}
-        {{ forum_menu(global_actions) }}
-      </div>
-    </div>
-
-    {% if threads %}
-      <table border="0" class="thread-table">
-        <tr>
-          <th>
-            {{ _("Topic") }}
-          </th>
-          <th>
-            {{ _("Participants") }}
-          </th>
-          <th style="width: 8.9%;">
-            {{ _("Replies") }}
-          </th>
-          <th>
-            {{ _("Viewers") }}
-          </th>
-          <th>
-            {{ _("Views") }}
-          </th>
-          <th style="width: 8%;">
-            {{ _("Activity") }}
-          </th>
-        </tr>
-        {% for thread in threads %}
-          {{ m_thread(thread) }}
-        {% endfor %}
-      </table>
-      <br>
-      <br>
-    {% else %}
-      <p>{{ _("No message has been posted to this community yet.") }}</p>
-    {% endif %}
-
-    {% if has_more or True %}
-      <br>
-      <p class="thread-all">
-        <i class="fa fa-th-list" aria-hidden="true" style="color:gray;"></i>
-        <a href="{{ url_for('.archives', community_id=g.community.slug) }}">{{ _("All conversations") }}</a>
-      </p>
-    {% endif %}
+{#- A community's discussions: the latest active first, the unread ones marked; the
+    filters as pills, a filter on titles, starting a discussion. Drawn in
+    `mockups/templates/forum.html`. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_head.html" as f with context %}
+{% block page_title %}{{ _("Discussions") }} · {{ g.community.name }}{% endblock %}
+{% block content %}
+<div class="ads-card">
+  {{ f.head("week" if filter == "week" else "latest") }}
+  {#- Narrows the threads to those whose title has the words, across all of the
+      community's threads, on the server. -#}
+  <div class="sbe-toolbar">
+    <form class="ads-input-icon" method="get" action="{{ request.path }}" role="search">
+      <span class="ads-input-icon__addon">{{ icon("filter") }}</span>
+      <input class="ads-input" type="search" name="q" value="{{ q }}" placeholder="{{ _('Filter discussions') }}" aria-label="{{ _('Filter discussions by title') }}">
+    </form>
+    {% if q %}<a href="{{ request.path }}">{{ _("Show all") }}</a>{% endif %}
   </div>
+  {% if threads %}
+  <div class="ads-table-scroll">
+    <table class="ads-table ads-table--vcenter">
+      <thead><tr><th>{{ _("Subject") }}</th><th class="ads-end ads-col--secondary">{{ _("Replies") }}</th><th class="ads-end ads-col--secondary">{{ _("Last post") }}</th></tr></thead>
+      <tbody>
+        {% for thread in threads %}{{ m.thread_row(thread, unread.get(thread, 0)) }}{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="ads-card__body ads-muted">{% if q %}{{ _("No discussion has these words in its title.") }}{% else %}{{ _("No discussion has been started in this community yet.") }}{% endif %}</div>
+  {% endif %}
+  {% if has_more %}
+  <div class="ads-card__foot"><a href="{{ url_for('forum.archives', community_id=g.community.slug) }}">{{ _("All the discussions, by month") }}</a></div>
+  {% endif %}
+</div>
 {% endblock %}
-
-
-{% macro m_thread(thread) %}
-  {%- set thread_href = url_for(thread) %}
-  {%- set thread_length = thread.posts|length %}
-  <tr>
-    <td>
-      <div class="entry">
-        <h4 class="thread-list-title">
-          {%- if thread.closed %}
-            <i class="fa fa-lock fa-big"></i>
-          {%- endif %}
-          <a href="{{ thread_href }}"
-             title="{{ thread.created_at | age(date_threshold='day') }}"
-             class="thread-title">{{ thread.title }}</a>
-        </h4>
-        <p>{{ thread.posts[0].body_html|safe|striptags|truncate(155, False, '...', 0) }}</p>
-      </div>
-    </td>
-    <td class="thread-frequent-posters">
-      {% call m_user_link(thread.creator) %}
-        {{ m_user_photo(thread.creator, size=40) }}
-      {%- endcall %}
-
-      {% for p in thread.get_frequent_posters(5) %}
-        {% call m_user_link(p) %}
-          <span class="thread-participants-logo">
-          {{ m_user_photo(p, size=30) }}
-          </span>
-        {%- endcall %}
-      {% endfor %}
-    </td>
-    <td>
-      <div class="text-center">
-        <a class="thread-replies" href="{{ thread_href }}">{{ thread_length-1 }}</a>
-        {% if nb_viewed_posts[thread] %}
-          <span
-              class="thread-unread-posts">+{{ nb_viewed_posts[thread] }}</span>
-        {% endif %}
-      </div>
-    </td>
-    <td style="width:7%;">
-      <div class="text-center">
-        <i class="fa fa-user" aria-hidden="true"></i>
-        {{ nb_viewers[thread] }}
-      </div>
-    </td>
-    <td style="width:7%;">
-      <div class="text-center thread-viewed-times">
-        {{ nb_viewed_times[thread] or 0 }}
-      </div>
-    </td>
-    <td>
-      <div class="text-center">
-        {{ activity_time_format(thread.last_post_at) }}
-      </div>
-    </td>
-  </tr>
-{% endmacro %}

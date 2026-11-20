@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from itertools import count
 from typing import TYPE_CHECKING, Any
+from urllib.parse import urlsplit
 
 import jinja2
 import sqlalchemy as sa
@@ -12,11 +13,14 @@ import svcs
 from flask import Flask, appcontext_pushed, g, request_started
 from flask_super import register_commands
 from flask_talisman import DEFAULT_CSP_POLICY, Talisman
+from loguru import logger
 
 from abilian.core import extensions, signals
-from abilian.extensions import asset_manager
+
+# Vite integration now handled by Flask-Vite in setup/extensions.py
 from abilian.services import settings_service
 from abilian.services.security import ANONYMOUS
+from abilian.services.settings.models import Setting
 from abilian.web.access_blueprint import allow_access_for_roles
 from abilian.web.nav import setup_nav_and_breadcrumbs
 
@@ -26,6 +30,8 @@ from .extensions import init_extensions, init_sentry
 from .logging import init_logging
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from abilian.app import Application
 
 
@@ -43,6 +49,7 @@ def setup_app(app: Application, plugins=None) -> None:
     # First init required stuff: db to make queries, and settings service
     extensions.db.init_app(app)
     settings_service.init_app(app)
+    load_stored_settings(app)
 
     init_extensions(app)
 
@@ -55,8 +62,11 @@ def setup_app(app: Application, plugins=None) -> None:
 
     if not app.debug:
         # CSP
-        csp = app.config.get("CONTENT_SECURITY_POLICY", DEFAULT_CSP_POLICY)
-        Talisman(app, content_security_policy=csp)
+        Talisman(
+            app,
+            content_security_policy=content_security_policy(app.config),
+            force_https=app.config.get("TALISMAN_FORCE_HTTPS", True),
+        )
 
     setup_blueprints(app)
 
@@ -67,7 +77,7 @@ def setup_app(app: Application, plugins=None) -> None:
 
     init_access_controllers(app)
 
-    asset_manager.finalize_assets_setup(app)
+    # Vite assets don't need finalization like Flask-Assets did
 
     # At this point all models should have been imported: time to configure
     # mappers. Normally Sqlalchemy does it when needed but mappers may be
@@ -94,9 +104,44 @@ def setup_app(app: Application, plugins=None) -> None:
     register_commands(app)
 
 
+def load_stored_settings(app: Flask) -> None:
+    """The settings saved from the administration, over those of the configuration
+    files: each process reads them as it starts."""
+    with app.app_context():
+        try:
+            # No table yet: the database is still to be made (`flask initdb`).
+            if not sa.inspect(extensions.db.engine).has_table(Setting.__tablename__):
+                return
+            stored = settings_service.namespace("config").as_dict()
+        except sa.exc.OperationalError as e:
+            # The process starts all the same, on its files' settings, and says so.
+            logger.error(
+                "Settings saved from the administration not read, the database "
+                "does not answer: {error}",
+                error=e,
+            )
+            return
+    app.config.update(stored)
+
+
 def connect_signals() -> None:
     appcontext_pushed.connect(install_id_generator)
     request_started.connect(setup_nav_and_breadcrumbs)
+
+
+def content_security_policy(config: Mapping[str, Any]) -> dict[str, str]:
+    """The configured policy, letting the browser report to Sentry if it does.
+
+    `default-src 'self'` also covers `connect-src`, so the reports the Sentry
+    SDK sends to the DSN's host would be refused.
+    """
+    policy = dict(config.get("CONTENT_SECURITY_POLICY", DEFAULT_CSP_POLICY))
+    dsn = config.get("SENTRY_DSN")
+    if dsn and config.get("SENTRY_SDK_URL"):
+        url = urlsplit(dsn)
+        origin = f"{url.scheme}://{url.netloc.rpartition('@')[2]}"
+        policy["connect-src"] = f"{policy.get('connect-src', "'self'")} {origin}"
+    return policy
 
 
 # TODO: remove

@@ -31,13 +31,13 @@ def reindex_tree(obj: Folder) -> None:
         return
 
     descendants = (
-        sa.select([CmisObject.id, CmisObject._parent_id])
+        sa.select(CmisObject.id, CmisObject._parent_id)
         .where(CmisObject._parent_id == sa.bindparam("ancestor_id"))
         .cte(name="descendants", recursive=True)
     )
     da = descendants.alias()
     CA = sa.orm.aliased(CmisObject)
-    d_ids = sa.select([CA.id, CA._parent_id])
+    d_ids = sa.select(CA.id, CA._parent_id)
     descendants = descendants.union_all(d_ids.where(CA._parent_id == da.c.id))
     session = sa.orm.object_session(obj) or db.session()
 
@@ -48,7 +48,7 @@ def reindex_tree(obj: Folder) -> None:
     # as an added bonus, "obj" will also be in query results, thus will be added
     # in "to_update" without needing to do it apart.
     entity_ids_q = sa.union(
-        sa.select([descendants.c.id]), sa.select([sa.bindparam("ancestor_id")])
+        sa.select(descendants.c.id), sa.select(sa.bindparam("ancestor_id"))
     )
     query = (
         session.query(Entity)

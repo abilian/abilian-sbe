@@ -7,14 +7,14 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from flask import Blueprint, Flask, g
-from flask_login import current_user
 from loguru import logger
 from werkzeug.exceptions import Forbidden
 from werkzeug.utils import import_string
 
+from abilian.core.extensions.login import AnonymousUser, current_user
 from abilian.core.util import unwrap
 from abilian.i18n import _l
-from abilian.services.security import ADMIN, security
+from abilian.services.security import ADMIN, is_site_admin, security
 from abilian.web.action import Endpoint, actions
 from abilian.web.nav import BreadcrumbItem, NavGroup, NavItem
 
@@ -45,6 +45,9 @@ class Admin:
                 current_user, ADMIN
             )
 
+        # Not rendered as a menu: the navbar reaches the admin section through
+        # one entry in the user menu. This stays the container that owns the
+        # panel items, the breadcrumb root and the active-path lookup.
         self.nav_root = NavGroup(
             "admin", "root", title=_l("Admin"), endpoint=None, condition=condition
         )
@@ -169,14 +172,11 @@ class Admin:
             "admin", __name__, template_folder="templates", url_prefix=f"/{_BP_PREFIX}"
         )
 
+        # Checked before the panels read the URL: a panel looks up what it
+        # names, and its 404 would tell anyone what exists.
+        self.blueprint.url_value_preprocessor(check_security)
         self.blueprint.url_value_preprocessor(self.build_breadcrumbs)
         self.blueprint.url_value_preprocessor(self.panel_preprocess_value)
-
-        @self.blueprint.before_request
-        def check_security() -> None:
-            user = unwrap(current_user)
-            if not security.has_role(user, "admin"):
-                raise Forbidden
 
     def panel_preprocess_value(self, endpoint: str, view_args: dict[Any, Any]) -> None:
         panel = self._panels_endpoints.get(endpoint)
@@ -191,3 +191,14 @@ class Admin:
             endpoint_bc = self.breadcrumb_items.get(panel)
             if endpoint_bc:
                 g.breadcrumb.append(endpoint_bc)
+
+
+def check_security(endpoint: str | None, view_args: dict[str, Any] | None) -> None:
+    """Refuse anyone but a site administrator.
+
+    Runs before flask-login has loaded the visitor into `g.user`, so it reads
+    the visitor itself instead of letting `is_site_admin` look there.
+    """
+    user = unwrap(current_user)
+    if isinstance(user, AnonymousUser) or not is_site_admin(user):
+        raise Forbidden

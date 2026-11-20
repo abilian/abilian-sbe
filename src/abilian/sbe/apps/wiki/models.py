@@ -3,9 +3,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from flask_login import current_user
 from sqlalchemy import (
     Column,
     DateTime,
@@ -17,7 +16,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.event import listens_for
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import Mapped, backref, relationship
+from sqlalchemy.orm import Mapped, backref, mapped_column, relationship
 
 from abilian.core.entities import Entity, db
 from abilian.core.models import SEARCHABLE
@@ -40,6 +39,12 @@ __all__ = ["WikiPage", "WikiPageAttachment", "WikiPageRevision"]
 class WikiPage(Entity):
     __tablename__ = "wiki_page"
 
+    if TYPE_CHECKING:
+        # Set at runtime by backrefs declared below or on the other class;
+        # declared here for type checkers.
+        revisions: Mapped[list[WikiPageRevision]]
+        attachments: Mapped[list[WikiPageAttachment]]
+
     # : The title for this page
     _title: Mapped[str] = Column("title", Unicode(200), nullable=False, index=True)
 
@@ -53,7 +58,7 @@ class WikiPage(Entity):
     )
 
     #: The body, using some markup language (Markdown for now)
-    body_src = Column(
+    body_src: Mapped[str] = mapped_column(
         UnicodeText,
         default="",
         nullable=False,
@@ -62,10 +67,20 @@ class WikiPage(Entity):
 
     __table_args__ = (UniqueConstraint("title", "community_id"),)
 
-    def __init__(self, title="", body_src="", message="", *args, **kwargs) -> None:
+    def __init__(
+        self,
+        title: str = "",
+        body_src: str = "",
+        message: str = "",
+        *args: Any,
+        author: User | None = None,
+        **kwargs: Any,
+    ) -> None:
+        """`author` writes the first revision; None when nobody does, as for
+        a page made outside a request."""
         super().__init__(*args, **kwargs)
         self.title = title
-        self.create_revision(body_src, message)
+        self.create_revision(author, body_src, message)
 
     # title is defined as a hybrid property to allow name <-> title sync
     # (2 way)
@@ -81,7 +96,9 @@ class WikiPage(Entity):
         if self.name != title:
             self.name = title
 
-    def create_revision(self, body_src: str, message: str = "") -> None:
+    def create_revision(
+        self, author: User | None, body_src: str, message: str = ""
+    ) -> None:
         revision = WikiPageRevision()
         if self.revisions:
             revision.number = max(r.number for r in self.revisions) + 1
@@ -89,8 +106,10 @@ class WikiPage(Entity):
             revision.number = 0
         self.body_src = revision.body_src = body_src
         revision.message = message
-        revision.author = current_user
-        revision.page = self
+        revision.author = author
+        # Appended rather than given `page=self`: the collection cascades the
+        # revision into the page's session, a backref no longer does.
+        self.revisions.append(revision)
 
     @property
     def last_revision(self) -> WikiPageRevision:
@@ -104,11 +123,7 @@ class WikiPage(Entity):
     def body_html(self) -> str:
         from . import markup
 
-        html = markup.convert(self, self.body_src)
-        return html
-
-        # TODO: remove Javascript from content
-        # return bleach.clean(html, strip=True)
+        return markup.convert(self.community, self.body_src)
 
 
 @listens_for(WikiPage.name, "set", active_history=True)
@@ -131,27 +146,29 @@ class WikiPageRevision(db.Model):
     __table_args__ = (UniqueConstraint("page_id", "number"),)
 
     # : Some primary key just in case
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     #: Date and time this revision was created
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime | None] = mapped_column(
+        DateTime, default=datetime.utcnow
+    )
 
     #: The page this revision belongs to
     page = relationship(WikiPage, backref="revisions")
-    page_id = Column(ForeignKey(WikiPage.id))
+    page_id: Mapped[int | None] = mapped_column(ForeignKey(WikiPage.id))
 
     #: The revision number
-    number = Column(Integer, nullable=False)
+    number: Mapped[int] = mapped_column(Integer, nullable=False)
 
     #: The body, using some markup language (Markdown for now)
-    body_src = Column(UnicodeText, default="", nullable=False)
+    body_src: Mapped[str] = mapped_column(UnicodeText, default="", nullable=False)
 
     #: Commit message
-    message = Column(UnicodeText, default="", nullable=False)
+    message: Mapped[str] = mapped_column(UnicodeText, default="", nullable=False)
 
     #: The author of this revision
     author = relationship(User)
-    author_id = Column(ForeignKey(User.id))
+    author_id: Mapped[int | None] = mapped_column(ForeignKey(User.id))
 
 
 class WikiPageAttachment(BaseContent):
@@ -160,7 +177,9 @@ class WikiPageAttachment(BaseContent):
     __mapper_args__ = {"polymorphic_identity": "wikipage_attachment"}
     sbe_type = "wikipage:attachment"
 
-    _wikipage_id = Column(Integer, ForeignKey(WikiPage.id), nullable=True)
+    _wikipage_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(WikiPage.id), nullable=True
+    )
     wikipage = relationship(
         WikiPage,
         primaryjoin=(_wikipage_id == WikiPage.id),

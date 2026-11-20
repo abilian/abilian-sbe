@@ -7,21 +7,29 @@ from __future__ import annotations
 from collections import Counter
 from datetime import date, datetime, timedelta
 from itertools import groupby
+from typing import TYPE_CHECKING
 from urllib.parse import quote
 
-import sqlalchemy as sa
 from flask import current_app, flash, g, make_response, render_template, request
 from flask_babel import format_date
-from flask_login import current_user
 from sqlalchemy.orm import joinedload
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
+from abilian.core.extensions.login import authenticated, authenticated_user
+from abilian.core.sqlalchemy.session import session_of
 from abilian.core.util import utc_dt
 from abilian.i18n import _, _l
-from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
+from abilian.sbe.apps.calendar.models import Event
+from abilian.sbe.apps.communities import decorators as guard
+from abilian.sbe.apps.communities.blueprint import (
+    CommunityBlueprint,
+    in_community,
+    with_tool,
+)
 from abilian.sbe.apps.communities.common import activity_time_format, object_viewers
-from abilian.sbe.apps.communities.security import is_manager
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.sbe.apps.communities.views import default_view_kw
+from abilian.sbe.apps.forum.security import can_write
 from abilian.services.viewtracker import viewtracker
 from abilian.web import url_for, views
 from abilian.web.action import ButtonAction, Endpoint
@@ -32,6 +40,9 @@ from .forms import PostEditForm, PostForm, ThreadForm
 from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
 
+if TYPE_CHECKING:
+    from abilian.core.models.subjects import User
+
 # TODO: move to config
 MAX_THREADS = 30
 
@@ -39,6 +50,8 @@ forum = CommunityBlueprint(
     "forum", __name__, url_prefix="/forum", template_folder="templates"
 )
 route = forum.route
+forum.before_request(in_community("thread_id", Thread))
+forum.before_request(with_tool("has_forum"))
 
 
 def post_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):
@@ -55,31 +68,17 @@ def init_forum_values(endpoint, values) -> None:
 
     g.breadcrumb.append(
         BreadcrumbItem(
-            label=_l("Conversations"),
+            label=_l("Discussions"),
             url=Endpoint("forum.index", community_id=g.community.slug),
         )
     )
 
 
-def get_nb_viewers(entities):
-    if entities:
-        views = viewtracker.get_views(entities=entities)
-        threads = [
-            thread.entity
-            for thread in views
-            if thread.user in g.community.members
-            and thread.user != thread.entity.creator
-        ]
-
-        return Counter(threads)
-    return None
-
-
-def get_viewed_posts(entities):
+def get_viewed_posts(user: User, entities):
     if not entities:
         return None
 
-    views = viewtracker.get_views(entities=entities, user=current_user)
+    views = viewtracker.get_views(entities=entities, user=user)
     all_hits = viewtracker.get_hits(views=views)
     nb_viewed_posts = {}
     for view in views:
@@ -91,9 +90,10 @@ def get_viewed_posts(entities):
                 [post for post in entity.posts if post.created_at > cutoff]
             )
 
+    # A thread never opened is new from its first message on.
     never_viewed = set(entities) - {view.entity for view in views}
     for entity in never_viewed:
-        nb_viewed_posts[entity] = len(entity.posts) - 1
+        nb_viewed_posts[entity] = len(entity.posts)
 
     return nb_viewed_posts
 
@@ -122,53 +122,46 @@ def get_viewed_times(entities):
     return None
 
 
+#: The "most read" filters: how far back each looks.
+PERIODS = {
+    "today": timedelta(days=1),
+    "week": timedelta(days=7),
+    "month": timedelta(days=31),
+    "year": timedelta(days=365),
+}
+
+
 @route("/")
 @route("/<string:filter>")
-def index(filter=None):
-    query = Thread.query.filter(Thread.community_id == g.community.id).order_by(
-        Thread.last_post_at.desc()
-    )
-
-    threads = query.all()
-    has_more = False
-
-    nb_viewed_times = get_viewed_times(threads)
-    for thread in threads:
-        thread.nb_views = nb_viewed_times.get(thread, 0)
-
-    dt = None
-    if filter == "today":
-        dt = timedelta(days=1)
-    elif filter == "week":
-        dt = timedelta(days=7)
-    elif filter == "month":
-        dt = timedelta(days=31)
-    elif filter == "year":
-        dt = timedelta(days=365)
-    elif filter:
+@authenticated
+def index(user: User, filter=None):
+    """A community's discussions, the latest active first; or, with a period, the
+    most read started in it. `q` narrows them to those whose title has the words."""
+    if filter and filter not in PERIODS:
         raise BadRequest
+    q = request.args.get("q", "").strip()
+    query = Thread.query.filter(Thread.community_id == g.community.id)
+    if q:
+        query = query.filter(Thread.title.ilike(f"%{q}%"))
 
-    if dt:
-        cutoff_date = datetime.utcnow() - dt
-        threads = [thread for thread in threads if thread.created_at > cutoff_date]
-
-    if dt:
-        threads = sorted(threads, key=lambda thread: -thread.nb_views)
+    if filter:
+        cutoff = datetime.utcnow() - PERIODS[filter]
+        recent = query.filter(Thread.created_at > cutoff).all()
+        views = get_viewed_times(recent) or {}
+        threads = sorted(recent, key=lambda thread: -views.get(thread, 0))
+        has_more = False
     else:
+        query = query.order_by(Thread.last_post_at.desc())
         has_more = query.count() > MAX_THREADS
         threads = query.limit(MAX_THREADS).all()
-
-    nb_viewers = get_nb_viewers(threads)
-    nb_viewed_posts = get_viewed_posts(threads)
 
     return render_template(
         "forum/index.html",
         threads=threads,
         has_more=has_more,
-        nb_viewers=nb_viewers,
-        nb_viewed_posts=nb_viewed_posts,
-        nb_viewed_times=nb_viewed_times,
-        activity_time_format=activity_time_format,
+        unread=get_viewed_posts(user, threads) or {},
+        filter=filter,
+        q=q,
     )
 
 
@@ -206,8 +199,7 @@ def archives():
 def attachments():
     all_threads = (
         Thread.query.filter(Thread.community_id == g.community.id)
-        .options(joinedload("posts"))
-        .options(joinedload("posts.attachments"))
+        .options(joinedload(Thread.posts).joinedload(Post.attachments))
         .order_by(Thread.created_at.desc())
         .all()
     )
@@ -225,15 +217,18 @@ def attachments():
 
 
 class BaseThreadView:
-    Model = Thread
-    Form = ThreadForm
+    Model: type[Thread | Post] = Thread
     pk = "thread_id"
-    base_template = "community/_base.html"
+
+    #: the logged-in user, set by `prepare_args()`
+    user: User
 
     def can_send_by_mail(self):
-        return g.community.type == "participative" or is_manager(user=current_user)
+        return g.community.type == "participative" or can_manage(self.user, g.community)
 
     def prepare_args(self, args, kwargs):
+        # Before the parent's: it loads the object, which may need the user.
+        self.user = authenticated_user()
         args, kwargs = super().prepare_args(args, kwargs)
         self.send_by_email = False
 
@@ -250,7 +245,7 @@ class BaseThreadView:
         return url_for(self.obj)
 
 
-class ThreadView(BaseThreadView, views.ObjectView):
+class ThreadView(BaseThreadView, views.ObjectView[Thread, PostForm]):
     methods = ["GET", "HEAD"]
     Form = PostForm
     template = "forum/thread.html"
@@ -258,15 +253,29 @@ class ThreadView(BaseThreadView, views.ObjectView):
     @property
     def template_kwargs(self):
         kw = super().template_kwargs
-        kw["thread"] = self.obj
-        kw["is_closed"] = self.obj.closed
-        kw["is_manager"] = is_manager(user=current_user)
-        kw["viewers"] = object_viewers(self.obj)
-        kw["views"] = get_viewed_times([self.obj])
-        kw["participants"] = {post.creator for post in self.obj.posts}
-        kw["activity_time_format"] = activity_time_format
-        viewtracker.record_hit(entity=self.obj, user=current_user)
+        kw.update(thread_page_kwargs(self.user, self.obj))
+        viewtracker.record_hit(entity=self.obj, user=self.user)
         return kw
+
+
+def thread_page_kwargs(user: User, thread: Thread) -> dict:
+    """What a thread's page shows around its reply form.
+
+    The unread posts are counted before the visit is recorded, which marks them read.
+    """
+    return {
+        "thread": thread,
+        "is_closed": thread.closed,
+        "viewers": object_viewers(user, thread),
+        "views": get_viewed_times([thread]),
+        "participants": {post.creator for post in thread.posts},
+        "activity_time_format": activity_time_format,
+        # On its page, what is new comes after its first message, the thread itself.
+        "new_posts": min(
+            (get_viewed_posts(user, [thread]) or {}).get(thread, 0),
+            len(thread.posts) - 1,
+        ),
+    }
 
 
 thread_view = ThreadView.as_view("thread")
@@ -274,13 +283,10 @@ default_view(forum, Post, None, kw_func=post_kw_view_func)(thread_view)
 default_view(forum, Thread, "thread_id", kw_func=default_view_kw)(thread_view)
 
 route("/<int:thread_id>/")(thread_view)
-route("/<int:thread_id>/attachments")(
-    ThreadView.as_view("thread_attachments", template="forum/thread_attachments.html")
-)
 
 
-class ThreadCreate(BaseThreadView, views.ObjectCreate):
-    base_template = "community/_forumbase.html"
+class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
+    Form = ThreadForm
     template = "forum/thread_create.html"
     POST_BUTTON = ButtonAction(
         "form", "create", btn_class="primary", title=_l("Post this message")
@@ -291,7 +297,16 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
     def init_object(self, args, kwargs):
         args, kwargs = super().init_object(args, kwargs)
         self.thread = self.obj
+        self.about = event_to_discuss(request.values.get("event"))
+        if self.about is not None and not self.thread.title:
+            self.thread.title = self.about.title
         return args, kwargs
+
+    @property
+    def template_kwargs(self):
+        kw = super().template_kwargs
+        kw["about"] = self.about
+        return kw
 
     def before_populate_obj(self) -> None:
         del self.form["attachments"]
@@ -307,20 +322,22 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
     def after_populate_obj(self) -> None:
         if self.thread.community is None:
             self.thread.community = g.community._model
+        if self.about is not None:
+            self.about.thread = self.thread
 
-        self.post = self.thread.create_post(body_html=self.message_body)
-        obj_meta = self.post.meta.setdefault("abilian.sbe.forum", {})
+        self.new_post = self.thread.create_post(body_html=self.message_body)
+        obj_meta = self.new_post.meta.setdefault("abilian.sbe.forum", {})
         obj_meta["origin"] = "web"
         obj_meta["send_by_email"] = self.send_by_email
-        session = sa.orm.object_session(self.thread)
+        session = session_of(self.thread)
         uploads = current_app.extensions["uploads"]
 
         for handle in request.form.getlist("attachments"):
-            fileobj = uploads.get_file(current_user, handle)
+            fileobj = uploads.get_file(self.user, handle)
             if fileobj is None:
                 continue
 
-            meta = uploads.get_metadata(current_user, handle)
+            meta = uploads.get_metadata(self.user, handle)
             name = meta.get("filename", handle)
             mimetype = meta.get("mimetype")
 
@@ -331,7 +348,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
                 continue
 
             attachment = PostAttachment(name=name)
-            attachment.post = self.post
+            attachment.post = self.new_post
 
             with fileobj.open("rb") as f:
                 attachment.set_content(f.read(), mimetype)
@@ -339,13 +356,13 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
 
     def commit_success(self) -> None:
         if self.send_by_email:
-            message = send_post_by_email.send(self.post.id)
-            # task = send_post_by_email.delay(self.post.id)
-            meta = self.post.meta.setdefault("abilian.sbe.forum", {})
+            message = send_post_by_email.send(self.new_post.id)
+            # task = send_post_by_email.delay(self.new_post.id)
+            meta = self.new_post.meta.setdefault("abilian.sbe.forum", {})
             # note: message_id is of type str
             meta["send_post_by_email_task"] = message.message_id
-            self.post.meta.changed()
-            session = sa.orm.object_session(self.post)
+            self.new_post.meta.changed()
+            session = session_of(self.new_post)
             session.commit()
 
     @property
@@ -359,12 +376,38 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate):
 route("/new_thread/")(ThreadCreate.as_view("new_thread", view_endpoint=".thread"))
 
 
+def event_to_discuss(value: str | None) -> Event | None:
+    """The event of this community a new thread is about, while it has none."""
+    if not value:
+        return None
+    try:
+        event_id = int(value)
+    except ValueError as e:
+        msg = f"Not an event: {value!r}"
+        raise BadRequest(msg) from e
+    return Event.query.filter(
+        Event.id == event_id,
+        Event.community_id == g.community.id,
+        Event.thread_id.is_(None),
+    ).first()
+
+
 class ThreadPostCreate(ThreadCreate):
-    """Add a new post to a thread."""
+    """Add a new post to a thread.
+
+    A reply the server refuses comes back on the thread's page, its error under it.
+    """
 
     methods = ["POST"]
     Form = PostForm
     Model = Post
+    template = "forum/thread.html"
+
+    @property
+    def template_kwargs(self):
+        kw = super().template_kwargs
+        kw.update(thread_page_kwargs(self.user, self.thread))
+        return kw
 
     def init_object(self, args, kwargs):
         # we DO want to skip ThreadCreate.init_object. hence super is not based on
@@ -379,24 +422,22 @@ class ThreadPostCreate(ThreadCreate):
 
     def after_populate_obj(self) -> None:
         super().after_populate_obj()
-        session = sa.orm.object_session(self.obj)
+        session = session_of(self.obj)
         session.expunge(self.obj)
-        self.obj = self.post
-
-
-class ThreadViewers(ThreadView):
-    template = "forum/thread_viewers.html"
+        self.obj = self.new_post
 
 
 route("/<int:thread_id>/")(
     ThreadPostCreate.as_view("thread_post", view_endpoint=".thread")
 )
 
-route("/<int:thread_id>/viewers")(ThreadViewers.as_view("thread_viewers"))
 
+class ThreadDelete(BaseThreadView, views.ObjectDelete[Thread, ThreadForm]):
+    """Moderation: the community's managers', as the thread's page offers it."""
 
-class ThreadDelete(BaseThreadView, views.ObjectDelete):
+    Form = ThreadForm
     methods = ["POST"]
+    decorators = (*views.ObjectDelete.decorators, guard.can_manage)
     _message_success = _('Thread "{title}" deleted.')
 
     def message_success(self):
@@ -406,10 +447,11 @@ class ThreadDelete(BaseThreadView, views.ObjectDelete):
 route("/<int:thread_id>/delete")(ThreadDelete.as_view("thread_delete"))
 
 
-class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
-    """Close / Re-open a thread."""
+class ThreadCloseView(BaseThreadView, views.object.BaseObjectView[Thread]):
+    """Close / Re-open a thread: moderation, the community's managers'."""
 
     methods = ["POST"]
+    decorators = (*views.object.BaseObjectView.decorators, guard.can_manage)
     _VALID_ACTIONS = {"close", "reopen"}
     CLOSED_MSG = _l("The thread is now closed for edition and new contributions.")
     REOPENED_MSG = _l("The thread is now re-opened for edition and new contributions.")
@@ -426,7 +468,7 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
     def post(self, action=None):
         is_closed = action == "close"
         self.obj.closed = is_closed
-        sa.orm.object_session(self.obj).commit()
+        session_of(self.obj).commit()
 
         msg = self.CLOSED_MSG if is_closed else self.REOPENED_MSG
         flash(str(msg))
@@ -436,10 +478,11 @@ class ThreadCloseView(BaseThreadView, views.object.BaseObjectView):
 route("/<int:thread_id>/close")(ThreadCloseView.as_view("thread_close"))
 
 
-class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
+class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
     Form = PostEditForm
     Model = Post
     pk = "object_id"
+    template = "forum/post_edit.html"
 
     def can_send_by_mail(self) -> bool:
         # post edit: don't notify every time
@@ -452,12 +495,26 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         thread_id = kwargs.pop("thread_id", None)
         self.thread = self.obj.thread
         assert thread_id == self.thread.id
+
+        # Nothing checked whose post this was. The community blueprint gates
+        # the route to members, so any member could edit any other member's
+        # post through a URL the template declines to show them.
+        if not can_write(self.user, self.obj):
+            raise Forbidden
+
         return args, kwargs
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["message"] = self.obj.body_html
         return kwargs
+
+    @property
+    def template_kwargs(self):
+        kw = super().template_kwargs
+        kw["post"] = self.obj
+        kw["thread"] = self.thread
+        return kw
 
     def before_populate_obj(self) -> None:
         self.message_body = self.form.message.data
@@ -472,15 +529,15 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
         del self.form["attachments"]
 
     def after_populate_obj(self) -> None:
-        session = sa.orm.object_session(self.obj)
+        session = session_of(self.obj)
         uploads = current_app.extensions["uploads"]
         self.obj.body_html = self.message_body
         obj_meta = self.obj.meta.setdefault("abilian.sbe.forum", {})
         history = obj_meta.setdefault("history", [])
         history.append(
             {
-                "user_id": current_user.id,
-                "user": str(current_user),
+                "user_id": self.user.id,
+                "user": str(self.user),
                 "date": utc_dt(datetime.utcnow()).isoformat(),
                 "reason": self.form.reason.data,
             }
@@ -503,11 +560,11 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit):
             session.delete(att)
 
         for handle in request.form.getlist("attachments"):
-            fileobj = uploads.get_file(current_user, handle)
+            fileobj = uploads.get_file(self.user, handle)
             if fileobj is None:
                 continue
 
-            meta = uploads.get_metadata(current_user, handle)
+            meta = uploads.get_metadata(self.user, handle)
             name = meta.get("filename", handle)
             mimetype = meta.get("mimetype")
 

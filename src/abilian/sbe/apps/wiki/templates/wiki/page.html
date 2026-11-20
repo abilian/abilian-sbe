@@ -1,48 +1,66 @@
+{#- A wiki page as it reads: its text, the links to other pages (a page not written
+    yet dashed), its files, who changed it last; editing in sight, the rest behind ⋮.
+    Drawn in `mockups/templates/wiki-page.html`. -#}
 {% extends "wiki/_base.html" %}
-
-{% from "macros/box.html" import m_box_menu, m_box_content %}
-{%- from "community/macros.html" import viewers_snapshot -%}
-
-{% block content %}
-  {% call m_box_content() %}
-    {{ viewers_snapshot(viewers) }}
-    <br>
-    <div class="wiki-page">
-      <h1>{{ page.title }}</h1>
-
-      <div class="wiki-page-info">
-        <span class="last-modified">
-          {{ _("Last modified by") }} {{ page.last_modified_by }}
-          {{ _("on") }} {{ page.updated_at | datetimeformat }}</span>
-      </div>
-
-      <div class="wiki-page-body">
-        {{ page.body_html|safe }}
-      </div>
-
-      {%- if page.attachments %}
-        <div id="attachments">
-          <ul>
-            {%- for attachment in page.attachments %}
-              <li>
-              <span class="attachment-item">
-                <img src="{{ attachment.icon }}" style="vertical-align: middle;" alt=""/>
-                <a href="{{ url_for(".attachment_download", community_id=g.community.slug, title=page.title, attachment=attachment.id) }}">{{ attachment.name }}</a>
-                ({{ attachment.content_length|filesize }})
-              </span>
-
-                <form
-                    action="{{ url_for('.attachment_delete', community_id=g.community.slug, title=page.title, attachment=attachment.id) }}"
-                    method="POST" style="display: inline;">
-                  {{ csrf.field() }}
-                  <button type="submit" disabled="disabled" name="action" value="delete"><i class="fa fa-trash"></i>
-                  </button>
-                </form>
-              </li>
-            {%- endfor %}
-          </ul>
-        </div>
-      {%- endif %}
+{% import "wiki/macros.html" as w with context %}
+{% set last = page.last_revision %}
+{% set kw = {"community_id": g.community.slug, "title": page.title} %}
+{% block wiki_title %}{{ page.title }}{% endblock %}
+{% block wiki_content %}
+<article class="ads-card" aria-labelledby="page-title">
+  <div class="ads-card__head ads-spread">
+    <div class="ads-stack ads-gap-sm">
+      {{ w.page_head(page) }}
+      <span class="ads-muted ads-cluster ads-gap-sm">
+        {%- if last.author %}{{ _("Modified by") }} {{ m.avatar(last.author, "ads-avatar--xs") }}{{ last.author.name }},{% else %}{{ _("Modified") }}{% endif %} {{ m.time(last.created_at) }} · <a href="{{ url_for('.page_changes', **kw) }}">{{ ngettext("%(num)d revision", "%(num)d revisions", page.revisions | length) }}</a>
+      </span>
     </div>
-  {% endcall %}
+    <div class="ads-cluster ads-gap-sm">
+      <a class="ads-btn ads-btn--primary" href="{{ url_for('.page_edit', **kw) }}">{{ icon("pencil") }}{{ _("Edit") }}</a>
+      <details class="ads-dropdown">
+        <summary class="ads-btn ads-btn--ghost" aria-label="{{ _('More actions on the page') }}">{{ icon("dots-vertical") }}</summary>
+        <div class="ads-menu">
+          <a class="ads-menu__item" href="{{ url_for('.page_changes', **kw) }}">{{ icon("history") }}{{ _("History") }}</a>
+          <a class="ads-menu__item" href="{{ url_for('.page_source', **kw) }}">{{ icon("file-text") }}{{ _("Source") }}</a>
+          <button class="ads-menu__item" type="button" data-modal-open="#upload-files">{{ icon("paperclip") }}{{ _("Attach files") }}</button>
+          {% if viewers %}<a class="ads-menu__item" href="{{ url_for('.page_viewers', **kw) }}">{{ icon("eye") }}{{ _("Readers list") }}</a>{% endif %}
+          <div class="ads-menu__sep"></div>
+          <button class="ads-menu__item ads-menu__item--danger" type="button" data-modal-open="#modal-delete">{{ icon("trash") }}{{ _("Delete the page") }}</button>
+        </div>
+      </details>
+    </div>
+  </div>
+  <div class="ads-card__body ads-prose">{{ page.body_html | safe }}</div>
+  {% if page.attachments %}
+  <section class="ads-card__body ads-stack ads-gap-sm" id="attachments" aria-labelledby="page-files">
+    <h3 class="sbe-section-title" id="page-files">{{ _("Attachments") }}</h3>
+    <ul class="ads-list">
+      {% for attachment in page.attachments %}
+      <li>
+        {{ file_icon(attachment.name) }}
+        <span class="ads-fill sbe-lines"><a class="sbe-quiet" href="{{ url_for('.attachment_download', attachment=attachment.id, **kw) }}">{{ attachment.name }}</a><span class="ads-muted">{{ attachment.content_length | filesize }}</span></span>
+        <button class="ads-btn ads-btn--ghost ads-btn--sm" type="button" data-modal-open="#modal-delete-attachment-{{ attachment.id }}" aria-label="{{ _('Delete %(name)s', name=attachment.name) }}">{{ icon("trash") }}</button>
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+</article>
+{% endblock %}
+
+{% block overlays %}
+{% call w.dialog("upload-files", _("Attach files to the page"), url_for(".attachment_upload", **kw), "upload") %}
+<input class="ads-file-input" type="file" name="attachments" multiple required aria-label="{{ _('Files to attach') }}">
+{% endcall %}
+
+{% call w.dialog("modal-delete", _("Delete the page “%(title)s”?", title=page.title), url_for(".page_delete", community_id=g.community.slug), danger=true) %}
+<input type="hidden" name="title" value="{{ page.title }}">
+<p>{{ _("Its text and its history go for everyone in the community. This cannot be undone.") }}</p>
+{% endcall %}
+
+{% for attachment in page.attachments %}
+{% call w.dialog("modal-delete-attachment-%d" % attachment.id, _("Delete “%(name)s”?", name=attachment.name), url_for(".attachment_delete", attachment=attachment.id, **kw), danger=true) %}
+<p>{{ _("It goes for everyone in the community. This cannot be undone.") }}</p>
+{% endcall %}
+{% endfor %}
 {% endblock %}

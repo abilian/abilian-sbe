@@ -1,0 +1,314 @@
+# Copyright (c) 2012-2024, Abilian SAS
+
+from __future__ import annotations
+
+import re
+from io import BytesIO
+from typing import TYPE_CHECKING
+
+import pytest
+from flask import g, url_for
+from pytest import fixture
+from toolz import first
+
+from abilian.core.models.subjects import User
+from abilian.sbe.apps.communities.models import READER, Community
+from abilian.sbe.apps.wiki import views
+from abilian.sbe.apps.wiki.models import WikiPage, WikiPageAttachment
+from abilian.services import get_service, security_service
+from abilian.services.security import ADMIN
+from abilian.web import url_for as abilian_url_for
+from tests.util import client_login
+
+if TYPE_CHECKING:
+    from flask_sqlalchemy import SQLAlchemy
+
+    from abilian.app import Application
+
+
+@fixture
+def user1(db):
+    user = User(
+        email="user_1@example.com",
+        password="azerty",  # noqa: S106
+        can_login=True,
+    )
+    db.session.add(user)
+    return user
+
+
+@fixture
+def user2(db):
+    user = User(
+        email="user_2@example.com",
+        password="azerty",  # noqa: S106
+        can_login=True,
+    )
+    db.session.add(user)
+    return user
+
+
+@fixture
+def user3(db):
+    user = User(
+        email="user_3@example.com",
+        password="azerty",  # noqa: S106
+        can_login=True,
+    )
+    db.session.add(user)
+    return user
+
+
+@fixture
+def community1(db, user1):
+    community = Community(name="Community 1")
+    db.session.add(community)
+    community.set_membership(user1, READER)
+    return community
+
+
+@fixture
+def community2(db, user2):
+    community = Community(name="Community 2")
+    db.session.add(community)
+    community.set_membership(user2, READER)
+    return community
+
+
+def test_home(client, community1, user1) -> None:
+    with client_login(client, user1):
+        response = client.get(url_for("wiki.index", community_id=community1.slug))
+        assert response.status_code == 302
+
+        response = client.get(
+            url_for("wiki.page", title="Home", community_id=community1.slug)
+        )
+        assert response.status_code == 200
+
+
+def test_create_page_initial_form(client, community1, user1) -> None:
+    with client_login(client, user1):
+        g.community = community1
+        view = views.PageCreate()
+        view.prepare_args([], {})
+        form = view.form
+        assert form["last_revision_id"].data is None
+
+
+def test_wiki_indexed(
+    community1,
+    community2,
+    admin_user,
+    user1,
+    user2,
+    user3,
+    app: Application,
+    db: SQLAlchemy,
+    client,
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("TESTING_DIRECT_FUNCTION_CALL", "testing")
+    SERVICES = ("security", "indexing")
+    for svc_name in SERVICES:
+        svc = get_service(svc_name)
+        if not svc.running:
+            svc.start()
+
+    get_service("indexing")
+
+    with client_login(client, admin_user):
+        page1 = WikiPage(title="Community 1", community=community1)
+        db.session.add(page1)
+
+        page2 = WikiPage(title="Community 2: other", community=community2)
+        db.session.add(page2)
+
+        db.session.commit()
+
+    obj_types = (WikiPage.entity_type,)
+    with client_login(client, user3):
+        res = svc.search("community", object_types=obj_types, user=user3)
+        assert len(res) == 0
+
+    with client_login(client, user1):
+        res = svc.search("community", object_types=obj_types, user=user1)
+        assert len(res) == 1
+
+        hit = res[0]
+        assert hit["object_key"] == page1.object_key
+
+    with client_login(client, user2):
+        res = svc.search("community", object_types=obj_types, user=user2)
+        assert len(res) == 1
+
+        hit = res[0]
+        assert hit["object_key"] == page2.object_key
+
+
+def test_create_page(community1, app, admin_user, client) -> None:
+    community = community1
+
+    with client_login(client, admin_user):
+        url = url_for("wiki.page_new", community_id=community.slug)
+        url += "?title=Some+page+name"
+        response = client.get(url)
+        assert response.status_code == 200
+        # make sure the title is filled when comming from wikilink
+        assert 'value="Some page name"' in response.get_data(as_text=True)
+
+        title = "Some page"
+        body = "LuuP3jai"
+        url = url_for("wiki.page_new", community_id=community.slug)
+        data = {"title": title, "body_src": body, "__action": "create"}
+        response = client.post(url, data=data)
+        assert response.status_code == 302
+
+        url = url_for("wiki.page", community_id=community.slug, title=title)
+        response = client.get(url)
+        assert response.status_code == 200
+        assert body in response.get_data(as_text=True)
+
+        # edit
+        url = url_for("wiki.page_edit", community_id=community.slug, title=title)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        # Slightly hackish way to get the page_id
+        line = first(
+            l
+            for l in response.get_data(as_text=True).split("\n")
+            if 'name="page_id"' in l
+        )
+        m = re.search(r'value="(.*?)"', line)
+        page_id = int(m.group(1))
+
+        url = url_for("wiki.page_changes", community_id=community.slug, title=title)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        url = url_for("wiki.page_source", community_id=community.slug, title=title)
+        response = client.get(url)
+        assert response.status_code == 200
+
+        url = url_for("wiki.page_edit", community_id=community.slug)
+        data = {
+            "title": title,
+            "page_id": page_id,
+            "body_src": "abc def",
+            "__action": "edit",
+        }
+        response = client.post(url, data=data)
+        assert response.status_code == 302
+
+        url = url_for(
+            "wiki.page_compare",
+            rev0="on",
+            rev1="on",
+            community_id=community.slug,
+            title=title,
+        )
+        response = client.get(url)
+        assert response.status_code == 200
+
+
+@pytest.mark.parametrize(
+    ("endpoint", "method"),
+    [("wiki.attachment_download", "get"), ("wiki.attachment_delete", "post")],
+)
+def test_an_attachment_of_another_page_is_not_found(
+    app, db, client, community1, user1, endpoint, method
+) -> None:
+    security_service.start()
+    security_service.grant_role(user1, ADMIN)
+    with client_login(client, user1):
+        page = WikiPage(title="Here", body_src="here", community=community1)
+        other = WikiPage(title="There", body_src="there", community=community1)
+        attachment = WikiPageAttachment(name="secret.txt")
+        attachment.set_content(b"secret", "text/plain")
+        other.attachments.append(attachment)
+        db.session.add_all([page, other])
+        db.session.commit()
+
+        for attachment_id in (attachment.id, 999999):
+            url = url_for(
+                endpoint,
+                community_id=community1.slug,
+                title="Here",
+                attachment=attachment_id,
+            )
+            assert getattr(client, method)(url).status_code == 404, attachment_id
+
+
+def _attachment(name: str) -> WikiPageAttachment:
+    attachment = WikiPageAttachment(name=name)
+    attachment.set_content(name.encode(), "text/plain")
+    return attachment
+
+
+def test_the_form_attaches_and_removes_files_when_the_page_is_saved(
+    app, db, client, community1, user1
+) -> None:
+    """Only this page's files: another page's, named in the form, stays."""
+    security_service.start()
+    security_service.grant_role(user1, ADMIN)
+    page = WikiPage(title="Here", body_src="here", community=community1)
+    other = WikiPage(title="There", body_src="there", community=community1)
+    old, kept, elsewhere = (_attachment(n) for n in ("old.txt", "kept.txt", "x.txt"))
+    page.attachments.extend([old, kept])
+    other.attachments.append(elsewhere)
+    db.session.add_all([page, other])
+    db.session.commit()
+
+    data = {
+        "title": "Here",
+        "page_id": page.id,
+        "body_src": "here",
+        "remove_attachment": [str(old.id), str(elsewhere.id)],
+        "attachments": (BytesIO(b"new"), "new.txt"),
+        "__action": "edit",
+    }
+    with client_login(client, user1):
+        response = client.post(
+            url_for("wiki.page_edit", community_id=community1.slug), data=data
+        )
+
+    assert response.status_code == 302
+    db.session.expire_all()
+    assert [a.name for a in page.attachments] == ["kept.txt", "new.txt"]
+    assert [a.name for a in other.attachments] == ["x.txt"]
+
+
+def test_a_new_page_comes_with_its_files(app, db, client, community1, user1) -> None:
+    security_service.start()
+    security_service.grant_role(user1, ADMIN)
+    data = {
+        "title": "Fresh",
+        "body_src": "fresh",
+        "attachments": [(BytesIO(b"a"), "a.txt"), (BytesIO(b""), "")],
+        "__action": "create",
+    }
+    with client_login(client, user1):
+        response = client.post(
+            url_for("wiki.page_new", community_id=community1.slug), data=data
+        )
+
+    assert response.status_code == 302
+    page = WikiPage.query.filter(WikiPage.title == "Fresh").one()
+    assert [a.name for a in page.attachments] == ["a.txt"]
+
+
+def test_a_page_url_is_the_page_not_its_viewers(
+    app: Application, db: SQLAlchemy, community1: Community
+) -> None:
+    """The viewers view subclasses the page view, and used to inherit its
+    registration as the default view: uploading or deleting an attachment then
+    ended on the viewers page."""
+    page = WikiPage(title="Some page", community=community1)
+    db.session.add(page)
+    db.session.flush()
+
+    with app.test_request_context():
+        url = abilian_url_for(page)
+
+    assert "/wiki/page/" in url
+    assert "title=Some+page" in url

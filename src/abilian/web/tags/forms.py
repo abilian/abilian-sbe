@@ -6,12 +6,13 @@ from __future__ import annotations
 
 from flask import current_app
 from wtforms import StringField
+from wtforms.widgets import TextInput
 
 from abilian.core.models.tag import Tag
 from abilian.web.forms import Field, Form
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import required
-from abilian.web.forms.widgets import ListWidget, Select2
+from abilian.web.forms.widgets import ListWidget
 
 
 class TagsField(Field):
@@ -23,7 +24,7 @@ class TagsField(Field):
     """
 
     multiple = True
-    widget = Select2(js_init="tags-select", multiple=True)
+    widget = TextInput()
     view_widget = ListWidget()
 
     def __init__(self, ns, *args, **kwargs) -> None:
@@ -49,20 +50,19 @@ class TagsField(Field):
     def default(self):
         return set()
 
+    def _value(self) -> str:
+        return "; ".join(sorted(tag.label for tag in self.data or ()))
+
     def process_data(self, data):
         data = {t for t in data if t.ns == self.ns}
         return super().process_data(data)
 
     def process_formdata(self, valuelist) -> None:
         extension = current_app.extensions["tags"]
-        valuelist = set(valuelist[0].split(";"))
+        labels = {label.strip() for label in valuelist[0].split(";")} - {""}
         data = set()
 
-        for label in valuelist:
-            label = label.strip()
-            if not label:
-                continue
-
+        for label in labels:
             tag = extension.get(ns=self.ns, label=label)
             if tag is None:
                 tag = Tag(ns=self.ns, label=label)

@@ -1,0 +1,43 @@
+{#- Making a community, which only a site administrator does: its name and what it is
+    for, whether its members take part or mostly read, its tools, and the person who
+    will run it. Beside it, what happens next. Drawn in
+    `mockups/templates/community-new.html`. -#}
+{% extends "admin/_ads.html" %}
+{% import "community/_fields.html" as c with context %}
+{% set posted = request.method == "POST" %}
+{% block page_title %}{{ _("New community") }} · {{ _("Administration") }}{% endblock %}
+{% block heading %}{{ _("New community") }}{% endblock %}
+{% block content %}
+<div class="ads-with-aside">
+  <form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" aria-label="{{ _('The new community') }}">
+    {{ form.csrf_token }}
+    <div class="ads-card__body ads-stack">
+      {{ c.name(form) }}
+      {{ c.description(form) }}
+      {#- A new community: its members take part, it has discussions and documents. -#}
+      {{ c.members(form, form.type.data if posted else "participative") }}
+      {{ c.tools(form, {"has_forum": form.has_forum.data, "has_documents": form.has_documents.data, "has_wiki": form.has_wiki.data} if posted else {"has_forum": true, "has_documents": true}) }}
+      {{ c.joining(form, form.visibility.data if posted else "secret") }}
+      <div class="ads-field">
+        <label class="ads-label" for="manager">{{ _("Its manager") }}</label>
+        {#- No icon beside it: the picker wraps the field in its own box. -#}
+        <input class="ads-input" id="manager" type="text" name="manager" data-picker="{{ url_for('social.users_json') }}" aria-describedby="manager-help">
+        <small class="ads-help" id="manager-help">{{ _("Someone who has an account; they can name other managers. Left empty, it is you.") }}</small>
+      </div>
+    </div>
+    <div class="ads-card__foot ads-cluster ads-gap-sm">
+      <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="create">{{ _("Create the community") }}</button>
+      <a class="ads-btn ads-btn--ghost" href="{{ url_for('.index') }}">{{ _("Cancel") }}</a>
+    </div>
+  </form>
+  <aside class="ads-stack" aria-label="{{ _('What happens next') }}">
+    <section class="ads-card" aria-labelledby="next">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="next">{{ _("What happens next") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <p>{{ _("The community is made empty, open to its members only. Its manager finds it among their communities and invites the others.") }}</p>
+        <p class="ads-muted">{{ _("All this can be changed later in its settings, except its address.") }}</p>
+      </div>
+    </section>
+  </aside>
+</div>
+{% endblock %}

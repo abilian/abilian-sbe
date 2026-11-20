@@ -1,67 +1,81 @@
-{% extends "default/object_edit.html" %}
-
-{% from "macros/box.html" import m_box_content with context %}
-{% from "macros/form.html" import  m_field with context %}
-
-{% block after_form %}
-  {% call m_box_content(_("Delete community"), color="danger") %}
-
-    <p>Supprimer la communauté (attention, action irréversible!)</p>
-
-    <form action="{{ url_for(".delete", community_id=g.community.slug) }}"
-          method="POST" enctype="multipart/form-data">
-      {{ form.csrf_token }}
-      <div class="form-actions">
-        <button type="submit" name="__action" value="delete" class="btn btn-danger">
-          {{ _("Destroy community") }}
-        </button>
+{#- A community's settings, for its managers: its name, what it is for and its image;
+    whether its members write or mostly read; its tools. Beside it, its address, which
+    stays, and deleting it, behind a dialog that names it. Drawn in
+    `mockups/templates/community-settings.html`. -#}
+{% extends "ads_community.html" %}
+{% import "forum/_post_fields.html" as fields %}
+{% import "community/_fields.html" as c with context %}
+{% set community = g.community %}
+{% block page_title %}{{ _("Settings") }} · {{ community.name }}{% endblock %}
+{% block content %}
+<div class="ads-with-aside">
+  <form class="ads-card" id="edit-form" method="post" action="{{ request.path }}" enctype="multipart/form-data" aria-labelledby="settings">
+    {{ form.csrf_token }}
+    <div class="ads-card__head"><h2 class="ads-card__title" id="settings">{{ _("The community's settings") }}</h2></div>
+    <div class="ads-card__body ads-stack">
+      {{ c.name(form) }}
+      {{ c.description(form) }}
+      <div class="ads-field">
+        <span class="ads-label">{{ _("Its image") }}</span>
+        <div class="ads-media">
+          {{ m.tile(community) }}
+          <div class="ads-stack ads-gap-sm">
+            {#- Sent as soon as it is picked (`widgets/image.js`). -#}
+            <div class="js-widget sbe-uploader" data-init-with="imageInput" data-init-params='{"width": 64, "height": 64, "resize_mode": "CROP"}'>
+              <label class="ads-btn js-file-button">{{ icon("photo") }}{{ _("Change the image") }}<input class="sbe-sr-only" type="file" name="{{ form.image.name }}" accept="image/png, image/jpeg"></label>
+              <div class="selected-files sbe-uploader__list"></div>
+            </div>
+            {#- The field's own marker: the image saved is removed. -#}
+            {% if community.own_image %}<label class="ads-check"><input type="checkbox" name="__{{ form.image.name }}_delete__" value="0"> <span>{{ _("Back to the initial") }}</span></label>{% endif %}
+          </div>
+        </div>
+        {{ fields.errors(form.image) }}
       </div>
-    </form>
+      {{ c.members(form, form.type.data) }}
+      {{ c.tools(form, {"has_forum": form.has_forum.data, "has_documents": form.has_documents.data, "has_wiki": form.has_wiki.data}) }}
+      {{ c.joining(form, form.visibility.data) }}
+    </div>
+    <div class="ads-card__foot ads-cluster ads-gap-sm">
+      <button class="ads-btn ads-btn--primary" type="submit" name="__action" value="edit">{{ _("Save") }}</button>
+      <a class="ads-btn ads-btn--ghost" href="{{ url_for('wall.index', community_id=community.slug) }}">{{ _("Cancel") }}</a>
+    </div>
+  </form>
 
-    {%- deferJS %}
-      <script>
-        require(
-            ['Abilian', 'jquery', 'bootbox'],
-            function (Abilian, $, bootbox) {
-              function setupDeleteButton() {
-                $('button.btn-danger[value="delete"]').click(function (e) {
-                  e.preventDefault();
-                  var $button = $(this);
-                  var button_form = $(this.form);
-                  var msg = '<p class="lead">Voulez-vous vraiment supprimer la communauté «{{ g.community.name }}»?</p>';
+  <aside class="ads-stack" aria-label="{{ _('Its address, and deleting it') }}">
+    <section class="ads-card" aria-labelledby="address">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="address">{{ _("Its address") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <code class="sbe-wrap">{{ url_for('wall.index', community_id=community.slug) }}</code>
+        <p class="ads-muted">{{ _("It does not change with the name: the links already sent stay good.") }}</p>
+      </div>
+    </section>
+    {#- Deleting a community is the site's administrators' (`CommunityDelete`). -#}
+    {% if is_site_admin() %}
+    <section class="ads-card" aria-labelledby="delete">
+      <div class="ads-card__head"><h2 class="ads-card__title" id="delete">{{ _("Delete the community") }}</h2></div>
+      <div class="ads-card__body ads-stack ads-gap-sm">
+        <p class="ads-muted">{{ _("Its discussions, its documents and its wiki go for all its members. This cannot be undone.") }}</p>
+        <button class="ads-btn ads-btn--danger" type="button" data-modal-open="#modal-delete">{{ icon("trash") }}{{ _("Delete “%(name)s”", name=community.name) }}</button>
+      </div>
+    </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
 
-                  bootbox.dialog({
-                    'title': '<strong class="text-danger"><i class="glyphicon glyphicon-warning-sign">' +
-                        '</i> La suppression est irréversible</strong>',
-                    'message': msg,
-                    'buttons': {
-                      'cancel': {
-                        label: '{{ _('Cancel') }}',
-                        className: "btn-primary"
-                      },
-                      'confirm': {
-                        label: '{{_('Destroy') }}',
-                        className: 'btn-danger',
-                        callback: function () {
-                          var action_val = $('<input />',
-                              {
-                                'type': 'hidden',
-                                'name': '__action',
-                                'value': $button.attr('value')
-                              });
-                          button_form.append(action_val);
-                          button_form.submit();
-                        }
-                      },
-                    }
-                  });
-                });
-              }
-
-              Abilian.fn.onAppInit(setupDeleteButton);
-            }
-        );
-      </script>
-    {%- enddeferJS %}
-  {%- endcall %}
+{% block overlays %}
+{% if is_site_admin() %}
+<dialog class="ads-modal__panel sbe-dialog" id="modal-delete" aria-labelledby="modal-delete-title">
+  <form method="post" action="{{ url_for('.delete', community_id=community.slug) }}">
+    {{ form.csrf_token }}
+    <input type="hidden" name="__action" value="delete">
+    <div class="ads-modal__head"><h2 class="ads-modal__title" id="modal-delete-title">{{ _("Delete “%(name)s”?", name=community.name) }}</h2></div>
+    <div class="ads-modal__body"><p>{{ _("Its discussions, its documents and its wiki go for its %(num)d members. This cannot be undone.", num=community.membership_count) }}</p></div>
+    <div class="ads-modal__foot">
+      <button class="ads-btn ads-btn--ghost" type="button" data-modal-close>{{ _("Cancel") }}</button>
+      <button class="ads-btn ads-btn--danger" type="submit">{{ _("Delete the community") }}</button>
+    </div>
+  </form>
+</dialog>
+{% endif %}
 {% endblock %}

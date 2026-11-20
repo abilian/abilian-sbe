@@ -89,7 +89,7 @@ class FormContext:
 
 
 class Form(FlaskForm):
-    _groups: dict[str, list[Field]] = OrderedDict()
+    _groups: dict[str, list[str]] = OrderedDict()
 
     #: :class:`FormPermissions` instance
     _permissions: FormPermissions | None = None

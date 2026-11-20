@@ -5,9 +5,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 from flask import g, url_for as url_for_orig
-from flask_babel import lazy_gettext as _l
 from flask_login import current_user
 
+from abilian.core.application import as_application
+from abilian.core.extensions.login import authenticated_user
+from abilian.i18n import _l
+from abilian.sbe.apps.communities.security import can_manage
 from abilian.web.action import Action, Endpoint, actions
 from abilian.web.nav import NavItem
 
@@ -31,13 +34,13 @@ class CommunityEndpoint(Endpoint):
 class CommunityTabAction(Action):
     Endpoint = CommunityEndpoint
 
-    def url(self, context: dict[str, Any] | None = None) -> CommunityEndpoint | str:
+    def url(self, context: dict[str, Any] | None = None) -> str:
         if self._url:
-            return super().url()
+            return super().url(context)
 
         endpoint = self.endpoint
         if endpoint:
-            return endpoint
+            return str(endpoint)
         return url_for(f"{self.name}.index")
 
     def is_current(self) -> bool:
@@ -53,8 +56,15 @@ _actions = (
         url=lambda context: url_for_orig("communities.index"),
         condition=lambda ctx: current_user.is_authenticated,
     ),
-    # Tabs
-    CommunityTabAction("communities:tabs", "wall", _l("Activities")),
+    # Tabs, the most used first: the forum carries the application. One name per
+    # thing, everywhere: "Discussions" (`notes/ux/design-principles.md`).
+    CommunityTabAction("communities:tabs", "wall", _l("Home")),
+    CommunityTabAction(
+        "communities:tabs",
+        "forum",
+        _l("Discussions"),
+        condition=lambda ctx: g.community.has_forum,
+    ),
     CommunityTabAction(
         "communities:tabs",
         "documents",
@@ -66,12 +76,6 @@ _actions = (
         "wiki",
         _l("Wiki"),
         condition=lambda ctx: g.community.has_wiki,
-    ),
-    CommunityTabAction(
-        "communities:tabs",
-        "forum",
-        _l("Conversations"),
-        condition=lambda ctx: g.community.has_forum,
     ),
     CommunityTabAction(
         "communities:tabs",
@@ -87,14 +91,18 @@ _actions = (
         "settings",
         _l("Settings"),
         icon="cog",
-        condition=lambda ctx: current_user.has_role("admin"),
+        # The same question `CommunityEdit` enforces. It used to ask
+        # `current_user.has_role("admin")`, so a manager could reach the
+        # settings page only by typing its URL.
+        condition=lambda ctx: can_manage(authenticated_user(), g.community),
         endpoint="communities.settings",
     ),
 )
 
 
 def register_actions(state: BlueprintSetupState) -> None:
-    if not actions.installed(state.app):
+    app = as_application(state.app)
+    if not actions.installed(app):
         return
-    with state.app.app_context():
+    with app.app_context():
         actions.register(*_actions)

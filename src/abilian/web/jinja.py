@@ -13,8 +13,6 @@ from flask_babel import get_locale as babel_get_locale
 from jinja2.loaders import ChoiceLoader, FileSystemLoader, PackageLoader
 from sqlalchemy.orm.attributes import NEVER_SET, NO_VALUE
 
-import abilian.core.util
-import abilian.i18n
 from abilian.web import csrf
 from abilian.web.filters import init_filters
 from abilian.web.util import url_for
@@ -37,8 +35,6 @@ class JinjaManagerMixin(Flask):
             app=current_app,
             csrf=csrf,
             get_locale=babel_get_locale,
-            local_dt=abilian.core.util.local_dt,
-            _n=abilian.i18n._n,
             url_for=url_for,
             user_photo_url=user_photo_url,
             NO_VALUE=NO_VALUE,
@@ -50,11 +46,6 @@ class JinjaManagerMixin(Flask):
     @cached_property
     def jinja_options(self) -> dict[str, Any]:
         options = dict(Flask.jinja_options)
-
-        jinja_exts = options.setdefault("extensions", [])
-        ext = "abilian.core.extensions.jinjaext.DeferredJSExtension"
-        if ext not in jinja_exts:
-            jinja_exts.append(ext)
 
         if "bytecode_cache" not in options:
             cache_dir = Path(self.instance_path, "cache", "jinja")
