@@ -202,8 +202,9 @@ def test_a_database_failing_to_load_the_signed_in_user_is_an_error(
     session.add(user)
     session.commit()
     user_id = str(user.id)
-    # A column the code maps and the database lacks: a migration not applied.
-    session.execute(sa.text('ALTER TABLE "user" DROP COLUMN job_title'))
+    # The query fails in the database: what a migration not applied does. A table
+    # gone, rather than a column, which SQLite before 3.35 cannot drop.
+    session.execute(sa.text('DROP TABLE "user"'))
     session.commit()
     session.expire_all()
 
