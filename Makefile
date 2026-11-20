@@ -151,7 +151,6 @@ front:  ## Build the front-end assets (CSS/JS) into the package
 .PHONY: update-deps
 update-deps:  ## Update dependencies
 	uv sync -U
-	uv export -o requirements.txt
 	pre-commit autoupdate
 	uv pip list --outdated
 
