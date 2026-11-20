@@ -3,7 +3,6 @@ from __future__ import annotations
 from logging.config import fileConfig
 
 from alembic import context
-from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -56,11 +55,9 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    # The application's own engine: the database it runs on, an in-memory
+    # SQLite included, and not a second engine made from the URL.
+    connectable = current_app.extensions["migrate"].db.engine
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)

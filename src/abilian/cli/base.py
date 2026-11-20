@@ -6,6 +6,7 @@ import runpy
 
 import click
 from flask.cli import with_appcontext
+from flask_migrate import stamp
 from flask_super.cli import command
 
 from abilian.core.extensions import db
@@ -16,7 +17,11 @@ from abilian.services import get_service
 @command()
 @with_appcontext
 def initdb() -> None:
+    """Create the tables, at the schema of the latest migration, and say so."""
     db.create_all()
+    # Marked at the latest migration, the database takes the next
+    # `flask db upgrade`; left unmarked, it would replay them all.
+    stamp()
     create_root_user()
 
 
