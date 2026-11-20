@@ -1080,12 +1080,9 @@ def descendants_view(user: User, folder_id):
                 tree.append((child, "document", []))
         return tree
 
-    owners = {}
-    owners_query = User.query.filter(User.id.in_(owner_ids)).add_column(
-        sa.sql.func.concat("user:", User.id).label("key")
-    )
-    for owner, key in owners_query:
-        owners[key] = owner
+    owners = {
+        f"user:{owner.id}": owner for owner in User.query.filter(User.id.in_(owner_ids))
+    }
 
     ctx = {
         "folder": folder,
