@@ -12,7 +12,7 @@ It runs as three processes: the web application, a worker for background tasks (
 
 ## Three ways to run it
 
-- **[On Hop3](hop3.md)**, a platform that builds and runs the application, its database and its Redis from the repository: the shortest way to a production site.
+- **[On Hop3](hop3.md)**, a platform that runs the application from its PyPI package, with its database and its Redis: the shortest way to a production site.
 - **[On a server](server.md)**, step by step, on a Debian or Ubuntu machine.
 - **For development**, on your own machine: see the [developer guide](../develop/index.md).
 

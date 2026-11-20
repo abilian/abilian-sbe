@@ -40,7 +40,7 @@ make run
 
 ## Running it in production
 
-- **On [Hop3](https://hop3.cloud/)**: the repository's `hop3.toml` builds the application, provides PostgreSQL and Redis, and keeps the files on a volume. See [docs/src/install/hop3.md](docs/src/install/hop3.md).
+- **On [Hop3](https://hop3.cloud/)**: a small project pins the version of SBE from PyPI, and its `hop3.toml` runs it with PostgreSQL and Redis and keeps the files on a volume. See [docs/src/install/hop3.md](docs/src/install/hop3.md).
 - **On a server**, Debian or Ubuntu, with PostgreSQL or MariaDB, behind nginx: see [docs/src/install/server.md](docs/src/install/server.md).
 
 The settings are environment variables: see [docs/src/install/configuration.md](docs/src/install/configuration.md).

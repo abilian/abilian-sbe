@@ -12,7 +12,7 @@ Il tourne sous la forme de trois processus : l'application web, un *worker* pour
 
 ## Trois façons de le faire tourner
 
-- **[Sur Hop3](hop3.md)**, une plateforme qui construit et exécute l'application, sa base de données et son Redis à partir du dépôt : le chemin le plus court vers un site en production.
+- **[Sur Hop3](hop3.md)**, une plateforme qui exécute l'application à partir de son paquet PyPI, avec sa base de données et son Redis : le chemin le plus court vers un site en production.
 - **[Sur un serveur](server.md)**, pas à pas, sur une machine Debian ou Ubuntu.
 - **Pour le développement**, sur votre propre machine : voir le [guide du développeur](../develop/index.md).
 
