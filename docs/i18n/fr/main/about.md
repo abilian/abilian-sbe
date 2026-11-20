@@ -4,7 +4,7 @@ Abilian SBE (Social Business Engine) est développé par [Abilian](https://abili
 
 ## Licence
 
-Abilian SBE est un logiciel libre, publié sous la [GNU Lesser General Public License, version 3](https://www.gnu.org/licenses/lgpl-3.0.html). Vous pouvez l'utiliser, l'étudier, le modifier et le partager, y compris au sein d'une application plus grande. Le projet suit la spécification [REUSE](https://reuse.software/) : chaque fichier indique sa licence.
+Abilian SBE est un logiciel libre, publié sous la [GNU Lesser General Public License, version 3](https://www.gnu.org/licenses/lgpl-3.0.html). Vous pouvez l'utiliser, l'étudier, le modifier et le partager, y compris au sein d'une application plus grande. Le projet suit la spécification [REUSE](https://reuse.software/) : `REUSE.toml` déclare le copyright et la licence de chaque fichier.
 
 ## Sa construction
 

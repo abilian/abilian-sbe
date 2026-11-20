@@ -57,4 +57,4 @@ The [developer guide](docs/src/develop/index.md) describes the code, the tests a
 
 ## Licence
 
-Abilian SBE is free software, under the [GNU Lesser General Public License, version 3](LICENSES/LGPL-3.0-only.txt), developed by [Abilian](https://abilian.com/). The project follows the [REUSE](https://reuse.software/) specification: every file states its copyright and licence.
+Abilian SBE is free software, under the [GNU Lesser General Public License, version 3](LICENSES/LGPL-3.0-only.txt), developed by [Abilian](https://abilian.com/). The project follows the [REUSE](https://reuse.software/) specification: `REUSE.toml` declares the copyright and licence of every file.
