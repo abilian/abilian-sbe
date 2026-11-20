@@ -1,0 +1,12 @@
+/* The screenshots: a frame and a shadow, so a white page stands out from the
+   documentation's own white page. */
+.md-typeset img[src*="assets/shots/"] {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 6px;
+  box-shadow: 0 6px 24px rgb(0 0 0 / 8%);
+}
+
+/* The home page's first heading: larger, as the page's promise. */
+.md-content h1:first-of-type {
+  font-weight: 700;
+}

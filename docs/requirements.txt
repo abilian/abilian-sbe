@@ -1,2 +1,0 @@
-# Requirements needed to build the doc.
-mkdocs-material

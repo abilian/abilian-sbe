@@ -1,0 +1,99 @@
+# Documentation site for Abilian SBE, built with Zensical: the English edition.
+#
+# Sources live in docs/src, and this edition builds to docs/site/en/. The French
+# edition is generated from this file by preprocess.py; the site root is
+# docs/index.html. Paths resolve relative to this file. `make serve` previews,
+# `make preview` serves the whole site, `make check` fails on a broken link.
+
+[project]
+
+docs_dir = "src"
+site_dir = "site/en"
+
+site_name = "Abilian SBE"
+site_description = "Abilian SBE is a free and open source collaboration platform: communities with their discussions, documents, wiki and calendar, for an organisation, a network or a cluster."
+site_author = "Abilian SAS"
+site_url = "https://sbe-docs.hop3.abilian.com/en/"
+
+# The language selector, one entry per edition, English first. Every edition is
+# at /<lang>/, and the site root is a chooser (index.html, beside this file).
+# lang.js points each entry at the same page in the other edition.
+extra_javascript = ["assets/lang.js"]
+extra_css = ["assets/extra.css"]
+
+copyright = """
+Copyright &copy; 2012-2026 Abilian SAS.
+Abilian SBE is free software, under the
+<a href="https://www.gnu.org/licenses/lgpl-3.0.html">LGPL v3</a>.
+"""
+
+# Top-level entries become the tab bar under the header, so the list stays short.
+nav = [
+    { "Home" = [
+        { "Overview" = "index.md" },
+        { "About" = "main/about.md" },
+    ]},
+    { "Using SBE" = [
+        { "Getting started" = "guide/index.md" },
+        { "Communities" = "guide/communities.md" },
+        { "Discussions" = "guide/discussions.md" },
+        { "Documents" = "guide/documents.md" },
+        { "Wiki" = "guide/wiki.md" },
+        { "Calendar" = "guide/calendar.md" },
+        { "People and search" = "guide/search.md" },
+        { "Your account" = "guide/account.md" },
+    ]},
+    { "Administration" = "admin/index.md" },
+    { "Install" = [
+        { "Overview" = "install/index.md" },
+        { "On a server" = "install/server.md" },
+        { "On Hop3" = "install/hop3.md" },
+        { "Configuration" = "install/configuration.md" },
+    ]},
+    { "Developers" = [
+        { "Overview" = "develop/index.md" },
+        { "Contributing" = "develop/contributing.md" },
+        { "Governance" = "develop/governance.md" },
+        { "Roadmap" = "develop/roadmap.md" },
+    ]},
+]
+
+[[project.extra.alternate]]
+name = "English"
+link = "/en/"
+lang = "en"
+
+[[project.extra.alternate]]
+name = "Français"
+link = "/fr/"
+lang = "fr"
+
+[project.theme]
+
+language = "en"
+logo = "assets/abilian-mark.svg"
+favicon = "assets/abilian-mark.svg"
+
+features = [
+    "content.code.copy",
+    "content.tabs.link",
+    "navigation.footer",
+    "navigation.instant",
+    "navigation.instant.prefetch",
+    "navigation.path",
+    "navigation.sections",
+    "navigation.tabs",
+    "navigation.top",
+    "navigation.tracking",
+    "search.highlight",
+]
+
+[[project.theme.palette]]
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to light mode"

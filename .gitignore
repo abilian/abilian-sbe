@@ -76,3 +76,9 @@ dump.rdb
 
 # Playwright e2e scratch instance
 /tmp/abilian-sbe-e2e/
+
+# Documentation: the built site and what docs/preprocess.py generates.
+/docs/site/
+/docs/.cache/
+/docs/i18n/*/assets/
+/docs/zensical.*.toml

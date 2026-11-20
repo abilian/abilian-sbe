@@ -1,0 +1,42 @@
+# What each edition of the site says in its own language, read by
+# preprocess.py. The editions themselves are the [[project.extra.alternate]]
+# entries in zensical.toml, English first, which needs no section here.
+#
+# `nav` translates every label of zensical.toml's nav, English on the left. A
+# label with no translation stops the build, so a new English page cannot reach
+# another edition under an English title. Developers is translated but not its
+# pages: that section is English only, and the edition has one page for it.
+
+[fr]
+site_name = "Abilian SBE"
+site_description = "Abilian SBE est une plateforme de collaboration libre : des communautés avec leurs discussions, leurs documents, leur wiki et leur agenda, pour une organisation, un réseau ou un pôle."
+copyright = """
+Copyright &copy; 2012-2026 Abilian SAS.
+Abilian SBE est un logiciel libre, sous licence
+<a href="https://www.gnu.org/licenses/lgpl-3.0.html">LGPL v3</a>.
+"""
+dark = "Passer en mode sombre"
+light = "Passer en mode clair"
+
+[fr.nav]
+"Home" = "Accueil"
+"Overview" = "Présentation"
+"About" = "À propos"
+"Using SBE" = "Utiliser SBE"
+"Getting started" = "Premiers pas"
+"Communities" = "Communautés"
+"Discussions" = "Discussions"
+"Documents" = "Documents"
+"Wiki" = "Wiki"
+"Calendar" = "Agenda"
+"People and search" = "Annuaire et recherche"
+"Your account" = "Votre compte"
+"Administration" = "Administration"
+"Install" = "Installer"
+"On a server" = "Sur un serveur"
+"On Hop3" = "Sur Hop3"
+"Configuration" = "Configuration"
+"Developers" = "Développeurs"
+"Contributing" = "Contribuer"
+"Governance" = "Gouvernance"
+"Roadmap" = "Feuille de route"

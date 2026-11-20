@@ -1,0 +1,95 @@
+<!doctype html>
+<!--
+  The root of the documentation site, which belongs to no edition: every edition
+  is at /<lang>/. preprocess.py --site-root copies this to site/index.html once
+  they are built, and refuses when an edition has no link here.
+
+  With JavaScript it goes straight on: to the edition chosen last time (the
+  cookie lang.js sets from the language selector), or the first one the browser
+  asks for, or English. Without, it is the list below. `#stay` opts out of the
+  redirect, so the page can be read on purpose.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Abilian SBE</title>
+    <meta
+      name="description"
+      content="Abilian SBE, a free and open source collaboration platform. Documentation in English and French."
+    />
+    <link rel="alternate" hreflang="en" href="en/" />
+    <link rel="alternate" hreflang="fr" href="fr/" />
+    <link rel="alternate" hreflang="x-default" href="en/" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --page: #f8fafc;
+        --ink: #0f172a;
+        --faint: #64748b;
+        --line: #e2e8f0;
+        --accent: #066fd1;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --page: #0f172a;
+          --ink: #e2e8f0;
+          --faint: #94a3b8;
+          --line: #334155;
+          --accent: #60a5fa;
+        }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 2rem 1rem;
+        background: var(--page);
+        color: var(--ink);
+        font: 16px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main { width: 100%; max-width: 32rem; text-align: center; }
+      img { width: 4rem; height: 4rem; }
+      h1 { margin: 0.5rem 0 0.3rem; font-size: 2rem; letter-spacing: -0.02em; }
+      .tag { margin: 0 0 2rem; color: var(--faint); }
+      .choices { display: grid; gap: 0.7rem; text-align: left; }
+      a.choice {
+        display: block;
+        padding: 0.9rem 1.2rem;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        color: var(--ink);
+        text-decoration: none;
+      }
+      a.choice:hover, a.choice:focus-visible { border-color: var(--accent); }
+      a.choice span { display: block; color: var(--faint); font-size: 0.9rem; }
+    </style>
+    <script>
+      (function () {
+        if (location.hash === "#stay") return;
+        var langs = ["en", "fr"];
+        var chosen = (document.cookie.match(/(?:^|; )sbe-docs-lang=([a-z]+)/) || [])[1];
+        if (!chosen) {
+          var asked = (navigator.languages || [navigator.language || "en"]).map(function (l) {
+            return l.slice(0, 2).toLowerCase();
+          });
+          chosen = asked.filter(function (l) { return langs.indexOf(l) >= 0; })[0];
+        }
+        location.replace((langs.indexOf(chosen) >= 0 ? chosen : "en") + "/");
+      })();
+    </script>
+  </head>
+  <body>
+    <main>
+      <img src="en/assets/abilian-mark.svg" alt="" />
+      <h1>Abilian SBE</h1>
+      <p class="tag">A free collaboration platform · Une plateforme de collaboration libre</p>
+      <div class="choices">
+        <a class="choice" href="en/" hreflang="en" lang="en">English<span>Documentation in English</span></a>
+        <a class="choice" href="fr/" hreflang="fr" lang="fr">Français<span>Documentation en français</span></a>
+      </div>
+    </main>
+  </body>
+</html>

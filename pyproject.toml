@@ -107,7 +107,7 @@ artifacts = ["src/abilian/sbe/static/vite/*"]
 [dependency-groups]
 doc = [
     # Documentation
-    "mkdocs-material>=9.5.4,<10.0.0",
+    "zensical>=0.1.2",
 ]
 dev = [
     # The PostgreSQL driver is an extra, which a plain `uv sync` leaves out:
@@ -155,6 +155,7 @@ dev = [
     "import-linter>=2.15",
     "zuban>=0.10.2",
     "abilian-ds==0.3.0",
+    "watchdog>=7.1.0",
 ]
 
 [tool.uv]
