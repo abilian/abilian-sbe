@@ -116,6 +116,12 @@ clean:
 tidy: clean
 	rm -rf .tox .nox .venv
 
+.PHONY: translations
+## Compile the catalogs the app reads (git keeps only their .po files)
+translations:
+	pybabel -q compile -d src/abilian/translations
+	pybabel -q compile -d src/abilian/sbe/translations
+
 .PHONY:
 update-pot: update-pot
 	python setup.py extract_messages update_catalog compile_catalog

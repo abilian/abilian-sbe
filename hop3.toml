@@ -29,10 +29,18 @@ node-version = "22"
 before-build = "cd vite && npm ci && npm run build"
 
 [run]
-# Before any process starts: the schema follows the code (from production's
-# 1f4631da751b, the migrations are all it lacks), then the two data backfills that
-# memberships from before need, both idempotent.
-before-run = ["flask db upgrade", "flask backfill-community-roles", "flask backfill-creator-memberships"]
+# Before any process starts: the translations compiled (git keeps the .po files, not
+# the .mo files the app reads: without them the site speaks no French); the schema
+# following the code (from production's 1f4631da751b, the migrations are all it
+# lacks); then the two data backfills that memberships from before need, both
+# idempotent.
+before-run = [
+    "pybabel -q compile -d src/abilian/translations",
+    "pybabel -q compile -d src/abilian/sbe/translations",
+    "flask db upgrade",
+    "flask backfill-community-roles",
+    "flask backfill-creator-memberships",
+]
 start = "gunicorn abilian.wsgi:app -b 0.0.0.0:$PORT --workers 4 --log-level info --log-file -"
 start-timeout = 180
 # What the previews and text extraction call: pdftotext and pdftoppm, convert, and
