@@ -93,7 +93,7 @@ lint.extend-ignore = [
 "**/__init__.py" = [
     "F401", # 'module' imported but unused
 ]
-"migrations/**/*.py" = [
+"src/abilian/migrations/**/*.py" = [
     "E402", # module level import not at top of file
     "INP001", # implicit namespace packages
 ]

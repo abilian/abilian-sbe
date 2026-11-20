@@ -50,6 +50,7 @@ version = "2.0.0"
 source = { editable = "." }
 default-groups = ["dev", "doc"]
 dependencies = [
+    { name = "alembic" },
     { name = "apscheduler" },
     { name = "attrs" },
     { name = "babel" },
@@ -157,6 +158,7 @@ doc = [
 
 [package.metadata]
 requires-dist = [
+    { name = "alembic", specifier = ">=1.20.1" },
     { name = "apscheduler", specifier = ">=3.10.4,<4.0.0" },
     { name = "attrs", specifier = ">=24.2.0" },
     { name = "babel" },

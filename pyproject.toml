@@ -82,6 +82,7 @@ dependencies = [
     "hyperlink>=21.0.0",
     "python-dotenv>=1.2.4",
     "flask-vite>=0.6.1",
+    "alembic>=1.20.1",
 ]
 
 [project.urls]

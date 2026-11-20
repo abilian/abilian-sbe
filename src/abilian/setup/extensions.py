@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import warnings
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import defusedxml
@@ -48,6 +49,8 @@ db = extensions.db
 #: Must match `server.port` in vite/vite.config.js, which pins it with
 #: strictPort. Override with FLASK_VITE_DEV_SERVER if the port is taken.
 VITE_DEV_SERVER = "http://localhost:5180"
+
+MIGRATIONS_DIR = Path(__file__).parent.parent / "migrations"
 
 
 def vite_asset(path: str) -> Markup:
@@ -114,8 +117,9 @@ def init_extensions(app: Application) -> None:
 
     init_csrf(app)
 
-    # Flask-Migrate
-    Migrate(app, db)
+    # Flask-Migrate. The migrations ship in the package, so that an installed
+    # SBE upgrades its database without a checkout of the repository.
+    Migrate(app, db, directory=str(MIGRATIONS_DIR))
 
     # Abilian Core services
     security_service.init_app(app)
