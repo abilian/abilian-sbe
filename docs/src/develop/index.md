@@ -25,9 +25,13 @@ make run            # the web server, Vite and Redis, through honcho
 - `src/abilian/sbe/apps/`: the applications: communities, documents, forum, wiki, calendar, social, preferences.
 - `src/abilian/sbe/templates/` and `static/`: the pages, on the Abilian Design System (`static/ads/`, themed by `static/theme.css`).
 - `vite/`: the pages' scripts.
-- `migrations/`: the Alembic migrations.
+- `src/abilian/migrations/`: the Alembic migrations, shipped in the package so that `flask db upgrade` runs from an installed SBE.
 - `mockups/`: static mockups of every page, built by `uv run python mockups/build.py`.
 - `notes/`: plans, decisions and the [Architecture Decision Records](https://github.com/abilian/abilian-sbe-monorepo/tree/main/notes/adrs).
+
+## Releasing
+
+`make dist` builds the scripts and the translations, then the sdist and the wheel in `dist/`, and checks that the wheel holds the scripts, the compiled translations and the migrations, and that neither package holds tests, notes or documentation.
 
 ## Testing
 

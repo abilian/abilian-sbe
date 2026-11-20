@@ -122,6 +122,13 @@ translations:
 	pybabel -q compile -d src/abilian/translations
 	pybabel -q compile -d src/abilian/sbe/translations
 
+.PHONY: dist
+## Build the sdist and the wheel, with the scripts and the translations
+dist: front translations
+	rm -rf dist
+	uv build
+	uv run python tools/check_dist.py dist
+
 .PHONY:
 update-pot: update-pot
 	python setup.py extract_messages update_catalog compile_catalog

@@ -99,11 +99,17 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/abilian"]
-# The Vite build output is gitignored, and hatchling honours VCS ignores, so it
-# has to be force-included. Shipping it means `pip install abilian-sbe` yields a
-# styled app with no Node and no build step at deploy time. Run `make front`
-# before building a wheel.
-artifacts = ["src/abilian/sbe/static/vite/*"]
+# The Vite build output and the compiled translations are gitignored, and
+# hatchling honours VCS ignores, so they have to be force-included. Shipping
+# them means `pip install abilian-sbe` yields a styled, translated app with no
+# Node and no build step at deploy time. `make dist` builds them first.
+artifacts = ["src/abilian/sbe/static/vite/*", "src/abilian/**/*.mo"]
+
+[tool.hatch.build.targets.sdist]
+# Only what builds the package: hatchling reads the project's .gitignore, not a
+# global one, so anything else lying in the checkout would ship.
+only-include = ["src/abilian", "README.md", "CHANGELOG.md", "LICENSES", "REUSE.toml"]
+artifacts = ["src/abilian/sbe/static/vite/*", "src/abilian/**/*.mo"]
 
 [dependency-groups]
 doc = [
