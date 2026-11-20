@@ -128,6 +128,11 @@ dist: front translations
 	rm -rf dist
 	uv build
 	uv run python tools/check_dist.py dist
+	# The wheel alone, with what it declares and nothing from the checkout:
+	# the app starts and finds its migrations.
+	cd /tmp && FLASK_APP=abilian.wsgi FLASK_SERVER_NAME=localhost \
+		FLASK_SECRET_KEY=check FLASK_SQLALCHEMY_DATABASE_URI=sqlite:// \
+		uv run -q --isolated --no-project --with $(CURDIR)/dist/*.whl flask db heads
 
 .PHONY:
 update-pot: update-pot
