@@ -202,11 +202,19 @@ def test_a_database_failing_to_load_the_signed_in_user_is_an_error(
     session.add(user)
     session.commit()
     user_id = str(user.id)
-    # The query fails in the database: what a migration not applied does. A table
-    # gone, rather than a column, which SQLite before 3.35 cannot drop.
-    session.execute(sa.text('DROP TABLE "user"'))
+    # The query fails in the database, as with a migration not applied: the table
+    # moved aside, then back. Renamed, as every database here can (SQLite before
+    # 3.35 drops no column), its names quoted as each database quotes them.
+    quote = session.get_bind().dialect.identifier_preparer.quote
+    table, aside = quote(User.__table__.name), quote("user_aside")
+    session.execute(sa.text(f"ALTER TABLE {table} RENAME TO {aside}"))
     session.commit()
     session.expire_all()
-
-    with app.test_request_context(), pytest.raises(sa.exc.OperationalError):
-        login_manager._user_callback(user_id)
+    try:
+        # Which error says "no such table" depends on the database: their parent.
+        with app.test_request_context(), pytest.raises(sa.exc.DBAPIError):
+            login_manager._user_callback(user_id)
+    finally:
+        session.rollback()
+        session.execute(sa.text(f"ALTER TABLE {aside} RENAME TO {table}"))
+        session.commit()

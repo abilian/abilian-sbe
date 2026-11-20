@@ -1,10 +1,13 @@
 .git
 .gitignore
 .idea
-.pyre
-.vagrant
-.tox
 .nox
+.pyre
+.tox
+.vagrant
+.venv
 
-front/node_modules
 data
+front/node_modules
+sandbox
+src/instance
