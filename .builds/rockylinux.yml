@@ -26,28 +26,28 @@ tasks:
       sudo pip3.12 install -U uv
       # The default Node 16 is too old for Vite 7 and Tailwind 4.
       sudo dnf module -y install nodejs:22/common
-      cd abilian-sbe
+      cd abilian-sbe*
       uv sync -q
       npm install -q
       make front
 
   - lint: |
-      cd abilian-sbe
+      cd abilian-sbe*
       uv run make lint
 
   - test: |
-      cd abilian-sbe
+      cd abilian-sbe*
       uv run make test
 
   # nox runs through uv, on the Python version that requires-python allows.
   - nox-lint: |
-      cd abilian-sbe
+      cd abilian-sbe*
       uvx --python 3.13 nox -e lint
 
   - nox-test: |
-      cd abilian-sbe
+      cd abilian-sbe*
       uvx --python 3.13 nox -e pytest-3.13
 
   - buildah: |
-      cd abilian-sbe
+      cd abilian-sbe*
       buildah build .

@@ -35,7 +35,7 @@ packages:
 
 tasks:
   - setup: |
-      cd abilian-sbe
+      cd abilian-sbe*
       npm install
       make front
       # Each task is a new login, so the group applies from the next task on.
@@ -45,17 +45,17 @@ tasks:
   # Alpine's py3-nox lacks its attrs dependency, and Alpine's Python (3.14)
   # is outside requires-python: run nox through uv, on Python 3.13.
   - lint-nox: |
-      cd abilian-sbe
+      cd abilian-sbe*
       uvx -q --python 3.13 nox -e lint
 
   - test-nox: |
-      cd abilian-sbe
+      cd abilian-sbe*
       uvx -q --python 3.13 nox -e pytest-3.13
 
   - test-mariadb-docker: |
-      cd abilian-sbe
+      cd abilian-sbe*
       make test-mariadb-docker DOCKER_TESTS_EXTRA="-f tests/docker/compose.host-network.yaml"
 
   - test-postgres-docker: |
-      cd abilian-sbe
+      cd abilian-sbe*
       make test-postgres-docker DOCKER_TESTS_EXTRA="-f tests/docker/compose.host-network.yaml"

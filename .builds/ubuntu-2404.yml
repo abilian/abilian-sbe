@@ -42,17 +42,17 @@ tasks:
       # Ubuntu's Node 18 is too old for Vite 7 and Tailwind 4.
       curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
       sudo apt-get install -y nodejs
-      cd abilian-sbe
+      cd abilian-sbe*
       npm install
       make front
 
   # nox runs through uv, on the Python version that requires-python allows.
   - lint-nox: |
       export PATH=$HOME/.local/bin:$PATH
-      cd abilian-sbe
+      cd abilian-sbe*
       uvx --python 3.13 nox -e lint
 
   - test-nox: |
       export PATH=$HOME/.local/bin:$PATH
-      cd abilian-sbe
+      cd abilian-sbe*
       uvx --python 3.13 nox -e pytest-3.13
