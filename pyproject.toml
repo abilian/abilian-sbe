@@ -122,7 +122,6 @@ dev = [
     "html5lib",
     "hyperlink",
     "pytest>=8.3.3",
-    "tox>=4.5.1",
     "pytest-flask",
     "flask-linktester",
     "pillow>=13.0.0",   # to replace imghdr

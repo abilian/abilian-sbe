@@ -114,7 +114,7 @@ clean:
 .PHONY: tidy
 ## Make super-clean
 tidy: clean
-	rm -rf .tox .nox .venv
+	rm -rf .nox .venv
 
 .PHONY: translations
 ## Compile the catalogs the app reads (git keeps only their .po files)
