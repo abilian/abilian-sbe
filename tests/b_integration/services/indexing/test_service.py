@@ -74,3 +74,23 @@ def test_clear(app: Application, svc: WhooshIndexService) -> None:
     svc.start()
     svc.stop()
     svc.clear()
+
+
+def test_reindex_rebuilds_the_index_from_the_database(
+    app: Application, session: Session, svc: WhooshIndexService
+) -> None:
+    """`flask reindex`, which a migrated site runs: the index is not copied."""
+    from abilian.cli.indexing import reindex
+
+    session.add(IndexedContact(name="Ada Lovelace"))
+    session.commit()
+    # `clear` empties the index and stops the service, which starts again empty.
+    svc.clear()
+    svc.start(ignore_state=True)
+    index = svc.app_state.indexes["default"]
+    assert index.doc_count() == 0
+
+    result = app.test_cli_runner().invoke(reindex)
+
+    assert result.exit_code == 0, result.output
+    assert index.doc_count() >= 1

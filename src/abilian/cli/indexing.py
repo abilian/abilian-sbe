@@ -59,7 +59,9 @@ class Reindexer:
         self.index_service = get_service("indexing")
         self.index = self.index_service.app_state.indexes["default"]
         self.adapted = self.index_service.adapted
-        self.session = Session(bind=db.session.get_bind(None, None), autocommit=True)
+        # Its own session, apart from the app's: each class is read in a
+        # transaction of its own (`reindex_class`).
+        self.session = Session(bind=db.engine)
         self.indexed: set[str] = set()
         self.cleared: set[str] = set()
 
