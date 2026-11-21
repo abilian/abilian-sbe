@@ -153,6 +153,10 @@ def init_access_controllers(app: Application) -> None:
     app.add_access_controller(
         "static", allow_access_for_roles(ANONYMOUS), endpoint=True
     )
+    # For the platform that checks the app is up, which does not sign in.
+    app.add_access_controller(
+        "health.health", allow_access_for_roles(ANONYMOUS), endpoint=True
+    )
     # debugtoolbar: this is needed to have it when not authenticated
     # on a private site. We cannot do this in init_debug_toolbar,
     # since auth service is not yet installed.

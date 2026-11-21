@@ -38,8 +38,8 @@ worker = "flask worker"
 scheduler = "flask scheduler"
 
 [healthcheck]
-path = "/user/login"
-contains = 'name="password"'
+path = "/health"
+contains = "OK"
 
 [[addons]]
 type = "postgres"
