@@ -20,6 +20,8 @@
 .eggs
 coverage.xml
 package-lock.json
+# Except the one the build of the pages' scripts installs from (npm ci).
+!vite/package-lock.json
 yarn.lock
 
 # Secret / local settings
