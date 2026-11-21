@@ -26,8 +26,8 @@ id = "mon-extranet"
 list = ["extranet.example.org"]
 
 [run]
-# Avant chaque démarrage : le schéma suit le code.
-before-run = ["flask db upgrade"]
+# Avant chaque démarrage : les tables créées au premier, puis tenues à jour.
+before-run = ["flask preparedb"]
 start = "gunicorn abilian.wsgi:app -b 0.0.0.0:$PORT --workers 4 --log-file -"
 start-timeout = 180
 # Pour les aperçus et la recherche dans les documents.
@@ -94,11 +94,10 @@ Depuis le projet :
 hop3 deploy
 ```
 
-Pour un nouveau site, créez les tables et le premier administrateur en lançant ces commandes dans l'environnement de l'application (`hop3 help` indique comment y lancer une commande) :
+Le premier démarrage crée les tables. Créez ensuite le premier administrateur, dans l'environnement de l'application :
 
 ```bash
-flask initdb
-flask createuser --role admin --name "Ada Lovelace" ada@example.org a-password
+hop3 run --app mon-extranet flask createuser --role admin --name "Ada Lovelace" ada@example.org a-password
 ```
 
 ## Mettre à jour
@@ -107,4 +106,4 @@ Changez la version d'`abilian-sbe` dans `pyproject.toml`, lancez `uv lock`, puis
 
 ## Déplacer un site existant
 
-Restaurez une sauvegarde de l'ancienne base dans la base Hop3, copiez l'ancien dossier `data/files` dans le dossier `data/files` du volume, puis déployez : le schéma est mis à jour avant le démarrage de l'application. Lancez ensuite `flask reindex` une fois, pour reconstruire l'index de recherche.
+Videz la base créée par Hop3, importez-y une sauvegarde de l'ancienne (`hop3 addon postgres import`), copiez l'ancien dossier `data/files` dans le dossier `data/files` du volume, puis redéployez : `flask preparedb` trouve les anciennes tables et les met à jour. Lancez ensuite `flask reindex` une fois, pour reconstruire l'index de recherche.

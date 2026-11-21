@@ -5,8 +5,9 @@ from __future__ import annotations
 import runpy
 
 import click
+import sqlalchemy as sa
 from flask.cli import with_appcontext
-from flask_migrate import stamp
+from flask_migrate import stamp, upgrade
 from flask_super.cli import command
 
 from abilian.core.extensions import db
@@ -23,6 +24,20 @@ def initdb() -> None:
     # `flask db upgrade`; left unmarked, it would replay them all.
     stamp()
     create_root_user()
+
+
+@command()
+@with_appcontext
+def preparedb() -> None:
+    """Make the database ready for this version: created when there is none,
+    brought up to date by the migrations when there is one.
+
+    What a deployment runs before each start, the first included.
+    """
+    if sa.inspect(db.engine).get_table_names():
+        upgrade()
+    else:
+        initdb.callback()
 
 
 @command()
