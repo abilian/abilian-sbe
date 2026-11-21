@@ -9,7 +9,7 @@ from types import SimpleNamespace
 
 from loguru import logger
 
-from abilian.setup.logging import init_loguru
+from abilian.setup.logging import init_logging
 
 
 class Probe:
@@ -27,7 +27,7 @@ def _fails(value: Probe) -> None:
 
 
 def test_logging_an_error_runs_nothing_of_what_was_in_its_frames() -> None:
-    init_loguru(SimpleNamespace(debug=True, logger=logging.getLogger("probe")))
+    init_logging(SimpleNamespace(debug=True, logger=logging.getLogger("probe")))
     Probe.printed = 0
     try:
         _fails(Probe())

@@ -21,8 +21,6 @@ import logging
 
 __all__ = ["patch_logger"]
 
-logging.basicConfig()
-
 _mk_fmt = "[%(name)s] %(message)s at %(pathname)s:%(lineno)d"
 _mk_format = logging.Formatter(fmt=_mk_fmt)
 
