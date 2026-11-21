@@ -17,7 +17,7 @@ Job = namedtuple("Job", ["actor", "key"])
 DEFAULT_SCHEDULE = {
     "SCHEDULE_SEND_DAILY_SOCIAL_DIGEST": "0 10 * * *",
     "PERIODIC_CLEAN_UPLOAD_DIRECTORY": "0 * * * *",
-    "SCHEDULE_CHECK_MAILDIR": "* * * * *",
+    # No SCHEDULE_CHECK_MAILDIR: the forum sets it on a site that uses a Maildir.
 }
 
 _actor_registry = set()
@@ -50,8 +50,9 @@ def run_scheduler(config: dict) -> int:
     for job in _actor_registry:
         crontab_content = crontab_from_config(config, job)
         if not crontab_content:
-            logger.warning(
-                "Missing crontab, NOT registering cron job: {actor}",
+            # A job without a schedule is one the site does not use.
+            logger.info(
+                "No schedule, cron job not registered: {actor}",
                 actor=str(job.actor),
             )
             continue

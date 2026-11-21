@@ -522,8 +522,8 @@ def process_email(message: email.message.Message) -> bool:
 def check_maildir() -> None:
     """Check the MailDir for emails to be injected in Threads.
 
-    This task is registered only if `INCOMING_MAIL_USE_MAILDIR` is True.
-    By default it is run every minute.
+    Scheduled only if `INCOMING_MAIL_USE_MAILDIR` is True, every minute by
+    default (`SCHEDULE_CHECK_MAILDIR`).
     """
     home = expanduser("~")
     maildirpath = Path(home) / "Maildir"

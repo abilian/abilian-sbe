@@ -16,6 +16,10 @@ if TYPE_CHECKING:
 def register_plugin(app: Application) -> None:
     app.config.setdefault("SBE_FORUM_REPLY_BY_MAIL", False)
     app.config.setdefault("INCOMING_MAIL_USE_MAILDIR", False)
+    # Replies by e-mail land in a Maildir, checked every minute; a site that
+    # does not use one has nothing to check, and no Maildir.
+    if app.config["INCOMING_MAIL_USE_MAILDIR"]:
+        app.config.setdefault("SCHEDULE_CHECK_MAILDIR", "* * * * *")
 
     # from . import tasks
     from .cli import check_email, inject_email
