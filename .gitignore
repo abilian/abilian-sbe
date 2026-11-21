@@ -82,3 +82,4 @@ dump.rdb
 /docs/.cache/
 /docs/i18n/*/assets/
 /docs/zensical.*.toml
+.hop3-local.toml
