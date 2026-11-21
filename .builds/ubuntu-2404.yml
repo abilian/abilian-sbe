@@ -4,6 +4,9 @@
 
 image: ubuntu/24.04
 
+secrets:
+  - b88a4c2c-944c-42a6-9fbb-7483049c458a
+
 packages:
   # Build tools
   - software-properties-common
