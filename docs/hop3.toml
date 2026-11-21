@@ -1,0 +1,14 @@
+# SBE Documentation Site
+
+[metadata]
+id = "sbe-docs"
+title = "Abilian SBE Documentation"
+description = "Official documentation for Abilian SBE"
+
+[build]
+toolchain = "static"
+static-dir = "site"
+ignore = ["src"]
+
+[env]
+HOST_NAME = "abilian-sbe.lab.abilian.com"
