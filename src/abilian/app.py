@@ -172,8 +172,7 @@ class Application(
     @cached_property
     def data_dir(self) -> Path:
         path = Path(self.instance_path, "data")
-        if not path.exists():
-            path.mkdir(0o775, parents=True)
+        path.mkdir(0o775, parents=True, exist_ok=True)
 
         return path
 

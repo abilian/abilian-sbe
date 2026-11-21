@@ -87,8 +87,7 @@ class FileUploadsExtension:
         :returns: file handle
         """
         user_dir = self.user_dir(user)
-        if not user_dir.exists():
-            user_dir.mkdir(mode=0o775)
+        user_dir.mkdir(mode=0o775, exist_ok=True)
 
         handle = str(uuid1())
         file_path = user_dir / handle

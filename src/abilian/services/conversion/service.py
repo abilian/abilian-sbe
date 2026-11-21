@@ -61,10 +61,8 @@ class Converter:
         self.cache_dir = cache_dir
         self.cache.cache_dir = self.cache_dir
 
-        if not self.tmp_dir.exists():
-            self.tmp_dir.mkdir()
-        if not self.cache_dir.exists():
-            self.cache_dir.mkdir()
+        self.tmp_dir.mkdir(exist_ok=True)
+        self.cache_dir.mkdir(exist_ok=True)
 
     def clear(self) -> None:
         self.cache.clear()

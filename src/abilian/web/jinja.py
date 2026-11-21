@@ -49,8 +49,7 @@ class JinjaManagerMixin(Flask):
 
         if "bytecode_cache" not in options:
             cache_dir = Path(self.instance_path, "cache", "jinja")
-            if not cache_dir.exists():
-                cache_dir.mkdir(0o775, parents=True)
+            cache_dir.mkdir(0o775, parents=True, exist_ok=True)
 
             options["bytecode_cache"] = jinja2.FileSystemBytecodeCache(
                 str(cache_dir), "%s.cache"

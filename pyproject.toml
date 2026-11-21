@@ -162,6 +162,7 @@ dev = [
     "zuban>=0.10.2",
     "abilian-ds==0.3.0",
     "watchdog>=7.1.0",
+    "twine>=7.0.0",
 ]
 
 [tool.uv]

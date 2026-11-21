@@ -52,8 +52,7 @@ class BlobStoreService(Service):
         super().init_app(app)
 
         path = app.data_dir / "files"
-        if not path.exists():
-            path.mkdir(mode=0o775, parents=True)
+        path.mkdir(mode=0o775, parents=True, exist_ok=True)
 
         with app.app_context():
             self.app_state.path = path.resolve()
@@ -106,8 +105,7 @@ class BlobStoreService(Service):
         _assert_uuid(uuid)
 
         dest = self.abs_path(uuid)
-        if not dest.parent.exists():
-            dest.parent.mkdir(0o775, parents=True)
+        dest.parent.mkdir(0o775, parents=True, exist_ok=True)
 
         if hasattr(content, "read"):
             content = content.read()
@@ -274,8 +272,7 @@ class SessionBlobStoreService(Service):
         super().init_app(app)
 
         path = Path(app.instance_path, "tmp", "files_transactions")
-        if not path.exists():
-            path.mkdir(0o775, parents=True)
+        path.mkdir(0o775, parents=True, exist_ok=True)
 
         with app.app_context():
             self.app_state.path = path.resolve()
@@ -457,8 +454,7 @@ class BlobStoreTransaction:
         self._cleared = True
 
     def begin(self) -> None:
-        if not self.tmp_folder.exists():
-            self.tmp_folder.mkdir(0o700)
+        self.tmp_folder.mkdir(0o700, exist_ok=True)
 
     def rollback(self) -> None:
         self._clear()
