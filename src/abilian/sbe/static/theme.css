@@ -91,6 +91,9 @@
    it into an oval (ADS request 25). */
 .ads-avatar { flex: none; }
 
+/* An avatar is a link to the person's profile: no underline under the initials. */
+a.ads-avatar { text-decoration: none; }
+
 /* A person: initials on a tint of their colour, in its ink. A photo, when there is
    one, replaces both. */
 .ads-avatar.sbe-person {

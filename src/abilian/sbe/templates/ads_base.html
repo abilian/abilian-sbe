@@ -109,7 +109,7 @@
     <button class="ads-btn ads-btn--ghost sbe-bar-icon ads-tip" type="button" data-ads-theme data-tip="{{ _('Light or dark theme') }}" aria-label="{{ _('Light or dark theme') }}">{{ icon("moon", "ads-icon sbe-when-light") }}{{ icon("sun", "ads-icon sbe-when-dark") }}</button>
   </div>
   <details class="ads-dropdown">
-    <summary class="ads-btn ads-btn--ghost sbe-bar-icon" aria-label="{{ _('My account') }}">{{ m.avatar(current_user) }}</summary>
+    <summary class="ads-btn ads-btn--ghost sbe-bar-icon" aria-label="{{ _('My account') }}">{{ m.avatar(current_user, link=false) }}</summary>
     <div class="ads-menu">
       <p class="ads-subheader sbe-menu-heading">{{ current_user.name }}</p>
       <a class="ads-menu__item" href="{{ url_for('social.user', user_id=current_user.id) }}">{{ icon("user") }}{{ _("My profile") }}</a>

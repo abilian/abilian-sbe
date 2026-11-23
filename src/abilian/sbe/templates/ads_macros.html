@@ -2,12 +2,19 @@
     draw them first; `notes/ux/design-principles.md` says why they look so. -#}
 
 {#- A person: their photo, or else their initials on a tint of their colour; their
-    name on hover and for screen readers. `has_photo` is asked with the person, the
-    photo itself only by the browser. -#}
-{% macro avatar(user, size_class="ads-avatar--sm") -%}
-<span class="ads-avatar {{ size_class }} sbe-person {{ identity_class(user.name) }}" role="img" aria-label="{{ user.name }}" title="{{ user.name }}">
+    name on hover and for screen readers. A link to their profile, but where it sits
+    inside a control already (`link=false`): the account menu's button. `has_photo`
+    is asked with the person, the photo itself only by the browser. -#}
+{% macro avatar(user, size_class="ads-avatar--sm", link=true) -%}
+{%- set face -%}
   {%- if user.has_photo %}<img src="{{ url_for('users.photo', user_id=user.id) }}" alt="" loading="lazy">{% else %}{{ initials(user.name) }}{% endif -%}
-</span>
+{%- endset -%}
+{%- set classes = "ads-avatar " ~ size_class ~ " sbe-person " ~ identity_class(user.name) -%}
+{%- if link -%}
+<a class="{{ classes }} ads-tip" href="{{ url_for('social.user', user_id=user.id) }}" aria-label="{{ user.name }}" data-tip="{{ user.name }}">{{ face }}</a>
+{%- else -%}
+<span class="{{ classes }}" role="img" aria-label="{{ user.name }}" title="{{ user.name }}">{{ face }}</span>
+{%- endif -%}
 {%- endmacro %}
 
 {#- A community: its image, or else its initial on its colour. Squares for places,

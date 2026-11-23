@@ -159,7 +159,7 @@ def test_change_owner_posts_the_person_picked(
 
     row = page.locator("#objects-table tbody tr", has_text="E2E Sample")
     owner = row.locator(".sbe-person")
-    previous_owner = owner.get_attribute("title")
+    previous_owner = owner.get_attribute("aria-label")
     row.locator('input[name="object-selected"]').check()
     page.locator('[data-modal-open="#modal-change-owner"]').click()
     dialog = page.locator("#modal-change-owner")
@@ -171,7 +171,7 @@ def test_change_owner_posts_the_person_picked(
     dialog.get_by_role("button", name="Change owner").click()
     page.wait_for_load_state("networkidle")
 
-    assert owner.get_attribute("title") != previous_owner
+    assert owner.get_attribute("aria-label") != previous_owner
     js_errors.assert_clean("changing the owner")
 
 
