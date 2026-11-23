@@ -10,7 +10,7 @@ from __future__ import annotations
 import os
 from typing import TYPE_CHECKING, Any
 
-from pytest import fixture
+from pytest import MonkeyPatch, fixture
 
 from abilian.core.models.subjects import User
 from abilian.sbe.app import create_app
@@ -18,11 +18,13 @@ from abilian.sbe.apps.communities.models import READER, Community
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
+    from pathlib import Path
 
     from flask import Flask
     from flask.ctx import AppContext, RequestContext
     from flask.testing import FlaskClient
     from flask_sqlalchemy.session import Session as FlaskSession
+    from pytest import TempPathFactory
     from sqlalchemy.orm import scoped_session
 
     from abilian.app import Application
@@ -59,14 +61,27 @@ def config() -> Any:
     return TestConfig
 
 
-@fixture(scope="module")
-def app(config: Any) -> Application:
-    # We currently return a fresh app for each test.
-    # Using session-scoped app doesn't currently work.
-    # Note: the impact on speed is minimal.
-    # from abilian.sbe.app import create_app
+@fixture(scope="session", autouse=True)
+def instance_root(tmp_path_factory: TempPathFactory) -> Iterator[Path]:
+    """Keep every app the tests create out of a real instance folder.
 
-    return create_app(config=config)
+    `create_app` takes its instance folder from FLASK_INSTANCE_PATH, which a
+    shell running the site may have set, and else from the project's own.
+    """
+    path = tmp_path_factory.mktemp("instance")
+    with MonkeyPatch.context() as monkeypatch:
+        monkeypatch.setenv("FLASK_INSTANCE_PATH", str(path))
+        yield path
+
+
+@fixture(scope="module")
+def app(config: Any, tmp_path_factory: TempPathFactory) -> Application:
+    """One app for each test module, with an instance folder of its own.
+
+    Not one for the whole session: that does not work yet.
+    """
+    instance_path = tmp_path_factory.mktemp("instance")
+    return create_app(config=config, instance_path=str(instance_path))
 
 
 @fixture

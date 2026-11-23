@@ -6,7 +6,6 @@ module."""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
-from unittest import mock
 
 import pytest
 import sqlalchemy as sa
@@ -27,13 +26,24 @@ from abilian.services import index_service, security_service
 from tests.util import login
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from sqlalchemy.orm import Session
 
     from abilian.app import Application
     from abilian.core.sqlalchemy import SQLAlchemy
 
-# from .. import signals, views
-# from ..models import MEMBER, READER, Community, CommunityIdColumn, community_content
+
+@community_content
+class DecoratedContent(Entity):
+    """Content of a community, as `community_content` makes it.
+
+    Defined once, here: a mapped class defined in a test is added to the
+    metadata every test shares, again each time the test runs.
+    """
+
+    community_id = CommunityIdColumn()
+    community = sa.orm.relationship(Community, foreign_keys=[community_id])
 
 
 @pytest.fixture
@@ -42,6 +52,24 @@ def community(db_session: Session) -> Community:
     db_session.add(community)
     db_session.commit()
     return community
+
+
+@pytest.fixture
+def membership_signals() -> Iterator[dict[str, list]]:
+    """The membership signals sent during the test, by name."""
+    received: dict[str, list] = {"set": [], "removed": []}
+
+    def on_set(sender: Community, **kwargs: object) -> None:
+        received["set"].append((sender, kwargs))
+
+    def on_removed(sender: Community, **kwargs: object) -> None:
+        received["removed"].append((sender, kwargs))
+
+    signals.membership_set.connect(on_set)
+    signals.membership_removed.connect(on_removed)
+    yield received
+    signals.membership_set.disconnect(on_set)
+    signals.membership_removed.disconnect(on_removed)
 
 
 #
@@ -75,10 +103,12 @@ def test_can_recreate_with_same_name(community: Community, db: SQLAlchemy) -> No
 
     community = Community(name=name)
     db.session.add(community)
-
-    # if community.folder was not deleted, this will raise IntegrityError. Test
-    # passes if no exceptions is raised
+    # Raises IntegrityError if the first community's folder was left behind.
     db.session.commit()
+    db.session.expire_all()
+
+    assert Community.query.one().name == name
+    assert community.folder.name == name
 
 
 def test_rename(community: Community) -> None:
@@ -92,26 +122,19 @@ def test_auto_slug(community: Community) -> None:
     assert community.slug == "my-community"
 
 
-def test_membership(community: Community, db: SQLAlchemy) -> None:
+def test_membership(
+    community: Community, db: SQLAlchemy, membership_signals: dict[str, list]
+) -> None:
     user = User(email="user@example.com")
 
     memberships = community.memberships
     assert memberships == []
 
-    # setup signals testers with mocks.
-    when_set = mock.MagicMock()
-    when_set.mock_add_spec(["__name__"])  # required for signals
-    signals.membership_set.connect(when_set)
-    when_removed = mock.MagicMock()
-    when_removed.mock_add_spec(["__name__"])
-    signals.membership_removed.connect(when_removed)
-
     # invalid role
     with pytest.raises(ValueError, match="Invalid role"):
         community.set_membership(user, "dummy role name")
 
-    assert not when_set.called
-    assert not when_removed.called
+    assert membership_signals == {"set": [], "removed": []}
 
     # simple member
     community.set_membership(user, MEMBER)
@@ -122,9 +145,11 @@ def test_membership(community: Community, db: SQLAlchemy) -> None:
     assert memberships[0].user == user
     assert memberships[0].role is MEMBER
 
-    when_set.assert_called_once_with(community, is_new=True, membership=memberships[0])
-    assert not when_removed.called
-    when_set.reset_mock()
+    assert membership_signals == {
+        "set": [(community, {"is_new": True, "membership": memberships[0]})],
+        "removed": [],
+    }
+    membership_signals["set"].clear()
 
     assert community.get_role(user) is MEMBER
 
@@ -143,9 +168,11 @@ def test_membership(community: Community, db: SQLAlchemy) -> None:
 
     assert community.get_role(user) == "manager"
 
-    when_set.assert_called_once_with(community, is_new=False, membership=memberships[0])
-    assert not when_removed.called
-    when_set.reset_mock()
+    assert membership_signals == {
+        "set": [(community, {"is_new": False, "membership": memberships[0]})],
+        "removed": [],
+    }
+    membership_signals["set"].clear()
 
     # remove user
     membership = memberships[0]
@@ -155,8 +182,10 @@ def test_membership(community: Community, db: SQLAlchemy) -> None:
     memberships = community.memberships
     assert memberships == []
 
-    assert not when_set.called
-    when_removed.assert_called_once_with(community, membership=membership)
+    assert membership_signals == {
+        "set": [],
+        "removed": [(community, {"membership": membership})],
+    }
 
 
 def test_folder_roles(community: Community, db: SQLAlchemy, app: Application) -> None:
@@ -174,17 +203,7 @@ def test_folder_roles(community: Community, db: SQLAlchemy, app: Application) ->
 
 
 def test_community_content_decorator(community: Community, db: SQLAlchemy) -> None:
-    @community_content
-    class CommunityContent(Entity):
-        community_id = CommunityIdColumn()
-        community = sa.orm.relationship(Community, foreign_keys=[community_id])
-
-    sa.orm.configure_mappers()
-    conn = db.session.connection()
-    for table in sa.inspect(CommunityContent).tables:
-        table.create(conn, checkfirst=True)
-
-    cc = CommunityContent(name="my content", community=community)
+    cc = DecoratedContent(name="my content", community=community)
     db.session.add(cc)
     db.session.flush()
     assert hasattr(cc, "community_slug")

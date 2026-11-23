@@ -3,9 +3,10 @@ from __future__ import annotations
 import nox
 
 PYTHON_VERSIONS = ["3.12", "3.13", "3.14", "3.15"]
+#: The tests drop every table: a database's name must end with `_test`.
+#: PostgreSQL and MariaDB run in containers: `make test-postgres-docker`.
 DB_URIS = [
-    "sqlite:///test.db",
-    # TODO: Postgres & MariaDB
+    "sqlite:///sbe_test.db",
 ]
 nox.options.reuse_existing_virtualenvs = True
 nox.options.default_venv_backend = "uv|virtualenv"
@@ -35,8 +36,9 @@ def pytest(session: nox.Session) -> None:
 @nox.session
 @nox.parametrize("db_uri", DB_URIS)
 def db_test(session: nox.Session, db_uri: str) -> None:
+    # The name the tests' config reads, not the app's FLASK_ prefixed one.
     env = {
-        "FLASK_SQLALCHEMY_DATABASE_URI": db_uri,
+        "SQLALCHEMY_DATABASE_URI": db_uri,
     }
     uv_sync(session)
     session.run("uv", "run", "--active", "pytest", "--tb=short", env=env)

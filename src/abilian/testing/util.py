@@ -5,13 +5,15 @@
 from __future__ import annotations
 
 import contextlib
+import tempfile
 from contextlib import AbstractContextManager
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 from flask_login import login_user, logout_user
 from hyperlink import URL
-from redis import Redis
 from sqlalchemy import text
+from sqlalchemy.engine import make_url
 from sqlalchemy.exc import DatabaseError
 
 from abilian.services import get_service
@@ -25,13 +27,13 @@ if TYPE_CHECKING:
     from abilian.core.sqlalchemy import SQLAlchemy
 
 __all__ = (
+    "check_test_database",
     "class_fqn",
     "cleanup_db",
     "client_login",
     "ensure_services_started",
     "login",
     "path_from_url",
-    "redis_available",
     "stop_all_services",
 )
 
@@ -88,8 +90,46 @@ def login(user, remember=False, force=False):
     return LoginContext()
 
 
+#: The suffix that marks a database as one the tests may wipe out.
+TEST_DATABASE_SUFFIX = "_test"
+
+
+class NotATestDatabaseError(Exception):
+    """The tests were pointed at a database they must not wipe out."""
+
+
+def check_test_database(uri: str) -> None:
+    """Refuse a database the tests could not wipe out without harm.
+
+    The tests drop every table between two tests, and the URI comes from the
+    environment: one left over from a shell that runs the site would empty its
+    database. Allowed: SQLite in memory or in a temporary directory, and any
+    database whose name ends with `_test`.
+    """
+    url = make_url(uri)
+    name = url.database or ""
+    if url.get_backend_name() == "sqlite":
+        if name in ("", ":memory:"):
+            return
+        path = Path(name).resolve()
+        if path.stem.endswith(TEST_DATABASE_SUFFIX):
+            return
+        if path.is_relative_to(Path(tempfile.gettempdir()).resolve()):
+            return
+    elif name.endswith(TEST_DATABASE_SUFFIX):
+        return
+
+    msg = (
+        f"Refusing to run the tests on {url.render_as_string()}: they drop every"
+        f" table. Use SQLite in memory or in a temporary directory, or a"
+        f" database whose name ends with {TEST_DATABASE_SUFFIX!r}."
+    )
+    raise NotATestDatabaseError(msg)
+
+
 def cleanup_db(db: SQLAlchemy) -> None:
     """Drop all the tables, in a way that doesn't raise integrity errors."""
+    check_test_database(str(db.engine.url))
     if db.engine.name in ("mysql", "mariadb"):
         _delete_tables(db)
         db.session.remove()
@@ -145,16 +185,6 @@ def stop_all_services(app: Application) -> None:
     for service in app.service_manager.list_services():
         if service.running:
             service.stop()
-
-
-def redis_available() -> bool:
-    redis_host = "127.0.0.1"
-    try:
-        client = Redis(redis_host, socket_connect_timeout=1)
-        client.ping()
-    except Exception:
-        return False
-    return True
 
 
 def class_fqn(cls: type) -> str:
