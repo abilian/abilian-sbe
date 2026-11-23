@@ -32,9 +32,6 @@ test-with-coverage:
 		--cov extranet --cov abilian \
 	  	--cov-report term-missing
 
-test-with-validator:
-	VALIDATOR_URL=http://html5.validator.nu/ pytest
-
 test-long:
 	RUN_SLOW_TESTS=True pytest -x
 

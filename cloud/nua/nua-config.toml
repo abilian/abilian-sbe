@@ -60,7 +60,7 @@ start = [
     "date",
     "flask assets build",
     "flask initdb",
-    "flask createuser --role admin --name admin ${ADMIN_MAIL} ${ADMIN_PASSWORD}",
+    "flask createuser --role admin --name admin --password ${ADMIN_PASSWORD} ${ADMIN_MAIL}",
     "honcho -f /nua/Procfile start"
 ]
 

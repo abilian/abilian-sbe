@@ -1,6 +1,6 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-""""""
+"""`flask reindex`: rebuild the search index from the database."""
 
 from __future__ import annotations
 
@@ -18,7 +18,7 @@ from flask_super.cli import command
 from loguru import logger
 from sqlalchemy.orm.session import Session
 from tqdm import tqdm
-from whoosh.writing import CLEAR, AsyncWriter
+from whoosh.writing import CLEAR
 
 from abilian.core.extensions import db
 from abilian.services import get_service
@@ -29,6 +29,9 @@ if TYPE_CHECKING:
 STOP = object()
 COMMIT = object()
 
+#: Seconds to wait for the index lock, which the worker holds while it indexes.
+WRITER_TIMEOUT = 30
+
 
 @command()
 @click.option("--batch-size", default=0)
@@ -38,7 +41,8 @@ COMMIT = object()
 def reindex(clear: bool, progressive: bool, batch_size: int) -> None:
     """Reindex all content; optionally clear index before.
 
-    All is done in asingle transaction by default.
+    All is done in a single transaction by default. Exits with an error if a
+    class could not be reindexed; the others are, all the same.
 
     :param clear: clear index content.
     :param progressive: don't run in a single transaction.
@@ -48,6 +52,9 @@ def reindex(clear: bool, progressive: bool, batch_size: int) -> None:
     """
     reindexer = Reindexer(clear, progressive, batch_size)
     reindexer.reindex_all()
+    if reindexer.failed:
+        msg = f"Could not reindex: {', '.join(reindexer.failed)}"
+        raise click.ClickException(msg)
 
 
 class Reindexer:
@@ -64,6 +71,8 @@ class Reindexer:
         self.session = Session(bind=db.engine)
         self.indexed: set[str] = set()
         self.cleared: set[str] = set()
+        #: The names of the classes that could not be reindexed.
+        self.failed: list[str] = []
 
         strategy = progressive_mode if self.progressive else single_transaction
         self.strategy = strategy(self.index, clear=self.clear)
@@ -99,12 +108,13 @@ class Reindexer:
             query = self.session.query(cls).options(sa.orm.lazyload("*"))
             try:
                 count = query.count()
-            except Exception as e:
+            except sa.exc.SQLAlchemyError as e:
                 logger.exception(
                     "Indexing error on class {name}: {exc}",
                     name=name,
                     exc=repr(e),
                 )
+                self.failed.append(name)
                 return
 
             print("*" * 79)
@@ -154,12 +164,14 @@ class Reindexer:
 
 # indexing strategies
 def single_transaction(index, clear):
-    with AsyncWriter(index) as writer:
+    # A writer of its own, waiting for the lock: an `AsyncWriter` that finds
+    # the index locked buffers in memory, with no writer to clear the index.
+    with index.writer(timeout=WRITER_TIMEOUT) as writer:
         if clear:
             print("*" * 80)
             print("WILL CLEAR INDEX BEFORE REINDEXING")
             print("*" * 80)
-            writer.writer.mergetype = CLEAR
+            writer.mergetype = CLEAR
 
         doc = yield True
         while doc is not STOP:

@@ -1,5 +1,7 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
+"""The periodic tasks: actors queued on a cron schedule by `flask scheduler`."""
+
 from __future__ import annotations
 
 from collections import namedtuple
@@ -24,6 +26,12 @@ _actor_registry = set()
 
 
 def crontab(crontab: str) -> Callable:
+    """Schedule the decorated actor with the cron line in setting `crontab`.
+
+    The default schedules are in `DEFAULT_SCHEDULE`; an empty line, or none,
+    leaves the actor unscheduled.
+    """
+
     def decorator(func: Callable) -> Callable:
         # logger.debug("Registering cron job: {func}", func=str(func))
         job = Job(actor=func, key=crontab)
@@ -34,6 +42,7 @@ def crontab(crontab: str) -> Callable:
 
 
 def crontab_from_config(config: dict, job: Job) -> str:
+    """The cron line of `job` in `config`, else its default; "" for none."""
     key = job.key.upper()
     if key in config:
         # schedule value can be ""
@@ -44,6 +53,7 @@ def crontab_from_config(config: dict, job: Job) -> str:
 
 
 def run_scheduler(config: dict) -> int:
+    """Queue each scheduled actor on its schedule, until interrupted."""
     scheduler = BlockingScheduler()
     scheduler.remove_all_jobs()
 

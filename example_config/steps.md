@@ -145,7 +145,7 @@ This commands are required only once:
 ```bash
 flask assets build
 flask initdb
-flask createuser --role admin --name admin admin@example.com some_password
+flask createuser --role admin --name admin admin@example.com   # asks for the password
 ```
 
 ## Start the SBE application

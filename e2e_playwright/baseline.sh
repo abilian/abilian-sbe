@@ -49,7 +49,7 @@ done
 
 rm -f "$E2E_DIR/baseline.db"
 uv run flask initdb
-uv run flask createuser --role admin --name Admin "$E2E_EMAIL" "$E2E_PASSWORD"
+SBE_PASSWORD="$E2E_PASSWORD" uv run flask createuser --role admin --name Admin "$E2E_EMAIL"
 uv run flask script "$SEED"
 # Compiles the LESS bundles up front, so the first screenshot is not of a
 # half-built stylesheet.

@@ -97,7 +97,7 @@ hop3 deploy
 Le premier démarrage crée les tables. Créez ensuite le premier administrateur, dans l'environnement de l'application :
 
 ```bash
-hop3 run --app mon-extranet flask createuser --role admin --name "Ada Lovelace" ada@example.org a-password
+hop3 run --app mon-extranet flask createuser --role admin --name "Ada Lovelace" --password un-mot-de-passe ada@example.org
 ```
 
 ## Mettre à jour

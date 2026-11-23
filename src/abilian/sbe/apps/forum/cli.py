@@ -2,64 +2,39 @@
 
 from __future__ import annotations
 
-import fileinput
-import sys
-from email.parser import FeedParser
+import email
+from typing import TextIO
 
 import click
 from flask.cli import with_appcontext
-from loguru import logger
 
 from .tasks import check_maildir, process_email
 
 
 @click.command()
+@click.argument("file", type=click.File("r"), default="-")
 @with_appcontext
-def inject_email(filename="-") -> None:
-    """Read one email from stdin, parse it, forward it in a task to be
-    persisted."""
-    do_inject_email(filename)
+def inject_email(file: TextIO) -> None:
+    """Queue the reply email in FILE (stdin by default) to be posted."""
+    do_inject_email(file.read())
 
 
-def do_inject_email(filename="-") -> None:
-    parser = FeedParser()
+def do_inject_email(raw: str) -> None:
+    """Parse the email `raw` and queue it to be posted, if it is readable."""
+    message = email.message_from_string(raw)
+    if not raw.strip():
+        msg = "No email was given"
+        raise click.ClickException(msg)
+    if message.defects:
+        msg = f"The email has defects: {message.defects}"
+        raise click.ClickException(msg)
 
-    try:
-        # iterate over stdin
-        for line in fileinput.input(filename):
-            parser.feed(line)
-    except KeyboardInterrupt:
-        logger.info("Aborted by user, exiting.")
-        sys.exit(1)
-    except BaseException:
-        logger.opt(exception=True).error("Error during email parsing")
-        sys.exit(1)
-    finally:
-        # close the parser to generate a email.message
-        message = parser.close()
-        fileinput.close()
-
-    if message:
-        # make sure no email.errors are present
-        if not message.defects:
-            process_email.send(message)
-        else:
-            logger.error(
-                "email has defects, message content:\n"
-                "------ START -------\n"
-                "{message}"
-                "\n------ END -------\n",
-                message=message,
-                extra={"stack": True},
-            )
-    else:
-        logger.error("no email was parsed from stdin", extra={"stack": True})
+    # A Dramatiq message is JSON: the email goes as text.
+    process_email.send(message.as_string())
 
 
 @click.command()
 @with_appcontext
 def check_email() -> None:
-    """Read one email from current user Maildir, parse it, forward it in a
-    task to be persisted."""
-
+    """Post the replies waiting in the current user's Maildir."""
     check_maildir()

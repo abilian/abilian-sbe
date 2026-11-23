@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import operator
-import os
+import re
 from importlib.metadata import distributions
 from typing import TYPE_CHECKING, cast
 
@@ -26,19 +26,23 @@ def extensions_command():
 @command(short_help="Show config")
 @with_appcontext
 def config() -> None:
-    config_ = dict(sorted(current_app.config.items()))
-    print("CONFIG:\n")
-    for k, v in config_.items():
-        try:
-            print(f"{k}: {v}")
-        except Exception as e:
-            print(f"{k}: {e}")
+    """Show the configuration, its secrets masked."""
+    for key, value in sorted(current_app.config.items()):
+        click.echo(f"{key}: {masked(key, value)}")
 
-    print("\nENV:\n")
 
-    env_ = dict(sorted(os.environ.items()))
-    for k, v in env_.items():
-        print(f"{k}: {v}")
+#: Settings whose whole value is a secret, by their name.
+SECRET_KEY_PATTERN = re.compile("KEY|PASSWORD|SECRET|DSN|TOKEN")
+#: The password in a URI such as `postgresql://user:password@host/db`.
+URI_PASSWORD_PATTERN = re.compile(r"(://[^:/@\s]*:)[^@/\s]+@")
+MASK = "********"
+
+
+def masked(key: str, value: object) -> str:
+    """`value` as text, without the secret it may be or hold."""
+    if value and SECRET_KEY_PATTERN.search(key.upper()):
+        return MASK
+    return URI_PASSWORD_PATTERN.sub(rf"\1{MASK}@", str(value))
 
 
 # @command(name="debug", short_help="Show debug information")

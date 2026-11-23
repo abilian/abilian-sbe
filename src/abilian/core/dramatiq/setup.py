@@ -20,8 +20,6 @@ DEFAULT_DRAMATIQ_RATE_LIMIT_REDIS_URL = "redis://localhost:6379/0"
 RATE_LIMITER = []
 
 
-# with DISTRIBUTED_MUTEX.acquire():
-#         time.sleep(1)
 def init_dramatiq_engine(app) -> None:
     if dramatiq.app is not None:
         # ensure only one initialization, especially during tests
@@ -29,12 +27,6 @@ def init_dramatiq_engine(app) -> None:
 
     logger.debug("Setting up Dramatiq")
     logger.debug(f"SERVER_NAME: '{app.config.get('SERVER_NAME')}'")
-    # for k in (
-    #     "DRAMATIQ_RATE_LIMIT_REDIS_URL",
-    #     "DRAMATIQ_BROKER_URL",
-    #     "DEFAULT_DRAMATIQ_RATE_LIMIT_REDIS_URL",
-    # ):
-    #     logger.debug(f"{k}: '{app.config.get(k)}'")
 
     dramatiq.init_app(app)
 
@@ -42,12 +34,8 @@ def init_dramatiq_engine(app) -> None:
     _add_dramatiq_abortable(app)
     _register_scheduler(app)
 
-    # Only for debug
-    # _print_dramatiq_config()
-
 
 def _setup_rate_limiter(app) -> None:
-    # logger.debug("Add dramatiq rate limiter")
     if app.testing:
         backend = RateLimitStubBackend()
     else:
@@ -68,7 +56,6 @@ def _rate_limiter_redis_client(app) -> redis.Redis:
 
 
 def _register_scheduler(app) -> None:
-    # logger.debug("Register scheduler")
     app.cli.add_command(scheduler)
 
 
@@ -97,7 +84,6 @@ def _add_dramatiq_abortable(app) -> None:
     abort(message_id, mode=AbortMode.CANCEL)
     abort(message.message_id, mode=AbortMode.ABORT, abort_timeout=2000)
     """
-    # logger.debug("Add dramatiq abortable")
     if app.testing:
         backend = dramatiq_abort.backends.StubBackend()
     else:
@@ -106,20 +92,3 @@ def _add_dramatiq_abortable(app) -> None:
         )
     abortable = Abortable(backend=backend)
     dramatiq.broker.add_middleware(abortable)
-
-
-def _print_dramatiq_config() -> None:
-    """Show tasks broker configuration."""
-    broker = dramatiq.broker
-    messages = []
-    messages.append("Dramatiq broker in app:")
-    messages.append(f"{broker=}")
-    messages.append("broker middlewares:")
-    middlewares = ", ".join([str(mw.__class__.__name__) for mw in broker.middleware])
-    messages.append(middlewares)
-    messages.append("broker.get_declared_queues():")
-    messages.append(str(broker.get_declared_queues()))
-    messages.append("broker.get_declared_actors():")
-    messages.append(str(broker.get_declared_actors()))
-    for msg in messages:
-        logger.debug(msg)

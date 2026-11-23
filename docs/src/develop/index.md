@@ -13,7 +13,7 @@ make install        # uv sync and the pre-commit hooks
 make front translations
 cp example_config/dot_env .env      # then edit it
 uv run flask initdb
-uv run flask createuser --role admin --name Admin admin@example.org a-password
+uv run flask createuser --role admin --name Admin admin@example.org   # asks for the password
 make run            # the web server, Vite and Redis, through honcho
 ```
 

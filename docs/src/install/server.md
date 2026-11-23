@@ -73,8 +73,10 @@ These commands are needed once, to create the tables and the first administrator
 
 ```bash
 flask initdb
-flask createuser --role admin --name "Ada Lovelace" ada@example.org a-password
+flask createuser --role admin --name "Ada Lovelace" ada@example.org
 ```
+
+`flask createuser` asks for the password, or reads it from `SBE_PASSWORD` in a script.
 
 For a site moved from another server, restore its database instead, copy its files into `src/instance/data/files` (or the `FLASK_INSTANCE_PATH` you set), then run `flask db upgrade` and `flask reindex`.
 
