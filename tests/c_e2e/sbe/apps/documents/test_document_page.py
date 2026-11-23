@@ -21,6 +21,7 @@ from abilian.sbe.apps.communities.models import MANAGER, MEMBER
 from abilian.sbe.apps.documents.views.documents import document_history
 from abilian.services import audit_service, security_service
 from abilian.services.security import WRITER
+from abilian.services.viewtracker.models import Hit, View
 from abilian.web.util import url_for
 from tests.util import client_login, ensure_services_started
 
@@ -212,7 +213,7 @@ def test_refreshing_the_preview_comes_back_to_the_document(
     )
     client_login(client, manager)
 
-    response = client.get(refresh)
+    response = client.post(refresh)
 
     assert response.status_code == 302
     assert response.location.endswith(url)
@@ -393,3 +394,15 @@ def test_a_reader_has_no_document_mailed_by_the_site(
 
     assert status == 403
     assert outbox == []
+
+
+def test_opening_the_page_keeps_the_view(
+    document: Document, manager: User, client: FlaskClient, db: SQLAlchemy
+) -> None:
+    with client_login(client, manager):
+        assert client.get(url_for(document)).status_code == 200
+        # What the request committed, not what its session still held: before
+        # signing out, which commits too.
+        db.session.rollback()
+
+    assert Hit.query.join(View).filter(View.entity_id == document.id).count() == 1

@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 from dataclasses import dataclass
 from datetime import datetime
 from typing import TYPE_CHECKING
@@ -19,7 +18,7 @@ from flask import (
 )
 from flask_mail import Message
 from PIL import Image
-from werkzeug.exceptions import BadRequest, Forbidden, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden
 
 from abilian.core.extensions import db, mail
 from abilian.core.extensions.login import authenticated
@@ -40,7 +39,7 @@ from abilian.services.conversion import ConversionError, converter
 from abilian.services.image import FIT, get_format, resize
 from abilian.services.security import MANAGE, WRITE
 from abilian.services.viewtracker import viewtracker
-from abilian.web import csrf, url_for
+from abilian.web import url_for
 from abilian.web.action import actions
 from abilian.web.frontend import add_to_recent_items
 from abilian.web.views import default_view
@@ -53,7 +52,6 @@ from .util import (
     edit_object,
     get_document,
     get_folder,
-    match,
 )
 from .views import community_blueprint
 
@@ -111,6 +109,8 @@ def document_view(user: User, doc_id: int) -> str:
         add_to_recent_items(doc, "document")
 
     viewtracker.record_hit(entity=doc, user=user)
+    # The view keeps the hit; the tracker only records it.
+    db.session.commit()
     lock = doc.lock
     may_write = content_repository.has_permission(user, WRITE, doc)
     comments = current_app.extensions["comments"]
@@ -190,7 +190,6 @@ def _change_kind(entry: AuditEntry) -> str | None:
 #
 @route("/doc/<int:doc_id>/", methods=["POST"])
 @route("/doc/<int:doc_id>/<int:folder_id>/", methods=["POST"])
-@csrf.protect
 # TODO: URL doesn't seem right
 @authenticated
 def document_edit(user: User, doc_id, folder_id=None):
@@ -228,7 +227,6 @@ def document_viewers(user: User, doc_id):
 
 
 @route("/doc/<int:doc_id>/delete", methods=["POST"])
-@csrf.protect
 @authenticated
 def document_delete(user: User, doc_id: int) -> Response:
     doc = get_document(user, doc_id)
@@ -243,7 +241,6 @@ def document_delete(user: User, doc_id: int) -> Response:
 
 
 @route("/doc/<int:doc_id>/upload", methods=["POST"])
-@csrf.protect
 @authenticated
 def document_upload(user: User, doc_id):
     doc = get_document(user, doc_id)
@@ -268,23 +265,52 @@ def document_upload(user: User, doc_id):
 def document_download(user: User, doc_id: int, attach: bool = False) -> Response:
     """Download the file content."""
     doc = get_document(user, doc_id)
-
-    response = make_response(doc.content)
+    check_antivirus_ok(doc)
+    attach = attach or bool(request.args.get("attach"))
+    response = content_response(doc.content, doc.content_type, doc.title, attach)
     response.headers["content-length"] = doc.content_length
-    response.headers["content-type"] = doc.content_type
+    return response
 
-    if not attach:
-        attach = request.args.get("attach", False)
 
-    if attach or not match(
-        doc.content_type, ("text/plain", "application/pdf", "image/*")
-    ):
-        # Note: we omit text/html for security reasons.
-        quoted_filename = quote(doc.title.encode("utf8"))
+def check_antivirus_ok(doc: Document) -> None:
+    """Refuse the content of a document the antivirus has not cleared: the page
+    hides the buttons, but the links work without them."""
+    if not doc.antivirus_ok:
+        raise Forbidden(_("This document has not been cleared by the antivirus."))
+
+
+#: The types a browser is let show in the page itself: none of them runs a script.
+#: Any other, HTML and SVG among them, is downloaded, lest an uploaded file run its
+#: scripts as the site.
+INLINE_CONTENT_TYPES = frozenset(
+    {
+        "text/plain",
+        "application/pdf",
+        "image/png",
+        "image/jpeg",
+        "image/gif",
+        "image/webp",
+    }
+)
+
+
+def content_response(
+    content: bytes | str, content_type: str | None, filename: str, attach: bool = False
+) -> Response:
+    """`content` served as `content_type`: shown in the browser when the type is one
+    of the `INLINE_CONTENT_TYPES`, downloaded as `filename` otherwise or when asked.
+    """
+    content_type = content_type or "application/octet-stream"
+    response = make_response(content)
+    response.headers["content-type"] = content_type
+    # Else a browser may guess another type than the one sent, HTML among them.
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    base_type = content_type.partition(";")[0].strip().lower()
+    if attach or base_type not in INLINE_CONTENT_TYPES:
+        quoted_filename = quote(filename.encode("utf8"))
         response.headers["content-disposition"] = (
             f'attachment;filename="{quoted_filename}"'
         )
-
     return response
 
 
@@ -355,9 +381,10 @@ def document_preview_image(user: User, doc_id: int) -> Response:
     if not doc.content:
         return preview_missing_image()
 
-    size = int(request.args.get("size", 0))
-
-    # Just in case
+    size = request.args.get("size", 0, type=int)
+    if size < 0:
+        msg = f"Not a preview size: {size}"
+        raise BadRequest(msg)
     size = min(size, MAX_PREVIEW_SIZE)
 
     # compute image if size != standard document size
@@ -366,6 +393,8 @@ def document_preview_image(user: User, doc_id: int) -> Response:
     content_type = "image/jpeg"
 
     if doc.content_type.startswith("image/svg"):
+        # Served as an attachment (`content_response`): an <img> still shows it, but
+        # opened on its own, its scripts do not run.
         image = doc.content
         content_type = doc.content_type
     elif doc.content_type.startswith("image/"):
@@ -376,54 +405,53 @@ def document_preview_image(user: User, doc_id: int) -> Response:
         if image:
             content_type = Image.MIME[get_format(image)]
     else:
-        page = int(request.args.get("page", 0))
+        page = request.args.get("page", 0, type=int)
         try:
             image = get_image(doc.digest, doc.content, doc.content_type, page, size)
-        except BaseException:
+        except (ConversionError, OSError, IndexError):
+            # No converter for its type, one that failed, or no such page.
             # TODO: use generic "conversion failed" image
             image = ""
 
     if not image:
         return preview_missing_image()
 
-    response = make_response(image)
-    response.headers["content-type"] = content_type
-    return response
+    return content_response(image, content_type, doc.title)
 
 
-@route("/doc/<int:doc_id>/refresh_preview")
+@route("/doc/<int:doc_id>/refresh_preview", methods=["POST"])
 @authenticated
-def refresh_preview(user: User, doc_id):
-    """Force to compute a new preview."""
+def refresh_preview(user: User, doc_id: int) -> Response:
+    """Compute the document's preview again: for whoever manages it, as its page
+    offers it. A preview that cannot be made is said so."""
     doc = get_document(user, doc_id)
-    if not doc:
-        raise NotFound
+    check_manage_access(user, doc)
 
     ct = doc.find_content_type(doc.content_type)
     if ct != doc.content_type:
         doc.content_type = ct
         db.session.commit()
 
-    check_manage_access(user, doc)
     # Taken first: the tasks close the request's session, detaching the document.
     url = url_for(doc)
-    # convert_document_content.apply([doc_id])
-    with contextlib.suppress(ConversionError, OSError):
-        convert_document_content(doc_id)
-    # preview_document.apply([doc_id])
-    with contextlib.suppress(ConversionError, OSError):
-        preview_document(doc_id)
+    convert_document_content(doc_id)
+    preview_document(doc_id)
+    # The tasks log their failures and go on: what tells is whether there is one.
+    # Looked up again, as they leave it (and the community) detached.
+    doc = content_repository.get_document_by_id(doc_id)
+    if doc is None or not doc.has_preview():
+        flash(_("No preview could be made for this document."), "error")
     return redirect(url)
 
 
 @route("/doc/<int:doc_id>/send", methods=["POST"])
-@csrf.protect
 @authenticated
 def document_send(user: User, doc_id: int) -> Response:
     """Mail the document to an address, with a word: for whoever may write it, as
     the page offers it, since the site's mail server carries it anywhere."""
     doc = get_document(user, doc_id)
     check_write_access(user, doc)
+    check_antivirus_ok(doc)
 
     recipient = request.form.get("recipient")
     user_msg = request.form.get("message")
@@ -482,38 +510,3 @@ def document_view_pdf(user: User, doc_id):
             ".document_download", community_id=g.community.slug, doc_id=doc.id
         ),
     )
-
-
-#
-# Tagging (currently not used!)
-#
-# @route("/tag")
-# def tag():
-#     tag = request.args.get("tag")
-#     if not tag:
-#         return redirect("/dm/")
-#
-#     bc = [dict(path="/", label="Home"), dict(path="/dm/", label="DM")]
-#     bc += [dict(path=request.path, label="Filter by tag")]
-#     # TODO ...
-#     docs = Document.query.filter(Document.tags.like("%" + tag + "%"))
-#     docs = list(docs.all())
-#     docs = [f for f in docs if tag in f.tags.split(",")]
-#     title = "Files filtered by tag: %s" % tag
-#     return render_template("dm/home.html", title=title, breadcrumbs=bc,
-#                            files=docs)
-#
-#
-# @route("/<int:file_id>/tag", methods=['POST'])
-# def tag_post(file_id):
-#     doc = get_document(user, file_id)
-#     tags = request.form.get("tags")
-#
-#     doc.tags = tags
-#     self = unwrap(current_app)
-#     activity.send(self, actor=g.user, verb="tag", object=doc)
-#
-#     db.session.commit()
-#
-#     flash("Tags successfully successfully updated", "success")
-#     return redirect(url_for(".document_view", doc_id=doc.id))

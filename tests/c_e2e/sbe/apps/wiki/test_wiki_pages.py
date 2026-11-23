@@ -178,3 +178,21 @@ def test_a_page_takes_no_id_or_class_of_the_page_around_it(
 
     assert '<h2 id="wiki-upload-files">Upload files</h2>' in html
     assert "<div>Click</div>" in html
+
+
+@pytest.mark.parametrize(
+    "revisions", [{"rev0": "on", "rev7": "on"}, {"rev0": "on", "revx": "on"}]
+)
+def test_comparing_a_revision_the_page_does_not_have_is_not_found(
+    revisions: dict[str, str],
+    member: User,
+    community1: Community,
+    client: FlaskClient,
+) -> None:
+    url = url_for(
+        "wiki.page_compare", community_id=community1.slug, title="Expenses", **revisions
+    )
+    with client_login(client, member):
+        response = client.get(url)
+
+    assert response.status_code == 404

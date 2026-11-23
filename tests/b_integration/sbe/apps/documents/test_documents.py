@@ -2,18 +2,20 @@
 
 from __future__ import annotations
 
-import sys
 from typing import IO, TYPE_CHECKING
 
 import pytest
+from dramatiq import Message
 
 from abilian.core.models.subjects import User
 from abilian.sbe.apps.documents.models import Document, Folder
+from abilian.sbe.apps.documents.tasks import process_document
 from abilian.sbe.apps.documents.views.folders import explore_archive
 from abilian.services import index_service, security_service
 from tests.util import DATA_DIR, login
 
 if TYPE_CHECKING:
+    from dramatiq.brokers.stub import StubBroker
     from sqlalchemy.orm import Session
 
     from abilian.app import Application
@@ -25,29 +27,66 @@ def open_file(filename: str) -> IO[bytes]:
     return path.open("rb")
 
 
-def test_document(app: Application, session: Session) -> None:
+@pytest.fixture
+def broker(app: Application) -> StubBroker:
+    return process_document.broker
+
+
+def test_an_unscanned_document_is_queued_for_the_antivirus(
+    app: Application,
+    session: Session,
+    broker: StubBroker,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     root = Folder(title="root")
     doc = Document(parent=root, title="test")
-    data = open_file("onepage.pdf").read()
-    doc.set_content(data, "application/pdf")
+    with open_file("onepage.pdf") as fd:
+        doc.set_content(fd.read(), "application/pdf")
     session.add(doc)
     session.commit()
+    # The commit queues the document's conversions, with an antivirus scan.
+    broker.flush_all()
+    monkeypatch.setitem(app.config, "ANTIVIRUS_CHECK_REQUIRED", True)
 
-    # coverage
-    app.config["ANTIVIRUS_CHECK_REQUIRED"] = True
     doc.ensure_antivirus_scheduled()
 
+    queue = broker.queues[process_document.queue_name].queue
+    messages = [Message.decode(data) for data in queue]
+    assert [(m.actor_name, m.args) for m in messages] == [
+        ("process_document", (doc.id,))
+    ]
 
-def test_antivirus_properties(app: Application, session: Session) -> None:
+
+def test_a_document_is_not_queued_when_no_scan_is_required(
+    app: Application,
+    session: Session,
+    broker: StubBroker,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    doc = Document(parent=Folder(title="root"), title="test")
+    doc.set_content(b"content", "text/plain")
+    session.add(doc)
+    session.commit()
+    # The commit queues the document's conversions, with an antivirus scan.
+    broker.flush_all()
+    monkeypatch.setitem(app.config, "ANTIVIRUS_CHECK_REQUIRED", False)
+
+    doc.ensure_antivirus_scheduled()
+
+    assert not broker.queues[process_document.queue_name].queue
+
+
+def test_antivirus_properties(
+    app: Application, session: Session, monkeypatch: pytest.MonkeyPatch
+) -> None:
     root = Folder(title="root")
     doc = Document(parent=root, title="test")
     doc.set_content(b"content", "text/plain")
-    appcfg = app.config
     meta = doc.content_blob.meta
 
     # 1: not check required ################
     # no data in meta
-    appcfg["ANTIVIRUS_CHECK_REQUIRED"] = False
+    monkeypatch.setitem(app.config, "ANTIVIRUS_CHECK_REQUIRED", False)
     assert doc.antivirus_scanned is False
     assert doc.antivirus_status is None
     assert doc.antivirus_required is False
@@ -77,7 +116,7 @@ def test_antivirus_properties(app: Application, session: Session) -> None:
     # 2: check required ##################
     # no data in meta
     del meta["antivirus"]
-    appcfg["ANTIVIRUS_CHECK_REQUIRED"] = True
+    monkeypatch.setitem(app.config, "ANTIVIRUS_CHECK_REQUIRED", True)
     assert doc.antivirus_scanned is False
     assert doc.antivirus_status is None
     assert doc.antivirus_required is True
@@ -149,23 +188,27 @@ def test_folder_indexed(
         assert hit["community_slug"] == community2.slug
 
 
-@pytest.mark.skipif(sys.version_info >= (3, 0), reason="Doesn't work yet on Py3k")
-def test_explore_archive() -> None:
-    fd = open_file("content.zip")
-    result = [("/".join(path), f) for path, f in explore_archive(fd)]
+def test_explore_archive_without_uncompressing_yields_the_upload() -> None:
+    with open_file("content.zip") as fd:
+        result = [("/".join(path), f) for path, f in explore_archive(fd)]
+
     assert result == [("", fd)]
 
-    fd = open_file("content.zip")
-    archive_content = explore_archive(fd, uncompress=True)
-    result = {f"{'/'.join(path)}/{f.filename}" for path, f in archive_content}
-    assert result == {
+
+def archive_paths(filename: str) -> set[str]:
+    with open_file(filename) as fd:
+        archive_content = explore_archive(fd, uncompress=True)
+        return {f"{'/'.join(path)}/{f.filename}" for path, f in archive_content}
+
+
+def test_explore_archive_yields_the_files_of_a_zip() -> None:
+    assert {
         "existing-doc/file.txt",
         "existing-doc/subfolder_in_renamed/doc.txt",
         "folder 1/doc.txt",
         "folder 1/dos cp437: é.txt",
-        # FIXME: there is currently a regression with the way unicode filenames are decoded.
-        # See: https://stackoverflow.com/questions/13261347/
-        # (On MacOS, the utf-8 bit is not set by the Compress utility, and zipfile
-        # incorreclty assumes CP437).
-        # "folder 1/osx: utf-8: é.txt",
-    }
+    } <= archive_paths("content.zip")
+
+
+def test_explore_archive_decodes_a_utf8_name_without_the_utf8_flag() -> None:
+    assert "folder 1/osx: utf-8: é.txt" in archive_paths("content.zip")

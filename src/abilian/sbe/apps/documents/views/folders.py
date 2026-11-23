@@ -7,17 +7,14 @@ import fnmatch
 import itertools
 import os
 import re
-import sys
 import tempfile
-import traceback
 from dataclasses import dataclass
 from datetime import datetime
 from functools import partial
 from io import StringIO
-from itertools import takewhile
 from typing import IO, TYPE_CHECKING, Any
 from urllib.parse import quote
-from zipfile import ZipFile, is_zipfile
+from zipfile import ZipFile, ZipInfo, is_zipfile
 
 import sqlalchemy as sa
 import whoosh.query as wq
@@ -34,9 +31,8 @@ from flask import (
     send_file,
     session,
 )
-from loguru import logger
 from markupsafe import Markup, escape
-from werkzeug.exceptions import BadRequest, InternalServerError
+from werkzeug.exceptions import BadRequest
 from xlwt import Workbook, easyxf
 
 from abilian.core.extensions import db
@@ -51,7 +47,7 @@ from abilian.sbe.apps.documents.repository import content_repository
 from abilian.sbe.apps.documents.search import reindex_tree
 from abilian.services import get_service
 from abilian.services.security import MANAGE, READ, WRITE, Role, security
-from abilian.web import csrf, http, url_for
+from abilian.web import http, url_for
 from abilian.web.action import actions
 from abilian.web.listing import Listing, by_name
 from abilian.web.views import default_view
@@ -79,19 +75,6 @@ if TYPE_CHECKING:
 route = community_blueprint.route
 
 __all__ = ()
-
-
-def tracing_formatter(record: dict) -> str:
-    """Add trace to the logger.
-
-    Taken from loguru documentation."""
-    # Filter out frames coming from Loguru internals
-    frames = takewhile(
-        lambda f: "/loguru/" not in f.filename, traceback.extract_stack()
-    )
-    stack = " > ".join(f"{f.filename}:{f.name}:{f.lineno}" for f in frames)
-    record["extra"]["stack"] = stack
-    return "{level} | {extra[stack]} - {message}\n{exception}"
 
 
 @route("/")
@@ -188,21 +171,16 @@ def folder_view(user: User, folder_id):
     )
 
 
-@route("/folder/change_view_style/<int:folder_id>", methods=["GET", "POST"])
-@csrf.protect
+@route("/folder/change_view_style/<int:folder_id>", methods=["POST"])
 @authenticated
 def change_view_style(user: User, folder_id):
     # The folder is not used, but must be visible here.
     get_folder(user, folder_id)
-    if request.method == "POST":
-        view_style = request.form["view_style"]
-        if view_style == "gallery_view":
-            session["sbe_doc_view_style"] = "gallery_view"
-        else:
-            session["sbe_doc_view_style"] = "thumbnail_view"
-        return redirect(
-            url_for(".folder_view", folder_id=folder_id, community_id=g.community.slug)
-        )
+    view_style = request.form["view_style"]
+    if view_style == "gallery_view":
+        session["sbe_doc_view_style"] = "gallery_view"
+    else:
+        session["sbe_doc_view_style"] = "thumbnail_view"
     return redirect(
         url_for(".folder_view", folder_id=folder_id, community_id=g.community.slug)
     )
@@ -336,17 +314,16 @@ def permissions(user: User, folder_id):
 
             principal = ""
             if self.entry.user:
-                principal = render(self._USER_FMT, user=self.entry.user)
+                principal = Markup(render(self._USER_FMT, user=self.entry.user))
             elif self.entry.group:
                 principal = escape(self.entry.group.name)
 
-            self.msg = Markup(
-                msg.format(
-                    date=self.date,
-                    manager=self.manager,
-                    role=self.entry.role,
-                    principal=principal,
-                )
+            # Markup first: what is put in is escaped, but for the markup made above.
+            self.msg = Markup(msg).format(
+                date=self.date,
+                manager=Markup(self.manager),
+                role=self.entry.role,
+                principal=principal,
             )
 
     audit_entries = [EntryPresenter(e) for e in security.entries_for(folder)]
@@ -363,8 +340,11 @@ def permissions(user: User, folder_id):
     return render_template("documents/permissions.html", **ctx)
 
 
+#: The roles a folder's manager may give on it, as its permissions page offers them.
+FOLDER_ROLES = frozenset({"reader", "writer", "manager"})
+
+
 @route("/folder/<int:folder_id>/permissions", methods=["POST"])
-@csrf.protect
 @authenticated
 def permissions_update(user: User, folder_id):
     folder = get_folder(user, folder_id)
@@ -404,6 +384,9 @@ def permissions_update(user: User, folder_id):
 
     if action == "add-user-role":
         role = request.form["role"].lower()
+        if role not in FOLDER_ROLES:
+            msg = f"Not a role on a folder: {role!r}"
+            raise BadRequest(msg)
         user_id = int(request.form["user"])
         member = User.query.get_or_404(user_id)
 
@@ -601,7 +584,6 @@ def iter_permissions(folder, user):
 # Actions on folders
 #
 @route("/folder/<int:folder_id>", methods=["POST"])
-@csrf.protect
 @authenticated
 def folder_post(user: User, folder_id: int) -> Response:
     """A POST on a folder can result on several different actions (depending on
@@ -630,13 +612,9 @@ def folder_post(user: User, folder_id: int) -> Response:
     if action == "change-owner":
         return change_owner(user, folder)
 
-    # Probably an error or a hack attempt.
-    # Logger will inform sentry if enabled
-    logger.remove()
-    logger.add(sys.stderr, format=tracing_formatter)
-    logger.error("Unknown folder action.")
-    flash(_("Unknown action."), "error")
-    return redirect(url_for(folder))
+    # The page sends none other: an error, or a hack attempt.
+    msg = f"Unknown folder action: {action!r}"
+    raise BadRequest(msg)
 
 
 def folder_edit(user: User, folder):
@@ -664,6 +642,25 @@ ARCHIVE_IGNORE_FILES = {
 ARCHIVE_IGNORE_FILES.add(re.compile(fnmatch.translate("*/")))
 
 
+#: Set when the archive says its names are UTF-8.
+ZIP_UTF8_FLAG = 0x800
+
+
+def archive_name(zipinfo: ZipInfo) -> str:
+    """The name of a file in an archive, as whoever made it wrote it.
+
+    Without the UTF-8 flag, `zipfile` decodes a name as CP437; but macOS's
+    Archive Utility, among others, writes UTF-8 without setting it.
+    """
+    if zipinfo.flag_bits & ZIP_UTF8_FLAG:
+        return zipinfo.filename
+    raw = zipinfo.filename.encode("cp437")
+    try:
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return zipinfo.filename
+
+
 def explore_archive(
     fd: FileStorage | IO[bytes], uncompress: bool = False
 ) -> Iterator[tuple[list[str], IO[bytes]]]:
@@ -687,15 +684,7 @@ def explore_archive(
 
     with ZipFile(fd, "r") as archive:
         for zipinfo in archive.infolist():
-            filename = zipinfo.filename
-            if isinstance(filename, bytes):
-                # not unicode: try to convert from utf-8 (OSX case: unicode flag not
-                # set), then legacy cp437
-                # http://stackoverflow.com/questions/13261347/correctly-decoding-zip-entry-file-names-cp437-utf-8-or
-                try:
-                    filename = filename.decode("utf-8")
-                except UnicodeDecodeError:
-                    filename = filename.decode("cp437")
+            filename = archive_name(zipinfo)
 
             if any(
                 pattern.match(filename) is not None for pattern in ARCHIVE_IGNORE_FILES
@@ -765,11 +754,15 @@ def download_multiple(user: User, folder: Folder) -> Response:
     if not folders:
         folders = [folder]
 
+    def cleared(documents: Iterable[Document]) -> list[Document]:
+        # Only what the antivirus cleared, as for a single download.
+        return [doc for doc in documents if doc.antivirus_ok]
+
     def rel_path(path: str, content: Document) -> str:
         return f"{path}/{content.title}"
 
     def zip_folder(zipfile: ZipFile, folder: Folder, path: str = "") -> ZipFile:
-        for doc in folder.documents:
+        for doc in cleared(folder.documents):
             doc_path = rel_path(path, doc)
             zipfile.writestr(doc_path, doc.content or b"")
 
@@ -786,7 +779,7 @@ def download_multiple(user: User, folder: Folder) -> Response:
     temp_factory = tempfile.NamedTemporaryFile
     zip_fn = temp_factory(prefix=f"tmp-{current_app.name}-", suffix=".zip")
     with ZipFile(zip_fn, "w") as zipfile:
-        for doc in docs:
+        for doc in cleared(docs):
             zipfile.writestr(doc.title, doc.content or b"")
         for subfolder in folders:
             zip_folder(zipfile, subfolder, subfolder.title)
@@ -865,11 +858,8 @@ def move_multiple(user: User, folder: Folder) -> Response:
         flash(_("Move elements: no destination folder selected. Aborted."), "error")
         return redirect(current_folder_url)
 
-    target_folder = content_repository.get_folder_by_id(target_folder_id)
-
-    if not target_folder:
-        msg = "Target folder not found"
-        raise InternalServerError(msg)
+    # Looked up in this community, as readable by the user: not found otherwise.
+    target_folder = get_folder(user, target_folder_id)
 
     if folder == target_folder:
         flash(
@@ -992,7 +982,10 @@ def change_owner(user: User, folder):
 def check_valid_name(user: User):
     """Check if name is valid for content creation in this folder."""
 
-    object_id = int(request.args["object_id"])
+    object_id = request.args.get("object_id", type=int)
+    if object_id is None:
+        msg = "No object id given"
+        raise BadRequest(msg)
     action = request.args.get("action")
     title = request.args.get("title")
 
@@ -1007,7 +1000,8 @@ def check_valid_name(user: User):
         parent = obj.parent
         help_text = _('Cannot rename: "{name}" is already present in parent folder')
     else:
-        raise InternalServerError
+        msg = f"Unknown action: {action!r}"
+        raise BadRequest(msg)
 
     existing = {e.title for e in parent.children}
 

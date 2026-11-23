@@ -13,6 +13,7 @@ from abilian.sbe.apps.documents import lock
 from abilian.sbe.apps.documents.lock import Lock
 
 if TYPE_CHECKING:
+    import pytest
     from flask import Flask
     from sqlalchemy.orm import Session
 
@@ -29,7 +30,7 @@ def test_lock() -> None:
     assert l.date == date
 
 
-def test_lock2(app: Flask, session: Session) -> None:
+def test_lock2(app: Flask, session: Session, monkeypatch: pytest.MonkeyPatch) -> None:
     user = User(
         email="test@example.com", first_name="Joe", last_name="Smith", can_login=True
     )
@@ -39,7 +40,7 @@ def test_lock2(app: Flask, session: Session) -> None:
     session.commit()
 
     # set 30s lifetime
-    app.config["SBE_LOCK_LIFETIME"] = 30
+    monkeypatch.setitem(app.config, "SBE_LOCK_LIFETIME", 30)
     dt_patcher = mock.patch.object(lock, "utcnow", mock.Mock(wraps=lock.utcnow))
     with dt_patcher as mocked:
         created_at = datetime(2015, 10, 22, 14, 58, 42, tzinfo=UTC)

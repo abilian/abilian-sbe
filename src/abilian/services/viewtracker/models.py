@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.schema import ForeignKey
+from sqlalchemy.schema import ForeignKey, Index
 from sqlalchemy.types import DateTime, Integer
 
 from abilian.core.entities import Entity, db
@@ -28,7 +28,12 @@ def _default_from(column):
 
 
 class View(db.Model):
+    """That a user viewed an entity: one per user and entity."""
+
     __tablename__ = "view"
+    __table_args__ = (
+        Index("uq_view_entity_id_user_id", "entity_id", "user_id", unique=True),
+    )
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True, nullable=False
@@ -44,19 +49,25 @@ class View(db.Model):
     entity = relationship(Entity, foreign_keys=_fk_entity_id)
 
     #: user id
-    user_id: Mapped[int] = mapped_column(Integer, ForeignKey(User.id), nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey(User.id), nullable=False, index=True
+    )
     user = relationship(User, foreign_keys=user_id)
 
     hits = relationship("Hit", backref="view", order_by="Hit.viewed_at", lazy="dynamic")
 
 
 class Hit(db.Model):
+    """One time a user viewed an entity."""
+
     __tablename__ = "hit"
 
     id: Mapped[int] = mapped_column(
         Integer, primary_key=True, autoincrement=True, nullable=False
     )
-    view_id: Mapped[int | None] = mapped_column(Integer, ForeignKey(View.id))
+    view_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey(View.id), index=True
+    )
 
     #: time of view
     viewed_at: Mapped[datetime | None] = mapped_column(

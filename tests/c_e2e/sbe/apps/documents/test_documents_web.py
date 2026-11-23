@@ -127,10 +127,14 @@ def test_content_outside_the_community_is_not_found(
 
 
 def test_role_form_with_a_missing_field_is_a_bad_request(
-    app: Application, client: FlaskClient, db: SQLAlchemy, community: Community
+    app: Application,
+    client: FlaskClient,
+    db: SQLAlchemy,
+    community: Community,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # Answer as in production: in debug mode, Flask raises the error instead.
-    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    monkeypatch.setitem(app.config, "TRAP_BAD_REQUEST_ERRORS", False)
     security_service.start()
     user = community.test_user
     security_service.grant_role(user, ADMIN)
@@ -225,10 +229,13 @@ def test_changing_to_an_unknown_owner_keeps_the_owner(
 
 
 def test_name_check_without_an_object_is_a_bad_request(
-    app: Application, client: FlaskClient, community: Community
+    app: Application,
+    client: FlaskClient,
+    community: Community,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     # Answer as in production: in debug mode, Flask raises the error instead.
-    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    monkeypatch.setitem(app.config, "TRAP_BAD_REQUEST_ERRORS", False)
     url = url_for("documents.check_valid_name", community_id=community.slug)
     with client_login(client, community.test_user):
         response = client.get(url, query_string={"action": "new", "title": "x"})

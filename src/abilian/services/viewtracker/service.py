@@ -2,10 +2,18 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
+from sqlalchemy.exc import IntegrityError
+
 from abilian.core.extensions import db
 from abilian.services import Service
 
 from .models import Hit, View
+
+if TYPE_CHECKING:
+    from abilian.core.entities import Entity
+    from abilian.core.models.subjects import User
 
 __all__ = ["viewtracker"]
 
@@ -14,22 +22,21 @@ class ViewTracker(Service):
     name = "viewtracker"
 
     @staticmethod
-    def record_hit(entity, user) -> None:
-        # Using user_id here in case user is a threadload proxy
-        views = View.query.filter(View.entity == entity, View.user_id == user.id)
-        if views.count():
-            view = views.first()
-            hit = Hit(view=view)
-            db.session.add(hit)
-
-        else:
-            view = View(entity=entity, user_id=user.id)
-            hit = Hit(view=view)
-            db.session.add(view)
-            db.session.add(hit)
-
-        # FIXME: not the right place
-        db.session.commit()
+    def record_hit(entity: Entity, user: User) -> None:
+        """Record that `user` viewed `entity`; the caller commits."""
+        # Ids, not the objects: the user may be a thread-local proxy.
+        views = View.query.filter(View.entity_id == entity.id, View.user_id == user.id)
+        view = views.one_or_none()
+        if view is None:
+            try:
+                with db.session.begin_nested():
+                    view = View(entity=entity, user_id=user.id)
+                    db.session.add(view)
+            except IntegrityError:
+                # Another request added it since: one view per (entity, user).
+                view = views.one()
+        db.session.add(Hit(view=view))
+        db.session.flush()
 
     @staticmethod
     def get_views(entity=None, entities=None, user=None, users=None):

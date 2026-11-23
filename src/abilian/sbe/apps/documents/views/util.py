@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING
 
 from flask import current_app, flash, g, request
 from flask_babel import gettext as _
-from werkzeug.exceptions import Forbidden, InternalServerError, NotFound
+from werkzeug.exceptions import BadRequest, Forbidden, NotFound
 
 from abilian.core.signals import activity
 from abilian.core.util import unwrap
@@ -167,7 +167,8 @@ def get_selected_objects(
 
     for obj in docs + folders:
         if obj.parent != folder:
-            raise InternalServerError
+            msg = f"Not in folder {folder.id}: {obj.id}"
+            raise BadRequest(msg)
 
     return folders, docs
 
@@ -236,13 +237,3 @@ def check_manage_access(user: User, obj: CmisObject) -> None:
     ):
         return
     raise Forbidden
-
-
-def match(mime_type: str, patterns: tuple[str, str, str]) -> bool:
-    if not mime_type:
-        mime_type = "application/binary"
-    for pat in patterns:
-        pat = pat.replace("*", r"\w*")
-        if re.match(pat, mime_type):
-            return True
-    return False

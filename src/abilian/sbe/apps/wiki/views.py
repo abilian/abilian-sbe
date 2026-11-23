@@ -36,7 +36,6 @@ from abilian.sbe.apps.documents.form_files import (
     form_touches_files,
 )
 from abilian.services.viewtracker import viewtracker
-from abilian.web import csrf
 from abilian.web.action import Endpoint, actions
 from abilian.web.nav import BreadcrumbItem
 from abilian.web.util import url_for
@@ -178,6 +177,8 @@ class PageView(BasePageView, ObjectView[WikiPage, WikiPageForm]):
 
         actions.context["object"] = self.obj
         viewtracker.record_hit(entity=self.obj, user=self.user)
+        # The view keeps the hit; the tracker only records it.
+        db.session.commit()
         return args, kwargs
 
 
@@ -384,22 +385,18 @@ def page_compare() -> str | Response:
         return redirect(
             url_for(".page_edit", title=title, community_id=g.community.slug)
         )
-    revisions = page.revisions
-    revisions = sorted(revisions, key=lambda x: x.number)
-    revs_to_compare = []
-    for arg in request.args:
-        if arg.startswith("rev"):
-            revs_to_compare.append(int(arg[3:]))
+    revisions = {rev.number: rev for rev in page.revisions}
+    # The page's checkboxes are named "rev<number>".
+    revs_to_compare = [arg[3:] for arg in request.args if arg.startswith("rev")]
     if len(revs_to_compare) != 2:
         flash(_("You must check exactly 2 revisions."), "error")
         url = url_for(".page_changes", title=title, community_id=g.community.slug)
         return redirect(url)
 
-    revs_to_compare.sort()
-    from_rev = revisions[revs_to_compare[0]]
-    to_rev = revisions[revs_to_compare[1]]
-    assert from_rev.number == revs_to_compare[0]
-    assert to_rev.number == revs_to_compare[1]
+    from_rev, to_rev = sorted(
+        (revision_numbered(revisions, number) for number in revs_to_compare),
+        key=lambda rev: rev.number,
+    )
 
     from_lines = from_rev.body_src.splitlines(1)
     to_lines = to_rev.body_src.splitlines(1)
@@ -411,6 +408,15 @@ def page_compare() -> str | Response:
     actions.context["object"] = page
     ctx = {"page": page, "diff": diff_lines, "rev1": from_rev, "rev2": to_rev}
     return render_template("wiki/compare.html", **ctx)
+
+
+def revision_numbered(
+    revisions: dict[int, WikiPageRevision], number: str
+) -> WikiPageRevision:
+    """The revision numbered `number`, as the URL gives it; not found if none is."""
+    if not number.isdecimal() or int(number) not in revisions:
+        raise NotFound
+    return revisions[int(number)]
 
 
 @route("/delete/", methods=["POST"])
@@ -459,7 +465,6 @@ def attachment_download() -> Response:
 
 
 @route("/attachments", methods=["POST"])
-@csrf.protect
 def attachment_upload() -> Response:
     title = request.args["title"].strip()
     try:
@@ -489,7 +494,6 @@ def attachment_upload() -> Response:
 
 
 @route("/attachments/delete", methods=["POST"])
-@csrf.protect
 def attachment_delete():
     title = request.args["title"].strip()
     attachment_id = int(request.args["attachment"])
@@ -526,12 +530,6 @@ def wiki_help():
     src = open(Path(__file__).parent / "data" / "help.txt").read()
     body = Markup(markdown(src))
     return render_template("wiki/help.html", body=body)
-
-
-@route("/export")
-def wiki_export() -> str:
-    # TODO
-    return "Not done yet"
 
 
 #
