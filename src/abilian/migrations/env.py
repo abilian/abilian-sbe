@@ -60,10 +60,27 @@ def run_migrations_online():
     connectable = current_app.extensions["migrate"].db.engine
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        on_sqlite = connection.dialect.name == "sqlite"
+        if on_sqlite:
+            # Batch mode changes a table on SQLite by copying it and dropping
+            # the original, which SQLite refuses while other rows reference it
+            # and foreign keys are enforced. The pragma is ignored inside a
+            # transaction: it is set, and committed, before the migrations.
+            _set_sqlite_foreign_keys(connection, enforced=False)
+        try:
+            context.configure(connection=connection, target_metadata=target_metadata)
 
-        with context.begin_transaction():
-            context.run_migrations()
+            with context.begin_transaction():
+                context.run_migrations()
+        finally:
+            if on_sqlite:
+                _set_sqlite_foreign_keys(connection, enforced=True)
+
+
+def _set_sqlite_foreign_keys(connection, *, enforced: bool) -> None:
+    state = "ON" if enforced else "OFF"
+    connection.exec_driver_sql(f"PRAGMA foreign_keys={state}")
+    connection.commit()
 
 
 if context.is_offline_mode():
