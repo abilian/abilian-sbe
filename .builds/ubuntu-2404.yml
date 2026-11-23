@@ -28,7 +28,6 @@ packages:
   - libffi-dev
   - libjpeg-dev
   - libjpeg-turbo8-dev
-  - libmagic-dev
   - libxslt-dev
   - libxslt1-dev
   # Other deps

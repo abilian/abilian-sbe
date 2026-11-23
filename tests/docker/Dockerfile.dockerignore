@@ -3,6 +3,7 @@
 !pyproject.toml
 !uv.lock
 !README.md
+!hatch_build.py
 !src
 !tests
 **/__pycache__
