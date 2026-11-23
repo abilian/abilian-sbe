@@ -5,17 +5,17 @@
 from __future__ import annotations
 
 import email
+import email.errors
 import mailbox
 import re
-from os.path import expanduser
+import smtplib
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import bleach
 import chardet
 import html2text
-from bleach.css_sanitizer import CSSSanitizer
-from flask import current_app, g
+from filelock import FileLock, Timeout
+from flask import current_app
 from flask_babel import get_locale
 from flask_mail import Message
 from itsdangerous import Serializer
@@ -31,11 +31,27 @@ from abilian.core.util import md5, unwrap
 from abilian.i18n import _l, render_template_i18n
 from abilian.sbe.apps.communities.security import is_member
 from abilian.web import url_for
+from abilian.web.rich_text import sanitize_html
 
-from .forms import ALLOWED_ATTRIBUTES, ALLOWED_STYLES, ALLOWED_TAGS
 from .models import Post, PostAttachment, Thread
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
 MAIL_REPLY_MARKER = _l("_____Write above this line to post_____")
+
+#: Members mailed by one `batch_send_post_to_users` task.
+CHUNK_SIZE = 20
+#: Wait before mailing again the members a batch could not reach: 5 minutes.
+RETRY_DELAY_MS = 300_000
+
+MAILDIR_LOCK_FILE = ".check_maildir.lock"
+PROCESSING_FOLDER = "processing"
+REJECTED_FOLDER = "rejected"
+
+
+class MailNotSentError(Exception):
+    """No member of a batch could be mailed: the batch is to be retried."""
 
 
 @dramatiq.actor(max_retries=20, max_backoff=86400000)
@@ -58,82 +74,55 @@ def send_post_by_email(post_id: int | str) -> None:
             community=repr(community.name),
         )
 
-        CHUNK_SIZE = 20
+        # One message per batch, so that a batch that fails is retried alone.
         members_id = [member.id for member in community.members if member.can_login]
-        chunk = []
-        for idx, member_id in enumerate(members_id):
-            chunk.append(member_id)
-            if idx % CHUNK_SIZE == 0:
-                batch_send_post_to_users(post.id, chunk)
-                chunk = []
-
-        if chunk:
-            batch_send_post_to_users(post.id, chunk)
+        for start in range(0, len(members_id), CHUNK_SIZE):
+            chunk = members_id[start : start + CHUNK_SIZE]
+            batch_send_post_to_users.send(post.id, chunk)
 
 
-# FIXME: add the dramatiq backernd for rate limit
-# @shared_task(max_retries=10, rate_limit="12/m")
 @dramatiq.actor(max_retries=20, max_backoff=86400000)
-def batch_send_post_to_users(post_id, members_id, failed_ids=None):
-    """Task run from send_post_by_email; auto-retry for mails that could not be
-    successfully sent.
+def batch_send_post_to_users(post_id: int, members_id: list[int]) -> None:
+    """Send a post to a batch of members, retrying those it could not reach.
 
-    Task default rate limit is 6/min.: there is at least 5 seconds between 2
-    batches.
-
-    During retry, if all `members_id` fails again, the task is retried
-    5min. later, then 10, 20, 40... up to 10 times before giving up. This ensures
-    retries up to approximatively 3 days and 13 hours after initial attempt
-    (geometric series is: 5min * (1-2**10) / 1-2) = 5115 mins).
+    Task run from `send_post_by_email`. The rate limiter allows 6 batches a
+    minute. A retry must not mail a member twice, so a batch that reached only
+    some members queues a new batch for the others; a batch that reached nobody
+    raises, and Dramatiq retries it with an exponential backoff.
     """
     if not members_id:
-        return None
+        return
 
     post = Post.query.get(post_id)
     if post is None:
         # deleted after task queued, but before task run
-        return None
-    with RATE_LIMITER[0].acquire():
-        logger.debug(
-            "post_id={post_id} members_id={members_id} failed_ids={failed_ids}",
-            post_id=post_id,
-            members_id=members_id,
-            failed_ids=failed_ids,
-        )
-        failed = set()
-        successfully_sent = []
-        thread = post.thread
-        community = thread.community
-        user_filter = (
-            User.id.in_(members_id) if len(members_id) > 1 else User.id == members_id[0]
-        )
-        users = User.query.filter(user_filter).all()
+        return
 
+    with RATE_LIMITER[0].acquire():
+        community = post.thread.community
+        users = User.query.filter(User.id.in_(members_id)).all()
+        failed = []
         for user in users:
             try:
                 with current_app.test_request_context("/send_post_by_email"):
                     send_post_to_user(community, post, user)
-            except BaseException:
-                failed.add(user.id)
-            else:
-                successfully_sent.append(user.id)
+            except (smtplib.SMTPException, OSError) as e:
+                logger.error(
+                    "Sending post {post_id} to user {user_id} failed: {error}",
+                    post_id=post_id,
+                    user_id=user.id,
+                    error=str(e),
+                )
+                failed.append(user.id)
 
-        # if failed:
-        #     if failed_ids is not None:
-        #         failed_ids = set(failed_ids)
-        #
-        #     if failed == failed_ids:
-        #         # 5 minutes * (2** retry count)
-        #         countdown = 300 * 2 ** batch_send_post_to_users.request.retries
-        #         batch_send_post_to_users.retry([post_id, list(failed)], countdown=countdown)
-        #     else:
-        #         batch_send_post_to_users.apply_async([post_id, list(failed)])
-
-        return {
-            "post_id": post_id,
-            "successfully_sent": successfully_sent,
-            "failed": list(failed),
-        }
+    if not failed:
+        return
+    if len(failed) == len(users):
+        msg = f"Could not send post {post_id} to any of {failed}"
+        raise MailNotSentError(msg)
+    batch_send_post_to_users.send_with_options(
+        args=(post_id, failed), delay=RETRY_DELAY_MS
+    )
 
 
 def build_local_part(name, uid):
@@ -233,13 +222,9 @@ def send_post_to_user(community, post, member) -> None:
         "Sending new post by email to {recipients}",
         recipients=message.recipients,
     )
-    try:
-        # with mail.connect() as connection:
-        with current_app.app_context():
-            mail.send(message)
-    except BaseException as e:
-        # log to sentry if enabled
-        logger.error("Send mail to user failed: {error}", error=str(e))
+    # Errors propagate: the batch that called us retries the recipient.
+    with current_app.app_context():
+        mail.send(message)
 
 
 def _mail_from_post(community, post, member) -> Message:
@@ -305,17 +290,6 @@ def extract_content(payload, marker):
     index = payload.rfind(marker)
     content = payload[:index]
     return content
-
-
-def validate_html(payload):
-    css_sanitizer = CSSSanitizer(allowed_css_properties=ALLOWED_STYLES)
-    args = {
-        "tags": ALLOWED_TAGS,
-        "attributes": ALLOWED_ATTRIBUTES,
-        "css_sanitizer": css_sanitizer,
-        "strip": True,
-    }
-    return bleach.clean(payload, **args).strip()
 
 
 def add_paragraph(newpost):
@@ -409,14 +383,14 @@ def process(message: email.message.Message, marker: str) -> tuple[str, list[dict
 
     if marker in content["html"]:
         newpost = extract_content(content["html"], marker[:9])
-        newpost = add_paragraph(validate_html(newpost))
+        newpost = add_paragraph(sanitize_html(newpost))
         newpost = clean_html(newpost)
     elif marker in content["plain"]:
         newpost = extract_content(content["plain"], marker[:9])
         newpost = add_paragraph(newpost)
     elif content["html"]:
         newpost = content["html"]
-        newpost = add_paragraph(validate_html(newpost))
+        newpost = add_paragraph(sanitize_html(newpost))
         newpost = clean_html(newpost)
     else:
         newpost = content["plain"]
@@ -428,13 +402,16 @@ def process(message: email.message.Message, marker: str) -> tuple[str, list[dict
 
 
 @dramatiq.actor(max_retries=20, max_backoff=86400000)
-def process_email(message: email.message.Message) -> bool:
-    """Email.Message object from command line script Run message (parsed
-    email).
+def process_email(message: str | email.message.Message) -> bool:
+    """Post a reply received by email to the thread its address names.
 
-    Processing chain extract community thread post member from reply_to
-    persist post in db.
+    A message queued by `flask inject_email` arrives as a string, since a
+    Dramatiq message must be JSON; a direct call may pass the parsed message.
+    The destination (locale, thread, member) is read from the signed `To:`
+    address. Return False if the message is rejected.
     """
+    if isinstance(message, str):
+        message = email.message_from_string(message)
     app = unwrap(current_app)
     # Extract post destination from To: field, (community/forum/thread/member)
     to_address = message["To"]
@@ -468,13 +445,13 @@ def process_email(message: email.message.Message) -> bool:
     # Extract text and attachments from message
     try:
         newpost, attachments = process(message, marker)
-    except BaseException:
+    except (LookupError, ValueError, email.errors.MessageError):
         logger.opt(exception=True).error("Could not Process message")
         return False
 
     # Persist post
     with current_app.test_request_context("/process_email", headers=rq_headers):
-        g.user = User.query.get(user_id)
+        user = User.query.get(user_id)
         thread = Thread.query.get(thread_id)
         if thread is None:
             # Deleted since the notification went out: retrying cannot help.
@@ -487,17 +464,17 @@ def process_email(message: email.message.Message) -> bool:
         # The address is signed, but it outlives a membership: whoever left the
         # community, or was removed from it, still has the e-mails it came in.
         # TODO: tell them, by e-mail, that the reply was not posted.
-        if g.user is None or not is_member(g.user, community):
+        if user is None or not is_member(user, community):
             logger.warning(
                 "Reply by a non-member to thread {thread_id}, dropped",
                 thread_id=thread_id,
             )
             return False
-        post = thread.create_post(body_html=newpost)
+        post = thread.create_post(body_html=newpost, creator=user, owner=user)
         obj_meta = post.meta.setdefault("abilian.sbe.forum", {})
         obj_meta["origin"] = "email"
         obj_meta["send_by_email"] = True
-        activity.send(app, actor=g.user, verb="post", object=post, target=community)
+        activity.send(app, actor=user, verb="post", object=post, target=community)
 
         for desc in attachments:
             filename = desc["filename"]
@@ -525,22 +502,44 @@ def check_maildir() -> None:
     Scheduled only if `INCOMING_MAIL_USE_MAILDIR` is True, every minute by
     default (`SCHEDULE_CHECK_MAILDIR`).
     """
-    home = expanduser("~")
-    maildirpath = Path(home) / "Maildir"
-    if not maildirpath.is_dir():
-        msg = f"{maildirpath} must be a directory"
+    maildir_path = Path.home() / "Maildir"
+    if not maildir_path.is_dir():
+        msg = f"{maildir_path} must be a directory"
         raise ValueError(msg)
 
-    incoming_mailbox = mailbox.Maildir(str(maildirpath))
-    incoming_mailbox.lock()  # Useless but recommended if old mbox is used by error
+    drain_maildir(maildir_path, process_email)
+
+
+def drain_maildir(
+    maildir_path: Path, post: Callable[[email.message.Message], bool]
+) -> None:
+    """Hand every new message of the Maildir to `post`, at most once.
+
+    `Maildir.lock()` does nothing, so a file lock keeps two runs (an overlap,
+    or a retry) from reading the same messages; a run that finds it held does
+    nothing. Each message moves to the `processing` folder before it is posted:
+    a run that fails after posting cannot post it again. It stays there, for an
+    admin to look at. A message `post` rejects moves to the `rejected` folder,
+    instead of being read again every minute.
+    """
+    lock = FileLock(maildir_path / MAILDIR_LOCK_FILE)
+    try:
+        lock.acquire(blocking=False)
+    except Timeout:
+        logger.info("{path} is being checked already, skipping", path=maildir_path)
+        return
 
     try:
-        for key, message in incoming_mailbox.items():
-            processed = process_email(message)
-
-            # delete the message if all went fine
-            if processed:
-                del incoming_mailbox[key]
-
+        inbox = mailbox.Maildir(maildir_path, create=False)
+        processing = inbox.add_folder(PROCESSING_FOLDER)
+        rejected = inbox.add_folder(REJECTED_FOLDER)
+        # A list, read once: the loop takes the messages out of the inbox.
+        for key, new_message in inbox.items():
+            processing_key = processing.add(new_message)
+            inbox.discard(key)
+            message = processing[processing_key]
+            if not post(message):
+                rejected.add(message)
+            processing.discard(processing_key)
     finally:
-        incoming_mailbox.close()  # Flushes all changes to disk then unlocks
+        lock.release()
