@@ -197,9 +197,14 @@ def test_members(
     ],
 )
 def test_a_member_form_with_unknown_ids_is_refused(
-    app, client: FlaskClient, community1: Community, data: dict, status: int
+    app,
+    client: FlaskClient,
+    community1: Community,
+    data: dict,
+    status: int,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    app.config["TRAP_BAD_REQUEST_ERRORS"] = False
+    monkeypatch.setitem(app.config, "TRAP_BAD_REQUEST_ERRORS", False)
     security_service.start()
     admin = community1.test_user
     security_service.grant_role(admin, ADMIN)

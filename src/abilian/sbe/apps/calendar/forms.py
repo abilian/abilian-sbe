@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import bleach
-from bleach.css_sanitizer import CSSSanitizer
 from wtforms import StringField, TextAreaField, URLField
 from wtforms.validators import ValidationError
 
@@ -13,42 +11,7 @@ from abilian.web.forms.fields import DateTimeField
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import required
 from abilian.web.forms.widgets import RichTextWidget
-
-ALLOWED_TAGS = {
-    "a",
-    "abbr",
-    "acronym",
-    "b",
-    "blockquote",
-    "br",
-    "code",
-    "em",
-    "i",
-    "li",
-    "ol",
-    "strong",
-    "ul",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "p",
-    "u",
-    "img",
-}
-
-ALLOWED_ATTRIBUTES = {
-    "*": ["title"],
-    "p": ["style"],
-    "a": ["href", "title"],
-    "abbr": ["title"],
-    "acronym": ["title"],
-    "img": ["src", "alt", "title"],
-}
-
-ALLOWED_STYLES = ["text-align"]
+from abilian.web.rich_text import sanitize_html
 
 
 class EventForm(Form):
@@ -69,14 +32,7 @@ class EventForm(Form):
     )
 
     def validate_description(self, field) -> None:
-        css_sanitizer = CSSSanitizer(allowed_css_properties=ALLOWED_STYLES)
-        field.data = bleach.clean(
-            field.data,
-            tags=ALLOWED_TAGS,
-            attributes=ALLOWED_ATTRIBUTES,
-            css_sanitizer=css_sanitizer,
-            strip=True,
-        )
+        field.data = sanitize_html(field.data)
 
     def validate_end(self, field) -> None:
         if self.start.data > self.end.data:

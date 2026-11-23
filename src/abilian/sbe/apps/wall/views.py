@@ -3,14 +3,12 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import date, datetime
-from itertools import groupby, islice
+from itertools import islice
 from typing import TYPE_CHECKING, Any
 
 import whoosh
 import whoosh.query as wq
 from flask import current_app, g, render_template
-from flask_babel import format_date
 from sqlalchemy.orm import joinedload
 
 from abilian.core.application import as_application
@@ -19,6 +17,7 @@ from abilian.sbe.apps.communities.blueprint import CommunityBlueprint
 from abilian.sbe.apps.communities.models import MANAGER
 from abilian.sbe.apps.documents.models import Document
 from abilian.sbe.apps.forum.models import Post, Thread
+from abilian.sbe.apps.forum.views import group_monthly
 from abilian.sbe.apps.main.feed import feed_item
 from abilian.services import get_service
 from abilian.web import url_for
@@ -27,6 +26,8 @@ from abilian.web.action import actions
 from .util import get_recent_entries
 
 if TYPE_CHECKING:
+    from datetime import datetime
+
     from abilian.core.models.subjects import User
     from abilian.services.activity.models import ActivityEntry
 
@@ -89,7 +90,7 @@ def files(user: User):
 
     all_files = sorted(all_files, key=lambda doc: doc.date)
     all_files = islice(reversed(all_files), 0, 50)
-    grouped_docs = group_monthly(all_files)
+    grouped_docs = group_monthly(all_files, lambda attachment: attachment.date)
 
     return render_template("wall/files.html", grouped_docs=grouped_docs)
 
@@ -166,21 +167,3 @@ def get_attachments_from_dms(user: User, community):
         attachments.append(attachment)
 
     return attachments
-
-
-# FIXME: copy/pasted then hacked from forum/views.py
-def group_monthly(objects):
-    # We're using Python's groupby instead of SA's group_by here
-    # because it's easier to support both SQLite and Postgres this way.
-    def grouper(entity):
-        return entity.date.year, entity.date.month
-
-    def format_month(year, month) -> str:
-        month = format_date(date(year, month, 1), "MMMM").capitalize()
-        return f"{month} {year}"
-
-    grouped = groupby(objects, grouper)
-    grouped = [
-        (format_month(year, month), list(objs)) for (year, month), objs in grouped
-    ]
-    return grouped

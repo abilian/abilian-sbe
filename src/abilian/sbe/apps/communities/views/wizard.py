@@ -24,7 +24,6 @@ from abilian.core.util import unwrap
 from abilian.i18n import _
 from abilian.sbe.apps.communities.decorators import can_manage
 from abilian.sbe.apps.communities.invitations import send_invitation
-from abilian.web import csrf
 from abilian.web.action import Endpoint
 from abilian.web.nav import BreadcrumbItem
 
@@ -89,7 +88,6 @@ def classify_invitees(text: str) -> list[Invitee]:
 
 
 @route("/<string:community_id>/members/wizard/preview", methods=["POST"])
-@csrf.protect
 @can_manage
 def wizard_preview() -> str:
     """What inviting the addresses typed so far would do to each: a piece of the
@@ -293,7 +291,6 @@ def wizard_data_insertion():
 
 
 @route("/<string:community_id>/members/wizard/step2", methods=["GET", "POST"])
-@csrf.protect
 @can_manage
 @tab("members")
 def wizard_check_data() -> Response | str:
@@ -374,7 +371,6 @@ def wizard_check_data() -> Response | str:
 
 
 @route("/<string:community_id>/members/wizard/complete", methods=["POST"])
-@csrf.protect
 @can_manage
 def wizard_saving() -> Response:
     """The list the second page checked, as its script left it, invited."""

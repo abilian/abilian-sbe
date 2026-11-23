@@ -27,7 +27,7 @@ from abilian.sbe.apps.communities.models import (
     communities_to_discover,
     managers_of,
 )
-from abilian.web import csrf, url_for
+from abilian.web import url_for
 
 from .views import route
 
@@ -57,7 +57,6 @@ def discover(user: User) -> str:
 
 
 @route("/discover/", methods=["POST"])
-@csrf.protect
 @authenticated
 def discover_post(user: User) -> Response:
     """Join an open community, or ask to join one open on request."""

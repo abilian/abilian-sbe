@@ -8,11 +8,12 @@ from typing import TYPE_CHECKING, cast
 from unittest import mock
 
 import pytest
+from dramatiq import Message
 from flask import url_for
 from flask_login import login_user
+from loguru import logger
 
 from abilian.sbe.apps.communities.models import MANAGER, MEMBER
-from abilian.sbe.apps.forum.cli import do_inject_email
 from abilian.sbe.apps.forum.models import Post, Thread
 from abilian.sbe.apps.forum.tasks import (
     build_reply_email_address,
@@ -20,12 +21,14 @@ from abilian.sbe.apps.forum.tasks import (
     process_email,
     send_post_by_email,
 )
-from abilian.sbe.apps.forum.views import ThreadCreate
 from abilian.services import get_service, security_service
 from tests.forum_util import get_string_from_file, started_thread
 from tests.util import client_login
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
+    from dramatiq.brokers.stub import StubBroker
     from flask_sqlalchemy import SQLAlchemy
 
     from abilian.services.indexing.service import IndexService
@@ -101,78 +104,82 @@ def test_forum_home(client, community1, login_admin) -> None:
     assert response.status_code == 200
 
 
-@pytest.mark.skip("Require fixing dramatiq tests to not loose session in test context")
-def test_create_thread_informative_member(
-    app, db: SQLAlchemy, client, community1, monkeypatch
+@pytest.fixture
+def broker(app) -> StubBroker:
+    broker = send_post_by_email.broker
+    broker.flush_all()
+    return broker
+
+
+def queued_mailings(broker: StubBroker) -> list[tuple]:
+    """The posts queued to be mailed to the community's members."""
+    queue = broker.queues[send_post_by_email.queue_name].queue
+    messages = [Message.decode(data) for data in queue]
+    return [m.args for m in messages if m.actor_name == send_post_by_email.actor_name]
+
+
+@pytest.mark.parametrize(("role", "mailed"), [(MEMBER, False), (MANAGER, True)])
+def test_only_a_manager_mails_a_new_thread_of_an_informative_community(
+    db: SQLAlchemy, client, community1, broker: StubBroker, role, mailed: bool
 ) -> None:
-    """Test with 'informative' community.
-
-    No mail sent, unless user is MANAGER
-    """
-
-    def commit_success_no_task(self) -> None:
-        if self.send_by_email:
-            send_post_by_email(self.post.id)
-
-    monkeypatch.setattr(ThreadCreate, "commit_success", commit_success_no_task)
-
     user = community1.test_user
     assert community1.type == "informative"
-    community1.set_membership(user, MEMBER)
+    community1.set_membership(user, role)
     db.session.commit()
-
-    title = "Brand new thread"
-    content = "shiny thread message"
     url = url_for("forum.new_thread", community_id=community1.slug)
-    data = {"title": title, "message": content, "__action": "create"}
+    data = {
+        "title": "Brand new thread",
+        "message": "Shiny.",
+        "__action": "create",
+        "send_by_email": "y",
+    }
 
-    mail = app.extensions["mail"]
-    with client_login(client, user), mail.record_messages():
-        data["send_by_email"] = "y"  # actually should not be in html form
+    with client_login(client, user):
         response = client.post(url, data=data)
-        assert response.status_code == 302
-        # FIXME: this doesn't pass
-        # assert len(outbox) == 0
+
+    assert response.status_code == 302
+    post = Post.query.one()
+    assert queued_mailings(broker) == ([(post.id,)] if mailed else [])
 
 
-@pytest.mark.skip("Require fixing dramatiq tests to not loose session in test context")
-def test_create_thread_informative_manager(
-    app, db: SQLAlchemy, client, community1, monkeypatch
+def test_a_thread_is_not_mailed_unless_asked(
+    db: SQLAlchemy, client, community1, broker: StubBroker
 ) -> None:
-    """Test with 'informative' community.
-
-    No mail sent, unless user is MANAGER
-    """
-
-    def commit_success_no_task(self) -> None:
-        if self.send_by_email:
-            send_post_by_email(self.post.id)
-
-    monkeypatch.setattr(ThreadCreate, "commit_success", commit_success_no_task)
-
     user = community1.test_user
-    assert community1.type == "informative"
     community1.set_membership(user, MANAGER)
     db.session.commit()
-
-    title = "Brand new thread"
-    content = "shiny thread message"
     url = url_for("forum.new_thread", community_id=community1.slug)
-    data = {"title": title, "message": content, "__action": "create"}
+    data = {"title": "Brand new thread", "message": "Shiny.", "__action": "create"}
 
-    mail = app.extensions["mail"]
     with client_login(client, user):
-        with mail.record_messages() as outbox:
-            data["send_by_email"] = "y"  # should be in html form
-            response = client.post(url, data=data)
-            assert response.status_code == 302
-            assert len(outbox) == 1
+        response = client.post(url, data=data)
 
-        with mail.record_messages() as outbox:
-            del data["send_by_email"]
-            response = client.post(url, data=data)
-            assert response.status_code == 302
-            assert len(outbox) == 0
+    assert response.status_code == 302
+    assert Post.query.count() == 1
+    assert queued_mailings(broker) == []
+
+
+def test_a_reply_is_shown_on_its_thread_and_mailed(
+    db: SQLAlchemy, client, community1, broker: StubBroker
+) -> None:
+    user = community1.test_user
+    community1.set_membership(user, MANAGER)
+    db.session.commit()
+    thread = started_thread(db, community1, user, "Budget 2027")
+    url = url_for(
+        "forum.thread_post", community_id=community1.slug, thread_id=thread.id
+    )
+    data = {"message": "My cherished post", "__action": "create", "send_by_email": "y"}
+
+    with client_login(client, user):
+        response = client.post(url, data=data)
+        page = client.get(url).get_data(as_text=True)
+
+    assert response.status_code == 302
+    assert "My cherished post" in page
+    reply = Post.query.filter(Post.body_html.contains("cherished")).one()
+    assert reply.thread_id == thread.id
+    assert queued_mailings(broker) == [(reply.id,)]
 
 
 def test_build_reply_email_address(app) -> None:
@@ -210,99 +217,18 @@ def test_extract_mail_destination_3(app) -> None:
     assert infos == ("en", "3", "4")
 
 
-@pytest.mark.skip("Require fixing dramatiq tests to not loose session in test context")
-def test_create_thread_and_post(community1, client, app, db) -> None:
-    community = community1
-    user = community.test_user
-
-    # activate email reply
-    app.config["SBE_FORUM_REPLY_BY_MAIL"] = True
-
-    # create a new user, add him/her to the current community as a MANAGER
-    community.set_membership(user, MANAGER)
-    db.session.commit()
-    client_login(client, user)
-
-    mail = app.extensions["mail"]
-    with mail.record_messages() as outbox:
-        title = "Brand new thread"
-        content = "shiny thread message"
-        url = url_for("forum.new_thread", community_id=community.slug)
-        data = {
-            "title": title,
-            "message": content,
-            "__action": "create",
-            "send_by_email": "y",
-        }
-        response = client.post(url, data=data)
-        assert response.status_code == 302
-
-        # extract the thread_id from the redirection url in response
-        threadid = response.location.rsplit("/", 2)[1]
-
-        # retrieve the new thread, make sur it has the message
-        url = url_for(
-            "forum.thread", thread_id=threadid, community_id=community.slug, title=title
-        )
-        response = client.get(url)
-        assert response.status_code == 200
-        assert content in response.get_data(as_text=True)
-
-        # check the email was sent with the new thread
-        assert len(outbox) == 1
-        assert outbox[0].subject == "[My Community] Brand new thread"
-
-    # reset the outbox for checking threadpost email
-    with mail.record_messages() as outbox:
-        content = data["message"] = "my cherished post"
-        del data["title"]
-        response = client.post(url, data=data)
-        assert response.status_code == 302
-
-        # retrieve the new thread, make sur it has the message
-        url = url_for(
-            "forum.thread", thread_id=threadid, community_id=community.slug, title=title
-        )
-        response = client.get(url)
-        assert response.status_code == 200
-        assert content in response.get_data(as_text=True)
-
-        # check the email was sent with the new threadpost
-        assert len(outbox) == 1
-        expected = "[My Community] Brand new thread"
-        assert str(outbox[0].subject) == expected
+@pytest.fixture
+def warnings() -> Iterator[list[str]]:
+    """The warnings logged during the test."""
+    messages: list[str] = []
+    sink = logger.add(messages.append, level="WARNING", format="{message}")
+    yield messages
+    logger.remove(sink)
 
 
-@pytest.mark.skip("Require fixing dramatiq tests to not loose session in test context")
-@mock.patch("fileinput.input")
-@mock.patch("abilian.sbe.apps.forum.cli.process_email")
-def test_parse_forum_email(mock_process_email, mock_email) -> None:
-    """No processing is tested only parsing into a email.message and
-    verifying inject_email() logic."""
-    # first load a test email returned by the mock_email
-    mock_email.return_value = get_string_from_file("notification.email")
-
-    # test the parsing function
-    do_inject_email()
-
-    # assert the email is read
-    assert mock_email.called
-    # assert a call on the task was made implying a message creation
-    assert mock_process_email.delay.called
-
-    ##
-    mock_email.reset_mock()
-    mock_process_email.delay.reset_mock()
-    assert not mock_email.called
-    assert not mock_process_email.delay.called
-
-    mock_email.return_value = get_string_from_file("defects.email")
-    do_inject_email()
-    assert mock_email.called
-    assert not mock_process_email.delay.called
-
-
-def test_a_reply_to_a_deleted_thread_is_dropped(app, db, community1) -> None:
+def test_a_reply_to_a_deleted_thread_is_dropped(
+    app, db, community1, warnings: list[str]
+) -> None:
     """The reply's thread no longer exists: dropped, not retried."""
     post = mock.Mock(id=1, thread_id=999999)
     message = email.message_from_string(get_string_from_file("notification.email"))
@@ -312,6 +238,9 @@ def test_a_reply_to_a_deleted_thread_is_dropped(app, db, community1) -> None:
         )
         message.replace_header("To", address)
         assert process_email(message) is False
+
+    assert warnings == ["Reply to a thread that no longer exists: 999999\n"]
+    assert Post.query.count() == 0
 
 
 def _reply_by_email(app, thread: Thread, user) -> bool:
@@ -336,7 +265,7 @@ def test_a_reply_by_email_from_a_member_is_posted(app, db, community1) -> None:
 
 
 def test_a_reply_by_email_from_someone_no_longer_a_member_is_dropped(
-    app, db, community1
+    app, db, community1, warnings: list[str]
 ) -> None:
     """The reply address is signed, and still works once its holder has left."""
     user = community1.test_user
@@ -346,6 +275,7 @@ def test_a_reply_by_email_from_someone_no_longer_a_member_is_dropped(
 
     assert _reply_by_email(app, thread, user) is False
 
+    assert warnings == [f"Reply by a non-member to thread {thread.id}, dropped\n"]
     db.session.expire_all()
     assert len(thread.posts) == 1
 

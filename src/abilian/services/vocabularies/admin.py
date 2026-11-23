@@ -113,9 +113,9 @@ class VocabularyPanel(AdminPanel):
         if not Model:
             return do_return()
 
-        if not group or group == "_":
-            # default group
-            group = None
+        if group == "_":
+            # The default group, which the vocabularies are registered under as "".
+            group = ""
 
         svc = get_service("vocabularies")
         Model = svc.get_vocabulary(name=Model, group=group)
@@ -144,9 +144,16 @@ class VocabularyPanel(AdminPanel):
             return do_return()
 
         session = db.session()
-        query = Model.query.with_lockmode("update")
-        item = query.get(object_id)
-        other = query.filter(cmp_op(item.position)).order_by(cmp_order).first()
+        # Both rows locked: two admins reordering at once must not swap the same.
+        item = session.get(Model, object_id, with_for_update=True)
+        if item is None:
+            raise NotFound
+        other = (
+            Model.query.with_for_update()
+            .filter(cmp_op(item.position))
+            .order_by(cmp_order)
+            .first()
+        )
 
         if other is not None:
             # switch positions

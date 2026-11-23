@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import bleach
-from bleach.css_sanitizer import CSSSanitizer
 from wtforms import BooleanField, StringField, TextAreaField
 
 from abilian.i18n import _l
@@ -11,42 +9,23 @@ from abilian.web.forms import Form, RichTextWidget
 from abilian.web.forms.fields import FileField
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import Length, optional, required
+from abilian.web.rich_text import (
+    ALLOWED_ATTRIBUTES,
+    ALLOWED_STYLES,
+    ALLOWED_TAGS,
+    sanitize_html,
+)
 
-ALLOWED_TAGS = {
-    "a",
-    "abbr",
-    "acronym",
-    "b",
-    "blockquote",
-    "br",
-    "code",
-    "em",
-    "i",
-    "li",
-    "ol",
-    "strong",
-    "ul",
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
-    "p",
-    "u",
-    "img",
-}
-
-ALLOWED_ATTRIBUTES = {
-    "*": ["title"],
-    "p": ["style"],
-    "a": ["href", "title"],
-    "abbr": ["title"],
-    "acronym": ["title"],
-    "img": ["src", "alt", "title"],
-}
-
-ALLOWED_STYLES = ["text-align"]
+# TODO: drop this re-export once `forum/tasks.py` calls `sanitize_html` instead.
+__all__ = [
+    "ALLOWED_ATTRIBUTES",
+    "ALLOWED_STYLES",
+    "ALLOWED_TAGS",
+    "BasePostForm",
+    "PostEditForm",
+    "PostForm",
+    "ThreadForm",
+]
 
 # instantiate this one before PostForm fields, so that it is listed first
 # when Threadform is displayed
@@ -67,14 +46,7 @@ class BasePostForm(Form):
     )
 
     def validate_message(self, field) -> None:
-        css_sanitizer = CSSSanitizer(allowed_css_properties=ALLOWED_STYLES)
-        field.data = bleach.clean(
-            field.data,
-            tags=ALLOWED_TAGS,
-            attributes=ALLOWED_ATTRIBUTES,
-            css_sanitizer=css_sanitizer,
-            strip=True,
-        )
+        field.data = sanitize_html(field.data)
 
 
 class PostForm(BasePostForm):

@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, ClassVar, Protocol
 import sqlalchemy as sa
 import sqlalchemy.exc
 import sqlalchemy.orm
-from flask import current_app, flash, g, redirect, render_template, request, url_for
+from flask import flash, g, redirect, render_template, request, url_for
 from loguru import logger
 from werkzeug.exceptions import BadRequest, NotFound
 from wtforms import Form
@@ -22,7 +22,7 @@ from abilian.core.signals import activity
 from abilian.i18n import _, _l
 from abilian.services import get_service
 from abilian.services.security import CREATE, DELETE, READ, WRITE
-from abilian.web import csrf, forms, nav
+from abilian.web import forms, nav
 from abilian.web.action import ButtonAction, Endpoint, actions
 
 from .base import JSONView, View
@@ -32,6 +32,8 @@ if TYPE_CHECKING:
 
     from flask.typing import ResponseReturnValue
     from werkzeug.datastructures import ImmutableMultiDict
+
+    from abilian.core.models.subjects import User
 
 
 class ViewedModel(Protocol):
@@ -195,7 +197,6 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
     """Edit object."""
 
     template = "default/object_edit.html"
-    decorators = (csrf.support_graceful_failure,)
     permission = WRITE
 
     #: :class:ButtonAction instance to show on form
@@ -203,6 +204,9 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
 
     #: submitted form data, set by `prepare_args()`
     data: ImmutableMultiDict[str, str]
+
+    #: the logged-in user, who makes the change; set by `prepare_args()`
+    user: User
 
     #: action name from form data
     action = None
@@ -251,10 +255,18 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
         return self.post()
 
     def prepare_args(self, args, kwargs):
+        # Before the parent's: the form is made there, for the user.
+        self.user = authenticated_user()
         args, kwargs = super().prepare_args(args, kwargs)
         self._buttons = self.get_form_buttons(*args, **kwargs)
         self.data = request.form
         return args, kwargs
+
+    def get_form_kwargs(self) -> dict[str, Any]:
+        kw = super().get_form_kwargs()
+        if issubclass(self.Form, forms.Form):
+            kw["user"] = self.user
+        return kw
 
     def get_form_buttons(self, *args, **kwargs):
         return [EDIT_BUTTON, CANCEL_BUTTON]
@@ -279,15 +291,17 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
 
     # actions
     def handle_action(self, action):
+        # The action comes from the form: one the view does not offer is the
+        # client's error.
         for button in self._buttons:
             if action == button.name:
                 if not button.available({"view": self}):
-                    msg = f'Action "{action.encode("utf-8")}" not available'
-                    raise ValueError(msg)
+                    msg = f"Action not available: {action!r}"
+                    raise BadRequest(msg)
                 break
         else:
-            msg = f'Unknown action: "{action.encode("utf-8")}"'
-            raise ValueError(msg)
+            msg = f"Unknown action: {action!r}"
+            raise BadRequest(msg)
 
         self.action = action
         self.button = button
@@ -299,14 +313,6 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
     def edit(self, redirect_to=None):
         if self.validate():
             return self.form_valid(redirect_to=redirect_to)
-        if csrf.has_failed():
-            errors = self.form.errors
-            csrf_failed = errors.pop("csrf_token", False)
-            if csrf_failed and not errors:
-                # failed only because of invalid/expired csrf, no error on
-                # form
-                return self.form_csrf_invalid()
-
         resp = self.form_invalid()
         if resp:
             return resp
@@ -411,23 +417,10 @@ class ObjectEdit[M: ViewedModel, F: Form](ObjectView[M, F]):
         """
         return
 
-    def form_csrf_invalid(self):
-        """Called when a form doesn't validate *only* because of csrf token
-        expiration.
-
-        This works only if form is an instance of :class:`flask_wtf.form.SecureForm`.
-        Else default CSRF protection (before request) will take place.
-
-        It must return a valid :class:`Flask.Response` instance. By default it
-        returns to edit form screen with an informative message.
-        """
-        current_app.extensions["csrf-handler"].flash_csrf_failed_message()
-        return self.get()
-
     def send_activity(self) -> None:
         activity.send(
             self,
-            actor=g.user,
+            actor=self.user,
             verb=self.activity_verb,
             object=self.obj,
             target=self.activity_target,
@@ -540,7 +533,7 @@ class ObjectDelete[M: ViewedModel, F: Form](ObjectEdit[M, F]):
         session.delete(self.obj)
         activity.send(
             self,
-            actor=g.user,
+            actor=self.user,
             verb="delete",
             object=self.obj,
             target=self.activity_target,

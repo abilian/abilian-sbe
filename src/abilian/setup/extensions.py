@@ -153,14 +153,7 @@ def init_babel(app: Flask) -> None:
 def init_csrf(app: Flask) -> None:
     # CSRF by default
     if app.config.get("WTF_CSRF_ENABLED"):
-        # extensions.csrf IS original wtf_csrf
-        # abilian_csrf is
-        # from .csrf import abilian_csrf
-        # from .csrf import wtf_csrf as csrf
-
-        extensions.csrf.init_app(app)  # double initialization
-        app.extensions["csrf"] = extensions.csrf
-        extensions.abilian_csrf.init_app(app)
+        extensions.csrf.init_app(app)
 
     app.register_blueprint(csrf.csrf_blueprint)
 

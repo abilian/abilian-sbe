@@ -15,7 +15,6 @@ from abilian.core.dramatiq.scheduler import DEFAULT_SCHEDULE
 from abilian.core.extensions import db
 from abilian.i18n import _, _l
 from abilian.services import get_service
-from abilian.web import csrf
 from abilian.web.admin import AdminPanel
 
 
@@ -125,7 +124,6 @@ class SettingsPanel(AdminPanel):
     def get(self) -> str:
         return render_template("admin/settings.html", keys=self._keys)
 
-    @csrf.protect
     def post(self):
         action = request.form.get("action")
 

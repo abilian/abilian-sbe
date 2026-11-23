@@ -20,7 +20,6 @@ from abilian.i18n import _, _l, get_default_locale
 from abilian.services import get_service
 from abilian.services.auth.passwords import weakness
 from abilian.services.preferences.panel import PreferencePanel
-from abilian.web import csrf
 from abilian.web.forms.filters import strip
 from abilian.web.forms.validators import required
 from abilian.web.preferences.user import UserPreferencesForm
@@ -77,7 +76,6 @@ class AccountPanel(PreferencePanel):
             form.locale.data = get_default_locale()
         return _render(form, user)
 
-    @csrf.protect
     def post(self) -> Response | str:
         user = authenticated_user()
         form = AccountForm(request.form)

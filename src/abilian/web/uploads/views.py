@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 
 from abilian.core.extensions.login import authenticated_user
 from abilian.services.security import AUTHENTICATED
-from abilian.web import csrf, url_for
+from abilian.web import url_for
 from abilian.web.access_blueprint import AccessControlBlueprint
 from abilian.web.forms import Form
 from abilian.web.views import JSONView, View
@@ -47,7 +47,6 @@ class NewUploadView(BaseUploadsView, JSONView):
     """Upload a new file."""
 
     methods = ["POST", "PUT"]
-    decorators = (csrf.support_graceful_failure,)
 
     #: file handle to be returned
     handle = None
@@ -81,7 +80,6 @@ class UploadView(BaseUploadsView, View):
     """Manage an uploaded file: download, delete."""
 
     methods = ["GET", "DELETE"]
-    decorators = (csrf.support_graceful_failure,)
 
     def get(self, handle, *args, **kwargs):
         file_obj = self.uploads.get_file(self.user, handle)

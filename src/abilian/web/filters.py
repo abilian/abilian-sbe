@@ -9,7 +9,6 @@ from datetime import datetime
 from functools import wraps
 from typing import TYPE_CHECKING, Any
 
-import bleach
 import dateutil.parser
 import flask_babel as babel
 from babel.dates import format_timedelta
@@ -151,14 +150,8 @@ def age(
     )
 
 
-@autoescape
-def linkify(s: str) -> Markup:
-    return Markup(bleach.linkify(s))
-
-
 def init_filters(env: Environment) -> None:
     env.filters["datetimeparse"] = datetimeparse
     env.filters["age"] = age
     env.filters["filesize"] = filesize
-    env.filters["linkify"] = linkify
     env.filters["paragraphs"] = paragraphs

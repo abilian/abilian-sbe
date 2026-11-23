@@ -38,6 +38,8 @@ PUBLIC_ENDPOINTS = frozenset(
         "csrf.json_token",
         # Followed from a notification email; the token says who.
         "notifications.unsubscribe_sbe",
+        # Checked by the platform the app runs on, which does not sign in.
+        "health.health",
     }
 )
 

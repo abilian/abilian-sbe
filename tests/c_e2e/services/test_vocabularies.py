@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import sqlalchemy as sa
 import sqlalchemy.exc
-from pytest import mark, raises
+from pytest import raises
 
 from abilian.services.vocabularies.models import BaseVocabulary, Vocabulary
 from abilian.services.vocabularies.service import vocabularies
@@ -121,9 +121,7 @@ def test_items(db, session) -> None:
     assert item is NORMAL
 
 
-@mark.skip
-def test_admin_panel_reorder(app, db, session, client, test_request_context) -> None:
-    db.create_all()
+def test_admin_panel_reorder(client, login_admin, session) -> None:
     items = [
         Voc(label="First", position=0),
         Voc(label="Second", position=2),
@@ -155,7 +153,7 @@ def test_admin_panel_reorder(app, db, session, client, test_request_context) -> 
     data.update(base_data)
     r = client.post(url, data=data)
     assert r.status_code == 302
-    assert path_from_url(r.location) == "/admin/vocabularies/_/defaultstates/"
+    assert path_from_url(r.location) == "/admin/vocabularies/_/voc/"
     assert Voc.query.order_by(Voc.position).all() == [first, second, third]
 
     data = {"down": third.id}

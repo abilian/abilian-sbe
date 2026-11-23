@@ -30,10 +30,10 @@ def test_test(app: Flask, client, login_user) -> None:
     [("Acme Intranet", "Signing in · Acme Intranet"), ("", "Signing in")],
 )
 def test_the_sign_in_page_names_the_site_only_when_there_is_one(
-    site_name: str, title: str, app: Flask, client
+    site_name: str, title: str, app: Flask, client, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     """An empty SITE_NAME used to leave the heading reading "Login to"."""
-    app.config["SITE_NAME"] = site_name
+    monkeypatch.setitem(app.config, "SITE_NAME", site_name)
 
     html = client.get(url_for("login.login_form")).get_data(as_text=True)
 

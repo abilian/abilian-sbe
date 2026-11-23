@@ -13,7 +13,6 @@ from typing import TYPE_CHECKING, Any
 
 import openpyxl
 import sqlalchemy as sa
-import sqlalchemy.sql.functions
 from flask import (
     current_app,
     flash,
@@ -55,7 +54,7 @@ from abilian.sbe.apps.documents.repository import content_repository
 from abilian.services import security as site_security
 from abilian.services.activity import ActivityEntry
 from abilian.services.security import Role
-from abilian.web import csrf, views
+from abilian.web import views
 from abilian.web.action import Endpoint
 from abilian.web.listing import Listing, by_name
 from abilian.web.nav import BreadcrumbItem
@@ -361,26 +360,41 @@ def image_url(community: Community | CommunityPresenter, **kwargs: Any) -> str:
 
 def _members_query() -> UserQuery:
     """Helper used in members views."""
-    last_activity_date = sa.sql.functions.max(ActivityEntry.happened_at).label(
-        "last_activity_date"
+    # A subquery, not a join and a GROUP BY on every column of the user: the
+    # photo stays deferred, and out of the grouping.
+    last_activity_date = (
+        sa.select(sa.func.max(ActivityEntry.happened_at))
+        .where(
+            ActivityEntry.actor_id == User.id,
+            ActivityEntry.target_id == Membership.community_id,
+        )
+        .correlate(User, Membership)
+        .scalar_subquery()
+        .label("last_activity_date")
     )
     memberships = (
-        User.query.options(sa.orm.undefer(User.photo))
-        .join(Membership)
-        .outerjoin(
-            ActivityEntry,
-            sa.sql.and_(
-                ActivityEntry.actor_id == User.id,
-                ActivityEntry.target_id == Membership.community_id,
-            ),
-        )
+        User.query.join(Membership)
         .filter(Membership.community == g.community, User.can_login == True)
         .add_columns(Membership.id, Membership.role, last_activity_date)
-        .group_by(User, Membership.id, Membership.role)
         .order_by(User.last_name.asc(), User.first_name.asc())
     )
 
     return memberships
+
+
+def _threads_by_creator(community: Community) -> dict[int, int]:
+    """How many threads each user started in `community`, by user id.
+
+    The thread model is reached through the `threads` relationship the forum
+    adds to a community: communities do not depend on the forum.
+    """
+    thread = sa.inspect(Community).relationships["threads"].mapper.class_
+    query = (
+        sa.select(thread.creator_id, sa.func.count())
+        .where(thread.community_id == community.id)
+        .group_by(thread.creator_id)
+    )
+    return dict(db.session.execute(query).tuples().all())
 
 
 @route("/<string:community_id>/members")
@@ -392,15 +406,15 @@ def members() -> str:
             url=Endpoint("communities.members", community_id=g.community.slug),
         )
     )
-    community_threads_users = [thread.creator for thread in g.community.threads]
-    threads_count = Counter(community_threads_users)
+    rows = _members_query().all()
+    by_creator = _threads_by_creator(g.community._model)
+    threads_count = Counter({row[0]: by_creator.get(row[0].id, 0) for row in rows})
     sort_keys = {
         "name": lambda row: by_name(row[0]),
         "posts": lambda row: threads_count[row[0]],
         "activity": lambda row: (row[3] is not None, row[3]),
         "role": lambda row: (str(row[2]), by_name(row[0])),
     }
-    rows = _members_query().all()
     managers = [row for row in rows if str(row[2]) == "manager"]
     only_managers = request.args.get("role") == "manager"
 
@@ -426,7 +440,6 @@ def members() -> str:
 
 
 @route("/<string:community_id>/members", methods=["POST"])
-@csrf.protect
 @can_manage
 def members_post() -> Response:
     community = g.community._model

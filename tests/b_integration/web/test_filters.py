@@ -6,7 +6,6 @@ import datetime as dt
 from textwrap import dedent
 from typing import TYPE_CHECKING
 
-import html5lib
 from flask import Flask
 from flask_babel import Babel
 from jinja2 import Environment
@@ -47,21 +46,6 @@ def test_filesize() -> None:
     assert str(filesize(10000000)) == f"10{NNSP}MB"
     assert str(filesize(1100100000)) == f"1.1{NNSP}GB"
     assert str(filesize(100000000000)) == f"100{NNSP}GB"
-
-
-def test_linkify() -> None:
-    tmpl = env.from_string('{{ "http://test.example.com"|linkify}}')
-    rendered = tmpl.render()
-    el = html5lib.parseFragment(rendered)
-    assert len(list(el)) == 1
-
-    el1 = el[0]
-    assert el1.tag == "{http://www.w3.org/1999/xhtml}a"
-    assert el1.text == "http://test.example.com"
-    assert sorted(el1.items()) == [
-        ("href", "http://test.example.com"),
-        ("rel", "nofollow"),
-    ]
 
 
 def test_paragraphs() -> None:

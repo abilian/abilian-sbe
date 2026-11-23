@@ -9,16 +9,13 @@ from __future__ import annotations
 
 import base64
 import html
-import re
 from typing import Any
-from urllib import parse
 
-import bleach
 import wtforms
 from flask import current_app, render_template, render_template_string
 from flask_babel import format_date, format_datetime, format_number
 from markupsafe import Markup
-from wtforms import FieldList, IntegerField, StringField
+from wtforms import IntegerField, StringField
 from wtforms.widgets import (
     DateInput as BaseDateInput,
     PasswordInput as BasePasswordInput,
@@ -52,55 +49,7 @@ __all__ = [
     "RichTextWidget",
     "SelectWidget",
     "TextArea",
-    "URLWidget",
-    "linkify_url",
-    "text2html",
 ]
-
-
-def linkify_url(value: str) -> str:
-    """Tranform an URL pulled from the database to a safe HTML fragment."""
-
-    value = value.strip()
-
-    rjs = r"[\s]*(&#x.{1,7})?".join(list("javascript:"))
-    rvb = r"[\s]*(&#x.{1,7})?".join(list("vbscript:"))
-    re_scripts = re.compile(f"({rjs})|({rvb})", re.IGNORECASE)
-
-    value = re_scripts.sub("", value)
-
-    url = value
-    if not url.startswith("http://") and not url.startswith("https://"):
-        url = f"http://{url}"
-
-    url = parse.urlsplit(url).geturl()
-    if '"' in url:
-        url = url.split('"')[0]
-    if "<" in url:
-        url = url.split("<")[0]
-
-    if value.startswith("http://"):
-        value = value[len("http://") :]
-    elif value.startswith("https://"):
-        value = value[len("https://") :]
-
-    if value.count("/") == 1 and value.endswith("/"):
-        value = value[0:-1]
-
-    return f'<a href="{url}">{value}</a>&nbsp;<i class="fa fa-external-link"></i>'
-
-
-def text2html(text: str) -> Markup | str:
-    text = text.strip()
-    if re.search(r"<(p|br)>", text.lower()):
-        return text
-    if "\n" not in text:
-        return text
-
-    lines = text.split("\n")
-    lines = [line for line in lines if line]
-    paragraphs = [f"<p>{line}</p>" for line in lines]
-    return Markup(bleach.clean("\n".join(paragraphs), tags={"p"}))
 
 
 #
@@ -437,11 +386,8 @@ class DateTimeInput:
 
 class DefaultViewWidget:
     def render_view(self, field: IntegerField | StringField, **kwargs: Any) -> str:
-        value = field.object_data
-        if isinstance(value, str):
-            return text2html(value)
         # [], None and other must be rendered using empty string
-        return str(value or "")
+        return str(field.object_data or "")
 
 
 class BooleanWidget(wtforms.widgets.CheckboxInput):
@@ -557,24 +503,6 @@ class MoneyWidget(TextInput):
 
 class EmailWidget(TextInput):
     pre_icon = "@"
-
-    def render_view(self, field: StringField, **kwargs: Any) -> str:
-        links = ""
-        if isinstance(field, FieldList):
-            for entry in field.entries:
-                link = bleach.linkify(entry.data, parse_email=True)
-                if link:
-                    links += f' {link}&nbsp;<i class="fa fa-envelope"></i><br>'
-        else:
-            link = bleach.linkify(field.object_data, parse_email=True)
-            if link:
-                links = f'{link}&nbsp;<i class="fa fa-envelope"></i>'
-        return links
-
-
-class URLWidget:
-    def render_view(self, field, **kwargs):
-        return linkify_url(field.object_data) if field.object_data else ""
 
 
 class RichTextWidget:

@@ -7,7 +7,7 @@ from __future__ import annotations
 from collections import Counter
 from datetime import date, datetime, timedelta
 from itertools import groupby
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 from urllib.parse import quote
 
 from flask import current_app, flash, g, make_response, render_template, request
@@ -41,6 +41,8 @@ from .models import Post, PostAttachment, Thread
 from .tasks import send_post_by_email
 
 if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
+
     from abilian.core.models.subjects import User
 
 # TODO: move to config
@@ -165,22 +167,30 @@ def index(user: User, filter=None):
     )
 
 
-def group_monthly(entities_list):
-    # We're using Python's groupby instead of SA's group_by here
-    # because it's easier to support both SQLite and Postgres this way.
-    def grouper(entity):
-        return entity.created_at.year, entity.created_at.month
+def group_monthly[T](
+    items: Iterable[T], when: Callable[[T], date]
+) -> list[tuple[str, list[T]]]:
+    """`items`, in their order, grouped by the month `when` says they are of, each
+    group named after its month ("March 2026")."""
 
-    def format_month(year, month) -> str:
-        month = format_date(date(year, month, 1), "MMMM").capitalize()
-        return f"{month} {year}"
+    # Python's groupby rather than SQL's GROUP BY: the same on SQLite and Postgres.
+    def month(item: T) -> tuple[int, int]:
+        return when(item).year, when(item).month
 
-    grouped_entities = groupby(entities_list, grouper)
-    grouped_entities = [
-        (format_month(year, month), list(entities))
-        for (year, month), entities in grouped_entities
+    def format_month(year: int, month: int) -> str:
+        name = format_date(date(year, month, 1), "MMMM").capitalize()
+        return f"{name} {year}"
+
+    return [
+        (format_month(year, month), list(group))
+        for (year, month), group in groupby(items, month)
     ]
-    return grouped_entities
+
+
+def created_at(entity: Thread | Post) -> date:
+    """When `entity` was created: what the archives group by."""
+    # Set on insert by the column's default; the model types it as nullable.
+    return cast("date", entity.created_at)
 
 
 @route("/archives/")
@@ -191,7 +201,7 @@ def archives():
         .all()
     )
 
-    grouped_threads = group_monthly(all_threads)
+    grouped_threads = group_monthly(all_threads, created_at)
     return render_template("forum/archives.html", grouped_threads=grouped_threads)
 
 
@@ -212,7 +222,7 @@ def attachments():
     posts_with_attachments.sort(key=lambda post: post.created_at)
     posts_with_attachments.reverse()
 
-    grouped_posts = group_monthly(posts_with_attachments)
+    grouped_posts = group_monthly(posts_with_attachments, created_at)
     return render_template("forum/attachments.html", grouped_posts=grouped_posts)
 
 
@@ -255,6 +265,8 @@ class ThreadView(BaseThreadView, views.ObjectView[Thread, PostForm]):
         kw = super().template_kwargs
         kw.update(thread_page_kwargs(self.user, self.obj))
         viewtracker.record_hit(entity=self.obj, user=self.user)
+        # The view keeps the hit; the tracker only records it.
+        session_of(self.obj).commit()
         return kw
 
 
@@ -329,30 +341,7 @@ class ThreadCreate(BaseThreadView, views.ObjectCreate[Thread, ThreadForm]):
         obj_meta = self.new_post.meta.setdefault("abilian.sbe.forum", {})
         obj_meta["origin"] = "web"
         obj_meta["send_by_email"] = self.send_by_email
-        session = session_of(self.thread)
-        uploads = current_app.extensions["uploads"]
-
-        for handle in request.form.getlist("attachments"):
-            fileobj = uploads.get_file(self.user, handle)
-            if fileobj is None:
-                continue
-
-            meta = uploads.get_metadata(self.user, handle)
-            name = meta.get("filename", handle)
-            mimetype = meta.get("mimetype")
-
-            if not isinstance(name, str):
-                name = str(name, encoding="utf-8", errors="ignore")
-
-            if not name:
-                continue
-
-            attachment = PostAttachment(name=name)
-            attachment.post = self.new_post
-
-            with fileobj.open("rb") as f:
-                attachment.set_content(f.read(), mimetype)
-            session.add(attachment)
+        attach_uploads(self.user, self.new_post)
 
     def commit_success(self) -> None:
         if self.send_by_email:
@@ -493,8 +482,13 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
         # ThreadPostCreate
         args, kwargs = super().init_object(args, kwargs)
         thread_id = kwargs.pop("thread_id", None)
+        if self.obj is None:
+            raise NotFound
         self.thread = self.obj.thread
-        assert thread_id == self.thread.id
+        # The post is looked up by its id alone: under another thread's URL, it is
+        # not found.
+        if thread_id != self.thread.id:
+            raise NotFound
 
         # Nothing checked whose post this was. The community blueprint gates
         # the route to members, so any member could edit any other member's
@@ -530,7 +524,6 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
 
     def after_populate_obj(self) -> None:
         session = session_of(self.obj)
-        uploads = current_app.extensions["uploads"]
         self.obj.body_html = self.message_body
         obj_meta = self.obj.meta.setdefault("abilian.sbe.forum", {})
         history = obj_meta.setdefault("history", [])
@@ -544,44 +537,40 @@ class ThreadPostEdit(BaseThreadView, views.ObjectEdit[Post, PostEditForm]):
         )
         self.obj.meta["abilian.sbe.forum"] = obj_meta  # trigger change for SA
 
-        attachments_to_remove = []
-        for idx in self.attachments_to_remove:
-            try:
-                idx = int(idx)
-            except ValueError:
-                continue
+        # The page numbers the post's files from 0; any other index is none of them.
+        attachments = self.obj.attachments
+        indexes = {int(idx) for idx in self.attachments_to_remove if idx.isdecimal()}
+        for idx in sorted(indexes):
+            if 0 <= idx < len(attachments):
+                session.delete(attachments[idx])
 
-            if idx > len(self.obj.attachments):
-                continue
-
-            attachments_to_remove.append(self.obj.attachments[idx])
-
-        for att in attachments_to_remove:
-            session.delete(att)
-
-        for handle in request.form.getlist("attachments"):
-            fileobj = uploads.get_file(self.user, handle)
-            if fileobj is None:
-                continue
-
-            meta = uploads.get_metadata(self.user, handle)
-            name = meta.get("filename", handle)
-            mimetype = meta.get("mimetype")
-
-            if not isinstance(name, str):
-                name = str(name, encoding="utf-8", errors="ignore")
-
-            if not name:
-                continue
-
-            attachment = PostAttachment(name=name, post=self.obj)
-
-            with fileobj.open("rb") as f:
-                attachment.set_content(f.read(), mimetype)
-            session.add(attachment)
+        attach_uploads(self.user, self.obj)
 
 
 route("/<int:thread_id>/<int:object_id>/edit")(ThreadPostEdit.as_view("post_edit"))
+
+
+def attach_uploads(user: User, post: Post) -> None:
+    """Attach to `post` the files `user` uploaded for the form, as its
+    `attachments` handles name them. A handle that names none is skipped."""
+    uploads = current_app.extensions["uploads"]
+    session = session_of(post)
+    for handle in request.form.getlist("attachments"):
+        fileobj = uploads.get_file(user, handle)
+        if fileobj is None:
+            continue
+
+        meta = uploads.get_metadata(user, handle)
+        name = meta.get("filename", handle)
+        if not isinstance(name, str):
+            name = str(name, encoding="utf-8", errors="ignore")
+        if not name:
+            continue
+
+        attachment = PostAttachment(name=name, post=post)
+        with fileobj.open("rb") as f:
+            attachment.set_content(f.read(), meta.get("mimetype"))
+        session.add(attachment)
 
 
 def attachment_kw_view_func(kw, obj, obj_type, obj_id, **kwargs):

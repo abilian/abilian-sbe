@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, cast
 
-from flask_login import current_user
 from wtforms import Field
 
 from abilian.core.entities import Entity
@@ -113,10 +112,11 @@ class FormPermissions:
         permission: Permission,
         field: str | None = None,
         obj: Entity | object | None = None,
-        user: User | None = None,
+        *,
+        user: User,
     ) -> bool:
-        if user is None:
-            user = cast("User", current_user)
+        """Whether `user` has `permission` on the form, or on its `field`, for
+        `obj`."""
         if obj is not None and not isinstance(obj, Entity):
             # permission/role can be set only on entities
             return True

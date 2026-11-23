@@ -10,6 +10,7 @@ in a browser, in `e2e_playwright/test_forms.py`.
 from __future__ import annotations
 
 from html import unescape
+from io import BytesIO
 from typing import TYPE_CHECKING
 
 import pytest
@@ -22,6 +23,7 @@ from tests.util import client_login, ensure_services_started
 if TYPE_CHECKING:
     from flask.testing import FlaskClient
 
+    from abilian.app import Application
     from abilian.core.models.subjects import User
     from abilian.core.sqlalchemy import SQLAlchemy
     from abilian.sbe.apps.communities.models import Community
@@ -113,3 +115,80 @@ def test_editing_a_message_lists_its_files_and_removes_one(
     db.session.expire_all()
     assert post.body_html == "<p>The minutes, approved.</p>"
     assert post.attachments == []
+
+
+@pytest.mark.parametrize("index", ["1", "-1"])
+def test_a_removal_index_naming_no_file_of_the_message_removes_none(
+    index: str, post: Post, member: User, client: FlaskClient, db: SQLAlchemy
+) -> None:
+    # The message has one file, numbered 0: 1 is past it, -1 would be the last.
+    data = {
+        "message": "<p>The minutes.</p>",
+        "__attachments_delete__": index,
+        "__action": "edit",
+    }
+    with client_login(client, member):
+        response = client.post(_edit(post), data=data)
+
+    assert response.status_code == 302
+    db.session.expire_all()
+    assert [a.name for a in post.attachments] == ["minutes.txt"]
+
+
+def test_a_file_uploaded_for_the_edit_is_attached_to_the_message(
+    app: Application,
+    post: Post,
+    member: User,
+    client: FlaskClient,
+    db: SQLAlchemy,
+) -> None:
+    uploads = app.extensions["uploads"]
+    handle = uploads.add_file(
+        member, BytesIO(b"Signed."), filename="signed.txt", mimetype="text/plain"
+    )
+    data = {
+        "message": "<p>The minutes, signed.</p>",
+        "attachments": handle,
+        "__action": "edit",
+    }
+    with client_login(client, member):
+        response = client.post(_edit(post), data=data)
+
+    assert response.status_code == 302
+    db.session.expire_all()
+    assert sorted(a.name for a in post.attachments) == ["minutes.txt", "signed.txt"]
+
+
+def test_a_message_under_another_threads_url_is_not_found(
+    community1: Community,
+    post: Post,
+    member: User,
+    client: FlaskClient,
+    db: SQLAlchemy,
+) -> None:
+    other = Thread(title="Another", community=community1)
+    other.creator = other.owner = member
+    other.create_post(body_html="<p>Else.</p>")
+    db.session.add(other)
+    db.session.commit()
+    url = url_for(
+        "forum.post_edit",
+        community_id=community1.slug,
+        thread_id=other.id,
+        object_id=post.id,
+    )
+
+    with client_login(client, member):
+        response = client.get(url)
+
+    assert response.status_code == 404
+
+
+def test_an_action_the_form_does_not_offer_is_a_bad_request(
+    post: Post, member: User, client: FlaskClient
+) -> None:
+    data = {"message": "<p>The minutes.</p>", "__action": "frobnicate"}
+    with client_login(client, member):
+        response = client.post(_edit(post), data=data)
+
+    assert response.status_code == 400

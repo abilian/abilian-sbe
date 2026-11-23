@@ -33,8 +33,9 @@
           <tbody>
             {% for item in items %}
             <tr>
-              {#- Labels may hold the few tags the form keeps (`vocabularies/forms.py`). -#}
-              <td class="ads-full"><a class="sbe-quiet" href="{{ url_for_voc_edit(item) }}">{{ item.label | safe }}</a></td>
+              {#- Labels may hold the few tags the form keeps (`vocabularies/forms.py`): shown
+                  as text, since a label stored otherwise would be trusted as markup. -#}
+              <td class="ads-full"><a class="sbe-quiet" href="{{ url_for_voc_edit(item) }}">{{ item.label | striptags }}</a></td>
               <td>{% if item.default %}{{ icon("check") }}<span class="sbe-sr-only">{{ _("Yes") }}</span>{% endif %}</td>
               <td>{% if item.active %}{{ icon("check") }}<span class="sbe-sr-only">{{ _("Yes") }}</span>{% endif %}</td>
               <td class="ads-end">

@@ -1,19 +1,25 @@
 # Copyright (c) 2012-2024, Abilian SAS
 
-"""Configuration specific to integratin tests.
+"""Configuration specific to integration tests.
 
 Note: app is extranet.app
 """
 
 from __future__ import annotations
 
-import shutil
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from pytest import fixture
 
 from abilian.sbe.app import create_app
 from tests.conftest import TestConfig
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pytest import TempPathFactory
+
+    from abilian.app import Application
 
 PUBLIC_ENDPOINTS = [
     "login.forgotten_pw_form",
@@ -38,18 +44,13 @@ ENDPOINTS_TO_IGNORE = {
 
 
 @fixture(scope="module")
-def instance_path(tmpdir_factory):
-    instance_path = str(tmpdir_factory.mktemp("instance"))
-    tmp_dir = Path(instance_path)
-    (tmp_dir / "tmp").mkdir()
-    (tmp_dir / "cache").mkdir()
-    (tmp_dir / "data").mkdir()
-
-    yield instance_path
-
-    shutil.rmtree(str(instance_path))
+def instance_path(tmp_path_factory: TempPathFactory) -> Path:
+    path = tmp_path_factory.mktemp("instance")
+    for name in ("tmp", "cache", "data"):
+        (path / name).mkdir()
+    return path
 
 
 @fixture(scope="module")
-def app(instance_path):
-    return create_app(config=TestConfig)
+def app(instance_path: Path) -> Application:
+    return create_app(config=TestConfig, instance_path=str(instance_path))

@@ -13,11 +13,18 @@ import pytz
 from wtforms import Form
 
 from abilian.core.entities import Entity
+from abilian.sbe.apps.documents.models import Folder
+from abilian.services import get_service
 from abilian.services.security import ANONYMOUS, OWNER, READ, WRITE, Role
 from abilian.web.forms import FormPermissions, fields, filters
 
 if TYPE_CHECKING:
+    from collections.abc import Iterator
+
     from abilian.app import Application
+    from abilian.core.models.subjects import User
+    from abilian.core.sqlalchemy import SQLAlchemy
+    from abilian.services.security.service import SecurityService
 
 
 def user_tz() -> str:
@@ -54,55 +61,85 @@ def test_lowercase() -> None:
 
 
 # FormPermissions
-# @pytest.mark.skip(reason="Need to be updated")
-def test_form_permissions_controller() -> None:
-    security_mock = mock.Mock()
-    has_role = security_mock.has_role = mock.Mock()
-    has_role.return_value = True
+MARK_ROLE = Role("tests:mark-role")
 
-    current_app_mock = mock.Mock()
-    current_app_mock.services = {"security": security_mock}
 
-    MarkRole = Role("tests:mark-role")
-    _MARK = object()
-    _ENTITY_MARK = Entity()
+@pytest.fixture
+def security(db: SQLAlchemy) -> Iterator[SecurityService]:
+    service = get_service("security")
+    service.start()
+    yield service
+    service.stop()
 
-    with mock.patch("abilian.services.current_app", current_app_mock):
-        # default role
-        fp = FormPermissions()
-        assert fp.has_permission(READ)
-        assert fp.has_permission(READ, obj=_MARK)
-        assert fp.has_permission(READ, obj=_ENTITY_MARK)
 
-        # change default
-        fp = FormPermissions(default=MarkRole)
-        assert fp.has_permission(READ)
-        assert fp.has_permission(READ, field="test")
+def test_form_permissions_default_role(security: SecurityService, user: User) -> None:
+    fp = FormPermissions()
 
-        fp = FormPermissions(default=MarkRole, read=ANONYMOUS)
-        assert fp.has_permission(READ)
-        assert fp.has_permission(READ, field="test")
-        assert fp.has_permission(WRITE)
+    assert fp.has_permission(READ, user=user)
+    assert fp.has_permission(READ, obj=Entity(), user=user)
+    # Permissions are set on entities only: anything else is always allowed.
+    assert FormPermissions(default=MARK_ROLE).has_permission(
+        READ, obj=object(), user=user
+    )
 
-        # field roles
-        fp = FormPermissions(
-            default=MarkRole, read=ANONYMOUS, fields_read={"test": {OWNER}}
-        )
-        assert fp.has_permission(READ)
-        assert fp.has_permission(READ, field="test")
-        assert fp.has_permission(READ, field="test")
 
-        # dynamic roles
-        dyn_roles = mock.Mock()
-        dyn_roles.return_value = [MarkRole]
-        fp = FormPermissions(read=dyn_roles)
-        assert fp.has_permission(READ)
-        assert dyn_roles.call_args == [{"permission": READ, "field": None, "obj": None}]
+def test_form_permissions_follow_the_users_roles(
+    security: SecurityService, user: User
+) -> None:
+    fp = FormPermissions(default=MARK_ROLE)
+    assert not fp.has_permission(READ, user=user)
+    assert not fp.has_permission(READ, field="test", user=user)
 
-        dyn_roles.reset_mock()
-        fp = FormPermissions(read=[OWNER, dyn_roles])
-        assert fp.has_permission(READ)
-        assert dyn_roles.call_args == [{"permission": READ, "field": None, "obj": None}]
+    security.grant_role(user, MARK_ROLE)
+
+    assert fp.has_permission(READ, user=user)
+    assert fp.has_permission(READ, field="test", user=user)
+
+
+def test_form_permissions_form_roles_override_the_default(
+    security: SecurityService, user: User
+) -> None:
+    fp = FormPermissions(default=MARK_ROLE, read=ANONYMOUS)
+
+    assert fp.has_permission(READ, user=user)
+    # Not the form's: a field and the other permissions keep the default.
+    assert not fp.has_permission(READ, field="test", user=user)
+    assert not fp.has_permission(WRITE, user=user)
+
+
+def test_form_permissions_field_roles(
+    security: SecurityService, db: SQLAlchemy, user: User
+) -> None:
+    fp = FormPermissions(
+        default=MARK_ROLE, read=ANONYMOUS, fields_read={"test": {OWNER}}
+    )
+    owned = Folder(title="Owned", owner=user)
+    other = Folder(title="Other")
+    db.session.add_all([owned, other])
+    db.session.flush()
+
+    assert fp.has_permission(READ, user=user)
+    assert fp.has_permission(READ, field="test", obj=owned, user=user)
+    assert not fp.has_permission(READ, field="test", obj=other, user=user)
+    assert not fp.has_permission(READ, field="test", user=user)
+
+
+def test_form_permissions_dynamic_roles(security: SecurityService, user: User) -> None:
+    calls = []
+
+    def dyn_roles(**kwargs: object) -> list[Role]:
+        calls.append(kwargs)
+        return [MARK_ROLE]
+
+    fp = FormPermissions(read=dyn_roles)
+    assert not fp.has_permission(READ, user=user)
+    assert calls == [{"permission": READ, "field": None, "obj": None}]
+
+    security.grant_role(user, MARK_ROLE)
+    calls.clear()
+    fp = FormPermissions(read=[OWNER, dyn_roles])
+    assert fp.has_permission(READ, user=user)
+    assert calls == [{"permission": READ, "field": None, "obj": None}]
 
 
 def patch_babel(app: Application) -> None:

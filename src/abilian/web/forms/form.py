@@ -10,7 +10,6 @@ from functools import partial
 from typing import Any, Self
 
 from flask import g, has_app_context
-from flask_login import current_user
 from flask_wtf import FlaskForm
 from loguru import logger
 from wtforms import Field, HiddenField
@@ -75,9 +74,6 @@ class FormContext:
             if self.obj is None or not isinstance(self.obj, Entity):
                 self.obj = self.__existing.obj
 
-        if self.user is None:
-            self.user = current_user
-
         g.__form_ctx__ = self
         return self
 
@@ -122,6 +118,12 @@ class Form(FlaskForm):
                 self._field_groups.update(dict.fromkeys(fields, label))
 
             if ctx.permission and self._permissions is not None:
+                if ctx.user is None:
+                    msg = (
+                        f"{self.__class__.__name__} filters its fields for a user:"
+                        " give it one (`user=`)"
+                    )
+                    raise TypeError(msg)
                 # we are going to alter groups: copy dict on instance to preserve class
                 # definition
                 self._groups = OrderedDict()

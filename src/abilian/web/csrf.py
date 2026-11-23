@@ -2,16 +2,12 @@
 
 from __future__ import annotations
 
-from functools import wraps
 from typing import TYPE_CHECKING
 
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app
 from flask_wtf import FlaskForm
-from werkzeug.exceptions import Forbidden
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from wtforms.csrf.core import CSRFTokenField
 
 csrf_blueprint = Blueprint("csrf", __name__, url_prefix="/csrf")
@@ -58,35 +54,3 @@ def token() -> str:
     # csrf_token is a CSRFTokenField
     # csrf_token.current_token is the current token str content
     return csrf_token.current_token
-
-
-def support_graceful_failure(view: Callable) -> Callable:
-    """Decorator to indicate that the view will handle itself the csrf failure.
-
-    View can be a view function or a class based view
-    """
-    view.csrf_support_graceful_failure = True
-    return view
-
-
-def has_failed():
-    return getattr(request, "csrf_failed", False)
-
-
-def protect(view: Callable) -> Callable:
-    """Protects a view agains CSRF attacks by checking `csrf_token` value in
-    submitted values. Do nothing if `config.WTF_CSRF_ENABLED` is not set.
-
-    Raises `werkzeug.exceptions.Forbidden` if validation fails.
-    """
-
-    @wraps(view)
-    def csrf_check(*args, **kwargs):
-        # an empty form is used to validate current csrf token and only that!
-        if not FlaskForm().validate():
-            msg = "CSRF validation failed."
-            raise Forbidden(msg)
-
-        return view(*args, **kwargs)
-
-    return csrf_check

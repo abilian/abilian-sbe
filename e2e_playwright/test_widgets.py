@@ -12,7 +12,6 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING
 
-import pytest
 from playwright.sync_api import expect
 
 if TYPE_CHECKING:
@@ -163,16 +162,28 @@ def test_search_endpoints_answer(logged_in: Page, base_url: str) -> None:
 
 
 def test_file_input_widget_initialises(logged_in: Page, base_url: str) -> None:
-    """Every attachment field is one of these; widgets/file.js binds it."""
+    """Every attachment field is one of these; widgets/file.js binds it.
+
+    The server renders a plain multiple file input. file.js takes its name, to
+    put it on a hidden input per file it uploads, so a bound field has none.
+    """
     logged_in.goto(
         f"{base_url}/communities/{COMMUNITY}/forum/new_thread/",
         wait_until="networkidle",
     )
 
-    if logged_in.locator(".js-file-button").count() == 0:
-        pytest.skip("no file input on this form")
+    file_input = logged_in.locator('.js-file-button input[type="file"]')
+    expect(file_input).to_have_count(1)
+    assert file_input.get_attribute("name") is None, "file.js did not bind the input"
 
-    assert logged_in.locator('.js-file-button input[type="file"]').count() > 0
+    file_input.set_input_files(
+        files=[{"name": "notes.txt", "mimeType": "text/plain", "buffer": b"Notes."}]
+    )
+
+    files = logged_in.locator(".selected-files")
+    expect(files.locator(".file-item .file-info")).to_contain_text("notes.txt")
+    # Uploaded: its handle, under the field's name, goes with the form.
+    expect(files.locator('input[type="hidden"][name="attachments"]')).to_have_count(1)
 
 
 def test_delete_confirmation_opens(logged_in: Page, base_url: str) -> None:
@@ -186,14 +197,13 @@ def test_delete_confirmation_opens(logged_in: Page, base_url: str) -> None:
         f"{base_url}/communities/{COMMUNITY}/docs/", wait_until="networkidle"
     )
 
+    # seed.py puts a document in the folder.
     checkbox = logged_in.locator('input[name="object-selected"]').first
-    if checkbox.count() == 0:
-        pytest.skip("nothing in the folder to delete")
+    expect(checkbox).to_be_attached()
     checkbox.check()
 
     delete_button = logged_in.locator('button[value="delete"]').first
-    if delete_button.count() == 0:
-        pytest.skip("no delete button on the listing")
+    expect(delete_button).to_be_attached()
     delete_button.click()
 
     dialog = logged_in.locator("dialog[open]")

@@ -8,7 +8,6 @@ from flask import abort, redirect, request, url_for
 from flask_login import login_user
 
 from abilian.core.models.subjects import User
-from abilian.web import csrf
 from abilian.web.admin.panel import AdminPanel
 
 if TYPE_CHECKING:
@@ -20,7 +19,6 @@ class ImpersonatePanel(AdminPanel):
     label = "Impersonate"
     icon = "user"
 
-    @csrf.protect
     def post(self) -> Response:
         """Sign in as someone, to see what they see: an account's page asks for it."""
         user = User.query.get(request.form.get("user", type=int))
