@@ -5,7 +5,6 @@ processing."""
 
 from __future__ import annotations
 
-import hashlib
 from io import BytesIO
 from typing import Any
 
@@ -27,9 +26,6 @@ FIT = "fit"
 CROP = "crop"
 
 RESIZE_MODES = frozenset({SCALE, FIT, CROP})
-
-# TODO: cache to file
-cache: dict[Any, bytes] = {}
 
 
 def open_image(img: BytesIO | bytes) -> Image.Image:
@@ -60,42 +56,36 @@ def get_save_format(fmt: str) -> str:
     return "JPEG"
 
 
-def resize(orig: Any, width: int, height: int, mode: str = FIT) -> bytes:
-    if isinstance(orig, bytes):
-        orig = BytesIO(orig)
+def resize(orig: BytesIO | bytes, width: int, height: int, mode: str = FIT) -> bytes:
+    """Return `orig` resized to `width` x `height`, following `mode`.
 
-    digest = hashlib.md5(orig.read()).digest()  # noqa: S324
-    cache_key = (digest, mode, width, height)
-    if cache_key in cache:
-        return cache[cache_key]
-
-    orig.seek(0)
-    image = open_image(orig)
+    Not cached: a cache would hold each original, a converted document's pages
+    among them, in every process; the responses are cached by the browsers.
+    """
+    data = orig if isinstance(orig, bytes) else orig.read()
+    image = open_image(data)
     image_format = image.format
     x, y = image.size
 
     if (x, y) == (width, height):
-        orig.seek(0)
-        return orig.read()
+        return data
 
-    if mode is SCALE:
+    if mode == SCALE:
         image = image.resize((width, height), Image.LANCZOS)
         assert image.size == (width, height)
-    elif mode is FIT:
+    elif mode == FIT:
         if x >= width or y >= height:
             # resize only if images exceed desired dimensions
             image.thumbnail((width, height), Image.LANCZOS)
             x1, y1 = image.size
             assert x1 == width or y1 == height
-    elif mode is CROP:
+    elif mode == CROP:
         image = _crop_and_resize(image, width, height)
         assert image.size == (width, height)
 
     output = BytesIO()
     image.save(output, get_save_format(image_format))
-    converted = output.getvalue()
-    cache[cache_key] = converted
-    return converted
+    return output.getvalue()
 
 
 def _crop_and_resize(image: Image.Image, width: int, height: int = 0) -> Image.Image:

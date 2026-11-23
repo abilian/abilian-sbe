@@ -178,9 +178,6 @@ class SecurityService(Service):
         information."""
         self.app_state.needs_db_flush = True
 
-    def clear(self) -> None:
-        pass
-
     def _current_user_manager(self, session: Session | None = None) -> User | None:
         """Who is performing this change, for the security audit trail.
 
@@ -625,8 +622,8 @@ class SecurityService(Service):
             hasattr(principal, "is_anonymous") and principal.is_anonymous
         ):
             args["anonymous"] = True
-            query.filter(
-                RoleAssignment.anonymous == False,
+            query = query.filter(
+                RoleAssignment.anonymous == True,
                 RoleAssignment.user == None,
                 RoleAssignment.group == None,
             )

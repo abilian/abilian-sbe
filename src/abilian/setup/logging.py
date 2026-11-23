@@ -20,6 +20,12 @@ def init_logging(app: Flask) -> None:
 
     The standard `logging` module, which Dramatiq and APScheduler use, goes
     through loguru too, so that one process writes in one format.
+
+    Safe to call again, as each `create_app` does: it replaces loguru's sinks
+    and the root logger's handlers instead of adding to them. Replacing is
+    deliberate, as any handler left on the root logger would print each
+    record a second time. That includes handlers others put there, pytest's
+    log capture among them.
     """
     level = "DEBUG" if app.debug else "INFO"
 

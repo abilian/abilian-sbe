@@ -9,8 +9,6 @@ Notes:
 from __future__ import annotations
 
 import contextlib
-import secrets
-import string
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 from urllib.parse import urljoin, urlparse
@@ -38,7 +36,7 @@ from loguru import logger
 from sqlalchemy import sql
 
 from abilian.core.extensions import csrf, db
-from abilian.core.models.subjects import User
+from abilian.core.models.subjects import User, gen_random_password
 from abilian.core.signals import auth_failed
 from abilian.core.util import md5, unwrap
 from abilian.i18n import _, render_template_i18n
@@ -179,7 +177,7 @@ def forgotten_pw(new_user: bool = False) -> str | Response:
     ).one_or_none()
     if user is not None:
         if not user.password:
-            user.set_password(random_password())
+            user.set_password(gen_random_password())
             db.session.commit()
         send_reset_password_instructions(user)
 
@@ -253,13 +251,6 @@ def reset_password_post(token: str) -> Response:
     )
 
     return redirect(url_for("login.login_form", next_url=request.url_root))
-
-
-def random_password():
-    pw = []
-    for _i in range(10):
-        pw.append(secrets.choice(string.ascii_letters + string.digits))
-    return pw
 
 
 def get_serializer(name: str) -> TimedSerializer:

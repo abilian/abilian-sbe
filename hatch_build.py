@@ -44,9 +44,12 @@ def compile_translations(root: Path) -> None:
     from babel.messages.frontend import CommandLineInterface
 
     for directory in TRANSLATIONS:
-        CommandLineInterface().run(
+        status = CommandLineInterface().run(
             ["pybabel", "-q", "compile", "-d", str(root / directory)]
         )
+        if status:
+            msg = f"Could not compile the translations in {directory}"
+            raise RuntimeError(msg)
 
 
 def build_scripts(root: Path) -> None:

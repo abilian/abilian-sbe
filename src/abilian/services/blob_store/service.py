@@ -12,12 +12,11 @@ from uuid import UUID, uuid1
 
 import sqlalchemy as sa
 from flask import g
-
-# import sqlalchemy.event
 from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm.session import Session, SessionTransaction
 
 from abilian.core.extensions import db
+from abilian.core.util import atomic_write
 from abilian.services import Service, ServiceState
 
 if typing.TYPE_CHECKING:
@@ -109,14 +108,12 @@ class BlobStoreService(Service):
 
         if hasattr(content, "read"):
             content = content.read()
+        if isinstance(content, str):
+            content = content.encode(encoding or "utf-8")
 
-        mode = "tw"
-        if not isinstance(content, str):
-            mode = "bw"
-            encoding = None
-
-        with dest.open(mode, encoding=encoding) as file:
-            file.write(content)
+        # A blob is read while another request replaces it: never let it see
+        # a truncated file.
+        atomic_write(dest, content)
 
     def delete(self, uuid: UUID) -> None:
         """Delete file with given uuid.
@@ -236,7 +233,6 @@ class SessionBlobStoreState(ServiceState):
         transaction.commit()
 
     def flush(self, session: Session) -> None:
-        # def flush(self, session: Session, flush_context: UOWTransaction):
         # when sqlalchemy is flushing it is done in a sub-transaction,
         # not the root one. So when calling our 'commit' from here
         # we are not in our root transaction, so changes will not be
@@ -289,7 +285,6 @@ class SessionBlobStoreService(Service):
         listen(Session, "after_commit", self.commit)
         listen(Session, "after_flush", self.flush)
         listen(Session, "after_rollback", self.rollback)
-        # appcontext_tearing_down.connect(self.clear_transaction, app)
 
     def _session_for(self, model_or_session: Model | Session) -> Session:
         """Return session instance for object parameter.
@@ -325,7 +320,6 @@ class SessionBlobStoreService(Service):
     def get(
         self, session: Session | Blob, uuid: UUID, default: Path | None = None
     ) -> Path | None:
-        # assert isinstance(session, Session)
         _assert_uuid(uuid)
 
         session = self._session_for(session)
@@ -424,8 +418,6 @@ class BlobStoreTransaction:
         self, root_path: Path, parent: BlobStoreTransaction | None = None
     ) -> None:
         self.tmp_folder = root_path / str(uuid1())
-        # if parent is not None and parent.cleared:
-        #   parent = None
 
         self._parent = parent
         self._deleted: set[UUID] = set()

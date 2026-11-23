@@ -4,19 +4,19 @@
 
 from __future__ import annotations
 
-import functools
 import hashlib
+import os
 import re
-import time
+import tempfile
 import unicodedata
 from datetime import datetime
 from math import ceil
+from pathlib import Path
 from typing import Any
 
 import pytz
 from babel.dates import LOCALTZ
 from flask import request
-from loguru import logger
 from werkzeug.local import LocalProxy
 
 
@@ -88,53 +88,19 @@ def get_params(names):
     return params
 
 
-class timer:
-    """Decorator that mesures the time it takes to run a function."""
+def atomic_write(path: Path, data: bytes) -> None:
+    """Write `data` to `path` so that no reader ever sees a partial file.
 
-    def __init__(self, callable) -> None:
-        self.__f = callable
-
-    def __call__(self, *args, **kwargs):
-        self.__start = time.time()
-        result = self.__f(*args, **kwargs)
-        value = (time.time() - self.__start) * 1000
-        prefix = f"{self.__f.__module__}.{self.__f.__name__}"
-        logger.info(
-            "{prefix} - elapsed time: {value:.2f}ms",
-            prefix=prefix,
-            value=value,
-        )
-        return result
-
-
-# From http://wiki.python.org/moin/PythonDecoratorLibrary#Memoize
-class memoized:
-    """Decorator that caches a function's return value each time it is called.
-
-    If called later with the same arguments, the cached value is
-    returned (not reevaluated).
+    Writes a temporary file beside `path`, then renames it over `path`.
     """
-
-    def __init__(self, func) -> None:
-        self.func = func
-        self.cache = {}
-        functools.wraps(func)(self)
-
-    def __call__(self, *args):
-        try:
-            return self.cache[args]
-        except KeyError:
-            value = self.func(*args)
-            self.cache[args] = value
-            return value
-        except TypeError:
-            # uncachable -- for instance, passing a list as an argument.
-            # Better to not cache than to blow up entirely.
-            return self.func(*args)
-
-    def __get__(self, obj, objtype):
-        """Support instance methods."""
-        return functools.partial(self.__call__, obj)
+    fd, tmp_name = tempfile.mkstemp(dir=path.parent, prefix=f".{path.name}.")
+    try:
+        with os.fdopen(fd, "wb") as f:
+            f.write(data)
+        os.replace(tmp_name, path)
+    except BaseException:
+        Path(tmp_name).unlink(missing_ok=True)
+        raise
 
 
 # From http://flask.pocoo.org/snippets/44/

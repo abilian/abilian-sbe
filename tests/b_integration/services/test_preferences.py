@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, cast
 
-import pytest
 from flask_login import current_user, login_user
 from pytest import fixture
 
 from abilian.app import Application, setup_app
+from abilian.core import signals
 from abilian.core.models.subjects import User
 from abilian.services import get_service, security_service
 from abilian.services.preferences.models import UserPreference
@@ -16,6 +16,8 @@ from abilian.services.preferences.panel import PreferencePanel
 from abilian.services.preferences.service import PreferenceService
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from sqlalchemy.orm import Session
 
     from abilian.core.sqlalchemy import SQLAlchemy
@@ -44,8 +46,10 @@ class AdminPanel(PreferencePanel):
 
 
 @fixture
-def app(config: type) -> Application:
-    app = Application()
+def app(config: type, tmp_path: Path) -> Application:
+    # As create_app() does, with the panels registered before the components
+    # are: the preferences blueprint is registered then, with its panels.
+    app = Application(instance_path=str(tmp_path))
     app.configure(config)
     setup_app(app)
 
@@ -55,6 +59,7 @@ def app(config: type) -> Application:
         prefs.register_panel(VisiblePanel(), app)
         prefs.register_panel(AdminPanel(), app)
 
+    signals.components_registered.send(app)
     return app
 
 
@@ -96,9 +101,10 @@ def test_preferences_with_various_types(app: Application, session: Session) -> N
     assert preferences == {"some_int": 1, "some_bool": True}
 
 
-@pytest.mark.skip("FIXME ASAP")
 def test_visible_panels(app: Application, db: SQLAlchemy) -> None:
-    user = User(email="test@example.com")
+    user = User(email="test@example.com", can_login=True)
+    db.session.add(user)
+    db.session.flush()
 
     with app.test_request_context():
         security_service.start()

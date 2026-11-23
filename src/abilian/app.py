@@ -8,14 +8,11 @@ from __future__ import annotations
 import errno
 import os
 import sys
-import warnings
 from functools import cached_property, partial, update_wrapper
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import defusedxml
-import sqlalchemy as sa
-import sqlalchemy.exc
 from flask import Flask, request
 from flask.config import ConfigAttribute
 from loguru import logger
@@ -45,8 +42,6 @@ if TYPE_CHECKING:
 __all__ = ["Application", "create_app"]
 
 defusedxml.defuse_stdlib()
-# Silence those warnings for now.
-warnings.simplefilter("ignore", category=sa.exc.SAWarning)
 
 db = extensions.db
 
@@ -198,8 +193,8 @@ class Application(
             self.config["FAVICO_URL"] = self.config.get("LOGO_URL")
 
         if not self.debug and self.config["SECRET_KEY"] == "CHANGEME":  # noqa: S105
-            logger.error("You must change the default secret config ('SECRET_KEY')")
-            sys.exit()
+            # A message makes the exit status 1: a supervisor sees a failure.
+            sys.exit("You must change the default secret config ('SECRET_KEY')")
 
     def check_instance_folder(self, create=False) -> None:
         """Verify instance folder exists, is a directory, and has necessary
@@ -324,12 +319,11 @@ class Application(
             ),
             send_file_from_directory,
         )
+        # Public unless restricted: a second, anonymous controller would let
+        # everybody past the roles' one.
         self.add_url_rule_with_role(
             url_path,
             endpoint=endpoint,
             view_func=view_func,
-            roles=roles,
-        )
-        self.add_access_controller(
-            endpoint, allow_access_for_roles(ANONYMOUS), endpoint=True
+            roles=roles or (ANONYMOUS,),
         )

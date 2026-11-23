@@ -8,14 +8,11 @@ import os
 import re
 import shutil
 import subprocess
-import threading
-import traceback
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 from loguru import logger
-from magic import Magic
 
 from abilian.services.image import resize
 
@@ -40,19 +37,11 @@ def poppler_bin_util(util: str) -> str:
 def has_pdftotext() -> bool:
     if poppler_bin_util("pdftotext"):
         return True
-    result = shutil.which("pdftotext") is not None
-    if not result:
-        logger.warning("has_pdftotext(): {result}", result=result)
-        logger.warning("has_pdftotext() PATH: {path}", path=os.environ["PATH"])
-    return result
+    return shutil.which("pdftotext") is not None
 
 
 def has_libreoffice() -> bool:
-    result = shutil.which("soffice") is not None
-    if not result:
-        logger.warning("has_libreoffice(): {result}", result=result)
-        logger.warning("has_libreoffice() PATH: {path}", path=os.environ["PATH"])
-    return result
+    return shutil.which("soffice") is not None
 
 
 HAS_PDFTOTEXT = has_pdftotext()
@@ -74,14 +63,6 @@ class Handler(ABC):
     @property
     def tmp_dir(self) -> Path:
         return get_tmp_dir()
-
-    @property
-    def mime_sniffer(self):
-        return Magic(mime=True)
-
-    @property
-    def encoding_sniffer(self) -> Magic:
-        return Magic(mime_encoding=True)
 
     def accept(self, source_mime_type: str, target_mime_type: str) -> bool:
         """Generic matcher based on patterns."""
@@ -125,21 +106,8 @@ class PdfToTextHandler(Handler):
                 msg = "pdftotext failed"
                 raise ConversionError(msg) from e
 
-            converted = open(out_fn, "rb").read()
-            try:
-                encoding = self.encoding_sniffer.from_file(out_fn)
-            except Exception:
-                encoding = None
-
-        if encoding in ("binary", None):
-            encoding = "ascii"
-        try:
-            converted_unicode = str(converted, encoding, errors="ignore")
-        except Exception:
-            traceback.print_exc()
-            converted_unicode = str(converted, errors="ignore")
-
-        return converted_unicode
+            # pdftotext writes UTF-8 by default.
+            return Path(out_fn).read_bytes().decode("utf-8", errors="replace")
 
 
 class ImageMagickHandler(Handler):
@@ -207,17 +175,15 @@ class LibreOfficePdfHandler(Handler):
     ]
     produces_mime_types = ["application/pdf"]
     run_timeout = 60
-    soffice = "soffice"
-    _process: subprocess.Popen
+    soffice: str | None = "soffice"
 
     def init_app(self, app: Flask) -> None:
         soffice = app.config.get("SOFFICE_LOCATION")
 
         if soffice:
             # make absolute path: avoid errors when running with different CWD
-            soffice_path = Path(soffice).resolve()
-            found = soffice_path.is_file()
-            if not found:
+            soffice = str(Path(soffice).resolve())
+            if not Path(soffice).is_file():
                 self.log.error("Can't find executable {soffice}", soffice=soffice)
 
         elif Path("/usr/local/bin/soffice").is_file():
@@ -234,7 +200,9 @@ class LibreOfficePdfHandler(Handler):
                 self.log.warning('Not allowed to execute "{soffice}"', soffice=soffice)
 
         else:
-            self.log.error("Can't find LibreOffice executable")
+            # Optional: the app runs without it, office documents just get
+            # no preview or full text.
+            self.log.warning("Can't find LibreOffice: office documents won't convert")
             soffice = None
 
         self.soffice = soffice
@@ -242,8 +210,12 @@ class LibreOfficePdfHandler(Handler):
     @acquire_lock("LibreOfficePdfHandler")
     def convert(self, blob: bytes, **kw: Any) -> bytes:
         """Convert using soffice converter."""
-        timeout = self.run_timeout
+        if not self.soffice:
+            msg = "LibreOffice not available"
+            raise ConversionError(msg)
+
         with make_temp_file(blob, tmp_dir=self.tmp_dir) as in_fn:
+            out_path = Path(in_fn).with_suffix(".pdf")
             cmd = [
                 self.soffice,
                 "--headless",
@@ -251,50 +223,28 @@ class LibreOfficePdfHandler(Handler):
                 "pdf",
                 "--outdir",
                 str(self.tmp_dir),
-                str(in_fn),
+                in_fn,
             ]
-
-            def run_soffice() -> None:
-                try:
-                    self._process = subprocess.Popen(
-                        cmd, close_fds=True, cwd=str(self.tmp_dir)
-                    )
-                    self._process.communicate()
-                except subprocess.CalledProcessError as e:
-                    logger.debug("CalledProcessError for soffice")
-                    logger.debug("returncode:{returncode}", returncode=e.returncode)
-                    logger.debug("e.cmd:{cmd}", cmd=e.cmd)
-                    logger.debug("stdout:{stdout}", stdout=e.stdout)
-                    logger.debug("stderr:{stderr}", stderr=e.stderr)
-                    raise ConversionError from e
-                except Exception as e:
-                    logger.opt(exception=True).error(
-                        "soffice error: {error}", error=str(e)
-                    )
-                    raise ConversionError from e
-
-            run_thread = threading.Thread(target=run_soffice)
-            run_thread.start()
-            run_thread.join(timeout)
             try:
-                if run_thread.is_alive():
-                    # timeout reached
-                    self._process.terminate()
-                    if self._process.poll() is not None:
-                        try:
-                            self._process.kill()
-                        except OSError:
-                            logger.warning(
-                                "Failed to kill process {process}",
-                                process=self._process,
-                            )
-
-                    msg = f"Conversion timeout ({timeout})"
-                    raise ConversionError(msg)
-
-                out_fn = f"{os.path.splitext(in_fn)[0]}.pdf"
-                converted = open(out_fn, "rb").read()
-                return converted
+                # run() kills soffice when the timeout expires.
+                subprocess.run(
+                    cmd,
+                    cwd=self.tmp_dir,
+                    timeout=self.run_timeout,
+                    check=True,
+                    capture_output=True,
+                )
+                # soffice may exit 0 without writing anything: reading the
+                # missing file then fails like any other conversion failure.
+                return out_path.read_bytes()
+            except subprocess.TimeoutExpired as e:
+                msg = f"Conversion timeout ({self.run_timeout}s)"
+                raise ConversionError(msg) from e
+            except subprocess.CalledProcessError as e:
+                msg = f"soffice failed ({e.returncode}): {e.stderr!r}"
+                raise ConversionError(msg) from e
+            except OSError as e:
+                msg = f"soffice failed: {e}"
+                raise ConversionError(msg) from e
             finally:
-                if hasattr(self, "_process"):
-                    del self._process
+                out_path.unlink(missing_ok=True)

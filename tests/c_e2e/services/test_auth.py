@@ -122,6 +122,28 @@ def test_forgotten_pw(app: Application, session: Session, client: FlaskClient) -
         assert msg.cc == []
 
 
+def test_forgotten_pw_for_an_account_without_password(
+    app: Application, session: Session, client: FlaskClient
+) -> None:
+    """An account with no password yet gets a random one, then the e-mail."""
+    mail = app.extensions["mail"]
+    user = User(email="nopass@domain.tld", can_login=True)
+    session.add(user)
+    session.flush()
+    # The column default fills in "*" on insert: clear it afterwards.
+    user.password = None
+    session.flush()
+
+    with mail.record_messages() as outbox:
+        response = client.post(
+            "/user/forgotten_pw", data={"email": "nopass@domain.tld"}
+        )
+
+    assert response.status_code == 302
+    assert [message.recipients for message in outbox] == [["nopass@domain.tld"]]
+    assert user.password
+
+
 def test_the_forgotten_password_form_does_not_tell_who_has_an_account(
     app: Application, session: Session, client: FlaskClient
 ) -> None:

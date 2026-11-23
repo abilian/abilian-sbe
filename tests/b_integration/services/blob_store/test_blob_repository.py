@@ -69,6 +69,17 @@ def test_set(session: Session) -> None:
     assert p.open("rb").read() == b"my file content"
 
 
+def test_set_replaces_the_file_instead_of_rewriting_it(session: Session) -> None:
+    """A reader of the old content must not see it truncated mid-write."""
+    u1 = uuid.uuid4()
+    blob_store.set(u1, b"old content")
+    with blob_store.abs_path(u1).open("rb") as reader:
+        blob_store.set(u1, b"new")
+        assert reader.read() == b"old content"
+    assert blob_store.abs_path(u1).read_bytes() == b"new"
+    assert [p.name for p in blob_store.abs_path(u1).parent.iterdir()] == [str(u1)]
+
+
 def test_setitem(session: Session) -> None:
     u1 = uuid.uuid4()
     p = blob_store.abs_path(u1)

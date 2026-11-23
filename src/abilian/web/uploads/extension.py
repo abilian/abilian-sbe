@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import json
+import stat
 import time
 from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid1
@@ -33,9 +34,6 @@ DEFAULT_CONFIG = {
     "USER_MAX_FILES": 1000,  # max number of files per user
     "DELETE_STALLED_AFTER": 60 * 60 * 24,  # delete files remaining after 1 day
 }
-
-# CLEANUP_SCHEDULE_ID = f"{__name__}.periodic_clean_upload_directory"
-# DEFAULT_CLEANUP_SCHEDULE = {"task": CLEANUP_SCHEDULE_ID, "schedule": timedelta(hours=1)}
 
 
 def is_valid_handle(handle: str) -> bool:
@@ -176,30 +174,34 @@ class FileUploadsExtension:
                 continue
 
             for content in user_dir.iterdir():
-                if not content.is_file():
-                    logger.error(
-                        "Found non-file in user upload dir: {content}",
-                        content=repr(content),
-                    )
-                    continue
-
-                if content.stat().st_ctime < minimum_age:
-                    content.unlink()
+                remove_if_stalled(content, minimum_age)
 
 
-# Task scheduled to run every hour:
-# make it expire after 50min (at invocation) : not necessary with apscheduler:
-# "By default, only one instance of each job is allowed to be run at the same
-# time. This means that if the job is about to be run but the previous run
-# hasnt finished yet, then the latest run is considered a misfire."
+def remove_if_stalled(path: Path, minimum_age: float) -> None:
+    """Remove the file at `path` if it was last changed before `minimum_age`.
+
+    Two cleanups may run at once, and a user may remove an upload meanwhile:
+    a file that is gone by the time it is looked at is no error.
+    """
+    try:
+        status = path.stat()
+    except FileNotFoundError:
+        return
+    if not stat.S_ISREG(status.st_mode):
+        logger.error("Found non-file in user upload dir: {path}", path=repr(path))
+        return
+    if status.st_ctime < minimum_age:
+        path.unlink(missing_ok=True)
+
+
 @crontab("PERIODIC_CLEAN_UPLOAD_DIRECTORY")
 @dramatiq.actor()
 def periodic_clean_upload_directory() -> None:
-    """This task should be run periodically.
+    """Delete the uploads left over for longer than `DELETE_STALLED_AFTER`.
 
-    Default config sets up schedule using
-    :data:`DEFAULT_CLEANUP_SCHEDULE`. `CELERYBEAT_SCHEDULE` key is
-    :data:`CLEANUP_SCHEDULE_ID`.
+    Queued every hour by default (`PERIODIC_CLEAN_UPLOAD_DIRECTORY`). The
+    scheduler only queues it: a slow run may still be going in one worker when
+    the next starts in another, hence a cleanup that tolerates another.
     """
     logger.debug("Running job: periodic_clean_upload_directory")
     with current_app.test_request_context("/tasks/periodic_clean_upload_directory"):

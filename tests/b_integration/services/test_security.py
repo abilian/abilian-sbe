@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pytest import fixture, mark
+from pytest import fixture
 
 from abilian.core.entities import Entity
 from abilian.core.models.subjects import Group, User, create_root_user
@@ -55,10 +55,19 @@ def test_ordering() -> None:
     assert roles == [ADMIN, ANONYMOUS, AUTHENTICATED]
 
 
-# TODO: may fail depending on test order, due to global state
-@mark.skip
-def test_enumerate_assignables(db) -> None:
-    assert Role.assignable_roles() == [ADMIN]
+def test_enumerate_assignables() -> None:
+    # Roles are registered globally, by every module that defines one: check
+    # membership, not the whole list.
+    assignable = Role("tests:assignable")
+    automatic = Role("tests:automatic", assignable=False)
+
+    roles = Role.assignable_roles()
+
+    assert ADMIN in roles
+    assert assignable in roles
+    assert automatic not in roles
+    assert not {ANONYMOUS, AUTHENTICATED, OWNER, CREATOR} & set(roles)
+    assert roles == sorted(roles)
 
 
 @fixture
@@ -69,7 +78,6 @@ def session(app: Application, db: SQLAlchemy) -> Iterator[Session]:
     yield db.session
 
     security.stop()
-    security.clear()
 
 
 class DummyModel(Entity):
@@ -254,6 +262,20 @@ def test_grant_roles_on_objects(session: Session) -> None:
     assert not security.has_permission(user, READ, new_obj)
 
 
+def test_ungrant_anonymous_leaves_the_users_assignment(session: Session) -> None:
+    user = User(email="john@example.com", password="x")  # noqa: S106
+    obj = DummyModel()
+    session.add_all([user, obj])
+    session.flush()
+    security.grant_role(ANONYMOUS, READER, obj)
+    security.grant_role(user, READER, obj)
+
+    security.ungrant_role(ANONYMOUS, READER, obj)
+
+    remaining = session.query(RoleAssignment).filter_by(role=READER, object=obj)
+    assert [(ra.anonymous, ra.user) for ra in remaining] == [(False, user)]
+
+
 def test_grant_roles_unique(session: Session) -> None:
     user = User(email="john@example.com", password="x")  # noqa: S106
     obj = DummyModel()
@@ -403,7 +425,6 @@ def test_has_permission_custom_roles(session: Session) -> None:
     assert security.has_permission(user, "manage")
 
 
-@mark.skip
 def test_query_entity_with_permission(session) -> None:
     get_filter = security.query_entity_with_permission
     user = User(email="john@example.com", password="x")  # noqa: S106

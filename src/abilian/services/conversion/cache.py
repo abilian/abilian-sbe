@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from abilian.core.util import atomic_write
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -42,16 +44,19 @@ class Cache:
         return None
 
     def set(self, key: CacheKey, value: str | bytes) -> None:
+        """Store `value`, atomically.
+
+        `__contains__` only checks the file exists, so a reader must never
+        see a half-written one.
+        """
         path = self._path(key)
         path.parent.mkdir(parents=True, exist_ok=True)
         if key[0] == "txt":
             assert isinstance(value, str)
-            path.write_text(value, "utf8")
+            data = value.encode("utf8")
         else:
             assert isinstance(value, bytes)
-            path.write_bytes(value)
+            data = value
+        atomic_write(path, data)
 
     __setitem__ = set
-
-    def clear(self) -> None:
-        pass

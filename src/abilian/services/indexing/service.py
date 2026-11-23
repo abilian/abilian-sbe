@@ -14,7 +14,6 @@ Based on Flask-whooshalchemy by Karl Gyllstrom.
 
 from __future__ import annotations
 
-import contextlib
 import os
 from inspect import isclass
 from pathlib import Path
@@ -29,7 +28,7 @@ from whoosh import query as wq
 from whoosh.filedb.filestore import FileStorage, RamStorage
 from whoosh.index import FileIndex, Index
 from whoosh.qparser import DisMaxParser
-from whoosh.writing import CLEAR, AsyncWriter
+from whoosh.writing import CLEAR
 
 from abilian.core import signals
 from abilian.core.application import as_application
@@ -59,6 +58,9 @@ if TYPE_CHECKING:
     from abilian.core.models import Model
 
 PENDING_INDEXATION_ATTR = "abilian_pending_indexation"
+
+#: Seconds to wait for the index lock before raising `LockError`.
+INDEX_WRITER_TIMEOUT = 30
 
 
 def url_for_hit(hit, default="#"):
@@ -127,8 +129,7 @@ class WhooshIndexService(Service):
         if not whoosh_base.is_absolute():
             whoosh_base = Path(app.instance_path) / whoosh_base
 
-        if not whoosh_base.is_dir():
-            whoosh_base.mkdir(parents=True)
+        whoosh_base.mkdir(parents=True, exist_ok=True)
 
         state.whoosh_base = str(whoosh_base.resolve())
 
@@ -210,7 +211,7 @@ class WhooshIndexService(Service):
         state = self.app_state
 
         for idx in state.indexes.values():
-            writer = AsyncWriter(idx)
+            writer = idx.writer(timeout=INDEX_WRITER_TIMEOUT)
             writer.commit(merge=True, optimize=True, mergetype=CLEAR)
 
         state.indexes.clear()
@@ -538,68 +539,61 @@ def index_update(index: str, items: list[tuple[str, str, int, dict]]) -> None:
 
     logger.debug("index_update() actor : index={index}", index=index)
 
-    index_name = index
-    index = service.app_state.indexes[index_name]
+    whoosh_index = service.app_state.indexes[index]
     adapted = service.adapted
 
-    # session = safe_session()
-    session = Session(bind=db.session.get_bind())
+    # A writer waits for the lock, then raises LockError, which Dramatiq
+    # retries. AsyncWriter waited in a thread instead, forever if the lock was
+    # never released, and its errors were lost with the thread.
+    writer = whoosh_index.writer(timeout=INDEX_WRITER_TIMEOUT)
     updated = set()
-    writer = AsyncWriter(index)
-    try:
-        for op, cls_name, pk, data in items:
-            if pk is None:
-                continue
-
-            # always delete. Whoosh manual says that 'update' is actually delete + add
-            # operation
-            object_key = f"{cls_name}:{pk}"
-            writer.delete_by_term("object_key", object_key)
-
-            adapter = adapted.get(cls_name)
-            if not adapter:
-                # FIXME: log to sentry?
-                continue
-
-            if object_key in updated:
-                # don't add twice the same document in same transaction. The writer will
-                # not delete previous records, ending in duplicate records for same
-                # document.
-                continue
-
-            if op in ("new", "changed"):
-                with session.begin(nested=True):
-                    obj = adapter.retrieve(pk, _session=session, **data)
-
-                if obj is None:
-                    # deleted after task queued, but before task run
+    with Session(bind=db.session.get_bind()) as session:
+        try:
+            for op, cls_name, pk, data in items:
+                if pk is None:
                     continue
 
-                document = service.get_document(obj, adapter)
-                try:
-                    writer.add_document(**document)
-                except ValueError:
-                    # logger is here to give us more infos in order to catch a weird bug
-                    # that happens regularly on CI but is not reliably
-                    # reproductible.
-                    logger.opt(exception=True).error(
-                        "writer.add_document({document})",
-                        document=repr(document),
-                    )
-                    raise
-                updated.add(object_key)
-    except Exception:
-        writer.cancel()
-        raise
+                # always delete. Whoosh manual says that 'update' is actually
+                # delete + add operation
+                object_key = f"{cls_name}:{pk}"
+                writer.delete_by_term("object_key", object_key)
 
-    session.close()
-    writer.commit()
+                adapter = adapted.get(cls_name)
+                if not adapter:
+                    # FIXME: log to sentry?
+                    continue
 
-    # Exception may happen when actual writer was already available:
-    # asyncwriter didn't need to start a thread
-    with contextlib.suppress(RuntimeError):
-        # async thread: wait for its termination
-        writer.join()
+                if object_key in updated:
+                    # don't add twice the same document in same transaction. The
+                    # writer will not delete previous records, ending in
+                    # duplicate records for same document.
+                    continue
+
+                if op in ("new", "changed"):
+                    with session.begin(nested=True):
+                        obj = adapter.retrieve(pk, _session=session, **data)
+
+                    if obj is None:
+                        # deleted after task queued, but before task run
+                        continue
+
+                    document = service.get_document(obj, adapter)
+                    try:
+                        writer.add_document(**document)
+                    except ValueError:
+                        # logger is here to give us more infos in order to catch a
+                        # weird bug that happens regularly on CI but is not
+                        # reliably reproductible.
+                        logger.opt(exception=True).error(
+                            "writer.add_document({document})",
+                            document=repr(document),
+                        )
+                        raise
+                    updated.add(object_key)
+        except Exception:
+            writer.cancel()
+            raise
+        writer.commit()
 
 
 class TestingStorage(RamStorage):

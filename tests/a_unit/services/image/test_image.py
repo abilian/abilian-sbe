@@ -43,3 +43,10 @@ def test_scale(orig_image: bytes) -> None:
 def test_crop(orig_image: bytes) -> None:
     image = resize(orig_image, 500, 500, CROP)
     assert get_size(image) == (500, 500)
+
+
+def test_mode_is_compared_by_value(orig_image: bytes) -> None:
+    """A mode string built at runtime (from a form, a URL) is not `CROP`."""
+    mode = "CROP".lower()
+    assert mode is not CROP
+    assert get_size(resize(orig_image, 100, 100, mode)) == (100, 100)

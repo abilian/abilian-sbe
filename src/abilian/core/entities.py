@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 import collections
+import functools
 import re
 from datetime import datetime
 from inspect import isclass
@@ -23,7 +24,7 @@ from sqlalchemy.types import Integer, String, UnicodeText
 from .extensions import db
 from .models import EDITABLE, SEARCHABLE, SYSTEM, BaseMixin, Indexable, Model
 from .sqlalchemy import JSONDict
-from .util import friendly_fqcn, memoized, slugify
+from .util import friendly_fqcn, slugify
 
 if TYPE_CHECKING:
     from sqlalchemy.engine.base import Connection
@@ -542,7 +543,7 @@ def polymorphic_update_timestamp(
             obj.updated_at = datetime.utcnow()
 
 
-@memoized
+@functools.cache
 def all_entity_classes():
     """Return the list of all concrete persistent classes that are subclasses
     of Entity."""

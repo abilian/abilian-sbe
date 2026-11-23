@@ -15,12 +15,12 @@ from inspect import isclass
 from typing import TYPE_CHECKING, Any
 
 import sqlalchemy as sa
-from flask import current_app, g
 from loguru import logger
 from sqlalchemy import event, extract
 from sqlalchemy.orm import Query, Session
 from sqlalchemy.orm.attributes import NEVER_SET, InstrumentedAttribute
 
+from abilian.core.context import get_current_principal
 from abilian.core.entities import Entity
 from abilian.core.extensions import db
 from abilian.services import Service, ServiceState
@@ -235,9 +235,8 @@ class AuditService(Service):
 
         self.app_state.creating_entries = True
         try:
-            # if an error happens during audit creation it should not break the rest of
-            # the application, and db session should be left clean. Only the developper
-            # (and raven/sentry/whatever) should know
+            # An error here fails the flush: a change committed without its
+            # audit entry would leave no trace of who made it.
             entries = []
             for identity_set, op in (
                 (session.new, CREATION),
@@ -245,16 +244,9 @@ class AuditService(Service):
                 (session.dirty, UPDATE),
             ):
                 for model in identity_set:
-                    try:
-                        entry = self.log(session, model, op)
-                        if entry:
-                            entries.append(entry)
-                    except Exception:
-                        if current_app.debug or current_app.testing:
-                            raise
-                        logger.opt(exception=True).error(
-                            "Exception during entry creation"
-                        )
+                    entry = self.log(session, model, op)
+                    if entry:
+                        entries.append(entry)
 
                 session.add_all(entries)
         finally:
@@ -265,10 +257,10 @@ class AuditService(Service):
             return None
 
         entity = model
-        try:
-            user_id = g.user.id
-        except Exception:
-            user_id = 0
+        # Nobody (a task, the CLI, a migration) is recorded as no user: the
+        # admin panel shows it as "System".
+        principal = get_current_principal()
+        user_id = principal.id if principal is not None else None
 
         meta = model.__auditable__
         if meta.related:

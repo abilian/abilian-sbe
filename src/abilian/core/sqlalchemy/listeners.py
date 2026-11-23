@@ -28,10 +28,6 @@ def ping_connection(
     try:
         cursor.execute("SELECT 1")
     except Exception as e:
-        # optional - dispose the whole pool
-        # instead of invalidating one at a time
-        # connection_proxy._pool.dispose()
-
         # raise DisconnectionError - pool will try
         # connecting again up to three times before raising.
         raise sa.exc.DisconnectionError from e

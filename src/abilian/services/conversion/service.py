@@ -65,7 +65,6 @@ class Converter:
         self.cache_dir.mkdir(exist_ok=True)
 
     def clear(self) -> None:
-        self.cache.clear()
         for d in (self.tmp_dir, self.cache_dir):
             shutil.rmtree(bytes(d))
             d.mkdir()
@@ -77,7 +76,7 @@ class Converter:
     def to_pdf(self, digest: str, blob: bytes, mime_type: str) -> bytes:
         cache_key = ("pdf", digest)
         pdf = self.cache.get_bytes(cache_key)
-        if pdf:
+        if pdf is not None:
             return pdf
         for handler in self.handlers:
             if handler.accept(mime_type, "application/pdf"):
@@ -101,7 +100,7 @@ class Converter:
         cache_key = ("txt", digest)
 
         text = self.cache.get_text(cache_key)
-        if text:
+        if text is not None:
             return text
 
         # Direct conversion possible
@@ -150,7 +149,7 @@ class Converter:
 
         cache_key = (f"img:{index}:{size}", digest)
         converted = self.cache.get_bytes(cache_key)
-        if converted:
+        if converted is not None:
             return converted
 
         # Direct conversion possible

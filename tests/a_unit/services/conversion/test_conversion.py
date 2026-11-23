@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import os
+import shutil
 import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING
-from warnings import warn
 
-from magic import Magic
 from pytest import fixture, mark
 
 from abilian.services.conversion.handler_lock import init_conversion_lock_dir
@@ -19,8 +17,9 @@ if TYPE_CHECKING:
 
     from abilian.services.conversion.service import Converter
 
-mime_sniffer = Magic(mime=True)
-encoding_sniffer = Magic(mime_encoding=True)
+#: What a PDF and a JPEG file start with.
+PDF_MAGIC = b"%PDF-"
+JPEG_MAGIC = b"\xff\xd8\xff"
 
 # FIXME: tests that rely on OOo are disabled until we fix stability issues.
 
@@ -85,32 +84,29 @@ def test_wordx_to_text(converter: Converter) -> None:
 def test_odt_to_pdf(converter: Converter) -> None:
     blob = read_file("test.odt")
     pdf = converter.to_pdf("", blob, "application/vnd.oasis.opendocument.text")
-    assert mime_sniffer.from_buffer(pdf) == "application/pdf"
+    assert pdf.startswith(PDF_MAGIC)
 
 
 @mark.skipif(not HAS_LIBREOFFICE, reason="requires libreoffice")
 def test_word_to_pdf(converter: Converter) -> None:
     blob = read_file("test.doc")
     pdf = converter.to_pdf("", blob, "application/msword")
-    assert mime_sniffer.from_buffer(pdf) == "application/pdf"
+    assert pdf.startswith(PDF_MAGIC)
 
 
 @mark.skip("maybe bug due to ImageMagik settings")
 def test_image_to_pdf(converter: Converter) -> None:
     blob = read_file("picture.jpg")
     pdf = converter.to_pdf("", blob, "image/jpeg")
-    assert mime_sniffer.from_buffer(pdf) == "application/pdf"
+    assert pdf.startswith(PDF_MAGIC)
 
 
 # To images
-@mark.skipif(not HAS_PDFTOTEXT, reason="requires poppler or poppler-util")
+@mark.skipif(not shutil.which("pdftoppm"), reason="requires pdftoppm (poppler)")
 def test_pdf_to_images(converter: Converter) -> None:
-    if not os.popen("which pdftoppm").read().strip():
-        warn("pdftoppm not found, skipping test")
-        return
     blob = read_file("onepage.pdf")
     image = converter.to_image("", blob, "application/pdf", 0)
-    assert mime_sniffer.from_buffer(image) == "image/jpeg"
+    assert image.startswith(JPEG_MAGIC)
 
 
 @mark.skipif(
@@ -119,4 +115,18 @@ def test_pdf_to_images(converter: Converter) -> None:
 def test_word_to_images(converter: Converter) -> None:
     blob = read_file("test.doc")
     image = converter.to_image("", blob, "application/msword", 0)
-    assert mime_sniffer.from_buffer(image) == "image/jpeg"
+    assert image.startswith(JPEG_MAGIC)
+
+
+def test_empty_cached_text_is_a_cache_hit(converter: Converter) -> None:
+    """An empty text is a valid result: it was converted again on every call."""
+    converter.cache[("txt", "digest")] = ""
+    # No handler takes this type: a miss would raise HandlerNotFoundError.
+    assert converter.to_text("digest", b"", "application/x-unknown") == ""
+
+
+def test_cache_write_leaves_no_temporary_file(converter: Converter) -> None:
+    converter.cache[("pdf", "digest")] = b"first"
+    converter.cache[("pdf", "digest")] = b"second"
+    assert converter.cache.get_bytes(("pdf", "digest")) == b"second"
+    assert [p.name for p in (converter.cache_dir / "pdf").iterdir()] == ["digest.blob"]

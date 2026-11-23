@@ -7,6 +7,7 @@ from __future__ import annotations
 import datetime as dt
 from itertools import count
 
+import pytest
 import sqlalchemy as sa
 from sqlalchemy import Column, Date, ForeignKey, Integer, Text, Unicode, UnicodeText
 from sqlalchemy.ext.declarative import declared_attr
@@ -256,3 +257,32 @@ def test_audit_collections(app, session) -> None:
     entry = AuditEntry.query.one()
     changes = entry.changes
     assert changes.collections == {"integers": (["1"], [])}
+
+
+def test_an_entry_made_by_nobody_has_no_user(app, session) -> None:
+    audit_service.start()
+    session.add(DummyAccount(name="Nobody SARL"))
+    session.flush()
+
+    entry = AuditEntry.query.one()
+    assert entry.user_id is None
+
+
+def test_a_failing_entry_fails_the_flush_in_production(
+    app, session, monkeypatch
+) -> None:
+    """Dropping the error lost the audit entry and left no trace of the change."""
+
+    def broken_log(*args, **kwargs):
+        msg = "audit broke"
+        raise ValueError(msg)
+
+    audit_service.start()
+    monkeypatch.setattr(app, "testing", False)
+    monkeypatch.setattr(app, "debug", False)
+    monkeypatch.setattr(audit_service, "log", broken_log)
+    session.add(DummyAccount(name="Broken SARL"))
+
+    with pytest.raises(ValueError, match="audit broke"):
+        session.flush()
+    session.rollback()
