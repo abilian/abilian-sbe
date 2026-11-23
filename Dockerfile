@@ -2,12 +2,13 @@ FROM python:3.12
 
 WORKDIR /app
 
-RUN adduser python
+RUN adduser --disabled-password --gecos '' python
 RUN chown -R python:python .
 
 COPY pyproject.toml .
 COPY uv.lock .
 COPY README.md .
+COPY hatch_build.py .
 COPY src src
 
 # Install uv
