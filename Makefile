@@ -79,8 +79,6 @@ format:
 	ruff format src tests *.py
 	ruff check --fix src tests
 	ruff format src tests *.py
-	markdown-toc -i README.md
-	markdown-toc -i docs/roadmap.md
 
 #
 # Everything else

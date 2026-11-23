@@ -34,6 +34,4 @@ def test_an_unscanned_document_is_queued_for_a_scan(
     assert result.exit_code == 0, result.output
     queue = broker.queues[antivirus_scan.queue_name].queue
     messages = [Message.decode(data) for data in queue]
-    assert [(m.actor_name, m.args) for m in messages] == [
-        ("antivirus_scan", (doc.id,))
-    ]
+    assert [(m.actor_name, m.args) for m in messages] == [("antivirus_scan", (doc.id,))]
